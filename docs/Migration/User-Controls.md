@@ -88,20 +88,636 @@ Create a new Razor component file with the same name as your ASCX user control. 
 }
 ```
 
-### Step 2: Remove Web Forms Syntax
+## Step-by-Step Migration Workflow
 
-Remove the `<%@ Control %>` directive and `runat="server"` attributes. Blazor doesn't use these.
+This section provides a systematic approach to migrating an ASCX user control to a Blazor component.
 
-**Before:**
-```html
-<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="PageHeader.ascx.cs" Inherits="..." %>
-<asp:TextBox ID="searchBox" runat="server" />
-```
+### Phase 1: Planning
 
-**After:**
+1. **Inventory the Control**
+   - List all public properties (parameters)
+   - List all public events (EventCallback in Blazor)
+   - Identify ViewState-backed properties
+   - Check for FindControl calls or other control tree traversal
+
+2. **Understand Data Flow**
+   - How does the parent pass data to the control?
+   - How does the control notify the parent of changes?
+   - What's the lifecycle (Page_Load, Page_PreRender, etc.)?
+
+3. **Assess Web Forms Control Usage**
+   - Which `<asp:*>` controls are used?
+   - Are there equivalent BWFC components?
+   - Can you use native HTML elements instead?
+
+### Phase 2: Create the Component Shell
+
+Create a new `.razor` file with the same name and basic structure:
+
 ```razor
-<input type="text" @bind="searchQuery" />
+@* Components/DepartmentFilter.razor *@
+<div class="department-filter">
+    @* Markup goes here *@
+</div>
+
+@code {
+    [Parameter]
+    public string Label { get; set; } = "Department:";
+
+    [Parameter]
+    public EventCallback<int> OnSelectionChanged { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Initialization logic
+    }
+}
 ```
+
+### Phase 3: Migrate Markup
+
+Convert `<asp:*>` controls to HTML or BWFC equivalents:
+
+=== "Web Forms"
+
+```html
+<asp:Label ID="lbl" runat="server" Text="Department:" />
+<asp:DropDownList ID="ddl" runat="server" CssClass="form-select" AutoPostBack="true" />
+<asp:Button ID="btn" runat="server" Text="Apply" OnClick="..." />
+```
+
+=== "Blazor (HTML)"
+
+```razor
+<label class="form-label">Department:</label>
+<select class="form-select" @onchange="HandleChange">
+    @if (departments != null)
+    {
+        @foreach (var dept in departments)
+        {
+            <option value="@dept.Id">@dept.Name</option>
+        }
+    }
+</select>
+<button class="btn btn-primary" @onclick="Apply">Apply</button>
+```
+
+=== "Blazor (BWFC Components)"
+
+```razor
+<Label Text="Department:" />
+<DropDownList Items="departments" @bind-SelectedValue="selectedDepartmentId" />
+<Button Text="Apply" @onclick="Apply" />
+```
+
+### Phase 4: Migrate Properties to Parameters
+
+Mark public properties as `[Parameter]`:
+
+```csharp
+[Parameter]
+public int SelectedDepartmentId { get; set; }
+
+[Parameter]
+public string Label { get; set; } = "Department:";
+
+[Parameter]
+public IEnumerable<Department> Departments { get; set; }
+```
+
+### Phase 5: Migrate Events to EventCallback
+
+Replace `public event EventHandler` with `EventCallback<T>` parameters:
+
+=== "Web Forms"
+
+```csharp
+public event EventHandler<DepartmentChangedEventArgs> DepartmentChanged;
+
+protected void ddlDepartments_SelectedIndexChanged(object sender, EventArgs e)
+{
+    var selectedId = int.Parse(ddlDepartments.SelectedValue);
+    DepartmentChanged?.Invoke(this, new DepartmentChangedEventArgs { DepartmentId = selectedId });
+}
+```
+
+=== "Blazor"
+
+```csharp
+[Parameter]
+public EventCallback<int> OnDepartmentChanged { get; set; }
+
+private async Task OnSelectionChanged(ChangeEventArgs e)
+{
+    var selectedId = int.Parse((string)e.Value);
+    await OnDepartmentChanged.InvokeAsync(selectedId);
+}
+```
+
+### Phase 6: Migrate Lifecycle
+
+Map Web Forms lifecycle to Blazor lifecycle methods:
+
+| Web Forms | Blazor | When |
+|-----------|--------|------|
+| `Page_Load` (first load) | `OnInitializedAsync` + `if (!IsPostBack)` | Component first renders |
+| `Page_Load` (postback) | `OnParametersSetAsync` or `IsPostBack == true` | Data changes or form submission |
+| `Page_PreRender` | `OnAfterRenderAsync` | After render tree is built |
+| `Dispose` / `OnUnload` | `IAsyncDisposable` | Component destroyed |
+
+```csharp
+protected override async Task OnInitializedAsync()
+{
+    if (!IsPostBack)
+    {
+        Departments = await LoadDepartments();
+    }
+}
+
+protected override async Task OnParametersSetAsync()
+{
+    // Called when parameters change from parent
+    await RefreshData();
+}
+
+public async ValueTask DisposeAsync()
+{
+    // Cleanup
+}
+```
+
+### Phase 7: Test
+
+- **Parent Component:** Pass parameters and handle events
+- **SSR Mode:** Verify ViewState persists across form submissions
+- **Interactive Mode:** Verify state persists across user interactions
+
+---
+
+## DepartmentPortal Migration Case Study
+
+This example migrates three ASCX controls from the DepartmentPortal sample application.
+
+### 1. DepartmentFilter Control
+
+**Purpose:** Allow users to filter data by department. Uses ViewState to persist selection.
+
+#### Web Forms Version
+
+**DepartmentFilter.ascx:**
+
+```html
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="DepartmentFilter.ascx.cs" %>
+
+<div class="department-filter">
+    <label for="ddlDepartment" class="form-label">Filter by Department:</label>
+    <select id="ddlDepartment" class="form-select" onchange="<%= OnDepartmentChanged %>">
+        <option value="">All Departments</option>
+        <!-- Populated by code-behind -->
+    </select>
+</div>
+```
+
+**DepartmentFilter.ascx.cs:**
+
+```csharp
+public partial class DepartmentFilter : UserControl
+{
+    // ViewState-backed property
+    public int? SelectedDepartmentId
+    {
+        get => (int?)(ViewState["SelectedDepartmentId"] ?? null);
+        set => ViewState["SelectedDepartmentId"] = value;
+    }
+
+    public List<Department> Departments { get; set; }
+
+    public event EventHandler<int?> DepartmentChanged;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            Departments = LoadDepartments();
+            BindDropdown();
+        }
+    }
+
+    private void BindDropdown()
+    {
+        // Populate options
+    }
+
+    private List<Department> LoadDepartments()
+    {
+        return DataProvider.GetDepartments();
+    }
+
+    protected void OnDepartmentChanged(object sender, EventArgs e)
+    {
+        var selectedId = Request.Form["ddlDepartment"];
+        SelectedDepartmentId = string.IsNullOrEmpty(selectedId) ? null : int.Parse(selectedId);
+        DepartmentChanged?.Invoke(this, SelectedDepartmentId);
+    }
+}
+```
+
+#### Blazor Version
+
+**Components/DepartmentFilter.razor:**
+
+```razor
+<div class="department-filter">
+    <label for="ddlDepartment" class="form-label">Filter by Department:</label>
+    <select id="ddlDepartment" class="form-select" @onchange="HandleChange">
+        <option value="">All Departments</option>
+        @if (Departments?.Any() == true)
+        {
+            @foreach (var dept in Departments)
+            {
+                <option value="@dept.Id" selected="@(SelectedDepartmentId == dept.Id)">@dept.Name</option>
+            }
+        }
+    </select>
+</div>
+
+@code {
+    [Parameter]
+    public int? SelectedDepartmentId { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> OnDepartmentChanged { get; set; }
+
+    public List<Department> Departments { get; set; } = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsPostBack)
+        {
+            Departments = await LoadDepartments();
+            ViewState.Set("Departments", Departments);
+        }
+        else
+        {
+            Departments = ViewState.GetValueOrDefault("Departments", new List<Department>());
+        }
+    }
+
+    private async Task HandleChange(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString();
+        var selectedId = string.IsNullOrEmpty(value) ? null : (int?)int.Parse(value);
+        SelectedDepartmentId = selectedId;
+        ViewState.Set("SelectedDepartmentId", selectedId);
+        await OnDepartmentChanged.InvokeAsync(selectedId);
+    }
+
+    private async Task<List<Department>> LoadDepartments()
+    {
+        return await DataProvider.GetDepartments();
+    }
+}
+```
+
+**Usage in Parent Component:**
+
+```razor
+<DepartmentFilter SelectedDepartmentId="selectedDeptId" OnDepartmentChanged="HandleDepartmentChange" />
+
+@code {
+    private int? selectedDeptId;
+
+    private async Task HandleDepartmentChange(int? deptId)
+    {
+        selectedDeptId = deptId;
+        await RefreshEmployeeList();
+    }
+}
+```
+
+---
+
+### 2. SearchBox Control
+
+**Purpose:** Accept search input with a search button. Raises event with search term.
+
+#### Web Forms Version
+
+```csharp
+public partial class SearchBox : UserControl
+{
+    public string SearchTerm
+    {
+        get => (string)(ViewState["SearchTerm"] ?? "");
+        set => ViewState["SearchTerm"] = value;
+    }
+
+    public event EventHandler<SearchEventArgs> Search;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            SearchTerm = "";
+        }
+    }
+
+    protected void btnSearch_Click(object sender, EventArgs e)
+    {
+        SearchTerm = txtSearch.Text;
+        Search?.Invoke(this, new SearchEventArgs { Term = SearchTerm });
+    }
+}
+
+public class SearchEventArgs : EventArgs
+{
+    public string Term { get; set; }
+}
+```
+
+#### Blazor Version
+
+```razor
+<div class="input-group mb-3">
+    <input type="text" class="form-control" placeholder="Search..." @bind="searchTerm" />
+    <button class="btn btn-outline-secondary" type="button">Search</button>
+</div>
+
+@code {
+    [Parameter]
+    public string SearchTerm { get; set; } = "";
+
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+
+    private string searchTerm = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsPostBack)
+        {
+            searchTerm = SearchTerm;
+            ViewState.Set("SearchTerm", searchTerm);
+        }
+        else
+        {
+            searchTerm = ViewState.GetValueOrDefault("SearchTerm", SearchTerm);
+        }
+    }
+
+    private async Task OnSearchClick()
+    {
+        SearchTerm = searchTerm;
+        ViewState.Set("SearchTerm", searchTerm);
+        await OnSearch.InvokeAsync(searchTerm);
+    }
+}
+```
+
+---
+
+### 3. StarRating Control
+
+**Purpose:** Display and capture star ratings. ViewState persists current rating.
+
+#### Web Forms Version
+
+```csharp
+public partial class StarRating : UserControl
+{
+    public int Rating
+    {
+        get => (int)(ViewState["Rating"] ?? 0);
+        set => ViewState["Rating"] = value;
+    }
+
+    public int MaxStars { get; set; } = 5;
+
+    public event EventHandler RatingChanged;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            RenderStars();
+        }
+    }
+
+    protected void lnkStar_Click(object sender, EventArgs e)
+    {
+        var star = (LinkButton)sender;
+        Rating = int.Parse(star.CommandArgument);
+        ViewState["Rating"] = Rating;
+        RatingChanged?.Invoke(this, EventArgs.Empty);
+        RenderStars();
+    }
+
+    private void RenderStars()
+    {
+        // Dynamically add LinkButton controls
+    }
+}
+```
+
+#### Blazor Version
+
+```razor
+<div class="star-rating">
+    @for (int i = 1; i <= MaxStars; i++)
+    {
+        var starIndex = i;
+        <button class="star @(starIndex <= Rating ? "filled" : "")" 
+                @onclick="() => SetRating(starIndex)"
+                aria-label="Rate @starIndex stars">
+            ★
+        </button>
+    }
+</div>
+
+<style>
+    .star { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #ddd; }
+    .star.filled { color: #ffd700; }
+</style>
+
+@code {
+    [Parameter]
+    public int Rating { get; set; } = 0;
+
+    [Parameter]
+    public int MaxStars { get; set; } = 5;
+
+    [Parameter]
+    public EventCallback<int> OnRatingChanged { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsPostBack)
+        {
+            ViewState.Set("Rating", Rating);
+        }
+        else
+        {
+            Rating = ViewState.GetValueOrDefault("Rating", 0);
+        }
+    }
+
+    private async Task SetRating(int value)
+    {
+        Rating = value;
+        ViewState.Set("Rating", Rating);
+        await OnRatingChanged.InvokeAsync(Rating);
+    }
+}
+```
+
+**Usage:**
+
+```razor
+<StarRating @bind-Rating="userRating" MaxStars="5" OnRatingChanged="HandleRating" />
+
+@code {
+    private int userRating;
+
+    private async Task HandleRating(int newRating)
+    {
+        await SubmitRating(userRating);
+    }
+}
+```
+
+---
+
+## ViewState & IsPostBack Integration
+
+The BlazorWebFormsComponents library now provides **fully functional ViewState and IsPostBack support**, enabling even closer drop-in migration compatibility.
+
+### ViewState in User Controls
+
+If your ASCX controls use ViewState for state persistence:
+
+=== "Web Forms ASCX Code-Behind"
+
+```csharp
+public partial class FilterPanel : UserControl
+{
+    public int SelectedDepartmentId
+    {
+        get => (int)(ViewState["SelectedDepartmentId"] ?? 0);
+        set => ViewState["SelectedDepartmentId"] = value;
+    }
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            SelectedDepartmentId = 0;
+            LoadDepartments();
+        }
+    }
+}
+```
+
+=== "Blazor Razor Component"
+
+```razor
+<div class="filter-panel">
+    @* ... component markup ... *@
+</div>
+
+@code {
+    public int SelectedDepartmentId
+    {
+        get => ViewState.GetValueOrDefault<int>("SelectedDepartmentId", 0);
+        set => ViewState.Set("SelectedDepartmentId", value);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsPostBack)
+        {
+            SelectedDepartmentId = 0;
+            await LoadDepartments();
+        }
+    }
+}
+```
+
+**Key Points:**
+
+- **SSR Mode:** ViewState is automatically serialized to a protected hidden form field and restored on form POST
+- **InteractiveServer Mode:** ViewState lives in component memory for the circuit lifetime
+- **IsPostBack:** Automatically returns `false` on initial load, `true` on form submission (SSR) or after first render (Interactive)
+
+See [ViewState & PostBack Shim](../UtilityFeatures/ViewState.md) for comprehensive documentation.
+
+### Advanced Pattern: State-Managed Components
+
+For complex user controls with multiple state variables, consider combining ViewState with parameters:
+
+```razor
+@* Parent passes data in, component persists selections in ViewState *@
+<FilterPanel Departments="@departments" @ref="filterPanel" />
+
+@code {
+    private List<Department> departments;
+    private FilterPanel filterPanel;
+
+    // Later: filterPanel.SelectedDepartmentId is persisted in ViewState
+    protected override async Task OnInitializedAsync()
+    {
+        departments = await DataProvider.GetDepartments();
+    }
+}
+```
+
+---
+
+## Using BWFC Components to Ease Migration
+
+If your user controls use BWFC compatibility components (e.g., `Button`, `DropDownList`, `Repeater`), the migration is even smoother:
+
+### BWFC Control Example
+
+=== "Web Forms ASCX"
+
+```html
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="SearchBox.ascx.cs" %>
+
+<div class="search-box">
+    <asp:TextBox ID="txtSearch" runat="server" CssClass="search-input" />
+    <asp:Button ID="btnSearch" runat="server" Text="Search" CssClass="btn btn-primary" OnClick="btnSearch_Click" />
+</div>
+```
+
+```csharp
+public partial class SearchBox : UserControl
+{
+    protected void btnSearch_Click(object sender, EventArgs e)
+    {
+        // Handle search
+    }
+}
+```
+
+=== "Blazor with BWFC Components"
+
+```razor
+<div class="search-box">
+    <TextBox @bind-Value="searchTerm" CssClass="search-input" />
+    <Button Text="Search" CssClass="btn btn-primary" @onclick="OnSearch" />
+</div>
+
+@code {
+    private string searchTerm;
+
+    private async Task OnSearch()
+    {
+        // Handle search
+    }
+}
+```
+
+BWFC components like `Button`, `TextBox`, `DropDownList`, and `Repeater` handle Web Forms–compatible attribute rendering and styling automatically, so the markup conversion is nearly 1:1.
 
 ### Step 3: Convert Properties to Parameters
 
