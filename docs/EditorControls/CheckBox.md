@@ -21,60 +21,82 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `InputAttributes` property is not implemented
 - `LabelAttributes` property is not implemented
 
-## Web Forms Declarative Syntax
+## Syntax
 
-```html
-<asp:CheckBox
-    AccessKey="string"
-    AutoPostBack="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    Checked="True|False"
-    CssClass="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnCheckedChanged="CheckedChanged event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    Text="string"
-    TextAlign="Left|Right"
-    ToolTip="string"
-    ValidationGroup="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:CheckBox
+        AccessKey="string"
+        AutoPostBack="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        Checked="True|False"
+        CssClass="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnCheckedChanged="CheckedChanged event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        Text="string"
+        TextAlign="Left|Right"
+        ToolTip="string"
+        ValidationGroup="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <CheckBox Text="I agree to the terms and conditions" 
+              @bind-Checked="isAgree"
+              OnCheckedChanged="HandleChange" />
+    
+    @code {
+        private bool isAgree = false;
+        
+        void HandleChange(ChangeEventArgs e)
+        {
+            // Handle the change
+        }
+    }
+    ```
+
+## Examples
 
 ### Basic CheckBox
 
 ```razor
 <CheckBox Text="I agree to the terms and conditions" />
 ```
+
+!!! tip "Two-way Binding"
+    Use `@bind-Checked` to automatically sync the checkbox state with your component property. This replaces Web Forms' `AutoPostBack` with Blazor's reactive model.
 
 ### Pre-checked CheckBox
 
@@ -116,6 +138,9 @@ By default, the label appears to the right of the checkbox. Use `TextAlign` to p
 ```
 
 ### Disabled CheckBox
+
+!!! note "Disabled State Styling"
+    When `Enabled="false"`, the checkbox is disabled in the HTML but styling may be limited by browser defaults. Use CSS classes for custom disabled styling.
 
 ```razor
 <CheckBox Text="This option is disabled" Enabled="false" Checked="true" />

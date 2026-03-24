@@ -20,7 +20,7 @@ ASP<span></span>.NET famously wrapped all .NET code in <% %>.  Starting with ASP
 
 ### _Imports files needed
 
-In order to match some of the syntax previously available in Web Forms markup, a series of `using static` statements are necessary to allow the appropriate shims to work with your markup.  You can find our sample of the `_Imports.razor` file here:  **INSERT LINK**
+In order to match some of the syntax previously available in Web Forms markup, a series of `using static` statements are necessary to allow the appropriate shims to work with your markup. You can find sample `_Imports.razor` files in the [sample applications](../samples/AfterBlazorServerSide/Components/_Imports.razor), which include imports like `@using static BlazorWebFormsComponents.WebColor` to support styling enums.
 
 ### User Controls (ASCX files) need to be converted to components
 

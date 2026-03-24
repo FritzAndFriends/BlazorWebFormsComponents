@@ -13,6 +13,47 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 
 ## Learnings
 
+### Documentation Organization & Structure Audit (Current Session)
+
+**Complete read-only audit of mkdocs.yml nav structure, component docs quality, and developer journey mapping.**
+
+**Key Findings:**
+
+1. **Category Organization:** 8 categories are functionally complete (all 54 components documented) but miss Web Forms cognitive mapping opportunities:
+   - ✅ Editor Controls, Data Controls, Validation Controls, Navigation Controls, Login Controls are well-aligned with Web Forms taxonomy
+   - ⚠️ AJAX Controls nav shows EditorControls file paths — suggests files should move to AjaxControls/ folder to align nav structure with file system
+   - ⚠️ Missing "Container Controls" section (Panel, PlaceHolder, MultiView/View, ContentPlaceHolder) and "Display Controls" section (Label, Literal, Image, Localize) — these patterns are important in Web Forms and worth surfacing separately
+   - 💡 Proposal: Expand to 10 categories (add Input Controls, Display Controls, Container Controls) to match Web Forms developer mental model
+
+2. **Migration Documentation Flow:** Migration/readme.md is excellent (Step 0-7 walkthrough) but home page (README.md) doesn't highlight the migration path:
+   - ✅ Migration section clearly visible in nav, step-by-step approach is honest and comprehensive
+   - ⚠️ First-time visitor to home page sees project intro but no obvious "Start Here" CTA for migration
+   - ⚠️ User-Controls.md appears to be a template placeholder (incomplete) — critical gap since ASCX→Component conversion is a primary developer need
+   - 💡 Improvement: Restructure home page with three sections: (1) Quick Links (Migration, Dashboard, Compatibility), (2) Component Showcase, (3) Infrastructure
+
+3. **Web Forms Fidelity in Docs (5-doc sample):**
+   - ✅ Button.md (95% coverage, excellent Before/After migration examples)
+   - ✅ GridView.md (85% coverage, good notes on sorting/paging Blazor differences)
+   - ⚠️ RequiredFieldValidator.md (70% coverage — "Blazor Syntax" section is incomplete, missing ForwardRef<InputBase<T>> example)
+   - ✅ Login.md (80% coverage, but lacks integration guidance for connecting to ASP.NET Core Identity)
+   - ✅ ViewState.md (90% coverage, exemplary guidance on deprecation path)
+   - Pattern: Docs excel at describing what controls do, but are sometimes weak on how to integrate them into real apps (auth, data binding, styling)
+
+4. **Developer Journey:** Three common paths tested:
+   - "Migrate my GridView" → Finds docs quickly (2 min) but has to know GridView is in Data Controls, not Editor Controls
+   - "What controls does BWFC support?" → Dashboard serves this well, but home page should surface it more prominently
+   - "I'm ready to migrate" → Migration section is clear, but home page doesn't link to it directly
+   - Verdict: Dashboard is a hidden gem; home page restructuring would unlock discoverability
+
+5. **Completeness vs Status Alignment:** ✅ Perfect — All 54 components in status.md have docs. Zero orphaned controls. Deferred controls (Xml, Substitution) clearly marked. Relationship between status.md (54 primary controls) and mkdocs.yml docs (all 54 + utilities + migration guides) is clear and implicit.
+
+6. **Proposed Reorganization (priority order):**
+   - **Immediate:** Home page CTAs + component index + complete UserControls.md + RequiredFieldValidator syntax examples
+   - **Short-term:** Move AJAX docs to AjaxControls/ folder, add data binding cheat sheets to data-bound controls
+   - **Medium-term:** Reorganize nav into 10 categories, link to complete migration examples (ContosoUniversity, DepartmentPortal)
+
+**Strategic Insight:** The docs are functionally sound and comprehensive, but suffer from visibility/discoverability issues on the home page and occasional completeness gaps in utility control integration (auth, data binding). The category taxonomy doesn't fully exploit Web Forms developer mental model opportunities.
+
 ### NuGet Static Asset Migration Strategy (2026-03-08)
 
 **Strategic Analysis Complete — Hybrid Option C Recommended**

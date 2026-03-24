@@ -20,39 +20,52 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 - `DefaultButton` - JavaScript-based button targeting is not implemented
 
-## Web Forms Declarative Syntax
+## Syntax
 
-```html
-<asp:Panel
-    ID="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DefaultButton="string"
-    Direction="NotSet|LeftToRight|RightToLeft"
-    Enabled="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Size="string"
-    ForeColor="color name|#dddddd"
-    GroupingText="string"
-    Height="size"
-    HorizontalAlign="NotSet|Left|Center|Right|Justify"
-    ScrollBars="None|Horizontal|Vertical|Both|Auto"
-    Visible="True|False"
-    Width="size"
-    Wrap="True|False"
-    runat="server">
-    
-    <!-- Child content here -->
-    
-</asp:Panel>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:Panel
+        ID="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DefaultButton="string"
+        Direction="NotSet|LeftToRight|RightToLeft"
+        Enabled="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Size="string"
+        ForeColor="color name|#dddddd"
+        GroupingText="string"
+        Height="size"
+        HorizontalAlign="NotSet|Left|Center|Right|Justify"
+        ScrollBars="None|Horizontal|Vertical|Both|Auto"
+        Visible="True|False"
+        Width="size"
+        Wrap="True|False"
+        runat="server">
+        
+        <!-- Child content here -->
+        
+    </asp:Panel>
+    ```
+
+=== "Blazor"
+
+    The Blazor Panel component removes the Web Forms attributes and uses simpler property-based syntax:
+
+    ```razor
+    <Panel CssClass="card p-3" Visible="true">
+        <h3>Panel Title</h3>
+        <p>Content goes here.</p>
+    </Panel>
+    ```
+
+## Examples
 
 ### Basic Panel
 
@@ -61,6 +74,9 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
     <p>This is content inside a panel.</p>
 </Panel>
 ```
+
+!!! note "Semantic HTML"
+    By default, Panel renders as a `<div>`. When `GroupingText` is set, it renders as a `<fieldset>` with a `<legend>` for better semantic structure in forms.
 
 ### Panel with CSS Class
 
@@ -94,6 +110,9 @@ When `GroupingText` is set, the Panel renders as a `<fieldset>` with a `<legend>
 ```
 
 ### Panel with ScrollBars
+
+!!! note "Overflow Handling"
+    The `ScrollBars` property applies CSS `overflow` styling. Use `ScrollBars.Auto` to show scrollbars only when content overflows.
 
 ```razor
 <Panel ScrollBars="ScrollBars.Auto" Height="Unit.Pixel(200)" Width="Unit.Pixel(300)">

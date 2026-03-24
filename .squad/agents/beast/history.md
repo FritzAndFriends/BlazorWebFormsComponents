@@ -7,9 +7,56 @@
 
 
 📌 Team update (2026-03-17): HttpHandlerBase implementation complete (7 files in Handlers/). Returns IEndpointConventionBuilder; Session markers added; build passes 0 errors. — decided by Cyclops
+
 ## Learnings
 
 <!-- ⚠ Summarized 2026-02-27 by Scribe — covers M1–M16 -->
+
+### Session (2026-03-XX by Beast): Documentation Audit Improvements
+
+**Status:** COMPLETED
+
+**Task:** Execute high-impact documentation improvements from audit:
+1. ✅ Expanded docs/README.md to comprehensive landing page (~70 lines)
+2. ✅ Converted 4 component files to tabbed syntax (Web Forms vs Blazor)
+3. ✅ Fixed Strategies.md INSERT LINK placeholder
+4. ✅ Added admonitions throughout converted files
+
+**Key Decisions & Patterns:**
+- **Landing Page Strategy:** Reorganized from brief descriptors to structured guide with 7 sections:
+  - "What is BlazorWebFormsComponents?" — concise pitch
+  - "Who This Is For" — brown-field developer targeting
+  - "Quick Start" — install, register, import, use (4-step path)
+  - "Component Overview" — 7 categories linked
+  - "Migration Resources" — hierarchical links to guides
+  - "Key Features" — bullet-point value proposition
+  - "What You Need to Know" — compatibility caveats
+  
+- **Tabbed Syntax Pattern:** Adopted `=== "Web Forms"` / `=== "Blazor"` for side-by-side comparison
+  - Extension: `pymdownx.tabbed` (already enabled in mkdocs.yml)
+  - Applied to: Button.md, Panel.md, CheckBox.md, CheckBox.md
+  - Pattern: Declarative syntax first (Web Forms), followed by simplified Blazor examples
+  - Placement: Replaces separate "Web Forms Declarative Syntax" + "Blazor Syntax" sections
+  
+- **Admonition Style:** Aligned with AjaxToolkit documentation best practices
+  - `!!! tip` — Migration tips and Blazor-specific patterns (e.g., two-way binding replaces AutoPostBack)
+  - `!!! note` — Behavior differences and rendering details (e.g., GroupingText creates <fieldset>)
+  - `!!! warning` — Security and unsupported features (e.g., OnClientClick script injection risks)
+  - Placement: After code block header, before or within example section
+  
+- **Links Fix:** Strategies.md `INSERT LINK` → Actual relative link to `/samples/AfterBlazorServerSide/Components/_Imports.razor`
+
+**Files Modified:**
+- docs/README.md (replaced 20 lines with ~70 lines of expanded content)
+- docs/EditorControls/Button.md (tabbed syntax + 2 admonitions: Command event bubbling tip, client script warning)
+- docs/EditorControls/Panel.md (tabbed syntax + 2 admonitions: Semantic HTML note, overflow handling note)
+- docs/EditorControls/CheckBox.md (tabbed syntax + 2 admonitions: Two-way binding tip, disabled state note)
+- docs/Migration/Strategies.md (replaced placeholder with live sample link)
+
+**Next Wave Candidates (25+ component docs):**
+- RegularExpressionValidator.md, ValidationSummary.md, Label.md, RequiredFieldValidator.md (stub docs needing expansion)
+- DropDownList.md, TextBox.md, ListBox.md (data-binding patterns worth tabbing)
+- DataGrid.md, GridView.md (template rendering examples)
 
 ### Issue #: Comprehensive Migration Documentation (User Controls, FindControl, Custom Control Base Classes)
 
@@ -632,3 +679,60 @@ Updated `.squad/skills/migration-standards/SKILL.md` to add new section at end:
 - Enum counts from source: HtmlTextWriterTag=78, HtmlTextWriterAttribute=55, HtmlTextWriterStyle=77
 - `DataBoundWebControl<T>` design around Blazor's case-insensitive parameter matching is a subtle but important constraint worth documenting prominently
 - The placeholder approach (`<!--BWFC_TPL_N-->`) for template interleaving is novel and deserves detailed explanation for future contributors
+
+### Comprehensive MkDocs Documentation Audit (2026-03-XX by Beast)
+
+**Status:** READ-ONLY AUDIT COMPLETED — Findings documented in `.squad/agents/beast/doc-audit-2026.md`
+
+**Session (2026-03-XX by Beast):**
+- Conducted cross-cutting quality audit of docs/ directory (124 .md files, 10 component categories)
+- Audited 10 areas: extension usage, code consistency, template consistency, completeness gaps, navigation, cross-linking, landing pages, dashboard integration, assets, and status tracking
+
+**Key Findings (Summary):**
+
+| Area | Status | Finding | Impact |
+|------|--------|---------|--------|
+| **MkDocs Extensions** | ⚠️ Underused | Tabbed content (`=== "Tab"`) used in only 4 files; should be in 25+ component docs | HIGH |
+| **Admonitions** | ✅ Good | 35 files use `!!!note/warning` strategically | N/A |
+| **Code Blocks** | ✅ Consistent | 150+ blocks properly labeled (razor, html, csharp, xml); Web Forms vs Blazor distinction clear | N/A |
+| **Component Docs** | ✅ Template Good | Consistent 13-section flow; but completeness varies 50%-100% | MEDIUM |
+| **Stub Docs** | 🔴 Critical | 2 placeholders (`RegularExpressionValidator=_TODO_`, `ValidationSummary=6 lines`) + 8 stubs (<100 lines) | HIGHEST |
+| **Navigation** | ✅ Good | Well-organized; minor category placement issue (HyperLink/ImageMap) | LOW |
+| **Cross-Linking** | ⚠️ Inconsistent | 40% of docs lack "See Also" sections; migration guides have no internal links | MEDIUM |
+| **Landing Page** | 🔴 Critical | README.md = 12 lines; missing Quick Start, component overview, "who this is for" | HIGH |
+| **Details Extension** | ⚠️ Unused | pymdownx.details (`???`) not used; could improve readability of 400+ line DataControls docs | MEDIUM |
+| **Assets/Images** | ✅ Good | 4 sample-site screenshots present but unreferenced; could enhance landing page | LOW |
+| **Status Tracking** | ⚠️ Gap | status.md shows "Complete" but docs folder has no parallel tracking; readers can't distinguish complete vs stub | MEDIUM |
+
+**Specific Critical Gaps:**
+1. **RegularExpressionValidator.md** — Single line: `_TODO_` (placeholder, not real doc)
+2. **ValidationSummary.md** — 6 lines with empty section headers; no features, examples, syntax, or migration notes
+3. **LinkButton.md, ImageButton.md, Label.md, Literal.md** — Minimal content (23-54 lines); missing Blazor syntax, examples, HTML output, migration notes
+4. **Migration/NET-Standard.md** — "Sample 2" section says "(coming soon)"
+5. **README.md** — 12 lines; fails to answer basic questions (What is this? How do I start? Is this for me?)
+
+**Top 7 Priority Improvements:**
+1. **Complete stubbed validator & utility docs** (Highest) — Audit status.md against actual doc line counts; expand RegularExpressionValidator, ValidationSummary, and 8 minimal docs to 150+ lines each
+2. **Implement tabbed Web Forms vs Blazor syntax** (Highest) — Convert section headers in 25+ component docs to `=== "Web Forms"` / `=== "Blazor"` tabbed format
+3. **Enhance landing page (README.md)** (High) — Expand to 50-75 lines with Quick Start, component overview, "who this is for," and dashboard callout
+4. **Standardize cross-linking** (High) — Add "See Also" sections to 40% of docs lacking them; connect migration guides with "Next Steps"
+5. **Use collapsible details for dense docs** (Medium) — GridView, DataList, FormView (400+ lines each) can use `??? "Features"` collapsible sections
+6. **Add doc status badges** (Medium) — Parallel to status.md tracking: add "Documentation Status" checklist to component docs showing which sections are complete vs partial
+7. **Minor nav fix** (Low) — Clarify HyperLink/ImageMap category placement (EditorControls vs NavigationControls)
+
+**Design Assessment:**
+- **Template:** ✅ Well-designed (consistent 13-section flow, clear patterns)
+- **Execution:** ⚠️ Inconsistent (50% complete docs, 50% stubs/minimal)
+- **Extensions:** 🔴 Massive underuse of tabbed content and details (Material Design features enabled but not leveraged)
+- **UX:** 🔴 Landing page fails first-time visitor test (doesn't answer "What is this?")
+
+**Output:**
+- Detailed 25+ KB audit report: `.squad/agents/beast/doc-audit-2026.md`
+- Includes: section-by-section findings, file counts, examples, recommendations with priorities
+
+**Key Learnings:**
+- Markdown extensions are only valuable if used; declaring them in mkdocs.yml doesn't help readers
+- Doc completeness audit is easier with automated line-count scanning (identified 10 stubs in seconds)
+- Template consistency is high (good design pattern) but application consistency is low (execution variance)
+- Status.md (component tracking) should have parallel doc-status tracking in docs folder (e.g., README with "complete vs stub" badges)
+- Landing pages are critical for developer experience — 12 lines is not enough for a 50-component library

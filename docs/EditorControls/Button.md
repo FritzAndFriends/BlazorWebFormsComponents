@@ -31,58 +31,76 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **UseSubmitBehavior** - Not supported; Blazor buttons trigger click events and you can inspect the form regardless
 - **AccessKey** - Use HTML `accesskey` attribute directly if needed
 
-## Web Forms Declarative Syntax
+## Syntax
 
-```html
-<asp:Button
-    AccessKey="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    CausesValidation="True|False"
-    CommandArgument="string"
-    CommandName="string"
-    CssClass="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnClick="Click event handler"
-    OnClientClick="string"
-    OnCommand="Command event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    PostBackUrl="uri"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    Text="string"
-    ToolTip="string"
-    UseSubmitBehavior="True|False"
-    ValidationGroup="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:Button
+        AccessKey="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        CausesValidation="True|False"
+        CommandArgument="string"
+        CommandName="string"
+        CssClass="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnClick="Click event handler"
+        OnClientClick="string"
+        OnCommand="Command event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        PostBackUrl="uri"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        Text="string"
+        ToolTip="string"
+        UseSubmitBehavior="True|False"
+        ValidationGroup="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
+
+=== "Blazor"
+
+    The Blazor Button component simplifies the syntax by removing Web Forms overhead:
+
+    ```razor
+    <Button Text="Click Me" 
+            OnClick="HandleClick"
+            Enabled="true"
+            CssClass="btn btn-primary" />
+    
+    @code {
+        void HandleClick()
+        {
+            // Handle the click
+        }
+    }
+    ```
 
 ### Basic Button with Click Event
 
@@ -96,6 +114,9 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
     }
 }
 ```
+
+!!! tip "Command Event Bubbling"
+    When `CommandName` is set, clicking the button triggers `OnCommand` instead of `OnClick`. This enables event bubbling through container components, a powerful pattern for handling commands from multiple buttons in a data grid or repeater.
 
 ### Button with Command
 
@@ -117,6 +138,9 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 ```
 
 ### Button with JavaScript Click
+
+!!! warning "Client-side Script Execution"
+    `OnClientClick` executes arbitrary JavaScript on the client. Ensure any JavaScript is properly sanitized and validated for security.
 
 ```razor
 <Button Text="Alert" OnClientClick="alert('Hello World!')" />
