@@ -25,28 +25,34 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **Design-time localization tooling** - No Blazor equivalent; localization is handled at runtime via .NET localization APIs
 - **EnableTheming / SkinID** - Theming is not supported in Blazor
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Localize
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    Mode="Transform|PassThrough|Encode"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Text="string"
-    Visible="True|False"
-/>
-```
+=== "Web Forms (Before)"
 
-## Blazor Syntax
+    ```html
+    <asp:Localize
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        Mode="Transform|PassThrough|Encode"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Text="string"
+        Visible="True|False"
+    />
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <Localize Text="Hello, World!" />
+    ```
 
 ### Basic Usage
 
@@ -103,31 +109,33 @@ Hello, World!
 &lt;em&gt;encoded&lt;/em&gt;
 ```
 
-## Migration Notes
+!!! tip "Migration Notes"
+    1. **Remove `asp:` prefix** — Change `<asp:Localize>` to `<Localize>`
+    2. **Remove `runat="server"`** — Not needed in Blazor
+    3. **Replace resource expressions** — Replace `<%$ Resources:MyResource, MyKey %>` with `IStringLocalizer<T>` injection
+    4. **Static text** — If the `Text` was hardcoded, no additional changes are needed
 
-When migrating from Web Forms to Blazor:
+## Example Migration
 
-1. **Remove `asp:` prefix** - Change `<asp:Localize>` to `<Localize>`
-2. **Remove `runat="server"`** - Not needed in Blazor
-3. **Replace resource expressions** - Replace `<%$ Resources:MyResource, MyKey %>` with `IStringLocalizer<T>` injection
-4. **Static text** - If the `Text` was hardcoded, no additional changes are needed
+=== "Web Forms (Before)"
 
-### Before (Web Forms)
+    ```html
+    <asp:Localize ID="lblWelcome"
+                  Text="<%$ Resources:Messages, WelcomeText %>"
+                  Mode="Encode"
+                  runat="server" />
+    ```
 
-```html
-<asp:Localize ID="lblWelcome"
-              Text="<%$ Resources:Messages, WelcomeText %>"
-              Mode="Encode"
-              runat="server" />
-```
+=== "Blazor (After)"
 
-### After (Blazor)
+    ```razor
+    @inject IStringLocalizer<MyPage> Localizer
 
-```razor
-@inject IStringLocalizer<MyPage> Localizer
+    <Localize Text="@Localizer["WelcomeText"]" Mode="LiteralMode.Encode" />
+    ```
 
-<Localize Text="@Localizer["WelcomeText"]" Mode="LiteralMode.Encode" />
-```
+!!! note "Key Difference"
+    In Web Forms, `Localize` enabled design-time localization via resource expressions like `<%$ Resources:MyResource, MyKey %>`. In Blazor, inject `IStringLocalizer<T>` and pass localized strings to the `Text` property.
 
 !!! tip "Consider Using Literal"
     Since `Localize` is identical to `Literal` in Blazor, you can use either component interchangeably. If you are writing new Blazor code (not migrating), `Literal` is the conventional choice. Use `Localize` when migrating existing markup that already uses `<asp:Localize>` to minimize changes.

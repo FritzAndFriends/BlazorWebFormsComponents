@@ -20,56 +20,58 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `AutoPostBack` - Not needed in Blazor. Use the `OnCheckedChanged` event instead.
 - `GroupName` with client-side validation - Use Blazor's validation components instead.
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:RadioButton 
-    ID="string"
-    Text="string"
-    GroupName="string"
-    Checked="True|False"
-    TextAlign="Left|Right"
-    Enabled="True|False"
-    AutoPostBack="True|False"
-    OnCheckedChanged="CheckedChanged event handler"
-    BackColor="color name|#dddddd"
-    ForeColor="color name|#dddddd"
-    CssClass="string"
-    runat="server" 
-/>
-```
+=== "Web Forms (Before)"
 
-## Blazor Syntax
+    ```html
+    <asp:RadioButton 
+        ID="string"
+        Text="string"
+        GroupName="string"
+        Checked="True|False"
+        TextAlign="Left|Right"
+        Enabled="True|False"
+        AutoPostBack="True|False"
+        OnCheckedChanged="CheckedChanged event handler"
+        BackColor="color name|#dddddd"
+        ForeColor="color name|#dddddd"
+        CssClass="string"
+        runat="server" 
+    />
+    ```
 
-```razor
-<!-- Simple radio button -->
-<RadioButton Text="Option A" />
+=== "Blazor (After)"
 
-<!-- Grouped radio buttons (mutually exclusive) -->
-<RadioButton Text="Small" GroupName="Size" Checked="@(size == "Small")" 
-             OnCheckedChanged="@(() => size = "Small")" />
-<RadioButton Text="Medium" GroupName="Size" Checked="@(size == "Medium")" 
-             OnCheckedChanged="@(() => size = "Medium")" />
-<RadioButton Text="Large" GroupName="Size" Checked="@(size == "Large")" 
-             OnCheckedChanged="@(() => size = "Large")" />
+    ```razor
+    <!-- Simple radio button -->
+    <RadioButton Text="Option A" />
 
-<!-- Text alignment -->
-<RadioButton Text="Label on left" TextAlign="Enums.TextAlign.Left" GroupName="Align" />
-<RadioButton Text="Label on right" TextAlign="Enums.TextAlign.Right" GroupName="Align" />
+    <!-- Grouped radio buttons (mutually exclusive) -->
+    <RadioButton Text="Small" GroupName="Size" Checked="@(size == "Small")" 
+                 OnCheckedChanged="@(() => size = "Small")" />
+    <RadioButton Text="Medium" GroupName="Size" Checked="@(size == "Medium")" 
+                 OnCheckedChanged="@(() => size = "Medium")" />
+    <RadioButton Text="Large" GroupName="Size" Checked="@(size == "Large")" 
+                 OnCheckedChanged="@(() => size = "Large")" />
 
-<!-- Two-way binding -->
-<RadioButton Text="Subscribe" Checked="@isSubscribed" 
-             CheckedChanged="@((value) => isSubscribed = value)" />
+    <!-- Text alignment -->
+    <RadioButton Text="Label on left" TextAlign="Enums.TextAlign.Left" GroupName="Align" />
+    <RadioButton Text="Label on right" TextAlign="Enums.TextAlign.Right" GroupName="Align" />
 
-<!-- Disabled radio button -->
-<RadioButton Text="Cannot select" Enabled="false" />
+    <!-- Two-way binding -->
+    <RadioButton Text="Subscribe" Checked="@isSubscribed" 
+                 CheckedChanged="@((value) => isSubscribed = value)" />
 
-<!-- Styled radio button -->
-<RadioButton Text="Styled" CssClass="custom-radio" BackColor="LightBlue" GroupName="Styled" />
+    <!-- Disabled radio button -->
+    <RadioButton Text="Cannot select" Enabled="false" />
 
-<!-- Radio button without text (no span wrapper) -->
-<RadioButton GroupName="NoLabel" />
-```
+    <!-- Styled radio button -->
+    <RadioButton Text="Styled" CssClass="custom-radio" BackColor="LightBlue" GroupName="Styled" />
+
+    <!-- Radio button without text (no span wrapper) -->
+    <RadioButton GroupName="NoLabel" />
+    ```
 
 ## Key Behaviors
 
@@ -107,41 +109,40 @@ Radio buttons with the same `GroupName` share the same HTML `name` attribute, wh
 <input id="guid" type="radio" name="GroupName" />
 ```
 
-## Migration Tips
-
-1. **Remove `asp:` prefix and `runat="server"`**: Change `<asp:RadioButton runat="server" />` to `<RadioButton />`
-2. **Update GroupName usage**: The property works the same way in Blazor
-3. **Replace AutoPostBack**: Use `OnCheckedChanged` event handler instead
-4. **Two-way binding**: Use `CheckedChanged` callback for `@bind`-like behavior
-5. **Update TextAlign**: Change `TextAlign="Left"` to `TextAlign="Enums.TextAlign.Left"`
+!!! tip "Migration Tips"
+    1. **Remove `asp:` prefix and `runat="server"`**: Change `<asp:RadioButton runat="server" />` to `<RadioButton />`
+    2. **Update GroupName usage**: The property works the same way in Blazor
+    3. **Replace AutoPostBack**: Use `OnCheckedChanged` event handler instead
+    4. **Two-way binding**: Use `CheckedChanged` callback for `@bind`-like behavior
+    5. **Update TextAlign**: Change `TextAlign="Left"` to `TextAlign="Enums.TextAlign.Left"`
 
 ## Example Migration
 
-### Before (Web Forms)
+=== "Web Forms (Before)"
 
-```html
-<asp:RadioButton ID="rbSmall" Text="Small" GroupName="Size" 
-                 AutoPostBack="true" OnCheckedChanged="Size_Changed" runat="server" />
-<asp:RadioButton ID="rbMedium" Text="Medium" GroupName="Size" 
-                 AutoPostBack="true" OnCheckedChanged="Size_Changed" runat="server" />
-<asp:RadioButton ID="rbLarge" Text="Large" GroupName="Size" 
-                 AutoPostBack="true" OnCheckedChanged="Size_Changed" runat="server" />
-```
+    ```html
+    <asp:RadioButton ID="rbSmall" Text="Small" GroupName="Size" 
+                     AutoPostBack="true" OnCheckedChanged="Size_Changed" runat="server" />
+    <asp:RadioButton ID="rbMedium" Text="Medium" GroupName="Size" 
+                     AutoPostBack="true" OnCheckedChanged="Size_Changed" runat="server" />
+    <asp:RadioButton ID="rbLarge" Text="Large" GroupName="Size" 
+                     AutoPostBack="true" OnCheckedChanged="Size_Changed" runat="server" />
+    ```
 
-### After (Blazor)
+=== "Blazor (After)"
 
-```razor
-<RadioButton Text="Small" GroupName="Size" Checked="@(selectedSize == "Small")" 
-             OnCheckedChanged="@(() => selectedSize = "Small")" />
-<RadioButton Text="Medium" GroupName="Size" Checked="@(selectedSize == "Medium")" 
-             OnCheckedChanged="@(() => selectedSize = "Medium")" />
-<RadioButton Text="Large" GroupName="Size" Checked="@(selectedSize == "Large")" 
-             OnCheckedChanged="@(() => selectedSize = "Large")" />
+    ```razor
+    <RadioButton Text="Small" GroupName="Size" Checked="@(selectedSize == "Small")" 
+                 OnCheckedChanged="@(() => selectedSize = "Small")" />
+    <RadioButton Text="Medium" GroupName="Size" Checked="@(selectedSize == "Medium")" 
+                 OnCheckedChanged="@(() => selectedSize = "Medium")" />
+    <RadioButton Text="Large" GroupName="Size" Checked="@(selectedSize == "Large")" 
+                 OnCheckedChanged="@(() => selectedSize = "Large")" />
 
-@code {
-    private string selectedSize = "Medium";
-}
-```
+    @code {
+        private string selectedSize = "Medium";
+    }
+    ```
 
 ## See Also
 

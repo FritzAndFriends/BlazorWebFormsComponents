@@ -20,39 +20,47 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 - `DefaultButton` - JavaScript-based button targeting is not implemented
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Panel
-    ID="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DefaultButton="string"
-    Direction="NotSet|LeftToRight|RightToLeft"
-    Enabled="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Size="string"
-    ForeColor="color name|#dddddd"
-    GroupingText="string"
-    Height="size"
-    HorizontalAlign="NotSet|Left|Center|Right|Justify"
-    ScrollBars="None|Horizontal|Vertical|Both|Auto"
-    Visible="True|False"
-    Width="size"
-    Wrap="True|False"
-    runat="server">
-    
-    <!-- Child content here -->
-    
-</asp:Panel>
-```
+=== "Web Forms (Before)"
 
-## Blazor Syntax
+    ```html
+    <asp:Panel
+        ID="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DefaultButton="string"
+        Direction="NotSet|LeftToRight|RightToLeft"
+        Enabled="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Size="string"
+        ForeColor="color name|#dddddd"
+        GroupingText="string"
+        Height="size"
+        HorizontalAlign="NotSet|Left|Center|Right|Justify"
+        ScrollBars="None|Horizontal|Vertical|Both|Auto"
+        Visible="True|False"
+        Width="size"
+        Wrap="True|False"
+        runat="server">
+        
+        <!-- Child content here -->
+        
+    </asp:Panel>
+    ```
+
+=== "Blazor (After)"
+
+    ```razor
+    <Panel>
+        <p>This is content inside a panel.</p>
+    </Panel>
+    ```
 
 ### Basic Panel
 
@@ -220,31 +228,32 @@ The `BackImageUrl` property sets a CSS background image on the panel. This rende
 | `ScrollBars.Both` | `overflow:scroll` |
 | `ScrollBars.Auto` | `overflow:auto` |
 
-## Migration Notes
+!!! tip "Migration Notes"
+    1. Remove the `asp:` prefix and `runat="server"` attribute
+    2. Replace `ID` with `@ref` if you need a component reference
+    3. The `DefaultButton` property is not implemented — use JavaScript or Blazor event handling instead
+    4. Use `ChildContent` pattern (content between tags) for child controls
 
-When migrating from Web Forms to Blazor:
+## Example Migration
 
-1. Remove the `asp:` prefix and `runat="server"` attribute
-2. Replace `ID` with `@ref` if you need a component reference
-3. The `DefaultButton` property is not implemented - use JavaScript or Blazor event handling instead
-4. Use `ChildContent` pattern (content between tags) for child controls
+=== "Web Forms (Before)"
 
-### Before (Web Forms):
-```html
-<asp:Panel ID="pnlDetails" 
-           CssClass="details-panel" 
-           Visible="true" 
-           runat="server">
-    <p>Panel content</p>
-</asp:Panel>
-```
+    ```html
+    <asp:Panel ID="pnlDetails" 
+               CssClass="details-panel" 
+               Visible="true" 
+               runat="server">
+        <p>Panel content</p>
+    </asp:Panel>
+    ```
 
-### After (Blazor):
-```razor
-<Panel CssClass="details-panel" Visible="true">
-    <p>Panel content</p>
-</Panel>
-```
+=== "Blazor (After)"
+
+    ```razor
+    <Panel CssClass="details-panel" Visible="true">
+        <p>Panel content</p>
+    </Panel>
+    ```
 
 ## See Also
 
