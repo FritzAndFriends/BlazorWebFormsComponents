@@ -192,6 +192,37 @@ namespace BlazorWebFormsComponents
 			=> HttpContextAccessor?.HttpContext is not null;
 
 		/// <summary>
+		/// Returns the HTML onchange attribute value for AutoPostBack behavior.
+		/// In SSR mode with AutoPostBack=true, returns "this.form.submit()" to trigger a form POST.
+		/// In Interactive mode or when AutoPostBack=false, returns null (Blazor handles events natively).
+		/// </summary>
+		protected string? GetAutoPostBackScript(bool autoPostBack)
+		{
+			if (!autoPostBack) return null;
+			if (CurrentRenderMode == WebFormsRenderMode.StaticSSR)
+				return "this.form.submit()";
+			return null;
+		}
+
+		private static readonly IReadOnlyDictionary<string, object> _emptyAttributes =
+			new Dictionary<string, object>();
+
+		/// <summary>
+		/// Returns an attribute dictionary containing onchange="this.form.submit()" when
+		/// AutoPostBack is true in SSR mode. Returns an empty dictionary otherwise.
+		/// Used via @attributes splatting to avoid compile-time conflicts with @onchange.
+		/// </summary>
+		protected IReadOnlyDictionary<string, object> GetAutoPostBackAttributes(bool autoPostBack)
+		{
+			var script = GetAutoPostBackScript(autoPostBack);
+			if (script != null)
+			{
+				return new Dictionary<string, object> { ["onchange"] = script };
+			}
+			return _emptyAttributes;
+		}
+
+		/// <summary>
 		/// Optional data protection provider for ViewState encryption in SSR mode.
 		/// Resolved lazily from the service provider — null when not registered.
 		/// ViewState serialization is skipped when unavailable.

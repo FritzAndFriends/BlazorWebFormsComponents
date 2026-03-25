@@ -98,11 +98,11 @@
 		
 		if (TextAlign == Enums.TextAlign.Left)
 		{
-			<label for="@inputId">@item.Text</label><input id="@inputId" type="checkbox" name="@($"{_baseId}${index}")" value="@item.Value" checked="@isChecked" disabled="@(!Enabled || !item.Enabled)" @onchange="e => HandleChange(item, e)" />
+			<label for="@inputId">@item.Text</label><input id="@inputId" type="checkbox" name="@($"{_baseId}${index}")" value="@item.Value" checked="@isChecked" disabled="@(!Enabled || !item.Enabled)" @onchange="e => HandleChange(item, e)" @attributes="GetAutoPostBackAttributes(AutoPostBack)" />
 		}
 		else
 		{
-			<input id="@inputId" type="checkbox" name="@($"{_baseId}${index}")" value="@item.Value" checked="@isChecked" disabled="@(!Enabled || !item.Enabled)" @onchange="e => HandleChange(item, e)" /><label for="@inputId">@item.Text</label>
+			<input id="@inputId" type="checkbox" name="@($"{_baseId}${index}")" value="@item.Value" checked="@isChecked" disabled="@(!Enabled || !item.Enabled)" @onchange="e => HandleChange(item, e)" @attributes="GetAutoPostBackAttributes(AutoPostBack)" /><label for="@inputId">@item.Text</label>
 		}
 	};
 }

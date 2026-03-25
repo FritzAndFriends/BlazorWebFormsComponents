@@ -96,7 +96,8 @@
 				   value="@item.Value"
 				   checked="@(item.Value == SelectedValue)"
 				   disabled="@(!Enabled || !item.Enabled)"
-				   @onchange="(e) => HandleChange(item, e)" />
+				   @onchange="(e) => HandleChange(item, e)"
+				   @attributes="GetAutoPostBackAttributes(AutoPostBack)" />
 		}
 		else
 		{
@@ -106,7 +107,8 @@
 				   value="@item.Value"
 				   checked="@(item.Value == SelectedValue)"
 				   disabled="@(!Enabled || !item.Enabled)"
-				   @onchange="(e) => HandleChange(item, e)" />
+				   @onchange="(e) => HandleChange(item, e)"
+				   @attributes="GetAutoPostBackAttributes(AutoPostBack)" />
 			<label for="@inputId">@item.Text</label>
 		}
 	};
