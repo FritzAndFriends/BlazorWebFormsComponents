@@ -152,9 +152,11 @@ namespace BlazorWebFormsComponents
 		/// In ServerInteractive mode, persists for the component's lifetime (in-memory).
 		/// In SSR mode, round-trips via a protected hidden form field.
 		///
-		/// <para><b>Migration note:</b> This enables Web Forms ViewState-backed property
-		/// patterns to work unchanged. For new Blazor code, prefer [Parameter] properties
-		/// and component fields.</para>
+		/// <para><b>Migration shim — not a destination.</b> This exists so Web Forms
+		/// <c>ViewState["key"]</c> patterns compile and run correctly during migration.
+		/// Once running, refactor to <c>[Parameter]</c> properties, component fields, or
+		/// cascading values. Unlike Web Forms, this is opt-in, per-component, dirty-tracked,
+		/// and encrypted by default.</para>
 		/// </summary>
 		public ViewStateDictionary ViewState { get; } = new();
 

@@ -1,5 +1,8 @@
 # ViewState and PostBack Shim
 
+!!! warning "Migration Shim — Not a Destination"
+    ViewState and IsPostBack are **migration compatibility features**. They exist so your Web Forms code-behind logic compiles and runs correctly in Blazor with minimal changes. Once your application is running, you should **refactor toward native Blazor patterns** — `[Parameter]` properties, component fields, and cascading values. See [Graduating Off ViewState](#graduating-off-viewstate) below.
+
 ## Overview
 
 The ViewState and PostBack shim features enable seamless migration of ASP.NET Web Forms applications to Blazor by emulating the familiar `ViewState` dictionary and `IsPostBack` pattern. These features bridge the gap between traditional stateless HTTP POST workflows and Blazor's component-based stateful architecture.
@@ -10,6 +13,20 @@ The ViewState and PostBack shim features enable seamless migration of ASP.NET We
 - **Mode-Adaptive IsPostBack** — A property that automatically detects postback scenarios based on your render mode
 - **Hidden Field Persistence** — Automatic round-tripping of ViewState through protected form fields in SSR
 - **Form State Continuity** — Seamless state management across SSR and ServerInteractive transitions
+
+### How This Differs from Web Forms ViewState
+
+The original Web Forms ViewState was a source of well-known problems: page bloat, security vulnerabilities, and invisible performance costs. Our implementation is fundamentally different:
+
+| Concern | Web Forms ViewState | BWFC ViewState Shim |
+|---------|-------------------|-------------------|
+| **Default behavior** | On for every control, always serialized | **Off by default** — opt-in per component |
+| **Scope** | Single `__VIEWSTATE` blob for the entire page | **Per-component** isolated fields (`__bwfc_viewstate_{ID}`) |
+| **Serialization** | Every render, even unchanged controls | **Dirty tracking** — skips serialization when nothing changed |
+| **Security** | Unencrypted until .NET 4.5.2 MAC patch | **Encrypted + signed by default** (ASP.NET Core Data Protection, AES-256) |
+| **Format** | Opaque binary (`LosFormatter`) | **JSON** — human-readable, debuggable |
+| **Visibility** | No insight into payload size | **Size warnings** logged when threshold exceeded |
+| **Interactive mode** | N/A | **In-memory only** — no serialization overhead |
 
 ---
 
@@ -604,6 +621,78 @@ public partial class ProductPage : System.Web.UI.Page
 | **IsPostBack Detection** | `HttpMethods.IsPost()` | `_hasInitialized` flag |
 | **Form Submission** | Traditional HTML POST | JavaScript event, no form submission |
 | **Use Case** | Legacy form migration | Interactive features |
+
+---
+
+## Graduating Off ViewState
+
+ViewState gets your Web Forms code running in Blazor. The next step is refactoring to native Blazor patterns. Here's how to migrate each common ViewState usage:
+
+### Simple Values → Component Fields
+
+=== "ViewState (Migration)"
+
+    ```csharp
+    // Web Forms pattern preserved during migration
+    public int SelectedDepartmentId
+    {
+        get => ViewState.GetValueOrDefault<int>("SelectedDepartmentId");
+        set => ViewState.Set("SelectedDepartmentId", value);
+    }
+    ```
+
+=== "Native Blazor (Target)"
+
+    ```csharp
+    // Refactored: simple field, no serialization overhead
+    private int _selectedDepartmentId;
+    ```
+
+### First-Load Guards → OnInitialized
+
+=== "ViewState (Migration)"
+
+    ```csharp
+    protected override void OnInitialized()
+    {
+        if (!IsPostBack)
+        {
+            ViewState["Products"] = LoadProducts();
+        }
+    }
+    ```
+
+=== "Native Blazor (Target)"
+
+    ```csharp
+    // OnInitialized already runs once per component instance
+    protected override void OnInitialized()
+    {
+        _products = LoadProducts();
+    }
+    ```
+
+### Cross-Component State → Cascading Values or DI Services
+
+=== "ViewState (Migration)"
+
+    ```csharp
+    // Parent stores state in ViewState, child reads it
+    ViewState["SelectedCategory"] = category;
+    ```
+
+=== "Native Blazor (Target)"
+
+    ```razor
+    <!-- Parent cascades value to children -->
+    <CascadingValue Value="@_selectedCategory">
+        @ChildContent
+    </CascadingValue>
+    ```
+
+### When ViewState Is Still Appropriate
+
+ViewState remains useful for **SSR form round-trips** where you need state to survive an HTTP POST without JavaScript. This is a legitimate pattern in SSR Blazor — similar to hidden fields in any web framework. The key difference from Web Forms: you're choosing to use it, not having it imposed on every control.
 
 ---
 
