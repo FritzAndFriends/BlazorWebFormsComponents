@@ -122,7 +122,7 @@ namespace BlazorWebFormsComponents.CustomControls
 					// Emit any remaining markup after the last placeholder
 					if (!string.IsNullOrEmpty(remaining))
 					{
-						builder.AddMarkupContent(sequence++, remaining);
+						builder.AddMarkupContent(sequence, remaining);
 					}
 				}
 			}

@@ -7,7 +7,7 @@ namespace BlazorWebFormsComponents.Test.CustomControls.TestComponents
 {
 	public class SimpleDataList : DataBoundWebControl
 	{
-		private List<string> _items = new();
+		private readonly List<string> _items = new();
 
 		protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Ul;
 

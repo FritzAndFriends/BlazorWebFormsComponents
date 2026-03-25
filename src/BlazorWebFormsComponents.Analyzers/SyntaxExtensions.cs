@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Linq;
 
 namespace BlazorWebFormsComponents.Analyzers
 {
@@ -11,15 +12,9 @@ namespace BlazorWebFormsComponents.Analyzers
         /// </summary>
         internal static SyntaxTrivia DetectEndOfLine(this SyntaxNode root)
         {
-            foreach (var trivia in root.DescendantTrivia())
-            {
-                if (trivia.IsKind(SyntaxKind.EndOfLineTrivia))
-                {
-                    return trivia;
-                }
-            }
-
-            return SyntaxFactory.EndOfLine("\n");
+            var eol = root.DescendantTrivia()
+                .FirstOrDefault(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
+            return eol.IsKind(SyntaxKind.EndOfLineTrivia) ? eol : SyntaxFactory.EndOfLine("\n");
         }
     }
 }

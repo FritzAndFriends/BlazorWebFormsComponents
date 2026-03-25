@@ -38,7 +38,6 @@ namespace BlazorWebFormsComponents.Analyzers
 
         private async Task<Document> CommentOutViewStateAsync(Document document, SyntaxNode diagnosticNode, CancellationToken cancellationToken)
         {
-            var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
             var statement = diagnosticNode.FirstAncestorOrSelf<StatementSyntax>();
             if (statement == null)
                 return document;
@@ -81,10 +80,7 @@ namespace BlazorWebFormsComponents.Analyzers
                 var lineIndent = line.Substring(0, ws);
                 var lineCode = line.Substring(ws);
 
-                if (i == 0)
-                    commentedLines[i] = "// " + lineCode;
-                else
-                    commentedLines[i] = lineIndent + "// " + lineCode;
+                commentedLines[i] = i == 0 ? "// " + lineCode : lineIndent + "// " + lineCode;
             }
             var commentedText = string.Join(newLine, commentedLines);
 

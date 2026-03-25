@@ -64,19 +64,7 @@ namespace BlazorWebFormsComponents.Analyzers
             if (memberAccess.Name.Identifier.Text == "Current" &&
                 memberAccess.Expression.ToString() == "HttpContext")
             {
-                // Avoid double-reporting if this is part of a larger expression
-                // that we'll catch elsewhere (e.g., HttpContext.Current.Session["key"])
-                // Only report if this node is not already the expression of another
-                // member access that we'd also flag.
-                var parent = memberAccess.Parent;
-                if (parent is MemberAccessExpressionSyntax parentMember)
-                {
-                    // If parent is HttpContext.Current.Session, and that's followed by element access,
-                    // we'll catch the Session["key"] separately. But HttpContext.Current itself is the problem.
-                    // Report it here regardless — the user needs to know HttpContext.Current is unavailable.
-                }
-
-                var containingMethod = memberAccess.FirstAncestorOrSelf<MethodDeclarationSyntax>();
+                var containingMethod= memberAccess.FirstAncestorOrSelf<MethodDeclarationSyntax>();
                 var memberName = containingMethod?.Identifier.Text ?? "<unknown>";
 
                 var diagnostic = Diagnostic.Create(Rule, memberAccess.GetLocation(), memberName);

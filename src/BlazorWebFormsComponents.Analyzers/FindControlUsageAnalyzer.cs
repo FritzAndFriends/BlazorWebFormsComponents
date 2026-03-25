@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace BlazorWebFormsComponents.Analyzers
 {
@@ -72,14 +73,9 @@ namespace BlazorWebFormsComponents.Analyzers
             if (symbolInfo.Symbol is IMethodSymbol methodSymbol)
                 return InheritsFromOrIs(methodSymbol.ContainingType, "BaseWebFormsComponent");
 
-            foreach (var candidate in symbolInfo.CandidateSymbols)
-            {
-                if (candidate is IMethodSymbol candidateMethod &&
-                    InheritsFromOrIs(candidateMethod.ContainingType, "BaseWebFormsComponent"))
-                    return true;
-            }
-
-            return false;
+            return symbolInfo.CandidateSymbols
+                .OfType<IMethodSymbol>()
+                .Any(cm => InheritsFromOrIs(cm.ContainingType, "BaseWebFormsComponent"));
         }
 
         private static bool InheritsFromOrIs(INamedTypeSymbol type, string baseTypeName)

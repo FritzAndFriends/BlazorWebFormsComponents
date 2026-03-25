@@ -42,16 +42,13 @@ namespace BlazorWebFormsComponents.Analyzers
         {
             var invocation = (InvocationExpressionSyntax)context.Node;
 
-            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess)
+            if (invocation.Expression is MemberAccessExpressionSyntax memberAccess && IsResponseRedirect(memberAccess))
             {
-                if (IsResponseRedirect(memberAccess))
-                {
-                    var containingMethod = invocation.FirstAncestorOrSelf<MethodDeclarationSyntax>();
-                    var memberName = containingMethod?.Identifier.Text ?? "<unknown>";
+                var containingMethod = invocation.FirstAncestorOrSelf<MethodDeclarationSyntax>();
+                var memberName = containingMethod?.Identifier.Text ?? "<unknown>";
 
-                    var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), memberName);
-                    context.ReportDiagnostic(diagnostic);
-                }
+                var diagnostic = Diagnostic.Create(Rule, invocation.GetLocation(), memberName);
+                context.ReportDiagnostic(diagnostic);
             }
         }
 
