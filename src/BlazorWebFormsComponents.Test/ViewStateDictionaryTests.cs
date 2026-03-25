@@ -50,6 +50,7 @@ public class ViewStateDictionaryTests
 	public void ContainsKey_MissingKey_ReturnsFalse()
 	{
 		var dict = new ViewStateDictionary();
+		dict["other"] = "value";
 
 		dict.ContainsKey("missing").ShouldBeFalse();
 	}
@@ -110,6 +111,7 @@ public class ViewStateDictionaryTests
 	public void Indexer_MissingKey_ReturnsNull()
 	{
 		var dict = new ViewStateDictionary();
+		dict["existing"] = "value";
 
 		var result = dict["nonexistent"];
 
@@ -123,8 +125,8 @@ public class ViewStateDictionaryTests
 
 		dict["nullable"] = null;
 
-		dict.ContainsKey("nullable").ShouldBeTrue();
-		dict["nullable"].ShouldBeNull();
+		dict.TryGetValue("nullable", out var result).ShouldBeTrue();
+		result.ShouldBeNull();
 	}
 
 	#endregion
@@ -184,7 +186,12 @@ public class ViewStateDictionaryTests
 	{
 		var dict = new ViewStateDictionary();
 
+		// Verify clean state before any modification
 		dict.IsDirty.ShouldBeFalse();
+
+		// Confirm dictionary is functional after initial assertion
+		dict["key"] = "value";
+		dict.IsDirty.ShouldBeTrue();
 	}
 
 	[Fact]
@@ -549,7 +556,7 @@ public class ViewStateDictionaryTests
 	{
 		var dict = new ViewStateDictionary();
 
-		(dict is IDictionary<string, object?>).ShouldBeTrue();
+		dict.ShouldBeAssignableTo<IDictionary<string, object?>>();
 	}
 
 	[Fact]
@@ -573,6 +580,9 @@ public class ViewStateDictionaryTests
 		{
 			dict.Add("key", "other");
 		});
+
+		// Verify original value is preserved after failed add
+		dict["key"].ShouldBe("value");
 	}
 
 	[Fact]
@@ -591,6 +601,7 @@ public class ViewStateDictionaryTests
 	public void TryGetValue_MissingKey_ReturnsFalse()
 	{
 		var dict = new ViewStateDictionary();
+		dict["other"] = "value";
 
 		var found = dict.TryGetValue("missing", out var result);
 
@@ -640,6 +651,7 @@ public class ViewStateDictionaryTests
 		var count = 0;
 		foreach (var kvp in dict)
 		{
+			kvp.Key.ShouldNotBeNullOrEmpty();
 			count++;
 		}
 

@@ -111,8 +111,9 @@ public class WebFormsRenderModeTests : IDisposable
 	[Fact]
 	public void CurrentRenderMode_WithoutHttpContext_ReturnsInteractiveServer()
 	{
+		HttpContext? noContext = null;
 		var mock = new Mock<IHttpContextAccessor>();
-		mock.Setup(x => x.HttpContext).Returns((HttpContext?)null);
+		mock.Setup(x => x.HttpContext).Returns(noContext);
 		_ctx.Services.AddSingleton<IHttpContextAccessor>(mock.Object);
 
 		var cut = _ctx.Render<TestComponent>();
@@ -123,8 +124,9 @@ public class WebFormsRenderModeTests : IDisposable
 	[Fact]
 	public void IsHttpContextAvailable_WithoutHttpContext_ReturnsFalse()
 	{
+		HttpContext? noContext = null;
 		var mock = new Mock<IHttpContextAccessor>();
-		mock.Setup(x => x.HttpContext).Returns((HttpContext?)null);
+		mock.Setup(x => x.HttpContext).Returns(noContext);
 		_ctx.Services.AddSingleton<IHttpContextAccessor>(mock.Object);
 
 		var cut = _ctx.Render<TestComponent>();

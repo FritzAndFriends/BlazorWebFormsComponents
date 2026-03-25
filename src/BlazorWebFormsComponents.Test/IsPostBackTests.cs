@@ -94,7 +94,8 @@ public class IsPostBackTests : IDisposable
 	private void RegisterNoHttpContext()
 	{
 		var mock = new Mock<IHttpContextAccessor>();
-		mock.Setup(x => x.HttpContext).Returns((HttpContext?)null);
+		HttpContext? noContext = null;
+		mock.Setup(x => x.HttpContext).Returns(noContext);
 		_ctx.Services.AddSingleton<IHttpContextAccessor>(mock.Object);
 	}
 

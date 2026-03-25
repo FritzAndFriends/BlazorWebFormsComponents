@@ -66,15 +66,16 @@ public static class ServiceCollectionExtensions
 
         // Fallback: look for a pre-generated snapshot alongside the running assembly
         var assemblyDir = System.IO.Path.GetDirectoryName(typeof(ComponentHealthService).Assembly.Location) ?? "";
-        var snapshotFileName = HealthSnapshotGenerator.SnapshotFileName.TrimStart(
-            System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar);
-        var snapshotPath = System.IO.Path.Combine(assemblyDir, snapshotFileName);
+        var snapshotFileName = HealthSnapshotGenerator.SnapshotFileName;
+        var snapshotPath = System.IO.Path.Combine(assemblyDir,
+            snapshotFileName.TrimStart(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar));
         var snapshotReports = HealthSnapshotGenerator.LoadSnapshot(snapshotPath);
 
         // Also check the app's base directory (common for published apps)
         if (snapshotReports == null)
         {
-            snapshotPath = System.IO.Path.Combine(System.AppContext.BaseDirectory, snapshotFileName);
+            snapshotPath = System.IO.Path.Combine(System.AppContext.BaseDirectory,
+                snapshotFileName.TrimStart(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar));
             snapshotReports = HealthSnapshotGenerator.LoadSnapshot(snapshotPath);
         }
 
