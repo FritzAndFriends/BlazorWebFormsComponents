@@ -34,42 +34,44 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 !!! warning "Authentication Integration"
     The ChangePassword component does NOT perform password changes directly. You must handle the `OnChangingPassword` event and use ASP.NET Identity's `UserManager<T>.ChangePasswordAsync()` or your own authentication service to perform the actual password change.
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ChangePassword
-    ID="ChangePassword1"
-    ChangePasswordTitleText="Change Your Password"
-    SuccessText="Your password has been changed!"
-    DisplayUserName="False"
-    OnChangingPassword="ChangePassword1_ChangingPassword"
-    OnChangedPassword="ChangePassword1_ChangedPassword"
-    runat="server" />
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:ChangePassword
+        ID="ChangePassword1"
+        ChangePasswordTitleText="Change Your Password"
+        SuccessText="Your password has been changed!"
+        DisplayUserName="False"
+        OnChangingPassword="ChangePassword1_ChangingPassword"
+        OnChangedPassword="ChangePassword1_ChangedPassword"
+        runat="server" />
+    ```
 
-```razor
-<ChangePassword ID="ChangePassword1"
-    ChangePasswordTitleText="Change Your Password"
-    DisplayUserName="false"
-    OnChangingPassword="HandleChangingPassword"
-    OnChangedPassword="HandleChangedPassword" />
+=== "Blazor"
 
-@code {
-    private async Task HandleChangingPassword(LoginCancelEventArgs e)
-    {
-        // Call your identity service to change the password
-        // var result = await UserManager.ChangePasswordAsync(user, currentPassword, newPassword);
-        // if (!result.Succeeded) { e.Cancel = true; }
+    ```razor
+    <ChangePassword ID="ChangePassword1"
+        ChangePasswordTitleText="Change Your Password"
+        DisplayUserName="false"
+        OnChangingPassword="HandleChangingPassword"
+        OnChangedPassword="HandleChangedPassword" />
+
+    @code {
+        private async Task HandleChangingPassword(LoginCancelEventArgs e)
+        {
+            // Call your identity service to change the password
+            // var result = await UserManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            // if (!result.Succeeded) { e.Cancel = true; }
+        }
+
+        private void HandleChangedPassword(EventArgs e)
+        {
+            // Password changed successfully
+        }
     }
-
-    private void HandleChangedPassword(EventArgs e)
-    {
-        // Password changed successfully
-    }
-}
-```
+    ```
 
 ## HTML Output
 
