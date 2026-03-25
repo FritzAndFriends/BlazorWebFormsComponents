@@ -48,42 +48,29 @@ It may seem strange that we have a HyperLink component when there already is an 
 - `EnableViewState` - ViewState is supported for compatibility but this parameter does nothing
 - `SkinID` - Theming is not available in Blazor
 
-## Usage Examples
+## Syntax Comparison
 
-### Web Forms Syntax
-```html
-<asp:HyperLink ID="lnkExample" 
-    NavigateUrl="https://example.com" 
-    Text="Visit Example" 
-    Target="_blank"
-    ToolTip="Click to visit example.com"
-    CssClass="btn btn-link"
-    runat="server" />
-```
+=== "Web Forms"
 
-### Blazor Syntax
-```html
-<HyperLink NavigateUrl="https://example.com" 
-    Text="Visit Example" 
-    Target="_blank"
-    ToolTip="Click to visit example.com"
-    CssClass="btn btn-link" />
-```
+    ```html
+    <asp:HyperLink ID="lnkExample" 
+        NavigateUrl="https://example.com" 
+        Text="Visit Example" 
+        Target="_blank"
+        ToolTip="Click to visit example.com"
+        CssClass="btn btn-link"
+        runat="server" />
+    ```
 
-### Blazor with Styling
-```html
-<HyperLink NavigateUrl="/products" 
-    Text="View Products" 
-    ForeColor="#0066cc"
-    Font-Bold="true"
-    Font-Size="14px" />
-```
+=== "Blazor"
 
-### Blazor without NavigateUrl (renders as plain anchor)
-```html
-<HyperLink Text="Inactive Link" 
-    ToolTip="This link has no URL" />
-```
+    ```razor
+    <HyperLink NavigateUrl="https://example.com" 
+        Text="Visit Example" 
+        Target="_blank"
+        ToolTip="Click to visit example.com"
+        CssClass="btn btn-link" />
+    ```
 
 ## WebForms Syntax Reference
 
@@ -128,6 +115,23 @@ It may seem strange that we have a HyperLink component when there already is an 
     Visible="True|False"
     Width="size"
 />
+```
+
+## Usage Examples
+
+### Blazor with Styling
+```html
+<HyperLink NavigateUrl="/products" 
+    Text="View Products" 
+    ForeColor="#0066cc"
+    Font-Bold="true"
+    Font-Size="14px" />
+```
+
+### Blazor without NavigateUrl (renders as plain anchor)
+```html
+<HyperLink Text="Inactive Link" 
+    ToolTip="This link has no URL" />
 ```
 
 ## See Also

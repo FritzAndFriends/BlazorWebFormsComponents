@@ -17,56 +17,58 @@ The LoginStatus component displays a login or logout link depending on the user'
 
 - LogoutAction.RedirectToLoginPage - use Redirect with LogoutPageUrl instead
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:LoginStatus
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    Enabled="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    LoginImageUrl="uri"
-    LoginText="string"
-    LogoutAction="Refresh|Redirect|RedirectToLoginPage"
-    LogoutImageUrl="uri"
-    LogoutPageUrl="uri"
-    LogoutText="string"
-    OnLoggedOut="LoggedOut event handler"
-    OnLoggingOut="LoggingOut event handler"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:LoginStatus
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        Enabled="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        LoginImageUrl="uri"
+        LoginText="string"
+        LogoutAction="Refresh|Redirect|RedirectToLoginPage"
+        LogoutImageUrl="uri"
+        LogoutPageUrl="uri"
+        LogoutText="string"
+        OnLoggedOut="LoggedOut event handler"
+        OnLoggingOut="LoggingOut event handler"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
 
-```razor
-<LoginStatus LoginText="Sign In"
-             LogoutText="Sign Out"
-             LoginPageUrl="/login"
-             LogoutAction="LogoutAction.Redirect"
-             LogoutPageUrl="/goodbye"
-             OnLoggedOut="HandleLoggedOut" />
-```
+=== "Blazor"
+
+    ```razor
+    <LoginStatus LoginText="Sign In"
+                 LogoutText="Sign Out"
+                 LoginPageUrl="/login"
+                 LogoutAction="LogoutAction.Redirect"
+                 LogoutPageUrl="/goodbye"
+                 OnLoggedOut="HandleLoggedOut" />
+    ```
 
 ## Usage Notes
 

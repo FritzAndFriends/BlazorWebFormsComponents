@@ -46,48 +46,80 @@ All hot spot types share these properties:
 - **EnableTheming/SkinID** — ASP.NET theming is not available in Blazor
 - **Lifecycle events** (`OnDataBinding`, `OnInit`, etc.) — Use Blazor lifecycle methods instead
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ImageMap
-    ID="string"
-    ImageUrl="uri"
-    AlternateText="string"
-    HotSpotMode="Navigate|PostBack|Inactive|NotSet"
-    OnClick="Click event handler"
-    Target="string"
-    ToolTip="string"
-    runat="server">
-    <asp:RectangleHotSpot
-        AlternateText="string"
-        Bottom="integer"
-        HotSpotMode="Navigate|PostBack|Inactive|NotSet"
-        Left="integer"
-        NavigateUrl="uri"
-        PostBackValue="string"
-        Right="integer"
-        Target="string"
-        Top="integer" />
-    <asp:CircleHotSpot
-        AlternateText="string"
-        HotSpotMode="Navigate|PostBack|Inactive|NotSet"
-        NavigateUrl="uri"
-        PostBackValue="string"
-        Radius="integer"
-        Target="string"
-        X="integer"
-        Y="integer" />
-    <asp:PolygonHotSpot
-        AlternateText="string"
-        Coordinates="string"
-        HotSpotMode="Navigate|PostBack|Inactive|NotSet"
-        NavigateUrl="uri"
-        PostBackValue="string"
-        Target="string" />
-</asp:ImageMap>
-```
+=== "Web Forms"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:ImageMap
+        ID="string"
+        ImageUrl="uri"
+        AlternateText="string"
+        HotSpotMode="Navigate|PostBack|Inactive|NotSet"
+        OnClick="Click event handler"
+        Target="string"
+        ToolTip="string"
+        runat="server">
+        <asp:RectangleHotSpot
+            AlternateText="string"
+            Bottom="integer"
+            HotSpotMode="Navigate|PostBack|Inactive|NotSet"
+            Left="integer"
+            NavigateUrl="uri"
+            PostBackValue="string"
+            Right="integer"
+            Target="string"
+            Top="integer" />
+        <asp:CircleHotSpot
+            AlternateText="string"
+            HotSpotMode="Navigate|PostBack|Inactive|NotSet"
+            NavigateUrl="uri"
+            PostBackValue="string"
+            Radius="integer"
+            Target="string"
+            X="integer"
+            Y="integer" />
+        <asp:PolygonHotSpot
+            AlternateText="string"
+            Coordinates="string"
+            HotSpotMode="Navigate|PostBack|Inactive|NotSet"
+            NavigateUrl="uri"
+            PostBackValue="string"
+            Target="string" />
+    </asp:ImageMap>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    @using BlazorWebFormsComponents
+    @using BlazorWebFormsComponents.Enums
+
+    <ImageMap ImageUrl="/images/map.png"
+              AlternateText="Site Map"
+              HotSpotMode="HotSpotMode.Navigate"
+              HotSpots="@hotSpots" />
+
+    @code {
+        private List<HotSpot> hotSpots = new List<HotSpot>
+        {
+            new RectangleHotSpot
+            {
+                Top = 0, Left = 0, Bottom = 100, Right = 200,
+                NavigateUrl = "/page1",
+                AlternateText = "Region 1"
+            },
+            new CircleHotSpot
+            {
+                X = 300, Y = 150, Radius = 50,
+                NavigateUrl = "/page2",
+                AlternateText = "Region 2"
+            }
+        };
+    }
+    ```
+
+## Blazor Usage Examples
 
 ### Navigation Hot Spots
 

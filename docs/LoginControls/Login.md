@@ -25,72 +25,74 @@ The Login component provides a complete user interface for logging into a web ap
 - LayoutTemplate
 - RenderOuterTable property
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:Login
-    CreateUserIconUrl="uri"
-    CreateUserText="string"
-    CreateUserUrl="uri"
-    DestinationPageUrl="uri"
-    DisplayRememberMe="True|False"
-    FailureText="string"
-    HelpPageIconUrl="uri"
-    HelpPageText="string"
-    HelpPageUrl="uri"
-    ID="string"
-    InstructionText="string"
-    LoginButtonImageUrl="uri"
-    LoginButtonText="string"
-    LoginButtonType="Button|Image|Link"
-    MembershipProvider="string"
-    OnAuthenticate="Authenticate event handler"
-    OnLoggedIn="LoggedIn event handler"
-    OnLoggingIn="LoggingIn event handler"
-    OnLoginError="LoginError event handler"
-    PasswordLabelText="string"
-    PasswordRecoveryIconUrl="uri"
-    PasswordRecoveryText="string"
-    PasswordRecoveryUrl="uri"
-    PasswordRequiredErrorMessage="string"
-    RememberMeSet="True|False"
-    RememberMeText="string"
-    runat="server"
-    TitleText="string"
-    UserName="string"
-    UserNameLabelText="string"
-    UserNameRequiredErrorMessage="string"
-    VisibleWhenLoggedIn="True|False"
-/>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:Login
+        CreateUserIconUrl="uri"
+        CreateUserText="string"
+        CreateUserUrl="uri"
+        DestinationPageUrl="uri"
+        DisplayRememberMe="True|False"
+        FailureText="string"
+        HelpPageIconUrl="uri"
+        HelpPageText="string"
+        HelpPageUrl="uri"
+        ID="string"
+        InstructionText="string"
+        LoginButtonImageUrl="uri"
+        LoginButtonText="string"
+        LoginButtonType="Button|Image|Link"
+        MembershipProvider="string"
+        OnAuthenticate="Authenticate event handler"
+        OnLoggedIn="LoggedIn event handler"
+        OnLoggingIn="LoggingIn event handler"
+        OnLoginError="LoginError event handler"
+        PasswordLabelText="string"
+        PasswordRecoveryIconUrl="uri"
+        PasswordRecoveryText="string"
+        PasswordRecoveryUrl="uri"
+        PasswordRequiredErrorMessage="string"
+        RememberMeSet="True|False"
+        RememberMeText="string"
+        runat="server"
+        TitleText="string"
+        UserName="string"
+        UserNameLabelText="string"
+        UserNameRequiredErrorMessage="string"
+        VisibleWhenLoggedIn="True|False"
+    />
+    ```
 
-```razor
-<Login TitleText="Sign In"
-       UserNameLabelText="Email:"
-       PasswordLabelText="Password:"
-       LoginButtonText="Sign In"
-       OnAuthenticate="HandleAuthenticate"
-       OnLoggedIn="HandleLoggedIn"
-       DestinationPageUrl="/dashboard">
-    <TitleTextStyle ForeColor="Navy" Font-Bold="true" />
-    <LoginButtonStyle BackColor="Blue" ForeColor="White" />
-</Login>
+=== "Blazor"
 
-@code {
-    private void HandleAuthenticate(AuthenticateEventArgs args)
-    {
-        // Implement your authentication logic here
-        args.Authenticated = ValidateCredentials(args);
+    ```razor
+    <Login TitleText="Sign In"
+           UserNameLabelText="Email:"
+           PasswordLabelText="Password:"
+           LoginButtonText="Sign In"
+           OnAuthenticate="HandleAuthenticate"
+           OnLoggedIn="HandleLoggedIn"
+           DestinationPageUrl="/dashboard">
+        <TitleTextStyle ForeColor="Navy" Font-Bold="true" />
+        <LoginButtonStyle BackColor="Blue" ForeColor="White" />
+    </Login>
+
+    @code {
+        private void HandleAuthenticate(AuthenticateEventArgs args)
+        {
+            // Implement your authentication logic here
+            args.Authenticated = ValidateCredentials(args);
+        }
+
+        private void HandleLoggedIn(EventArgs args)
+        {
+            // Handle successful login
+        }
     }
-
-    private void HandleLoggedIn(EventArgs args)
-    {
-        // Handle successful login
-    }
-}
-```
+    ```
 
 ## Usage Notes
 

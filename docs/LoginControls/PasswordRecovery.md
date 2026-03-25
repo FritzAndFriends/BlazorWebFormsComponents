@@ -51,66 +51,70 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 !!! warning "Authentication Integration"
     The PasswordRecovery component does NOT look up users, validate answers, or send emails. You must handle the `OnVerifyingUser` and `OnVerifyingAnswer` events and use ASP.NET Identity's `UserManager<T>` or your own authentication service to perform the actual recovery.
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:PasswordRecovery
-    ID="PasswordRecovery1"
-    UserNameTitleText="Forgot Your Password?"
-    UserNameInstructionText="Enter your User Name to receive your password."
-    QuestionTitleText="Identity Confirmation"
-    SuccessText="Your password has been sent to you."
-    SubmitButtonText="Submit"
-    HelpPageUrl="~/Help.aspx"
-    HelpPageText="Need help?"
-    OnVerifyingUser="PasswordRecovery1_VerifyingUser"
-    OnVerifyingAnswer="PasswordRecovery1_VerifyingAnswer"
-    OnSendingMail="PasswordRecovery1_SendingMail"
-    runat="server">
-    <TitleTextStyle BackColor="#336699" ForeColor="White" Font-Bold="True" />
-    <InstructionTextStyle Font-Italic="True" ForeColor="#333333" />
-</asp:PasswordRecovery>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:PasswordRecovery
+        ID="PasswordRecovery1"
+        UserNameTitleText="Forgot Your Password?"
+        UserNameInstructionText="Enter your User Name to receive your password."
+        QuestionTitleText="Identity Confirmation"
+        SuccessText="Your password has been sent to you."
+        SubmitButtonText="Submit"
+        HelpPageUrl="~/Help.aspx"
+        HelpPageText="Need help?"
+        OnVerifyingUser="PasswordRecovery1_VerifyingUser"
+        OnVerifyingAnswer="PasswordRecovery1_VerifyingAnswer"
+        OnSendingMail="PasswordRecovery1_SendingMail"
+        runat="server">
+        <TitleTextStyle BackColor="#336699" ForeColor="White" Font-Bold="True" />
+        <InstructionTextStyle Font-Italic="True" ForeColor="#333333" />
+    </asp:PasswordRecovery>
+    ```
 
-```razor
-<PasswordRecovery @ref="passwordRecovery"
-    ID="PasswordRecovery1"
-    UserNameTitleText="Forgot Your Password?"
-    UserNameInstructionText="Enter your User Name to receive your password."
-    QuestionTitleText="Identity Confirmation"
-    SuccessText="Your password has been sent to you."
-    SubmitButtonText="Submit"
-    HelpPageUrl="/help"
-    HelpPageText="Need help?"
-    OnVerifyingUser="HandleVerifyingUser"
-    OnVerifyingAnswer="HandleVerifyingAnswer"
-    OnSendingMail="HandleSendingMail" />
+=== "Blazor"
 
-@code {
-    private PasswordRecovery passwordRecovery;
+    ```razor
+    <PasswordRecovery @ref="passwordRecovery"
+        ID="PasswordRecovery1"
+        UserNameTitleText="Forgot Your Password?"
+        UserNameInstructionText="Enter your User Name to receive your password."
+        QuestionTitleText="Identity Confirmation"
+        SuccessText="Your password has been sent to you."
+        SubmitButtonText="Submit"
+        HelpPageUrl="/help"
+        HelpPageText="Need help?"
+        OnVerifyingUser="HandleVerifyingUser"
+        OnVerifyingAnswer="HandleVerifyingAnswer"
+        OnSendingMail="HandleSendingMail" />
 
-    private async Task HandleVerifyingUser(LoginCancelEventArgs e)
-    {
-        // Look up the user by passwordRecovery.UserName
-        // var user = await UserManager.FindByNameAsync(passwordRecovery.UserName);
-        // if (user == null) { e.Cancel = true; return; }
-        // passwordRecovery.SetQuestion(user.SecurityQuestion);
+    @code {
+        private PasswordRecovery passwordRecovery;
+
+        private async Task HandleVerifyingUser(LoginCancelEventArgs e)
+        {
+            // Look up the user by passwordRecovery.UserName
+            // var user = await UserManager.FindByNameAsync(passwordRecovery.UserName);
+            // if (user == null) { e.Cancel = true; return; }
+            // passwordRecovery.SetQuestion(user.SecurityQuestion);
+        }
+
+        private async Task HandleVerifyingAnswer(LoginCancelEventArgs e)
+        {
+            // Validate the answer: passwordRecovery.Answer
+            // if (!valid) { e.Cancel = true; return; }
+        }
+
+        private async Task HandleSendingMail(MailMessageEventArgs e)
+        {
+            // Send recovery email via your mail service
+        }
     }
+    ```
 
-    private async Task HandleVerifyingAnswer(LoginCancelEventArgs e)
-    {
-        // Validate the answer: passwordRecovery.Answer
-        // if (!valid) { e.Cancel = true; return; }
-    }
-
-    private async Task HandleSendingMail(MailMessageEventArgs e)
-    {
-        // Send recovery email via your mail service
-    }
-}
-```
+## Blazor Usage Notes
 
 ### Skipping the Question Step
 

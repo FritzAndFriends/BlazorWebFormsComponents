@@ -37,41 +37,43 @@ root.AddChild(products);
 - **Provider** - The `SiteMapProvider` property accepts a `SiteMapNode` root, not a provider name
 - **SkipLinkText** - Accessibility skip link not implemented
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:SiteMapPath
-    CurrentNodeStyle-BackColor="Yellow"
-    CurrentNodeTemplate="..."
-    ID="SiteMapPath1"
-    NodeStyle-ForeColor="Blue"
-    NodeTemplate="..."
-    ParentLevelsDisplayed="-1"
-    PathDirection="RootToCurrent"
-    PathSeparator=" > "
-    PathSeparatorStyle-Font-Bold="true"
-    PathSeparatorTemplate="..."
-    RenderCurrentNodeAsLink="false"
-    RootNodeStyle-Font-Bold="true"
-    RootNodeTemplate="..."
-    ShowToolTips="true"
-    SiteMapProvider="AspNetXmlSiteMapProvider"
-    SkipLinkText=""
-    runat="server" />
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:SiteMapPath
+        CurrentNodeStyle-BackColor="Yellow"
+        CurrentNodeTemplate="..."
+        ID="SiteMapPath1"
+        NodeStyle-ForeColor="Blue"
+        NodeTemplate="..."
+        ParentLevelsDisplayed="-1"
+        PathDirection="RootToCurrent"
+        PathSeparator=" > "
+        PathSeparatorStyle-Font-Bold="true"
+        PathSeparatorTemplate="..."
+        RenderCurrentNodeAsLink="false"
+        RootNodeStyle-Font-Bold="true"
+        RootNodeTemplate="..."
+        ShowToolTips="true"
+        SiteMapProvider="AspNetXmlSiteMapProvider"
+        SkipLinkText=""
+        runat="server" />
+    ```
 
-```razor
-<SiteMapPath
-    CurrentUrl="@CurrentPage"
-    ParentLevelsDisplayed="-1"
-    PathDirection="PathDirection.RootToCurrent"
-    PathSeparator=" > "
-    RenderCurrentNodeAsLink="false"
-    ShowToolTips="true"
-    SiteMapProvider="@SiteMap" />
-```
+=== "Blazor"
+
+    ```razor
+    <SiteMapPath
+        CurrentUrl="@CurrentPage"
+        ParentLevelsDisplayed="-1"
+        PathDirection="PathDirection.RootToCurrent"
+        PathSeparator=" > "
+        RenderCurrentNodeAsLink="false"
+        ShowToolTips="true"
+        SiteMapProvider="@SiteMap" />
+    ```
 
 ## Usage Notes
 
