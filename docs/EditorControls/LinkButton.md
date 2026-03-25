@@ -90,5 +90,5 @@ It may seem strange that we have a LinkButton component when there already is an
 
 - [Button](Button.md) — Standard push button control
 - [ImageButton](ImageButton.md) — Button that displays an image
-- [HyperLink](HyperLink.md) — Navigate to a URL
+- [HyperLink](../NavigationControls/HyperLink.md) — Navigate to a URL
 - [RequiredFieldValidator](../ValidationControls/RequiredFieldValidator.md) — Validate required fields

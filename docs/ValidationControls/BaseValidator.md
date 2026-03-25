@@ -200,4 +200,3 @@ See the individual validator pages for specific usage examples.
 - [RegularExpressionValidator](RegularExpressionValidator.md) — pattern validation
 - [CustomValidator](CustomValidator.md) — custom validation logic
 - [ValidationSummary](ValidationSummary.md) — display validation errors
-- [ValidationGroupProvider](../EditorControls/ValidationGroupProvider.md) — group validators for selective validation

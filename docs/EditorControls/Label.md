@@ -233,5 +233,5 @@ When migrating from Web Forms to Blazor:
 - [LinkButton](LinkButton.md) — Button that renders as a hyperlink
 - [TextBox](TextBox.md) — Text input control
 - [Panel](Panel.md) — Container control
-- [HyperLink](HyperLink.md) — Navigate to a URL
+- [HyperLink](../NavigationControls/HyperLink.md) — Navigate to a URL
 - [Live Demo](https://blazorwebformscomponents.azurewebsites.net/ControlSamples/Label) — Interactive Label samples
