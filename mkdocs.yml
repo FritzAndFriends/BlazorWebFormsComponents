@@ -179,23 +179,26 @@ nav:
     - ViewState and PostBack Shim: UtilityFeatures/ViewStateAndPostBack.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
-      - Getting started: Migration/readme.md
-      - Known Fidelity Divergences: MigrationGuides/KnownFidelityDivergences.md
-      - Automated Migration Guide: Migration/AutomatedMigration.md
-      - Roslyn Analyzers: Migration/Analyzers.md
-      - Deprecation Guidance: Migration/DeprecationGuidance.md
-      - Inline C# Expressions: Migration/InlineCSharp.md
-      - Migration Strategies: Migration/Strategies.md
-      - Custom Controls: Migration/Custom-Controls.md
-      - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
-      - Deferred Controls: Migration/DeferredControls.md
-      - Master Pages: Migration/MasterPages.md
-      - User Controls: Migration/User-Controls.md
-      - FindControl Migration: Migration/FindControl-Migration.md
-      - .NET Standard to the Rescue: Migration/NET-Standard.md
-      - Themes and Skins: Migration/ThemesAndSkins.md
-      - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
-      - Web Forms Application Migration Readiness: Migration/migration_readiness.md
+      - Getting Started: Migration/readme.md
+      - Assess:
+          - Migration Readiness Assessment: Migration/migration_readiness.md
+          - Deprecation Guidance: Migration/DeprecationGuidance.md
+          - Known Fidelity Divergences: MigrationGuides/KnownFidelityDivergences.md
+      - Plan:
+          - Migration Strategies: Migration/Strategies.md
+          - .NET Standard to the Rescue: Migration/NET-Standard.md
+          - Automated Migration Guide: Migration/AutomatedMigration.md
+          - Roslyn Analyzers: Migration/Analyzers.md
+      - Implement:
+          - Master Pages: Migration/MasterPages.md
+          - User Controls: Migration/User-Controls.md
+          - Inline C# Expressions: Migration/InlineCSharp.md
+          - Custom Controls: Migration/Custom-Controls.md
+          - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
+          - FindControl Migration: Migration/FindControl-Migration.md
+          - Deferred Controls: Migration/DeferredControls.md
+          - Themes and Skins: Migration/ThemesAndSkins.md
+          - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
   - Migration Tests:
       - Overview: migration-tests/README.md
       - WingtipToys 2026-03-04: migration-tests/wingtiptoys-2026-03-04/report.md
