@@ -8,7 +8,7 @@ namespace BlazorWebFormsComponents.Analyzers
 {
     /// <summary>
     /// Analyzer that detects IsPostBack and Page.IsPostBack usage patterns.
-    /// Blazor uses component lifecycle instead of the postback model.
+    /// IsPostBack works via the BWFC shim; suggests Blazor lifecycle methods for new code.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class IsPostBackUsageAnalyzer : DiagnosticAnalyzer
@@ -16,8 +16,8 @@ namespace BlazorWebFormsComponents.Analyzers
         public const string DiagnosticId = "BWFC003";
 
         private static readonly LocalizableString Title = "IsPostBack usage detected";
-        private static readonly LocalizableString MessageFormat = "'{0}' checks IsPostBack \u2014 Blazor doesn't have postbacks. Use lifecycle methods (OnInitialized, OnParametersSet) instead.";
-        private static readonly LocalizableString Description = "Flags IsPostBack and Page.IsPostBack checks. Blazor uses component lifecycle instead of postback model.";
+        private static readonly LocalizableString MessageFormat = "'{0}' checks IsPostBack \u2014 this works via the BWFC shim (SSR: checks HTTP POST, Interactive: tracks initialization). For new code, prefer OnInitialized lifecycle.";
+        private static readonly LocalizableString Description = "Flags IsPostBack and Page.IsPostBack checks. IsPostBack works via the BWFC shim during migration; prefer Blazor lifecycle methods for new code.";
         private const string Category = "Usage";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
@@ -25,7 +25,7 @@ namespace BlazorWebFormsComponents.Analyzers
             Title,
             MessageFormat,
             Category,
-            DiagnosticSeverity.Warning,
+            DiagnosticSeverity.Info,
             isEnabledByDefault: true,
             description: Description);
 

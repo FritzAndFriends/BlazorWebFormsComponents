@@ -9,7 +9,7 @@ namespace BlazorWebFormsComponents.Analyzers
 {
     /// <summary>
     /// Analyzer that detects properties using ViewState for backing storage.
-    /// These should be converted to [Parameter] properties for Blazor compatibility.
+    /// These work during migration; suggests converting to [Parameter] properties when ready.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class ViewStatePropertyPatternAnalyzer : DiagnosticAnalyzer
@@ -17,8 +17,8 @@ namespace BlazorWebFormsComponents.Analyzers
         public const string DiagnosticId = "BWFC020";
 
         private static readonly LocalizableString Title = "ViewState-backed property detected";
-        private static readonly LocalizableString MessageFormat = "Property '{0}' uses ViewState for storage. Convert to a [Parameter] property for Blazor compatibility.";
-        private static readonly LocalizableString Description = "Properties that use ViewState for backing storage should be converted to auto-properties with [Parameter] for Blazor.";
+        private static readonly LocalizableString MessageFormat = "Property '{0}' uses ViewState for storage — this works during migration. Consider converting to a [Parameter] property or component field when ready to adopt native Blazor patterns.";
+        private static readonly LocalizableString Description = "Properties that use ViewState for backing storage work during migration. Consider converting to auto-properties with [Parameter] when adopting native Blazor patterns.";
         private const string Category = "Migration";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(

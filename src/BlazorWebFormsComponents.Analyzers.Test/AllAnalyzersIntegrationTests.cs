@@ -41,6 +41,7 @@ public class AllAnalyzersIntegrationTests
         "BWFC021", // FindControlUsageAnalyzer
         "BWFC022", // PageClientScriptUsageAnalyzer
         "BWFC023", // IPostBackEventHandlerUsageAnalyzer
+        "BWFC025", // NonSerializableViewStateAnalyzer
     };
 
     #region ID Registration and Uniqueness
