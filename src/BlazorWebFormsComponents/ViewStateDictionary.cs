@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging;
 
 namespace BlazorWebFormsComponents;
 
@@ -84,6 +85,31 @@ public class ViewStateDictionary : IDictionary<string, object?>
 	{
 		var json = JsonSerializer.Serialize(_store);
 		return protector.Protect(json);
+	}
+
+	/// <summary>
+	/// Serializes the dictionary to a protected string, optionally logging a warning
+	/// when the payload exceeds a size threshold (approximate UTF-16 byte size in a hidden field).
+	/// </summary>
+	/// <param name="protector">The data protector to encrypt and sign the payload.</param>
+	/// <param name="logger">Optional logger for size warnings.</param>
+	/// <param name="warningThresholdBytes">Byte threshold above which a warning is logged. Default 4096.</param>
+	/// <returns>A protected string containing the serialized ViewState.</returns>
+	internal string Serialize(IDataProtector protector, ILogger? logger, int warningThresholdBytes = 4096)
+	{
+		var json = JsonSerializer.Serialize(_store);
+		var payload = protector.Protect(json);
+
+		var estimatedBytes = payload.Length * 2;
+		if (logger is not null && estimatedBytes > warningThresholdBytes)
+		{
+			logger.LogWarning(
+				"ViewState payload is {PayloadLength} bytes (threshold: {WarningThresholdBytes}). Consider reducing state or using server-side storage for large datasets.",
+				estimatedBytes,
+				warningThresholdBytes);
+		}
+
+		return payload;
 	}
 
 	/// <summary>

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -209,6 +210,25 @@ namespace BlazorWebFormsComponents
 		}
 
 		/// <summary>
+		/// Lazy-resolved logger for ViewState size warnings.
+		/// </summary>
+		private ILogger _logger;
+		private bool _loggerResolved;
+		private ILogger Logger
+		{
+			get
+			{
+				if (!_loggerResolved)
+				{
+					var factory = ServiceProvider?.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
+					_logger = factory?.CreateLogger<BaseWebFormsComponent>();
+					_loggerResolved = true;
+				}
+				return _logger;
+			}
+		}
+
+		/// <summary>
 		/// Is the content of this component rendered and visible to your users?
 		/// </summary>
 		[Parameter]
@@ -340,7 +360,8 @@ namespace BlazorWebFormsComponents
 
 			// SSR mode: deserialize ViewState from form POST data
 			if (CurrentRenderMode == WebFormsRenderMode.StaticSSR
-				&& DataProtectionProvider is not null)
+				&& DataProtectionProvider is not null
+				&& !string.IsNullOrEmpty(ID))
 			{
 				var context = HttpContextAccessor.HttpContext!;
 				if (HttpMethods.IsPost(context.Request.Method)
@@ -423,6 +444,9 @@ namespace BlazorWebFormsComponents
 		/// <param name="builder">The <see cref="RenderTreeBuilder"/> to emit the hidden field into.</param>
 		protected void RenderViewStateField(RenderTreeBuilder builder)
 		{
+			if (string.IsNullOrEmpty(ID))
+				return;
+
 			if (CurrentRenderMode != WebFormsRenderMode.StaticSSR
 				|| !ViewState.IsDirty
 				|| DataProtectionProvider is null)
@@ -431,7 +455,7 @@ namespace BlazorWebFormsComponents
 			}
 
 			var protector = DataProtectionProvider.CreateProtector("BWFC.ViewState");
-			var payload = ViewState.Serialize(protector);
+			var payload = ViewState.Serialize(protector, Logger);
 			var fieldName = $"__bwfc_viewstate_{ID}";
 
 			builder.OpenElement(0, "input");
