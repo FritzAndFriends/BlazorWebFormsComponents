@@ -1605,8 +1605,8 @@ public class InteractiveComponentTests
                 Timeout = 30000
             });
 
-            // Find the ViewState increment button (not the property-based one)
-            var viewStateButton = page.GetByRole(AriaRole.Button, new() { Name = "Click Me (ViewState)" });
+            // Find the ViewState increment button
+            var viewStateButton = page.GetByRole(AriaRole.Button, new() { Name = "Increment" });
             await viewStateButton.WaitForAsync(new() { Timeout = 5000 });
 
             // Click once — counter should go to 1
