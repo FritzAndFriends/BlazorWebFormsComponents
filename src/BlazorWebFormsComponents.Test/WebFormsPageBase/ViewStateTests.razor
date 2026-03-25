@@ -24,8 +24,6 @@
 		return Render<TestPage>();
 	}
 
-#pragma warning disable CS0618 // ViewState is [Obsolete] by design
-
 	[Fact]
 	public void ViewState_SetAndGet_StringValue()
 	{
@@ -58,14 +56,12 @@
 	}
 
 	[Fact]
-	public void ViewState_NonExistentKey_ThrowsKeyNotFoundException()
+	public void ViewState_NonExistentKey_ReturnsNull()
 	{
 		var cut = RenderTestPage();
 
-		Should.Throw<KeyNotFoundException>(() =>
-		{
-			var _ = cut.Instance.ViewState["nonexistent"];
-		});
+		// ViewStateDictionary returns null for missing keys (matches Web Forms behavior)
+		cut.Instance.ViewState["nonexistent"].ShouldBeNull();
 	}
 
 	[Fact]
@@ -119,15 +115,14 @@
 		cut.Instance.ViewState.ContainsKey("exists").ShouldBeTrue();
 	}
 
-#pragma warning restore CS0618
-
 	[Fact]
-	public void ViewState_HasObsoleteAttribute()
+	public void ViewState_DoesNotHaveObsoleteAttribute()
 	{
+		// ViewState is no longer [Obsolete] — it's a supported migration feature
 		var prop = typeof(WebFormsPageBase).GetProperty("ViewState");
 
 		prop.ShouldNotBeNull();
 		var attrs = prop.GetCustomAttributes(typeof(System.ObsoleteAttribute), false);
-		attrs.Length.ShouldBe(1);
+		attrs.Length.ShouldBe(0);
 	}
 }

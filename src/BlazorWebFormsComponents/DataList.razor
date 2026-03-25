@@ -18,7 +18,7 @@
 	@switch (RepeatLayout)
 	{
 
-		case TableRepeatLayout t:
+		case TableRepeatLayout:
 			<table id="@ClientID"
 						 accesskey="@AccessKey"
 						 cellpadding="@(CellPadding == default ? null : (int?)CellPadding)"
@@ -95,7 +95,7 @@
 				</tbody>
 			</table>
 			break;
-		case FlowRepeatLayout f:
+		case FlowRepeatLayout:
 			<span id="@ClientID" accesskey="@AccessKey" itemtype="@GetItemTypeAttribute()" style="@CalculatedStyle" title="@ToolTip" tabindex="@(TabIndex == default ? null : (short?)TabIndex)">
 				@if (HeaderTemplate != null && ShowHeader)
 				{

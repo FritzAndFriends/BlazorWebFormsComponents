@@ -122,7 +122,7 @@
 	{
 		var dataBoundFired = false;
 		var items = new List<string> { "Test" };
-		var cut = Render(
+		Render(
 			@<SimpleDataList DataSource="@items" OnDataBound="@((e) => { dataBoundFired = true; })" />
 		);
 		dataBoundFired.ShouldBeTrue();

@@ -64,6 +64,8 @@
 ---
 ## Active Decisions & Alerts
 
+📌 **Team update (2026-03-24):** ViewState Phase 1 test coverage complete — 73 contract tests written for ViewStateDictionary and IsPostBack behavior. 3 breaking changes identified in existing tests (expected); all 2588 tests now passing. InternalsVisibleTo added for test access, EphemeralDataProtectionProvider integration verified. Phase 2 test infrastructure ready. — decided by Rogue
+
 📌 **Team update (2026-03-17):** HttpHandlerBase handler tests validated — 94 tests passing, 1 test fixed (HttpMethod_DefaultIsGet bad assumption). No implementation bugs found; adapter architecture verified. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base. — decided by Rogue
 
 📌 **Team update (2026-03-17):** Rogue wrote 11 bUnit tests for GUID ID rendering (#471). New RadioButton/IDRendering.razor (6 tests), enhanced CheckBox/IDRendering.razor (+3 tests). All tests pass; integrated into regression suite. — decided by Rogue
@@ -365,4 +367,21 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 
  **Team update (2026-03-20):** Middleware integration testing pattern established (TestServer + AspxRewriteMiddlewareTests.cs, 46 tests). Microsoft.AspNetCore.TestHost added to test dependencies.  decided by Rogue
 
+### ViewStateDictionary, IsPostBack & WebFormsRenderMode Contract Tests (2026-03-24)
+
+**73 contract tests across 3 files — all pass.** Tests written against the ViewState-PostBack-Shim-Proposal spec; validated against Cyclops's Phase 1 implementation.
+
+**ViewStateDictionaryTests.cs (48 tests):** Basic dictionary ops, null safety (missing key returns null not throw), type coercion, IsDirty tracking (set/add/remove/clear/MarkClean), serialization roundtrip with EphemeralDataProtectionProvider, JSON type coercion after deserialization (int/bool/string/double/DateTime), edge cases (100K strings, special chars in keys), IDictionary interface compliance, Web Forms migration pattern, LoadFrom merge.
+
+**IsPostBackTests.cs (14 tests):** BaseWebFormsComponent + WebFormsPageBase in Interactive (false during init, true after) and SSR (GET=false, POST=true) modes. Guard pattern (!IsPostBack) block execution tests.
+
+**WebFormsRenderModeTests.cs (7 tests):** Enum values, CurrentRenderMode auto-detection, IsHttpContextAvailable.
+
+**Key findings:**
+- Existing ViewState tests will break: `ViewState_NonExistentKey_ThrowsKeyNotFoundException` (returns null now), `ViewState_HasObsoleteAttribute` ([Obsolete] removed), `IsPostBack_AlwaysReturnsFalse` (mode-adaptive now)
+- bUnit 2.x: `Render<T>()` not `RenderComponent<T>()`; `PageService` namespace conflict requires full qualification in .cs files
+- BaseWebFormsComponent sets _hasInitialized at END of OnInitializedAsync; WebFormsPageBase sets in OnInitialized
+- IDataProtectionProvider must be registered for BaseWebFormsComponent rendering (EphemeralDataProtectionProvider in tests)
+
+**File paths:** `src/BlazorWebFormsComponents.Test/ViewStateDictionaryTests.cs`, `IsPostBackTests.cs`, `WebFormsRenderModeTests.cs`
 

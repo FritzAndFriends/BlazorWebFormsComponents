@@ -87,13 +87,10 @@ namespace BlazorWebFormsComponents.Analyzers
                 }
             }
 
-            foreach (var required in requiredProps)
+            foreach (var required in requiredProps.Where(r => !assignedProperties.Contains(r)))
             {
-                if (!assignedProperties.Contains(required))
-                {
-                    var diagnostic = Diagnostic.Create(Rule, creation.GetLocation(), baseTypeName, required);
-                    context.ReportDiagnostic(diagnostic);
-                }
+                var diagnostic = Diagnostic.Create(Rule, creation.GetLocation(), baseTypeName, required);
+                context.ReportDiagnostic(diagnostic);
             }
         }
 
@@ -130,13 +127,11 @@ namespace BlazorWebFormsComponents.Analyzers
             var result = new HashSet<string>();
             if (creation.Initializer != null)
             {
-                foreach (var expr in creation.Initializer.Expressions)
+                foreach (var assignment in creation.Initializer.Expressions
+                    .OfType<AssignmentExpressionSyntax>()
+                    .Where(a => a.Left is IdentifierNameSyntax))
                 {
-                    if (expr is AssignmentExpressionSyntax assignment &&
-                        assignment.Left is IdentifierNameSyntax propName)
-                    {
-                        result.Add(propName.Identifier.Text);
-                    }
+                    result.Add(((IdentifierNameSyntax)assignment.Left).Identifier.Text);
                 }
             }
             return result;
@@ -163,17 +158,14 @@ namespace BlazorWebFormsComponents.Analyzers
 
         private static IEnumerable<string> GetSubsequentAssignments(BlockSyntax block, string variableName)
         {
-            foreach (var statement in block.Statements)
-            {
-                if (statement is ExpressionStatementSyntax exprStatement &&
-                    exprStatement.Expression is AssignmentExpressionSyntax assignment &&
-                    assignment.Left is MemberAccessExpressionSyntax memberAccess &&
+            return block.Statements
+                .OfType<ExpressionStatementSyntax>()
+                .Select(es => es.Expression)
+                .OfType<AssignmentExpressionSyntax>()
+                .Where(a => a.Left is MemberAccessExpressionSyntax memberAccess &&
                     memberAccess.Expression is IdentifierNameSyntax target &&
                     target.Identifier.Text == variableName)
-                {
-                    yield return memberAccess.Name.Identifier.Text;
-                }
-            }
+                .Select(a => ((MemberAccessExpressionSyntax)a.Left).Name.Identifier.Text);
         }
     }
 }

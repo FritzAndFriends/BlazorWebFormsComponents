@@ -5,9 +5,9 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
-## Core Context
+## Active Decisions & Alerts
 
-<!-- Summarized 2026-03-04 by Scribe — originals in history-archive.md -->
+📌 **Team update (2026-03-24):** ViewState Phase 1 architecture implemented — ViewStateDictionary (SSR + Interactive modes), mode-adaptive IsPostBack, hidden form field encryption, IDataProtectionProvider optional integration, CryptographicException fail-safe. Phase 2 (SSR persistence, AutoPostBack, analyzers, docs) planned for 7 weeks. Cyclops implementation validated; all 2588 tests pass. — decided by Forge
 
 M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService approved, ASCX/Snippets shelved. M2–M3 shipped (50/53 controls, 797 tests). Chart.js for Chart. DataBoundStyledComponent<T> recommended. Key patterns: Enums/ with int values, On-prefix events, feature branches→upstream/dev, ComponentCatalog.cs. Deployment: Docker+NBGV, dual NuGet, Azure webhook. M7–M14 milestone plans. HTML audit: 3 tiers, M11–M13. M15 fidelity: 132→131 divergences, 5 fixable bugs. Data controls: 90%+ sample parity, 4 remaining bugs. M17 AJAX: 6 controls shipped.
 
@@ -671,3 +671,35 @@ Analysis written to `.squad/decisions/inbox/forge-departmentportal-migration-pla
 Plan written to session workspace plan.md. Architecture decisions written to `.squad/decisions/inbox/forge-p1p5-plan.md`.
 
 📡 Team update (2026-03-22): P1–P5 implementation plan completed — 6 phases, 4 new files, 4 modified files, ~9 days. Execution order: P2→P3→P1→P4→P5→FindControl. Key: WebControl gets proper Render pipeline, 4 new shim types, namespace stays in BWFC.CustomControls. ✅ decided by Forge
+
+### Documentation Improvement Task Decomposition (2025-01-24)
+
+**Task:** Break down remaining documentation work (from PR #504 audit and ViewState Phase 1 PR #503) into actionable GitHub issues.
+
+**Deliverable:** 8 GitHub issues created on FritzAndFriends/BlazorWebFormsComponents:
+- #505: Convert DataControls documentation to tabbed syntax (GridView, Repeater, DataGrid, DataList, ListView, DetailsView, FormView, Chart, DataPager, PagerSettings)
+- #506: Convert ValidationControls documentation to tabbed syntax (BaseValidator, BaseCompareValidator, RequiredFieldValidator, CompareValidator, RangeValidator, RegularExpressionValidator, CustomValidator, ValidationSummary)
+- #507: Expand stub documentation (RegularExpressionValidator _TODO_, ValidationSummary stub with headers only, Label incomplete)
+- #508: Document ViewState and PostBack shim features from PR #503 (create ViewStateAndPostBack.md migration guide, document ViewStateDictionary, IsPostBack, hidden field persistence)
+- #509: Complete User-Controls.md migration guide (expand with ViewState patterns, state management, PostBack handling, working examples)
+- #510: Add cross-linking between related components (validation ↔ each other, list controls ↔ variants, data controls ↔ each other)
+- #511: Update mkdocs.yml navigation (add new migration guides, verify all docs indexed)
+- (#504 EditorControls conversion was also created but not queried in final list)
+
+**Key scoping decisions:**
+
+1. **Batch by component family** — Groups related controls together for efficient parallel work. EditorControls (22+ files), DataControls (10 files), ValidationControls (10 files) are three independent conversion tracks.
+
+2. **Stubs expanded during conversion** — Don't create separate tasks for expanding RegularExpressionValidator/ValidationSummary. These are handled as part of ValidationControls conversion (#506).
+
+3. **ViewState documentation as separate migration guide** — New PR #503 features warrant standalone docs (docs/MigrationGuides/ViewStateAndPostBack.md) rather than scattered component-by-component mentions.
+
+4. **User-Controls.md expansion depends on ViewState docs** — Will reference new ViewState shim patterns when complete.
+
+5. **Cross-linking as low-priority cleanup** — Can execute in parallel with syntax conversion work; final-pass quality improvement rather than blocker.
+
+6. **mkdocs.yml as final integration step** — Updated last to avoid navigation churn during other doc edits.
+
+**Pattern established:** All 8 issues follow consistent template (Context, Scope, Definition of Done, Notes). Labeled with `squad` + `type:docs`. Enables clear work delegation and measurable completion criteria.
+
+**Status:** Issues created and triaged in inbox. Awaiting team assignment. Decision note written to `.squad/decisions/inbox/forge-doc-task-plan.md`.

@@ -60,6 +60,8 @@
 ---
 ## Active Decisions & Alerts
 
+📌 **Team update (2026-03-24):** ViewState Phase 1 implementation complete & merged — `feature/viewstate-postback-shim` ready. ViewStateDictionary core, mode-adaptive IsPostBack, SSR hidden field round-trip, IDataProtectionProvider integration, CryptographicException fallback. All 2588 tests pass (2 breaking contracts fixed by Coordinator). Phase 2 (SSR persistence integration) approved. — decided by Cyclops
+
 📌 **Team update (2026-03-17):** HttpHandlerBase implementation validated by Rogue — 94 tests passing, all adapter patterns verified correct. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base ready for integration. — decided by Rogue
 
 📌 **Team update (2026-03-17):** Fixed #471 (GUID IDs) and #472 (L1 script). CheckBox/RadioButton/RadioButtonList now use ClientID exclusively; no GUID fallbacks. L1 script test suite: 7/10 → 15/15 (100%). All 2105 tests pass. — decided by Cyclops
@@ -578,3 +580,17 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 **Key patterns applied:** var everywhere (IDE0007), WebUtility.HtmlEncode instead of HttpUtility, Blazor route URLs instead of .aspx, `new()` target-typed syntax.
 
 **Build:** 0 errors, 0 warnings (excluding pre-existing NU1510 from upstream deps).
+### ViewState + IsPostBack Phase 1 Core Infrastructure (2026-03-24)
+
+**Summary:** Implemented Phase 1 of the ViewState/PostBack shim per Forge's architecture proposal. Created ViewStateDictionary class implementing IDictionary<string, object?> with null-safe indexer (Web Forms compat), type-safe convenience methods, IsDirty tracking, and IDataProtector-based Serialize/Deserialize with JsonElement type coercion. Updated BaseWebFormsComponent: ViewState upgraded from Dictionary to ViewStateDictionary, [Obsolete] removed, IsPostBack with mode-adaptive logic (SSR checks HTTP method, Interactive tracks _hasInitialized), CurrentRenderMode/IsHttpContextAvailable, RenderViewStateField, IDataProtectionProvider injection, ViewState deserialization from form POST. Updated WebFormsPageBase similarly. Created WebFormsRenderMode enum.
+
+**Key decisions:**
+- IDataProtectionProvider is injected as nullable (null-safe)  backward compat for apps that don't register DataProtection
+- ViewState deserialization happens BEFORE OnInit/OnLoad events in OnInitializedAsync  matches Web Forms lifecycle
+- CryptographicException from tampered payloads silently fails to empty ViewState (fail-safe)
+- Component ID for hidden field uses the developer-set `ID` parameter (`__bwfc_viewstate_{ID}`)
+- `var` used everywhere per IDE0007 enforcement
+
+**Files created:** ViewStateDictionary.cs, WebFormsRenderMode.cs
+**Files modified:** BaseWebFormsComponent.cs, WebFormsPageBase.cs
+**Build:** 0 errors, 122 warnings (all pre-existing)
