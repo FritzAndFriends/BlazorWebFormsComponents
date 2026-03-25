@@ -184,6 +184,7 @@ nav:
       - Automated Migration Guide: Migration/AutomatedMigration.md
       - Roslyn Analyzers: Migration/Analyzers.md
       - Deprecation Guidance: Migration/DeprecationGuidance.md
+      - Inline C# Expressions: Migration/InlineCSharp.md
       - Migration Strategies: Migration/Strategies.md
       - Custom Controls: Migration/Custom-Controls.md
       - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
