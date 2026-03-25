@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.Json;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging;
 
 namespace BlazorWebFormsComponents;
 
@@ -13,9 +14,11 @@ namespace BlazorWebFormsComponents;
 /// In ServerInteractive mode, persists for the component's lifetime (in-memory).
 /// In SSR mode, round-trips via a protected hidden form field.
 ///
-/// <para><b>Migration note:</b> This enables Web Forms ViewState-backed property
-/// patterns to work unchanged. For new Blazor code, prefer [Parameter] properties
-/// and component fields.</para>
+/// <para><b>Migration shim — not a destination.</b> This exists so Web Forms
+/// <c>ViewState["key"]</c> patterns compile and run correctly in Blazor during
+/// migration. Once running, refactor to <c>[Parameter]</c> properties, component
+/// fields, or cascading values. Unlike Web Forms ViewState, this implementation
+/// is opt-in, per-component, dirty-tracked, and encrypted by default.</para>
 /// </summary>
 public class ViewStateDictionary : IDictionary<string, object?>
 {
@@ -84,6 +87,31 @@ public class ViewStateDictionary : IDictionary<string, object?>
 	{
 		var json = JsonSerializer.Serialize(_store);
 		return protector.Protect(json);
+	}
+
+	/// <summary>
+	/// Serializes the dictionary to a protected string, optionally logging a warning
+	/// when the payload exceeds a size threshold (approximate UTF-16 byte size in a hidden field).
+	/// </summary>
+	/// <param name="protector">The data protector to encrypt and sign the payload.</param>
+	/// <param name="logger">Optional logger for size warnings.</param>
+	/// <param name="warningThresholdBytes">Byte threshold above which a warning is logged. Default 4096.</param>
+	/// <returns>A protected string containing the serialized ViewState.</returns>
+	internal string Serialize(IDataProtector protector, ILogger? logger, int warningThresholdBytes = 4096)
+	{
+		var json = JsonSerializer.Serialize(_store);
+		var payload = protector.Protect(json);
+
+		var estimatedBytes = payload.Length * 2;
+		if (logger is not null && estimatedBytes > warningThresholdBytes)
+		{
+			logger.LogWarning(
+				"ViewState payload is {PayloadLength} bytes (threshold: {WarningThresholdBytes}). Consider reducing state or using server-side storage for large datasets.",
+				estimatedBytes,
+				warningThresholdBytes);
+		}
+
+		return payload;
 	}
 
 	/// <summary>

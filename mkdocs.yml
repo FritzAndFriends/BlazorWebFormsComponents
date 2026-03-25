@@ -192,7 +192,6 @@ nav:
       - Implement:
           - Master Pages: Migration/MasterPages.md
           - User Controls: Migration/User-Controls.md
-          - Inline C# Expressions: Migration/InlineCSharp.md
           - Custom Controls: Migration/Custom-Controls.md
           - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
           - FindControl Migration: Migration/FindControl-Migration.md

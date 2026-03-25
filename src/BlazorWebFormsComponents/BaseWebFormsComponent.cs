@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -151,9 +152,11 @@ namespace BlazorWebFormsComponents
 		/// In ServerInteractive mode, persists for the component's lifetime (in-memory).
 		/// In SSR mode, round-trips via a protected hidden form field.
 		///
-		/// <para><b>Migration note:</b> This enables Web Forms ViewState-backed property
-		/// patterns to work unchanged. For new Blazor code, prefer [Parameter] properties
-		/// and component fields.</para>
+		/// <para><b>Migration shim — not a destination.</b> This exists so Web Forms
+		/// <c>ViewState["key"]</c> patterns compile and run correctly during migration.
+		/// Once running, refactor to <c>[Parameter]</c> properties, component fields, or
+		/// cascading values. Unlike Web Forms, this is opt-in, per-component, dirty-tracked,
+		/// and encrypted by default.</para>
 		/// </summary>
 		public ViewStateDictionary ViewState { get; } = new();
 
@@ -205,6 +208,25 @@ namespace BlazorWebFormsComponents
 					_dataProtectionResolved = true;
 				}
 				return _dataProtectionProvider;
+			}
+		}
+
+		/// <summary>
+		/// Lazy-resolved logger for ViewState size warnings.
+		/// </summary>
+		private ILogger _logger;
+		private bool _loggerResolved;
+		private ILogger Logger
+		{
+			get
+			{
+				if (!_loggerResolved)
+				{
+					var factory = ServiceProvider?.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
+					_logger = factory?.CreateLogger<BaseWebFormsComponent>();
+					_loggerResolved = true;
+				}
+				return _logger;
 			}
 		}
 
@@ -340,7 +362,8 @@ namespace BlazorWebFormsComponents
 
 			// SSR mode: deserialize ViewState from form POST data
 			if (CurrentRenderMode == WebFormsRenderMode.StaticSSR
-				&& DataProtectionProvider is not null)
+				&& DataProtectionProvider is not null
+				&& !string.IsNullOrEmpty(ID))
 			{
 				var context = HttpContextAccessor.HttpContext!;
 				if (HttpMethods.IsPost(context.Request.Method)
@@ -423,6 +446,9 @@ namespace BlazorWebFormsComponents
 		/// <param name="builder">The <see cref="RenderTreeBuilder"/> to emit the hidden field into.</param>
 		protected void RenderViewStateField(RenderTreeBuilder builder)
 		{
+			if (string.IsNullOrEmpty(ID))
+				return;
+
 			if (CurrentRenderMode != WebFormsRenderMode.StaticSSR
 				|| !ViewState.IsDirty
 				|| DataProtectionProvider is null)
@@ -431,7 +457,7 @@ namespace BlazorWebFormsComponents
 			}
 
 			var protector = DataProtectionProvider.CreateProtector("BWFC.ViewState");
-			var payload = ViewState.Serialize(protector);
+			var payload = ViewState.Serialize(protector, Logger);
 			var fieldName = $"__bwfc_viewstate_{ID}";
 
 			builder.OpenElement(0, "input");
