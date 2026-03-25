@@ -97,10 +97,11 @@ namespace BlazorWebFormsComponents
 		public int CellSpacing { get; set; } = -1;
 
 		/// <summary>
-		/// Gets or sets a value indicating whether the control automatically posts back to the server when the selection changes.
-		/// This property is obsolete in Blazor and is included for compatibility only.
+		/// Gets or sets whether the control automatically posts back when the value changes.
+		/// In SSR mode, emits <c>onchange="this.form.submit()"</c> on the HTML element.
+		/// In Interactive mode, Blazor's native event binding handles change events automatically.
 		/// </summary>
-		[Parameter, Obsolete("AutoPostBack is not supported in Blazor. Use OnSelectedIndexChanged event instead.")]
+		[Parameter]
 		public bool AutoPostBack { get; set; }
 
 		/// <summary>

@@ -8,7 +8,8 @@
 	<select class="@CssClass" style="@Style" title="@ToolTip"
 			size="@Rows"
 			multiple="@(SelectionMode == ListSelectionMode.Multiple ? true : (bool?)null)"
-			disabled="@(!Enabled)" @onchange="HandleChange">
+			disabled="@(!Enabled)" @onchange="HandleChange"
+			@attributes="GetAutoPostBackAttributes(AutoPostBack)">
 		@foreach (var item in GetItems())
 		{
 			<option value="@item.Value"

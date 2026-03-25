@@ -49,7 +49,12 @@ namespace BlazorWebFormsComponents
 		[Parameter, Obsolete("AutoComplete is handled by browser settings")]
 		public string AutoComplete { get; set; }
 
-		[Parameter, Obsolete("AutoPostBack is not supported in Blazor")]
+		/// <summary>
+		/// Gets or sets whether the control automatically posts back when the value changes.
+		/// In SSR mode, emits <c>onchange="this.form.submit()"</c> on the HTML element.
+		/// In Interactive mode, Blazor's native event binding handles change events automatically.
+		/// </summary>
+		[Parameter]
 		public bool AutoPostBack { get; set; }
 
 		internal string CalculatedType => TextMode.Value switch
