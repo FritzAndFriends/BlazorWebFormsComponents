@@ -9,6 +9,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
+    <ProjectReference Include="..\..\src\BlazorWebFormsComponents.Analyzers\BlazorWebFormsComponents.Analyzers.csproj"
+                      PrivateAssets="all"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="Analyzer" />
   </ItemGroup>
 
 </Project>

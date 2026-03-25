@@ -483,6 +483,89 @@ A common migration pattern is to start with SSR (traditional form posts) and gra
 
 ---
 
+## AutoPostBack (SSR)
+
+### What It Is
+
+In Web Forms, `AutoPostBack="true"` on controls like `<asp:DropDownList>`, `<asp:CheckBox>`, and `<asp:TextBox>` caused the form to automatically submit when the user changed the value. This triggered a full page postback.
+
+In BWFC, AutoPostBack is mode-adaptive:
+
+| Render Mode | Behavior |
+|---|---|
+| **SSR (Static)** | Emits `onchange="this.form.submit()"` on the HTML element — mimics the Web Forms postback |
+| **Interactive Server** | Uses Blazor's native `@onchange` event binding — no form submission needed |
+
+### Supported Controls
+
+AutoPostBack is supported on these controls:
+
+- `DropDownList`
+- `CheckBox`
+- `TextBox`
+- `RadioButton`
+- `ListBox`
+- `CheckBoxList`
+- `RadioButtonList`
+
+### Usage
+
+Set `AutoPostBack="true"` on any supported control. In SSR mode, changing the control value submits the enclosing `<form>`:
+
+```razor
+<form method="post" @formname="filter-form" @onsubmit="HandleFilter">
+    <AntiforgeryToken />
+
+    <DropDownList ID="ddlDepartment"
+                  DataSource="@departments"
+                  DataTextField="Name"
+                  DataValueField="Id"
+                  AutoPostBack="true" />
+
+    <p>Selected: @selectedDepartment</p>
+</form>
+
+@code {
+    private List<Department> departments = new();
+    private string selectedDepartment = "";
+
+    protected override void OnInitialized()
+    {
+        departments = DepartmentService.GetAll();
+    }
+
+    private void HandleFilter()
+    {
+        // This runs on form submit (triggered by AutoPostBack in SSR)
+        selectedDepartment = Request.Form["ddlDepartment"];
+    }
+}
+```
+
+### How It Works
+
+The `BaseWebFormsComponent.GetAutoPostBackAttributes()` method returns a dictionary of HTML attributes when AutoPostBack conditions are met:
+
+1. The control has `AutoPostBack = true`
+2. The current render mode is SSR (not Interactive)
+
+When both conditions are true, the method returns `{ "onchange": "this.form.submit()" }`, which is applied to the HTML input element via Blazor's `@attributes` splatting.
+
+When either condition is false, the method returns an empty dictionary and no extra attributes are emitted.
+
+### Combining with ViewState
+
+AutoPostBack and ViewState work together naturally in SSR:
+
+1. User changes a DropDownList value
+2. `onchange="this.form.submit()"` submits the form
+3. The form POST includes both the new value AND the ViewState hidden fields
+4. On the server, `IsPostBack` is `true`, ViewState is deserialized, and the new value is available
+
+This mirrors the Web Forms lifecycle without requiring any JavaScript interop or SignalR connection.
+
+---
+
 ## Migration Path: From Web Forms ViewState
 
 ### Before (Web Forms)
