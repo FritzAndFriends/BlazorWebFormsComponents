@@ -31,45 +31,47 @@ var pagedData = allData.Skip(dataPager.StartRowIndex).Take(dataPager.MaximumRows
 - **Fields collection** - Not supported; use Mode property for common layouts
 - **QueryStringField** - Not supported; implement URL-based paging separately
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:DataPager
-    ID="DataPager1"
-    PagedControlID="ListView1"
-    PageSize="10"
-    QueryStringField="page"
-    runat="server">
-    <Fields>
-        <asp:NextPreviousPagerField
-            ButtonType="Link"
-            FirstPageText="First"
-            LastPageText="Last"
-            NextPageText="Next"
-            PreviousPageText="Previous"
-            ShowFirstPageButton="true"
-            ShowLastPageButton="true"
-            ShowNextPageButton="true"
-            ShowPreviousPageButton="true" />
-        <asp:NumericPagerField
-            ButtonCount="5"
-            ButtonType="Link" />
-    </Fields>
-</asp:DataPager>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:DataPager
+        ID="DataPager1"
+        PagedControlID="ListView1"
+        PageSize="10"
+        QueryStringField="page"
+        runat="server">
+        <Fields>
+            <asp:NextPreviousPagerField
+                ButtonType="Link"
+                FirstPageText="First"
+                LastPageText="Last"
+                NextPageText="Next"
+                PreviousPageText="Previous"
+                ShowFirstPageButton="true"
+                ShowLastPageButton="true"
+                ShowNextPageButton="true"
+                ShowPreviousPageButton="true" />
+            <asp:NumericPagerField
+                ButtonCount="5"
+                ButtonType="Link" />
+        </Fields>
+    </asp:DataPager>
+    ```
 
-```razor
-<DataPager
-    TotalRowCount="@TotalItems"
-    PageSize="10"
-    @bind-PageIndex="CurrentPage"
-    Mode="PagerButtons.NumericFirstLast"
-    FirstPageText="First"
-    LastPageText="Last"
-    PageButtonCount="5" />
-```
+=== "Blazor"
+
+    ```razor
+    <DataPager
+        TotalRowCount="@TotalItems"
+        PageSize="10"
+        @bind-PageIndex="CurrentPage"
+        Mode="PagerButtons.NumericFirstLast"
+        FirstPageText="First"
+        LastPageText="Last"
+        PageButtonCount="5" />
+    ```
 
 ## Usage Notes
 
@@ -191,6 +193,8 @@ var pagedData = allData.Skip(dataPager.StartRowIndex).Take(dataPager.MaximumRows
 
 ## See Also
 
-- [ListView](../DataControls/ListView.md)
-- [GridView](../DataControls/GridView.md)
-- [Repeater](../DataControls/Repeater.md)
+- [ListView](ListView.md) — Full-featured list with built-in paging
+- [GridView](GridView.md) — Multi-record tabular display
+- [Repeater](Repeater.md) — For lightweight data repetition
+- [DataList](DataList.md) — For repeating data with layout options
+- [DetailsView](DetailsView.md) — Single record display

@@ -539,6 +539,933 @@ public partial class EmployeeList : UserControl
 
 ---
 
+## State Management in User Controls
+
+### Using ViewStateDictionary for Component State
+
+When migrating user controls that rely on ViewState, use `ViewStateDictionary` (available on `BaseWebFormsComponent` and `WebFormsPageBase`) to store component-level state that persists across postbacks.
+
+#### Basic ViewState Usage
+
+**Before (Web Forms ASCX):**
+```csharp
+public partial class SearchResultsControl : UserControl
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            ViewState["CurrentPage"] = 1;
+            ViewState["SearchTerm"] = "";
+        }
+    }
+
+    protected void NextButton_Click(object sender, EventArgs e)
+    {
+        int page = (int)ViewState["CurrentPage"];
+        ViewState["CurrentPage"] = page + 1;
+        LoadResults();
+    }
+
+    private void LoadResults()
+    {
+        string term = (string)ViewState["SearchTerm"];
+        // Load and bind data...
+    }
+}
+```
+
+**After (Blazor):**
+```razor
+@inherits BaseWebFormsComponent
+
+<div>
+    <input @bind="_searchTerm" placeholder="Search..." />
+    <Button Text="Search" @onclick="OnSearch" />
+    <Button Text="Next" @onclick="OnNext" />
+</div>
+
+@code {
+    private string _searchTerm = "";
+
+    protected override void OnInitialized()
+    {
+        if (!IsPostBack)
+        {
+            ViewState.Set("CurrentPage", 1);
+            ViewState.Set("SearchTerm", "");
+        }
+        else
+        {
+            // Restore state on postback
+            int page = ViewState.GetValueOrDefault<int>("CurrentPage", 1);
+            _searchTerm = ViewState.GetValueOrDefault<string>("SearchTerm", "");
+        }
+    }
+
+    private void OnSearch()
+    {
+        ViewState.Set("CurrentPage", 1);
+        ViewState.Set("SearchTerm", _searchTerm);
+    }
+
+    private void OnNext()
+    {
+        int page = ViewState.GetValueOrDefault<int>("CurrentPage", 1);
+        ViewState.Set("CurrentPage", page + 1);
+    }
+}
+```
+
+#### Type-Safe ViewState Access
+
+For cleaner, more maintainable code, use the `GetValueOrDefault<T>()` and `Set<T>()` methods:
+
+```razor
+@code {
+    private int GetCurrentPage()
+    {
+        return ViewState.GetValueOrDefault<int>("CurrentPage", 1);
+    }
+
+    private void SetCurrentPage(int page)
+    {
+        ViewState.Set("CurrentPage", page);
+    }
+
+    private void OnNext()
+    {
+        int page = GetCurrentPage();
+        SetCurrentPage(page + 1);
+    }
+}
+```
+
+### Sharing State Between Components
+
+When multiple child components need to share state, store it in the parent component's ViewState and pass it down via parameters:
+
+```razor
+@* Parent Component *@
+<ChildFilter @ref="_filterControl" 
+             OnFilterApplied="@OnFilterChanged" />
+<ChildResults Items="@_results" />
+
+@code {
+    private ChildFilter _filterControl;
+    private List<Item> _results;
+
+    protected override void OnInitialized()
+    {
+        if (!IsPostBack)
+        {
+            _results = LoadDefaultResults();
+            ViewState.Set("LastFilter", "");
+        }
+    }
+
+    private void OnFilterChanged(string filter)
+    {
+        ViewState.Set("LastFilter", filter);
+        _results = ApplyFilter(_results, filter);
+    }
+}
+
+@* Child Filter Component *@
+<input @bind="_filterText" />
+<button @onclick="OnApplyFilter">Apply</button>
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnFilterApplied { get; set; }
+
+    private string _filterText = "";
+
+    private async Task OnApplyFilter()
+    {
+        await OnFilterApplied.InvokeAsync(_filterText);
+    }
+}
+```
+
+---
+
+## Event Handling and Component Communication
+
+### Converting Web Forms Events to EventCallback
+
+Web Forms user controls expose events that parent pages listen to. In Blazor, use `EventCallback<T>` parameters for bidirectional communication.
+
+#### Simple Event Callback (No Payload)
+
+**Before (Web Forms):**
+```csharp
+public partial class ConfirmDialog : UserControl
+{
+    public event EventHandler OnOK;
+    public event EventHandler OnCancel;
+
+    protected void OKButton_Click(object sender, EventArgs e)
+    {
+        OnOK?.Invoke(this, EventArgs.Empty);
+    }
+
+    protected void CancelButton_Click(object sender, EventArgs e)
+    {
+        OnCancel?.Invoke(this, EventArgs.Empty);
+    }
+}
+```
+
+**After (Blazor):**
+```razor
+<div class="dialog">
+    <p>@Message</p>
+    <Button Text="OK" @onclick="OnOKClick" />
+    <Button Text="Cancel" @onclick="OnCancelClick" />
+</div>
+
+@code {
+    [Parameter]
+    public string Message { get; set; }
+
+    [Parameter]
+    public EventCallback OnOK { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    private async Task OnOKClick()
+    {
+        await OnOK.InvokeAsync();
+    }
+
+    private async Task OnCancelClick()
+    {
+        await OnCancel.InvokeAsync();
+    }
+}
+```
+
+#### Event Callback With Data (Typed Payload)
+
+**Before (Web Forms):**
+```csharp
+public partial class ItemSelector : UserControl
+{
+    public event EventHandler<int> OnItemSelected;
+
+    protected void ItemRepeater_ItemCommand(object source, RepeaterCommandEventArgs e)
+    {
+        if (e.CommandName == "Select")
+        {
+            int itemId = int.Parse((string)e.CommandArgument);
+            OnItemSelected?.Invoke(this, itemId);
+        }
+    }
+}
+```
+
+**After (Blazor):**
+```razor
+<ul>
+    @foreach (var item in Items)
+    {
+        <li>
+            @item.Name
+            <button @onclick="() => OnSelectItem(item.ID)">Select</button>
+        </li>
+    }
+</ul>
+
+@code {
+    [Parameter]
+    public List<Item> Items { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnItemSelected { get; set; }
+
+    private async Task OnSelectItem(int itemId)
+    {
+        await OnItemSelected.InvokeAsync(itemId);
+    }
+
+    public class Item
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+    }
+}
+```
+
+#### Parent Component Using Event Callbacks
+
+```razor
+@page "/demo"
+
+<ConfirmDialog Message="Are you sure?" 
+               OnOK="@OnConfirmed" 
+               OnCancel="@OnCancelled" />
+
+<ItemSelector Items="@_items" 
+              OnItemSelected="@OnItemSelected" />
+
+@code {
+    private List<Item> _items = new();
+
+    private void OnConfirmed()
+    {
+        Console.WriteLine("User confirmed");
+    }
+
+    private void OnCancelled()
+    {
+        Console.WriteLine("User cancelled");
+    }
+
+    private void OnItemSelected(int itemId)
+    {
+        Console.WriteLine($"Selected item: {itemId}");
+    }
+}
+```
+
+---
+
+## PostBack Patterns: IsPostBack and ViewState Integration
+
+### Understanding IsPostBack in Components
+
+`IsPostBack` indicates whether the current render is a first-time initialization or a subsequent postback/re-render. Combined with `ViewState`, this enables Web Forms-style initialization patterns.
+
+#### IsPostBack Detection Behavior
+
+- **SSR (Server-Side Rendering)** — Returns `true` when the HTTP request method is POST (form submission)
+- **ServerInteractive (Blazor WebSocket)** — Returns `true` after the component has initialized once
+
+#### One-Time Initialization with IsPostBack
+
+```razor
+@inherits BaseWebFormsComponent
+
+<div>
+    <p>Items loaded: @_items.Count</p>
+    <button @onclick="OnRefresh">Refresh Data</button>
+</div>
+
+@code {
+    private List<string> _items = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsPostBack)
+        {
+            // First render: load data from database
+            _items = await FetchItemsFromDatabase();
+        }
+        // On postback: _items retains its previous value
+    }
+
+    private async Task OnRefresh()
+    {
+        _items = await FetchItemsFromDatabase();
+    }
+
+    private async Task<List<string>> FetchItemsFromDatabase()
+    {
+        // Simulate database call
+        await Task.Delay(100);
+        return new() { "Item1", "Item2", "Item3" };
+    }
+}
+```
+
+### Combining IsPostBack with ViewState
+
+For SSR scenarios where state must survive form POSTs, use both `IsPostBack` and `ViewState`:
+
+```razor
+@page "/cart"
+@inherits WebFormsPageBase
+
+<form method="post">
+    <div>
+        <h2>Shopping Cart</h2>
+        <input @bind="_itemName" placeholder="Item name" />
+        <Button Text="Add Item" @onclick="OnAddItem" />
+    </div>
+
+    @if (_cartItems?.Any() == true)
+    {
+        <ul>
+            @foreach (var item in _cartItems)
+            {
+                <li>@item</li>
+            }
+        </ul>
+    }
+
+    <RenderViewStateField />
+</form>
+
+@code {
+    private string _itemName = "";
+    private List<string> _cartItems = new();
+
+    protected override void OnInitialized()
+    {
+        if (!IsPostBack)
+        {
+            // First render: initialize cart from database
+            _cartItems = new();
+            ViewState.Set("CartItems", _cartItems);
+        }
+        else
+        {
+            // Postback: restore cart from ViewState
+            _cartItems = ViewState.GetValueOrDefault<List<string>>("CartItems", new());
+        }
+    }
+
+    private void OnAddItem()
+    {
+        if (!string.IsNullOrEmpty(_itemName))
+        {
+            _cartItems.Add(_itemName);
+            ViewState.Set("CartItems", _cartItems);
+            _itemName = "";
+        }
+    }
+}
+```
+
+---
+
+## Gradual Migration: Coexisting ASCX and Razor Components
+
+When migrating a large application, you don't need to convert all user controls at once. ASCX controls and Razor components can coexist during the transition period.
+
+### Migration Timeline Strategy
+
+1. **Phase 1: Simple Controls** — Migrate stateless presentational controls first
+2. **Phase 2: Event-Driven Controls** — Migrate controls with events and callbacks
+3. **Phase 3: Stateful Controls** — Migrate complex controls with ViewState
+4. **Phase 4: Integration** — Update parent pages to use new Razor versions
+
+### Parallel Implementation Pattern
+
+```razor
+@* Interim state: Both old ASCX and new Razor exist *@
+
+@* Page that uses OLD ASCX control *@
+<%@ Register TagPrefix="uc" TagName="OldSearch" Src="~/Controls/OldSearchBox.ascx" %>
+<uc:OldSearch ID="SearchControl" runat="server" />
+
+@* Same page (during transition) using NEW Razor component *@
+@* Import in _Imports.razor instead of Register directive *@
+<NewSearchBox @ref="_newSearchControl" 
+              OnSearch="@OnSearch" />
+```
+
+### Wrapper Pattern for Gradual Rollout
+
+Create a wrapper component that conditionally uses old or new implementations:
+
+```razor
+@* SearchBoxAdapter.razor - wraps old and new implementations *@
+@implements IAsyncDisposable
+
+@if (UseNewImplementation)
+{
+    <NewSearchBox OnSearch="@OnSearch" />
+}
+else
+{
+    <div @ref="_oldControlContainer"></div>
+}
+
+@code {
+    [Parameter]
+    public EventCallback<string> OnSearch { get; set; }
+
+    [Parameter]
+    public bool UseNewImplementation { get; set; } = false;
+
+    private ElementReference _oldControlContainer;
+
+    private async Task OnSearch(string term)
+    {
+        await OnSearch.InvokeAsync(term);
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        // Cleanup old control if needed
+    }
+}
+```
+
+Use a configuration flag to control which implementation is active:
+
+```csharp
+// Startup.cs or Program.cs
+builder.Services.AddSingleton<MigrationConfig>(new MigrationConfig
+{
+    UseNewSearchBox = Environment.GetEnvironmentVariable("ENABLE_NEW_SEARCHBOX") == "true"
+});
+```
+
+---
+
+## Complete Working Examples
+
+### Example 1: Product Catalog Control with ViewState and EventCallback
+
+This example shows a realistic user control migration that includes state management, filtering, and events.
+
+#### Web Forms ASCX (Before)
+
+**ProductCatalog.ascx:**
+```html
+<%@ Control Language="C#" AutoEventWireup="true" CodeBehind="ProductCatalog.ascx.cs" Inherits="eCommerce.Controls.ProductCatalog" %>
+
+<div class="product-catalog">
+    <div class="filters">
+        <asp:DropDownList ID="CategoryDropdown" runat="server" 
+            AutoPostBack="true" OnSelectedIndexChanged="CategoryDropdown_SelectedIndexChanged">
+            <asp:ListItem Value="">All Categories</asp:ListItem>
+            <asp:ListItem Value="Electronics">Electronics</asp:ListItem>
+            <asp:ListItem Value="Clothing">Clothing</asp:ListItem>
+        </asp:DropDownList>
+    </div>
+
+    <asp:Repeater ID="ProductRepeater" runat="server">
+        <ItemTemplate>
+            <div class="product-card">
+                <h3><%# Eval("Name") %></h3>
+                <p>Price: $<%# Eval("Price", "{0:0.00}") %></p>
+                <asp:LinkButton ID="AddCartButton" runat="server" 
+                    CommandName="AddCart" CommandArgument='<%# Eval("ID") %>'>
+                    Add to Cart
+                </asp:LinkButton>
+            </div>
+        </ItemTemplate>
+    </asp:Repeater>
+</div>
+```
+
+**ProductCatalog.ascx.cs:**
+```csharp
+public partial class ProductCatalog : UserControl
+{
+    public event EventHandler<int> OnProductAdded;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            ViewState["CurrentCategory"] = "";
+            LoadProducts("");
+        }
+    }
+
+    protected void CategoryDropdown_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        string category = CategoryDropdown.SelectedValue;
+        ViewState["CurrentCategory"] = category;
+        LoadProducts(category);
+    }
+
+    protected void ProductRepeater_ItemCommand(object source, RepeaterCommandEventArgs e)
+    {
+        if (e.CommandName == "AddCart")
+        {
+            int productId = int.Parse((string)e.CommandArgument);
+            OnProductAdded?.Invoke(this, productId);
+        }
+    }
+
+    private void LoadProducts(string category)
+    {
+        var products = GetProductsByCategory(category);
+        ProductRepeater.DataSource = products;
+        ProductRepeater.DataBind();
+    }
+
+    private List<Product> GetProductsByCategory(string category)
+    {
+        // Simulate database query
+        return new()
+        {
+            new Product { ID = 1, Name = "Laptop", Category = "Electronics", Price = 999.99m },
+            new Product { ID = 2, Name = "Shirt", Category = "Clothing", Price = 29.99m }
+        };
+    }
+}
+
+public class Product
+{
+    public int ID { get; set; }
+    public string Name { get; set; }
+    public string Category { get; set; }
+    public decimal Price { get; set; }
+}
+```
+
+#### Blazor Razor Component (After)
+
+**ProductCatalog.razor:**
+```razor
+<div class="product-catalog">
+    <div class="filters">
+        <select @onchange="OnCategoryChanged">
+            <option value="">All Categories</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Clothing">Clothing</option>
+        </select>
+    </div>
+
+    @if (_filteredProducts?.Any() == true)
+    {
+        <div class="product-grid">
+            @foreach (var product in _filteredProducts)
+            {
+                <div class="product-card">
+                    <h3>@product.Name</h3>
+                    <p>Price: $@product.Price.ToString("0.00")</p>
+                    <Button Text="Add to Cart" @onclick="() => OnAddToCart(product.ID)" />
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>No products found.</p>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<int> OnProductAdded { get; set; }
+
+    private List<Product> _allProducts = new();
+    private List<Product> _filteredProducts = new();
+    private string _currentCategory = "";
+
+    protected override void OnInitialized()
+    {
+        if (!IsPostBack)
+        {
+            // First render: load all products
+            _allProducts = GetAllProducts();
+            _filteredProducts = _allProducts;
+            ViewState.Set("CurrentCategory", "");
+        }
+        else
+        {
+            // Postback: restore filter state
+            _currentCategory = ViewState.GetValueOrDefault<string>("CurrentCategory", "");
+            _allProducts = GetAllProducts();
+            ApplyFilter(_currentCategory);
+        }
+    }
+
+    private async Task OnCategoryChanged(ChangeEventArgs e)
+    {
+        _currentCategory = e.Value?.ToString() ?? "";
+        ViewState.Set("CurrentCategory", _currentCategory);
+        ApplyFilter(_currentCategory);
+        await Task.CompletedTask;
+    }
+
+    private void ApplyFilter(string category)
+    {
+        _filteredProducts = string.IsNullOrEmpty(category)
+            ? _allProducts
+            : _allProducts.Where(p => p.Category == category).ToList();
+    }
+
+    private async Task OnAddToCart(int productId)
+    {
+        await OnProductAdded.InvokeAsync(productId);
+    }
+
+    private List<Product> GetAllProducts()
+    {
+        return new()
+        {
+            new Product { ID = 1, Name = "Laptop", Category = "Electronics", Price = 999.99m },
+            new Product { ID = 2, Name = "Shirt", Category = "Clothing", Price = 29.99m },
+            new Product { ID = 3, Name = "Tablet", Category = "Electronics", Price = 499.99m }
+        };
+    }
+
+    public class Product
+    {
+        public int ID { get; set; }
+        public string Name { get; set; }
+        public string Category { get; set; }
+        public decimal Price { get; set; }
+    }
+}
+```
+
+#### Usage in a Parent Page
+
+**Web Forms (Before):**
+```aspx
+<%@ Page Language="C#" %>
+<%@ Register TagPrefix="uc" TagName="ProductCatalog" Src="~/Controls/ProductCatalog.ascx" %>
+
+<form runat="server">
+    <h1>Shopping</h1>
+    <uc:ProductCatalog ID="catalog" runat="server" OnProductAdded="Catalog_ProductAdded" />
+    <asp:Label ID="StatusLabel" runat="server" />
+
+    <script runat="server">
+        protected void Catalog_ProductAdded(object sender, int productId)
+        {
+            StatusLabel.Text = $"Added product {productId} to cart";
+        }
+    </script>
+</form>
+```
+
+**Blazor (After):**
+```razor
+@page "/shopping"
+
+<h1>Shopping</h1>
+<ProductCatalog OnProductAdded="@OnCatalogProductAdded" />
+@if (!string.IsNullOrEmpty(_statusMessage))
+{
+    <p>@_statusMessage</p>
+}
+
+@code {
+    private string _statusMessage = "";
+
+    private void OnCatalogProductAdded(int productId)
+    {
+        _statusMessage = $"Added product {productId} to cart";
+    }
+}
+```
+
+### Example 2: Multi-Step Form Control with IsPostBack
+
+This example demonstrates a form control that maintains state across steps using ViewState and IsPostBack.
+
+#### Web Forms ASCX (Before)
+
+**RegistrationWizard.ascx.cs:**
+```csharp
+public partial class RegistrationWizard : UserControl
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            ViewState["CurrentStep"] = 1;
+            ShowStep(1);
+        }
+        else
+        {
+            int step = (int)ViewState["CurrentStep"];
+            ShowStep(step);
+        }
+    }
+
+    protected void NextButton_Click(object sender, EventArgs e)
+    {
+        int currentStep = (int)ViewState["CurrentStep"];
+        
+        if (ValidateStep(currentStep))
+        {
+            SaveStepData(currentStep);
+            int nextStep = currentStep + 1;
+            
+            if (nextStep <= 3)
+            {
+                ViewState["CurrentStep"] = nextStep;
+                ShowStep(nextStep);
+            }
+            else
+            {
+                SubmitRegistration();
+            }
+        }
+    }
+
+    private void SaveStepData(int step)
+    {
+        if (step == 1)
+        {
+            ViewState["FirstName"] = FirstNameTextBox.Text;
+            ViewState["LastName"] = LastNameTextBox.Text;
+        }
+        // ... additional steps
+    }
+
+    private void ShowStep(int step)
+    {
+        Step1Panel.Visible = (step == 1);
+        Step2Panel.Visible = (step == 2);
+        Step3Panel.Visible = (step == 3);
+    }
+}
+```
+
+#### Blazor Razor Component (After)
+
+**RegistrationWizard.razor:**
+```razor
+@inherits BaseWebFormsComponent
+
+<div class="wizard">
+    @if (CurrentStep == 1)
+    {
+        <div class="step">
+            <h3>Step 1: Personal Information</h3>
+            <input @bind="_firstName" placeholder="First Name" />
+            <input @bind="_lastName" placeholder="Last Name" />
+        </div>
+    }
+    else if (CurrentStep == 2)
+    {
+        <div class="step">
+            <h3>Step 2: Contact Information</h3>
+            <input @bind="_email" placeholder="Email" />
+            <input @bind="_phone" placeholder="Phone" />
+        </div>
+    }
+    else if (CurrentStep == 3)
+    {
+        <div class="step">
+            <h3>Step 3: Confirmation</h3>
+            <p>Name: @(ViewState.GetValueOrDefault<string>("FirstName", "")) @(ViewState.GetValueOrDefault<string>("LastName", ""))</p>
+            <p>Email: @(ViewState.GetValueOrDefault<string>("Email", ""))</p>
+        </div>
+    }
+
+    <div class="buttons">
+        @if (CurrentStep > 1)
+        {
+            <Button Text="Back" @onclick="OnBack" />
+        }
+        @if (CurrentStep < 3)
+        {
+            <Button Text="Next" @onclick="OnNext" />
+        }
+        else
+        {
+            <Button Text="Submit" @onclick="OnSubmit" />
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback<RegistrationData> OnRegistrationComplete { get; set; }
+
+    private string _firstName = "";
+    private string _lastName = "";
+    private string _email = "";
+    private string _phone = "";
+
+    private int CurrentStep
+    {
+        get => ViewState.GetValueOrDefault<int>("CurrentStep", 1);
+        set => ViewState.Set("CurrentStep", value);
+    }
+
+    protected override void OnInitialized()
+    {
+        if (!IsPostBack)
+        {
+            CurrentStep = 1;
+            ViewState.Set("FirstName", "");
+            ViewState.Set("LastName", "");
+            ViewState.Set("Email", "");
+            ViewState.Set("Phone", "");
+        }
+        else
+        {
+            // Restore form fields from ViewState
+            _firstName = ViewState.GetValueOrDefault<string>("FirstName", "");
+            _lastName = ViewState.GetValueOrDefault<string>("LastName", "");
+            _email = ViewState.GetValueOrDefault<string>("Email", "");
+            _phone = ViewState.GetValueOrDefault<string>("Phone", "");
+        }
+    }
+
+    private async Task OnNext()
+    {
+        if (ValidateCurrentStep())
+        {
+            SaveCurrentStepData();
+            CurrentStep++;
+        }
+    }
+
+    private void OnBack()
+    {
+        SaveCurrentStepData();
+        CurrentStep--;
+    }
+
+    private async Task OnSubmit()
+    {
+        SaveCurrentStepData();
+
+        var data = new RegistrationData
+        {
+            FirstName = ViewState.GetValueOrDefault<string>("FirstName", ""),
+            LastName = ViewState.GetValueOrDefault<string>("LastName", ""),
+            Email = ViewState.GetValueOrDefault<string>("Email", ""),
+            Phone = ViewState.GetValueOrDefault<string>("Phone", "")
+        };
+
+        await OnRegistrationComplete.InvokeAsync(data);
+    }
+
+    private void SaveCurrentStepData()
+    {
+        switch (CurrentStep)
+        {
+            case 1:
+                ViewState.Set("FirstName", _firstName);
+                ViewState.Set("LastName", _lastName);
+                break;
+            case 2:
+                ViewState.Set("Email", _email);
+                ViewState.Set("Phone", _phone);
+                break;
+        }
+    }
+
+    private bool ValidateCurrentStep()
+    {
+        return CurrentStep switch
+        {
+            1 => !string.IsNullOrEmpty(_firstName) && !string.IsNullOrEmpty(_lastName),
+            2 => !string.IsNullOrEmpty(_email) && !string.IsNullOrEmpty(_phone),
+            _ => true
+        };
+    }
+
+    public class RegistrationData
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+    }
+}
+```
+
+---
+
 ## Using BWFC Components to Ease Migration
 
 If your user controls use BWFC compatibility components (e.g., `WebControl`, `Repeater`, `Button`), the migration is even smoother:
@@ -565,6 +1492,7 @@ BWFC components handle attribute rendering and styling automatically, so the mar
 - [Master Pages Migration Guide](MasterPages.md) — For layouts using `ContentPlaceHolder` and `Content`
 - [FindControl Migration Guide](FindControl-Migration.md) — Detailed solutions for control tree traversal patterns
 - [Deferred Controls](DeferredControls.md) — Controls with no Blazor equivalent
+- [ViewState and PostBack Shim](../UtilityFeatures/ViewStateAndPostBack.md) — Comprehensive guide for ViewStateDictionary and IsPostBack patterns
 
 ---
 
@@ -573,3 +1501,4 @@ BWFC components handle attribute rendering and styling automatically, so the mar
 - [Blazor Component Parameters](https://learn.microsoft.com/en-us/aspnet/core/blazor/components/cascading-values-and-parameters)
 - [Blazor Event Handling](https://learn.microsoft.com/en-us/aspnet/core/blazor/components/event-handling)
 - [Blazor Component Lifecycle](https://learn.microsoft.com/en-us/aspnet/core/blazor/components/lifecycle)
+- [ViewState and PostBack Shim](../UtilityFeatures/ViewStateAndPostBack.md) — State management and postback detection

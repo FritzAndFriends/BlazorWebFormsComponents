@@ -223,77 +223,79 @@ Stacks multiple series vertically within each category column. Use this when you
 - **Skins and themes** — Use CSS and `Palette` instead
 - **Serialization** (`ChartSerializer`) — Not applicable
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Chart
-    ID="Chart1"
-    runat="server"
-    Width="600px"
-    Height="400px"
-    Palette="BrightPastel"
-    ImageType="Png"
->
-    <Titles>
-        <asp:Title Text="Monthly Sales" Docking="Top" />
-    </Titles>
-    <Legends>
-        <asp:Legend Name="Legend1" Docking="Bottom" />
-    </Legends>
-    <Series>
-        <asp:Series
-            Name="Sales"
-            ChartType="Column"
-            XValueMember="Month"
-            YValueMembers="Amount"
-        />
-    </Series>
-    <ChartAreas>
-        <asp:ChartArea Name="ChartArea1">
-            <AxisX Title="Month" />
-            <AxisY Title="Revenue ($)" />
-        </asp:ChartArea>
-    </ChartAreas>
-</asp:Chart>
-```
+=== "Web Forms"
 
-**Code-behind (Web Forms):**
+    ```html
+    <asp:Chart
+        ID="Chart1"
+        runat="server"
+        Width="600px"
+        Height="400px"
+        Palette="BrightPastel"
+        ImageType="Png"
+    >
+        <Titles>
+            <asp:Title Text="Monthly Sales" Docking="Top" />
+        </Titles>
+        <Legends>
+            <asp:Legend Name="Legend1" Docking="Bottom" />
+        </Legends>
+        <Series>
+            <asp:Series
+                Name="Sales"
+                ChartType="Column"
+                XValueMember="Month"
+                YValueMembers="Amount"
+            />
+        </Series>
+        <ChartAreas>
+            <asp:ChartArea Name="ChartArea1">
+                <AxisX Title="Month" />
+                <AxisY Title="Revenue ($)" />
+            </asp:ChartArea>
+        </ChartAreas>
+    </asp:Chart>
+    ```
 
-```csharp
-protected void Page_Load(object sender, EventArgs e)
-{
-    Chart1.DataSource = GetSalesData();
-    Chart1.DataBind();
-}
-```
+    **Code-behind:**
 
-## Blazor Razor Syntax
-
-### Basic Chart with Data Points
-
-```razor
-<Chart ID="Chart1" ChartWidth="600px" ChartHeight="400px" Palette="ChartPalette.BrightPastel">
-    <ChartTitle Text="Monthly Sales" />
-    <ChartLegend Name="Legend1" LegendDocking="Docking.Bottom" />
-    <ChartSeries Name="Sales" ChartType="SeriesChartType.Column"
-                 Points="@salesData" />
-    <ChartArea Name="ChartArea1"
-               AxisX="@(new Axis { Title = "Month" })"
-               AxisY="@(new Axis { Title = "Revenue ($)" })" />
-</Chart>
-
-@code {
-    private List<DataPoint> salesData = new()
+    ```csharp
+    protected void Page_Load(object sender, EventArgs e)
     {
-        new DataPoint { Label = "Jan", YValues = new[] { 12000.0 } },
-        new DataPoint { Label = "Feb", YValues = new[] { 15000.0 } },
-        new DataPoint { Label = "Mar", YValues = new[] { 18000.0 } },
-        new DataPoint { Label = "Apr", YValues = new[] { 14000.0 } },
-        new DataPoint { Label = "May", YValues = new[] { 21000.0 } },
-        new DataPoint { Label = "Jun", YValues = new[] { 19000.0 } }
-    };
-}
-```
+        Chart1.DataSource = GetSalesData();
+        Chart1.DataBind();
+    }
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <Chart ID="Chart1" ChartWidth="600px" ChartHeight="400px" Palette="ChartPalette.BrightPastel">
+        <ChartTitle Text="Monthly Sales" />
+        <ChartLegend Name="Legend1" LegendDocking="Docking.Bottom" />
+        <ChartSeries Name="Sales" ChartType="SeriesChartType.Column"
+                     Points="@salesData" />
+        <ChartArea Name="ChartArea1"
+                   AxisX="@(new Axis { Title = "Month" })"
+                   AxisY="@(new Axis { Title = "Revenue ($)" })" />
+    </Chart>
+
+    @code {
+        private List<DataPoint> salesData = new()
+        {
+            new DataPoint { Label = "Jan", YValues = new[] { 12000.0 } },
+            new DataPoint { Label = "Feb", YValues = new[] { 15000.0 } },
+            new DataPoint { Label = "Mar", YValues = new[] { 18000.0 } },
+            new DataPoint { Label = "Apr", YValues = new[] { 14000.0 } },
+            new DataPoint { Label = "May", YValues = new[] { 21000.0 } },
+            new DataPoint { Label = "Jun", YValues = new[] { 19000.0 } }
+        };
+    }
+    ```
+
+## Examples
 
 ### Data-Bound Chart
 
@@ -414,66 +416,68 @@ protected void Page_Load(object sender, EventArgs e)
 9. **Child element names changed** — `<Titles>` → `<ChartTitle>`, `<Legends>` → `<ChartLegend>`, `<Series>` → `<ChartSeries>`, `<ChartAreas>` → `<ChartArea>` (singular, no wrapper element)
 10. **`ImageType` is ignored** — Chart.js renders to canvas, not an image file
 
-### Before (Web Forms)
+=== "Web Forms"
 
-```html
-<asp:Chart ID="Chart1" runat="server" Width="600" Height="400"
-           Palette="BrightPastel" ImageType="Png">
-    <Titles>
-        <asp:Title Text="Sales Report" Docking="Top" />
-    </Titles>
-    <Legends>
-        <asp:Legend Name="Legend1" Docking="Bottom" />
-    </Legends>
-    <Series>
-        <asp:Series Name="Revenue" ChartType="Column"
-                    XValueMember="Month" YValueMembers="Amount" />
-    </Series>
-    <ChartAreas>
-        <asp:ChartArea Name="ChartArea1">
-            <AxisX Title="Month" />
-            <AxisY Title="Amount ($)" />
-        </asp:ChartArea>
-    </ChartAreas>
-</asp:Chart>
-```
+    ```html
+    <asp:Chart ID="Chart1" runat="server" Width="600" Height="400"
+               Palette="BrightPastel" ImageType="Png">
+        <Titles>
+            <asp:Title Text="Sales Report" Docking="Top" />
+        </Titles>
+        <Legends>
+            <asp:Legend Name="Legend1" Docking="Bottom" />
+        </Legends>
+        <Series>
+            <asp:Series Name="Revenue" ChartType="Column"
+                        XValueMember="Month" YValueMembers="Amount" />
+        </Series>
+        <ChartAreas>
+            <asp:ChartArea Name="ChartArea1">
+                <AxisX Title="Month" />
+                <AxisY Title="Amount ($)" />
+            </asp:ChartArea>
+        </ChartAreas>
+    </asp:Chart>
+    ```
 
-```csharp
-// Code-behind
-Chart1.DataSource = GetMonthlyRevenue();
-Chart1.DataBind();
-```
+    ```csharp
+    // Code-behind
+    Chart1.DataSource = GetMonthlyRevenue();
+    Chart1.DataBind();
+    ```
 
-### After (Blazor)
+=== "Blazor"
 
-```razor
-<Chart ID="Chart1" ChartWidth="600px" ChartHeight="400px"
-       Palette="ChartPalette.BrightPastel">
-    <ChartTitle Text="Sales Report" TitleDocking="Docking.Top" />
-    <ChartLegend Name="Legend1" LegendDocking="Docking.Bottom" />
-    <ChartSeries Name="Revenue" ChartType="SeriesChartType.Column"
-                 XValueMember="Month" YValueMembers="Amount"
-                 Items="@monthlyRevenue" />
-    <ChartArea Name="ChartArea1"
-               AxisX="@(new Axis { Title = "Month" })"
-               AxisY="@(new Axis { Title = "Amount ($)" })" />
-</Chart>
+    ```razor
+    <Chart ID="Chart1" ChartWidth="600px" ChartHeight="400px"
+           Palette="ChartPalette.BrightPastel">
+        <ChartTitle Text="Sales Report" TitleDocking="Docking.Top" />
+        <ChartLegend Name="Legend1" LegendDocking="Docking.Bottom" />
+        <ChartSeries Name="Revenue" ChartType="SeriesChartType.Column"
+                     XValueMember="Month" YValueMembers="Amount"
+                     Items="@monthlyRevenue" />
+        <ChartArea Name="ChartArea1"
+                   AxisX="@(new Axis { Title = "Month" })"
+                   AxisY="@(new Axis { Title = "Amount ($)" })" />
+    </Chart>
 
-@code {
-    private List<object> monthlyRevenue;
+    @code {
+        private List<object> monthlyRevenue;
 
-    protected override void OnInitialized()
-    {
-        monthlyRevenue = GetMonthlyRevenue()
-            .Cast<object>().ToList();
+        protected override void OnInitialized()
+        {
+            monthlyRevenue = GetMonthlyRevenue()
+                .Cast<object>().ToList();
+        }
     }
-}
-```
+    ```
 
 ## See Also
 
 - [GridView](GridView.md) — Data grid with row templates
 - [Repeater](Repeater.md) — Flexible data repeater
+- [DataList](DataList.md) — Repeating data with layout options
+- [ListView](ListView.md) — Full-featured list with CRUD and paging
+- [DetailsView](DetailsView.md) — Single record display
+- [FormView](FormView.md) — Custom single record layout
 - [JavaScript Setup](../UtilityFeatures/JavaScriptSetup.md) — JavaScript configuration for the library
-- [Chart.js Documentation](https://www.chartjs.org/docs/) — The underlying charting library
-- [Microsoft Chart Class Reference](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.datavisualization.charting.chart?view=netframework-4.8)

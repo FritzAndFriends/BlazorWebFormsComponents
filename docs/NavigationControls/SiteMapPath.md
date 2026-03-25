@@ -220,6 +220,7 @@ Fires when a breadcrumb node item is bound to its data source. Useful for custom
 
 ## See Also
 
-- [Menu](Menu.md) - Hierarchical navigation menu
-- [TreeView](TreeView.md) - Tree-style navigation
-- [Migration Guide](../Migration/readme.md)
+- [Menu](Menu.md) — Hierarchical navigation menu
+- [TreeView](TreeView.md) — Tree-style hierarchical navigation
+- [HyperLink](HyperLink.md) — Simple link navigation
+- [ImageMap](ImageMap.md) — Image with clickable regions

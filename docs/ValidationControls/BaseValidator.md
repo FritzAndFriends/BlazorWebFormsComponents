@@ -145,32 +145,32 @@ All validators require a cascading EditContext, typically provided by the EditFo
 
 The EditContext coordinates validation across all validators on the form.
 
-## Web Forms → Blazor Comparison
+## Syntax Comparison
 
-### Web Forms Syntax
+=== "Web Forms"
 
-```html
-<asp:RequiredFieldValidator
-    ControlToValidate="NameInput"
-    Display="Dynamic"
-    ErrorMessage="Name is required"
-    Text="Name is required"
-    ForeColor="Red"
-    ValidationGroup="Personal"
-    runat="server" />
-```
+    ```html
+    <asp:RequiredFieldValidator
+        ControlToValidate="NameInput"
+        Display="Dynamic"
+        ErrorMessage="Name is required"
+        Text="Name is required"
+        ForeColor="Red"
+        ValidationGroup="Personal"
+        runat="server" />
+    ```
 
-### Blazor Syntax
+=== "Blazor"
 
-```razor
-<RequiredFieldValidator
-    ControlToValidate="Name"
-    Display="ValidatorDisplay.Dynamic"
-    ErrorMessage="Name is required"
-    Text="Name is required"
-    ForeColor="Red"
-    ValidationGroup="Personal" />
-```
+    ```razor
+    <RequiredFieldValidator
+        ControlToValidate="Name"
+        Display="ValidatorDisplay.Dynamic"
+        ErrorMessage="Name is required"
+        Text="Name is required"
+        ForeColor="Red"
+        ValidationGroup="Personal" />
+    ```
 
 **Key Differences:**
 
@@ -191,3 +191,12 @@ BaseValidator has the following concrete implementations:
 - CustomValidator — calls a custom validation function
 
 See the individual validator pages for specific usage examples.
+
+## See Also
+
+- [RequiredFieldValidator](RequiredFieldValidator.md) — validates that a field has a value
+- [CompareValidator](CompareValidator.md) — compares field values
+- [RangeValidator](RangeValidator.md) — validates value ranges
+- [RegularExpressionValidator](RegularExpressionValidator.md) — pattern validation
+- [CustomValidator](CustomValidator.md) — custom validation logic
+- [ValidationSummary](ValidationSummary.md) — display validation errors

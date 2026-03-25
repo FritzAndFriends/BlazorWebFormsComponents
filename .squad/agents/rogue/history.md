@@ -1,10 +1,67 @@
-﻿# Project Context
+# Project Context
 
 - **Owner:** Jeffrey T. Fritz
 - **Project:** BlazorWebFormsComponents  Blazor components emulating ASP.NET Web Forms controls for migration
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
+## Core Context
+
+**Role:** QA & Component Test Lead  
+**Expertise:** bUnit testing, Blazor component testing patterns, test architecture, integration testing
+
+### Key Responsibilities
+- Component test suite development and maintenance (1437+ bUnit tests)
+- Test pattern standardization (CSS class selectors, EventCallback testing, template verification)
+- Acceptance testing and Playwright test framework
+- Integration test harness setup and debugging
+
+### Active Test Areas
+1. **Component Unit Tests (bUnit):**
+   - ListView CRUD events (43 tests, Issue #356): All 16 events covered, cancellation, event ordering, lifecycle sequences
+   - FormView CRUD tests (8 tests): RenderOuterTable rendering, template content verification
+   - UpdatePanel tests (24 tests): ContentTemplate RenderFragment, dual syntax, styling
+   - WebFormsPageBase tests (8 tests): Title/MetaDescription delegation, IsPostBack always false
+   - Skins & Themes tests (13 tests): ThemeProvider pipeline, FontInfo sync (11 tests)
+   - GUID ID rendering (11 tests): RadioButton, CheckBox ID preservation
+   - HttpHandlerBase tests (94 tests): Handler routing, adapter patterns
+
+2. **Test Patterns:**
+   - CSS class selectors for template identification (span.display vs span.edit)
+   - cut.InvokeAsync() for HandleCommand dispatcher context
+   - FindComponent<T>() and FindAll().Count for structural comparison
+   - Event ordering via List<string> tracker with index assertions
+   - ShouldBeGreaterThanOrEqualTo for bUnit double-render tolerance
+   - Pre-set service values before rendering (not after) for initial assertions
+
+3. **Test Standards:**
+   - All new components require bUnit test file in src/BlazorWebFormsComponents.Test/{ComponentName}/
+   - Acceptance tests use Playwright for cross-browser verification
+   - GUID ID handling mandatory for client-side interop
+   - EventArgs classes tested alongside event callbacks
+
+### Recent Deliverables (2026-03)
+- Issue #471: GUID ID rendering tests (11 tests, RadioButton/CheckBox)
+- HttpHandlerBase test validation (94 tests, 0 bugs found, architecture verified)
+- UpdatePanel test suite (24 tests, all passing)
+- WebFormsPageBase tests (8 tests, all passing)
+- ListView CRUD event tests (43 tests, complete event coverage)
+
+### Quality Metrics
+- 1437+ total bUnit tests passing
+- 94 HttpHandlerBase tests (100% pass)
+- 24/24 UpdatePanel tests passing
+- 8/8 WebFormsPageBase tests passing
+- 43/43 ListView CRUD event tests passing
+- 0 known component test failures in regression suite
+
+### Known Test Patterns Not to Break
+- EventCallback<T> with EventArgs  don't use plain Action<EventArgs>
+- Template rendering  use CSS classes for identification, not structural assumptions
+- Component lifecycle  InvokeAsync needed for lifecycle callbacks
+- Head rendering  use FindComponent<PageTitle>() and FindComponent<HeadContent>()
+
+---
 ## Active Decisions & Alerts
 
 📌 **Team update (2026-03-17):** HttpHandlerBase handler tests validated — 94 tests passing, 1 test fixed (HttpMethod_DefaultIsGet bad assumption). No implementation bugs found; adapter architecture verified. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base. — decided by Rogue
@@ -307,4 +364,5 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 
 
  **Team update (2026-03-20):** Middleware integration testing pattern established (TestServer + AspxRewriteMiddlewareTests.cs, 46 tests). Microsoft.AspNetCore.TestHost added to test dependencies.  decided by Rogue
+
 

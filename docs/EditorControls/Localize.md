@@ -25,34 +25,34 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **Design-time localization tooling** - No Blazor equivalent; localization is handled at runtime via .NET localization APIs
 - **EnableTheming / SkinID** - Theming is not supported in Blazor
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Localize
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    Mode="Transform|PassThrough|Encode"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Text="string"
-    Visible="True|False"
-/>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:Localize
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        Mode="Transform|PassThrough|Encode"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Text="string"
+        Visible="True|False"
+    />
+    ```
 
-### Basic Usage
+=== "Blazor"
 
-```razor
-<Localize Text="Hello, World!" />
-```
+    ```razor
+    <Localize Text="Hello, World!" />
+    ```
 
 ### With Localized Text
 

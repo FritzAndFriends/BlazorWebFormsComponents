@@ -7,52 +7,88 @@ It may seem strange that we have a LinkButton component when there already is an
 - `OnCommand` event handler with event bubbling
 - `PostBackurl` The URL of the Web page to post to from the current page
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:LinkButton
-    AccessKey="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    CausesValidation="True|False"
-    CommandArgument="string"
-    CommandName="string"
-    CssClass="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnClick="Click event handler"
-    OnClientClick="string"
-    OnCommand="Command event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    PostBackUrl="uri"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    Text="string"
-    ToolTip="string"
-    ValidationGroup="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms"
+
+    ```html
+    <asp:LinkButton
+        AccessKey="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        CausesValidation="True|False"
+        CommandArgument="string"
+        CommandName="string"
+        CssClass="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnClick="Click event handler"
+        OnClientClick="string"
+        OnCommand="Command event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        PostBackUrl="uri"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        Text="string"
+        ToolTip="string"
+        ValidationGroup="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <LinkButton
+        Text="Click Me"
+        OnClick="HandleClick"
+        OnClientClick="return confirm('Are you sure?');"
+        CommandName="Select"
+        CommandArgument="42"
+        OnCommand="HandleCommand"
+        PostBackUrl="/target-page"
+        CssClass="link-btn" />
+
+    @code {
+        private void HandleClick(EventArgs e)
+        {
+            // Handle click event
+        }
+
+        private void HandleCommand(CommandEventArgs e)
+        {
+            var name = e.CommandName;    // "Select"
+            var arg = e.CommandArgument;  // "42"
+        }
+    }
+    ```
+
+## See Also
+
+- [Button](Button.md) — Standard push button control
+- [ImageButton](ImageButton.md) — Button that displays an image
+- [HyperLink](../NavigationControls/HyperLink.md) — Navigate to a URL
+- [RequiredFieldValidator](../ValidationControls/RequiredFieldValidator.md) — Validate required fields

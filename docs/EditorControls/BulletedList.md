@@ -21,46 +21,46 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 - **DataSourceID** - Not supported; bind directly to collections via `Items` parameter
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:BulletedList
-    ID="string"
-    runat="server"
-    BulletImageUrl="uri"
-    BulletStyle="NotSet|Numbered|LowerAlpha|UpperAlpha|LowerRoman|UpperRoman|Disc|Circle|Square|CustomImage"
-    DataSourceID="string"
-    DataTextField="string"
-    DataValueField="string"
-    DisplayMode="Text|HyperLink|LinkButton"
-    Enabled="True|False"
-    FirstBulletNumber="integer"
-    Target="string|_blank|_parent|_search|_self|_top"
-    Visible="True|False"
-    OnClick="Click event handler">
-    
-    <asp:ListItem Value="value1" Text="Item 1" />
-    <asp:ListItem Value="http://example.com" Text="Link" />
-    
-</asp:BulletedList>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:BulletedList
+        ID="string"
+        runat="server"
+        BulletImageUrl="uri"
+        BulletStyle="NotSet|Numbered|LowerAlpha|UpperAlpha|LowerRoman|UpperRoman|Disc|Circle|Square|CustomImage"
+        DataSourceID="string"
+        DataTextField="string"
+        DataValueField="string"
+        DisplayMode="Text|HyperLink|LinkButton"
+        Enabled="True|False"
+        FirstBulletNumber="integer"
+        Target="string|_blank|_parent|_search|_self|_top"
+        Visible="True|False"
+        OnClick="Click event handler">
 
-### Static Items (Text Mode)
+        <asp:ListItem Value="value1" Text="Item 1" />
+        <asp:ListItem Value="http://example.com" Text="Link" />
 
-```razor
-<BulletedList TItem="object" StaticItems="items" />
+    </asp:BulletedList>
+    ```
 
-@code {
-    private ListItemCollection items = new()
-    {
-        new ListItem("First item", "1"),
-        new ListItem("Second item", "2"),
-        new ListItem("Third item", "3")
-    };
-}
-```
+=== "Blazor"
+
+    ```razor
+    <BulletedList TItem="object" StaticItems="items" />
+
+    @code {
+        private ListItemCollection items = new()
+        {
+            new ListItem("First item", "1"),
+            new ListItem("Second item", "2"),
+            new ListItem("Third item", "3")
+        };
+    }
+    ```
 
 ### Data Binding
 

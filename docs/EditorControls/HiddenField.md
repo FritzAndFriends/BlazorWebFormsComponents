@@ -28,38 +28,38 @@ Unlike Web Forms, Blazor maintains component state automatically, so you may not
 - **OnDataBinding, OnDisposed, OnInit, OnLoad, OnPreRender, OnUnload** - Blazor component lifecycle is different; use Blazor lifecycle methods (`OnInitialized`, `OnParametersSet`, etc.)
 - **Visible** - Not applicable; use conditional rendering with `@if` instead
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:HiddenField
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    OnValueChanged="ValueChanged event handler"
-    runat="server"
-    SkinID="string"
-    Value="string"
-    Visible="True|False"
-/>
-```
+=== "Web Forms"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:HiddenField
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        OnValueChanged="ValueChanged event handler"
+        runat="server"
+        SkinID="string"
+        Value="string"
+        Visible="True|False"
+    />
+    ```
 
-### Basic Usage
+=== "Blazor"
 
-```razor
-<HiddenField ID="myHiddenField" Value="@secretValue" />
+    ```razor
+    <HiddenField ID="myHiddenField" Value="@secretValue" />
 
-@code {
-    private string secretValue = "stored-data-123";
-}
-```
+    @code {
+        private string secretValue = "stored-data-123";
+    }
+    ```
 
 ### With Value Changed Event
 
