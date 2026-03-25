@@ -2,7 +2,7 @@
 
 BlazorWebFormsComponents gives you **52 Blazor components** that match the names, properties, and HTML output of the original ASP.NET Web Forms controls. Drop the `asp:` prefix, add a `@using`, and your existing markup just works. Your CSS stays intact, your layout doesn't break, and your team can migrate page by page instead of all at once.
 
-!!! tip "Built for .NET 9 — supports Static SSR and ServerInteractive rendering modes."
+!!! tip "Built for .NET 10 — supports Static SSR and ServerInteractive rendering modes."
 
 ## Quick Start
 
@@ -39,10 +39,10 @@ For full setup details including JavaScript interop and ViewState configuration,
 | Category | Components | Status |
 |----------|:----------:|--------|
 | :material-form-textbox: [Editor Controls](EditorControls/Button.md) | 25 / 27 | Label, TextBox, Button, DropDownList, Calendar, FileUpload, and more |
-| :material-table: [Data Controls](DataControls/GridView.md) | 9 / 9 | :white_check_mark: GridView, ListView, Repeater, DataGrid, Chart, DetailsView |
-| :material-check-decagram: [Validation Controls](ValidationControls/RequiredFieldValidator.md) | 8 / 8 | :white_check_mark: RequiredFieldValidator, CompareValidator, RangeValidator, and more |
-| :material-navigation: [Navigation Controls](NavigationControls/Menu.md) | 3 / 3 | :white_check_mark: Menu, TreeView, SiteMapPath |
-| :material-account-lock: [Login Controls](LoginControls/Login.md) | 7 / 7 | :white_check_mark: Login, CreateUserWizard, ChangePassword, and more |
+| :material-table: [Data Controls](DataControls/GridView.md) | 9 / 9 | GridView, ListView, Repeater, DataGrid, Chart, DetailsView |
+| :material-check-decagram: [Validation Controls](ValidationControls/RequiredFieldValidator.md) | 8 / 8 | RequiredFieldValidator, CompareValidator, RangeValidator, and more |
+| :material-navigation: [Navigation Controls](NavigationControls/Menu.md) | 3 / 3 | Menu, TreeView, SiteMapPath |
+| :material-account-lock: [Login Controls](LoginControls/Login.md) | 7 / 7 | Login, CreateUserWizard, ChangePassword, and more |
 | :material-wrench: [Ajax Toolkit Extenders](AjaxToolkit/index.md) | 25+ | Accordion, ModalPopup, CalendarExtender, TabContainer, and more |
 
 ## Migration Tooling
