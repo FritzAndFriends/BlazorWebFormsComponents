@@ -1,0 +1,50 @@
+<!--
+  Fritz.BlazorWebFormsComponents.targets
+
+  Automatically imported by projects that reference the BlazorWebFormsComponents
+  NuGet package. Provides:
+    - Global using directives for BWFC namespaces
+    - Type aliases mapping Web Forms types to Blazor equivalents
+    - Migration-mode warning suppression (opt-in)
+
+  These allow migrated code-behinds to compile with minimal changes:
+    class MyPage : Page         →  resolves to WebFormsPageBase
+    class MyLayout : MasterPage →  resolves to LayoutComponentBase
+-->
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- ================================================================== -->
+  <!-- Global usings: BWFC namespaces available in all .cs files          -->
+  <!-- ================================================================== -->
+  <ItemGroup>
+    <Using Include="BlazorWebFormsComponents" />
+    <Using Include="BlazorWebFormsComponents.LoginControls" />
+    <Using Include="BlazorWebFormsComponents.Identity" />
+  </ItemGroup>
+
+  <!-- ================================================================== -->
+  <!-- Type aliases: Web Forms → Blazor equivalents                       -->
+  <!--                                                                    -->
+  <!-- These aliases let ": Page" and ": MasterPage" base class           -->
+  <!-- declarations compile without renaming them in migrated code.       -->
+  <!-- ================================================================== -->
+  <ItemGroup>
+    <Using Alias="Page" Include="BlazorWebFormsComponents.WebFormsPageBase" />
+    <Using Alias="MasterPage" Include="Microsoft.AspNetCore.Components.LayoutComponentBase" />
+    <Using Alias="ImageClickEventArgs" Include="Microsoft.AspNetCore.Components.Web.MouseEventArgs" />
+  </ItemGroup>
+
+  <!-- ================================================================== -->
+  <!-- Migration-mode warning suppression (opt-in)                        -->
+  <!--                                                                    -->
+  <!-- Set <BwfcMigrationMode>true</BwfcMigrationMode> in your project   -->
+  <!-- to suppress common migration noise warnings.                       -->
+  <!-- ================================================================== -->
+  <PropertyGroup Condition="'$(BwfcMigrationMode)' == 'true'">
+    <!-- CS8618: Non-nullable field not initialized (common in stub code) -->
+    <!-- CS0414: Field assigned but never used (stub fields)              -->
+    <!-- CS0067: Event never used (stub events)                           -->
+    <NoWarn>$(NoWarn);CS8618;CS0414;CS0067</NoWarn>
+  </PropertyGroup>
+
+</Project>

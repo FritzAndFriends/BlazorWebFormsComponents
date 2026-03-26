@@ -38,6 +38,14 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
+    <None Include="buildTransitive\Fritz.BlazorWebFormsComponents.targets">
+      <Pack>True</Pack>
+      <PackagePath>buildTransitive\</PackagePath>
+    </None>
+    <None Include="build\Fritz.BlazorWebFormsComponents.targets">
+      <Pack>True</Pack>
+      <PackagePath>build\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
