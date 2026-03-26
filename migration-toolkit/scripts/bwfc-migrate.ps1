@@ -411,6 +411,7 @@ function New-ProjectScaffold {
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <BwfcMigrationMode>true</BwfcMigrationMode>
   </PropertyGroup>
 
   <ItemGroup>
@@ -1882,25 +1883,23 @@ function Copy-CodeBehind {
             Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($bareOwinMatches.Count) Owin using(s)"
         }
 
-        # Replace fully-qualified Web Forms base class references with aliases
-        # (The global using aliases only work with unqualified names)
-        $fqnReplacements = @{
-            'System.Web.UI.Page'        = 'Page'         # → WebFormsPageBase via alias
-            'System.Web.UI.MasterPage'  = 'MasterPage'   # → LayoutComponentBase via alias
-            'System.Web.UI.UserControl' = 'ComponentBase' # → Blazor ComponentBase
-        }
-        $fqnCount = 0
-        foreach ($fqn in $fqnReplacements.Keys) {
-            $escaped = [regex]::Escape($fqn)
-            $pattern = [regex]"(?<!\w)$escaped(?!\w)"
-            $fqnMatches = $pattern.Matches($annotatedContent)
-            if ($fqnMatches.Count -gt 0) {
-                $annotatedContent = $pattern.Replace($annotatedContent, $fqnReplacements[$fqn])
-                $fqnCount += $fqnMatches.Count
-            }
-        }
-        if ($fqnCount -gt 0) {
-            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Replaced $fqnCount fully-qualified Web Forms type reference(s)"
+        # Strip Web Forms base class declarations from code-behind classes.
+        # The .razor file already has @inherits WebFormsPageBase, so the code-behind
+        # partial class must NOT also declare a base class (CS0263).
+        # Handle both FQN (System.Web.UI.Page) and unqualified (Page) forms.
+        $baseClassPatterns = @(
+            'System\.Web\.UI\.Page',
+            'System\.Web\.UI\.MasterPage',
+            'System\.Web\.UI\.UserControl',
+            '(?<!\w)Page(?!\w)',
+            '(?<!\w)MasterPage(?!\w)',
+            '(?<!\w)UserControl(?!\w)'
+        )
+        $baseClassRegex = [regex]('(partial\s+class\s+\w+)\s*:\s*(' + ($baseClassPatterns -join '|') + ')')
+        $baseClassMatches = $baseClassRegex.Matches($annotatedContent)
+        if ($baseClassMatches.Count -gt 0) {
+            $annotatedContent = $baseClassRegex.Replace($annotatedContent, '$1')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($baseClassMatches.Count) Web Forms base class declaration(s) — .razor @inherits handles inheritance"
         }
 
         # RF-12: Convert [QueryString] and [RouteData] parameter attributes
