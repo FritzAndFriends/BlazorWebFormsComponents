@@ -1902,25 +1902,19 @@ function Copy-CodeBehind {
             Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($baseClassMatches.Count) Web Forms base class declaration(s) — .razor @inherits handles inheritance"
         }
 
-        # RF-12: Convert [QueryString] and [RouteData] parameter attributes
-        $qsRegex = [regex]'\[QueryString\("([^"]+)"\)\]'
+        # RF-12: [QueryString] and [RouteData] parameter attributes
+        # BWFC provides [QueryString] and [RouteData] attributes that target
+        # AttributeTargets.Parameter, so these compile as-is on method params.
+        # Leave them in place — L2 promotes them to component properties.
+        $qsRegex = [regex]'\[QueryString\('
         $qsMatches = $qsRegex.Matches($annotatedContent)
         if ($qsMatches.Count -gt 0) {
-            $annotatedContent = $qsRegex.Replace($annotatedContent, '[SupplyParameterFromQuery(Name = "$1")]')
-            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($qsMatches.Count) [QueryString] to [SupplyParameterFromQuery]"
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Preserved $($qsMatches.Count) [QueryString] attribute(s) — BWFC shim compiles; L2 promotes to [SupplyParameterFromQuery] property"
         }
-
-        # [RouteData] is a Web Forms model-binding attribute for method parameters.
-        # It has no inline Blazor equivalent — [Parameter] targets properties, not
-        # method parameters, so placing it here would cause CS0592.  Strip the
-        # attribute and leave a TODO for Layer 2 to promote the value to a
-        # [Parameter] property on the component class.
-        $rdRegex = [regex]'([ \t]*)\[RouteData\]\s*'
+        $rdRegex = [regex]'\[RouteData\]'
         $rdMatches = $rdRegex.Matches($annotatedContent)
         if ($rdMatches.Count -gt 0) {
-            $rdReplacement = '${1}/* TODO: RouteData parameter — add a [Parameter] property to the component class and remove from method signature */' + "`n" + '${1}'
-            $annotatedContent = $rdRegex.Replace($annotatedContent, $rdReplacement)
-            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Stripped $($rdMatches.Count) [RouteData] attribute(s) — needs [Parameter] property in L2"
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Preserved $($rdMatches.Count) [RouteData] attribute(s) — BWFC shim compiles; L2 promotes to [Parameter] property"
         }
 
         # --- Response.Redirect → NavigationManager.NavigateTo conversion ---

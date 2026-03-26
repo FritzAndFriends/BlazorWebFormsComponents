@@ -46,10 +46,8 @@
     <!-- CS0414: Field assigned but never used (stub fields)              -->
     <!-- CS0067: Event never used (stub events)                           -->
     <!-- CS0612: Obsolete type used (EF6 shims are [Obsolete])            -->
-    <NoWarn>$(NoWarn);CS8618;CS0414;CS0067;CS0612</NoWarn>
-    <!-- RZ9980/RZ9981: Unclosed/unexpected HTML tags from L1 transforms  -->
-    <!-- RZ9996: Unrecognized child content in BWFC components            -->
-    <NoWarn>$(NoWarn);RZ9980;RZ9981;RZ9996</NoWarn>
+    <!-- IDE0007: Use var instead of explicit type (style, not functional) -->
+    <NoWarn>$(NoWarn);CS8618;CS0414;CS0067;CS0612;IDE0007</NoWarn>
   </PropertyGroup>
 
 </Project>
