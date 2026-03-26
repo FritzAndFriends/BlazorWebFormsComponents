@@ -2362,6 +2362,14 @@ if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
     Invoke-CssAutoDetection -OutputRoot $Output -SourcePath $Path
 }
 
+# NuGet Static Asset Extraction: Extract CSS/JS/fonts from NuGet packages to wwwroot/lib/
+if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
+    $nugetAssetScript = Join-Path $PSScriptRoot 'Migrate-NugetStaticAssets.ps1'
+    if (Test-Path $nugetAssetScript) {
+        & $nugetAssetScript -SourcePath $Path -OutputPath $Output
+    }
+}
+
 # Fix 1 (Run 11): Auto-detect JS files in Scripts/ and inject <script> tags into App.razor
 if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
     Invoke-ScriptAutoDetection -OutputRoot $Output -SourcePath $Path
