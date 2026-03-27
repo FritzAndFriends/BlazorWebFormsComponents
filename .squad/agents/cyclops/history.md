@@ -16,6 +16,8 @@
 - Custom control migration patterns (WebControl, DataBoundWebControl, TemplatedWebControl base classes)
 - EDMX parser integration for EF6  EF Core migrations
 
+📌 **Team update (2026-03-27):** Multi-targeting #516 implemented and validated. BlazorWebFormsComponents now ships net8.0;net9.0;net10.0. All 2606 tests pass × 3 TFMs = 7818 total. Zero code changes, conditional package versions only. CI matrix configured. Ready for GA release. — decided by Forge & Cyclops
+
 ### Active Projects
 - L1 Script (bwfc-migrate.ps1): 15/15 test suite (100%), covers 5 core patterns (GetRouteUrl, ContentWrappers, WebFormsAttributes, DataSourceID, Response.Redirect)
 - UpdatePanel enhancement: BaseStyledComponent with ContentTemplate RenderFragment, 24 tests, 0 warnings
