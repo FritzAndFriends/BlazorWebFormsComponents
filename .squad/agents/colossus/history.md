@@ -234,3 +234,19 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 - `samples/AfterBlazorServerSide.Tests/ControlSampleTests.cs` — 3 new `[InlineData]` entries
 - `samples/AfterBlazorServerSide.Tests/InteractiveComponentTests.cs` — 11 new `[Fact]` methods
 
+### Theming Sections 7 & 8 Integration Tests (2026-03-22)
+
+**Summary:** Added 2 Playwright interaction tests for upcoming Theming page enhancements (Sections 7 & 8 being built by Jubilee).
+
+**Tests added to `InteractiveComponentTests.cs`:**
+1. `Theming_ThemeMode_StyleSheetThemeVsTheme` — Navigates to /ControlSamples/Theming, verifies Section 7 (ThemeMode) has an h3 heading matching "ThemeMode" or "Theme Mode", confirms both StyleSheetTheme and Theme panels are rendered with text content assertions, and checks at least 2 buttons exist across both panels.
+2. `Theming_SubStyles_GridViewHeaderAndFooter` — Navigates to /ControlSamples/Theming, verifies Section 8 (sub-styles/data controls) has an h3 heading, confirms a `<table>` (GridView) is present in that section, and asserts the table has `<th>` header cells.
+
+**Patterns:**
+- Used `HasTextRegex` with case-insensitive regex for heading matching — resilient to "ThemeMode" vs "Theme Mode" naming.
+- Used `.Filter(new() { Has = heading })` to scope assertions to the correct `.demo-container` section.
+- Used `?? string.Empty` on `TextContentAsync()` to eliminate CS8602 null reference warning.
+- Tests are written defensively to work once Jubilee adds Sections 7 & 8 — they will fail with clear messages until those sections land.
+
+**Coverage:** 1 smoke test (existing) + 1 existing interaction test + 2 new interaction tests = 4 total Theming tests.
+
