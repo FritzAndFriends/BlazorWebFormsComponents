@@ -16,6 +16,18 @@ namespace BlazorWebFormsComponents.Theming
 			= new(StringComparer.OrdinalIgnoreCase);
 
 		/// <summary>
+		/// Controls how theme skins interact with explicit property values.
+		/// Default is StyleSheetTheme (theme sets defaults, explicit values win).
+		/// </summary>
+		public ThemeMode Mode { get; set; } = ThemeMode.StyleSheetTheme;
+
+		/// <summary>
+		/// CSS files to be included when this theme is active.
+		/// ThemeProvider will render &lt;link&gt; elements for each file.
+		/// </summary>
+		public List<string> CssFiles { get; set; }
+
+		/// <summary>
 		/// Registers a skin for a given control type.
 		/// </summary>
 		/// <param name="controlTypeName">The simple type name of the control (e.g. "Button", "GridView").</param>
@@ -100,6 +112,42 @@ namespace BlazorWebFormsComponents.Theming
 			var builder = new SkinBuilder();
 			configure(builder);
 			AddSkin(controlTypeName, builder.Skin, skinId);
+			return this;
+		}
+
+		/// <summary>
+		/// Fluent API: sets the theme mode.
+		/// </summary>
+		public ThemeConfiguration WithMode(ThemeMode mode)
+		{
+			Mode = mode;
+			return this;
+		}
+
+		/// <summary>
+		/// Fluent API: adds a CSS file to the theme.
+		/// </summary>
+		public ThemeConfiguration WithCssFile(string path)
+		{
+			if (string.IsNullOrWhiteSpace(path))
+				throw new ArgumentException("CSS file path cannot be null or empty.", nameof(path));
+
+			CssFiles ??= new List<string>();
+			CssFiles.Add(path);
+			return this;
+		}
+
+		/// <summary>
+		/// Fluent API: adds multiple CSS files to the theme.
+		/// </summary>
+		public ThemeConfiguration WithCssFiles(params string[] paths)
+		{
+			if (paths is null || paths.Length == 0)
+				throw new ArgumentException("At least one CSS file path must be provided.", nameof(paths));
+
+			foreach (var path in paths)
+				WithCssFile(path);
+
 			return this;
 		}
 	}

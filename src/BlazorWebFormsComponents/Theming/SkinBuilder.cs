@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -22,6 +23,18 @@ namespace BlazorWebFormsComponents.Theming
 				throw new ArgumentNullException(nameof(property));
 
 			SetValue(Skin, property.Body, value);
+			return this;
+		}
+
+		/// <summary>
+		/// Configures a sub-component style (e.g., HeaderStyle, RowStyle) on the skin.
+		/// </summary>
+		public SkinBuilder SubStyle(string styleName, Action<TableItemStyle> configure)
+		{
+			Skin.SubStyles ??= new Dictionary<string, TableItemStyle>(StringComparer.OrdinalIgnoreCase);
+			var style = new TableItemStyle();
+			configure(style);
+			Skin.SubStyles[styleName] = style;
 			return this;
 		}
 

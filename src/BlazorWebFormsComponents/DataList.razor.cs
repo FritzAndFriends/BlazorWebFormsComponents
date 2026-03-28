@@ -286,5 +286,30 @@ namespace BlazorWebFormsComponents
 			var handler = OnItemDataBound.HasDelegate ? OnItemDataBound : ItemDataBound;
 			handler.InvokeAsync(e);
 		}
+
+		/// <summary>
+		/// Applies theme skin properties to this control and its sub-styles.
+		/// </summary>
+		protected override void ApplyThemeSkin(Theming.ControlSkin skin, Theming.ThemeMode mode)
+		{
+			base.ApplyThemeSkin(skin, mode);
+
+			if (skin.SubStyles == null) return;
+
+			if (skin.SubStyles.TryGetValue("HeaderStyle", out var headerStyle))
+				HeaderStyle = ApplySubStyle(HeaderStyle, headerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("FooterStyle", out var footerStyle))
+				FooterStyle = ApplySubStyle(FooterStyle, footerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("ItemStyle", out var itemStyle))
+				ItemStyle = ApplySubStyle(ItemStyle, itemStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("AlternatingItemStyle", out var altItemStyle))
+				AlternatingItemStyle = ApplySubStyle(AlternatingItemStyle, altItemStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("SeparatorStyle", out var separatorStyle))
+				SeparatorStyle = ApplySubStyle(SeparatorStyle, separatorStyle, mode);
+		}
 	}
 }

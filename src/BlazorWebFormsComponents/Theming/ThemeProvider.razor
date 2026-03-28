@@ -1,5 +1,16 @@
 @namespace BlazorWebFormsComponents.Theming
 @inherits Microsoft.AspNetCore.Components.ComponentBase
+@using Microsoft.AspNetCore.Components.Web
+
+@if (Theme?.CssFiles != null && Theme.CssFiles.Count > 0)
+{
+	<HeadContent>
+		@foreach (var css in Theme.CssFiles)
+		{
+			<link rel="stylesheet" href="@css" />
+		}
+	</HeadContent>
+}
 
 <CascadingValue Value="Theme">
 	@ChildContent
@@ -14,9 +25,28 @@
 	public ThemeConfiguration Theme { get; set; }
 
 	/// <summary>
+	/// Controls how theme skins interact with explicit property values.
+	/// Default is StyleSheetTheme (theme sets defaults, explicit values win).
+	/// This parameter syncs with Theme.Mode.
+	/// </summary>
+	[Parameter]
+	public ThemeMode Mode { get; set; } = ThemeMode.StyleSheetTheme;
+
+	/// <summary>
 	/// The child content that will receive the cascading theme.
 	/// </summary>
 	[Parameter]
 	public RenderFragment ChildContent { get; set; }
+
+	protected override void OnParametersSet()
+	{
+		base.OnParametersSet();
+
+		// Sync Mode parameter to Theme.Mode
+		if (Theme != null)
+		{
+			Theme.Mode = Mode;
+		}
+	}
 
 }

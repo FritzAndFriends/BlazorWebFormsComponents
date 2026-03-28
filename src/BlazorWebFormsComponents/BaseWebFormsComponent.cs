@@ -373,12 +373,43 @@ namespace BlazorWebFormsComponents
 		{
 			base.OnParametersSet();
 
-			if (!EnableTheming || CascadedTheme == null) return;
+			if (!EnableTheming || !IsThemingEnabledByAncestors() || CascadedTheme == null) return;
 
-			var skin = CascadedTheme.GetSkin(GetType().Name, SkinID);
-			if (skin == null) return;
+			// Strip generic arity suffix (e.g., "GridView`1" → "GridView")
+			// so theme registrations use simple names like "GridView", not "GridView`1"
+			var typeName = GetType().Name;
+			var backtickIndex = typeName.IndexOf('`');
+			if (backtickIndex >= 0)
+				typeName = typeName[..backtickIndex];
 
-			ApplyThemeSkin(skin);
+			var skin = CascadedTheme.GetSkin(typeName, SkinID);
+			if (skin == null)
+			{
+				// Log warning if a specific SkinID was requested but not found
+				if (!string.IsNullOrEmpty(SkinID))
+				{
+					Logger?.LogWarning("Theme skin '{SkinID}' not found for control type '{TypeName}'", SkinID, typeName);
+				}
+				return;
+			}
+
+			ApplyThemeSkin(skin, CascadedTheme.Mode);
+		}
+
+		/// <summary>
+		/// Walks up the Parent chain to verify that theming is enabled for all ancestors.
+		/// Returns false if any ancestor has EnableTheming=false, true otherwise.
+		/// </summary>
+		private bool IsThemingEnabledByAncestors()
+		{
+			var current = Parent;
+			while (current != null)
+			{
+				if (!current.EnableTheming)
+					return false;
+				current = current.Parent;
+			}
+			return true;
 		}
 
 		/// <summary>
@@ -386,7 +417,88 @@ namespace BlazorWebFormsComponents
 		/// Called during OnParametersSet when theming is enabled and a matching skin is found.
 		/// The base implementation does nothing — subclasses apply properties relevant to them.
 		/// </summary>
-		protected virtual void ApplyThemeSkin(ControlSkin skin) { }
+		/// <param name="skin">The skin containing property values to apply.</param>
+		/// <param name="mode">The theme mode determining whether to override or default properties.</param>
+		protected virtual void ApplyThemeSkin(ControlSkin skin, ThemeMode mode) { }
+
+		/// <summary>
+		/// Helper method to apply a sub-style from a skin to a target TableItemStyle property.
+		/// Respects ThemeMode: Theme mode overrides all values, StyleSheetTheme mode only sets defaults.
+		/// Returns the modified style (for Theme mode) or the original target with defaults applied (for StyleSheetTheme mode).
+		/// </summary>
+		protected static TableItemStyle ApplySubStyle(TableItemStyle target, TableItemStyle skinStyle, ThemeMode mode)
+		{
+			if (skinStyle == null) return target;
+
+			if (mode == ThemeMode.Theme)
+			{
+				// Theme mode: override — replace entire style
+				return skinStyle;
+			}
+			else
+			{
+				// StyleSheetTheme mode: only set defaults
+				target ??= new TableItemStyle();
+
+				if (target.BackColor == default && skinStyle.BackColor != default)
+					target.BackColor = skinStyle.BackColor;
+
+				if (target.ForeColor == default && skinStyle.ForeColor != default)
+					target.ForeColor = skinStyle.ForeColor;
+
+				if (target.BorderColor == default && skinStyle.BorderColor != default)
+					target.BorderColor = skinStyle.BorderColor;
+
+				if (target.BorderStyle.Value == default && skinStyle.BorderStyle.Value != default)
+					target.BorderStyle = skinStyle.BorderStyle;
+
+				if (target.BorderWidth == default && skinStyle.BorderWidth != default)
+					target.BorderWidth = skinStyle.BorderWidth;
+
+				if (string.IsNullOrEmpty(target.CssClass) && !string.IsNullOrEmpty(skinStyle.CssClass))
+					target.CssClass = skinStyle.CssClass;
+
+				if (target.Height == default && skinStyle.Height != default)
+					target.Height = skinStyle.Height;
+
+				if (target.Width == default && skinStyle.Width != default)
+					target.Width = skinStyle.Width;
+
+				// Font properties
+				if (skinStyle.Font != null)
+				{
+					target.Font ??= new FontInfo();
+
+					if (string.IsNullOrEmpty(target.Font.Name) && string.IsNullOrEmpty(target.Font.Names) && !string.IsNullOrEmpty(skinStyle.Font.Name))
+						target.Font.Name = skinStyle.Font.Name;
+
+					if (target.Font.Size == FontUnit.Empty && skinStyle.Font.Size != FontUnit.Empty)
+						target.Font.Size = skinStyle.Font.Size;
+
+					if (!target.Font.Bold && skinStyle.Font.Bold)
+						target.Font.Bold = true;
+
+					if (!target.Font.Italic && skinStyle.Font.Italic)
+						target.Font.Italic = true;
+
+					if (!target.Font.Underline && skinStyle.Font.Underline)
+						target.Font.Underline = true;
+				}
+
+				// TableItemStyle-specific properties
+				if (target.HorizontalAlign.Value == default && skinStyle.HorizontalAlign.Value != default)
+					target.HorizontalAlign = skinStyle.HorizontalAlign;
+
+				if (target.VerticalAlign.Value == default && skinStyle.VerticalAlign.Value != default)
+					target.VerticalAlign = skinStyle.VerticalAlign;
+
+				// Wrap defaults to true, so only apply if skin explicitly sets it to false
+				if (target.Wrap && !skinStyle.Wrap)
+					target.Wrap = skinStyle.Wrap;
+
+				return target;
+			}
+		}
 
 		protected override async Task OnInitializedAsync()
 		{

@@ -731,5 +731,39 @@ namespace BlazorWebFormsComponents
 			StateHasChanged();
 		}
 
+		/// <summary>
+		/// Applies theme skin properties to this control and its sub-styles.
+		/// </summary>
+		protected override void ApplyThemeSkin(Theming.ControlSkin skin, Theming.ThemeMode mode)
+		{
+			base.ApplyThemeSkin(skin, mode);
+
+			if (skin.SubStyles == null) return;
+
+			if (skin.SubStyles.TryGetValue("HeaderStyle", out var headerStyle))
+				HeaderStyle = ApplySubStyle(HeaderStyle, headerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("RowStyle", out var rowStyle))
+				RowStyle = ApplySubStyle(RowStyle, rowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("AlternatingRowStyle", out var altRowStyle))
+				AlternatingRowStyle = ApplySubStyle(AlternatingRowStyle, altRowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("FooterStyle", out var footerStyle))
+				FooterStyle = ApplySubStyle(FooterStyle, footerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("PagerStyle", out var pagerStyle))
+				PagerStyle = ApplySubStyle(PagerStyle, pagerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("EditRowStyle", out var editRowStyle))
+				EditRowStyle = ApplySubStyle(EditRowStyle, editRowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("SelectedRowStyle", out var selectedRowStyle))
+				SelectedRowStyle = ApplySubStyle(SelectedRowStyle, selectedRowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("EmptyDataRowStyle", out var emptyDataRowStyle))
+				EmptyDataRowStyle = ApplySubStyle(EmptyDataRowStyle, emptyDataRowStyle, mode);
+		}
+
 	}
 }
