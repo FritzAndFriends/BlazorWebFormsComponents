@@ -416,6 +416,32 @@ Team update: ConfirmButtonExtender and FilteredTextBoxExtender implemented by Cy
 ### ModalPopupExtender & CollapsiblePanelExtender Implementation (2026-03-16)
 **Summary:** Implemented two more Ajax Control Toolkit extender components following established patterns from ConfirmButton/FilteredTextBox. Both inherit BaseExtenderComponent, use pure .cs classes (no .razor), and follow the JS module lifecycle pattern.
 
+## Learnings
+
+### Theme Mode System Implementation (2026-03-16, Issue #369)
+**Implemented:** WI-1 (ThemeMode enum), WI-3 (Container EnableTheming propagation), WI-4 (Runtime theme switching support)
+
+**Files modified:**
+- Created: `Theming/ThemeMode.cs` — enum with StyleSheetTheme (defaults) vs Theme (overrides)
+- Modified: `ThemeConfiguration.cs` — added Mode property + WithMode() fluent API
+- Modified: `ThemeProvider.razor` — added Mode parameter, syncs to Theme.Mode in OnParametersSet
+- Modified: `BaseWebFormsComponent.cs` — added IsThemingEnabledByAncestors() for container propagation, updated ApplyThemeSkin signature to accept ThemeMode
+- Modified: `BaseStyledComponent.cs` — dual-mode ApplyThemeSkin implementation (StyleSheetTheme vs Theme)
+
+**Pattern details:**
+1. **ThemeMode.StyleSheetTheme (default):** Sets default values only — explicit component property values take precedence. This preserves backward compatibility with existing components.
+2. **ThemeMode.Theme:** Theme overrides all property values, even explicitly set ones. Matches Web Forms Page.Theme behavior (most common usage).
+3. **Container propagation:** IsThemingEnabledByAncestors() walks the Parent chain to check EnableTheming. O(depth) operation but control trees are shallow.
+4. **Runtime switching:** Works via Blazor's CascadingValue change detection when ThemeProvider.Theme is assigned a NEW ThemeConfiguration instance. Mutating in-place won't trigger re-renders.
+
+**Key implementation choices:**
+- Default mode is StyleSheetTheme to preserve backward compatibility with existing themes
+- Theme mode only overrides properties when skin actually has a value (non-default/non-null check)
+- ThemeProvider syncs its Mode parameter to ThemeConfiguration.Mode in OnParametersSet
+- Container-level EnableTheming propagation checks entire ancestor chain before applying themes
+
+Build verified: 0 errors, 4 warnings (restore warnings, not code issues).
+
 **ModalPopupExtender (#446):** PopupControlID, BackgroundCssClass, OkControlID, CancelControlID, OnOkScript, OnCancelScript, DropShadow, Drag, PopupDragHandleControlID. JS creates overlay backdrop, centers popup with fixed positioning, traps focus within modal, supports Escape key close, and optional mouse-drag repositioning via drag handle.
 
 **CollapsiblePanelExtender (#447):** CollapseControlID, ExpandControlID (same ID = toggle), Collapsed, CollapsedSize, ExpandedSize, CollapsedText, ExpandedText, TextLabelID, ExpandDirection enum (Vertical/Horizontal), AutoCollapse, AutoExpand, ScrollContents. JS uses CSS transitions on height/width with smart initial-state setup (no transition on first paint, then enables animation).
@@ -618,3 +644,143 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 - `Microsoft.AspNetCore.Routing` 2.2.0 (NuGet) works across all TFMs
 
 **Build:** 0 errors across 3×3 project/TFM combos. **Tests:** 2606 × 3 TFMs = 7818 executions, all pass.
+## Learnings
+
+### WI-2: Sub-Component Style Theming (2025-01-25)
+
+**Summary:** Extended the theming system to support sub-component styles (HeaderStyle, RowStyle, AlternatingRowStyle, etc.) on all 5 data controls (GridView, DetailsView, FormView, DataGrid, DataList). Sub-styles enable theme authors to configure child styles through the skin fluent API without needing to use style RenderFragments.
+
+**Implementation:**
+- Extended ControlSkin.cs with SubStyles Dictionary<string, TableItemStyle>
+- Added SkinBuilder.SubStyle(styleName, configure) fluent method
+- Created BaseWebFormsComponent.ApplySubStyle helper that respects ThemeMode semantics (Theme=override, StyleSheetTheme=default)
+- Overrode ApplyThemeSkin in all 5 data controls to apply sub-styles from skin
+
+**Technical decisions:**
+- SubStyles dictionary uses StringComparer.OrdinalIgnoreCase for case-insensitive lookups
+- ApplySubStyle returns TableItemStyle (not ref parameter) because properties have internal setters that can't be passed by ref
+- Theme mode replaces entire sub-style object; StyleSheetTheme mode merges properties only if not already set
+- Style names match exact Web Forms property names (HeaderStyle, RowStyle, ItemStyle, etc.)
+
+**Sub-styles per control:**
+- GridView (8): HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, PagerStyle, EditRowStyle, SelectedRowStyle, EmptyDataRowStyle
+- DetailsView (10): HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, CommandRowStyle, EditRowStyle, InsertRowStyle, FieldHeaderStyle, EmptyDataRowStyle, PagerStyle
+- FormView (7): HeaderStyle, RowStyle, EditRowStyle, InsertRowStyle, FooterStyle, PagerStyle, EmptyDataRowStyle
+- DataGrid (7): HeaderStyle, ItemStyle, AlternatingItemStyle, FooterStyle, PagerStyle, SelectedItemStyle, EditItemStyle
+- DataList (5): HeaderStyle, FooterStyle, ItemStyle, AlternatingItemStyle, SeparatorStyle
+
+**Files modified:** ControlSkin.cs, SkinBuilder.cs, BaseWebFormsComponent.cs, GridView.razor.cs, DetailsView.razor.cs, FormView.razor.cs, DataGrid.razor.cs, DataList.razor.cs
+
+**Build:** 0 errors, warnings as baseline (all pre-existing)
+
+### WI-9 JSON Theme Format + WI-10 CSS Bundling (2026-03-28)
+
+**Summary:** Added JSON-based theme format as alternative to C# fluent API, plus CSS file bundling support in ThemeConfiguration and ThemeProvider.
+
+**Files Created:**
+- `src/BlazorWebFormsComponents/Theming/JsonThemeLoader.cs` — Static class with FromJson/FromJsonFile/ToJson methods + 5 custom JsonConverters (WebColor, Unit, FontUnit, BorderStyle, FontInfo) for System.Text.Json
+
+**Files Modified:**
+- `src/BlazorWebFormsComponents/Theming/ThemeConfiguration.cs` — Added CssFiles property + WithCssFile/WithCssFiles fluent API
+- `src/BlazorWebFormsComponents/Theming/ThemeProvider.razor` — Added HeadContent block to render <link> elements for CSS files
+
+**Implementation Details:**
+
+**JsonThemeLoader:**
+- Uses System.Text.Json (project standard) with camelCase naming policy
+- Custom converters handle Web Forms types:
+  - WebColorConverter: accepts HTML color names and hex values
+  - UnitConverter: accepts strings like "100px", "50%"
+  - FontUnitConverter: accepts strings like "14px", "Large"
+  - BorderStyleConverter: enum with case-insensitive parsing
+  - FontInfoConverter: object with Bold, Italic, Underline, Name, Names, Size
+- Property names in JSON are camelCase
+- "default" key maps to default skin (empty SkinID)
+- Named skins use their SkinID as key
+- Supports SubStyles dictionary for data control sections (HeaderStyle, RowStyle, etc.)
+
+**JSON Schema:**
+``json
+{
+  "mode": "StyleSheetTheme",
+  "cssFiles": ["css/theme.css", "css/gridview.css"],
+  "controls": {
+    "Button": {
+      "default": {
+        "backColor": "#507CD1",
+        "foreColor": "White",
+        "font": { "bold": true }
+      },
+      "DangerButton": {
+        "backColor": "Red",
+        "foreColor": "White",
+        "cssClass": "btn-danger"
+      }
+    }
+  }
+}
+``
+
+**CSS Bundling:**
+- ThemeConfiguration.CssFiles: List<string> property
+- WithCssFile(path): adds single file
+- WithCssFiles(params string[]): adds multiple files
+- ThemeProvider renders <link> elements in <HeadContent> component (Microsoft.AspNetCore.Components.Web, .NET 8+)
+- Only renders when CssFiles is non-null and has items
+
+**Build Status:** 0 errors, 124 warnings (existing)
+
+**Key Gotcha:** TableItemStyle properties use EnumParameter<BorderStyle> and non-nullable Unit — conversion from nullable DTOs requires HasValue checks before assignment.
+
+**Next Steps:** Consider adding validation for CSS file paths, JSON schema documentation, example theme files.
+
+---
+
+### WI-14: Theme Validation & Diagnostics (2026-03-28)
+
+**Task:** Add validation and diagnostic logging to the theming system to help developers identify misconfigured themes.
+
+**Files Created:**
+- src/BlazorWebFormsComponents/Theming/ThemeDiagnostics.cs
+
+**Files Modified:**
+- src/BlazorWebFormsComponents/BaseWebFormsComponent.cs
+
+**Implementation Details:**
+
+**ThemeDiagnostics class:**
+- KnownControlTypes: IReadOnlySet<string> with 60+ control names from the library
+- KnownSubStyles: IReadOnlyDictionary mapping control types to their valid sub-style names
+  - GridView: HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, PagerStyle, EditRowStyle, SelectedRowStyle, EmptyDataRowStyle
+  - DetailsView: HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, CommandRowStyle, EditRowStyle, InsertRowStyle, FieldHeaderStyle, EmptyDataRowStyle, PagerStyle
+  - FormView: HeaderStyle, RowStyle, EditRowStyle, InsertRowStyle, FooterStyle, PagerStyle, EmptyDataRowStyle
+  - DataGrid: HeaderStyle, ItemStyle, AlternatingItemStyle, FooterStyle, PagerStyle, SelectedItemStyle, EditItemStyle
+  - DataList: HeaderStyle, FooterStyle, ItemStyle, AlternatingItemStyle, SeparatorStyle
+  - Menu, TreeView, Calendar: appropriate style names for each
+- Validate(ThemeConfiguration): returns List<string> of warnings
+  - Uses reflection to access internal _skins field in ThemeConfiguration
+  - Rule 1: Warns about unknown control types not in KnownControlTypes
+  - Rule 2: Warns about unknown sub-style names for controls that support sub-styles
+  - Rule 3: Warns about empty skins (no properties set)
+  - Also warns if control doesn't support sub-styles but skin defines them
+
+**BaseWebFormsComponent.OnParametersSet enhancement:**
+- After GetSkin() call, checks if skin is null AND SkinID is not empty
+- Logs warning: "Theme skin '{SkinID}' not found for control type '{TypeName}'"
+- Uses existing Logger property (ILogger<BaseWebFormsComponent> injected via ServiceProvider)
+- Helps developers catch typos in SkinID attributes
+
+**Build Status:** ✅ 0 errors, existing warnings
+
+**Key Learning:** Reflection is necessary to validate themes since ThemeConfiguration's _skins dictionary is private. The Validate method provides comprehensive diagnostic output without breaking encapsulation.
+
+**Usage Example:**
+`csharp
+var theme = new ThemeConfiguration().ForControl("Button", b => b.WithBackColor("Red"));
+var warnings = ThemeDiagnostics.Validate(theme);
+foreach (var warning in warnings) {
+    Console.WriteLine(warning);
+}
+`
+
+**Next Steps:** Consider exposing a public API on ThemeConfiguration to enumerate skins without reflection, or document that validation requires reflection access.

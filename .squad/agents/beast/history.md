@@ -1009,3 +1009,50 @@ This wave establishes **documentation patterns** that will guide future control 
 - Periodically auditing docs/ vs mkdocs.yml nav prevents doc fragmentation
 - Test artifacts (migration benchmark runs) should be excluded from main nav to reduce clutter  only index the summary report, not intermediate outputs
 
+---
+
+## Issue WI-6: Wave 1 Theming Documentation
+
+**Status:** DELIVERED
+
+**Session (2026 by Beast):**
+
+**Task:** Create comprehensive Wave 1 Theming Documentation for the Skins & Themes feature
+
+**Deliverables:**
+1. New file: `docs/themes-and-skins.md` (15,924 characters, 470 lines)
+   - 9 major sections covering all theming aspects
+   - 40+ code examples (C# ThemeConfiguration and Blazor HTML)
+   - Comprehensive comparison tables and API reference
+   
+2. Navigation update: `mkdocs.yml`
+   - Added `- Themes and Skins: themes-and-skins.md` to main nav (line 67)
+   - Positioned after "Component Health Dashboard" for discoverability
+
+**Section Breakdown:**
+- **Overview** — Key concepts (ThemeConfiguration, ThemeProvider, ControlSkin, SkinID, ThemeMode)
+- **Quick Start** — 3-step minimal example (Define → Apply → Result)
+- **Theme Modes** — StyleSheetTheme vs Theme with comparison table and precedence rules
+- **Sub-Component Styles** — SubStyle API for GridView/DetailsView/FormView/DataGrid/DataList with counts
+- **Migration Guide** — Side-by-side Web Forms .skin files vs Blazor ThemeConfiguration
+- **EnableTheming & SkinID** — Opt-out patterns and named skin variants
+- **Runtime Theme Switching** — Dynamic theme switching example
+- **API Reference** — Complete tables for all types and properties
+- **Best Practices** — 6 key recommendations for theme development
+- **Troubleshooting** — Q&A for common theming issues
+
+**Verification:**
+- Markdown formatting verified (no syntax errors, proper tables, code blocks)
+- All 9 sections properly structured with --- dividers
+- Code examples complete and runnable
+- Cross-references to existing docs (Migration/ThemesAndSkins.md, StylingComponents.md, GridView.md)
+- mkdocs.yml navigation entry confirmed
+
+**Learnings:**
+- Theming documentation must bridge both Web Forms migration (pain point: .skin file conversion) AND Blazor-native usage (ThemeConfiguration builder pattern)
+- Comparison tables (StyleSheetTheme vs Theme) are essential for explaining precedence rules; developers need to understand WHY to choose one mode over another
+- Named skins (SkinID) are powerful for multi-variant theming  semantic names like "Danger", "Success" help developers implement button hierarchies quickly
+- Sub-component styling is critical for data controls  listing exact counts (GridView: 8, DetailsView: 10, etc.) helps developers discover available styling options
+- Positioning Themes & Skins near the top of nav (after dashboard) signals to developers that theming is a primary feature, not an advanced utility
+- Runtime theme switching example shows interactivity patterns that Blazor enables over static Web Forms themes
+
