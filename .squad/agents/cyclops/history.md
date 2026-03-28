@@ -16,6 +16,8 @@
 - Custom control migration patterns (WebControl, DataBoundWebControl, TemplatedWebControl base classes)
 - EDMX parser integration for EF6  EF Core migrations
 
+📌 **Team update (2026-03-27):** Multi-targeting #516 implemented and validated. BlazorWebFormsComponents now ships net8.0;net9.0;net10.0. All 2606 tests pass × 3 TFMs = 7818 total. Zero code changes, conditional package versions only. CI matrix configured. Ready for GA release. — decided by Forge & Cyclops
+
 ### Active Projects
 - L1 Script (bwfc-migrate.ps1): 15/15 test suite (100%), covers 5 core patterns (GetRouteUrl, ContentWrappers, WebFormsAttributes, DataSourceID, Response.Redirect)
 - UpdatePanel enhancement: BaseStyledComponent with ContentTemplate RenderFragment, 24 tests, 0 warnings
@@ -594,3 +596,25 @@ Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cycl
 **Files created:** ViewStateDictionary.cs, WebFormsRenderMode.cs
 **Files modified:** BaseWebFormsComponent.cs, WebFormsPageBase.cs
 **Build:** 0 errors, 122 warnings (all pre-existing)
+
+### Multi-Targeting net8.0/net9.0/net10.0 (Issue #516)
+
+**Scope:** Ship NuGet assemblies for net8.0, net9.0, and net10.0 so teams on .NET 8 LTS or .NET 9 can consume the library.
+
+**Changes:**
+- `Directory.Build.props`: Added TFM-conditional `AspNetCoreVersion`/`BlazorWebAssemblyVersion` (8.0.0 for net8.0, 9.0.0 for net9.0). Unconditional 10.0.0 defaults remain for single-target sample projects.
+- `BlazorWebFormsComponents.csproj`: `TargetFramework` → `TargetFrameworks` (net8.0;net9.0;net10.0). `FrameworkReference` and version-variable `PackageReference` items auto-resolve per TFM.
+- `BlazorAjaxToolkitComponents.csproj`: Same multi-target change (required because tests reference it).
+- `BlazorWebFormsComponents.Test.csproj`: Multi-targeted + `TestHost` version switched to `$(AspNetCoreVersion)` for per-TFM resolution.
+- `.github/workflows/build.yml`: SDK setup now installs 8.0.x, 9.0.x, and 10.0.x.
+- `SharedSampleObjects` unchanged — its `netstandard2.0` TFM already satisfies net8.0/net9.0.
+
+**Key learnings:**
+- .NET 10 SDK (global.json pinned) can build for older TFMs — no SDK matrix needed locally
+- `FrameworkReference Include="Microsoft.AspNetCore.App"` auto-resolves per TFM with no conditionals
+- Collection expression `= []` (C# 12) compiles on net8.0+ — no compatibility issue
+- bUnit 2.5.3 successfully builds and runs against all three TFMs
+- NU1510 "will not be pruned" warnings are informational — pre-existing, not caused by multi-targeting
+- `Microsoft.AspNetCore.Routing` 2.2.0 (NuGet) works across all TFMs
+
+**Build:** 0 errors across 3×3 project/TFM combos. **Tests:** 2606 × 3 TFMs = 7818 executions, all pass.
