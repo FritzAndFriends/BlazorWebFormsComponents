@@ -3166,6 +3166,98 @@ public class InteractiveComponentTests
     }
 
     [Fact]
+    public async Task Theming_ThemeMode_StyleSheetThemeVsTheme()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Theming", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Section 7 should have a heading mentioning ThemeMode or Theme Mode
+            var section7Heading = page.Locator("h3").Filter(new() { HasTextRegex = new System.Text.RegularExpressions.Regex(@"Theme\s*Mode", System.Text.RegularExpressions.RegexOptions.IgnoreCase) });
+            Assert.True(await section7Heading.CountAsync() >= 1, "Expected an h3 heading for ThemeMode / Theme Mode section");
+
+            // Find the demo-container that holds the ThemeMode section
+            var section7Container = page.Locator(".demo-container").Filter(new() { Has = section7Heading });
+            Assert.True(await section7Container.CountAsync() >= 1, "Expected a demo-container for the ThemeMode section");
+
+            // Both StyleSheetTheme and Theme panels should be rendered
+            var section7Text = await section7Container.First.TextContentAsync() ?? string.Empty;
+            Assert.True(
+                section7Text.Contains("StyleSheetTheme", StringComparison.OrdinalIgnoreCase) ||
+                section7Text.Contains("StyleSheet", StringComparison.OrdinalIgnoreCase),
+                "Expected StyleSheetTheme panel text in the ThemeMode section");
+            Assert.True(
+                section7Text.Contains("Theme", StringComparison.OrdinalIgnoreCase),
+                "Expected Theme panel text in the ThemeMode section");
+
+            // Buttons should exist in the section (both panels have themed buttons)
+            var buttonsInSection = section7Container.First.Locator("button, input[type='submit']");
+            Assert.True(await buttonsInSection.CountAsync() >= 2, "Expected at least 2 buttons in the ThemeMode section (one per panel)");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Theming_SubStyles_GridViewHeaderAndFooter()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Theming", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Section 8 should have a heading mentioning sub-styles or data controls
+            var section8Heading = page.Locator("h3").Filter(new() { HasTextRegex = new System.Text.RegularExpressions.Regex(@"Sub.*(Style|Control)|Data.*Control|Header.*Footer", System.Text.RegularExpressions.RegexOptions.IgnoreCase) });
+            Assert.True(await section8Heading.CountAsync() >= 1, "Expected an h3 heading for the sub-styles / data controls section");
+
+            // Find the demo-container holding the sub-styles section
+            var section8Container = page.Locator(".demo-container").Filter(new() { Has = section8Heading });
+            Assert.True(await section8Container.CountAsync() >= 1, "Expected a demo-container for the sub-styles section");
+
+            // GridView renders as a <table> — verify one exists in this section
+            var tableInSection = section8Container.First.Locator("table");
+            Assert.True(await tableInSection.CountAsync() >= 1, "Expected a table (GridView) in the sub-styles section");
+
+            // The table should have a header row (thead > tr > th or just th elements)
+            var headerCells = tableInSection.First.Locator("thead th, th");
+            Assert.True(await headerCells.CountAsync() >= 1, "Expected table header cells (th) in the GridView");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
     public async Task ModelErrorMessage_ClearButton_RemovesErrors()
     {
         var page = await _fixture.NewPageAsync();

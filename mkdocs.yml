@@ -64,6 +64,7 @@ plugins:
 nav:
   - Home: README.md
   - Component Health Dashboard: dashboard.md
+  - Themes and Skins: themes-and-skins.md
   - Editor Controls:
     - AdRotator: EditorControls/AdRotator.md
     - BulletedList: EditorControls/BulletedList.md

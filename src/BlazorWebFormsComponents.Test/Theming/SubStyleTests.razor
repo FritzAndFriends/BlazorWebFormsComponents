@@ -1,0 +1,285 @@
+@inherits Bunit.TestContext
+@using BlazorWebFormsComponents.Theming
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+@using Moq
+
+@code {
+
+	public SubStyleTests()
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		Services.AddSingleton<Microsoft.AspNetCore.DataProtection.IDataProtectionProvider>(
+			new Microsoft.AspNetCore.DataProtection.EphemeralDataProtectionProvider());
+		Services.AddSingleton<Microsoft.AspNetCore.Routing.LinkGenerator>(new Mock<Microsoft.AspNetCore.Routing.LinkGenerator>().Object);
+		Services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor>(new Mock<Microsoft.AspNetCore.Http.IHttpContextAccessor>().Object);
+	}
+
+	/// <summary>
+	/// GridView HeaderStyle from theme applies (Issue #369 / WI-5).
+	/// Theme defines HeaderStyle with BackColor, verify header row gets styled.
+	/// </summary>
+	[Fact]
+	public void GridView_HeaderStyle_FromTheme_Applies()
+	{
+		var data = GetTestItems();
+		var theme = new ThemeConfiguration()
+			.ForControl("GridView", skin => skin
+				.SubStyle("HeaderStyle", s =>
+				{
+					s.BackColor = FromHtml("#000080");
+					s.ForeColor = White;
+				}));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<GridView ItemType="SubStyleTestItem" DataSource="data" AutoGenerateColumns="false">
+					<Columns>
+						<BoundField ItemType="SubStyleTestItem" DataField="Name" HeaderText="Name" />
+					</Columns>
+				</GridView>
+			</ThemeProvider>
+		);
+
+		var header = cut.Find("thead tr");
+		var headerStyle = header.GetAttribute("style");
+		headerStyle.ShouldContain("background-color:#000080");
+		headerStyle.ShouldContain("color:White");
+	}
+
+	/// <summary>
+	/// GridView RowStyle and AlternatingRowStyle from theme.
+	/// </summary>
+	[Fact]
+	public void GridView_RowStyle_AndAlternatingRowStyle_FromTheme()
+	{
+		var data = GetTestItems();
+		var theme = new ThemeConfiguration()
+			.ForControl("GridView", skin => skin
+				.SubStyle("RowStyle", s => s.BackColor = FromHtml("#F0F0F0"))
+				.SubStyle("AlternatingRowStyle", s => s.BackColor = FromHtml("#FFFFFF")));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<GridView ItemType="SubStyleTestItem" DataSource="data" AutoGenerateColumns="false">
+					<Columns>
+						<BoundField ItemType="SubStyleTestItem" DataField="Name" HeaderText="Name" />
+					</Columns>
+				</GridView>
+			</ThemeProvider>
+		);
+
+		var rows = cut.FindAll("tbody tr");
+		rows.Count.ShouldBe(3);
+		// Even-indexed rows get RowStyle
+		rows[0].GetAttribute("style").ShouldContain("background-color:#F0F0F0");
+		rows[2].GetAttribute("style").ShouldContain("background-color:#F0F0F0");
+		// Odd-indexed row gets AlternatingRowStyle
+		rows[1].GetAttribute("style").ShouldContain("background-color:#FFFFFF");
+	}
+
+	/// <summary>
+	/// SubStyle with StyleSheetTheme mode: when target already has values, they are preserved.
+	/// Unit-level test of ApplySubStyle logic (HeaderStyle is internal set, not a [Parameter]).
+	/// </summary>
+	[Fact]
+	public void SubStyle_StyleSheetThemeMode_ExistingValuesPreserved()
+	{
+		var existing = new TableItemStyle { BackColor = Red };
+		var fromTheme = new TableItemStyle { BackColor = Blue, ForeColor = White };
+
+		// Use reflection to call the protected static ApplySubStyle helper
+		var method = typeof(BaseWebFormsComponent).GetMethod(
+			"ApplySubStyle",
+			System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+
+		var result = (TableItemStyle)method.Invoke(null, new object[] { existing, fromTheme, ThemeMode.StyleSheetTheme });
+
+		// Existing Red should be preserved in StyleSheetTheme mode
+		result.BackColor.ToHtml().ShouldBe("Red");
+		// ForeColor was not set on existing, so theme's White should fill in
+		result.ForeColor.ToHtml().ShouldBe("White");
+	}
+
+	/// <summary>
+	/// SubStyle with Theme mode: theme HeaderStyle overrides explicit.
+	/// </summary>
+	[Fact]
+	public void SubStyle_ThemeMode_ThemeWins()
+	{
+		var data = GetTestItems();
+		var explicitHeaderStyle = new TableItemStyle { BackColor = Red };
+		var theme = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme)
+			.ForControl("GridView", skin => skin
+				.SubStyle("HeaderStyle", s => s.BackColor = Blue));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<GridView ItemType="SubStyleTestItem" DataSource="data" AutoGenerateColumns="false" HeaderStyle="explicitHeaderStyle">
+					<Columns>
+						<BoundField ItemType="SubStyleTestItem" DataField="Name" HeaderText="Name" />
+					</Columns>
+				</GridView>
+			</ThemeProvider>
+		);
+
+		var header = cut.Find("thead tr");
+		var headerStyle = header.GetAttribute("style");
+		// Theme Blue should override explicit Red in Theme mode
+		headerStyle.ShouldContain("background-color:Blue");
+		headerStyle.ShouldNotContain("background-color:Red");
+	}
+
+	/// <summary>
+	/// SubStyle fluent API populates ControlSkin.SubStyles correctly.
+	/// </summary>
+	[Fact]
+	public void SubStyle_FluentAPI_PopulatesSubStyles()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("GridView", skin => skin
+				.SubStyle("HeaderStyle", s =>
+				{
+					s.BackColor = Blue;
+					s.ForeColor = White;
+				})
+				.SubStyle("RowStyle", s =>
+				{
+					s.BackColor = FromHtml("#F0F0F0");
+				}));
+
+		var gridViewSkin = theme.GetSkin("GridView");
+		gridViewSkin.ShouldNotBeNull();
+		gridViewSkin.SubStyles.ShouldNotBeNull();
+		gridViewSkin.SubStyles.Count.ShouldBe(2);
+		gridViewSkin.SubStyles.ContainsKey("HeaderStyle").ShouldBeTrue();
+		gridViewSkin.SubStyles.ContainsKey("RowStyle").ShouldBeTrue();
+
+		var headerStyle = gridViewSkin.SubStyles["HeaderStyle"];
+		headerStyle.BackColor.ToHtml().ShouldBe("Blue");
+		headerStyle.ForeColor.ToHtml().ShouldBe("White");
+
+		var rowStyle = gridViewSkin.SubStyles["RowStyle"];
+		rowStyle.BackColor.ToHtml().ShouldBe("#F0F0F0");
+	}
+
+	/// <summary>
+	/// Missing SubStyle gracefully falls back — GridView HeaderStyle unmodified when
+	/// theme only defines RowStyle but no HeaderStyle.
+	/// </summary>
+	[Fact]
+	public void MissingSubStyle_Graceful_HeaderUnmodified()
+	{
+		var data = GetTestItems();
+		var theme = new ThemeConfiguration()
+			.ForControl("GridView", skin => skin
+				.SubStyle("RowStyle", s => s.BackColor = Blue));
+		// Note: no HeaderStyle in theme
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<GridView ItemType="SubStyleTestItem" DataSource="data" AutoGenerateColumns="false">
+					<Columns>
+						<BoundField ItemType="SubStyleTestItem" DataField="Name" HeaderText="Name" />
+					</Columns>
+				</GridView>
+			</ThemeProvider>
+		);
+
+		var header = cut.Find("thead tr");
+		// HeaderStyle should be empty/default (no style attribute) since theme has no HeaderStyle
+		var headerStyle = header.GetAttribute("style");
+		headerStyle.ShouldBeNull();
+
+		// But rows should get RowStyle from theme
+		var rows = cut.FindAll("tbody tr");
+		rows[0].GetAttribute("style").ShouldContain("background-color:Blue");
+	}
+
+	/// <summary>
+	/// Multiple SubStyles on GridView from theme.
+	/// </summary>
+	[Fact]
+	public void GridView_MultipleSubStyles_FromTheme()
+	{
+		var data = GetTestItems();
+		var theme = new ThemeConfiguration()
+			.ForControl("GridView", skin => skin
+				.SubStyle("HeaderStyle", s => s.BackColor = FromHtml("#000080"))
+				.SubStyle("RowStyle", s => s.BackColor = FromHtml("#F0F0F0"))
+				.SubStyle("AlternatingRowStyle", s => s.BackColor = FromHtml("#FFFFFF"))
+				.SubStyle("FooterStyle", s => s.BackColor = FromHtml("#CCCCCC")));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<GridView ItemType="SubStyleTestItem" DataSource="data" AutoGenerateColumns="false" ShowFooter="true">
+					<Columns>
+						<BoundField ItemType="SubStyleTestItem" DataField="Name" HeaderText="Name" />
+					</Columns>
+				</GridView>
+			</ThemeProvider>
+		);
+
+		// Header
+		var header = cut.Find("thead tr");
+		header.GetAttribute("style").ShouldContain("background-color:#000080");
+
+		// Rows
+		var rows = cut.FindAll("tbody tr");
+		rows[0].GetAttribute("style").ShouldContain("background-color:#F0F0F0");
+		rows[1].GetAttribute("style").ShouldContain("background-color:#FFFFFF");
+
+		// Footer
+		var footer = cut.Find("tfoot tr");
+		footer.GetAttribute("style").ShouldContain("background-color:#CCCCCC");
+	}
+
+	/// <summary>
+	/// SubStyle with Font properties from theme.
+	/// </summary>
+	[Fact]
+	public void SubStyle_FontProperties_FromTheme()
+	{
+		var data = GetTestItems();
+		var theme = new ThemeConfiguration()
+			.ForControl("GridView", skin => skin
+				.SubStyle("HeaderStyle", s =>
+				{
+					s.Font.Bold = true;
+					s.Font.Size = FontUnit.Parse("14px");
+				}));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<GridView ItemType="SubStyleTestItem" DataSource="data" AutoGenerateColumns="false">
+					<Columns>
+						<BoundField ItemType="SubStyleTestItem" DataField="Name" HeaderText="Name" />
+					</Columns>
+				</GridView>
+			</ThemeProvider>
+		);
+
+		var header = cut.Find("thead tr");
+		var headerStyle = header.GetAttribute("style");
+		headerStyle.ShouldContain("font-weight:bold");
+		headerStyle.ShouldContain("font-size:14px");
+	}
+
+	private List<SubStyleTestItem> GetTestItems()
+	{
+		return new List<SubStyleTestItem>
+		{
+			new SubStyleTestItem { Id = 1, Name = "Item 1" },
+			new SubStyleTestItem { Id = 2, Name = "Item 2" },
+			new SubStyleTestItem { Id = 3, Name = "Item 3" }
+		};
+	}
+
+	public class SubStyleTestItem
+	{
+		public int Id { get; set; }
+		public string Name { get; set; }
+	}
+
+}

@@ -1,5 +1,7 @@
 @page "/ControlSamples/Theming"
 @using BlazorWebFormsComponents.Theming
+@using BlazorWebFormsComponents.Enums
+@using SharedSampleObjects.Models
 
 <PageTitle>Theming - Skins &amp; Themes PoC</PageTitle>
 
@@ -114,6 +116,68 @@ via <code>CascadingValue</code>. Each control automatically picks up its matchin
     </div>
 </div>
 
+@* ────────── Section 7: ThemeMode — StyleSheetTheme vs Theme ─────────── *@
+
+<div class="demo-container">
+    <h3>7. ThemeMode — StyleSheetTheme vs Theme</h3>
+    <p>Web Forms supported two theme behaviors: <code>Page.StyleSheetTheme</code> (theme sets
+    defaults, explicit values win) and <code>Page.Theme</code> (theme overrides all values).
+    Set <code>Mode</code> on <code>ThemeConfiguration</code> to choose.</p>
+
+    <div style="display:flex; gap:30px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:280px; border:1px solid #ddd; padding:12px; border-radius:4px;">
+            <h4>StyleSheetTheme <small>(default)</small></h4>
+            <p><em>Explicit <code>BackColor</code> wins over the theme.</em></p>
+            <ThemeProvider Theme="@StyleSheetThemeDemo">
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                    <Button Text="Theme Blue" />
+                    <Button Text="Explicit Green" BackColor="WebColor.Green" ForeColor="WebColor.White" />
+                    <Label Text="Theme Navy" />
+                    <Label Text="Explicit Red" ForeColor="WebColor.Red" />
+                </div>
+            </ThemeProvider>
+        </div>
+        <div style="flex:1; min-width:280px; border:1px solid #ddd; padding:12px; border-radius:4px;">
+            <h4>Theme <small>(override mode)</small></h4>
+            <p><em>Theme overrides all — even explicit green becomes blue.</em></p>
+            <ThemeProvider Theme="@ThemeOverrideDemo">
+                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                    <Button Text="Theme Blue" />
+                    <Button Text="Explicit Green" BackColor="WebColor.Green" ForeColor="WebColor.White" />
+                    <Label Text="Theme Navy" />
+                    <Label Text="Explicit Red" ForeColor="WebColor.Red" />
+                </div>
+            </ThemeProvider>
+        </div>
+    </div>
+</div>
+
+@* ────────── Section 8: Sub-component Styles on Data Controls ────────── *@
+
+<div class="demo-container">
+    <h3>8. Sub-component Styles on Data Controls</h3>
+    <p>Data controls like <code>GridView</code> expose multiple style slots — header, rows,
+    alternating rows, footer, and more. Use <code>SkinBuilder.SubStyle()</code> to theme
+    each section independently through <code>ThemeConfiguration</code>.</p>
+
+    <ThemeProvider Theme="@GridViewTheme">
+        <GridView ItemType="Product"
+                  Items="@_products"
+                  AutoGenerateColumns="false"
+                  ShowFooter="true"
+                  Caption="Themed Product Catalog"
+                  GridLines="GridLines.Both"
+                  CellPadding="4">
+            <Columns>
+                <BoundField ItemType="Product" DataField="Id" HeaderText="ID" />
+                <BoundField ItemType="Product" DataField="Name" HeaderText="Product" />
+                <BoundField ItemType="Product" DataField="Category" HeaderText="Category" />
+                <BoundField ItemType="Product" DataField="Price" HeaderText="Price" />
+            </Columns>
+        </GridView>
+    </ThemeProvider>
+</div>
+
 <hr />
 
 @* ───────────────────── Migration Guide ───────────────────────────────────── *@
@@ -186,6 +250,8 @@ theme.AddSkin("Button", new ControlSkin
 
     <pre><code class="language-razor">@@page "/ControlSamples/Theming"
 @@using BlazorWebFormsComponents.Theming
+@@using BlazorWebFormsComponents.Enums
+@@using SharedSampleObjects.Models
 
 &lt;ThemeProvider Theme="@@SampleTheme"&gt;
     &lt;!-- Default skins applied automatically --&gt;
@@ -211,9 +277,35 @@ theme.AddSkin("Button", new ControlSkin
     &lt;/ThemeProvider&gt;
 &lt;/ThemeProvider&gt;
 
+&lt;!-- Section 7: ThemeMode comparison --&gt;
+&lt;ThemeProvider Theme="@@StyleSheetThemeDemo"&gt;
+    &lt;Button Text="Theme Blue" /&gt;
+    &lt;Button Text="Explicit Green" BackColor="WebColor.Green" ForeColor="WebColor.White" /&gt;
+&lt;/ThemeProvider&gt;
+
+&lt;ThemeProvider Theme="@@ThemeOverrideDemo"&gt;
+    &lt;Button Text="Theme Blue" /&gt;
+    &lt;Button Text="Explicit Green" BackColor="WebColor.Green" ForeColor="WebColor.White" /&gt;
+&lt;/ThemeProvider&gt;
+
+&lt;!-- Section 8: GridView with themed sub-component styles --&gt;
+&lt;ThemeProvider Theme="@@GridViewTheme"&gt;
+    &lt;GridView ItemType="Product" Items="@@_products"
+              AutoGenerateColumns="false" ShowFooter="true"&gt;
+        &lt;Columns&gt;
+            &lt;BoundField ItemType="Product" DataField="Id" HeaderText="ID" /&gt;
+            &lt;BoundField ItemType="Product" DataField="Name" HeaderText="Product" /&gt;
+        &lt;/Columns&gt;
+    &lt;/GridView&gt;
+&lt;/ThemeProvider&gt;
+
 @@code {
     private ThemeConfiguration SampleTheme;
     private ThemeConfiguration AlternateTheme;
+    private ThemeConfiguration StyleSheetThemeDemo;
+    private ThemeConfiguration ThemeOverrideDemo;
+    private ThemeConfiguration GridViewTheme;
+    private List&lt;Product&gt; _products;
 
     protected override void OnInitialized()
     {
@@ -264,6 +356,50 @@ theme.AddSkin("Button", new ControlSkin
             ForeColor = WebColor.FromHtml("#006633"),
             Font = new FontInfo { Italic = true }
         });
+
+        // Section 7: ThemeMode demos — same skins, different modes
+        StyleSheetThemeDemo = new ThemeConfiguration(); // defaults to StyleSheetTheme
+        StyleSheetThemeDemo.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Blue, ForeColor = WebColor.White
+        });
+        StyleSheetThemeDemo.AddSkin("Label", new ControlSkin
+        {
+            ForeColor = WebColor.Navy, Font = new FontInfo { Bold = true }
+        });
+
+        ThemeOverrideDemo = new ThemeConfiguration { Mode = ThemeMode.Theme };
+        ThemeOverrideDemo.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Blue, ForeColor = WebColor.White
+        });
+        ThemeOverrideDemo.AddSkin("Label", new ControlSkin
+        {
+            ForeColor = WebColor.Navy, Font = new FontInfo { Bold = true }
+        });
+
+        // Section 8: GridView sub-component styles (fluent API)
+        GridViewTheme = new ThemeConfiguration();
+        GridViewTheme.ForControl("GridView", b =&gt; b
+            .SubStyle("HeaderStyle", s =&gt;
+            {
+                s.BackColor = WebColor.Navy;
+                s.ForeColor = WebColor.White;
+                s.Font.Bold = true;
+            })
+            .SubStyle("AlternatingRowStyle", s =&gt;
+            {
+                s.BackColor = WebColor.FromHtml("#F0F4F8");
+            })
+            .SubStyle("FooterStyle", s =&gt;
+            {
+                s.BackColor = WebColor.FromHtml("#336699");
+                s.ForeColor = WebColor.White;
+                s.Font.Italic = true;
+            })
+        );
+
+        _products = Product.GetProducts(5);
     }
 }</code></pre>
 </div>
@@ -271,6 +407,10 @@ theme.AddSkin("Button", new ControlSkin
 @code {
     private ThemeConfiguration SampleTheme;
     private ThemeConfiguration AlternateTheme;
+    private ThemeConfiguration StyleSheetThemeDemo;
+    private ThemeConfiguration ThemeOverrideDemo;
+    private ThemeConfiguration GridViewTheme;
+    private List<Product> _products;
 
     protected override void OnInitialized()
     {
@@ -325,5 +465,53 @@ theme.AddSkin("Button", new ControlSkin
             ForeColor = WebColor.FromHtml("#006633"),
             Font = new FontInfo { Italic = true }
         });
+
+        // Section 7: ThemeMode demos — same skins, different modes
+        StyleSheetThemeDemo = new ThemeConfiguration(); // defaults to StyleSheetTheme
+        StyleSheetThemeDemo.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Blue,
+            ForeColor = WebColor.White
+        });
+        StyleSheetThemeDemo.AddSkin("Label", new ControlSkin
+        {
+            ForeColor = WebColor.Navy,
+            Font = new FontInfo { Bold = true }
+        });
+
+        ThemeOverrideDemo = new ThemeConfiguration { Mode = ThemeMode.Theme };
+        ThemeOverrideDemo.AddSkin("Button", new ControlSkin
+        {
+            BackColor = WebColor.Blue,
+            ForeColor = WebColor.White
+        });
+        ThemeOverrideDemo.AddSkin("Label", new ControlSkin
+        {
+            ForeColor = WebColor.Navy,
+            Font = new FontInfo { Bold = true }
+        });
+
+        // Section 8: GridView sub-component styles (fluent API)
+        GridViewTheme = new ThemeConfiguration();
+        GridViewTheme.ForControl("GridView", b => b
+            .SubStyle("HeaderStyle", s =>
+            {
+                s.BackColor = WebColor.Navy;
+                s.ForeColor = WebColor.White;
+                s.Font.Bold = true;
+            })
+            .SubStyle("AlternatingRowStyle", s =>
+            {
+                s.BackColor = WebColor.FromHtml("#F0F4F8");
+            })
+            .SubStyle("FooterStyle", s =>
+            {
+                s.BackColor = WebColor.FromHtml("#336699");
+                s.ForeColor = WebColor.White;
+                s.Font.Italic = true;
+            })
+        );
+
+        _products = Product.GetProducts(5);
     }
 }

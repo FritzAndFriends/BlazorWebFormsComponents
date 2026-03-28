@@ -1,4 +1,5 @@
 using BlazorWebFormsComponents.Enums;
+using System.Collections.Generic;
 
 namespace BlazorWebFormsComponents.Theming
 {
@@ -29,5 +30,11 @@ namespace BlazorWebFormsComponents.Theming
 		public FontInfo Font { get; set; }
 
 		public string ToolTip { get; set; }
+
+		/// <summary>
+		/// Sub-component styles keyed by style name (e.g., "HeaderStyle", "RowStyle").
+		/// Used by data controls (GridView, DetailsView, etc.) to theme individual sections.
+		/// </summary>
+		public Dictionary<string, TableItemStyle> SubStyles { get; set; }
 	}
 }

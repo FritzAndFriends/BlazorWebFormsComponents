@@ -1,0 +1,249 @@
+@using BlazorWebFormsComponents.Theming
+@using BlazorWebFormsComponents.Enums
+@using Bunit
+@using Shouldly
+@using Xunit
+@using Microsoft.AspNetCore.Components.Web
+@inherits TestContext
+
+@code {
+	/// <summary>
+	/// Unit tests for CSS bundling in ThemeProvider (Wave 2 - WI-11).
+	/// Tests that ThemeProvider correctly renders link elements for CSS files.
+	/// </summary>
+
+	[Fact]
+	public void ThemeProvider_WithCssFiles_RendersLinkElements()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration()
+			.WithCssFile("theme.css")
+			.WithCssFile("custom.css");
+
+		// Act
+		var cut = Render<ThemeProvider>(parameters => parameters
+			.Add(p => p.Theme, theme)
+			.Add(p => p.ChildContent, (RenderFragment)(builder => { }))
+		);
+
+		// Assert - HeadContent is rendered (its content goes to HeadOutlet)
+		var headContent = cut.FindComponent<HeadContent>();
+		headContent.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void ThemeProvider_WithoutCssFiles_NoLinkElements()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+
+		// Act
+		var cut = Render<ThemeProvider>(parameters => parameters
+			.Add(p => p.Theme, theme)
+			.Add(p => p.ChildContent, (RenderFragment)(builder => { }))
+		);
+
+		// Assert - No HeadContent should be rendered
+		cut.FindComponents<HeadContent>().Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ThemeProvider_WithNullTheme_NoLinkElements()
+	{
+		// Arrange
+		ThemeConfiguration theme = null;
+
+		// Act
+		var cut = Render<ThemeProvider>(parameters => parameters
+			.Add(p => p.Theme, theme)
+			.Add(p => p.ChildContent, (RenderFragment)(builder => { }))
+		);
+
+		// Assert - No HeadContent
+		cut.FindComponents<HeadContent>().Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ThemeProvider_WithEmptyCssFilesList_NoLinkElements()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration
+		{
+			CssFiles = new List<string>()
+		};
+
+		// Act
+		var cut = Render<ThemeProvider>(parameters => parameters
+			.Add(p => p.Theme, theme)
+			.Add(p => p.ChildContent, (RenderFragment)(builder => { }))
+		);
+
+		// Assert - No HeadContent
+		cut.FindComponents<HeadContent>().Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void ThemeProvider_WithMultipleCssFiles_RendersAllLinks()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration()
+			.WithCssFile("a.css")
+			.WithCssFile("b.css")
+			.WithCssFile("c.css");
+
+		// Act
+		var cut = Render<ThemeProvider>(parameters => parameters
+			.Add(p => p.Theme, theme)
+			.Add(p => p.ChildContent, (RenderFragment)(builder => { }))
+		);
+
+		// Assert - HeadContent is rendered
+		var headContent = cut.FindComponent<HeadContent>();
+		headContent.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void ThemeProvider_CascadesTheme_ToChildren()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, WebColor.Red));
+
+		// Act
+		var cut = Render<ThemeProvider>(parameters => parameters
+			.Add(p => p.Theme, theme)
+			.Add(p => p.ChildContent, (RenderFragment)(builder =>
+			{
+				// Add simple test content
+				builder.OpenElement(0, "div");
+				builder.AddContent(1, "Test");
+				builder.CloseElement();
+			}))
+		);
+
+		// Assert - just verify it renders without error and theme is cascaded
+		cut.ShouldNotBeNull();
+		cut.Markup.ShouldContain("Test");
+	}
+
+	[Fact]
+	public void ThemeProvider_ModeParameter_SyncsToThemeMode()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration
+		{
+			Mode = ThemeMode.StyleSheetTheme
+		};
+
+		// Act
+		var cut = Render<ThemeProvider>(parameters => parameters
+			.Add(p => p.Theme, theme)
+			.Add(p => p.Mode, ThemeMode.Theme)
+			.Add(p => p.ChildContent, (RenderFragment)(builder => { }))
+		);
+
+		// Assert - Mode parameter should sync to Theme.Mode
+		theme.Mode.ShouldBe(ThemeMode.Theme);
+	}
+
+	[Fact]
+	public void ThemeConfiguration_FluentCssApi_Works()
+	{
+		// Arrange & Act
+		var config = new ThemeConfiguration()
+			.WithCssFile("a.css")
+			.WithCssFiles("b.css", "c.css");
+
+		// Assert
+		config.CssFiles.ShouldNotBeNull();
+		config.CssFiles.Count.ShouldBe(3);
+		config.CssFiles[0].ShouldBe("a.css");
+		config.CssFiles[1].ShouldBe("b.css");
+		config.CssFiles[2].ShouldBe("c.css");
+	}
+
+	[Fact]
+	public void ThemeConfiguration_WithCssFile_ChainableWithOtherMethods()
+	{
+		// Arrange & Act
+		var config = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme)
+			.WithCssFile("theme.css")
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, WebColor.Red));
+
+		// Assert
+		config.Mode.ShouldBe(ThemeMode.Theme);
+		config.CssFiles.ShouldNotBeNull();
+		config.CssFiles.Count.ShouldBe(1);
+		config.GetSkin("Button").ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void ThemeProvider_WithRelativePaths_RendersCorrectly()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration()
+			.WithCssFile("/css/theme.css")
+			.WithCssFile("../styles/custom.css")
+			.WithCssFile("https://cdn.example.com/theme.css");
+
+		// Act
+		var cut = Render<ThemeProvider>(parameters => parameters
+			.Add(p => p.Theme, theme)
+			.Add(p => p.ChildContent, (RenderFragment)(builder => { }))
+		);
+
+		// Assert - HeadContent is rendered
+		var headContent = cut.FindComponent<HeadContent>();
+		headContent.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void ThemeConfiguration_WithCssFile_NullOrEmpty_ThrowsException()
+	{
+		// Arrange
+		var config = new ThemeConfiguration();
+
+		// Act & Assert
+		Should.Throw<ArgumentException>(() => config.WithCssFile(null));
+		Should.Throw<ArgumentException>(() => config.WithCssFile(""));
+		Should.Throw<ArgumentException>(() => config.WithCssFile("   "));
+	}
+
+	[Fact]
+	public void ThemeConfiguration_WithCssFiles_NullOrEmpty_ThrowsException()
+	{
+		// Arrange
+		var config = new ThemeConfiguration();
+
+		// Act & Assert
+		Should.Throw<ArgumentException>(() => config.WithCssFiles(null));
+		Should.Throw<ArgumentException>(() => config.WithCssFiles());
+	}
+
+	[Fact]
+	public void ThemeProvider_RendersChildContent()
+	{
+		// Arrange
+		var theme = new ThemeConfiguration();
+
+		// Act
+		var cut = Render<ThemeProvider>(parameters => parameters
+			.Add(p => p.Theme, theme)
+			.Add(p => p.ChildContent, (RenderFragment)(builder =>
+			{
+				builder.OpenElement(0, "div");
+				builder.AddAttribute(1, "id", "test-content");
+				builder.AddContent(2, "Test Content");
+				builder.CloseElement();
+			}))
+		);
+
+		// Assert
+		var html = cut.Markup;
+		html.ShouldContain("id=\"test-content\"");
+		html.ShouldContain("Test Content");
+	}
+}

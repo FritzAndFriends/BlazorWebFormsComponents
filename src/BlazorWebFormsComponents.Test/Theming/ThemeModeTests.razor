@@ -1,0 +1,244 @@
+@inherits Bunit.TestContext
+@using BlazorWebFormsComponents.Theming
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+@using Moq
+
+@code {
+
+	public ThemeModeTests()
+	{
+		Services.AddSingleton<Microsoft.AspNetCore.DataProtection.IDataProtectionProvider>(
+			new Microsoft.AspNetCore.DataProtection.EphemeralDataProtectionProvider());
+		Services.AddSingleton<Microsoft.AspNetCore.Routing.LinkGenerator>(new Mock<Microsoft.AspNetCore.Routing.LinkGenerator>().Object);
+		Services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor>(new Mock<Microsoft.AspNetCore.Http.IHttpContextAccessor>().Object);
+	}
+
+	/// <summary>
+	/// Theme mode overrides explicit BackColor value (Issue #369 / WI-5).
+	/// In Theme mode, skin values override explicit component properties.
+	/// </summary>
+	[Fact]
+	public void ThemeMode_OverridesExplicitBackColor()
+	{
+		var theme = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme" Mode="ThemeMode.Theme">
+				<Button Text="Test" BackColor="Red" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldContain("background-color:Blue");
+		style.ShouldNotContain("background-color:Red");
+	}
+
+	/// <summary>
+	/// StyleSheetTheme mode preserves explicit BackColor (backward compatibility).
+	/// </summary>
+	[Fact]
+	public void StyleSheetThemeMode_PreservesExplicitBackColor()
+	{
+		var theme = new ThemeConfiguration()
+			.WithMode(ThemeMode.StyleSheetTheme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Test" BackColor="Red" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldContain("background-color:Red");
+		style.ShouldNotContain("background-color:Blue");
+	}
+
+	/// <summary>
+	/// Theme mode overrides explicit CssClass.
+	/// </summary>
+	[Fact]
+	public void ThemeMode_OverridesExplicitCssClass()
+	{
+		var theme = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme)
+			.ForControl("Label", skin => skin
+				.Set(s => s.CssClass, "theme-class"));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme" Mode="ThemeMode.Theme">
+				<Label Text="Test" CssClass="my-class" />
+			</ThemeProvider>
+		);
+
+		var span = cut.Find("span");
+		span.GetAttribute("class").ShouldBe("theme-class");
+	}
+
+	/// <summary>
+	/// Theme mode overrides explicit Font.Bold.
+	/// </summary>
+	[Fact]
+	public void ThemeMode_OverridesExplicitFontBold()
+	{
+		var theme = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme)
+			.ForControl("Label", skin => skin
+				.Set(s => s.Font.Bold, true));
+
+		// Create a FontInfo with Bold=false explicitly set
+		var font = new FontInfo { Bold = false };
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme" Mode="ThemeMode.Theme">
+				<Label Text="Test" Font="font" />
+			</ThemeProvider>
+		);
+
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("font-weight:bold");
+	}
+
+	/// <summary>
+	/// ThemeMode defaults to StyleSheetTheme (backward compatibility).
+	/// Without explicit mode set, should behave as StyleSheetTheme.
+	/// </summary>
+	[Fact]
+	public void ThemeMode_DefaultsToStyleSheetTheme()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		// Default Mode property is StyleSheetTheme
+		theme.Mode.ShouldBe(ThemeMode.StyleSheetTheme);
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Test" BackColor="Red" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		// Explicit value wins in StyleSheetTheme mode
+		style.ShouldContain("background-color:Red");
+		style.ShouldNotContain("background-color:Blue");
+	}
+
+	/// <summary>
+	/// ThemeMode propagates via ThemeProvider.
+	/// Setting Mode on ThemeConfiguration applies to all themed components.
+	/// </summary>
+	[Fact]
+	public void ThemeMode_PropagatesViaThemeProvider()
+	{
+		var theme = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue))
+			.ForControl("Label", skin => skin
+				.Set(s => s.ForeColor, FromHtml("#00FF00")));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme" Mode="ThemeMode.Theme">
+				<Button Text="Btn" BackColor="Red" />
+				<Label Text="Lbl" ForeColor="@FromHtml("#FF0000")" />
+			</ThemeProvider>
+		);
+
+		// Both components should use theme values in Theme mode
+		var input = cut.Find("input");
+		input.GetAttribute("style").ShouldContain("background-color:Blue");
+
+		var span = cut.Find("span");
+		span.GetAttribute("style").ShouldContain("color:#00FF00");
+	}
+
+	/// <summary>
+	/// WithMode fluent API works correctly.
+	/// </summary>
+	[Fact]
+	public void WithMode_FluentAPI_SetsThemeMode()
+	{
+		var theme1 = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme);
+		theme1.Mode.ShouldBe(ThemeMode.Theme);
+
+		var theme2 = new ThemeConfiguration()
+			.WithMode(ThemeMode.StyleSheetTheme);
+		theme2.Mode.ShouldBe(ThemeMode.StyleSheetTheme);
+	}
+
+	/// <summary>
+	/// Theme mode with no explicit value on component.
+	/// In both modes, if component has no explicit value, theme value applies.
+	/// </summary>
+	[Fact]
+	public void ThemeMode_AppliesThemeWhenNoExplicitValue()
+	{
+		var themeStyleSheet = new ThemeConfiguration()
+			.WithMode(ThemeMode.StyleSheetTheme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var themeTheme = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		// StyleSheetTheme mode with no explicit value
+		var cut1 = Render(
+			@<ThemeProvider Theme="themeStyleSheet">
+				<Button Text="Test" />
+			</ThemeProvider>
+		);
+		cut1.Find("input").GetAttribute("style").ShouldContain("background-color:Blue");
+
+		// Theme mode with no explicit value
+		var cut2 = Render(
+			@<ThemeProvider Theme="themeTheme">
+				<Button Text="Test" />
+			</ThemeProvider>
+		);
+		cut2.Find("input").GetAttribute("style").ShouldContain("background-color:Blue");
+	}
+
+	/// <summary>
+	/// Theme mode with multiple properties.
+	/// Theme mode overrides all explicitly set properties.
+	/// </summary>
+	[Fact]
+	public void ThemeMode_OverridesMultipleProperties()
+	{
+		var theme = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue)
+				.Set(s => s.ForeColor, Green)
+				.Set(s => s.Width, new Unit("200px")));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme" Mode="ThemeMode.Theme">
+				<Button Text="Test" BackColor="Red" ForeColor="Yellow" Width="@(new Unit("100px"))" />
+			</ThemeProvider>
+		);
+
+		var input = cut.Find("input");
+		var style = input.GetAttribute("style");
+		style.ShouldContain("background-color:Blue");
+		style.ShouldContain("color:Green");
+		style.ShouldContain("width:200px");
+		style.ShouldNotContain("background-color:Red");
+		style.ShouldNotContain("color:Yellow");
+		style.ShouldNotContain("width:100px");
+	}
+
+}

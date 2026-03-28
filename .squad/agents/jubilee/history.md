@@ -430,3 +430,11 @@ This wave establishes **documentation patterns** that will guide future control 
 - Consistent pattern across all data/validation controls supports developer learning curve
 
 **PR:** #515 created, base=dev, head=squad/505-506-data-validation-docs
+
+### Theming Sample Enhancement — Sections 7 & 8 (ThemeMode + SubStyles)
+
+- **Section 7: ThemeMode Demo** — Side-by-side comparison of StyleSheetTheme (default, explicit values win) vs Theme (overrides all values). Uses two ThemeProviders with identical skins but different Mode settings. Buttons and labels with explicit BackColor/ForeColor show the behavioral difference visually.
+- **Section 8: Sub-component Styles on Data Controls** — GridView themed via SkinBuilder.SubStyle() fluent API. Demonstrates HeaderStyle, AlternatingRowStyle, and FooterStyle applied through ThemeConfiguration.ForControl(). Uses Product.GetProducts(5) for a compact in-memory dataset.
+- **Source Code section** updated with both new markup examples and full @code initialization for the new themes.
+- **Key discovery:** GridLines enum is in BlazorWebFormsComponents.Enums and requires explicit @using — not covered by @using BlazorWebFormsComponents alone. Similarly, TableItemStyle has an internal constructor — must use SkinBuilder.SubStyle() from outside the assembly.
+- **SubStyles keys** must match GridView's ApplyThemeSkin keys exactly: `HeaderStyle`, `AlternatingRowStyle`, `FooterStyle` (not `AlternatingItemStyle`).
