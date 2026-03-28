@@ -48,3 +48,26 @@ BlazorWebFormsComponents is a library providing Blazor components that emulate A
 - Successfully parsed named Button skin (SkinID="DangerButton")
 - Successfully parsed GridView with nested HeaderStyle and RowStyle sub-components
 - All color conversions, font attributes, and sub-styles worked correctly
+
+### Web Forms Theme Migration SKILL.md (2025-01-27)
+
+**Task**: Write a SKILL.md that teaches Copilot and Squad agents how to migrate Web Forms themes to Blazor using BWFC auto-discovery.
+
+**Delivered**:
+- Created `.squad/skills/theme-migration/SKILL.md` as authoritative reference for theme migration pattern
+- Documented Web Forms theme structure (App_Themes/ folder with .skin, .css, images)
+- Explained auto-discovery flow: copy → `AddBlazorWebFormsComponents()` → `SkinFileParser` → `ThemeProvider` injection
+- Covered key concepts:
+  - Theme folder identification and copy operation (preserve structure)
+  - Default theme selection (first folder alphabetically)
+  - CSS auto-discovery and injection via ThemeProvider
+  - Named skins (SkinID parameter requirement in Blazor)
+  - ThemeMode (StyleSheetTheme default vs. Theme override mode)
+  - Multiple themes support and custom ThemesPath configuration
+- Provided 3 detailed examples (simple, multiple themes, named skins)
+- Documented edge cases (no themes, CSS-only themes, custom paths)
+- Included anti-patterns with do's and don'ts (manual registration, missing ThemeProvider, image handling)
+
+**Why This Matters**: This SKILL.md replaces the need for agent-specific migration scripts. Any agent (Copilot, Cyclops, Rogue, or future Squad members) doing Web Forms migration now has a standardized reference explaining the theme pattern. No more tribal knowledge — the pattern is documented, discoverable, and reusable across projects.
+
+**Key Principle**: The SKILL teaches the "what" and "why" but delegates implementation details (SkinFileParser internals, ThemeProvider rendering) to library code. This keeps the SKILL maintainable as the implementation evolves.

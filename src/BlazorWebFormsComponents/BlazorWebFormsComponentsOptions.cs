@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using BlazorWebFormsComponents.Theming;
 
 namespace BlazorWebFormsComponents;
 
@@ -8,6 +9,19 @@ namespace BlazorWebFormsComponents;
 /// </summary>
 public class BlazorWebFormsComponentsOptions
 {
+    /// <summary>
+    /// Path to the themes folder relative to wwwroot. When null (default),
+    /// auto-discovery looks for "App_Themes" under wwwroot. Set to a custom
+    /// path to override, or set to empty string to disable auto-discovery.
+    /// </summary>
+    public string? ThemesPath { get; set; }
+
+    /// <summary>
+    /// Controls how auto-discovered theme skins interact with explicit property values.
+    /// Default is StyleSheetTheme (theme sets defaults, explicit values win).
+    /// </summary>
+    public ThemeMode ThemeMode { get; set; } = ThemeMode.StyleSheetTheme;
+
     /// <summary>
     /// When true, registers middleware to rewrite .aspx URLs to their Blazor equivalents.
     /// Default: true

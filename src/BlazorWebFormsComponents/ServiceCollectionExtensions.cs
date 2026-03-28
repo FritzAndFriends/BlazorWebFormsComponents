@@ -1,6 +1,9 @@
 using System;
+using System.IO;
 using BlazorWebFormsComponents.Diagnostics;
+using BlazorWebFormsComponents.Theming;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorWebFormsComponents;
@@ -36,6 +39,38 @@ public static class ServiceCollectionExtensions
         var options = new BlazorWebFormsComponentsOptions();
         configure?.Invoke(options);
         services.AddSingleton(options);
+
+        // Auto-discover Web Forms themes from wwwroot/App_Themes (or custom path).
+        // Uses IWebHostEnvironment at resolution time so WebRootPath is available.
+        services.AddSingleton<ThemeConfiguration>(sp =>
+        {
+            var env = sp.GetService<IWebHostEnvironment>();
+            var themesRelPath = options.ThemesPath ?? "App_Themes";
+
+            // Empty string means auto-discovery is explicitly disabled
+            if (string.IsNullOrEmpty(themesRelPath) && options.ThemesPath is not null)
+                return new ThemeConfiguration();
+
+            var webRoot = env?.WebRootPath ?? "";
+            if (string.IsNullOrEmpty(webRoot))
+                return new ThemeConfiguration();
+
+            var fullPath = Path.Combine(webRoot, themesRelPath);
+            if (!Directory.Exists(fullPath))
+                return new ThemeConfiguration();
+
+            var config = SkinFileParser.ParseThemeFolder(fullPath);
+            config.Mode = options.ThemeMode;
+
+            // Auto-discover CSS files in the theme folder
+            foreach (var css in Directory.GetFiles(fullPath, "*.css", SearchOption.AllDirectories))
+            {
+                var relativePath = Path.GetRelativePath(webRoot, css).Replace('\\', '/');
+                config.WithCssFile(relativePath);
+            }
+
+            return config;
+        });
 
         return services;
     }

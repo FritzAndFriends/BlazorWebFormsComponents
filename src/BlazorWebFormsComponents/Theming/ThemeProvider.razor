@@ -1,18 +1,19 @@
 @namespace BlazorWebFormsComponents.Theming
 @inherits Microsoft.AspNetCore.Components.ComponentBase
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.Extensions.DependencyInjection
 
-@if (Theme?.CssFiles != null && Theme.CssFiles.Count > 0)
+@if (EffectiveTheme?.CssFiles != null && EffectiveTheme.CssFiles.Count > 0)
 {
 	<HeadContent>
-		@foreach (var css in Theme.CssFiles)
+		@foreach (var css in EffectiveTheme.CssFiles)
 		{
 			<link rel="stylesheet" href="@css" />
 		}
 	</HeadContent>
 }
 
-<CascadingValue Value="Theme">
+<CascadingValue Value="EffectiveTheme">
 	@ChildContent
 </CascadingValue>
 
@@ -20,6 +21,8 @@
 
 	/// <summary>
 	/// The theme configuration to cascade to child components.
+	/// When null, falls back to a ThemeConfiguration registered via DI
+	/// (e.g. auto-discovered from App_Themes by AddBlazorWebFormsComponents).
 	/// </summary>
 	[Parameter]
 	public ThemeConfiguration Theme { get; set; }
@@ -38,14 +41,28 @@
 	[Parameter]
 	public RenderFragment ChildContent { get; set; }
 
+	/// <summary>
+	/// Service provider used to resolve an optional DI-registered ThemeConfiguration.
+	/// </summary>
+	[Inject]
+	private IServiceProvider ServiceProvider { get; set; }
+
+	/// <summary>
+	/// The resolved theme: explicit Theme parameter wins, then DI fallback.
+	/// </summary>
+	private ThemeConfiguration EffectiveTheme { get; set; }
+
 	protected override void OnParametersSet()
 	{
 		base.OnParametersSet();
 
-		// Sync Mode parameter to Theme.Mode
-		if (Theme != null)
+		// Explicit parameter wins; fall back to DI-registered theme
+		EffectiveTheme = Theme ?? ServiceProvider?.GetService<ThemeConfiguration>();
+
+		// Sync Mode parameter to the effective theme
+		if (EffectiveTheme != null)
 		{
-			Theme.Mode = Mode;
+			EffectiveTheme.Mode = Mode;
 		}
 	}
 

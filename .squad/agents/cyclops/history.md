@@ -784,3 +784,20 @@ foreach (var warning in warnings) {
 `
 
 **Next Steps:** Consider exposing a public API on ThemeConfiguration to enumerate skins without reflection, or document that validation requires reflection access.
+
+### Theme Auto-Discovery in AddBlazorWebFormsComponents (2026-03)
+
+**Task:** Minimize migration script effort for Web Forms themes — if `App_Themes/` is copied to `wwwroot/App_Themes/`, everything should work with zero extra `Program.cs` configuration.
+
+**Implementation:**
+- `BlazorWebFormsComponentsOptions`: Added `ThemesPath` (string?, defaults null = auto-discover "App_Themes") and `ThemeMode` (defaults StyleSheetTheme)
+- `ServiceCollectionExtensions.AddBlazorWebFormsComponents`: Registers `ThemeConfiguration` as singleton via factory using `IWebHostEnvironment.WebRootPath` at resolution time. Auto-discovers `.skin` files via `SkinFileParser.ParseThemeFolder()` and CSS files via `Directory.GetFiles("*.css", AllDirectories)`. Empty `ThemeConfiguration` registered when no App_Themes folder exists.
+- `ThemeProvider.razor`: Injects `IServiceProvider` (always available, avoids test breakage) and resolves `ThemeConfiguration` as DI fallback. Explicit `Theme` parameter always wins. Uses `EffectiveTheme` private field for both CSS rendering and CascadingValue.
+
+**Key Design Decisions:**
+- Used `IServiceProvider.GetService<ThemeConfiguration>()` instead of direct `[Inject] ThemeConfiguration` to avoid breaking 2,685 existing tests that don't register the service
+- Used `sp.GetService<IWebHostEnvironment>()` (nullable) instead of `GetRequiredService` to gracefully handle environments without web hosting
+- Empty string `ThemesPath` explicitly disables auto-discovery; null means use default "App_Themes"
+
+**Build:** ✅ 0 errors, 135 warnings (all pre-existing)
+**Tests:** ✅ 2,685 passed, 0 failed, 0 skipped
