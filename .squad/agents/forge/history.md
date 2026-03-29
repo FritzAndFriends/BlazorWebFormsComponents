@@ -15,6 +15,26 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 
 ## Learnings
 
+### Migration Shim Gap Analysis (2026-03-27)
+
+**Comprehensive analysis of manual migration work completed.** Catalogued 47 distinct manual migration items across 14 categories after auditing bwfc-migrate.ps1 (L1), all existing BWFC shims, and WingtipToys Run 7 benchmark results.
+
+Key findings:
+1. **Current automation: ~60%.** L1 script handles file transforms, directives, expressions, prefixes, scaffolding. Existing shims (WebFormsPageBase, ResponseShim, RequestShim, ViewStateDictionary, Identity stubs, EF6 stubs, HttpHandlerBase, middleware stack) provide another ~15% compilation coverage.
+
+2. **Top 5 highest-impact new shims identified:**
+   - Page lifecycle method renaming (Roslyn fixer or L1 regex) — affects 100% of pages
+   - Event handler signature conversion (L1 markup @-prefix + code-behind rewrite) — affects 80%+ of pages
+   - SessionShim scoped service — `Session["key"]` is in 40%+ of enterprise apps
+   - ConfigurationManager shim — `AppSettings["key"]` is the #1 System.Web dependency
+   - web.config `<appSettings>` → appsettings.json auto-conversion in L1
+
+3. **Estimated impact:** Tier 1 shims would push automation from ~60% to ~80%. Tier 1+2 would reach ~90%.
+
+4. **Irreducible manual work (~10%):** Full Identity provider migration, DataSourceID → service injection, third-party vendor controls, inline `<% code blocks %>`, FindControl patterns, business logic integrations.
+
+5. **Report saved to `dev-docs/migration-shim-analysis.md`** — 47-item table with feasibility ratings (🟢/🟡/🔴), detailed shim approaches per category, and priority recommendations.
+
 ### NuGet Static Asset Migration Strategy (2026-03-08)
 
 **Strategic Analysis Complete — Hybrid Option C Recommended**

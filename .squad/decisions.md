@@ -13644,3 +13644,109 @@ Migration scripts and Copilot agents need to set up Web Forms themes when conver
 - Existing apps: no behavioral change (empty ThemeConfiguration registered when no folder exists).
 - Test suite: all 2,685 tests pass unchanged.
 
+
+# Decision: Migration Shim Prioritization
+
+**Author:** Forge (Web Forms Reviewer)
+**Date:** 2026-03-27
+**Status:** Proposed — awaiting Jeff's review
+
+## Context
+
+Analyzed the full Web Forms → Blazor migration gap. Today's automation level is ~60% (L1 script + existing shims). Jeff wants to get "sneaky and creative" about closing the remaining gaps with shims, type aliases, and programmatic tricks.
+
+## Decision
+
+Prioritize 5 Tier 1 shims that would push automation from ~60% to ~80%:
+
+1. **Page lifecycle method renaming** — Roslyn fixer or L1 regex transform. `Page_Load` → `OnInitializedAsync`, `Page_Init` → `OnInitialized`, etc. Affects 100% of migrated pages.
+
+2. **Event handler signature conversion** — L1 markup `@` prefix on `OnClick="handler"` attributes + code-behind signature rewrite (`object sender, EventArgs e` → `MouseEventArgs e`). Affects 80%+ of pages.
+
+3. **SessionShim service** — Scoped DI service wrapping `ISession` with Web Forms-style `Session["key"]` indexer. Falls back to in-memory dictionary in interactive mode.
+
+4. **ConfigurationManager shim** — Static class with `AppSettings` and `ConnectionStrings` properties delegating to `IConfiguration`. Register via `AddBlazorWebFormsComponents()`.
+
+5. **web.config → appsettings.json** — L1 script enhancement to parse `<appSettings>` and `<connectionStrings>` into `appsettings.json`.
+
+## Full Analysis
+
+See `dev-docs/migration-shim-analysis.md` for the complete 47-item catalog with feasibility ratings, proposed approaches, and effort estimates.
+
+## Estimated Timeline
+
+- Tier 1 (5 items): 5–6 weeks
+- Tier 2 (7 items): 6–8 weeks additional
+- Combined: ~90% automation achievable
+
+## Trade-offs
+
+- Shims are explicitly migration aids, not long-term patterns. All should be marked `[Obsolete]` with guidance to convert to idiomatic Blazor.
+- SessionShim in interactive mode uses in-memory fallback (not real session). Must log warnings.
+- ConfigurationManager shim requires initialization in `Program.cs` — adds a one-time wiring step.
+- Roslyn fixers require shipping an analyzer NuGet package alongside the component library.
+
+# Decision: Migration Automation — 23 Gaps, 3-Phase Plan
+
+**By:** Bishop (Migration Tooling Dev)
+**Date:** 2026-07-25
+**Requested by:** Jeffrey T. Fritz
+
+## What
+
+Full audit of bwfc-migrate.ps1 and BWFC shim library identified 23 automation gaps between L1 output and compilable/runnable Blazor code. Proposed solutions range from type aliases (minutes) to Startup.cs extraction (days).
+
+Report: `dev-docs/migration-automation-opportunities.md`
+
+## Key Decisions Proposed
+
+1. **Phase 1 priority: "Just Make It Compile"** — ConfigurationManager shim, BundleConfig/RouteConfig stubs, Web.config→appsettings.json, selective using retention, App_Start/ copy, App_Themes/ auto-copy. These 6 items target the most common compile blockers.
+
+2. **Phase 2 priority: "Just Make It Run"** — Session shim on WebFormsPageBase, Page_Load→OnInitializedAsync script transform, IsPostBack guard unwrapping, event handler signature transform, Bind() expression conversion. These 6 items reduce L2 manual work by ~40%.
+
+3. **ConfigurationManager shim lives in BWFC library** (not just script transforms). Namespace: `BlazorWebFormsComponents`. Initialized via `AddBlazorWebFormsComponents()`. Type alias added to .targets file. This is the #1 highest-impact single change.
+
+4. **Session shim added to WebFormsPageBase** as `protected SessionShim Session` property. Uses `ISession` when HttpContext available, falls back to in-memory dictionary. Script scaffolds session middleware registration when usage detected.
+
+5. **HttpContext.Current shim** (GAP-02) placed in `System.Web` namespace so existing using directives resolve it. This is controversial — it's a static accessor anti-pattern — but it's marked `[Obsolete]` and makes utility classes compile at L1.
+
+6. **Script should stop blindly stripping all `System.Web.*` usings** — instead, selectively retain usings when the file references types with BWFC shims.
+
+## Why
+
+Current L1→L2 handoff produces ~30-40 compile errors per app. Most are repetitive patterns (missing ConfigurationManager, missing BundleConfig, stripped usings) solvable with shims. The goal is to push L1 "compiles clean" rate from ~60% to ~80%, cutting L2 time in half.
+
+## Team Impact
+
+- **Cyclops**: Will implement the BWFC library shims (ConfigurationManager, Session, FormsAuthentication)
+- **Bishop**: Will implement the bwfc-migrate.ps1 transforms (lifecycle, event handlers, config extraction)
+- **Rogue**: Should write tests for new shims
+- **Colossus**: Will need to update integration tests after shims ship
+
+## Status
+
+PROPOSED — awaiting Jeff's review and team discussion.
+
+# Decision: Theming Integration Tests Written Ahead of Sections 7 & 8
+
+**Author:** Colossus  
+**Date:** 2026-03-22  
+**Status:** Implemented
+
+## Context
+
+Jubilee is building Section 7 (ThemeMode — StyleSheetTheme vs Theme) and Section 8 (Sub-Styles — GridView header/footer theming) on the `/ControlSamples/Theming` page. Tests were requested in advance so they're ready when the markup lands.
+
+## Decision
+
+Two new Playwright tests added to `InteractiveComponentTests.cs`:
+
+1. **`Theming_ThemeMode_StyleSheetThemeVsTheme`** — Uses regex heading match (`Theme\s*Mode`) and text content assertions to verify both StyleSheetTheme and Theme panels render with buttons.
+2. **`Theming_SubStyles_GridViewHeaderAndFooter`** — Uses regex heading match for the sub-styles section, verifies `<table>` and `<th>` header cells exist (GridView structure).
+
+Both tests use flexible selectors (regex for headings, semantic HTML elements like `table`, `th`, `button`) rather than class names or exact text to tolerate minor markup changes from Jubilee.
+
+## Impact
+
+These tests will fail with clear assertion messages until Jubilee's sections are added. Once the markup is present, they should pass without modification.
+

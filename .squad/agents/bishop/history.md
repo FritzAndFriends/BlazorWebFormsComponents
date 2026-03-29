@@ -71,3 +71,20 @@ BlazorWebFormsComponents is a library providing Blazor components that emulate A
 **Why This Matters**: This SKILL.md replaces the need for agent-specific migration scripts. Any agent (Copilot, Cyclops, Rogue, or future Squad members) doing Web Forms migration now has a standardized reference explaining the theme pattern. No more tribal knowledge — the pattern is documented, discoverable, and reusable across projects.
 
 **Key Principle**: The SKILL teaches the "what" and "why" but delegates implementation details (SkinFileParser internals, ThemeProvider rendering) to library code. This keeps the SKILL maintainable as the implementation evolves.
+
+### Migration Automation Audit (2026-07-25)
+
+**Task**: Audit bwfc-migrate.ps1 (2,714 lines), all BWFC shims, and migration test results to identify manual gaps and propose automation solutions.
+
+**Key Findings**:
+- L1 script handles ~60% of migration mechanically (22 categories of transforms)
+- BWFC library provides 20+ shims (WebFormsPageBase, ResponseShim, RequestShim, ViewStateDictionary, Handler framework, Middleware, Identity stubs, EF6 stubs)
+- Identified 23 automation gaps with proposed solutions
+- 9 quick wins shippable in single PRs (ConfigurationManager shim, Web.config→appsettings.json, IsPostBack unwrap, App_Themes auto-copy, BundleConfig stubs, etc.)
+- Top 3 "sneaky wins": ConfigurationManager.AppSettings shim, Session["key"] shim, Web.config→appsettings.json extraction
+- Missing shims: ConfigurationManager, HttpContext.Current, FormsAuthentication, Session (on WebFormsPageBase), BundleConfig/RouteConfig, Server.MapPath (outside handlers)
+- Missing script transforms: Page_Load→OnInitializedAsync, event handler signatures, Bind() expressions, Global.asax extraction, Startup.cs/OWIN parsing
+- WingtipToys Run 7: 14/14 tests pass, 366 transforms, 55 L2 files touched
+- ContosoUniversity Run 22: 39/40 tests pass, EDMX parser handles all models
+
+**Deliverable**: `dev-docs/migration-automation-opportunities.md` — structured report with gap inventory, proposed solutions, complexity estimates, and implementation order across 3 phases.
