@@ -42,8 +42,10 @@ public class SessionShim
 	/// <summary>
 	/// Gets or sets a session value by key, emulating
 	/// <c>Session["key"]</c> from ASP.NET Web Forms.
-	/// Values are JSON-serialized when stored in <see cref="ISession"/>
-	/// and deserialized on retrieval.
+	/// Values are stored in the in-memory fallback dictionary as the primary store
+	/// and optionally synced to <see cref="ISession"/> for cross-request persistence.
+	/// This "fallback-first" design ensures reliable operation in interactive
+	/// Blazor Server mode where ISession may be unreliable (no active HTTP pipeline).
 	/// </summary>
 	/// <param name="key">The session key.</param>
 	/// <returns>The stored value, or <c>null</c> if the key is not found.</returns>
@@ -51,28 +53,52 @@ public class SessionShim
 	{
 		get
 		{
+			// Primary: in-memory store (always up-to-date in current scope/circuit)
+			if (_fallbackStore.TryGetValue(key, out var fallbackValue))
+				return fallbackValue;
+
+			// Secondary: hydrate from ISession (cross-request persistence)
 			if (TryGetSession(out var session))
 			{
-				var json = session.GetString(key);
-				if (json is null) return null;
-				return JsonSerializer.Deserialize<object>(json);
+				try
+				{
+					var json = session.GetString(key);
+					if (json is null) return null;
+					var value = JsonSerializer.Deserialize<object>(json);
+					_fallbackStore[key] = value;
+					return value;
+				}
+				catch (Exception ex)
+				{
+					_logger.LogDebug(ex, "SessionShim: ISession read failed for key '{Key}'.", key);
+				}
 			}
 
-			_fallbackStore.TryGetValue(key, out var value);
-			return value;
+			return null;
 		}
 		set
 		{
+			// Always store in primary (in-memory)
+			if (value is null)
+				_fallbackStore.TryRemove(key, out _);
+			else
+				_fallbackStore[key] = value;
+
+			// Best-effort sync to ISession for cross-request persistence
 			if (TryGetSession(out var session))
 			{
-				if (value is null)
-					session.Remove(key);
-				else
-					session.SetString(key, JsonSerializer.Serialize(value));
-				return;
+				try
+				{
+					if (value is null)
+						session.Remove(key);
+					else
+						session.SetString(key, JsonSerializer.Serialize(value));
+				}
+				catch (Exception ex)
+				{
+					_logger.LogDebug(ex, "SessionShim: ISession write failed for key '{Key}'.", key);
+				}
 			}
-
-			_fallbackStore[key] = value;
 		}
 	}
 
@@ -84,13 +110,7 @@ public class SessionShim
 	/// <returns>The deserialized value, or <c>default</c> if the key is not found.</returns>
 	public T? Get<T>(string key)
 	{
-		if (TryGetSession(out var session))
-		{
-			var json = session.GetString(key);
-			if (json is null) return default;
-			return JsonSerializer.Deserialize<T>(json);
-		}
-
+		// Primary: in-memory store
 		if (_fallbackStore.TryGetValue(key, out var value))
 		{
 			if (value is T typed) return typed;
@@ -103,6 +123,23 @@ public class SessionShim
 			return JsonSerializer.Deserialize<T>(serialized);
 		}
 
+		// Secondary: hydrate from ISession
+		if (TryGetSession(out var session))
+		{
+			try
+			{
+				var json = session.GetString(key);
+				if (json is null) return default;
+				var result = JsonSerializer.Deserialize<T>(json);
+				_fallbackStore[key] = result;
+				return result;
+			}
+			catch (Exception ex)
+			{
+				_logger.LogDebug(ex, "SessionShim: ISession typed read failed for key '{Key}'.", key);
+			}
+		}
+
 		return default;
 	}
 
@@ -112,13 +149,16 @@ public class SessionShim
 	/// <param name="key">The session key to remove.</param>
 	public void Remove(string key)
 	{
+		_fallbackStore.TryRemove(key, out _);
+
 		if (TryGetSession(out var session))
 		{
-			session.Remove(key);
-			return;
+			try { session.Remove(key); }
+			catch (Exception ex)
+			{
+				_logger.LogDebug(ex, "SessionShim: ISession remove failed for key '{Key}'.", key);
+			}
 		}
-
-		_fallbackStore.TryRemove(key, out _);
 	}
 
 	/// <summary>
@@ -126,13 +166,16 @@ public class SessionShim
 	/// </summary>
 	public void Clear()
 	{
+		_fallbackStore.Clear();
+
 		if (TryGetSession(out var session))
 		{
-			session.Clear();
-			return;
+			try { session.Clear(); }
+			catch (Exception ex)
+			{
+				_logger.LogDebug(ex, "SessionShim: ISession clear failed.");
+			}
 		}
-
-		_fallbackStore.Clear();
 	}
 
 	/// <summary>
@@ -142,25 +185,22 @@ public class SessionShim
 	/// <returns><c>true</c> if the key exists; otherwise <c>false</c>.</returns>
 	public bool ContainsKey(string key)
 	{
-		if (TryGetSession(out var session))
-			return session.Keys.Any(k => k == key);
+		if (_fallbackStore.ContainsKey(key))
+			return true;
 
-		return _fallbackStore.ContainsKey(key);
+		if (TryGetSession(out var session))
+		{
+			try { return session.Keys.Any(k => k == key); }
+			catch { return false; }
+		}
+
+		return false;
 	}
 
 	/// <summary>
 	/// Gets the number of items in the session.
 	/// </summary>
-	public int Count
-	{
-		get
-		{
-			if (TryGetSession(out var session))
-				return session.Keys.Count();
-
-			return _fallbackStore.Count;
-		}
-	}
+	public int Count => _fallbackStore.Count;
 
 	/// <summary>
 	/// Attempts to get the ASP.NET Core <see cref="ISession"/> from the
