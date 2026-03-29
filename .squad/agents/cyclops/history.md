@@ -819,3 +819,21 @@ foreach (var warning in warnings) {
 - BundleConfig/RouteConfig use original System.Web.* namespaces so existing using statements work unchanged.
 
 **Build:** 0 errors on net8.0;net9.0;net10.0 (438 warnings, all pre-existing)
+
+### GAP-04: SessionShim — Session["key"] Drop-In Replacement (2026-07-28)
+
+**Task:** Implement `SessionShim` as a scoped service providing dictionary-style `Session["key"]` access for migrated Web Forms code.
+
+**Files created/modified:**
+- `SessionShim.cs`: Scoped service with `object? this[string key]` indexer, `Get<T>(key)` typed helper, `Remove()`, `Clear()`, `ContainsKey()`, `Count`. Uses `ISession` with JSON serialization when HTTP context is available; falls back to `ConcurrentDictionary` in interactive Blazor Server mode. Logs one-time warning on fallback.
+- `ServiceCollectionExtensions.cs`: Added `AddDistributedMemoryCache()`, `AddSession()`, `AddScoped<SessionShim>()` to `AddBlazorWebFormsComponents()`.
+- `WebFormsPageBase.cs`: Added `[Inject] SessionShim _sessionShim` and `protected SessionShim Session` property so `Session["key"]` works in any page inheriting WebFormsPageBase.
+
+**Key decisions:**
+- System.Text.Json for serialization (zero external deps, consistent with project).
+- `IHttpContextAccessor` is optional constructor parameter — graceful degradation, no throws.
+- `TryGetSession` catches `InvalidOperationException` for cases where session middleware is not configured.
+- One-time `ILogger.LogWarning` on fallback so devs get visibility without log spam.
+- `ISession.Keys` requires `System.Linq` for `Any()`/`Count()` — must include the using.
+
+**Build:** ✅ 0 errors on net8.0;net9.0;net10.0

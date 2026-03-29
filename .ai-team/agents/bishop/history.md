@@ -98,3 +98,10 @@
 - **Regex change:** `([ \t]*)\[RouteData\]` → `([ \t]*)\[RouteData\]\s*` (also consumes trailing whitespace to keep formatting clean).
 - **L1 tests:** All 15 pass (100% pass rate, 100% line accuracy).
 - **Key pattern:** When a Web Forms attribute has no inline Blazor equivalent, strip it and leave a TODO for Layer 2 — never substitute an attribute that targets a different declaration type.
+
+## Phase 2: GAP-05 + GAP-07  Lifecycle and Event Handler Transforms (2026-03-29)
+
+Added `Convert-PageLifecycleMethods` (GAP-05) and `Convert-EventHandlerSignatures` (GAP-07) to bwfc-migrate.ps1.
+- GAP-05: Page_Load  OnInitializedAsync, Page_Init  OnInitialized, Page_PreRender  OnAfterRenderAsync(bool firstRender)
+- GAP-07: Standard EventArgs handlers strip both params; specialized *EventArgs handlers keep the EventArgs param, strip sender
+- Updated 6 expected test files. All 21 L1 tests pass at 100% line accuracy.

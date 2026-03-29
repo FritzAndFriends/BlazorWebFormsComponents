@@ -176,6 +176,8 @@ public static class ComponentCatalog
         // Migration Helpers
         new("ConfigurationManager", "Migration Helpers", "/ControlSamples/Migration/ConfigurationManager", "Static shim for reading AppSettings and ConnectionStrings from IConfiguration",
             Keywords: new[] { "config", "appsettings", "connectionstrings", "web.config", "migration", "shim" }),
+        new("Session State", "Migration Helpers", "/migration/session", "SessionShim providing Web Forms-compatible Session[\"key\"] access in Blazor",
+            Keywords: new[] { "session", "state", "httpcontext", "migration", "shim" }),
         new("NamingContainer", "Migration Helpers", "/ControlSamples/NamingContainer", "Establishes naming scope for child components, equivalent to INamingContainer",
             Keywords: new[] { "naming", "scope", "id", "prefix" }),
         new("ScriptManager", "Migration Helpers", "/ControlSamples/ScriptManager", "Migration stub for AJAX script management",

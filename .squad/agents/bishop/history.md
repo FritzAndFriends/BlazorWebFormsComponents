@@ -116,3 +116,31 @@ BlazorWebFormsComponents is a library providing Blazor components that emulate A
 
 **Validation**: Script parses cleanly, WhatIf mode works, existing 15-test suite maintains 12/15 pass rate (3 pre-existing base-class-stripping failures unchanged). Script grew from 2,714 to ~3,000 lines.
 
+
+## Phase 2: GAP-05 + GAP-07  Lifecycle and Event Handler Transforms (2026-03-29)
+
+### GAP-05: Page Lifecycle Method Transform
+Added `Convert-PageLifecycleMethods` function to bwfc-migrate.ps1:
+- `Page_Load(object sender, EventArgs e)`  `protected override async Task OnInitializedAsync()` with `await base.OnInitializedAsync();` injection
+- `Page_Init(object sender, EventArgs e)`  `protected override void OnInitialized()`
+- `Page_PreRender(object sender, EventArgs e)`  `protected override async Task OnAfterRenderAsync(bool firstRender)` with `if (firstRender)` body guard
+- Case-insensitive method name matching, handles all access modifier combinations
+- TODO comments injected for developer review
+
+### GAP-07: Event Handler Signature Transform  CRITICAL
+Added `Convert-EventHandlerSignatures` function to bwfc-migrate.ps1:
+- Standard `EventArgs`  strip both params: `Handler(object sender, EventArgs e)`  `Handler()`
+- Specialized `*EventArgs` subtypes  strip sender only: `Handler(object sender, GridViewCommandEventArgs e)`  `Handler(GridViewCommandEventArgs e)`
+- Decision logic: exact match on "EventArgs" type name determines strip-both vs keep-specialized
+- Regex anchored to `\w*EventArgs` to avoid false positives on non-EventArgs parameter types
+- Iterative processing handles multiple handlers per file (up to 200 safety limit)
+- Access modifiers and async keywords preserved as-is
+
+### Pipeline integration
+Both functions called in `Copy-CodeBehind` after existing transforms, before file write:
+1. Strip usings (existing)  2. IsPostBack unwrap (existing)  3. URL cleanup (existing)  4. Lifecycle convert (GAP-05)  5. Event handler signatures (GAP-07)  6. Write file
+
+### Test results
+Updated 6 expected test files (TC13, TC14, TC15, TC16, TC18, TC19) to reflect new transforms.
+TC19 (lifecycle) and TC20/TC21 (event handlers) are dedicated test cases for these features.
+**All 21 tests pass at 100% line accuracy.**
