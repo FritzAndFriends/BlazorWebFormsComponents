@@ -20,8 +20,11 @@ namespace MyApp
 {
     public partial class TC16_IsPostBackGuard
     {
-        protected void Page_Load(object sender, EventArgs e)
+        protected override async Task OnInitializedAsync()
         {
+            // TODO: Review lifecycle conversion — verify async behavior
+            await base.OnInitializedAsync();
+
                         // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
             LoadDropDownLists();
                         InitializeData();

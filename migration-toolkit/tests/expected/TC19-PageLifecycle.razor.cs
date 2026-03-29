@@ -18,19 +18,33 @@ using System;
 
 namespace MyApp
 {
-    public partial class TC13_ResponseRedirect
+    public partial class TC19_PageLifecycle
     {
-    [Inject] private NavigationManager NavigationManager { get; set; } // TODO: Add @using Microsoft.AspNetCore.Components to _Imports.razor if needed
-
         protected override async Task OnInitializedAsync()
         {
             // TODO: Review lifecycle conversion — verify async behavior
             await base.OnInitializedAsync();
 
-            NavigationManager.NavigateTo("/Products.aspx");
-            NavigationManager.NavigateTo("/Cart.aspx");
-            NavigationManager.NavigateTo(GetUrl() /* TODO: Verify navigation target */);
+            LoadData();
+        }
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            // TODO: Review lifecycle conversion — verify async behavior
+            if (firstRender)
+            {
+                UpdateUI();
+            }
+        }
+
+        private void LoadData()
+        {
+            // Load data
+        }
+
+        private void UpdateUI()
+        {
+            // Update UI
         }
     }
 }
-

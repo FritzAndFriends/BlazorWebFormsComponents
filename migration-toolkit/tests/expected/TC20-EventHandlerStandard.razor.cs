@@ -18,19 +18,16 @@ using System;
 
 namespace MyApp
 {
-    public partial class TC13_ResponseRedirect
+    public partial class TC20_EventHandlerStandard
     {
-    [Inject] private NavigationManager NavigationManager { get; set; } // TODO: Add @using Microsoft.AspNetCore.Components to _Imports.razor if needed
-
-        protected override async Task OnInitializedAsync()
+        protected void Button_Click()
         {
-            // TODO: Review lifecycle conversion — verify async behavior
-            await base.OnInitializedAsync();
+            // Handle button click
+        }
 
-            NavigationManager.NavigateTo("/Products.aspx");
-            NavigationManager.NavigateTo("/Cart.aspx");
-            NavigationManager.NavigateTo(GetUrl() /* TODO: Verify navigation target */);
+        protected void LinkButton_Click()
+        {
+            // Handle link click
         }
     }
 }
-

@@ -18,8 +18,11 @@
       - Flags DataSourceID attributes and data source controls for conversion
       - Copies code-behind files with TODO annotations
 
-    Semantic transforms (lifecycle methods, data binding logic, event handlers)
-    are NOT handled here — those require the Copilot skill layer (Layer 2).
+    Code-behind transforms include:
+      - Page lifecycle methods (Page_Load, Page_Init, Page_PreRender) → Blazor equivalents
+      - Event handler signatures → Blazor-compatible signatures (strip sender, adjust EventArgs)
+    Remaining semantic transforms (data binding logic, complex state management)
+    require the Copilot skill layer (Layer 2).
 
 .PARAMETER Path
     Path to the Web Forms project root directory containing .aspx/.ascx/.master files.
@@ -2240,6 +2243,200 @@ function Remove-IsPostBackGuards {
     return $Content
 }
 
+function Convert-PageLifecycleMethods {
+    <#
+    .SYNOPSIS
+        Transforms Web Forms page lifecycle methods to Blazor equivalents (GAP-05).
+    .DESCRIPTION
+        Converts:
+          Page_Load(object sender, EventArgs e) → protected override async Task OnInitializedAsync()
+          Page_Init(object sender, EventArgs e) → protected override void OnInitialized()
+          Page_PreRender(object sender, EventArgs e) → protected override async Task OnAfterRenderAsync(bool firstRender)
+    #>
+    param(
+        [string]$Content,
+        [string]$RelPath
+    )
+
+    $convertCount = 0
+
+    # --- Page_Load → OnInitializedAsync ---
+    # Matches any access modifier combination + void + Page_Load (case-insensitive method name)
+    $pageLoadRegex = [regex]'(?m)([ \t]*)(?:(?:protected|private|public|internal)\s+)?(?:(?:virtual|override|new|static|sealed|abstract)\s+)*void\s+(?i:Page_Load)\s*\(\s*object\s+\w+\s*,\s*EventArgs\s+\w+\s*\)'
+
+    if ($pageLoadRegex.IsMatch($Content)) {
+        $match = $pageLoadRegex.Match($Content)
+        $indent = $match.Groups[1].Value
+        $matchStart = $match.Index
+        $matchEnd = $matchStart + $match.Length
+
+        $newSig = "${indent}protected override async Task OnInitializedAsync()"
+        $Content = $Content.Substring(0, $matchStart) + $newSig + $Content.Substring($matchEnd)
+
+        # Find opening brace after the new signature
+        $sigEnd = $matchStart + $newSig.Length
+        $bracePos = $sigEnd
+        while ($bracePos -lt $Content.Length -and $Content[$bracePos] -match '\s') { $bracePos++ }
+
+        if ($bracePos -lt $Content.Length -and $Content[$bracePos] -eq '{') {
+            $injection = "`n${indent}    // TODO: Review lifecycle conversion — verify async behavior`n${indent}    await base.OnInitializedAsync();`n"
+            $Content = $Content.Substring(0, $bracePos + 1) + $injection + $Content.Substring($bracePos + 1)
+        }
+
+        $convertCount++
+        Write-TransformLog -File $RelPath -Transform 'LifecycleConvert' -Detail "Page_Load → OnInitializedAsync"
+    }
+
+    # --- Page_Init → OnInitialized ---
+    $pageInitRegex = [regex]'(?m)([ \t]*)(?:(?:protected|private|public|internal)\s+)?(?:(?:virtual|override|new|static|sealed|abstract)\s+)*void\s+(?i:Page_Init)\s*\(\s*object\s+\w+\s*,\s*EventArgs\s+\w+\s*\)'
+
+    if ($pageInitRegex.IsMatch($Content)) {
+        $match = $pageInitRegex.Match($Content)
+        $indent = $match.Groups[1].Value
+        $matchStart = $match.Index
+        $matchEnd = $matchStart + $match.Length
+
+        $newSig = "${indent}protected override void OnInitialized()"
+        $Content = $Content.Substring(0, $matchStart) + $newSig + $Content.Substring($matchEnd)
+
+        # Find opening brace and inject TODO comment
+        $sigEnd = $matchStart + $newSig.Length
+        $bracePos = $sigEnd
+        while ($bracePos -lt $Content.Length -and $Content[$bracePos] -match '\s') { $bracePos++ }
+
+        if ($bracePos -lt $Content.Length -and $Content[$bracePos] -eq '{') {
+            $injection = "`n${indent}    // TODO: Review lifecycle conversion — verify async behavior`n"
+            $Content = $Content.Substring(0, $bracePos + 1) + $injection + $Content.Substring($bracePos + 1)
+        }
+
+        $convertCount++
+        Write-TransformLog -File $RelPath -Transform 'LifecycleConvert' -Detail "Page_Init → OnInitialized"
+    }
+
+    # --- Page_PreRender → OnAfterRenderAsync ---
+    $preRenderRegex = [regex]'(?m)([ \t]*)(?:(?:protected|private|public|internal)\s+)?(?:(?:virtual|override|new|static|sealed|abstract)\s+)*void\s+(?i:Page_PreRender)\s*\(\s*object\s+\w+\s*,\s*EventArgs\s+\w+\s*\)'
+
+    if ($preRenderRegex.IsMatch($Content)) {
+        $match = $preRenderRegex.Match($Content)
+        $indent = $match.Groups[1].Value
+        $matchStart = $match.Index
+        $matchEnd = $matchStart + $match.Length
+
+        $newSig = "${indent}protected override async Task OnAfterRenderAsync(bool firstRender)"
+        $Content = $Content.Substring(0, $matchStart) + $newSig + $Content.Substring($matchEnd)
+
+        # Find opening brace
+        $sigEnd = $matchStart + $newSig.Length
+        $braceStart = $sigEnd
+        while ($braceStart -lt $Content.Length -and $Content[$braceStart] -match '\s') { $braceStart++ }
+
+        if ($braceStart -lt $Content.Length -and $Content[$braceStart] -eq '{') {
+            # Brace-count to find matching close brace
+            $depth = 1
+            $pos = $braceStart + 1
+            while ($pos -lt $Content.Length -and $depth -gt 0) {
+                if ($Content[$pos] -eq '{') { $depth++ }
+                elseif ($Content[$pos] -eq '}') { $depth-- }
+                $pos++
+            }
+
+            if ($depth -eq 0) {
+                $braceEnd = $pos - 1
+                $body = $Content.Substring($braceStart + 1, $braceEnd - $braceStart - 1)
+                $bodyIndent = "${indent}    "
+
+                # Build wrapped body with firstRender guard
+                $newBody = "`n${bodyIndent}// TODO: Review lifecycle conversion — verify async behavior"
+                $newBody += "`n${bodyIndent}if (firstRender)"
+                $newBody += "`n${bodyIndent}{"
+
+                # Re-indent original body lines by one level
+                $bodyLines = $body -split "`n"
+                foreach ($line in $bodyLines) {
+                    $trimmed = $line.TrimEnd()
+                    if ($trimmed.Length -gt 0) {
+                        $newBody += "`n    $trimmed"
+                    }
+                }
+
+                $newBody += "`n${bodyIndent}}"
+                $newBody += "`n${indent}"
+
+                $Content = $Content.Substring(0, $braceStart + 1) + $newBody + $Content.Substring($braceEnd)
+            }
+        }
+
+        $convertCount++
+        Write-TransformLog -File $RelPath -Transform 'LifecycleConvert' -Detail "Page_PreRender → OnAfterRenderAsync with firstRender guard"
+    }
+
+    if ($convertCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'LifecycleConvert' -Detail "Converted $convertCount page lifecycle method(s) to Blazor equivalents"
+    }
+
+    return $Content
+}
+
+function Convert-EventHandlerSignatures {
+    <#
+    .SYNOPSIS
+        Transforms Web Forms event handler signatures to Blazor-compatible signatures (GAP-07).
+    .DESCRIPTION
+        Rules:
+          - If EventArgs type is EXACTLY 'EventArgs' → strip both params: Handler()
+          - If EventArgs type is a specialized subclass (e.g., GridViewCommandEventArgs) →
+            strip 'object sender', keep the specialized EventArgs: Handler(GridViewCommandEventArgs e)
+          - Access modifiers are preserved as-is
+          - async is NOT added unless already present
+    #>
+    param(
+        [string]$Content,
+        [string]$RelPath
+    )
+
+    $stripCount = 0
+    $keepCount = 0
+
+    # Match methods with (object sender, *EventArgs param) signature.
+    # Group 1: everything before the parens (modifiers + return type + method name)
+    # Group 2: the EventArgs type name (must end with 'EventArgs')
+    # Group 3: the EventArgs parameter name
+    $handlerRegex = [regex]'((?:(?:protected|private|public|internal)\s+)?(?:(?:static|virtual|override|new|sealed|abstract|async)\s+)*(?:void|Task(?:<[^>]+>)?)\s+\w+)\s*\(\s*object\s+\w+\s*,\s*(\w*EventArgs)\s+(\w+)\s*\)'
+
+    $maxIterations = 200
+    $iterations = 0
+
+    while ($handlerRegex.IsMatch($Content) -and $iterations -lt $maxIterations) {
+        $iterations++
+        $match = $handlerRegex.Match($Content)
+        $prefix = $match.Groups[1].Value
+        $eventArgsType = $match.Groups[2].Value
+        $eventArgsParam = $match.Groups[3].Value
+
+        if ($eventArgsType -eq 'EventArgs') {
+            # Standard EventArgs — strip both params entirely
+            $replacement = "${prefix}()"
+            $Content = $Content.Substring(0, $match.Index) + $replacement + $Content.Substring($match.Index + $match.Length)
+            $stripCount++
+        }
+        else {
+            # Specialized EventArgs — strip sender, keep the EventArgs param
+            $replacement = "${prefix}($eventArgsType $eventArgsParam)"
+            $Content = $Content.Substring(0, $match.Index) + $replacement + $Content.Substring($match.Index + $match.Length)
+            $keepCount++
+        }
+    }
+
+    if ($stripCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'EventHandler' -Detail "Stripped sender+EventArgs from $stripCount standard event handler(s)"
+    }
+    if ($keepCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'EventHandler' -Detail "Stripped sender, kept specialized EventArgs in $keepCount event handler(s)"
+    }
+
+    return $Content
+}
+
 function Copy-CodeBehind {
     param(
         [string]$SourceFile,
@@ -2559,6 +2756,12 @@ function Copy-CodeBehind {
         if ($aspxUrlCount -gt 0) {
             Write-TransformLog -File $RelPath -Transform 'AspxUrlCleanup' -Detail "Cleaned $aspxUrlCount .aspx URL reference(s) in string literals"
         }
+
+        # --- GAP-05: Page lifecycle method conversion ---
+        $annotatedContent = Convert-PageLifecycleMethods -Content $annotatedContent -RelPath $RelPath
+
+        # --- GAP-07: Event handler signature conversion ---
+        $annotatedContent = Convert-EventHandlerSignatures -Content $annotatedContent -RelPath $RelPath
 
         $outputDir = Split-Path $OutputFile -Parent
         if (-not (Test-Path $outputDir)) {

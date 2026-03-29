@@ -15,22 +15,18 @@
 //   - User controls → Blazor component references
 // =============================================================================
 using System;
-
 namespace MyApp
 {
-    public partial class TC13_ResponseRedirect
+    public partial class TC21_EventHandlerSpecialized
     {
-    [Inject] private NavigationManager NavigationManager { get; set; } // TODO: Add @using Microsoft.AspNetCore.Components to _Imports.razor if needed
-
-        protected override async Task OnInitializedAsync()
+        protected void Grid_RowCommand(GridViewCommandEventArgs e)
         {
-            // TODO: Review lifecycle conversion — verify async behavior
-            await base.OnInitializedAsync();
+            // Handle row command
+        }
 
-            NavigationManager.NavigateTo("/Products.aspx");
-            NavigationManager.NavigateTo("/Cart.aspx");
-            NavigationManager.NavigateTo(GetUrl() /* TODO: Verify navigation target */);
+        protected void Grid_PageIndexChanging(GridViewPageEventArgs e)
+        {
+            // Handle paging
         }
     }
 }
-

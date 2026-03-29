@@ -22,15 +22,18 @@ namespace MyApp
     {
     [Inject] private NavigationManager NavigationManager { get; set; } // TODO: Add @using Microsoft.AspNetCore.Components to _Imports.razor if needed
 
-        protected void Page_Load(object sender, EventArgs e)
+        protected override async Task OnInitializedAsync()
         {
+            // TODO: Review lifecycle conversion — verify async behavior
+            await base.OnInitializedAsync();
+
             NavigationManager.NavigateTo("/Products.aspx");
             NavigationManager.NavigateTo("/Admin/Dashboard.aspx?id=1");
             string url = "~/Help.aspx#section";
             var path = "~/Images/logo.png";
         }
 
-        protected void Button_Click(object sender, EventArgs e)
+        protected void Button_Click()
         {
             NavigationManager.NavigateTo("/Checkout.aspx");
         }
