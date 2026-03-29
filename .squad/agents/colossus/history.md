@@ -58,6 +58,22 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
  Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
 
+## Phase 2 Playwright Tests (2026-07-24)
+
+Added 6 integration tests across 2 new files in `samples/AfterBlazorServerSide.Tests/Migration/`:
+
+**SessionDemoTests.cs** (5 tests for `/migration/session` — GAP-04 SessionShim):
+1. `Session_SetAndGetValue` — stores a value via input+button, verifies display updates
+2. `Session_CountIncrementsAfterStore` — stores 2 keys (string + int counter), verifies count ≥ 2
+3. `Session_ClearRemovesAllValues` — stores value, clicks Clear, verifies count=0 and display="(empty)"
+4. `Session_TypedCounter` — clicks Increment Counter 3×, verifies Session.Get<int> increments correctly
+5. `Session_PersistsAcrossNavigation` — stores value, navigates to home and back, verifies persistence
+
+**ConfigurationManagerTests.cs** (1 regression test for Phase 1):
+6. `ConfigurationManager_PageLoads` — loads page, checks heading, verifies AppSettings card renders, no errors
+
+Patterns used: `data-audit-control` attribute selectors for card targeting, `DOMContentLoaded` wait strategy, `FillAsync` + Tab for Blazor Server `@bind` inputs, `WaitForTimeoutAsync` for post-click re-render. Build green — 0 errors.
+
  Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
 
  Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
