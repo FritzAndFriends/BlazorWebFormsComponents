@@ -301,6 +301,16 @@ Parallel fan-out of three documentation agents to standardize control library do
 
 This wave establishes **documentation patterns** that will guide future control categories (NavigationControls, LoginControls). The tabbed syntax pattern enables better UX for migrating developers and maintains consistency across the library.
 
+### M28 ConfigurationManager Migration Sample Page (2026-03-29)
+
+- **Created ConfigurationManager demo page** at `Components/Pages/ControlSamples/Migration/ConfigurationManager.razor` demonstrating the Phase 1 ConfigurationManager shim.
+- **Page structure** follows ViewState sample pattern: descriptive intro, before/after code comparisons, live demos with data-audit-control markers, setup instructions, and graduation path to native IConfiguration.
+- **ComponentCatalog.cs** updated — added ConfigurationManager entry to "Migration Helpers" category with keywords for discoverability.
+- **appsettings.json** updated — added AppSettings section with SiteName/MaxItemsPerPage/EnableFeatureX and ConnectionStrings with DefaultConnection for demo purposes.
+- **Program.cs** updated — added `app.UseConfigurationManagerShim()` call after `app.UseBlazorWebFormsComponents()` to initialize the shim.
+- **Namespace gotcha:** ConfigurationManager lives in `BlazorWebFormsComponents` namespace (not System.Web.Configuration). Had to use fully qualified name in Razor due to potential conflict with System.Configuration.ConfigurationManager. The `global using BlazorWebFormsComponents;` in Program.cs doesn't apply to Razor components by default.
+- **Demo sections:** (1) AppSettings with live table showing key/value pairs, (2) ConnectionStrings with live table, (3) Setup instructions, (4) Native IConfiguration alternative with injected demo.
+
 ### Next Phase
 
 - Merge PRs #513, #514, #515 after review

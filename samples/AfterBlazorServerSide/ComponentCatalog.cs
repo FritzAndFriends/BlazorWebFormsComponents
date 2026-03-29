@@ -174,6 +174,8 @@ public static class ComponentCatalog
             Keywords: new[] { "showcase", "migration", "demo", "accordion", "tabs", "modal", "autocomplete", "calendar", "mask", "slider", "hover", "toolkit" }),
 
         // Migration Helpers
+        new("ConfigurationManager", "Migration Helpers", "/ControlSamples/Migration/ConfigurationManager", "Static shim for reading AppSettings and ConnectionStrings from IConfiguration",
+            Keywords: new[] { "config", "appsettings", "connectionstrings", "web.config", "migration", "shim" }),
         new("NamingContainer", "Migration Helpers", "/ControlSamples/NamingContainer", "Establishes naming scope for child components, equivalent to INamingContainer",
             Keywords: new[] { "naming", "scope", "id", "prefix" }),
         new("ScriptManager", "Migration Helpers", "/ControlSamples/ScriptManager", "Migration stub for AJAX script management",

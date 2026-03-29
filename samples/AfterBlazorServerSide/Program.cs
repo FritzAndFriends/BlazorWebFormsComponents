@@ -38,6 +38,7 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseBlazorWebFormsComponents();
+app.UseConfigurationManagerShim();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
