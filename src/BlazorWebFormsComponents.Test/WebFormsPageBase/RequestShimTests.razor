@@ -27,6 +27,8 @@
 		var mockAccessor = new Mock<IHttpContextAccessor>();
 		mockAccessor.Setup(x => x.HttpContext).Returns((HttpContext)null);
 		Services.AddSingleton<IHttpContextAccessor>(mockAccessor.Object);
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
 		Services.AddScoped<IPageService, PageService>();
 		return Render<TestPage>();
 	}
@@ -112,6 +114,8 @@
 		Services.AddSingleton<IHttpContextAccessor>(mockAccessor.Object);
 		var nav = new MockNavigationManager();
 		Services.AddSingleton<Microsoft.AspNetCore.Components.NavigationManager>(nav);
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
 		Services.AddScoped<IPageService, PageService>();
 
 		var cut = Render<TestPage>();

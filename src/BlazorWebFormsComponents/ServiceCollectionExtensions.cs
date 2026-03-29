@@ -34,8 +34,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlazorWebFormsComponents(this IServiceCollection services, Action<BlazorWebFormsComponentsOptions>? configure)
     {
         services.AddHttpContextAccessor();
+        services.AddDistributedMemoryCache();
+        services.AddSession();
         services.AddScoped<BlazorWebFormsJsInterop>();
         services.AddScoped<IPageService, PageService>();
+        services.AddScoped<SessionShim>();
 
         var options = new BlazorWebFormsComponentsOptions();
         configure?.Invoke(options);
