@@ -6,6 +6,39 @@ The output project from this operation will be a .NET Core 3.1 project running s
 
 The first step is a step of acknowledgement.  This process is not 100% and is not guaranteed to deliver a Blazor application without some amount of rewriting.  Applications are written in many different ways, and the tools provided here are attempting to get your project *CLOSE* to Blazor so that you have to rewrite as little code as possible.
 
+## Phase 1: Just Make It Compile (Compilation Shims)
+
+Before diving into deep architectural changes, BWFC provides **compilation shims** that allow migrated code to compile unchanged. This phase focuses on making your Web Forms code work in a Blazor project with minimal refactoring.
+
+### Phase 1 Features
+
+The BWFC migration toolkit includes:
+
+| Feature | What It Does | More Info |
+|---------|-------------|-----------|
+| **ConfigurationManager Shim** | Migrated BLL/DAL code accesses `ConfigurationManager.AppSettings["key"]` and `ConnectionStrings["name"]` unchanged | [Configuration Manager Guide](Phase1-ConfigurationManager.md) |
+| **App_Start Stubs** | `BundleConfig` and `RouteConfig` files compile as-is; bundle/route processing happens in Blazor alternatives | [App_Start Stubs Guide](Phase1-AppStartStubs.md) |
+| **L1 Automated Script** | Mechanical transforms: `web.config` → `appsettings.json`, `.aspx` → `.razor`, `IsPostBack` guard unwrapping, selective `using` retention | [Automated Migration Guide](AutomatedMigration.md) |
+
+### Phase 1 Workflow
+
+1. **Scan** your Web Forms app: `bwfc-scan.ps1` inventories controls and readiness
+2. **Run L1 Script**: `bwfc-migrate.ps1` performs mechanical transforms and web.config extraction
+3. **Enable Shims**: Call `AddBlazorWebFormsComponents()` in `Program.cs`
+4. **Compile**: Your migrated project compiles with minimal code changes
+5. **Plan Phase 2**: Identify which shims to replace with Blazor-native patterns
+
+### When to Move to Phase 2
+
+Phase 1 gets your code **compiling**. Plan Phase 2 migration when you're ready to:
+
+- Replace `ConfigurationManager` with dependency injection
+- Replace bundling stubs with Blazor CSS/JS Isolation
+- Implement proper routing with `@page` directives
+- Add proper configuration providers (Azure Key Vault, etc.)
+
+See [Automated Migration Guide](AutomatedMigration.md) for next steps.
+
 ## Step 1 - Readiness
 
 There are good application architectures and there are not-so-good application architectures to be considered for migration to Blazor.  We've written another document to help you evaluate the [readiness of your application for migration](migration_readiness.md).  It is recommended you read through that documentation to understand what makes an application better prepared for migration to Blazor.
