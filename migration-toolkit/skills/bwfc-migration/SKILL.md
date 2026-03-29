@@ -223,6 +223,123 @@ The cleanup handles four patterns: tilde-prefixed with/without query strings, an
 
 ---
 
+## Phase 2: Just Make It Run
+
+Phase 2 transforms convert compile-compatible code into **functionally correct Blazor code** — bridging the gap between "it compiles" (Phase 1) and "it runs." These are Layer 2 (Copilot-assisted) transforms.
+
+### Session Shim
+
+BWFC provides `SessionShim`, a scoped service that emulates `Session["key"]` access in migrated pages. Code-behind that reads/writes `Session["CartId"]` or similar patterns works without rewriting.
+
+**How it works:**
+- `SessionShim` implements dictionary-style `this[string key]` indexer
+- Registered as a scoped service — state is per-circuit (Blazor Server)
+- Migrated pages that inherit `WebFormsPageBase` get automatic access via a `Session` property
+
+**Setup in Program.cs:**
+
+```csharp
+builder.Services.AddSessionShim();
+```
+
+**Before/After — code-behind unchanged:**
+
+```csharp
+// This code works in BOTH Web Forms and Blazor (with SessionShim):
+Session["CartId"] = cartId;
+var id = Session["CartId"]?.ToString();
+```
+
+> **Note:** `SessionShim` is an in-memory per-circuit store. It does NOT persist across browser refreshes or reconnections. For durable state, migrate to a scoped DI service with server-side persistence.
+
+### Page Lifecycle Transforms
+
+Phase 2 converts Web Forms page lifecycle methods to their Blazor equivalents. These transforms run after Phase 1 has already unwrapped `IsPostBack` guards.
+
+| Web Forms Method | Blazor Method | Notes |
+|---|---|---|
+| `Page_Load(object sender, EventArgs e)` | `protected override async Task OnInitializedAsync()` | Primary init — runs once on first render |
+| `Page_Init(object sender, EventArgs e)` | `protected override void OnInitialized()` | Sync init — for non-async setup |
+| `Page_PreRender(object sender, EventArgs e)` | `protected override async Task OnAfterRenderAsync(bool firstRender)` | Post-render logic — guard with `if (firstRender)` when appropriate |
+
+```csharp
+// Before (Phase 1 output — compiles but uses Web Forms signatures):
+protected void Page_Load(object sender, EventArgs e)
+{
+    products = GetProducts();
+}
+
+protected void Page_Init(object sender, EventArgs e)
+{
+    theme = "Default";
+}
+
+protected void Page_PreRender(object sender, EventArgs e)
+{
+    lblCount.Text = products.Count.ToString();
+}
+
+// After (Phase 2 — Blazor lifecycle):
+protected override async Task OnInitializedAsync()
+{
+    products = await GetProductsAsync();
+}
+
+protected override void OnInitialized()
+{
+    theme = "Default";
+}
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender)
+    {
+        lblCount.Text = products.Count.ToString();
+        StateHasChanged();
+    }
+}
+```
+
+### Event Handler Signature Cleanup
+
+Phase 2 strips **standard** `EventArgs` parameters from event handlers but **preserves specialized** EventArgs types that carry data.
+
+**Rule:** If the handler signature uses `EventArgs` (the base class), remove both `object sender` and `EventArgs e`. If it uses a specialized type (`CommandEventArgs`, `GridViewEditEventArgs`, etc.), keep the specialized parameter.
+
+| Before (Web Forms) | After (Blazor) | Why |
+|---|---|---|
+| `void Btn_Click(object sender, EventArgs e)` | `void Btn_Click()` | `EventArgs` carries no data — strip both params |
+| `void Grid_RowCommand(object sender, GridViewCommandEventArgs e)` | `void Grid_RowCommand(CommandEventArgs e)` | Specialized args carry `CommandName`/`CommandArgument` — keep |
+| `void Ddl_Changed(object sender, EventArgs e)` | `void Ddl_Changed()` | Standard `EventArgs` — strip |
+
+```csharp
+// Standard EventArgs — strip both parameters:
+// Before:
+protected void SubmitBtn_Click(object sender, EventArgs e)
+{
+    NavigationManager.NavigateTo("/Confirmation");
+}
+// After:
+private void SubmitBtn_Click()
+{
+    NavigationManager.NavigateTo("/Confirmation");
+}
+
+// Specialized EventArgs — keep the BWFC equivalent:
+// Before:
+protected void CartGrid_RowCommand(object sender, GridViewCommandEventArgs e)
+{
+    var productId = e.CommandArgument.ToString();
+}
+// After:
+private void CartGrid_RowCommand(CommandEventArgs e)
+{
+    var productId = e.CommandArgument.ToString();
+}
+```
+
+---
+
 ## Migration Pipeline — MANDATORY
 
 > ⚠️ **CRITICAL: The migration pipeline is a two-layer automated sequence. Both layers MUST run. Do NOT make any manual code fixes between Layer 1 and Layer 2.**

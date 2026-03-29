@@ -230,3 +230,124 @@ For FormView, DetailsView:
     @Body
 </div>
 ```
+
+---
+
+## Phase 2 Transforms
+
+Phase 2 (Layer 2, Copilot-assisted) converts compile-compatible code into functionally correct Blazor code.
+
+### Page Lifecycle Method Transforms
+
+Convert Web Forms lifecycle methods to Blazor equivalents. Apply **after** Phase 1 has unwrapped IsPostBack guards.
+
+**Page_Load → OnInitializedAsync:**
+
+```csharp
+// Before (Phase 1 output):
+protected void Page_Load(object sender, EventArgs e)
+{
+    categories = GetCategories();
+    BindGrid();
+}
+
+// After (Phase 2):
+protected override async Task OnInitializedAsync()
+{
+    categories = await GetCategoriesAsync();
+    // DataBound controls auto-bind via SelectMethod — remove explicit BindGrid()
+}
+```
+
+**Page_Init → OnInitialized:**
+
+```csharp
+// Before:
+protected void Page_Init(object sender, EventArgs e)
+{
+    theme = "Default";
+    ViewState["Initialized"] = true;
+}
+
+// After:
+protected override void OnInitialized()
+{
+    theme = "Default";
+    // ViewState removed — use component fields instead
+}
+```
+
+**Page_PreRender → OnAfterRenderAsync:**
+
+```csharp
+// Before:
+protected void Page_PreRender(object sender, EventArgs e)
+{
+    lblTotal.Text = cart.GetTotal().ToString("C");
+}
+
+// After:
+protected override async Task OnAfterRenderAsync(bool firstRender)
+{
+    if (firstRender)
+    {
+        lblTotal.Text = cart.GetTotal().ToString("C");
+        StateHasChanged();
+    }
+}
+```
+
+> **Key differences:** `OnAfterRenderAsync` runs *after* render (not before), so UI updates require `StateHasChanged()`. Guard with `if (firstRender)` to avoid infinite render loops.
+
+### Event Handler Signature Transforms
+
+Strip **standard** `EventArgs` (carries no data). Preserve **specialized** EventArgs (carries command data, selection data, etc.).
+
+**Standard EventArgs — strip both parameters:**
+
+```csharp
+// Before:
+protected void SaveBtn_Click(object sender, EventArgs e)
+{
+    SaveRecord();
+}
+
+// After:
+private void SaveBtn_Click()
+{
+    SaveRecord();
+}
+```
+
+**Specialized EventArgs — keep the BWFC equivalent:**
+
+```csharp
+// Before:
+protected void ProductList_ItemCommand(object sender, ListViewCommandEventArgs e)
+{
+    if (e.CommandName == "AddToCart")
+    {
+        var productId = e.CommandArgument.ToString();
+        AddToCart(productId);
+    }
+}
+
+// After:
+private void ProductList_ItemCommand(CommandEventArgs e)
+{
+    if (e.CommandName == "AddToCart")
+    {
+        var productId = e.CommandArgument.ToString();
+        AddToCart(productId);
+    }
+}
+```
+
+**Decision table:**
+
+| Original Parameter Type | Action | BWFC Equivalent |
+|---|---|---|
+| `EventArgs` | **Strip** both params | No parameter |
+| `CommandEventArgs` / `GridViewCommandEventArgs` / `ListViewCommandEventArgs` | **Keep** — map to BWFC type | `CommandEventArgs` |
+| `GridViewEditEventArgs` / `GridViewDeleteEventArgs` | **Keep** — map to BWFC type | Check BWFC component API |
+| `RepeaterCommandEventArgs` | **Keep** — map to BWFC type | `CommandEventArgs` |

@@ -105,6 +105,8 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 
 ### Event Handler Strategy
 
+> **Phase 2 signature cleanup:** Standard `EventArgs` parameters are stripped (they carry no data). Specialized EventArgs types (`CommandEventArgs`, `GridViewEditEventArgs`, etc.) are preserved and mapped to their BWFC equivalents. See `bwfc-migration` skill CODE-TRANSFORMS.md for the full decision table.
+
 BWFC components already expose EventCallback parameters with **matching Web Forms names**:
 
 | Web Forms | BWFC | Action |
@@ -145,7 +147,8 @@ The script should preserve the attribute and annotate the signature change neede
 
 ### Session State → Scoped Services
 
-- Replace `Session["key"]` with a scoped DI service
+- **Phase 2 quick-start:** Use `SessionShim` (`builder.Services.AddSessionShim()`) for immediate `Session["key"]` compatibility — code-behind works unchanged via `WebFormsPageBase.Session`
+- **Final migration:** Replace `Session["key"]` with a scoped DI service for durable state
 - Use `IHttpContextAccessor` for cookie-based persistence when needed
 - Register in `Program.cs` with `builder.Services.AddScoped<TService>()`
 - Example: `Session["CartId"]` → `CartStateService` with cookie-based cart ID
@@ -257,14 +260,17 @@ This applies to **both L1-generated scaffolding and L2 Copilot-generated code**.
 
 ### Page Lifecycle Mapping
 
-| Web Forms | Blazor | Notes |
-|---|---|---|
-| `Page_Load` | `OnInitializedAsync` | One-time init |
-| `Page_PreInit` | `OnInitializedAsync` (early) | Theme setup |
-| `Page_PreRender` | `OnAfterRenderAsync` | Post-render logic |
-| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase`; L1 script auto-unwraps simple guards | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
-| `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
-| `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
+| Web Forms | Blazor | Phase | Notes |
+|---|---|---|---|
+| `Page_Load` | `OnInitializedAsync` | Phase 1: compiles as-is; **Phase 2: transform** | One-time init |
+| `Page_Init` | `OnInitialized` | Phase 1: compiles as-is; **Phase 2: transform** | Sync initialization |
+| `Page_PreInit` | `OnInitializedAsync` (early) | Phase 2 | Theme setup |
+| `Page_PreRender` | `OnAfterRenderAsync(bool firstRender)` | Phase 1: compiles as-is; **Phase 2: transform** | Guard with `if (firstRender)` to avoid render loops |
+| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase`; L1 script auto-unwraps simple guards | Phase 1 | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
+| `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | Phase 1 | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
+| `Response.Redirect` | `NavigationManager.NavigateTo()` | Phase 2 | Inject `NavigationManager` |
+
+> **Phase 2 lifecycle transforms:** After Phase 1 produces compilable code with original `Page_Load`/`Page_Init`/`Page_PreRender` signatures, Phase 2 converts these to proper Blazor lifecycle overrides. See `bwfc-migration` skill for full before/after examples.
 
 ### Layer 1 (Script) vs Layer 2 (Copilot-Assisted) Boundary
 
