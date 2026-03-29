@@ -883,6 +883,261 @@ function Invoke-ScriptAutoDetection {
 
 #endregion
 
+#region --- Web.config → appsettings.json (GAP-12) ---
+
+function Convert-WebConfigToAppSettings {
+    <#
+    .SYNOPSIS
+        Parses Web.config for appSettings and connectionStrings, generates appsettings.json (GAP-12).
+    .DESCRIPTION
+        Reads <appSettings> keys and <connectionStrings> entries from the source project's Web.config
+        and generates an appsettings.json in the output Blazor project. Merges with any existing
+        appsettings.json content the scaffold already generates.
+    #>
+    param(
+        [string]$SourcePath,
+        [string]$OutputRoot
+    )
+
+    # Find Web.config
+    $webConfigPath = Join-Path $SourcePath 'Web.config'
+    if (-not (Test-Path $webConfigPath)) {
+        $webConfigPath = Join-Path $SourcePath 'web.config'
+    }
+    if (-not (Test-Path $webConfigPath)) {
+        Write-Host '  No Web.config found — skipping appsettings.json generation' -ForegroundColor DarkGray
+        return
+    }
+
+    try {
+        [xml]$webConfig = Get-Content -Path $webConfigPath -Raw -Encoding UTF8
+
+        $appSettings = @{}
+        $connectionStrings = @{}
+
+        # Parse <appSettings>
+        $appSettingsNode = $webConfig.SelectNodes('//appSettings/add')
+        if ($appSettingsNode -and $appSettingsNode.Count -gt 0) {
+            foreach ($node in $appSettingsNode) {
+                $key = $node.GetAttribute('key')
+                $value = $node.GetAttribute('value')
+                if ($key) {
+                    $appSettings[$key] = $value
+                }
+            }
+        }
+
+        # Parse <connectionStrings>
+        $connStrNodes = $webConfig.SelectNodes('//connectionStrings/add')
+        if ($connStrNodes -and $connStrNodes.Count -gt 0) {
+            foreach ($node in $connStrNodes) {
+                $name = $node.GetAttribute('name')
+                $connStr = $node.GetAttribute('connectionString')
+                if ($name -and $connStr) {
+                    # Skip LocalSqlServer and other built-in connection strings
+                    if ($name -ne 'LocalSqlServer' -and $name -ne 'LocalMySqlServer') {
+                        $connectionStrings[$name] = $connStr
+                    }
+                }
+            }
+        }
+
+        if ($appSettings.Count -eq 0 -and $connectionStrings.Count -eq 0) {
+            Write-Host '  Web.config has no appSettings or connectionStrings — skipping' -ForegroundColor DarkGray
+            return
+        }
+
+        # Build the appsettings.json structure
+        $jsonObj = [ordered]@{}
+
+        # Add connection strings section
+        if ($connectionStrings.Count -gt 0) {
+            $connStrSection = [ordered]@{}
+            foreach ($entry in $connectionStrings.GetEnumerator()) {
+                $connStrSection[$entry.Key] = $entry.Value
+            }
+            $jsonObj['ConnectionStrings'] = $connStrSection
+        }
+
+        # Add app settings as top-level keys
+        foreach ($entry in $appSettings.GetEnumerator()) {
+            $jsonObj[$entry.Key] = $entry.Value
+        }
+
+        # Add standard Blazor sections
+        if (-not $jsonObj.Contains('Logging')) {
+            $jsonObj['Logging'] = [ordered]@{
+                'LogLevel' = [ordered]@{
+                    'Default' = 'Information'
+                    'Microsoft.AspNetCore' = 'Warning'
+                }
+            }
+        }
+        if (-not $jsonObj.Contains('AllowedHosts')) {
+            $jsonObj['AllowedHosts'] = '*'
+        }
+
+        $appSettingsPath = Join-Path $OutputRoot 'appsettings.json'
+
+        # Merge with existing appsettings.json if it was already generated
+        if (Test-Path $appSettingsPath) {
+            try {
+                $existingJson = Get-Content -Path $appSettingsPath -Raw -Encoding UTF8 | ConvertFrom-Json -AsHashtable
+                # Merge: existing values take precedence for duplicate keys
+                foreach ($key in $existingJson.Keys) {
+                    if (-not $jsonObj.Contains($key)) {
+                        $jsonObj[$key] = $existingJson[$key]
+                    }
+                    elseif ($key -eq 'ConnectionStrings' -and $existingJson[$key] -is [hashtable]) {
+                        # Merge connection strings
+                        foreach ($csKey in $existingJson[$key].Keys) {
+                            if (-not $jsonObj['ConnectionStrings'].Contains($csKey)) {
+                                $jsonObj['ConnectionStrings'][$csKey] = $existingJson[$key][$csKey]
+                            }
+                        }
+                    }
+                }
+            }
+            catch {
+                # If existing file can't be parsed, overwrite it
+                Write-Host "  Warning: Could not parse existing appsettings.json — overwriting" -ForegroundColor Yellow
+            }
+        }
+
+        if ($PSCmdlet.ShouldProcess($appSettingsPath, "Generate appsettings.json from Web.config")) {
+            $jsonContent = $jsonObj | ConvertTo-Json -Depth 4
+            Set-Content -Path $appSettingsPath -Value $jsonContent -Encoding UTF8
+
+            $totalKeys = $appSettings.Count + $connectionStrings.Count
+            Write-Host "  Generated appsettings.json ($($appSettings.Count) app settings, $($connectionStrings.Count) connection strings)" -ForegroundColor Green
+            Write-TransformLog -File 'appsettings.json' -Transform 'WebConfig' -Detail "Extracted $($appSettings.Count) appSettings key(s) and $($connectionStrings.Count) connectionString(s) from Web.config"
+
+            if ($appSettings.Count -gt 0) {
+                $keyList = ($appSettings.Keys | Sort-Object) -join ', '
+                Write-TransformLog -File 'appsettings.json' -Transform 'WebConfig' -Detail "AppSettings keys: $keyList"
+            }
+            if ($connectionStrings.Count -gt 0) {
+                $connList = ($connectionStrings.Keys | Sort-Object) -join ', '
+                Write-TransformLog -File 'appsettings.json' -Transform 'WebConfig' -Detail "ConnectionStrings: $connList"
+                Write-ManualItem -File 'appsettings.json' -Category 'ConnectionString' -Detail "Connection strings extracted from Web.config — verify and update for target environment: $connList"
+            }
+        }
+        else {
+            Write-Host "[WhatIf] Would generate appsettings.json from Web.config"
+        }
+    }
+    catch {
+        Write-Host "  Warning: Could not parse Web.config — $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-ManualItem -File 'Web.config' -Category 'ParseError' -Detail "Could not parse Web.config for appsettings.json generation: $($_.Exception.Message)"
+    }
+}
+
+#endregion
+
+#region --- App_Start Directory Copy (GAP-22) ---
+
+function Copy-AppStart {
+    <#
+    .SYNOPSIS
+        Copies App_Start/*.cs files to the output project with cleanup (GAP-22).
+    .DESCRIPTION
+        Copies C# files from the source project's App_Start/ directory,
+        strips Web Forms usings, removes [assembly: ...] attributes,
+        and adds TODO comments for patterns needing manual review.
+    #>
+    param(
+        [string]$SourcePath,
+        [string]$OutputRoot
+    )
+
+    $appStartDir = Join-Path $SourcePath 'App_Start'
+    if (-not (Test-Path $appStartDir -PathType Container)) {
+        return 0
+    }
+
+    $csFiles = @(Get-ChildItem -Path $appStartDir -Filter '*.cs' -File)
+    if ($csFiles.Count -eq 0) {
+        return 0
+    }
+
+    $copied = 0
+    Write-Host "Copying $($csFiles.Count) App_Start file(s)..." -ForegroundColor Green
+
+    foreach ($file in $csFiles) {
+        $relPath = "App_Start/$($file.Name)"
+        # Copy to root of output project (not App_Start/ subfolder — Blazor has no App_Start convention)
+        $destFile = Join-Path $OutputRoot $file.Name
+
+        if ($PSCmdlet.ShouldProcess($destFile, "Copy App_Start file")) {
+            $csContent = Get-Content -Path $file.FullName -Raw -Encoding UTF8
+
+            # Add TODO header
+            $csContent = "// TODO: Review — auto-copied from App_Start/$($file.Name). Blazor has no App_Start convention.`n// TODO: Move relevant configuration to Program.cs or appropriate service registration.`n`n" + $csContent
+
+            # Strip [assembly: ...] attributes (can span multiple lines)
+            $assemblyAttrRegex = [regex]'(?m)^\s*\[assembly:\s*[^\]]*\]\s*\r?\n?'
+            $assemblyAttrMatches = $assemblyAttrRegex.Matches($csContent)
+            if ($assemblyAttrMatches.Count -gt 0) {
+                $csContent = $assemblyAttrRegex.Replace($csContent, '')
+                Write-TransformLog -File $relPath -Transform 'AppStart' -Detail "Stripped $($assemblyAttrMatches.Count) [assembly:] attribute(s)"
+            }
+
+            # Strip System.Web.UI.* usings
+            $csContent = $csContent -replace 'using\s+System\.Web\.UI(\.\w+)*;\s*\r?\n?', ''
+
+            # Strip System.Web.Security
+            $csContent = $csContent -replace 'using\s+System\.Web\.Security;\s*\r?\n?', ''
+
+            # Selectively handle System.Web.Optimization (BundleConfig stubs in BWFC)
+            if ($csContent -match 'Bundle|BundleTable|BundleCollection') {
+                $csContent = $csContent -replace 'using\s+System\.Web\.Optimization;\s*\r?\n?', "// using System.Web.Optimization; // BWFC: BundleConfig stubs available via BlazorWebFormsComponents namespace`n"
+            } else {
+                $csContent = $csContent -replace 'using\s+System\.Web\.Optimization;\s*\r?\n?', ''
+            }
+
+            # Selectively handle System.Web.Routing (RouteConfig stubs in BWFC)
+            if ($csContent -match 'Route|RouteTable|RouteCollection') {
+                $csContent = $csContent -replace 'using\s+System\.Web\.Routing;\s*\r?\n?', "// using System.Web.Routing; // BWFC: RouteConfig stubs available via BlazorWebFormsComponents namespace`n"
+            } else {
+                $csContent = $csContent -replace 'using\s+System\.Web\.Routing;\s*\r?\n?', ''
+            }
+
+            # Strip remaining System.Web.* usings
+            $csContent = $csContent -replace 'using\s+System\.Web(\.\w+)*;\s*\r?\n?', ''
+
+            # Strip Microsoft.AspNet.* usings
+            $csContent = $csContent -replace 'using\s+Microsoft\.AspNet(\.\w+)*;\s*\r?\n?', ''
+
+            # Strip Microsoft.Owin.* usings
+            $csContent = $csContent -replace 'using\s+Microsoft\.Owin(\.\w+)*;\s*\r?\n?', ''
+
+            # Strip Owin usings
+            $csContent = $csContent -replace 'using\s+Owin;\s*\r?\n?', ''
+
+            # Add TODO for common patterns that need manual review
+            if ($csContent -match 'WebApiConfig|GlobalConfiguration') {
+                $csContent = $csContent -replace '(class\s+WebApiConfig)', '// TODO: BWFC — Web API configuration should be migrated to minimal API endpoints in Program.cs`n$1'
+                Write-ManualItem -File $relPath -Category 'AppStart' -Detail "WebApiConfig detected — migrate to minimal API endpoints in Program.cs"
+            }
+            if ($csContent -match 'FilterConfig|GlobalFilters') {
+                $csContent = $csContent -replace '(class\s+FilterConfig)', '// TODO: BWFC — Filter configuration should use ASP.NET Core middleware pipeline in Program.cs`n$1'
+                Write-ManualItem -File $relPath -Category 'AppStart' -Detail "FilterConfig detected — migrate to middleware pipeline in Program.cs"
+            }
+
+            Set-Content -Path $destFile -Value $csContent -Encoding UTF8
+            Write-TransformLog -File $relPath -Transform 'AppStart' -Detail "Copied App_Start/$($file.Name) → $($file.Name) (root)"
+            $copied++
+        }
+        else {
+            Write-Host "[WhatIf] Would copy App_Start: $relPath → $($file.Name)"
+        }
+    }
+
+    return $copied
+}
+
+#endregion
+
 #region --- Directive Transforms ---
 
 function ConvertFrom-PageDirective {
@@ -1263,6 +1518,44 @@ function ConvertFrom-Expressions {
     if ($commentMatches.Count -gt 0) {
         $Content = $commentRegex.Replace($Content, '@*$1*@')
         Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($commentMatches.Count) comment(s) to Razor syntax"
+    }
+
+    # --- GAP-13: Bind() → @bind two-way binding ---
+    # Bind() is used in EditItemTemplate/InsertItemTemplate for two-way data binding.
+    # When used inside an attribute value (e.g., Text='<%# Bind("Name") %>'), convert to @bind-Value.
+    # When standalone, convert to @context.PropertyName (same as Eval).
+
+    # Bind() inside attribute values: attr='<%# Bind("Prop") %>' → @bind-Value="context.Prop"
+    # Note: We handle the most common case where Bind() is the attribute value for Text, SelectedValue, etc.
+    $bindAttrRegex = [regex]'(\w+)\s*=\s*''<%#\s*Bind\("(\w+)"\)\s*%>'''
+    $bindAttrMatches = $bindAttrRegex.Matches($Content)
+    if ($bindAttrMatches.Count -gt 0) {
+        $Content = $bindAttrRegex.Replace($Content, '@bind-Value="context.$2"')
+        Write-TransformLog -File $RelPath -Transform 'BindExpression' -Detail "Converted $($bindAttrMatches.Count) Bind() attribute(s) to @bind-Value"
+    }
+
+    # Bind() inside attribute values with double quotes: attr="<%# Bind("Prop") %>"
+    $bindAttrDblRegex = [regex]'(\w+)\s*=\s*"<%#\s*Bind\("(\w+)"\)\s*%>"'
+    $bindAttrDblMatches = $bindAttrDblRegex.Matches($Content)
+    if ($bindAttrDblMatches.Count -gt 0) {
+        $Content = $bindAttrDblRegex.Replace($Content, '@bind-Value="context.$2"')
+        Write-TransformLog -File $RelPath -Transform 'BindExpression' -Detail "Converted $($bindAttrDblMatches.Count) Bind() double-quoted attribute(s) to @bind-Value"
+    }
+
+    # Bind() with HTML-encoded delimiter: <%#: Bind("Prop") %> → @context.Prop (read-only context)
+    $bindEncodedRegex = [regex]'<%#:\s*Bind\("(\w+)"\)\s*%>'
+    $bindEncodedMatches = $bindEncodedRegex.Matches($Content)
+    if ($bindEncodedMatches.Count -gt 0) {
+        $Content = $bindEncodedRegex.Replace($Content, '@context.$1')
+        Write-TransformLog -File $RelPath -Transform 'BindExpression' -Detail "Converted $($bindEncodedMatches.Count) encoded Bind() to @context (read-only fallback)"
+    }
+
+    # Standalone Bind(): <%# Bind("Prop") %> → @context.Prop
+    $bindStandaloneRegex = [regex]'<%#\s*Bind\("(\w+)"\)\s*%>'
+    $bindStandaloneMatches = $bindStandaloneRegex.Matches($Content)
+    if ($bindStandaloneMatches.Count -gt 0) {
+        $Content = $bindStandaloneRegex.Replace($Content, '@context.$1')
+        Write-TransformLog -File $RelPath -Transform 'BindExpression' -Detail "Converted $($bindStandaloneMatches.Count) standalone Bind() to @context"
     }
 
     # Data binding with Eval and format string: <%#: Eval("prop", "{0:fmt}") %> → @context.prop.ToString("fmt")
@@ -1819,6 +2112,134 @@ function Add-DataSourceIDWarning {
 
 #region --- Code-Behind Handling ---
 
+function Remove-IsPostBackGuards {
+    <#
+    .SYNOPSIS
+        Unwraps IsPostBack guard patterns from code-behind content (GAP-06).
+    .DESCRIPTION
+        In Web Forms, Page_Load commonly wraps first-load logic in if (!IsPostBack) { ... }.
+        In Blazor, OnInitializedAsync runs only once, so the guard is unnecessary.
+        Simple guards (no else) are unwrapped. Complex guards (with else) get a TODO comment.
+    #>
+    param(
+        [string]$Content,
+        [string]$RelPath
+    )
+
+    $unwrapCount = 0
+    $todoCount = 0
+
+    # --- Simple IsPostBack guards (no else clause) ---
+    # Matches: if (!IsPostBack) { body }, if (!Page.IsPostBack) { body }, if (!this.IsPostBack) { body }
+    # Also: if (IsPostBack == false), if (Page.IsPostBack == false), etc.
+    # Uses brace-counting to find the matching close brace.
+
+    # Patterns that represent "if not postback"
+    $guardPatterns = @(
+        'if\s*\(\s*!(?:Page\.|this\.)?IsPostBack\s*\)',
+        'if\s*\(\s*(?:Page\.|this\.)?IsPostBack\s*==\s*false\s*\)',
+        'if\s*\(\s*false\s*==\s*(?:Page\.|this\.)?IsPostBack\s*\)'
+    )
+    $combinedPattern = '(?:' + ($guardPatterns -join '|') + ')'
+
+    # Process the content iteratively — find each guard and unwrap or annotate
+    $guardRegex = [regex]$combinedPattern
+    $iterations = 0
+    $maxIterations = 50  # safety limit
+
+    while ($guardRegex.IsMatch($Content) -and $iterations -lt $maxIterations) {
+        $iterations++
+        $match = $guardRegex.Match($Content)
+        $matchStart = $match.Index
+        $afterMatch = $matchStart + $match.Length
+
+        # Skip whitespace to find the opening brace
+        $braceStart = $afterMatch
+        while ($braceStart -lt $Content.Length -and $Content[$braceStart] -match '\s') { $braceStart++ }
+
+        if ($braceStart -ge $Content.Length -or $Content[$braceStart] -ne '{') {
+            # No brace found — single-statement guard, skip for safety
+            $Content = $Content.Substring(0, $matchStart) + "/* TODO: IsPostBack guard — review for Blazor */ " + $Content.Substring($matchStart)
+            $todoCount++
+            continue
+        }
+
+        # Brace-count to find matching close brace
+        $depth = 1
+        $pos = $braceStart + 1
+        while ($pos -lt $Content.Length -and $depth -gt 0) {
+            if ($Content[$pos] -eq '{') { $depth++ }
+            elseif ($Content[$pos] -eq '}') { $depth-- }
+            $pos++
+        }
+
+        if ($depth -ne 0) {
+            # Unbalanced braces — skip
+            $Content = $Content.Substring(0, $matchStart) + "/* TODO: IsPostBack guard — could not parse */ " + $Content.Substring($matchStart)
+            $todoCount++
+            continue
+        }
+
+        $braceEnd = $pos - 1  # position of closing brace
+
+        # Check for else clause after the closing brace
+        $afterClose = $braceEnd + 1
+        $checkPos = $afterClose
+        while ($checkPos -lt $Content.Length -and $Content[$checkPos] -match '\s') { $checkPos++ }
+
+        $hasElse = ($checkPos + 3 -lt $Content.Length) -and ($Content.Substring($checkPos, 4) -match '^else\b')
+
+        if ($hasElse) {
+            # Complex case — add TODO comment instead of unwrapping
+            $todoComment = "// TODO: BWFC — IsPostBack guard with else clause. In Blazor, OnInitializedAsync runs once (no postback).`n            // Review: move 'if' body to OnInitializedAsync and 'else' body to an event handler or remove.`n            "
+            $Content = $Content.Substring(0, $matchStart) + $todoComment + $Content.Substring($matchStart)
+            $todoCount++
+        }
+        else {
+            # Simple case — unwrap the guard: extract body, dedent one level, add comment
+            $body = $Content.Substring($braceStart + 1, $braceEnd - $braceStart - 1)
+
+            # Dedent: remove one level of leading whitespace (4 spaces or 1 tab) from each line
+            $bodyLines = $body -split "`n"
+            $dedentedLines = foreach ($line in $bodyLines) {
+                $line -replace '^(    |\t)', ''
+            }
+            $dedentedBody = ($dedentedLines -join "`n").Trim()
+
+            # Determine the indentation of the original if statement
+            $lineStart = $matchStart
+            while ($lineStart -gt 0 -and $Content[$lineStart - 1] -ne "`n") { $lineStart-- }
+            $indent = ''
+            if ($Content.Substring($lineStart, $matchStart - $lineStart) -match '^(\s+)') {
+                $indent = $Matches[1]
+            }
+
+            $replacement = "${indent}// BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change`n"
+            # Re-indent the dedented body
+            foreach ($line in $dedentedBody -split "`n") {
+                if ($line.Trim().Length -gt 0) {
+                    $replacement += "${indent}${line}`n"
+                } else {
+                    $replacement += "`n"
+                }
+            }
+
+            $Content = $Content.Substring(0, $matchStart) + $replacement.TrimEnd("`n") + $Content.Substring($braceEnd + 1)
+            $unwrapCount++
+        }
+    }
+
+    if ($unwrapCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'IsPostBack' -Detail "Unwrapped $unwrapCount simple IsPostBack guard(s)"
+    }
+    if ($todoCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'IsPostBack' -Detail "Added TODO for $todoCount complex IsPostBack guard(s)"
+        Write-ManualItem -File $RelPath -Category 'IsPostBack' -Detail "$todoCount IsPostBack guard(s) with else clauses need manual review"
+    }
+
+    return $Content
+}
+
 function Copy-CodeBehind {
     param(
         [string]$SourceFile,
@@ -1851,7 +2272,63 @@ function Copy-CodeBehind {
 
         $annotatedContent = $todoHeader + $content
 
-        # Strip System.Web.* usings — these are Web Forms namespaces with no Blazor equivalent
+        # --- GAP-09: Selective using retention ---
+        # Before stripping System.Web.* usings, preserve specific ones that have BWFC shims.
+        # Convert retained usings to their BWFC-compatible equivalents.
+        $retainedUsingCount = 0
+
+        # Keep using System.Configuration; — BWFC provides ConfigurationManager shim
+        # (No transformation needed — the shim lives in the BlazorWebFormsComponents namespace
+        # which is already in GlobalUsings.cs via the .targets file)
+        $sysConfigRegex = [regex]'using\s+System\.Configuration;\s*\r?\n?'
+        $sysConfigMatches = $sysConfigRegex.Matches($annotatedContent)
+        if ($sysConfigMatches.Count -gt 0) {
+            # Replace with a comment — ConfigurationManager is available via BWFC namespace
+            $annotatedContent = $sysConfigRegex.Replace($annotatedContent, "// using System.Configuration; // BWFC: ConfigurationManager shim available via BlazorWebFormsComponents namespace`n")
+            $retainedUsingCount += $sysConfigMatches.Count
+            Write-TransformLog -File $RelPath -Transform 'UsingRetention' -Detail "Retained System.Configuration reference (BWFC ConfigurationManager shim)"
+        }
+
+        # Keep using System.Web.Optimization; when BundleConfig patterns exist
+        $webOptRegex = [regex]'using\s+System\.Web\.Optimization;\s*\r?\n?'
+        $webOptMatches = $webOptRegex.Matches($annotatedContent)
+        if ($webOptMatches.Count -gt 0) {
+            $annotatedContent = $webOptRegex.Replace($annotatedContent, "// using System.Web.Optimization; // BWFC: BundleConfig stubs available via BlazorWebFormsComponents namespace`n")
+            $retainedUsingCount += $webOptMatches.Count
+            Write-TransformLog -File $RelPath -Transform 'UsingRetention' -Detail "Retained System.Web.Optimization reference (BWFC BundleConfig stubs)"
+        }
+
+        # Keep using System.Web.Routing; when RouteConfig patterns exist
+        $webRoutingRegex = [regex]'using\s+System\.Web\.Routing;\s*\r?\n?'
+        $webRoutingMatches = $webRoutingRegex.Matches($annotatedContent)
+        if ($webRoutingMatches.Count -gt 0) {
+            $annotatedContent = $webRoutingRegex.Replace($annotatedContent, "// using System.Web.Routing; // BWFC: RouteConfig stubs available via BlazorWebFormsComponents namespace`n")
+            $retainedUsingCount += $webRoutingMatches.Count
+            Write-TransformLog -File $RelPath -Transform 'UsingRetention' -Detail "Retained System.Web.Routing reference (BWFC RouteConfig stubs)"
+        }
+
+        if ($retainedUsingCount -gt 0) {
+            Write-TransformLog -File $RelPath -Transform 'UsingRetention' -Detail "Selectively retained $retainedUsingCount using(s) with BWFC shim equivalents"
+        }
+
+        # Strip System.Web.UI.* usings — Web Forms UI namespaces with no Blazor equivalent
+        $webUIUsingsRegex = [regex]'using\s+System\.Web\.UI(\.\w+)*;\s*\r?\n?'
+        $webUIUsingMatches = $webUIUsingsRegex.Matches($annotatedContent)
+        if ($webUIUsingMatches.Count -gt 0) {
+            $annotatedContent = $webUIUsingsRegex.Replace($annotatedContent, '')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($webUIUsingMatches.Count) System.Web.UI.* using(s)"
+        }
+
+        # Strip System.Web.Security — no Blazor equivalent
+        $webSecurityRegex = [regex]'using\s+System\.Web\.Security;\s*\r?\n?'
+        $webSecurityMatches = $webSecurityRegex.Matches($annotatedContent)
+        if ($webSecurityMatches.Count -gt 0) {
+            $annotatedContent = $webSecurityRegex.Replace($annotatedContent, '')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($webSecurityMatches.Count) System.Web.Security using(s)"
+        }
+
+        # Strip remaining System.Web.* usings that weren't selectively retained above
+        # (System.Web.Optimization and System.Web.Routing were already handled)
         $webUsingsRegex = [regex]'using\s+System\.Web(\.\w+)*;\s*\r?\n?'
         $webUsingMatches = $webUsingsRegex.Matches($annotatedContent)
         if ($webUsingMatches.Count -gt 0) {
@@ -2037,6 +2514,50 @@ function Copy-CodeBehind {
             }
             Write-TransformLog -File $RelPath -Transform 'ViewStateDetect' -Detail "Detected $($vsMatches.Count) ViewState[`"key`"] usage(s) — keys: $($vsKeys -join ', ')"
             Write-ManualItem -File $RelPath -Category 'ViewState' -Detail "ViewState keys used: $($vsKeys -join ', ') — convert to private fields (see generated suggestions in code-behind)"
+        }
+
+        # --- GAP-06: IsPostBack guard unwrapping ---
+        $annotatedContent = Remove-IsPostBackGuards -Content $annotatedContent -RelPath $RelPath
+
+        # --- GAP-20: .aspx URL cleanup in code-behind string literals ---
+        # Replace "~/SomePage.aspx" → "/SomePage" and "~/SomePage.aspx?param=val" → "/SomePage?param=val"
+        # Also handle relative .aspx references without ~/
+        $aspxUrlCount = 0
+
+        # Pattern 1: "~/SomePage.aspx?query" → "/SomePage?query" (with query string)
+        $aspxTildeQsRegex = [regex]'"~/([^"]*?)\.aspx\?([^"]*)"'
+        $aspxTildeQsMatches = $aspxTildeQsRegex.Matches($annotatedContent)
+        if ($aspxTildeQsMatches.Count -gt 0) {
+            $annotatedContent = $aspxTildeQsRegex.Replace($annotatedContent, '"/$1?$2"')
+            $aspxUrlCount += $aspxTildeQsMatches.Count
+        }
+
+        # Pattern 2: "~/SomePage.aspx" → "/SomePage" (no query string)
+        $aspxTildeRegex = [regex]'"~/([^"]*?)\.aspx"'
+        $aspxTildeMatches = $aspxTildeRegex.Matches($annotatedContent)
+        if ($aspxTildeMatches.Count -gt 0) {
+            $annotatedContent = $aspxTildeRegex.Replace($annotatedContent, '"/$1"')
+            $aspxUrlCount += $aspxTildeMatches.Count
+        }
+
+        # Pattern 3: Relative .aspx references in NavigateTo/Redirect calls: "SomePage.aspx?q" → "/SomePage?q"
+        $aspxRelQsRegex = [regex]'(NavigationManager\.NavigateTo\(\s*")([^"~/][^"]*?)\.aspx\?([^"]*)"'
+        $aspxRelQsMatches = $aspxRelQsRegex.Matches($annotatedContent)
+        if ($aspxRelQsMatches.Count -gt 0) {
+            $annotatedContent = $aspxRelQsRegex.Replace($annotatedContent, '$1/$2?$3"')
+            $aspxUrlCount += $aspxRelQsMatches.Count
+        }
+
+        # Pattern 4: Relative .aspx references in NavigateTo/Redirect calls: "SomePage.aspx" → "/SomePage"
+        $aspxRelRegex = [regex]'(NavigationManager\.NavigateTo\(\s*")([^"~/][^"]*?)\.aspx"'
+        $aspxRelMatches = $aspxRelRegex.Matches($annotatedContent)
+        if ($aspxRelMatches.Count -gt 0) {
+            $annotatedContent = $aspxRelRegex.Replace($annotatedContent, '$1/$2"')
+            $aspxUrlCount += $aspxRelMatches.Count
+        }
+
+        if ($aspxUrlCount -gt 0) {
+            Write-TransformLog -File $RelPath -Transform 'AspxUrlCleanup' -Detail "Cleaned $aspxUrlCount .aspx URL reference(s) in string literals"
         }
 
         $outputDir = Split-Path $OutputFile -Parent
@@ -2383,6 +2904,16 @@ if (-not $SkipProjectScaffold) {
     Write-Host ''
 }
 
+# GAP-12: Web.config → appsettings.json (after scaffold, before code-behind copy)
+Write-Host 'Extracting Web.config settings...' -ForegroundColor Green
+if (-not $WhatIfPreference) {
+    Convert-WebConfigToAppSettings -SourcePath $Path -OutputRoot $Output
+}
+else {
+    Write-Host '[WhatIf] Would extract appSettings and connectionStrings from Web.config'
+}
+Write-Host ''
+
 # Discover and transform Web Forms files
 Write-Host 'Discovering Web Forms files...' -ForegroundColor Green
 $sourceFiles = Get-ChildItem -Path $Path -Recurse -File | Where-Object {
@@ -2623,6 +3154,27 @@ foreach ($dirName in $bllDirNames) {
 
 #endregion
 
+#region --- App_Start Directory Copy (GAP-22) ---
+
+$appStartCopied = 0
+if (-not $WhatIfPreference) {
+    $appStartCopied = Copy-AppStart -SourcePath $Path -OutputRoot $Output
+    if ($appStartCopied -gt 0) {
+        Write-Host ''
+    }
+}
+else {
+    $appStartDir = Join-Path $Path 'App_Start'
+    if (Test-Path $appStartDir -PathType Container) {
+        $appStartFiles = @(Get-ChildItem -Path $appStartDir -Filter '*.cs' -File)
+        if ($appStartFiles.Count -gt 0) {
+            Write-Host "[WhatIf] Would copy $($appStartFiles.Count) App_Start file(s)" -ForegroundColor Yellow
+        }
+    }
+}
+
+#endregion
+
 #region --- Redirect Handler Program.cs Annotations (RF-08) ---
 
 if ($script:RedirectHandlers.Count -gt 0 -and -not $WhatIfPreference) {
@@ -2671,6 +3223,7 @@ Write-Host "  Transforms applied:    $($script:TransformsApplied)"
 Write-Host "  Static files copied:   $staticCount"
 Write-Host "  Model files copied:    $modelsCopied"
 Write-Host "  BLL files copied:      $bllCopied"
+Write-Host "  App_Start files copied: $appStartCopied"
 Write-Host "  Items needing review:  $($script:ManualItems.Count)"
 Write-Host ''
 

@@ -88,3 +88,31 @@ BlazorWebFormsComponents is a library providing Blazor components that emulate A
 - ContosoUniversity Run 22: 39/40 tests pass, EDMX parser handles all models
 
 **Deliverable**: `dev-docs/migration-automation-opportunities.md` — structured report with gap inventory, proposed solutions, complexity estimates, and implementation order across 3 phases.
+
+### Phase 1 L1 Script Enhancements (2026-07-25)
+
+**Task**: Implement 6 GAP items from the migration automation audit as Phase 1 "Just Make It Compile" enhancements to `bwfc-migrate.ps1`.
+
+**Implementation Details**:
+
+- **GAP-12 (Web.config → appsettings.json)**: New `Convert-WebConfigToAppSettings` function. Parses `<appSettings>` and `<connectionStrings>` via XML, generates proper JSON structure, merges with existing appsettings.json. Placed in pipeline after scaffold generation, before code-behind copy. Skips built-in connection strings (LocalSqlServer).
+
+- **GAP-06 (IsPostBack Guard Unwrapping)**: New `Remove-IsPostBackGuards` function with iterative brace-counting approach. Handles 6 pattern variants (`!IsPostBack`, `!Page.IsPostBack`, `!this.IsPostBack`, `== false` forms). Simple guards unwrapped with comment; complex guards (else clause) get TODO annotation. Max 50 iterations safety limit.
+
+- **GAP-22 (App_Start/ Directory Copy)**: New `Copy-AppStart` function. Copies .cs files to output root (not App_Start/ subfolder). Strips `[assembly:]` attributes via multiline regex. Applies same selective using retention as code-behind. Flags WebApiConfig and FilterConfig for manual review.
+
+- **GAP-09 (Selective Using Retention)**: Restructured Copy-CodeBehind using-stripping to preserve `System.Configuration`, `System.Web.Optimization`, `System.Web.Routing` as comments with BWFC equivalence notes. Then strips in specific order: UI → Security → remaining Web → AspNet → Owin. Prevents false-positive compile errors.
+
+- **GAP-20 (.aspx URL Cleanup)**: 4-pattern transform in Copy-CodeBehind: tilde+query+aspx, tilde+aspx, relative+query in NavigateTo, relative in NavigateTo. Converts `"~/Page.aspx?q=v"` → `"/Page?q=v"`.
+
+- **GAP-13 (Bind() → @bind Transform)**: Added to `ConvertFrom-Expressions` before Eval() transforms. Attribute-value Bind() → `@bind-Value="context.Prop"`. Standalone Bind() → `@context.Prop`. Handles both single-quoted and double-quoted attribute values.
+
+**Key Technical Decisions**:
+1. IsPostBack uses iterative brace-counting rather than regex for brace matching — regex can't reliably match nested braces
+2. Using retention runs BEFORE blanket stripping — retained usings are converted to commented-out forms with BWFC notes so developers understand the equivalence
+3. Bind() transforms run before Eval() in expression pipeline to avoid conflicts (Bind is more specific)
+4. App_Start files go to output root, not a subdirectory — Blazor has no App_Start convention
+5. URL cleanup handles NavigateTo context specifically to avoid false positives in non-URL strings
+
+**Validation**: Script parses cleanly, WhatIf mode works, existing 15-test suite maintains 12/15 pass rate (3 pre-existing base-class-stripping failures unchanged). Script grew from 2,714 to ~3,000 lines.
+

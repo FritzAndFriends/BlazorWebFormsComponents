@@ -15,7 +15,7 @@ Patterns for migrating Web Forms code-behind, data binding, and master pages to 
 | `Page_Load(object sender, EventArgs e)` | `protected override async Task OnInitializedAsync()` | First load |
 | `Page_PreRender(...)` | `protected override async Task OnParametersSetAsync()` | Before each render |
 | `Page_Init(...)` | `protected override void OnInitialized()` | Sync initialization |
-| `if (!IsPostBack)` | Works unchanged via `WebFormsPageBase` | Always enters the block — correct for first-render code |
+| `if (!IsPostBack)` | **L1 auto-unwraps** simple guards; works unchanged via `WebFormsPageBase` if left in | Always enters the block — correct for first-render code |
 | `if (IsPostBack)` (without `!`) | **Dead code — flag for manual review** | Never enters the block in Blazor; move logic to event handlers |
 
 ```csharp
@@ -29,21 +29,51 @@ protected void Page_Load(object sender, EventArgs e)
     }
 }
 
-// Blazor (with WebFormsPageBase — IsPostBack compiles unchanged)
-protected override async Task OnInitializedAsync()
+// After L1 (simple guard auto-unwrapped):
+protected void Page_Load(object sender, EventArgs e)
 {
-    if (!IsPostBack)  // ✅ compiles — always true, block always executes
-    {
-        products = await ProductService.GetProductsAsync();
-    }
+    // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
+    products = GetProducts();
+    GridView1.DataBind();
 }
 
-// Or, simplified (since IsPostBack is always false):
+// After L2 (Blazor lifecycle):
 protected override async Task OnInitializedAsync()
 {
     products = await ProductService.GetProductsAsync();
 }
 ```
+
+#### IsPostBack Guard Handling (L1 Automated)
+
+The L1 script (`bwfc-migrate.ps1`) applies `Remove-IsPostBackGuards` to every code-behind file:
+
+**Simple guards** (no `else` clause): The `if (!IsPostBack)` / `if (!Page.IsPostBack)` / `if (!this.IsPostBack)` / `if (IsPostBack == false)` wrapper is removed and the body is extracted and dedented. A comment replaces the guard:
+
+```csharp
+// BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
+LoadCategories();
+BindGrid();
+```
+
+**Complex guards** (with `else` clause): A TODO comment is inserted above the guard for manual review:
+
+```csharp
+// TODO: BWFC — IsPostBack guard with else clause. In Blazor, OnInitializedAsync runs once (no postback).
+// Review: move 'if' body to OnInitializedAsync and 'else' body to an event handler or remove.
+if (!IsPostBack)
+{
+    LoadInitialData();
+}
+else
+{
+    ProcessPostBackData();
+}
+```
+
+**Single-statement guards** (no braces): Flagged with a TODO comment — the script does not attempt to parse braceless `if` statements.
+
+**Layer 2 action:** After L1, convert `Page_Load` → `OnInitializedAsync` and move the unwrapped body into the async method. For complex guards, move the `if` body into `OnInitializedAsync` and the `else` body into event handlers or remove it.
 
 ### Event Handlers
 
@@ -68,6 +98,19 @@ private void SubmitBtn_Click()
 | `Response.Redirect("~/path")` | `NavigationManager.NavigateTo("/path")` |
 | `Response.RedirectToRoute(...)` | `NavigationManager.NavigateTo($"/path/{param}")` |
 | `Server.Transfer("~/page.aspx")` | `NavigationManager.NavigateTo("/page")` |
+
+### `.aspx` URL Cleanup (L1 Automated)
+
+The L1 script automatically rewrites `.aspx` URL string literals in code-behind files. This runs after `Response.Redirect` → `NavigationManager.NavigateTo` conversion.
+
+| Pattern | Before | After |
+|---------|--------|-------|
+| Tilde + query string | `"~/Products.aspx?id=5"` | `"/Products?id=5"` |
+| Tilde, no query | `"~/Products.aspx"` | `"/Products"` |
+| Relative in NavigateTo + query | `NavigationManager.NavigateTo("Products.aspx?q=x")` | `NavigationManager.NavigateTo("/Products?q=x")` |
+| Relative in NavigateTo | `NavigationManager.NavigateTo("Products.aspx")` | `NavigationManager.NavigateTo("/Products")` |
+
+> **Note:** `.aspx` references in markup (href attributes) are preserved — `AspxRewriteMiddleware` can handle those at runtime. The L1 URL cleanup targets **code-behind string literals** only.
 
 ### Query String / Route Parameters
 

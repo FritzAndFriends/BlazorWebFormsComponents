@@ -205,6 +205,38 @@ This is a BWFC-specific behavior that mirrors Web Forms' `TextBox` `TextChanged`
 - Image paths update: `~/Images/` → `/Images/`
 - Font paths: same pattern
 
+### Compile-Compatibility Shims
+
+BWFC ships shims that let migrated business logic and `App_Start` files compile without modification. These are part of the "Just Make It Compile" strategy — eliminate build errors first, then address runtime behavior.
+
+| Shim | Namespace | What It Provides |
+|---|---|---|
+| **ConfigurationManager** | `BlazorWebFormsComponents` | `AppSettings["key"]` → reads from `IConfiguration`. `ConnectionStrings["name"]` → reads from `IConfiguration.GetConnectionString()`. |
+| **BundleTable / Bundle / ScriptBundle / StyleBundle** | `System.Web.Optimization` | No-op stubs. `BundleTable.Bundles.Add(...)` compiles and does nothing. `App_Start/BundleConfig.cs` compiles as-is. |
+| **RouteTable / RouteCollection** | `System.Web.Routing` | No-op stubs. `RouteTable.Routes.MapPageRoute(...)` compiles and does nothing. `App_Start/RouteConfig.cs` compiles as-is. |
+
+**ConfigurationManager setup:**
+
+```csharp
+var app = builder.Build();
+app.UseConfigurationManagerShim();   // Binds to IConfiguration
+```
+
+**appsettings.json mapping:** Map `Web.config` `<appSettings>` keys under an `"AppSettings"` section and `<connectionStrings>` under `"ConnectionStrings"`:
+
+```json
+{
+  "AppSettings": {
+    "SiteName": "My Store"
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=...;Database=...;"
+  }
+}
+```
+
+> **BundleConfig/RouteConfig are no-ops.** They exist only to prevent compile errors. In Blazor, use `<link>` / `<script>` tags in `App.razor` for assets and `@page` directives for routing.
+
 ### Generated Code — Variable Declaration Styles
 
 > **CRITICAL:** All local variable declarations in generated Blazor code MUST use `var` (implicit typing), not explicit types. This is enforced by `.editorconfig` as **IDE0007 error**.
@@ -230,7 +262,7 @@ This applies to **both L1-generated scaffolding and L2 Copilot-generated code**.
 | `Page_Load` | `OnInitializedAsync` | One-time init |
 | `Page_PreInit` | `OnInitializedAsync` (early) | Theme setup |
 | `Page_PreRender` | `OnAfterRenderAsync` | Post-render logic |
-| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase` | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
+| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase`; L1 script auto-unwraps simple guards | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
 | `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
 | `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
 
@@ -253,6 +285,9 @@ Script handles:
 - Scaffold generation (csproj, Program.cs, etc.)
 - SelectMethod/GetRouteUrl flagging
 - Register directive cleanup
+- **IsPostBack guard unwrapping** — simple `if (!IsPostBack) { ... }` guards are auto-unwrapped (body extracted, `if` removed). Complex guards with `else` clauses get TODO comments for manual review.
+- **`.aspx` URL cleanup** — string literals like `"~/Page.aspx?id=5"` are rewritten to `"/Page?id=5"` in code-behind files (tilde-prefixed and relative patterns).
+- **`using` retention for BWFC shims** — `System.Configuration`, `System.Web.Optimization`, and `System.Web.Routing` usings are preserved (as comments with guidance) because BWFC provides compile-compatible shims.
 
 **Layer 2 — Copilot-Assisted** (NOT manual — guided by the `bwfc-migration` skill):
 - EF6 → EF Core (models, DbContext, seed)

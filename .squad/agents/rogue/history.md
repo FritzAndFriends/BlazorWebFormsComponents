@@ -416,3 +416,21 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 
 **File paths:** `src/BlazorWebFormsComponents.Test/Theming/{ThemeModeTests.razor, ContainerPropagationTests.razor, SubStyleTests.razor, RuntimeThemeSwitchTests.razor}`
 
+### Phase 1 Library Shim Tests (2026-07)
+
+Wrote 30 unit tests across 3 files for Phase 1 library shims (ConfigurationManager, BundleConfig, RouteConfig). Tests written from spec before implementation lands.
+
+**Test files created:**
+- `ConfigurationManagerTests.cs` — 10 tests: AppSettings read, missing key null, fallback to root key, precedence, ConnectionStrings read/null/multiple, Initialize, uninitialized behavior. Uses `IDisposable` to reset static state between tests. Uses `Microsoft.Extensions.Configuration.Memory` for in-memory config.
+- `BundleConfigTests.cs` — 12 tests: BundleTable.Bundles not-null and singleton, BundleCollection.Add no-op, ScriptBundle/StyleBundle construction, Include fluent API (single/multi file), full fluent chain patterns. All "compiles and doesn't throw" tests.
+- `RouteConfigTests.cs` — 8 tests: RouteTable.Routes not-null and singleton, MapPageRoute no-op (single/multi), Ignore no-op (single/multi), full typical RegisterRoutes pattern.
+
+**Key patterns:**
+- Static shim tests use `IDisposable` for cleanup (ConfigurationManager is static)
+- No-op stub tests use `Should.NotThrow()` for verification
+- Fluent API tests assert `ShouldBeSameAs(bundle)` for return self
+- ConfigurationManager.ConnectionStrings returns object with `.ConnectionString` property (Web Forms compat)
+- All tests in `BlazorWebFormsComponents.Test` namespace, plain xUnit (no bUnit needed — these are non-component types)
+
+**Build status:** Expected CS0103/CS0246 errors — shim implementations don't exist yet. Zero syntax errors in test code.
+

@@ -801,3 +801,21 @@ foreach (var warning in warnings) {
 
 **Build:** ✅ 0 errors, 135 warnings (all pre-existing)
 **Tests:** ✅ 2,685 passed, 0 failed, 0 skipped
+
+### Phase 1 Library Shims (2026-07-28)
+
+**Task:** Implement three migration shims to eliminate the most common compilation blockers in migrated Web Forms apps.
+
+**Files created:**
+- ConfigurationManager.cs: Static shim shadowing System.Configuration.ConfigurationManager via namespace. AppSettings[key] reads AppSettings:{key} then {key} from IConfiguration. ConnectionStrings[name] reads via GetConnectionString(). Initialized by app.UseConfigurationManagerShim().
+- BundleConfig.cs: No-op stubs in System.Web.Optimization for Bundle/ScriptBundle/StyleBundle/BundleTable/BundleCollection.
+- RouteConfig.cs: No-op stubs in System.Web.Routing for RouteCollection/RouteTable.
+- Updated ServiceCollectionExtensions.cs with UseConfigurationManagerShim(this WebApplication app).
+
+**Key decisions:**
+- ConfigurationManager is static (like EF6 Database shim) because the Web Forms API is static. Uses WebApplication.Configuration for initialization.
+- Namespace shadowing via .targets global using avoids needing a type alias in the .targets file.
+- AppSettings fallback order: AppSettings:{key} first (structured), then {key} directly (flat).
+- BundleConfig/RouteConfig use original System.Web.* namespaces so existing using statements work unchanged.
+
+**Build:** 0 errors on net8.0;net9.0;net10.0 (438 warnings, all pre-existing)

@@ -67,6 +67,10 @@ In `Program.cs`:
 
 ```csharp
 builder.Services.AddBlazorWebFormsComponents();
+
+// After building the app, enable the ConfigurationManager shim:
+var app = builder.Build();
+app.UseConfigurationManagerShim();
 ```
 
 In your layout file (`MainLayout.razor`), add the `<Page />` render component once. This subscribes to `IPageService` and emits `<PageTitle>` and `<meta>` tags:
@@ -93,6 +97,129 @@ In `App.razor` or the host page `<head>`:
 ```html
 <script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>
 ```
+
+---
+
+## Phase 1 Compile-Compatibility Shims
+
+BWFC ships several **compile-compatibility shims** that let migrated Web Forms business logic (BLL/DAL) and `App_Start` files compile without modification. These are no-op or thin-wrapper implementations — they exist to eliminate build errors, not to replicate runtime behavior.
+
+### ConfigurationManager Shim
+
+BWFC provides `ConfigurationManager.AppSettings["key"]` and `ConfigurationManager.ConnectionStrings["name"]` so that BLL/DAL code referencing `System.Configuration.ConfigurationManager` compiles unchanged.
+
+**How it works:**
+- `AppSettings["key"]` reads from `IConfiguration["AppSettings:{key}"]`, falling back to `IConfiguration[key]`
+- `ConnectionStrings["name"]` reads from `IConfiguration.GetConnectionString(name)` and wraps the result in a `ConnectionStringSettings` object (with `.Name`, `.ConnectionString`, `.ProviderName` properties)
+- Returns `null` for missing keys (same behavior as the Web Forms original)
+
+**Setup in Program.cs:**
+
+```csharp
+var app = builder.Build();
+app.UseConfigurationManagerShim();   // ← one-line initialization
+```
+
+The `UseConfigurationManagerShim()` extension method calls `ConfigurationManager.Initialize(app.Configuration)` internally.
+
+**Before/After — BLL code unchanged:**
+
+```csharp
+// This code compiles in BOTH Web Forms and Blazor (with the shim):
+public static class SiteSettings
+{
+    public static string SiteName =>
+        ConfigurationManager.AppSettings["SiteName"];
+
+    public static string DefaultConnection =>
+        ConfigurationManager.ConnectionStrings["DefaultConnection"].ConnectionString;
+}
+```
+
+**appsettings.json mapping:** Place Web Forms `appSettings` values under an `AppSettings` section in `appsettings.json`:
+
+```json
+{
+  "AppSettings": {
+    "SiteName": "My Store",
+    "ItemsPerPage": "20"
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=MyDb;Trusted_Connection=True;"
+  }
+}
+```
+
+> **Tip:** The L1 script detects connection strings from `Web.config` and scaffolds them into the `Program.cs` template. Create `appsettings.json` with the `AppSettings` and `ConnectionStrings` sections mapped from the original `Web.config` `<appSettings>` and `<connectionStrings>` elements.
+
+### BundleConfig and RouteConfig Stubs
+
+BWFC provides no-op shim types in the `System.Web.Optimization` and `System.Web.Routing` namespaces so that `App_Start/BundleConfig.cs` and `RouteConfig.cs` files compile without modification:
+
+- **`BundleTable.Bundles`** → returns a no-op `BundleCollection` (`.Add()` does nothing)
+- **`ScriptBundle`** / **`StyleBundle`** → constructors accept virtual paths, `.Include()` returns `this`
+- **`RouteTable.Routes`** → returns a no-op `RouteCollection` (`.MapPageRoute()`, `.Ignore()` do nothing)
+
+**What this means for migration:**
+- `App_Start/BundleConfig.cs` and `RouteConfig.cs` can be copied into the Blazor project as-is — they compile and run as no-ops
+- Bundling is not needed in Blazor — use `<link>` and `<script>` tags in `App.razor` instead (the L1 script auto-detects CSS/JS files and scaffolds them)
+- Routing is handled by `@page` directives and ASP.NET Core endpoint routing
+
+The L1 script automatically retains `using System.Web.Optimization;` and `using System.Web.Routing;` references (as comments with guidance) when these namespaces are detected in code-behind files.
+
+### IsPostBack Guard Unwrapping
+
+The L1 script (`bwfc-migrate.ps1`) automatically processes `if (!IsPostBack) { ... }` guards in code-behind files:
+
+**Simple guards (no `else` clause):** The guard is unwrapped — the `if` statement is removed and the body is extracted and dedented. A comment is left:
+```csharp
+// Before (Web Forms):
+protected void Page_Load(object sender, EventArgs e)
+{
+    if (!IsPostBack)
+    {
+        LoadCategories();
+        BindGrid();
+    }
+}
+
+// After (L1 output):
+protected void Page_Load(object sender, EventArgs e)
+{
+    // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
+    LoadCategories();
+    BindGrid();
+}
+```
+
+**Complex guards (with `else` clause):** A TODO comment is added for manual review:
+```csharp
+// TODO: BWFC — IsPostBack guard with else clause. In Blazor, OnInitializedAsync runs once (no postback).
+// Review: move 'if' body to OnInitializedAsync and 'else' body to an event handler or remove.
+if (!IsPostBack)
+{
+    LoadInitialData();
+}
+else
+{
+    ProcessPostBackData();
+}
+```
+
+**Why this matters:** Blazor has no postback concept. `OnInitializedAsync` runs once (equivalent to first load). The guard is unnecessary and removing it reduces visual noise in migrated code. `WebFormsPageBase.IsPostBack` still compiles if left in (always returns `false`), but unwrapping makes the intent clearer.
+
+### `.aspx` URL Cleanup in Code-Behind
+
+The L1 script rewrites `.aspx` URL string literals in code-behind files:
+
+| Before | After |
+|--------|-------|
+| `"~/Products.aspx?id=5"` | `"/Products?id=5"` |
+| `"~/Products.aspx"` | `"/Products"` |
+| `NavigationManager.NavigateTo("Products.aspx?q=search")` | `NavigationManager.NavigateTo("/Products?q=search")` |
+| `NavigationManager.NavigateTo("Products.aspx")` | `NavigationManager.NavigateTo("/Products")` |
+
+The cleanup handles four patterns: tilde-prefixed with/without query strings, and relative references in `NavigateTo()` calls with/without query strings.
 
 ---
 
@@ -136,6 +263,9 @@ The migration pipeline has **two mandatory layers** that run in strict sequence:
 - LoginView preservation(keeps BWFC LoginView, does NOT rewrite as AuthorizeView)
 - Master page → MainLayout.razor conversion
 - Scaffold generation (csproj, Program.cs, _Imports.razor, App.razor)
+- **IsPostBack guard unwrapping** — `if (!IsPostBack) { ... }` blocks are auto-unwrapped (body extracted, guard removed). Complex guards with `else` clauses get TODO comments for manual review.
+- **`.aspx` URL cleanup** — string literals like `"~/Products.aspx?id=5"` are rewritten to `"/Products?id=5"` in code-behind files. Handles tilde-prefixed and relative `.aspx` references.
+- **`using` retention for BWFC shims** — `using System.Configuration;`, `using System.Web.Optimization;`, and `using System.Web.Routing;` are preserved (commented with guidance) because BWFC provides compile-compatible shims for `ConfigurationManager`, `BundleTable`/`BundleConfig`, and `RouteTable`/`RouteConfig`.
 
 ### Layer 2 — Copilot Transforms
 
@@ -265,7 +395,7 @@ Detailed control mappings and code transformation patterns are in child document
 Replace `ViewState["key"]` with component fields.
 
 ### No PostBack
-`if (!IsPostBack)` → works AS-IS with `WebFormsPageBase` (always enters the block). `if (IsPostBack)` (without `!`) → **dead code** in Blazor; flag for manual review and move logic to event handlers.
+`if (!IsPostBack)` → The L1 script auto-unwraps simple guards (extracts body, removes the `if`). Complex guards (with `else`) get TODO comments. If any remain, they work AS-IS with `WebFormsPageBase` (always enters the block). `if (IsPostBack)` (without `!`) → **dead code** in Blazor; flag for manual review and move logic to event handlers.
 
 ### No DataSource Controls
 `SqlDataSource`, `ObjectDataSource`, `EntityDataSource` → injected services. See `/bwfc-data-migration`.
@@ -312,6 +442,9 @@ Include during migration to prevent errors, remove when stable.
 - [ ] URLs converted (~/ → /)
 - [ ] <asp:Content> wrappers removed
 - [ ] <form runat="server"> replaced with <div>
+- [ ] IsPostBack guards unwrapped (simple) or TODO'd (complex)
+- [ ] .aspx URL literals cleaned up in code-behind
+- [ ] ConfigurationManager / BundleConfig / RouteConfig usings retained for BWFC shims
 
 ### Layer 2 — Structural
 - [ ] SelectMethod string → SelectHandler delegate
