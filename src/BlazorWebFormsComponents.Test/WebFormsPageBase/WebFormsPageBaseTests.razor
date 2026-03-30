@@ -22,6 +22,8 @@
 
 	private IRenderedComponent<TestPage> RenderTestPage()
 	{
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
 		Services.AddScoped<IPageService, PageService>();
 		return Render<TestPage>();
 	}

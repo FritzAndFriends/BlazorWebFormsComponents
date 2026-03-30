@@ -181,6 +181,13 @@ nav:
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
   - Migration:
       - Getting Started: Migration/readme.md
+      - Phase 1 - Compilation Shims:
+          - ConfigurationManager: Migration/Phase1-ConfigurationManager.md
+          - App_Start Stubs: Migration/Phase1-AppStartStubs.md
+      - Phase 2 - Runtime Shims:
+          - Session State: Migration/Phase2-SessionShim.md
+          - Page Lifecycle: Migration/Phase2-LifecycleTransforms.md
+          - Event Handler Signatures: Migration/Phase2-EventHandlerSignatures.md
       - Assess:
           - Migration Readiness Assessment: Migration/migration_readiness.md
           - Deprecation Guidance: Migration/DeprecationGuidance.md

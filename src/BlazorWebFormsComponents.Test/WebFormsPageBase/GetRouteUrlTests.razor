@@ -78,6 +78,8 @@
 		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
 		mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
 		Services.AddSingleton<IHttpContextAccessor>(mockHttpAccessor.Object);
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
 		Services.AddScoped<IPageService, PageService>();
 		return (Render<TestPage>(), linkGen);
 	}

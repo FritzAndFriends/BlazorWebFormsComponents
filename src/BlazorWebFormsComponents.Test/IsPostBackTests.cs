@@ -35,6 +35,7 @@ public class IsPostBackTests : IDisposable
 		_ctx.Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
 		_ctx.Services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider());
 		_ctx.Services.AddLogging();
+		_ctx.Services.AddScoped<SessionShim>();
 	}
 
 	public void Dispose() => _ctx.Dispose();

@@ -13644,3 +13644,220 @@ Migration scripts and Copilot agents need to set up Web Forms themes when conver
 - Existing apps: no behavioral change (empty ThemeConfiguration registered when no folder exists).
 - Test suite: all 2,685 tests pass unchanged.
 
+
+# Decision: Migration Shim Prioritization
+
+**Author:** Forge (Web Forms Reviewer)
+**Date:** 2026-03-27
+**Status:** Proposed — awaiting Jeff's review
+
+## Context
+
+Analyzed the full Web Forms → Blazor migration gap. Today's automation level is ~60% (L1 script + existing shims). Jeff wants to get "sneaky and creative" about closing the remaining gaps with shims, type aliases, and programmatic tricks.
+
+## Decision
+
+Prioritize 5 Tier 1 shims that would push automation from ~60% to ~80%:
+
+1. **Page lifecycle method renaming** — Roslyn fixer or L1 regex transform. `Page_Load` → `OnInitializedAsync`, `Page_Init` → `OnInitialized`, etc. Affects 100% of migrated pages.
+
+2. **Event handler signature conversion** — L1 markup `@` prefix on `OnClick="handler"` attributes + code-behind signature rewrite (`object sender, EventArgs e` → `MouseEventArgs e`). Affects 80%+ of pages.
+
+3. **SessionShim service** — Scoped DI service wrapping `ISession` with Web Forms-style `Session["key"]` indexer. Falls back to in-memory dictionary in interactive mode.
+
+4. **ConfigurationManager shim** — Static class with `AppSettings` and `ConnectionStrings` properties delegating to `IConfiguration`. Register via `AddBlazorWebFormsComponents()`.
+
+5. **web.config → appsettings.json** — L1 script enhancement to parse `<appSettings>` and `<connectionStrings>` into `appsettings.json`.
+
+## Full Analysis
+
+See `dev-docs/migration-shim-analysis.md` for the complete 47-item catalog with feasibility ratings, proposed approaches, and effort estimates.
+
+## Estimated Timeline
+
+- Tier 1 (5 items): 5–6 weeks
+- Tier 2 (7 items): 6–8 weeks additional
+- Combined: ~90% automation achievable
+
+## Trade-offs
+
+- Shims are explicitly migration aids, not long-term patterns. All should be marked `[Obsolete]` with guidance to convert to idiomatic Blazor.
+- SessionShim in interactive mode uses in-memory fallback (not real session). Must log warnings.
+- ConfigurationManager shim requires initialization in `Program.cs` — adds a one-time wiring step.
+- Roslyn fixers require shipping an analyzer NuGet package alongside the component library.
+
+# Decision: Migration Automation — 23 Gaps, 3-Phase Plan
+
+**By:** Bishop (Migration Tooling Dev)
+**Date:** 2026-07-25
+**Requested by:** Jeffrey T. Fritz
+
+## What
+
+Full audit of bwfc-migrate.ps1 and BWFC shim library identified 23 automation gaps between L1 output and compilable/runnable Blazor code. Proposed solutions range from type aliases (minutes) to Startup.cs extraction (days).
+
+Report: `dev-docs/migration-automation-opportunities.md`
+
+## Key Decisions Proposed
+
+1. **Phase 1 priority: "Just Make It Compile"** — ConfigurationManager shim, BundleConfig/RouteConfig stubs, Web.config→appsettings.json, selective using retention, App_Start/ copy, App_Themes/ auto-copy. These 6 items target the most common compile blockers.
+
+2. **Phase 2 priority: "Just Make It Run"** — Session shim on WebFormsPageBase, Page_Load→OnInitializedAsync script transform, IsPostBack guard unwrapping, event handler signature transform, Bind() expression conversion. These 6 items reduce L2 manual work by ~40%.
+
+3. **ConfigurationManager shim lives in BWFC library** (not just script transforms). Namespace: `BlazorWebFormsComponents`. Initialized via `AddBlazorWebFormsComponents()`. Type alias added to .targets file. This is the #1 highest-impact single change.
+
+4. **Session shim added to WebFormsPageBase** as `protected SessionShim Session` property. Uses `ISession` when HttpContext available, falls back to in-memory dictionary. Script scaffolds session middleware registration when usage detected.
+
+5. **HttpContext.Current shim** (GAP-02) placed in `System.Web` namespace so existing using directives resolve it. This is controversial — it's a static accessor anti-pattern — but it's marked `[Obsolete]` and makes utility classes compile at L1.
+
+6. **Script should stop blindly stripping all `System.Web.*` usings** — instead, selectively retain usings when the file references types with BWFC shims.
+
+## Why
+
+Current L1→L2 handoff produces ~30-40 compile errors per app. Most are repetitive patterns (missing ConfigurationManager, missing BundleConfig, stripped usings) solvable with shims. The goal is to push L1 "compiles clean" rate from ~60% to ~80%, cutting L2 time in half.
+
+## Team Impact
+
+- **Cyclops**: Will implement the BWFC library shims (ConfigurationManager, Session, FormsAuthentication)
+- **Bishop**: Will implement the bwfc-migrate.ps1 transforms (lifecycle, event handlers, config extraction)
+- **Rogue**: Should write tests for new shims
+- **Colossus**: Will need to update integration tests after shims ship
+
+## Status
+
+PROPOSED — awaiting Jeff's review and team discussion.
+
+# Decision: Theming Integration Tests Written Ahead of Sections 7 & 8
+
+**Author:** Colossus  
+**Date:** 2026-03-22  
+**Status:** Implemented
+
+## Context
+
+Jubilee is building Section 7 (ThemeMode — StyleSheetTheme vs Theme) and Section 8 (Sub-Styles — GridView header/footer theming) on the `/ControlSamples/Theming` page. Tests were requested in advance so they're ready when the markup lands.
+
+## Decision
+
+Two new Playwright tests added to `InteractiveComponentTests.cs`:
+
+1. **`Theming_ThemeMode_StyleSheetThemeVsTheme`** — Uses regex heading match (`Theme\s*Mode`) and text content assertions to verify both StyleSheetTheme and Theme panels render with buttons.
+2. **`Theming_SubStyles_GridViewHeaderAndFooter`** — Uses regex heading match for the sub-styles section, verifies `<table>` and `<th>` header cells exist (GridView structure).
+
+Both tests use flexible selectors (regex for headings, semantic HTML elements like `table`, `th`, `button`) rather than class names or exact text to tolerate minor markup changes from Jubilee.
+
+## Impact
+
+These tests will fail with clear assertion messages until Jubilee's sections are added. Once the markup is present, they should pass without modification.
+
+
+
+### 2026-07-25: Phase 1 L1 Script Enhancements — 6 GAPs Implemented
+
+**By:** Bishop (Migration Tooling Dev)
+
+**What:** Implemented 6 automation gaps in `migration-toolkit/scripts/bwfc-migrate.ps1` for Phase 1 "Just Make It Compile":
+
+1. **GAP-12: Web.config → appsettings.json** — New `Convert-WebConfigToAppSettings` function parses `<appSettings>` and `<connectionStrings>` from Web.config, generates `appsettings.json` with proper structure, merges with existing scaffold content. Runs after scaffold generation, before code-behind copy.
+
+2. **GAP-06: IsPostBack Guard Unwrapping** — New `Remove-IsPostBackGuards` helper function called from `Copy-CodeBehind`. Detects `if (!IsPostBack)`, `if (!Page.IsPostBack)`, `if (IsPostBack == false)` etc. Simple guards (no else) are unwrapped with a `// BWFC: IsPostBack guard unwrapped` comment. Complex guards (with else clause) get a TODO comment instead.
+
+3. **GAP-22: App_Start/ Directory Copy** — New `Copy-AppStart` function copies `*.cs` files from `App_Start/` to the output project root (not a subdirectory). Strips `System.Web.*` usings (with selective retention for Optimization/Routing), strips `[assembly:]` attributes, adds TODO headers, and flags WebApiConfig/FilterConfig patterns for manual review.
+
+4. **GAP-09: Selective Using Retention** — Restructured the using-stripping logic in `Copy-CodeBehind` to first preserve specific usings that have BWFC shims (System.Configuration, System.Web.Optimization, System.Web.Routing), then strip everything else in a specific order: `System.Web.UI.*` → `System.Web.Security` → remaining `System.Web.*` → `Microsoft.AspNet.*` → `Microsoft.Owin.*` → `Owin`.
+
+5. **GAP-20: .aspx URL Cleanup** — Added URL cleanup transforms in `Copy-CodeBehind`: `"~/Page.aspx"` → `"/Page"`, `"~/Page.aspx?q=v"` → `"/Page?q=v"`, and relative .aspx references in NavigateTo calls.
+
+6. **GAP-13: Bind() → @bind Transform** — Added Bind() expression handling in `ConvertFrom-Expressions`: attribute-value Bind() becomes `@bind-Value="context.Prop"`, standalone/encoded Bind() becomes `@context.Prop`. Runs before Eval() transforms in the expression pipeline.
+
+**Technical approach:**
+- All new functions follow existing script patterns (Write-TransformLog, Write-ManualItem, WhatIf awareness)
+- IsPostBack unwrapping uses iterative brace-counting (not regex for brace matching)
+- Using retention runs before blanket stripping, converting retained usings to comments with BWFC equivalence notes
+- URL cleanup handles 4 patterns (tilde+query, tilde-only, relative+query in NavigateTo, relative in NavigateTo)
+- Bind() transforms run before Eval() in expression pipeline to avoid conflicts
+
+**Validated:** Script parses cleanly, runs in WhatIf mode, existing test suite maintains 12/15 pass rate (3 pre-existing failures unchanged). Summary output includes new App_Start file count.
+
+**Why this matters:** These 6 transforms collectively target the most common "manual review" items in migrated code-behind files. Combined with existing BWFC shims, they push L1 coverage closer to the ~75% target by eliminating IsPostBack confusion, preserving config values, and cleaning up URLs automatically.
+
+
+### 2026-07-28: Phase 1 Library Shims — ConfigurationManager, BundleConfig, RouteConfig
+
+**By:** Cyclops (Component Dev)
+
+**What:** Added three shim/stub files to BlazorWebFormsComponents:
+
+1. **ConfigurationManager.cs** (GAP-01) — Static shim in `BlazorWebFormsComponents` namespace that shadows `System.Configuration.ConfigurationManager`. Provides `AppSettings["key"]` (reads `AppSettings:{key}` then falls back to `{key}` from IConfiguration) and `ConnectionStrings["name"]` (reads from `IConfiguration.GetConnectionString(name)`). Initialized via `app.UseConfigurationManagerShim()` in Program.cs.
+
+2. **BundleConfig.cs** (GAP-10) — No-op stubs in `System.Web.Optimization` namespace: `BundleCollection`, `Bundle`, `ScriptBundle`, `StyleBundle`, `BundleTable`. Allows `App_Start/BundleConfig.cs` to compile unchanged.
+
+3. **RouteConfig.cs** (GAP-10) — No-op stubs in `System.Web.Routing` namespace: `RouteCollection` (with `MapPageRoute`, `Ignore`), `RouteTable`. Allows `App_Start/RouteConfig.cs` to compile unchanged.
+
+4. **ServiceCollectionExtensions.cs** — Added `UseConfigurationManagerShim(this WebApplication app)` extension method that calls `ConfigurationManager.Initialize(app.Configuration)`.
+
+**Technical approach:**
+- ConfigurationManager follows the same shim pattern as ResponseShim/RequestShim but is static (like the EF6 Database shim) since the original API is static
+- Namespace shadowing: placed in `BlazorWebFormsComponents` namespace so the .targets global using (`<Using Include="BlazorWebFormsComponents" />`) makes it shadow `System.Configuration.ConfigurationManager` naturally — no type alias needed
+- BundleConfig/RouteConfig use `System.Web.Optimization` and `System.Web.Routing` namespaces to match exact Web Forms using statements
+- All three files compile cleanly on net8.0, net9.0, net10.0
+
+**Why this matters:** These are the most common compilation blockers when migrating Web Forms apps. ConfigurationManager is used by virtually every BLL/DAL layer. BundleConfig and RouteConfig are in every Web Forms `App_Start` folder. These shims let that code compile immediately after L1 migration.
+
+
+# Decision: Phase 1 Shim Test Contracts
+
+**By:** Rogue (QA Analyst)  
+**Date:** 2026-07-25
+
+## What
+
+Wrote 30 unit tests across 3 files defining the API contract for Phase 1 library shims:
+
+| File | Tests | Covers |
+|------|-------|--------|
+| `ConfigurationManagerTests.cs` | 10 | AppSettings, ConnectionStrings, Initialize, fallback, precedence |
+| `BundleConfigTests.cs` | 12 | BundleTable, BundleCollection, ScriptBundle, StyleBundle |
+| `RouteConfigTests.cs` | 8 | RouteTable, RouteCollection.MapPageRoute, RouteCollection.Ignore |
+
+## API Contracts the Tests Assume
+
+These assumptions constrain Cyclops's implementation:
+
+1. **ConfigurationManager** — static class in `BlazorWebFormsComponents` namespace
+   - `Initialize(IConfiguration)` — must be called first
+   - `AppSettings[key]` → `string?` — looks up `AppSettings:{key}`, falls back to root `{key}`
+   - `ConnectionStrings[name]` → object with `.ConnectionString` property (Web Forms compat), or `null`
+
+2. **BundleTable** — static class, `Bundles` property returns `BundleCollection` singleton
+   - `BundleCollection.Add(Bundle)` — no-op, does not throw
+   - `ScriptBundle(virtualPath).Include(params string[])` → returns self
+   - `StyleBundle(virtualPath).Include(params string[])` → returns self
+
+3. **RouteTable** — static class, `Routes` property returns `RouteCollection` singleton
+   - `RouteCollection.MapPageRoute(string, string, string)` — no-op
+   - `RouteCollection.Ignore(string)` — no-op
+
+## Why This Matters
+
+Tests are written *ahead of implementation* so Cyclops has a clear, testable contract. If the implementation deviates from these contracts, either the tests or the implementation need to be reconciled — not silently shipped.
+
+## Open Questions for Cyclops
+
+- Does `ConfigurationManager.ConnectionStrings["name"]` return a `ConnectionStringSettings` class (with `.ConnectionString` + `.Name` + `.ProviderName`) or a simpler wrapper? Tests assume `.ConnectionString` property exists.
+- Should `ConfigurationManager` throw `InvalidOperationException` before `Initialize()` is called, or return null? Tests accommodate either behavior.
+
+
+### Phase 1 shim documentation added to migration skills
+
+**By:** Psylocke (Skills Engineer)
+
+**What:** Updated three skill files (`bwfc-migration/SKILL.md`, `bwfc-migration/CODE-TRANSFORMS.md`, `migration-standards/SKILL.md`) to document Phase 1 compile-compatibility shims and L1 script capabilities: ConfigurationManager shim (`app.UseConfigurationManagerShim()`), BundleConfig/RouteConfig no-op stubs, IsPostBack guard unwrapping (`Remove-IsPostBackGuards`), and `.aspx` URL cleanup in code-behind.
+
+**Key decisions in the documentation:**
+1. **ConfigurationManager registration pattern:** Documented as `app.UseConfigurationManagerShim()` (the extension method), not direct `ConfigurationManager.Initialize()` — the extension method is the public API surface.
+2. **appsettings.json mapping convention:** Documented that `Web.config` `<appSettings>` keys map under an `"AppSettings"` section in `appsettings.json` (matching the shim's `IConfiguration["AppSettings:{key}"]` lookup order).
+3. **IsPostBack in checklists:** Updated the Per-Page Migration Checklist to include IsPostBack unwrapping, .aspx URL cleanup, and shim using retention as L1 automated items.
+
+**Why this matters:** End-users invoking the `bwfc-migration` or `migration-standards` skills will now get accurate guidance on Phase 1 capabilities instead of being told to handle these items manually.
+

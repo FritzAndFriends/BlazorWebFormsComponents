@@ -416,3 +416,40 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 
 **File paths:** `src/BlazorWebFormsComponents.Test/Theming/{ThemeModeTests.razor, ContainerPropagationTests.razor, SubStyleTests.razor, RuntimeThemeSwitchTests.razor}`
 
+### Phase 1 Library Shim Tests (2026-07)
+
+Wrote 30 unit tests across 3 files for Phase 1 library shims (ConfigurationManager, BundleConfig, RouteConfig). Tests written from spec before implementation lands.
+
+**Test files created:**
+- `ConfigurationManagerTests.cs` — 10 tests: AppSettings read, missing key null, fallback to root key, precedence, ConnectionStrings read/null/multiple, Initialize, uninitialized behavior. Uses `IDisposable` to reset static state between tests. Uses `Microsoft.Extensions.Configuration.Memory` for in-memory config.
+- `BundleConfigTests.cs` — 12 tests: BundleTable.Bundles not-null and singleton, BundleCollection.Add no-op, ScriptBundle/StyleBundle construction, Include fluent API (single/multi file), full fluent chain patterns. All "compiles and doesn't throw" tests.
+- `RouteConfigTests.cs` — 8 tests: RouteTable.Routes not-null and singleton, MapPageRoute no-op (single/multi), Ignore no-op (single/multi), full typical RegisterRoutes pattern.
+
+**Key patterns:**
+- Static shim tests use `IDisposable` for cleanup (ConfigurationManager is static)
+- No-op stub tests use `Should.NotThrow()` for verification
+- Fluent API tests assert `ShouldBeSameAs(bundle)` for return self
+- ConfigurationManager.ConnectionStrings returns object with `.ConnectionString` property (Web Forms compat)
+- All tests in `BlazorWebFormsComponents.Test` namespace, plain xUnit (no bUnit needed — these are non-component types)
+
+**Build status:** Expected CS0103/CS0246 errors — shim implementations don't exist yet. Zero syntax errors in test code.
+
+### SessionShim + L1 Integration Tests (2026-07)
+
+**SessionShim unit tests (13 tests):** Created `src/BlazorWebFormsComponents.Test/SessionShimTests.cs` targeting in-memory fallback mode. Constructor: `SessionShim(ILogger<SessionShim> logger, IHttpContextAccessor? httpContextAccessor = null)` — logger is required (throws ArgumentNullException if null), httpContextAccessor is optional. Used `NullLogger<SessionShim>.Instance` for test setup. All 13 tests PASS across net8.0/net9.0/net10.0:
+- Indexer: set/get, get missing (null), set null, overwrite
+- Remove: existing key, missing key (no throw)
+- Clear: removes all, count goes to 0
+- ContainsKey: true for existing, false for missing
+- Get<T>: typed retrieval, missing key returns default(T)
+- MultipleTypes: string, int, bool, complex object — all stored and retrieved correctly
+
+**L1 integration test cases (TC19-TC21):** Added 3 test cases to `migration-toolkit/tests/`:
+- TC19-PageLifecycle (GAP-05): Page_Load → OnInitializedAsync, Page_PreRender → OnAfterRenderAsync(bool firstRender). L1 script adds `await base.OnInitializedAsync()`, TODO review comment, and wraps PreRender body in `if (firstRender)`. **PASS**
+- TC20-EventHandlerStandard (GAP-07): Standard EventArgs handlers (Button_Click, LinkButton_Click) — both `(object sender, EventArgs e)` params stripped. **PASS**
+- TC21-EventHandlerSpecialized (GAP-07): Specialized EventArgs (GridViewCommandEventArgs, GridViewPageEventArgs) — sender stripped, typed EventArgs kept. L1 strips `using System.Web.UI.WebControls;` and removes blank line between using/namespace. **PASS**
+
+Key findings: GAP-05 and GAP-07 transforms are already implemented in the L1 script. Existing expected outputs for TC13-TC16, TC18 are stale — they predate the lifecycle conversion feature and will need updating (not in scope for this task). Overall L1 pass rate: 16/21 (76%).
+
+Conventions discovered: SessionShim uses Shouldly assertions + xUnit `[Fact]` (matching ViewStateDictionaryTests pattern). L1 test naming: `TC{N}-{PascalCaseName}` with sequential numbering. Expected code-behind always includes the standard 15-line TODO header.
+

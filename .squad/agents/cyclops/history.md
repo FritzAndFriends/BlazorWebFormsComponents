@@ -801,3 +801,39 @@ foreach (var warning in warnings) {
 
 **Build:** ✅ 0 errors, 135 warnings (all pre-existing)
 **Tests:** ✅ 2,685 passed, 0 failed, 0 skipped
+
+### Phase 1 Library Shims (2026-07-28)
+
+**Task:** Implement three migration shims to eliminate the most common compilation blockers in migrated Web Forms apps.
+
+**Files created:**
+- ConfigurationManager.cs: Static shim shadowing System.Configuration.ConfigurationManager via namespace. AppSettings[key] reads AppSettings:{key} then {key} from IConfiguration. ConnectionStrings[name] reads via GetConnectionString(). Initialized by app.UseConfigurationManagerShim().
+- BundleConfig.cs: No-op stubs in System.Web.Optimization for Bundle/ScriptBundle/StyleBundle/BundleTable/BundleCollection.
+- RouteConfig.cs: No-op stubs in System.Web.Routing for RouteCollection/RouteTable.
+- Updated ServiceCollectionExtensions.cs with UseConfigurationManagerShim(this WebApplication app).
+
+**Key decisions:**
+- ConfigurationManager is static (like EF6 Database shim) because the Web Forms API is static. Uses WebApplication.Configuration for initialization.
+- Namespace shadowing via .targets global using avoids needing a type alias in the .targets file.
+- AppSettings fallback order: AppSettings:{key} first (structured), then {key} directly (flat).
+- BundleConfig/RouteConfig use original System.Web.* namespaces so existing using statements work unchanged.
+
+**Build:** 0 errors on net8.0;net9.0;net10.0 (438 warnings, all pre-existing)
+
+### GAP-04: SessionShim — Session["key"] Drop-In Replacement (2026-07-28)
+
+**Task:** Implement `SessionShim` as a scoped service providing dictionary-style `Session["key"]` access for migrated Web Forms code.
+
+**Files created/modified:**
+- `SessionShim.cs`: Scoped service with `object? this[string key]` indexer, `Get<T>(key)` typed helper, `Remove()`, `Clear()`, `ContainsKey()`, `Count`. Uses `ISession` with JSON serialization when HTTP context is available; falls back to `ConcurrentDictionary` in interactive Blazor Server mode. Logs one-time warning on fallback.
+- `ServiceCollectionExtensions.cs`: Added `AddDistributedMemoryCache()`, `AddSession()`, `AddScoped<SessionShim>()` to `AddBlazorWebFormsComponents()`.
+- `WebFormsPageBase.cs`: Added `[Inject] SessionShim _sessionShim` and `protected SessionShim Session` property so `Session["key"]` works in any page inheriting WebFormsPageBase.
+
+**Key decisions:**
+- System.Text.Json for serialization (zero external deps, consistent with project).
+- `IHttpContextAccessor` is optional constructor parameter — graceful degradation, no throws.
+- `TryGetSession` catches `InvalidOperationException` for cases where session middleware is not configured.
+- One-time `ILogger.LogWarning` on fallback so devs get visibility without log spam.
+- `ISession.Keys` requires `System.Linq` for `Any()`/`Count()` — must include the using.
+
+**Build:** ✅ 0 errors on net8.0;net9.0;net10.0

@@ -21,6 +21,15 @@ public abstract class WebFormsPageBase : ComponentBase
 [Inject] private LinkGenerator _linkGenerator { get; set; } = null!;
 [Inject] private IHttpContextAccessor _httpContextAccessor { get; set; } = null!;
 [Inject] private ILogger<WebFormsPageBase> _logger { get; set; } = null!;
+[Inject] private SessionShim _sessionShim { get; set; } = null!;
+
+/// <summary>
+/// Provides dictionary-style <c>Session["key"]</c> access, emulating
+/// ASP.NET Web Forms <c>HttpSessionState</c>. Backed by ASP.NET Core
+/// <see cref="ISession"/> in SSR mode; falls back to in-memory storage
+/// in interactive Blazor Server mode.
+/// </summary>
+protected SessionShim Session => _sessionShim;
 
 /// <summary>
 /// Returns <c>true</c> when an <see cref="HttpContext"/> is available

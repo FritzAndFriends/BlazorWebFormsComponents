@@ -4,6 +4,7 @@ using BlazorWebFormsComponents.Diagnostics;
 using BlazorWebFormsComponents.Theming;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorWebFormsComponents;
@@ -33,8 +34,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlazorWebFormsComponents(this IServiceCollection services, Action<BlazorWebFormsComponentsOptions>? configure)
     {
         services.AddHttpContextAccessor();
+        services.AddDistributedMemoryCache();
+        services.AddSession();
         services.AddScoped<BlazorWebFormsJsInterop>();
         services.AddScoped<IPageService, PageService>();
+        services.AddScoped<SessionShim>();
 
         var options = new BlazorWebFormsComponentsOptions();
         configure?.Invoke(options);
@@ -128,6 +132,25 @@ public static class ServiceCollectionExtensions
         }
 
         return services;
+    }
+
+    /// <summary>
+    /// Initializes the <see cref="ConfigurationManager"/> shim from the application's
+    /// <see cref="IConfiguration"/>. Call this in Program.cs after building the app:
+    /// <code>
+    /// var app = builder.Build();
+    /// app.UseConfigurationManagerShim();
+    /// </code>
+    /// This enables migrated Web Forms code to use
+    /// <c>ConfigurationManager.AppSettings["key"]</c> and
+    /// <c>ConfigurationManager.ConnectionStrings["name"]</c>.
+    /// </summary>
+    /// <param name="app">The web application</param>
+    /// <returns>The web application for chaining</returns>
+    public static WebApplication UseConfigurationManagerShim(this WebApplication app)
+    {
+        ConfigurationManager.Initialize(app.Configuration);
+        return app;
     }
 
     /// <summary>

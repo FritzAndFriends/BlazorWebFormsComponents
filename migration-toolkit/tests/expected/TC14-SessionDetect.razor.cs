@@ -27,10 +27,13 @@ using System;
 
 namespace MyApp
 {
-    public partial class TC14_SessionDetect : System.Web.UI.Page
+    public partial class TC14_SessionDetect
     {
-        protected void Page_Load(object sender, EventArgs e)
+        protected override async Task OnInitializedAsync()
         {
+            // TODO: Review lifecycle conversion — verify async behavior
+            await base.OnInitializedAsync();
+
             var cartId = Session["CartId"];
             Session["UserName"] = "test";
         }

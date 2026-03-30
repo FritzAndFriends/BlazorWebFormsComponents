@@ -58,6 +58,22 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
  Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
 
+## Phase 2 Playwright Tests (2026-07-24)
+
+Added 6 integration tests across 2 new files in `samples/AfterBlazorServerSide.Tests/Migration/`:
+
+**SessionDemoTests.cs** (5 tests for `/migration/session` — GAP-04 SessionShim):
+1. `Session_SetAndGetValue` — stores a value via input+button, verifies display updates
+2. `Session_CountIncrementsAfterStore` — stores 2 keys (string + int counter), verifies count ≥ 2
+3. `Session_ClearRemovesAllValues` — stores value, clicks Clear, verifies count=0 and display="(empty)"
+4. `Session_TypedCounter` — clicks Increment Counter 3×, verifies Session.Get<int> increments correctly
+5. `Session_PersistsAcrossNavigation` — stores value, navigates to home and back, verifies persistence
+
+**ConfigurationManagerTests.cs** (1 regression test for Phase 1):
+6. `ConfigurationManager_PageLoads` — loads page, checks heading, verifies AppSettings card renders, no errors
+
+Patterns used: `data-audit-control` attribute selectors for card targeting, `DOMContentLoaded` wait strategy, `FillAsync` + Tab for Blazor Server `@bind` inputs, `WaitForTimeoutAsync` for post-click re-render. Build green — 0 errors.
+
  Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
 
  Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
@@ -250,3 +266,25 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
 **Coverage:** 1 smoke test (existing) + 1 existing interaction test + 2 new interaction tests = 4 total Theming tests.
 
+
+## Session: L1 Integration Test Cases for Phase 1 Enhancements (2026-03-29 00:07)
+
+Added 3 new test cases to migration-toolkit/tests/ for L1 script Phase 1 enhancements:
+- **TC16-IsPostBackGuard**: Tests IsPostBack guard unwrapping (GAP-06)  verifies the script removes if (!IsPostBack) { } wrappers and adds explanatory comment
+- **TC17-BindExpression**: Tests Bind()  @bind-Value transform (GAP-13)  verifies <%# Bind("Prop") %> becomes @bind-Value="context.Prop"
+- **TC18-UrlCleanup**: Tests .aspx URL cleanup (GAP-20)  verifies Response.Redirect() arguments have .aspx extensions removed and tilde converted to slash
+
+All 3 tests passing. Test suite now has 18 test cases (was 15). Pass rate 78% (14/18), line accuracy 98.2%.
+
+**Key learnings:**
+- L1 test discovery: Run-L1Tests.ps1 discovers test cases by scanning inputs/ for *.aspx files, expects corresponding .razor in expected/ directory
+- Test input format: TC##-Name.aspx + optional TC##-Name.aspx.cs for code-behind
+- Expected output format: TC##-Name.razor + optional TC##-Name.razor.cs for code-behind expectations
+- Test runner uses normalized line-by-line comparison (trims trailing whitespace, normalizes line endings, removes trailing blank lines)
+- Important: Expected files must match ACTUAL script output including:
+  - Extra indentation/whitespace preserved from AST transformations (e.g., IsPostBack unwrapping leaves original indentation)
+  - ItemType="object" attributes added by script to FormView/DropDownList
+  - Standard TODO comment header in .razor.cs files
+  - Removal of : System.Web.UI.Page base class from partial classes
+- URL cleanup transform only applies to Response.Redirect() call arguments, not to arbitrary string literals containing URLs
+- To verify exact output: copy input files to temp directory, run bwfc-migrate.ps1 on directory (not individual file), examine generated .razor/.razor.cs files

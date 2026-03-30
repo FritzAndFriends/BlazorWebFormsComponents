@@ -23,6 +23,8 @@
 	{
 		var mockNav = new MockNavigationManager();
 		Services.AddSingleton<Microsoft.AspNetCore.Components.NavigationManager>(mockNav);
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
 		Services.AddScoped<IPageService, PageService>();
 		return (Render<TestPage>(), mockNav);
 	}

@@ -105,6 +105,8 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 
 ### Event Handler Strategy
 
+> **Phase 2 signature cleanup:** Standard `EventArgs` parameters are stripped (they carry no data). Specialized EventArgs types (`CommandEventArgs`, `GridViewEditEventArgs`, etc.) are preserved and mapped to their BWFC equivalents. See `bwfc-migration` skill CODE-TRANSFORMS.md for the full decision table.
+
 BWFC components already expose EventCallback parameters with **matching Web Forms names**:
 
 | Web Forms | BWFC | Action |
@@ -145,7 +147,8 @@ The script should preserve the attribute and annotate the signature change neede
 
 ### Session State → Scoped Services
 
-- Replace `Session["key"]` with a scoped DI service
+- **Phase 2 quick-start:** Use `SessionShim` (`builder.Services.AddSessionShim()`) for immediate `Session["key"]` compatibility — code-behind works unchanged via `WebFormsPageBase.Session`
+- **Final migration:** Replace `Session["key"]` with a scoped DI service for durable state
 - Use `IHttpContextAccessor` for cookie-based persistence when needed
 - Register in `Program.cs` with `builder.Services.AddScoped<TService>()`
 - Example: `Session["CartId"]` → `CartStateService` with cookie-based cart ID
@@ -205,6 +208,38 @@ This is a BWFC-specific behavior that mirrors Web Forms' `TextBox` `TextChanged`
 - Image paths update: `~/Images/` → `/Images/`
 - Font paths: same pattern
 
+### Compile-Compatibility Shims
+
+BWFC ships shims that let migrated business logic and `App_Start` files compile without modification. These are part of the "Just Make It Compile" strategy — eliminate build errors first, then address runtime behavior.
+
+| Shim | Namespace | What It Provides |
+|---|---|---|
+| **ConfigurationManager** | `BlazorWebFormsComponents` | `AppSettings["key"]` → reads from `IConfiguration`. `ConnectionStrings["name"]` → reads from `IConfiguration.GetConnectionString()`. |
+| **BundleTable / Bundle / ScriptBundle / StyleBundle** | `System.Web.Optimization` | No-op stubs. `BundleTable.Bundles.Add(...)` compiles and does nothing. `App_Start/BundleConfig.cs` compiles as-is. |
+| **RouteTable / RouteCollection** | `System.Web.Routing` | No-op stubs. `RouteTable.Routes.MapPageRoute(...)` compiles and does nothing. `App_Start/RouteConfig.cs` compiles as-is. |
+
+**ConfigurationManager setup:**
+
+```csharp
+var app = builder.Build();
+app.UseConfigurationManagerShim();   // Binds to IConfiguration
+```
+
+**appsettings.json mapping:** Map `Web.config` `<appSettings>` keys under an `"AppSettings"` section and `<connectionStrings>` under `"ConnectionStrings"`:
+
+```json
+{
+  "AppSettings": {
+    "SiteName": "My Store"
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=...;Database=...;"
+  }
+}
+```
+
+> **BundleConfig/RouteConfig are no-ops.** They exist only to prevent compile errors. In Blazor, use `<link>` / `<script>` tags in `App.razor` for assets and `@page` directives for routing.
+
 ### Generated Code — Variable Declaration Styles
 
 > **CRITICAL:** All local variable declarations in generated Blazor code MUST use `var` (implicit typing), not explicit types. This is enforced by `.editorconfig` as **IDE0007 error**.
@@ -225,14 +260,17 @@ This applies to **both L1-generated scaffolding and L2 Copilot-generated code**.
 
 ### Page Lifecycle Mapping
 
-| Web Forms | Blazor | Notes |
-|---|---|---|
-| `Page_Load` | `OnInitializedAsync` | One-time init |
-| `Page_PreInit` | `OnInitializedAsync` (early) | Theme setup |
-| `Page_PreRender` | `OnAfterRenderAsync` | Post-render logic |
-| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase` | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
-| `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
-| `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
+| Web Forms | Blazor | Phase | Notes |
+|---|---|---|---|
+| `Page_Load` | `OnInitializedAsync` | Phase 1: compiles as-is; **Phase 2: transform** | One-time init |
+| `Page_Init` | `OnInitialized` | Phase 1: compiles as-is; **Phase 2: transform** | Sync initialization |
+| `Page_PreInit` | `OnInitializedAsync` (early) | Phase 2 | Theme setup |
+| `Page_PreRender` | `OnAfterRenderAsync(bool firstRender)` | Phase 1: compiles as-is; **Phase 2: transform** | Guard with `if (firstRender)` to avoid render loops |
+| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase`; L1 script auto-unwraps simple guards | Phase 1 | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
+| `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | Phase 1 | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
+| `Response.Redirect` | `NavigationManager.NavigateTo()` | Phase 2 | Inject `NavigationManager` |
+
+> **Phase 2 lifecycle transforms:** After Phase 1 produces compilable code with original `Page_Load`/`Page_Init`/`Page_PreRender` signatures, Phase 2 converts these to proper Blazor lifecycle overrides. See `bwfc-migration` skill for full before/after examples.
 
 ### Layer 1 (Script) vs Layer 2 (Copilot-Assisted) Boundary
 
@@ -253,6 +291,9 @@ Script handles:
 - Scaffold generation (csproj, Program.cs, etc.)
 - SelectMethod/GetRouteUrl flagging
 - Register directive cleanup
+- **IsPostBack guard unwrapping** — simple `if (!IsPostBack) { ... }` guards are auto-unwrapped (body extracted, `if` removed). Complex guards with `else` clauses get TODO comments for manual review.
+- **`.aspx` URL cleanup** — string literals like `"~/Page.aspx?id=5"` are rewritten to `"/Page?id=5"` in code-behind files (tilde-prefixed and relative patterns).
+- **`using` retention for BWFC shims** — `System.Configuration`, `System.Web.Optimization`, and `System.Web.Routing` usings are preserved (as comments with guidance) because BWFC provides compile-compatible shims.
 
 **Layer 2 — Copilot-Assisted** (NOT manual — guided by the `bwfc-migration` skill):
 - EF6 → EF Core (models, DbContext, seed)
