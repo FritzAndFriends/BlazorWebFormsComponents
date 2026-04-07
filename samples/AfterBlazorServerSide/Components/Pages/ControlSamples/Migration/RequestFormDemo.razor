@@ -28,7 +28,7 @@
 <div class="card" data-audit-control="form-input">
     <div class="card-body">
         <h5 class="card-title">User Profile Form</h5>
-        <form method="post">
+        <form method="post" @formname="requestFormDemo">
             <AntiforgeryToken />
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
