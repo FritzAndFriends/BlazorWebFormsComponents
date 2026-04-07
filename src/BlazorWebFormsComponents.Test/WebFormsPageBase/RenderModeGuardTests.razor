@@ -29,6 +29,7 @@
 
 	private IRenderedComponent<TestPage> RenderWithHttpContext()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
 		mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
 		Services.AddSingleton<IHttpContextAccessor>(mockHttpAccessor.Object);
@@ -42,6 +43,7 @@
 
 	private IRenderedComponent<TestPage> RenderWithoutHttpContext()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
 		mockHttpAccessor.Setup(x => x.HttpContext).Returns((HttpContext)null);
 		Services.AddSingleton<IHttpContextAccessor>(mockHttpAccessor.Object);
@@ -62,6 +64,7 @@
 		Services.AddMemoryCache();
 		Services.AddScoped<CacheShim>();
 		Services.AddScoped<ServerShim>();
+		Services.AddScoped<ClientScriptShim>();
 	}
 
 	[Fact]

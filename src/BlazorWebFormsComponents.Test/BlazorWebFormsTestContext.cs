@@ -30,9 +30,8 @@ public abstract class BlazorWebFormsTestContext : BunitContext
     /// <param name="outputHelper">Optional xUnit test output helper for logging. When provided, enables logging output in test results.</param>
     protected BlazorWebFormsTestContext(ITestOutputHelper outputHelper)
     {
-        // Configure bUnit's JSInterop to handle the OnAfterRender call
-        // This is required because the base component calls this on first render
-        JSInterop.SetupVoid("bwfc.Page.OnAfterRender");
+        // Configure bUnit's JSInterop to handle all JS calls from lifecycle methods
+        JSInterop.Mode = JSRuntimeMode.Loose;
 
         // Register required services for BaseWebFormsComponent and WebFormsPageBase
         Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
@@ -41,6 +40,7 @@ public abstract class BlazorWebFormsTestContext : BunitContext
         Services.AddMemoryCache();
         Services.AddScoped<CacheShim>();
         Services.AddScoped<ServerShim>();
+        Services.AddScoped<ClientScriptShim>();
 
         // Always register logging so ILogger<T> is resolvable.
         // Add xUnit output sink when a test output helper is provided.

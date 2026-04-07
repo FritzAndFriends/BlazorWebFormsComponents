@@ -20,6 +20,7 @@
 
 	private IRenderedComponent<TestPage> RenderTestPage()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		Services.AddLogging();
 		Services.AddScoped<SessionShim>();
 		Services.AddScoped<IPageService, PageService>();
@@ -36,6 +37,7 @@
 		Services.AddMemoryCache();
 		Services.AddScoped<CacheShim>();
 		Services.AddScoped<ServerShim>();
+		Services.AddScoped<ClientScriptShim>();
 	}
 
 	[Fact]

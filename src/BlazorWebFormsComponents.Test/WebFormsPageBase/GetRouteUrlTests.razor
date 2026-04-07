@@ -73,6 +73,7 @@
 
 	private (IRenderedComponent<TestPage> cut, CapturingLinkGenerator linkGen) RenderWithCapturingLinkGen()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		var linkGen = new CapturingLinkGenerator();
 		Services.AddSingleton<LinkGenerator>(linkGen);
 		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
@@ -94,6 +95,7 @@
 		Services.AddMemoryCache();
 		Services.AddScoped<CacheShim>();
 		Services.AddScoped<ServerShim>();
+		Services.AddScoped<ClientScriptShim>();
 	}
 
 	[Fact]

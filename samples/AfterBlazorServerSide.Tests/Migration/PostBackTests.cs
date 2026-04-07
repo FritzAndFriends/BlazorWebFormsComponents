@@ -28,7 +28,7 @@ public class PostBackTests
 
         try
         {
-            await page.GotoAsync($"{_fixture.BaseUrl}/postback-demo", new PageGotoOptions
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/PostBackDemo", new PageGotoOptions
             {
                 WaitUntil = WaitUntilState.NetworkIdle,
                 Timeout = 30000
@@ -76,7 +76,7 @@ public class PostBackTests
 
         try
         {
-            await page.GotoAsync($"{_fixture.BaseUrl}/postback-demo", new PageGotoOptions
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/PostBackDemo", new PageGotoOptions
             {
                 WaitUntil = WaitUntilState.NetworkIdle,
                 Timeout = 30000
@@ -124,7 +124,7 @@ public class PostBackTests
 
         try
         {
-            await page.GotoAsync($"{_fixture.BaseUrl}/postback-demo", new PageGotoOptions
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/PostBackDemo", new PageGotoOptions
             {
                 WaitUntil = WaitUntilState.NetworkIdle,
                 Timeout = 30000

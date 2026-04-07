@@ -34,7 +34,7 @@ public class IsPostBackTests : IDisposable
 	public IsPostBackTests()
 	{
 		_ctx = new BunitContext();
-		_ctx.JSInterop.SetupVoid("bwfc.Page.OnAfterRender");
+		_ctx.JSInterop.Mode = JSRuntimeMode.Loose;
 		_ctx.Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
 		_ctx.Services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider());
 		_ctx.Services.AddLogging();
@@ -43,6 +43,7 @@ public class IsPostBackTests : IDisposable
 		_ctx.Services.AddMemoryCache();
 		_ctx.Services.AddScoped<CacheShim>();
 		_ctx.Services.AddScoped<ServerShim>();
+		_ctx.Services.AddScoped<ClientScriptShim>();
 	}
 
 	private static IWebHostEnvironment CreateMockWebHostEnv()

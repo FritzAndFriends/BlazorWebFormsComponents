@@ -21,6 +21,7 @@
 
 	private (IRenderedComponent<TestPage> cut, MockNavigationManager nav) RenderWithMockNav()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		var mockNav = new MockNavigationManager();
 		Services.AddSingleton<Microsoft.AspNetCore.Components.NavigationManager>(mockNav);
 		Services.AddLogging();
@@ -33,6 +34,7 @@
 		Services.AddMemoryCache();
 		Services.AddScoped<CacheShim>();
 		Services.AddScoped<ServerShim>();
+		Services.AddScoped<ClientScriptShim>();
 		return (Render<TestPage>(), mockNav);
 	}
 

@@ -22,6 +22,7 @@
 
 	private IRenderedComponent<TestPage> RenderWithMockNav(string uri = null)
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		var nav = new MockNavigationManager(initialUri: uri ?? "http://localhost/");
 		Services.AddSingleton<Microsoft.AspNetCore.Components.NavigationManager>(nav);
 		var mockAccessor = new Mock<IHttpContextAccessor>();
@@ -43,6 +44,7 @@
 		Services.AddMemoryCache();
 		Services.AddScoped<CacheShim>();
 		Services.AddScoped<ServerShim>();
+		Services.AddScoped<ClientScriptShim>();
 	}
 
 	[Fact]
@@ -118,6 +120,7 @@
 	[Fact]
 	public void Cookies_WithHttpContext_ReturnsRealCookies()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		// Set up a real HttpContext with cookies
 		var httpContext = new DefaultHttpContext();
 		httpContext.Request.Headers["Cookie"] = "session=abc123";
