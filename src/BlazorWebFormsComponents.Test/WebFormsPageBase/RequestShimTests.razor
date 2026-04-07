@@ -1,5 +1,6 @@
 @using Microsoft.AspNetCore.Components.Rendering
 @using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.Primitives
 @using Moq
 
 @code {
@@ -138,5 +139,180 @@
 
 		var cookies = cut.Instance.ExposedRequest.Cookies;
 		cookies["session"].ShouldBe("abc123");
+	}
+
+	// ── Form: Without HttpContext (interactive mode — graceful degradation) ──
+
+	[Fact]
+	public void Form_WithoutHttpContext_ReturnsEmptyFormShim()
+	{
+		var cut = RenderWithMockNav();
+
+		var form = cut.Instance.ExposedRequest.Form;
+
+		form["anything"].ShouldBeNull();
+	}
+
+	[Fact]
+	public void Form_WithoutHttpContext_GetValues_ReturnsNull()
+	{
+		var cut = RenderWithMockNav();
+
+		var form = cut.Instance.ExposedRequest.Form;
+
+		form.GetValues("key").ShouldBeNull();
+	}
+
+	[Fact]
+	public void Form_WithoutHttpContext_AllKeys_ReturnsEmpty()
+	{
+		var cut = RenderWithMockNav();
+
+		var form = cut.Instance.ExposedRequest.Form;
+
+		form.AllKeys.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Form_WithoutHttpContext_Count_ReturnsZero()
+	{
+		var cut = RenderWithMockNav();
+
+		var form = cut.Instance.ExposedRequest.Form;
+
+		form.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Form_WithoutHttpContext_ContainsKey_ReturnsFalse()
+	{
+		var cut = RenderWithMockNav();
+
+		var form = cut.Instance.ExposedRequest.Form;
+
+		form.ContainsKey("key").ShouldBeFalse();
+	}
+
+	// ── Form: With HttpContext (SSR mode — real form data) ──
+
+	private IRenderedComponent<TestPage> RenderWithFormHttpContext(
+		string contentType,
+		Dictionary<string, StringValues>? formFields = null)
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		var httpContext = new DefaultHttpContext();
+		httpContext.Request.ContentType = contentType;
+		if (formFields != null)
+		{
+			httpContext.Request.Form = new FormCollection(formFields);
+		}
+		var mockAccessor = new Mock<IHttpContextAccessor>();
+		mockAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+		Services.AddSingleton<IHttpContextAccessor>(mockAccessor.Object);
+		var nav = new MockNavigationManager();
+		Services.AddSingleton<Microsoft.AspNetCore.Components.NavigationManager>(nav);
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
+		Services.AddScoped<IPageService, PageService>();
+		RegisterShimServices();
+		return Render<TestPage>();
+	}
+
+	[Fact]
+	public void Form_WithHttpContext_ReturnsFormValue()
+	{
+		var cut = RenderWithFormHttpContext("application/x-www-form-urlencoded",
+			new Dictionary<string, StringValues>
+			{
+				{ "username", new StringValues("jeff") }
+			});
+
+		cut.Instance.ExposedRequest.Form["username"].ShouldBe("jeff");
+	}
+
+	[Fact]
+	public void Form_WithHttpContext_GetValues_ReturnsMultipleValues()
+	{
+		var cut = RenderWithFormHttpContext("application/x-www-form-urlencoded",
+			new Dictionary<string, StringValues>
+			{
+				{ "items", new StringValues(new[] { "a", "b", "c" }) }
+			});
+
+		var values = cut.Instance.ExposedRequest.Form.GetValues("items");
+
+		values.ShouldNotBeNull();
+		values.Length.ShouldBe(3);
+		values.ShouldBe(new[] { "a", "b", "c" });
+	}
+
+	[Fact]
+	public void Form_WithHttpContext_AllKeys_ReturnsFieldNames()
+	{
+		var cut = RenderWithFormHttpContext("application/x-www-form-urlencoded",
+			new Dictionary<string, StringValues>
+			{
+				{ "username", new StringValues("jeff") },
+				{ "email", new StringValues("jeff@test.com") }
+			});
+
+		var keys = cut.Instance.ExposedRequest.Form.AllKeys;
+
+		keys.ShouldContain("username");
+		keys.ShouldContain("email");
+	}
+
+	[Fact]
+	public void Form_WithHttpContext_Count_ReturnsFieldCount()
+	{
+		var cut = RenderWithFormHttpContext("application/x-www-form-urlencoded",
+			new Dictionary<string, StringValues>
+			{
+				{ "username", new StringValues("jeff") },
+				{ "email", new StringValues("jeff@test.com") }
+			});
+
+		cut.Instance.ExposedRequest.Form.Count.ShouldBe(2);
+	}
+
+	[Fact]
+	public void Form_WithHttpContext_ContainsKey_ReturnsTrueForExistingField()
+	{
+		var cut = RenderWithFormHttpContext("application/x-www-form-urlencoded",
+			new Dictionary<string, StringValues>
+			{
+				{ "username", new StringValues("jeff") }
+			});
+
+		cut.Instance.ExposedRequest.Form.ContainsKey("username").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Form_WithHttpContext_MissingKey_ReturnsNull()
+	{
+		var cut = RenderWithFormHttpContext("application/x-www-form-urlencoded",
+			new Dictionary<string, StringValues>
+			{
+				{ "username", new StringValues("jeff") }
+			});
+
+		cut.Instance.ExposedRequest.Form["nonexistent"].ShouldBeNull();
+	}
+
+	// ── Form: Edge cases ──
+
+	[Fact]
+	public void Form_WithHttpContext_NonFormEncoded_ReturnsEmpty()
+	{
+		// JSON content-type with no Form set — accessing Form throws InvalidOperationException
+		// which RequestShim catches and returns an empty FormShim
+		var cut = RenderWithFormHttpContext("application/json");
+
+		var form = cut.Instance.ExposedRequest.Form;
+
+		form["anything"].ShouldBeNull();
+		form.Count.ShouldBe(0);
+		form.AllKeys.ShouldBeEmpty();
+		form.ContainsKey("anything").ShouldBeFalse();
 	}
 }
