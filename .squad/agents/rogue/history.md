@@ -345,6 +345,18 @@ Test file: `src/BlazorWebFormsComponents.Test/UpdatePanel/ContentTemplateTests.r
 
 **Key patterns:**
 - Regex GUID detection: `[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-...` for anti-GUID assertions
+
+## Request.Form Shim Tests (feature/request-form-shim)
+
+Added 12 bUnit tests for `Request.Form` / `FormShim` in `RequestShimTests.razor`. Three categories:
+
+1. **Without HttpContext (5 tests):** Verified graceful degradation — indexer returns null, GetValues returns null, AllKeys empty, Count 0, ContainsKey false.
+2. **With HttpContext (6 tests):** SSR mode with `DefaultHttpContext` + `FormCollection` — single values, multi-value fields (checkbox pattern), AllKeys, Count, ContainsKey, and missing key returns null.
+3. **Edge case (1 test):** Non-form-encoded request (JSON content-type) catches `InvalidOperationException` and returns empty FormShim.
+
+Created `RenderWithFormHttpContext()` helper to DRY up HttpContext+form setup across SSR tests.
+
+All 20 RequestShimTests passing (8 existing + 12 new). Pushed to `feature/request-form-shim`.
 - Label-for accessibility: always verify label.for == input.id
 - _Imports.razor provides `@inherits BlazorWebFormsTestContext` — no need for explicit @inherits in test files
 - `@using Shouldly` added locally when not using _Imports default assertions
