@@ -43,14 +43,67 @@ In Blazor, HTTP request data is only available during server-side rendering (SSR
 }
 ```
 
+## Request.Form
+
+The `FormShim` provides `NameValueCollection`-compatible access to HTTP form POST data in server-side rendering (SSR) mode. This allows code-behind using `Request.Form["fieldName"]` to compile and work with Blazor forms.
+
+```csharp
+// Web Forms
+string username = Request.Form["username"];
+string[] selectedColors = Request.Form.GetValues("colors");
+if (Request.Form.Count > 0) { /* process form */ }
+```
+
+### Supported Members
+
+| Member | Returns | Description |
+|--------|---------|-------------|
+| `Form["key"]` | `string?` | First value for the field, or null |
+| `Form.GetValues("key")` | `string[]?` | All values (multi-select, checkboxes) |
+| `Form.AllKeys` | `string[]` | Names of all submitted fields |
+| `Form.Count` | `int` | Number of form fields |
+| `Form.ContainsKey("key")` | `bool` | Whether a field was submitted |
+
+### Blazor Usage
+
+```razor
+@inherits WebFormsPageBase
+
+@code {
+    private string _username = "";
+    private string[] _selectedColors = Array.Empty<string>();
+    private int _fieldCount = 0;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        
+        if (Request.Form.Count > 0)
+        {
+            _username = Request.Form["username"] ?? "";
+            _selectedColors = Request.Form.GetValues("colors") ?? Array.Empty<string>();
+            _fieldCount = Request.Form.Count;
+        }
+    }
+}
+```
+
+### Rendering Mode Behavior
+
+| Mode | Behavior |
+|------|----------|
+| SSR (Static Server Rendering) | Full access — wraps `HttpContext.Request.Form` |
+| Interactive Blazor Server | Returns empty — logs warning on first access |
+| Non-form requests (JSON, etc.) | Returns empty — exceptions caught gracefully |
+
 ## Graceful Degradation
 
 Blazor Server components can run in two modes:
 
-| Mode | `HttpContext` | `QueryString` | `Cookies` | `Url` |
-|---|---|---|---|---|
-| SSR / Pre-render | ✅ Available | From HTTP request | From HTTP request | From HTTP request |
-| Interactive (WebSocket) | ❌ Unavailable | Parsed from `NavigationManager.Uri` | Empty collection (warning logged) | From `NavigationManager.Uri` |
+| Mode | `HttpContext` | `QueryString` | `Cookies` | `Url` | `Form` |
+|---|---|---|---|---|---|
+| SSR / Pre-render | ✅ Available | From HTTP request | From HTTP request | From HTTP request | From HTTP request |
+| Interactive (WebSocket) | ❌ Unavailable | Parsed from `NavigationManager.Uri` | Empty collection (warning logged) | From `NavigationManager.Uri` | Empty collection (warning logged) |
 
 Use the `IsHttpContextAvailable` guard when cookie access is critical:
 
@@ -130,6 +183,8 @@ string fullPath = Request.Url.AbsolutePath;
 |---|---|---|
 | `Request.QueryString["id"]` | `Request.QueryString["id"]` | `NavigationManager.Uri` + parse, or `[SupplyParameterFromQuery]` |
 | `Request.Cookies["name"]` | `Request.Cookies["name"]` | `IHttpContextAccessor` (SSR only) |
+| `Request.Form["field"]` | `Request.Form["field"]` | `EditForm` with `@bind` |
+| `Request.Form.GetValues("field")` | `Request.Form.GetValues("field")` | `EditForm` with multi-value binding |
 | `Request.Url` | `Request.Url` | `NavigationManager.ToAbsoluteUri(Nav.Uri)` |
 | `Request.Url.AbsolutePath` | `Request.Url.AbsolutePath` | `new Uri(Nav.Uri).AbsolutePath` |
 
@@ -138,22 +193,37 @@ string fullPath = Request.Url.AbsolutePath;
 `RequestShim` is a migration bridge. As you refactor:
 
 1. **Replace `QueryString` with `[SupplyParameterFromQuery]`** — Blazor's built-in attribute binds query parameters directly to component properties
-2. **Replace `Url` with `NavigationManager`** — Inject `NavigationManager` and use `Uri` or `ToAbsoluteUri()`
-3. **Replace `Cookies` with proper state management** — Use cascading parameters, `ProtectedSessionStorage`, or server-side services instead of cookies
+2. **Replace `Form` with `EditForm` and `@bind`** — Blazor's form data binding replaces the traditional POST form pattern
+3. **Replace `Url` with `NavigationManager`** — Inject `NavigationManager` and use `Uri` or `ToAbsoluteUri()`
+4. **Replace `Cookies` with proper state management** — Use cascading parameters, `ProtectedSessionStorage`, or server-side services instead of cookies
 
 ```razor
 @* Before (migration shim) *@
 @inherits WebFormsPageBase
 @code {
     string id = Request.QueryString["id"];
+    string username = Request.Form["username"];
     Uri url = Request.Url;
 }
 
 @* After (native Blazor) *@
 @inject NavigationManager Nav
+
+<EditForm Model="@_model" OnSubmit="@HandleSubmit">
+    <InputText @bind-Value="_model.Username" />
+    <button type="submit">Submit</button>
+</EditForm>
+
 @code {
     [SupplyParameterFromQuery] public string Id { get; set; }
     Uri url => Nav.ToAbsoluteUri(Nav.Uri);
+    
+    private FormModel _model = new();
+    
+    private void HandleSubmit()
+    {
+        // Process _model directly — no Request.Form needed
+    }
 }
 ```
 
