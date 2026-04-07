@@ -325,7 +325,7 @@ protected override async Task OnAfterRenderAsync(bool firstRender)
 
     if (firstRender)
     {
-        _postBackTargetId = $"{GetType().Name}_{GetHashCode()}";
+        _postBackTargetId = GetType().Name;
         _postBackRef = DotNetObjectReference.Create(this);
 
         // Bootstrap __doPostBack and registration functions

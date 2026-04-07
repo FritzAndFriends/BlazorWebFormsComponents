@@ -941,3 +941,24 @@ foreach (var warning in warnings) {
 - Includes loaded via dynamic `<script>` element creation in eval
 - Auto-flush happens every render (not just firstRender) so scripts registered in event handlers work correctly
 - Build: 0 errors across net8.0/net9.0/net10.0
+
+### ClientScript Phase 2: PostBack + ScriptManager Runtime (2026-07-17)
+
+**Summary:** Replaced NotSupportedException stubs with working PostBack/Callback implementations. Created full JS interop bridge for __doPostBack and ScriptManager.GetCurrent() pattern.
+
+**Files Created:**
+- PostBackEventArgs.cs, ScriptManagerShim.cs, bwfc-postback.js
+
+**Files Modified:**
+- ClientScriptShim.cs: 3 methods now return working JS strings; added ResolveControlId
+- WebFormsPageBase.cs: IAsyncDisposable, ClientScript, PostBack event, JSInvokable handlers, OnAfterRenderAsync registration
+- ServiceCollectionExtensions.cs: ScriptManagerShim DI registration
+- ClientScriptShimTests.cs: Updated tests for new behavior + null edge cases
+
+**Technical Decisions:**
+- Inline JS bootstrap avoids race conditions with external script loading
+- ResolveControlId prefers BaseWebFormsComponent.ID, falls back to type name
+- ScriptManagerShim: both DI and static GetCurrent() factory
+- PostBack target ID: TypeName_HashCode for per-instance uniqueness
+
+**Build:** 0 errors, 32 tests pass x 3 TFMs

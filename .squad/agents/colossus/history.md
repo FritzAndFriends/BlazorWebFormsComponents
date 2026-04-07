@@ -290,3 +290,13 @@ All 3 tests passing. Test suite now has 18 test cases (was 15). Pass rate 78% (1
   - Removal of : System.Web.UI.Page base class from partial classes
 - URL cleanup transform only applies to Response.Redirect() call arguments, not to arbitrary string literals containing URLs
 - To verify exact output: copy input files to temp directory, run bwfc-migrate.ps1 on directory (not individual file), examine generated .razor/.razor.cs files
+
+## PostBack Demo Integration Tests (Phase 2)
+
+**Date:** 2026-07-23
+**Task:** Write Playwright integration tests for `/postback-demo` page (Phase 2 of ClientScript migration).
+**File created:** `samples/AfterBlazorServerSide.Tests/Migration/PostBackTests.cs`
+**Tests:** 3 tests — PostBack button trigger, PostBack hyperlink click, ScriptManager startup script registration.
+**Status:** Compiles clean (0 errors). Demo page not yet created by Jubilee — tests will pass once the page exists.
+**Patterns used:** Same `[Collection(nameof(PlaywrightCollection))]` + `PlaywrightFixture` pattern as all other migration tests. 30s navigation timeout, 10s element wait, 2s post-action settle for CI reliability. `try/finally` with `page.CloseAsync()`.
+**Commit:** `0c75aba2` on `feature/clientscript-phase2`

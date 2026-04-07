@@ -214,3 +214,21 @@ Added `ClientScriptTransform.cs` (Order 850) to the code-behind pipeline. Handle
 - **Tests:** All 349 tests pass (same count as before), updated 20 unit test assertions + TC33 expected output file.
 - **Regex approach:** Single `PageOrThisPrefixRegex` with lookahead handles all three shim-compatible methods in one pass. Much simpler than the old per-pattern regexes with inline script extraction.
 
+### ClientScriptTransform: Phase 2 — PostBack + ScriptManager Shim-Preserving (Bishop)
+
+- **Date:** 2026-07-31
+- **What changed:** `ClientScriptTransform.cs` (Order 850) now preserves ALL ClientScript/ScriptManager patterns for shim use. No more TODO markers.
+- **Phase 2 patterns (newly shim-preserved):**
+  - `Page.ClientScript.GetPostBackEventReference(...)` → `ClientScript.GetPostBackEventReference(...)` (prefix stripped)
+  - `this.ClientScript.GetPostBackEventReference(...)` → `ClientScript.GetPostBackEventReference(...)` (prefix stripped)
+  - `ScriptManager.GetCurrent(Page)` → `ScriptManager.GetCurrent(this)` (Page→this substitution)
+  - `ScriptManager.GetCurrent(this.Page)` → `ScriptManager.GetCurrent(this)` (this.Page→this substitution)
+  - `ScriptManager.GetCurrent(this)` → preserved as-is (already correct)
+- **Regex changes:**
+  - `PageOrThisPrefixRegex` lookahead expanded to include `GetPostBackEventReference`
+  - Removed `GetPostBackEventRefRegex` and `ScriptManagerGetCurrentRegex` (TODO-emitting regexes)
+  - Added `ScriptManagerGetCurrentPageRegex` for Page→this substitution
+- **Shim comment:** Now conditionally mentions `ScriptManagerShim` when ScriptManager patterns detected (dual-shim comment)
+- **Tests:** 353 total (was 349) — 4 new test cases for Phase 2 patterns, updated 6 existing assertions
+- **Key design decision:** `hasScriptManagerCall` flag tracks ScriptManager presence separately from `hasShimCall` to conditionally generate the dual-shim comment
+

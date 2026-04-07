@@ -34,30 +34,17 @@ public class PostBackTests
                 Timeout = 30000
             });
 
-            // Wait for Blazor interactive circuit to be ready
-            var button = page.Locator("#postback-button");
-            await button.WaitForAsync(new LocatorWaitForOptions
-            {
-                State = WaitForSelectorState.Attached,
-                Timeout = 10000
-            });
+            // Wait for __doPostBack to be bootstrapped by OnAfterRenderAsync
+            await page.WaitForFunctionAsync("typeof window.__doPostBack === 'function'",
+                null, new PageWaitForFunctionOptions { Timeout = 10000 });
 
+            var button = page.Locator("#postback-button");
             await button.ClickAsync();
 
-            // Wait for the result to appear after the server round-trip
+            // Wait for Blazor to process the postback and re-render
             var result = page.Locator("#postback-result");
-            await result.WaitForAsync(new LocatorWaitForOptions
-            {
-                State = WaitForSelectorState.Attached,
-                Timeout = 10000
-            });
-
-            // Allow time for Blazor to process the postback and re-render
-            await page.WaitForTimeoutAsync(2000);
-
-            var resultText = await result.TextContentAsync();
-            Assert.NotNull(resultText);
-            Assert.Contains("PostBack received!", resultText!);
+            await Assertions.Expect(result).ToContainTextAsync("PostBack received!",
+                new LocatorAssertionsToContainTextOptions { Timeout = 10000 });
         }
         finally
         {
@@ -82,30 +69,17 @@ public class PostBackTests
                 Timeout = 30000
             });
 
-            // Wait for Blazor interactive circuit to be ready
-            var link = page.Locator("#postback-link");
-            await link.WaitForAsync(new LocatorWaitForOptions
-            {
-                State = WaitForSelectorState.Attached,
-                Timeout = 10000
-            });
+            // Wait for __doPostBack to be bootstrapped by OnAfterRenderAsync
+            await page.WaitForFunctionAsync("typeof window.__doPostBack === 'function'",
+                null, new PageWaitForFunctionOptions { Timeout = 10000 });
 
+            var link = page.Locator("#postback-link");
             await link.ClickAsync();
 
-            // Wait for the result to appear after the server round-trip
+            // Wait for Blazor to process the postback and re-render
             var result = page.Locator("#hyperlink-result");
-            await result.WaitForAsync(new LocatorWaitForOptions
-            {
-                State = WaitForSelectorState.Attached,
-                Timeout = 10000
-            });
-
-            // Allow time for Blazor to process the postback and re-render
-            await page.WaitForTimeoutAsync(2000);
-
-            var resultText = await result.TextContentAsync();
-            Assert.NotNull(resultText);
-            Assert.Contains("PostBack received!", resultText!);
+            await Assertions.Expect(result).ToContainTextAsync("PostBack received!",
+                new LocatorAssertionsToContainTextOptions { Timeout = 10000 });
         }
         finally
         {
@@ -132,14 +106,8 @@ public class PostBackTests
 
             // Wait for the startup script to execute and populate the target
             var target = page.Locator("#scriptmanager-target");
-            await target.WaitForAsync(new LocatorWaitForOptions
-            {
-                State = WaitForSelectorState.Attached,
-                Timeout = 10000
-            });
-
-            // Allow time for OnAfterRenderAsync to fire and JS to execute
-            await page.WaitForTimeoutAsync(2000);
+            await Assertions.Expect(target).Not.ToHaveTextAsync(string.Empty,
+                new LocatorAssertionsToHaveTextOptions { Timeout = 10000 });
 
             var targetText = await target.TextContentAsync();
             Assert.NotNull(targetText);

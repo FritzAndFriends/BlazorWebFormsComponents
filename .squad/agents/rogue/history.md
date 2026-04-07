@@ -490,3 +490,17 @@ Conventions discovered: SessionShim uses Shouldly assertions + xUnit `[Fact]` (m
 - System.CommandLine tests work by reconstructing the command tree locally rather than trying to invoke Program.Main — this decouples from Bishop's refactoring of Program.cs.
 - Test case count: 21 TC* cases (TC01-TC21), of which 8 have code-behind pairs (TC13-TC16, TC18-TC21). Total 29 input files + 29 expected files = 58 TestData files.
 
+### Phase 2 PostBack + ScriptManager Shim Tests (2026-07)
+
+**Wrote 35 new unit tests across 3 files for Phase 2 shims.** All 70 targeted tests pass (including pre-existing Phase 1 tests) across net8.0/net9.0/net10.0. Zero regressions (55 pre-existing failures in ViewState/RequestShim unrelated).
+
+**Files modified/created:**
+- `ClientScriptShimTests.cs` (modified) — 15 new tests: GetPostBackEventReference escaping (single quotes, backslashes), output format, null/empty args, control type resolution; GetPostBackClientHyperlink consistency with EventReference, null control, escaping; GetCallbackEventReference escaping (single quotes, backslashes in context), null context/argument defaults, output format with all params.
+- `ScriptManagerShimTests.cs` (created) — 12 tests: Constructor null throws ArgumentNull, valid construction; GetCurrent error cases (plain object, null, integer, error message content); GetCurrent success via reflection-injected ClientScriptShim on mock BaseWebFormsComponent; Delegation tests for RegisterStartupScript (3 overloads), RegisterClientScriptBlock, RegisterClientScriptInclude.
+- `PostBackEventArgsTests.cs` (created) — 11 tests: Constructor sets EventTarget/EventArgument, null target/argument allowed, both null, empty strings; Immutability via reflection (CanWrite=false); Inherits from System.EventArgs; Round-trip with special characters, Unicode, long strings.
+
+**Key patterns used:**
+- Reflection to inject `_clientScript`/`_clientScriptResolved` on `Mock<BaseWebFormsComponent>` for `GetCurrent` success test (ClientScript property is non-virtual, can't be mocked directly).
+- Fully-qualified `BlazorWebFormsComponents.BaseWebFormsComponent` required — test project has a `BaseWebFormsComponent/` folder creating namespace ambiguity. Same for `System.EventArgs` vs `EventArgs/` folder.
+- `dotnet test --filter` uses `|` for OR (not `OR` keyword) in vstest filter expressions.
+
