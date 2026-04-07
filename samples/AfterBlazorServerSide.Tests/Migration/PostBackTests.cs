@@ -78,7 +78,7 @@ public class PostBackTests
 
             // Wait for Blazor to process the postback and re-render
             var result = page.Locator("#hyperlink-result");
-            await Assertions.Expect(result).ToContainTextAsync("PostBack received!",
+            await Assertions.Expect(result).ToContainTextAsync("Hyperlink PostBack!",
                 new LocatorAssertionsToContainTextOptions { Timeout = 10000 });
         }
         finally
