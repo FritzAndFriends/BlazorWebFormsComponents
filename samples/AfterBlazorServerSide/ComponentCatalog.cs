@@ -196,6 +196,8 @@ public static class ComponentCatalog
             Keywords: new[] { "cache", "memorycache", "insert", "remove", "expiration", "migration", "shim" }),
         new("Request", "Migration Helpers", "/migration/request", "RequestShim providing QueryString, Url, and Cookies with SSR fallback",
             Keywords: new[] { "request", "querystring", "url", "cookies", "httpcontext", "migration", "shim" }),
+        new("Request.Form", "Migration Helpers", "/migration/request-form", "FormShim providing Web Forms-compatible Request.Form access with SSR support",
+            Keywords: new[] { "request", "form", "post", "formshim", "ssr", "migration", "shim" }),
         new("Response.Redirect", "Migration Helpers", "/migration/response-redirect", "ResponseShim providing Redirect with automatic ~/  and .aspx stripping",
             Keywords: new[] { "response", "redirect", "navigation", "tilde", "aspx", "migration", "shim" }),
         new("IsPostBack", "Migration Helpers", "/migration/ispostback", "IsPostBack status, guard pattern, and IsHttpContextAvailable check",
