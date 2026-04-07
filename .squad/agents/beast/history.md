@@ -1250,3 +1250,33 @@ This wave establishes **documentation patterns** that will guide future control 
 - Shim philosophy ("zero-rewrite") is the defining characteristic of BWFC; must be stated clearly and repeatedly
 - Real-world example reduces abstract pattern to concrete steps — 6-week timeline with specific pages makes it believable
 - Placement in nav right after "Getting Started" signals that philosophy comes before mechanics; guides readers toward informed decision-making
+
+### 2026 (Current): Request.Form Shim Documentation
+
+**Task:** Document the new `Request.Form` property added to the RequestShim infrastructure by Cyclops.
+
+**What was built (by Cyclops):** FormShim wrapper providing `NameValueCollection`-compatible API for accessing form POST data:
+- `Request.Form["fieldName"]`  first value or null
+- `Request.Form.GetValues("fieldName")`  string[] for multi-value fields
+- `Request.Form.AllKeys`  all field names
+- `Request.Form.Count`  field count
+- `Request.Form.ContainsKey("key")`  existence check
+- Gracefully returns empty in interactive mode (logs warning once)
+- Catches exceptions for non-form-encoded requests (JSON, etc.)
+
+**Documentation Approach:**
+- Located existing `docs/UtilityFeatures/RequestShim.md`  already documented QueryString, Cookies, and Url properties
+- Added new `## Request.Form` section with:
+  - 1 code example (Web Forms form POST pattern)
+  - 5-member supported members table (indexer, GetValues, AllKeys, Count, ContainsKey)
+  - Blazor usage example with OnInitialized lifecycle
+  - 'Rendering Mode Behavior' table (SSR vs interactive)
+- Updated 'Graceful Degradation' comparison table to include Form column
+- Expanded 'Migration Path' table with 2 new rows (Form["field"] and Form.GetValues())
+- Enhanced 'Moving On' section with step 2 guidance: 'Replace Form with EditForm and @bind'
+- Added complete before/after code example showing migration path
+
+**Files Changed:**
+- `docs/UtilityFeatures/RequestShim.md` (+76 lines)
+
+**Commit:** `a1646602` to `feature/request-form-shim`
