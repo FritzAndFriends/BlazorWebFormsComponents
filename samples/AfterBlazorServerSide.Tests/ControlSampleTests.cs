@@ -247,6 +247,14 @@ public class ControlSampleTests
         await VerifyPageLoadsWithoutErrors(path);
     }
 
+    // Migration Shim Sample Pages
+    [Theory]
+    [InlineData("/migration/request-form")]
+    public async Task MigrationPage_Loads_WithoutErrors(string path)
+    {
+        await VerifyPageLoadsWithoutErrors(path);
+    }
+
     // Ajax Control Toolkit Controls
     [Theory]
     [InlineData("/ControlSamples/Accordion")]
