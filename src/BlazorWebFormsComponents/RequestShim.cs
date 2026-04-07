@@ -9,9 +9,10 @@ namespace BlazorWebFormsComponents;
 
 /// <summary>
 /// Compatibility shim for ASP.NET Web Forms <c>Request</c> object.
-/// Provides <c>Request.Cookies</c>, <c>Request.QueryString</c>, and
-/// <c>Request.Url</c> with graceful degradation when <see cref="HttpContext"/>
-/// is unavailable (interactive WebSocket rendering).
+/// Provides <c>Request.Cookies</c>, <c>Request.Form</c>,
+/// <c>Request.QueryString</c>, and <c>Request.Url</c> with graceful
+/// degradation when <see cref="HttpContext"/> is unavailable (interactive
+/// WebSocket rendering).
 /// </summary>
 public class RequestShim
 {
@@ -19,6 +20,7 @@ public class RequestShim
 	private readonly Microsoft.AspNetCore.Components.NavigationManager _nav;
 	private readonly ILogger _logger;
 	private bool _cookieWarned;
+	private bool _formWarned;
 
 	internal RequestShim(
 		HttpContext? httpContext,
@@ -51,6 +53,41 @@ public class RequestShim
 			}
 
 			return EmptyRequestCookies.Instance;
+		}
+	}
+
+	/// <summary>
+	/// Gets the form POST data. When <see cref="HttpContext"/> is unavailable
+	/// (interactive rendering), returns an empty <see cref="FormShim"/> and logs
+	/// a warning on first access. Also returns empty when the request body is
+	/// not form-encoded (e.g., JSON payloads).
+	/// </summary>
+	public FormShim Form
+	{
+		get
+		{
+			if (_httpContext != null)
+			{
+				try
+				{
+					return new FormShim(_httpContext.Request.Form);
+				}
+				catch (InvalidOperationException)
+				{
+					// Request body is not form-encoded (e.g., JSON or empty).
+					return new FormShim(null);
+				}
+			}
+
+			if (!_formWarned)
+			{
+				_logger.LogWarning(
+					"Request.Form accessed without HttpContext (interactive render mode). " +
+					"Returning empty FormShim. Form-dependent logic will not function.");
+				_formWarned = true;
+			}
+
+			return new FormShim(null);
 		}
 	}
 

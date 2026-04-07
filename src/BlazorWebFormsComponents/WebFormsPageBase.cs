@@ -136,10 +136,11 @@ protected ResponseShim Response
 
 /// <summary>
 /// Compatibility shim for Web Forms <c>Request</c> object.
-/// Supports <c>Request.Cookies</c>, <c>Request.QueryString</c>,
-/// and <c>Request.Url</c>. Degrades gracefully when HttpContext
-/// is unavailable: cookies return empty, QueryString and Url fall
-/// back to <see cref="NavigationManager"/>.
+/// Supports <c>Request.Cookies</c>, <c>Request.Form</c>,
+/// <c>Request.QueryString</c>, and <c>Request.Url</c>. Degrades
+/// gracefully when HttpContext is unavailable: cookies and form
+/// return empty, QueryString and Url fall back to
+/// <see cref="NavigationManager"/>.
 /// </summary>
 protected RequestShim Request
 => new(_httpContextAccessor.HttpContext, _navigationManager, _logger);
