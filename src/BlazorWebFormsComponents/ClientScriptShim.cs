@@ -28,6 +28,9 @@ public class ClientScriptShim
 	private readonly Dictionary<string, string> _startupScripts = new();
 	private readonly Dictionary<string, string> _scriptBlocks = new();
 	private readonly Dictionary<string, string> _scriptIncludes = new();
+	private readonly HashSet<string> _flushedStartupScripts = new();
+	private readonly HashSet<string> _flushedScriptBlocks = new();
+	private readonly HashSet<string> _flushedScriptIncludes = new();
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="ClientScriptShim"/> class.
@@ -80,7 +83,8 @@ public class ClientScriptShim
 	/// <returns><c>true</c> if the script is registered; otherwise <c>false</c>.</returns>
 	public bool IsStartupScriptRegistered(Type type, string key)
 	{
-		return _startupScripts.ContainsKey(BuildKey(type, key));
+		var k = BuildKey(type, key);
+		return _startupScripts.ContainsKey(k) || _flushedStartupScripts.Contains(k);
 	}
 
 	// ─── Client Script Blocks ──────────────────────────────────────────
@@ -111,7 +115,8 @@ public class ClientScriptShim
 	/// <returns><c>true</c> if the script block is registered; otherwise <c>false</c>.</returns>
 	public bool IsClientScriptBlockRegistered(Type type, string key)
 	{
-		return _scriptBlocks.ContainsKey(BuildKey(type, key));
+		var k = BuildKey(type, key);
+		return _scriptBlocks.ContainsKey(k) || _flushedScriptBlocks.Contains(k);
 	}
 
 	// ─── Client Script Includes ────────────────────────────────────────
@@ -149,7 +154,7 @@ public class ClientScriptShim
 	/// <returns><c>true</c> if the include is registered; otherwise <c>false</c>.</returns>
 	public bool IsClientScriptIncludeRegistered(string key)
 	{
-		return _scriptIncludes.ContainsKey(key);
+		return _scriptIncludes.ContainsKey(key) || _flushedScriptIncludes.Contains(key);
 	}
 
 	// ─── Flush ─────────────────────────────────────────────────────────
@@ -187,6 +192,10 @@ public class ClientScriptShim
 			var loaderScript = $"(function(){{var s=document.createElement('script');s.src='{EscapeJsString(kvp.Value)}';document.head.appendChild(s);}})()";
 			await jsRuntime.InvokeVoidAsync("eval", loaderScript);
 		}
+
+		foreach (var key in _scriptBlocks.Keys) _flushedScriptBlocks.Add(key);
+		foreach (var key in _startupScripts.Keys) _flushedStartupScripts.Add(key);
+		foreach (var key in _scriptIncludes.Keys) _flushedScriptIncludes.Add(key);
 
 		_scriptBlocks.Clear();
 		_startupScripts.Clear();

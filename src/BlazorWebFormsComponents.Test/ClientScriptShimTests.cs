@@ -300,10 +300,11 @@ public class ClientScriptShimTests
 
 		await shim.FlushAsync(mockJs.Object);
 
-		// After flush, all queues should be empty
-		shim.IsStartupScriptRegistered(typeof(ClientScriptShimTests), "temp").ShouldBeFalse();
-		shim.IsClientScriptBlockRegistered(typeof(ClientScriptShimTests), "block").ShouldBeFalse();
-		shim.IsClientScriptIncludeRegistered("inc").ShouldBeFalse();
+		// After flush, queues are empty (no re-execution) but registration
+		// status persists — matching Web Forms page-lifecycle semantics.
+		shim.IsStartupScriptRegistered(typeof(ClientScriptShimTests), "temp").ShouldBeTrue();
+		shim.IsClientScriptBlockRegistered(typeof(ClientScriptShimTests), "block").ShouldBeTrue();
+		shim.IsClientScriptIncludeRegistered("inc").ShouldBeTrue();
 	}
 
 	[Fact]
