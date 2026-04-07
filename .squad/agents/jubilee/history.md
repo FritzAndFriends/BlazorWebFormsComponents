@@ -486,3 +486,16 @@ This wave establishes **documentation patterns** that will guide future control 
 - **Updated** `ComponentList.razor` — added PostBack & ScriptManager link in Migration Helpers section.
 - **Build verified:** 0 errors, pre-existing BL0005 warnings only.
 - **Lesson:** Pages that need the PostBack event must `@inherits WebFormsPageBase`. The ClientScript property is available via inheritance (no separate `@inject` needed). `OnAfterRenderAsync` in WebFormsPageBase handles `FlushAsync` automatically.
+
+
+### Request.Form Sample Page (2026-04-07)
+
+- **Created** `RequestFormDemo.razor` at `/migration/request-form` -- four-section demo page for the FormShim.
+- **Section 1: Basic Field Access** -- Before/After showing Request.Form["username"]. Live demo displays null in interactive mode.
+- **Section 2: Multi-Value Fields** -- GetValues for checkboxes. Live demo shows null return.
+- **Section 3: Form Metadata** -- Table with AllKeys, Count, ContainsKey live values.
+- **Section 4: Migration Guidance** -- Side-by-side Request.Form shim vs EditForm+bind migration path table.
+- **Updated** ComponentCatalog.cs -- added Request.Form in Migration Helpers after Request.
+- **data-audit-control** markers: form-basic-demo, form-getvalues-demo, form-metadata-demo, form-migration-guidance.
+- **Build verified:** 0 errors.
+- **Lesson:** FormShim indexer returns null (not empty string) -- use null-coalescing for display.
