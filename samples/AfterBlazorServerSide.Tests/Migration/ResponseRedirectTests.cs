@@ -32,15 +32,16 @@ public class ResponseRedirectTests
                 Timeout = 30000
             });
 
+            // Wait for Blazor interactive circuit — OnAfterRenderAsync bootstraps __doPostBack
+            await page.WaitForFunctionAsync("typeof window.__doPostBack === 'function'",
+                null, new PageWaitForFunctionOptions { Timeout = 10000 });
+
             var card = page.Locator("[data-audit-control='redirect-basic-demo']");
             var button = card.Locator("button:has-text('Response.Redirect')");
 
-            // Ensure Blazor interactive circuit is ready before clicking
-            await button.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Attached, Timeout = 10000 });
             await button.ClickAsync();
 
-            // forceLoad: true triggers full page navigation (HTTP + prerender + SignalR)
-            // which needs generous timeout in CI
+            // forceLoad: true triggers full page navigation
             await page.WaitForURLAsync("**/migration/session", new PageWaitForURLOptions
             {
                 WaitUntil = WaitUntilState.Load,
