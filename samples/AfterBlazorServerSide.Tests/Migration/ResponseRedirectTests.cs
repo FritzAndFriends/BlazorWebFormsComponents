@@ -41,12 +41,12 @@ public class ResponseRedirectTests
 
             await button.ClickAsync();
 
-            // forceLoad: true triggers full page navigation
-            await page.WaitForURLAsync("**/migration/session", new PageWaitForURLOptions
-            {
-                WaitUntil = WaitUntilState.Load,
-                Timeout = 30000
-            });
+            // forceLoad: true goes through SignalR → JS interop → location.href,
+            // which can be slow on CI.  Use auto-retrying Expect assertion instead
+            // of WaitForURLAsync, which depends on navigation lifecycle events.
+            await Assertions.Expect(page).ToHaveURLAsync(
+                new System.Text.RegularExpressions.Regex(".*migration/session.*"),
+                new PageAssertionsToHaveURLOptions { Timeout = 60000 });
 
             Assert.Contains("/migration/session", page.Url);
         }
