@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Primitives;
 using Microsoft.JSInterop;
 
 namespace BlazorWebFormsComponents;
@@ -143,7 +144,31 @@ protected ResponseShim Response
 /// <see cref="NavigationManager"/>.
 /// </summary>
 protected RequestShim Request
-=> new(_httpContextAccessor.HttpContext, _navigationManager, _logger);
+	=> _requestShim ??= new(_httpContextAccessor.HttpContext, _navigationManager, _logger);
+private RequestShim? _requestShim;
+
+/// <summary>
+/// Injects form data captured by <see cref="WebFormsForm"/> into the
+/// <see cref="Request"/> shim so that <c>Request.Form["key"]</c>
+/// returns the submitted values during interactive mode.
+/// </summary>
+/// <param name="formData">Form field data from JS interop.</param>
+public void SetRequestFormData(Dictionary<string, StringValues> formData)
+{
+	// Ensure the shim is initialized, then push form data into it
+	_ = Request;
+	_requestShim!.SetFormData(formData);
+}
+
+/// <summary>
+/// Convenience overload accepting <see cref="FormSubmitEventArgs"/>
+/// directly from a <c>&lt;WebFormsForm OnSubmit="SetRequestFormData"&gt;</c> binding.
+/// </summary>
+/// <param name="e">The form submit event args.</param>
+public void SetRequestFormData(FormSubmitEventArgs e)
+{
+	SetRequestFormData(e.FormData);
+}
 
 /// <summary>
 /// Compatibility shim for Web Forms <c>Server</c> object.
