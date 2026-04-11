@@ -78,6 +78,25 @@ Patterns used: `data-audit-control` attribute selectors for card targeting, `DOM
 
  Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
 
+## WebFormsForm Interactive Demo Tests (2026-07-25)
+
+Added integration tests for `/migration/webforms-form` interactive demo page:
+
+**ControlSampleTests.cs** — 1 smoke test:
+- Added `[InlineData("/migration/webforms-form")]` to `MigrationPage_Loads_WithoutErrors` Theory group
+
+**Migration/WebFormsFormTests.cs** — 4 tests (new file):
+1. `WebFormsForm_PageLoads_Successfully` — smoke test with console error filtering
+2. `WebFormsForm_InitialLoad_ShowsFormWithoutResults` — render test verifying form inputs visible, no results pre-submit
+3. `WebFormsForm_SubmitForm_ShowsRequestFormValues` — interaction test: fills name/email, checks color checkbox, submits, verifies Request.Form values in results
+4. `WebFormsForm_SubmitForm_StaysOnSamePage` — verifies interactive mode doesn't navigate away on submit
+
+## Learnings
+
+- Interactive Blazor Server form pages re-render in place via SignalR — no HTTP POST/redirect. Use `WaitForAsync` on results elements instead of `WaitForLoadStateAsync(NetworkIdle)`.
+- For interactive pages, use `WaitForSelectorState.Visible` with generous timeout (10s) after button click to account for SignalR round-trip latency.
+- Flexible locators (`input[name='name'], input#name, input[id*='name' i]`) accommodate demo pages whose exact markup may vary.
+
  Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
 
 ## Learnings

@@ -15,6 +15,77 @@ M1–M16: 6 PRs reviewed, Calendar/FileUpload rejected, ImageMap/PageService app
 
 ## Learnings
 
+### WebFormsForm Architecture Design — Issue #533 (2026-03-28)
+
+**Architecture Design Complete — Dual-Mode FormShim + Interactive JS Interop**
+
+Designed the complete architecture for the `<WebFormsForm>` component to enable `Request.Form` support in interactive (ServerInteractive) render mode. Issue #533 identified a critical gap: in interactive Blazor Server, `Request.Form` returns empty because there's no HTTP POST — all interactions flow through SignalR WebSocket.
+
+**Key Architectural Decisions:**
+
+1. **FormShim Dual-Mode Support** — Refactored to wrap either `IFormCollection` (SSR) or `Dictionary<string, StringValues>` (interactive).
+   - Added new constructor: `FormShim(Dictionary<string, StringValues> interopData)`
+   - Added `SetFormData(Dictionary<string, StringValues>)` method for JS interop population
+   - All accessors (indexer, GetValues, AllKeys, Count, ContainsKey) check both sources
+   - Preserves SSR stateless HTTP semantics; enables mutable state in interactive mode
+
+2. **RequestShim Caching Strategy** — Only cache FormShim in interactive mode.
+   - SSR creates fresh FormShim on each access (stateless)
+   - Interactive caches single instance so WebFormsForm mutations persist across `Request.Form` accesses
+   - Added `SetFormData()` method for WebFormsForm to populate the cached instance
+   - Enhanced warning log message guides developers to use WebFormsForm
+
+3. **WebFormsForm Razor Component** — Conditional rendering based on render mode.
+   - SSR mode: renders native `<form method="post" action="...">` with natural POST
+   - Interactive mode: renders `<form @onsubmit="HandleSubmit" @onsubmit:preventDefault>`
+   - Supports `Method` (FormMethod enum: Get/Post), `Action`, `ChildContent`, HTML attributes, `OnSubmit` callback
+   - `OnSubmit` callback fires with `Dictionary<string, StringValues>` after form submission
+   - Uses `@ref _formElement` to obtain DOM reference for JS interop
+
+4. **JavaScript Interop Module** (`bwfc-webformsform.js`) — Three key functions:
+   - `registerForm(dotnetRef, formElement)` — Track component for cleanup
+   - `readFormData(formElement)` — Extract `FormData` from DOM, convert to key-value pairs, handle multi-value fields
+   - `unregisterForm(dotnetRef)` — Cleanup on component dispose
+   - Multi-value fields (checkboxes, multi-select) preserved as arrays in `Dictionary<string, StringValues>`
+
+5. **WebFormsPageBase Integration** — Minimal coupling.
+   - Already has `RequestShim` as injected dependency
+   - Page components bind `<WebFormsForm OnSubmit="HandleSubmitHandler">`
+   - Handler calls `_requestShim.SetFormData(formData)` (or WebFormsForm's `OnSubmit` automatically does it)
+   - After `SetFormData()`, subsequent `Request.Form["field"]` accesses see populated data
+
+6. **FormMethod Enum** — Simple enum `FormMethod { Get = 0, Post = 1 }` for API completeness.
+
+**Key Design Principles:**
+
+- **Minimal Surface Changes** — FormShim and RequestShim already existed; new constructors/methods are additive, not breaking.
+- **Graceful Degradation** — Empty form in interactive mode if developer forgets WebFormsForm; no exceptions.
+- **Idiomatic Blazor** — Uses `@onsubmit`, `EventCallback`, `IJSRuntime`, standard component patterns.
+- **Stateless HTTP (SSR) vs Stateful WebSocket (Interactive)** — Architecture cleanly separates the two models.
+- **Multi-value Field Support** — `FormShim.GetValues("field")` works correctly for checkboxes, multi-selects via `StringValues` (IEnumerable<string>).
+
+**Design Artifacts:**
+
+- Comprehensive architecture document: `.squad/decisions/inbox/forge-webformsform-architecture.md` (25KB, 8 sections covering FormShim/RequestShim/Component/JS/Integration/Migration/Decisions/Checklists)
+- Includes open questions, implementation checklist, and success criteria
+- Testing strategy: 8–10 bUnit tests + 5 Playwright integration tests outlined
+
+**Next Steps for Implementation:**
+
+1. Create `Enums/FormMethod.cs`
+2. Update `FormShim.cs` with dual-mode constructor and `SetFormData()` method
+3. Update `RequestShim.cs` with FormShim caching and `SetFormData()` method
+4. Create `Components/WebFormsForm.razor` component
+5. Create `wwwroot/js/bwfc-webformsform.js` JavaScript module
+6. Update `WebFormsPageBase.cs` to expose public method for form data population (optional, if tighter integration desired)
+7. Write comprehensive bUnit and Playwright tests
+8. Create sample page demonstrating form submission and `Request.Form` access
+9. Update documentation and navigation
+
+**Key Insight:** The architecture cleanly bridges Web Forms' stateless HTTP POST model with Blazor's stateful WebSocket model. Migrators can use identical `Request.Form["field"]` patterns in both SSR and ServerInteractive render modes — the component handles the transport differences transparently.
+
+---
+
 ### Migration Shim Gap Analysis (2026-03-27)
 
 **Comprehensive analysis of manual migration work completed.** Catalogued 47 distinct manual migration items across 14 categories after auditing bwfc-migrate.ps1 (L1), all existing BWFC shims, and WingtipToys Run 7 benchmark results.

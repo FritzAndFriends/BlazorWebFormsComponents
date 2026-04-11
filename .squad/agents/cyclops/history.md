@@ -16,6 +16,8 @@
 - Custom control migration patterns (WebControl, DataBoundWebControl, TemplatedWebControl base classes)
 - EDMX parser integration for EF6  EF Core migrations
 
+📌 **Team update (2026-04-11):** WebFormsForm (Issue #533) complete — FormSubmitEventArgs created by Coordinator. Cyclops built WebFormsForm.razor + ES module JS interop (bwfc-webformsform.js). Rogue delivered 39 bUnit tests (FormShimTests.cs, WebFormsFormTests.razor). FormShim dual-mode support enabled (IFormCollection + Dictionary<string,StringValues>). RequestShim SetRequestFormData() accepts form event args. @inherits ComponentBase fix applied to WebFormsForm. All 4 agents synchronized. Wave 2 (Jubilee/Beast/Colossus) ready. — decided by Coordinator
+
 📌 **Team update (2026-03-27):** Multi-targeting #516 implemented and validated. BlazorWebFormsComponents now ships net8.0;net9.0;net10.0. All 2606 tests pass × 3 TFMs = 7818 total. Zero code changes, conditional package versions only. CI matrix configured. Ready for GA release. — decided by Forge & Cyclops
 
 ### Active Projects
@@ -962,3 +964,26 @@ foreach (var warning in warnings) {
 - PostBack target ID: TypeName_HashCode for per-instance uniqueness
 
 **Build:** 0 errors, 32 tests pass x 3 TFMs
+
+### Issue #533: WebFormsForm Component (2026-07)
+
+**Summary:** Built `WebFormsForm` component enabling `Request.Form` to work in both SSR and interactive Blazor Server modes.
+
+**Files Created:**
+- `FormMethod.cs` — enum (Get=0, Post=1)
+- `WebFormsForm.razor` — dual-mode form component (SSR: plain form; interactive: JS interop submit handler)
+- `wwwroot/js/bwfc-webformsform.js` — ES module exporting `readFormData(formElement)` that reads FormData from DOM
+
+**Files Modified:**
+- `FormShim.cs` — Added `_interopData` dictionary field, new `FormShim(Dictionary<string, StringValues>)` constructor, `SetFormData()` method. All members (indexer, GetValues, AllKeys, Count, ContainsKey) now check `_interopData` when `_form` is null.
+- `RequestShim.cs` — Added `_cachedFormShim` field for interactive mode persistence. Form getter caches the shim so SetFormData survives. Warning message updated to mention `<WebFormsForm>`. Added `SetFormData()` method.
+- `WebFormsPageBase.cs` — Changed `Request` from always-new to cached `_requestShim` field. Added `SetRequestFormData()` public method. Added `using Microsoft.Extensions.Primitives`.
+
+**Design Decisions:**
+- JS file is ES module (matching Basepage.module.js pattern), loaded via `IJSObjectReference` import
+- FormShim dual-source: `IFormCollection` for SSR, `Dictionary<string, StringValues>` for interop
+- RequestShim caches FormShim in interactive mode so form data persists across accesses
+- WebFormsForm detects interactive mode via `HttpContext == null` pattern (consistent with WebFormsPageBase)
+- `@onsubmit:preventDefault` prevents default form submission in interactive mode
+
+**Build:** ✅ 0 errors on net8.0;net9.0;net10.0

@@ -94,6 +94,24 @@
 - Three-tab format (Before/After/Alternative) works well for complex migration scenarios with multiple approaches
 - Consistent tab naming ("Web Forms" / "Blazor") improves developer navigation across multiple documentation pages
 
+## Learnings — WebFormsForm Documentation (2026-XX)
+
+**Session (by Beast):**
+- Created comprehensive `docs/UtilityFeatures/WebFormsForm.md` documenting new form component for interactive Blazor Server mode
+- Updated `mkdocs.yml` to include WebFormsForm in navigation (positioned alphabetically before WebFormsPage)
+- Added cross-reference section in `RequestShim.md` explaining interactive mode story: SSR uses native `Request.Form`, interactive mode uses `<WebFormsForm>` component
+- Pattern: Component docs include background, parameters table, syntax comparison (Web Forms vs. Blazor), multi-phase migration path, and working example
+- Key design: `<WebFormsForm>` bridges HTTP POST gap by capturing form data via JS interop and injecting into `Request.Form` shim
+- Migration narrative: Phase 1 (SSR + standard form), Phase 2 (interactive + WebFormsForm), Phase 3 (modern EditForm + @bind)
+
+**Documentation Standards Applied:**
+- Parameters documented in table format with Type, Default, and Description
+- Dual-mode explanation (SSR vs. Interactive) with rendering mode behavior table
+- Login form example showing before/after with error handling
+- "How It Works" section explaining JS interop flow
+- Accessibility notes and related documentation cross-links
+- ~270 lines total; follows existing BWFC component doc patterns
+
 ### Issue #505: DataControls Tabbed Syntax Documentation
 
 **Status:** ✅ DELIVERED

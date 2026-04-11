@@ -499,3 +499,13 @@ This wave establishes **documentation patterns** that will guide future control 
 - **data-audit-control** markers: form-basic-demo, form-getvalues-demo, form-metadata-demo, form-migration-guidance.
 - **Build verified:** 0 errors.
 - **Lesson:** FormShim indexer returns null (not empty string) -- use null-coalescing for display.
+### WebFormsForm Interactive Demo (2026-04-11)
+
+- **Created** `WebFormsFormDemo.razor` at `Components/Pages/ControlSamples/Migration/` with route `/migration/webforms-form`.
+- **No** `[ExcludeFromInteractiveRouting]` -- page runs in interactive mode (contrast with SSR RequestFormDemo).
+- **Inherits** `WebFormsPageBase`; uses `<WebFormsForm OnSubmit="HandleFormSubmit">` wrapping standard HTML inputs.
+- **Handler pattern:** `SetRequestFormData(e)` then `Request.Form["field"]` -- same API as Web Forms.
+- **Sections:** Try-It form, results table, Before/After code comparison (3 scenarios), Migration Guidance with 3-stage progression table (SSR → WebFormsForm → EditForm), Source Code block.
+- **Updated** ComponentCatalog.cs -- added WebFormsForm entry in Migration Helpers after Request.Form.
+- **data-audit-control** markers: webforms-form-input, webforms-form-results, webforms-form-migration-guidance.
+- **Build verified:** 0 errors.

@@ -14312,3 +14312,1143 @@ Phase 1 ClientScript Migration test coverage decisions. BWFC024 tests deferred (
 **Affects:** Cyclops (Component Dev)
 
 Finding: ClientScriptShim.BuildKey(Type type, string key) accesses type.FullName without null check. Passing null throws NullReferenceException instead of expected ArgumentNullException. Recommendation: add ArgumentNullException.ThrowIfNull(type) guard in RegisterStartupScript, RegisterClientScriptBlock, IsStartupScriptRegistered methods  or in BuildKey itself. Test ClientScriptShimTests.RegisterStartupScript_NullType_ThrowsNullReference documents current behavior; rename to _ThrowsArgumentNull when Cyclops adds guard. Priority: Low (edge case, but consistent guard clauses good practice for public API).
+
+# Decision: Strangler Fig Pattern Documentation
+
+**Date:** 2026  
+**Proposed by:** Beast (Technical Writer)  
+**Status:** IMPLEMENTED  
+
+## Summary
+
+Created comprehensive **Strangler Fig Pattern** documentation as the overarching philosophical framework for BWFC migration strategy. The pattern explains why BWFC exists and how its three layers (Roslyn analyzers, CLI tool, runtime shims) work together to enable incremental, side-by-side Web Forms → Blazor migration with zero downtime.
+
+## Context
+
+Jeff Fritz requested that BWFC's migration documentation be reframed around the **Strangler Fig pattern** — the practice of incrementally replacing a legacy system while keeping it running in parallel. This is the core philosophy underlying BWFC's design:
+
+- **Roslyn analyzers** guide migration by detecting Web Forms patterns
+- **CLI tool** performs L1 mechanical transforms
+- **Runtime shims** (ClientScriptShim, SessionShim, CacheShim, ServerShim) enable zero-rewrite compatibility
+
+Current migration guides scattered this philosophy across many documents. Consolidation was needed.
+
+## Decision
+
+Implement Strangler Fig pattern documentation as:
+
+1. **New standalone guide** (`docs/Migration/StranglerFigPattern.md`) covering:
+   - What the pattern is (biological metaphor → software practice)
+   - How BWFC enables it (4-step journey: Instrument → Strangle → Zero-Rewrite → Modernize)
+   - Visual progression (Legacy → Mixed → Blazor Dominant → Modernized)
+   - Why it works (zero downtime, parallel velocity, reversibility)
+   - Real-world e-commerce example (6-week phased migration)
+   - Comparison: Big Bang vs Strangler Fig vs Parallel Development
+
+2. **Cross-link from existing docs:**
+   - ClientScriptMigrationGuide.md: Add "Strangler Fig Pattern Context" section after recommended shim section
+   - Strategies.md: Add "The Strangler Fig Pattern: Migration Philosophy" section near top
+   - readme.md: Add "Migration Philosophy" section explaining the approach
+
+3. **Update mkdocs.yml navigation:**
+   - Place StranglerFigPattern.md second in Migration nav (right after "Getting Started")
+   - Strategic positioning: readers learn philosophy before mechanics
+
+## Key Technical Facts Documented
+
+- **Roslyn analyzers are purely syntactic** — They match patterns like `IsClientScriptAccess()` in the syntax tree without requiring System.Web type resolution. This means they work in any .NET project.
+
+- **ClientScriptShim uses queue-and-flush pattern** — Scripts are queued during component lifecycle, auto-flushed in OnAfterRenderAsync via IJSRuntime.InvokeVoidAsync("eval", script). This matches Web Forms deduplication behavior.
+
+- **Shims are production-ready** — Zero-rewrite approach is permanent, not a transitional hack. Modernization (Phase 2 refactoring to native Blazor patterns) is optional and on the team's schedule.
+
+- **L1 CLI handles mechanical transforms** — Directive changes (@Page → @page), markup conversion (<asp: → component names), code-behind pattern transforms (Page_Load → OnInitialized).
+
+## Rationale
+
+1. **Philosophy first** — Developers need to understand *why* they can migrate incrementally before diving into *how*. Strangler Fig pattern explains the "why."
+
+2. **Reduces migration anxiety** — Framing as "both systems run in parallel" with reversible steps makes large migrations feel manageable and low-risk.
+
+3. **Differentiates BWFC** — The zero-rewrite shim approach is what makes BWFC unique. This must be the first thing developers learn.
+
+4. **Guides informed decisions** — Developers can identify their current phase (Legacy, Mixed, Dominant, Modernized) and know what steps come next.
+
+5. **Consolidates scattered philosophy** — Previously, the pattern was implied across many docs. Now it's explicit and easy to reference.
+
+## Cross-References
+
+- **Roslyn Analyzers:** [Analyzers.md](../../docs/Migration/Analyzers.md) — Technical details on BWFC022, BWFC023, BWFC024
+- **ClientScriptShim:** [ClientScriptMigrationGuide.md](../../docs/Migration/ClientScriptMigrationGuide.md) — Deep dive on JS pattern migration
+- **Session State:** [Phase2-SessionShim.md](../../docs/Migration/Phase2-SessionShim.md) — Zero-rewrite session migration
+- **Automated Migration:** [AutomatedMigration.md](../../docs/Migration/AutomatedMigration.md) — L1 CLI tool guide
+- **Migration Strategies:** [Strategies.md](../../docs/Migration/Strategies.md) — High-level planning
+
+## Files Created/Updated
+
+- ✅ **Created:** `docs/Migration/StranglerFigPattern.md` (12.1K, comprehensive guide)
+- ✅ **Updated:** `docs/Migration/ClientScriptMigrationGuide.md` (added Strangler Fig context section)
+- ✅ **Updated:** `docs/Migration/Strategies.md` (added pattern philosophy section)
+- ✅ **Updated:** `docs/Migration/readme.md` (added migration philosophy section)
+- ✅ **Updated:** `mkdocs.yml` (added StranglerFigPattern to nav, strategic placement after Getting Started)
+- ✅ **Updated:** `.squad/agents/beast/history.md` (appended documentation task details and learnings)
+
+## Learnings
+
+1. **Metaphors matter** — The Strangler Fig metaphor (tree gradually replacing another tree) immediately resonates with developers and makes the pattern memorable.
+
+2. **Visual progression > prose** — The 4-phase diagram (Legacy → Mixed → Dominant → Modernized) conveys the journey better than narrative alone.
+
+3. **Real-world examples > abstract patterns** — The e-commerce example (6-week phased migration of Product Search → Cart → Accounts) makes incremental migration feel achievable.
+
+4. **Philosophy placement in nav signals importance** — Placing StranglerFigPattern right after "Getting Started" tells developers "learn this first, before mechanics."
+
+5. **Zero-rewrite is the differentiator** — Must be stated clearly and repeatedly. It's what makes BWFC unique and why teams should choose it over "big bang" rewrites.
+
+6. **Shims are production-ready** — Developers fear compatibility layers are "temporary hacks." Documentation must emphasize shims are permanent, well-tested, and leave room for optional Phase 2 modernization.
+
+## Next Steps (if any)
+
+- Monitor developer questions in issues/discussions to see if Strangler Fig framing resonates
+- Use this doc as the intro reference for first-time migration planners
+- Consider creating a decision tree helper ("What phase are you in? What's your next step?") based on the 4-phase model
+
+
+---
+
+# Decision: WebFormsForm Documentation Architecture
+
+**Decided by:** Beast (Technical Writer)  
+**Date:** 2026-XX  
+**Status:** Approved & Implemented
+
+## Problem Statement
+
+New `<WebFormsForm>` component needed comprehensive documentation explaining how it bridges HTTP POST form submission gap in interactive Blazor Server mode. Developers need clear guidance on:
+1. When to use WebFormsForm vs. standard `<form>` vs. EditForm
+2. How form data flows from JS interop into `Request.Form` shim
+3. Three-phase migration path from Web Forms → interactive → modern Blazor
+
+## Solution Implemented
+
+### 1. New Documentation File: `docs/UtilityFeatures/WebFormsForm.md`
+
+**Structure:**
+- Background: Explains Web Forms form submission vs. interactive Blazor WebSocket gap
+- Use Cases: Interactive pages, SSR pages, gradual migration scenarios
+- Rendering Mode Behavior table: SSR (native `Request.Form`) vs. Interactive (JS interop) vs. Target (EditForm)
+- Parameters table: Method, Action, OnSubmit, ChildContent, unmatched attributes
+- Syntax Comparison: Web Forms (asp:TextBox, asp:Button, code-behind) vs. Blazor (HTML inputs, WebFormsForm, C# callback)
+- Migration Path: 3-phase approach with code examples
+- Full Working Example: Login form (Web Forms → Blazor)
+- "How It Works" section: Form submission → JS interop → FormData capture → OnSubmit callback → SetRequestFormData
+- Dual-Mode Support: Code samples for SSR (ExcludeFromInteractiveRouting) vs. Interactive (WebFormsForm)
+- Notes: HTML attributes passthrough, file uploads, default action, validation, accessibility
+- Related Documentation: Cross-links to RequestShim, WebFormsPage, EditForm
+
+**Lines:** ~270 (inline with Button.md, GridView.md complexity)
+
+### 2. Navigation Update: `mkdocs.yml`
+
+Added entry under Utility Features section:
+```yaml
+- WebFormsForm: UtilityFeatures/WebFormsForm.md
+```
+
+Positioned alphabetically before WebFormsPage for discoverability.
+
+### 3. Cross-Reference: `docs/UtilityFeatures/RequestShim.md`
+
+Updated "Rendering Mode Behavior" section to explain interactive mode story:
+- Added note: "Use `<WebFormsForm>` component to enable access (see below)"
+- Inserted new subsection: "Interactive Mode: Using WebFormsForm" with code example
+- Links to WebFormsForm.md documentation
+
+## Key Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **Component doc location:** `UtilityFeatures/` (not EditorControls) | WebFormsForm is a form wrapper utility, not an individual Web Forms control |
+| **Dual-mode explanation:** SSR vs. Interactive table + examples | Developers often mix SSR and interactive pages; clarifies when each approach applies |
+| **3-phase migration path:** SSR → Interactive → EditForm | Reflects team's gradual migration philosophy; no forced rewrites |
+| **Cross-reference in RequestShim.md** | Closes the loop: form submission captures data → Request.Form enables access → developers understand the flow |
+| **Login form example** | Concrete, realistic scenario (authentication) more relatable than generic form |
+| **"How It Works" section** | Builds developer confidence: explains JS interop, FormData API, callback mechanism |
+
+## Migration Narrative
+
+**Phase 1: Quickest Path (SSR)**
+- Keep existing `<form>` elements
+- Mark page with `[ExcludeFromInteractiveRouting]`
+- `Request.Form` works natively
+- No code changes
+
+**Phase 2: Gradual Adoption (Interactive)**
+- Replace `<form>` with `<WebFormsForm>`
+- Add `OnSubmit` callback
+- Call `SetRequestFormData(e)` to populate Request.Form
+- Existing code-behind logic continues working
+
+**Phase 3: Target State (Modern)**
+- Replace `<WebFormsForm>` with `<EditForm>`
+- Use `@bind` for two-way binding
+- Eliminate Request.Form shim
+- Full type safety
+
+## Standards Applied
+
+✅ **Tabbed Syntax**: Web Forms / Blazor comparison tabs for all code examples  
+✅ **Parameters Table**: Type, Default, Description format consistent with Button, GridView docs  
+✅ **Migration Guide Pattern**: Before/after with exact transformations  
+✅ **Cross-Linking**: RequestShim.md updated with forward reference to WebFormsForm.md  
+✅ **Accessibility Notes**: Semantic HTML guidance included  
+✅ **Code Examples**: Complete, runnable, realistic scenarios  
+
+## Deliverables
+
+| Item | Status |
+|------|--------|
+| `docs/UtilityFeatures/WebFormsForm.md` created | ✅ Done |
+| `mkdocs.yml` updated with navigation entry | ✅ Done |
+| `RequestShim.md` updated with cross-reference | ✅ Done |
+| `.squad/agents/beast/history.md` updated with learnings | ✅ Done |
+| All cross-references verified | ✅ Done |
+
+## Impact
+
+- **Developers:** Clear pathway for form submission in interactive Blazor; no guessing about Request.Form availability
+- **Gradual Migration:** Supports 3-phase adoption; teams can migrate at their own pace
+- **Documentation Consistency:** Follows established patterns; integrates seamlessly with existing BWFC docs
+- **Discoverability:** Linked from RequestShim.md; positioned in navigation for developers searching form topics
+
+## Related Decisions
+
+- Decision to support `Request.Form` in interactive mode (not documented here, but context for this feature)
+- Strangler Fig Pattern migration strategy (referenced in Phase 1/2/3 narrative)
+
+
+---
+
+# Decision: CLI Transform Preserves All ClientScript/ScriptManager Patterns (Phase 2)
+
+**Date:** 2026-07-31
+**Author:** Bishop (Migration Tooling Dev)
+**Status:** Implemented
+
+## Context
+
+ClientScriptTransform Phase 1 emitted TODO markers for `GetPostBackEventReference` and `ScriptManager.GetCurrent()` because no runtime shim existed. Phase 2 shims (ClientScriptShim + ScriptManagerShim) now handle these patterns.
+
+## Decision
+
+The CLI transform now preserves ALL six ClientScript/ScriptManager patterns instead of commenting out two of them. Zero TODO markers remain — shims handle everything at runtime.
+
+- `GetPostBackEventReference` → prefix-stripped, preserved for ClientScriptShim
+- `ScriptManager.GetCurrent(Page)` → converted to `ScriptManager.GetCurrent(this)` for ScriptManagerShim
+- Shim dependency comment conditionally mentions ScriptManagerShim when ScriptManager patterns detected
+
+## Impact
+
+- All agents: migrated code no longer has `// TODO: Replace __doPostBack` or `// TODO: ScriptManager.GetCurrent() has no Blazor equivalent` — these calls just work via shims
+- Layer 2 agents: less manual fixup needed for postback and ScriptManager patterns
+- Test count: 349 → 353
+
+
+---
+
+### ClientScriptTransform: Switched Default to Shim-Preserving Path
+
+**By:** Bishop (Migration Tooling Dev)
+
+**Date:** 2026-07-31
+
+**Status:** IMPLEMENTED
+
+**Requested by:** Jeffrey T. Fritz
+
+**Affects:** Forge (CLI output changes), Cyclops (analyzer guidance may reference IJSRuntime → update to reference ClientScriptShim), Beast (docs may reference old transform behavior)
+
+**Summary:** `ClientScriptTransform.cs` in the CLI pipeline no longer rewrites `Page.ClientScript` calls to `IJSRuntime` skeletons. Instead, it strips `Page.`/`this.` prefixes and preserves the original API calls, which are now handled at runtime by `ClientScriptShim`.
+
+**What changed:**
+1. `RegisterStartupScript`, `RegisterClientScriptInclude`, `RegisterClientScriptBlock` — prefix stripped, calls preserved
+2. `ScriptManager.RegisterStartupScript(control, ...)` → `ClientScript.RegisterStartupScript(...)` (first param dropped)
+3. `GetPostBackEventReference` — still TODO (shim throws NotSupportedException)
+4. `ScriptManager.GetCurrent` — still TODO (no shim equivalent)
+5. IJSRuntime `[Inject]` injection removed; replaced with ClientScriptShim dependency comment
+
+**Why:** Jeff's directive: "Zero-rewrite shim approach is PRECISELY what we should be building." The ClientScriptShim makes the original Web Forms API calls work as-is in Blazor, so the CLI should preserve them rather than rewriting to a different API.
+
+**Impact on other agents:**
+- **Forge/Bishop:** CLI `migrate` command output for any code-behind with ClientScript calls will now contain preserved calls instead of IJSRuntime skeletons
+- **Cyclops:** Analyzers BWFC022/023/024 guidance text may reference IJSRuntime migration — consider updating to mention ClientScriptShim as the primary path
+- **Beast:** ClientScriptMigrationGuide.md may need a section on the shim-first approach
+- **All agents:** When generating migrated code-behind, use `ClientScript.XXX(...)` calls (not `IJSRuntime`) for patterns the shim supports
+
+
+---
+
+### 2026-04-07T12:26:20Z: GitHub workflow and release process
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:**
+1. Feature/fix PRs go against UPSTREAM (FritzAndFriends/BlazorWebFormsComponents) targeting the `dev` branch using squash merge.
+2. After merge, pull upstream/dev to local and push to origin. Delete the feature branch.
+3. Feature branches use `feature/{description}` naming convention.
+4. Release process: PR from upstream/dev → upstream/main using regular merge (NOT squash). Add a tag, create a GitHub Release. This triggers CI/CD to deploy sample sites, docs, and push NuGet packages.
+5. Post-release: sync both dev and main locally from upstream and push to origin.
+**Why:** User request — captured for team memory. These are the canonical Git and release workflows for all Squad agents.
+
+
+---
+
+# Decision: PostBack Shim Runtime Strategy
+
+**Date:** 2026-07-17  
+**Author:** Cyclops  
+**Status:** Implemented  
+
+## Context
+
+ClientScriptShim Phase 1 left `GetPostBackEventReference()`, `GetPostBackClientHyperlink()`, and `GetCallbackEventReference()` as `NotSupportedException` stubs. Phase 2 needed to make these return working JavaScript strings — zero rewrite, same API.
+
+## Decision
+
+1. **Inline JS bootstrap** — WebFormsPageBase.OnAfterRenderAsync injects `__doPostBack` and registration functions via `eval()` on firstRender. This avoids race conditions with external script loading while keeping `bwfc-postback.js` available as an optional static asset.
+
+2. **ResolveControlId priority** — Checks `BaseWebFormsComponent.ID` first (the developer-assigned HTML ID), then falls back to `GetType().Name`. This matches Web Forms' ClientID behavior.
+
+3. **ScriptManagerShim dual-path** — Supports both DI injection (`services.AddScoped<ScriptManagerShim>`) and static `GetCurrent(page)` factory. Migrated code using `ScriptManager.GetCurrent(Page)` compiles unchanged.
+
+4. **PostBack target ID format** — `TypeName_HashCode` ensures per-instance uniqueness when multiple page components exist.
+
+## Impact
+
+- Tests updated: 3 tests changed from throw-verification to return-value-verification, plus 3 new null-handling tests
+- No breaking changes to existing consumers
+- WebFormsPageBase now implements IAsyncDisposable (new interface on the class)
+
+
+---
+
+# Decision: WebFormsForm JS Interop as ES Module
+
+**Date:** 2026-07
+**Author:** Cyclops
+**Status:** Implemented
+**Issue:** #533
+
+## Context
+WebFormsForm needs JS interop to read FormData from the DOM during interactive mode form submissions.
+
+## Decision
+Used ES module pattern (`export function readFormData`) loaded via `IJSObjectReference` import, matching the existing `Basepage.module.js` and `chart-interop.js` pattern — NOT the IIFE+window global pattern used by `bwfc-postback.js`.
+
+## Rationale
+- ES modules are the established pattern for component-level JS interop in this project
+- Module import is lazy (loaded on first submit), avoiding unnecessary script loading
+- `IJSObjectReference` provides proper disposal and cleanup
+- The postback IIFE pattern exists because it needs to be globally available for `__doPostBack()`; form data reading is component-scoped
+
+## Implications
+- New JS interop files should follow the ES module pattern unless they need global availability
+- The JS file path is `_content/Fritz.BlazorWebFormsComponents/js/bwfc-webformsform.js`
+
+
+---
+
+# WebFormsForm Architecture — Issue #533
+
+**Requested by:** Jeffrey T. Fritz  
+**Date:** 2026-03-28  
+**Status:** Design Phase  
+**Affects:** FormShim, RequestShim, WebFormsPageBase, JS Interop
+
+---
+
+## Overview
+
+Issue #533 proposes a `<WebFormsForm>` Blazor component to enable `Request.Form` support in interactive mode (ServerInteractive render mode with Blazor Server). Currently, `Request.Form` only works in SSR mode because interactive mode has no HTTP POST — form submissions flow through SignalR WebSocket.
+
+The solution bridges this gap via JavaScript interop: WebFormsForm captures FormData on submit, sends it through SignalR to C#, and populates a mutable FormShim that backs `Request.Form`.
+
+---
+
+## Architecture Design
+
+### 1. FormShim Changes — Dual-Mode Support
+
+**Current State:**
+```csharp
+public class FormShim
+{
+    private readonly IFormCollection? _form;
+    internal FormShim(IFormCollection? form) { _form = form; }
+    public string? this[string key] { get { ... } }
+    public string[]? GetValues(string key) { ... }
+}
+```
+
+FormShim is immutable and wraps only `IFormCollection`. Problem: no way to inject data from JS interop in interactive mode.
+
+**Solution:** Add dual-mode internal representation.
+
+```csharp
+public class FormShim
+{
+    private readonly IFormCollection? _form;
+    private Dictionary<string, StringValues>? _interopData;
+
+    // Keep existing constructor for SSR (IFormCollection from HttpContext.Request.Form)
+    internal FormShim(IFormCollection? form)
+    {
+        _form = form;
+        _interopData = null;
+    }
+
+    // New constructor for JS interop data (interactive mode)
+    internal FormShim(Dictionary<string, StringValues> interopData)
+    {
+        _form = null;
+        _interopData = interopData;
+    }
+
+    // New method: populate from JS interop data
+    // Called by WebFormsForm component after receiving data from JS
+    internal void SetFormData(Dictionary<string, StringValues> data)
+    {
+        _interopData = data;
+    }
+
+    // Update indexer and methods to check both sources
+    public string? this[string key]
+    {
+        get
+        {
+            if (_form != null)
+                return _form.TryGetValue(key, out var values) ? values.FirstOrDefault() : null;
+
+            if (_interopData != null)
+                return _interopData.TryGetValue(key, out var values) ? values.FirstOrDefault() : null;
+
+            return null;
+        }
+    }
+
+    public string[]? GetValues(string key)
+    {
+        if (_form != null)
+        {
+            if (_form.TryGetValue(key, out var values))
+            {
+                var result = values.ToArray();
+                return result.Length > 0 ? result : null;
+            }
+            return null;
+        }
+
+        if (_interopData != null)
+        {
+            if (_interopData.TryGetValue(key, out var values))
+            {
+                var result = values.ToArray();
+                return result.Length > 0 ? result : null;
+            }
+            return null;
+        }
+
+        return null;
+    }
+
+    public string[] AllKeys
+        => (_form?.Keys ?? _interopData?.Keys ?? Array.Empty<string>()).ToArray();
+
+    public int Count
+        => (_form?.Count ?? _interopData?.Count ?? 0);
+
+    public bool ContainsKey(string key)
+        => (_form?.ContainsKey(key) ?? _interopData?.ContainsKey(key) ?? false);
+}
+```
+
+**Key Decisions:**
+- Add a new constructor for interop data (ctor overloading, not a factory method).
+- Keep `_form` nullable for both cases (SSR has form, interactive has interop data).
+- Use `Dictionary<string, StringValues>` internally for interop (matches ASP.NET Core's IFormCollection structure).
+- All accessors fallback to `_interopData` if `_form` is null.
+
+**Why:** Minimal surface change to FormShim. Existing code paths unaffected. Interactive mode gets a separate code path that's transparent to end users.
+
+---
+
+### 2. RequestShim Changes — Mutable Form Property
+
+**Current State:**
+```csharp
+public FormShim Form
+{
+    get
+    {
+        if (_httpContext != null)
+            return new FormShim(_httpContext.Request.Form);
+        
+        if (!_formWarned)
+        {
+            _logger.LogWarning("Request.Form accessed without HttpContext...");
+            _formWarned = true;
+        }
+
+        return new FormShim(null);
+    }
+}
+```
+
+**Problem:** Creates a new FormShim on every access (property getter). No way for WebFormsForm to update the FormShim that Request.Form returns.
+
+**Solution:** Cache the FormShim instance. In interactive mode, reuse the same instance so WebFormsForm mutations are visible to subsequent Request.Form accesses.
+
+```csharp
+public class RequestShim
+{
+    private readonly HttpContext? _httpContext;
+    private readonly NavigationManager _nav;
+    private readonly ILogger _logger;
+    private bool _cookieWarned;
+    private bool _formWarned;
+    private FormShim? _cachedFormShim; // ← Cache for interactive mode
+
+    // ... existing constructor ...
+
+    public FormShim Form
+    {
+        get
+        {
+            if (_httpContext != null)
+            {
+                try
+                {
+                    // SSR: always fresh (live HttpContext.Request.Form)
+                    return new FormShim(_httpContext.Request.Form);
+                }
+                catch (InvalidOperationException)
+                {
+                    return new FormShim(null);
+                }
+            }
+
+            // Interactive: cache and reuse so mutations persist
+            if (_cachedFormShim == null)
+            {
+                if (!_formWarned)
+                {
+                    _logger.LogWarning(
+                        "Request.Form accessed without HttpContext (interactive render mode). " +
+                        "Returning empty FormShim. Form-dependent logic will not function. " +
+                        "Use <WebFormsForm> component to populate Request.Form from submitted form data.");
+                    _formWarned = true;
+                }
+
+                _cachedFormShim = new FormShim(new Dictionary<string, StringValues>());
+            }
+
+            return _cachedFormShim;
+        }
+    }
+
+    /// <summary>
+    /// Internal method called by WebFormsForm component (via JS interop)
+    /// to populate Request.Form with submitted form data in interactive mode.
+    /// </summary>
+    internal void SetFormData(Dictionary<string, StringValues> formData)
+    {
+        if (_httpContext == null) // Only in interactive mode
+        {
+            _cachedFormShim ??= new FormShim(new Dictionary<string, StringValues>());
+            _cachedFormShim.SetFormData(formData);
+        }
+    }
+}
+```
+
+**Key Decisions:**
+- Cache FormShim only in interactive mode (SSR always creates fresh, which is correct for stateless HTTP).
+- Add `SetFormData()` method for WebFormsForm to call.
+- Log helpful message guiding developers to use WebFormsForm.
+
+**Why:** Maintains SSR's stateless HTTP semantics while supporting interactive mode's persistent component state. Cache only when needed.
+
+---
+
+### 3. WebFormsForm Component — Razor Structure
+
+Create a new file: `src/BlazorWebFormsComponents/Components/WebFormsForm.razor`
+
+```razor
+@* WebFormsForm.razor — Component wrapping <form> for interactive Request.Form support *@
+@namespace BlazorWebFormsComponents
+@inherits ComponentBase
+@implements IAsyncDisposable
+
+@if (!IsInteractiveMode)
+{
+    @* SSR mode: render a plain form that posts naturally *@
+    <form method="@Method.ToString().ToLower()" action="@Action" @attributes="HtmlAttributes">
+        @ChildContent
+    </form>
+}
+else
+{
+    @* Interactive mode: prevent default, use JS interop *@
+    <form method="@Method.ToString().ToLower()" 
+          @onsubmit="HandleSubmit" 
+          @onsubmit:preventDefault
+          @ref="_formElement"
+          @attributes="HtmlAttributes">
+        @ChildContent
+    </form>
+}
+
+@code {
+    [CascadingParameter] private HttpContext? HttpContext { get; set; }
+    [Inject] private IJSRuntime JSRuntime { get; set; } = null!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    /// <summary>
+    /// HTTP method: GET (default) or POST.
+    /// </summary>
+    [Parameter]
+    public FormMethod Method { get; set; } = FormMethod.Post;
+
+    /// <summary>
+    /// Form action URL (SSR mode only). In interactive mode, ignored.
+    /// </summary>
+    [Parameter]
+    public string? Action { get; set; }
+
+    /// <summary>
+    /// Content to render inside the form (child components and elements).
+    /// </summary>
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Additional HTML attributes (class, id, data-*, etc.).
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> HtmlAttributes { get; set; } = new();
+
+    /// <summary>
+    /// Raised when form is submitted in interactive mode.
+    /// Subscribe to perform validation or post-processing.
+    /// </summary>
+    [Parameter]
+    public EventCallback<Dictionary<string, StringValues>> OnSubmit { get; set; }
+
+    private ElementReference _formElement;
+    private DotNetObjectReference<WebFormsForm>? _dotnetRef;
+    private bool IsInteractiveMode => HttpContextAccessor.HttpContext == null;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender && IsInteractiveMode)
+        {
+            _dotnetRef = DotNetObjectReference.Create(this);
+            await JSRuntime.InvokeVoidAsync(
+                "window.bwfc?.webFormsForm?.registerForm",
+                _dotnetRef,
+                _formElement);
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        // Read FormData from DOM
+        var formData = await JSRuntime.InvokeAsync<Dictionary<string, StringValues>>(
+            "window.bwfc?.webFormsForm?.readFormData",
+            _formElement);
+
+        if (formData != null)
+        {
+            // Populate Request.Form via RequestShim
+            // (see WebFormsPageBase integration below)
+            await OnSubmit.InvokeAsync(formData);
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public Task ReceiveFormDataFromJs(Dictionary<string, StringValues> formData)
+    {
+        // Alternative path: JS can call this directly
+        return OnSubmit.InvokeAsync(formData);
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (IsInteractiveMode && _dotnetRef != null)
+        {
+            try
+            {
+                await JSRuntime.InvokeVoidAsync(
+                    "window.bwfc?.webFormsForm?.unregisterForm",
+                    _dotnetRef);
+            }
+            catch { }
+
+            _dotnetRef.Dispose();
+            _dotnetRef = null;
+        }
+    }
+}
+```
+
+**Key Design Points:**
+
+1. **Render Mode Detection:** `IsInteractiveMode` checks if `HttpContext` is available.
+   - SSR: render native `<form method="post" action="...">` (normal form posting)
+   - Interactive: render form with `@onsubmit="HandleSubmit"` + `preventDefault`
+
+2. **Method & Action Properties:**
+   - `Action` ignored in interactive mode (forms don't POST in Blazor Server)
+   - `Method` property for API completeness (some apps may inspect it)
+
+3. **Child Content:** Standard RenderFragment to wrap input fields, buttons, etc.
+
+4. **HTML Attributes:** `[Parameter(CaptureUnmatchedValues = true)]` allows `<WebFormsForm id="myForm" class="form-control">`.
+
+5. **OnSubmit Callback:** Optional `EventCallback<Dictionary<string, StringValues>>` for validation/logging. Allows page components to hook form submission.
+
+6. **FormMethod Enum:** Define a simple enum for HTTP method.
+
+```csharp
+// src/BlazorWebFormsComponents/Components/FormMethod.cs
+public enum FormMethod
+{
+    Get = 0,
+    Post = 1
+}
+```
+
+---
+
+### 4. JavaScript Module — FormData Capture & Interop
+
+Create: `src/BlazorWebFormsComponents/wwwroot/js/bwfc-webformsform.js`
+
+```javascript
+// bwfc-webformsform.js
+// Manages FormData capture and interop for WebFormsForm in interactive mode
+
+(function () {
+    'use strict';
+
+    window.bwfc = window.bwfc || {};
+    window.bwfc.webFormsForm = window.bwfc.webFormsForm || {};
+
+    const registeredForms = new Map();
+
+    /**
+     * Registers a form for interop and sets up submit handler.
+     * Called from WebFormsForm.OnAfterRenderAsync()
+     * @param {DotNetObjectReference} dotnetRef - Reference to WebFormsForm component
+     * @param {ElementReference} formElement - Reference to DOM form element
+     */
+    window.bwfc.webFormsForm.registerForm = function (dotnetRef, formElement) {
+        if (!formElement) {
+            console.warn('[BWFC WebFormsForm] Form element reference invalid');
+            return;
+        }
+
+        registeredForms.set(formElement, dotnetRef);
+    };
+
+    /**
+     * Unregisters a form (cleanup on dispose).
+     * @param {DotNetObjectReference} dotnetRef - Reference to WebFormsForm component
+     */
+    window.bwfc.webFormsForm.unregisterForm = function (dotnetRef) {
+        for (let [formEl, ref] of registeredForms.entries()) {
+            if (ref === dotnetRef) {
+                registeredForms.delete(formEl);
+                break;
+            }
+        }
+    };
+
+    /**
+     * Reads FormData from a form element and converts to key-value pairs.
+     * Supports multi-value fields (e.g., checkboxes, multi-select).
+     * @param {ElementReference} formElement - Reference to DOM form element
+     * @returns {Object} Dictionary of field names → string[] or string
+     */
+    window.bwfc.webFormsForm.readFormData = async function (formElement) {
+        if (!formElement) {
+            console.warn('[BWFC WebFormsForm] Form element reference invalid');
+            return {};
+        }
+
+        const formData = new FormData(formElement);
+        const result = {};
+
+        // GroupValue fields by name to handle multi-value fields (checkboxes, etc.)
+        for (const [key, value] of formData.entries()) {
+            if (!result[key]) {
+                result[key] = [];
+            }
+            result[key].push(value);
+        }
+
+        // Convert single-value fields from array to string for compatibility
+        // (ASP.NET NameValueCollection returns string or string[], we'll let C# handle it)
+        // Actually, keep as arrays — FormShim.GetValues() expects StringValues (IEnumerable<string>)
+        for (const key in result) {
+            if (result[key].length === 1) {
+                // Keep as array; StringValues will wrap it
+            }
+        }
+
+        console.debug('[BWFC WebFormsForm] Captured form data:', result);
+        return result;
+    };
+
+    /**
+     * Alternative: submits form data directly via JS interop callback.
+     * For advanced scenarios (custom form validation, AJAX-style submission).
+     * @param {DotNetObjectReference} dotnetRef - Reference to WebFormsForm component
+     * @param {ElementReference} formElement - Reference to DOM form element
+     */
+    window.bwfc.webFormsForm.submitFormData = async function (dotnetRef, formElement) {
+        if (!dotnetRef || !formElement) {
+            console.warn('[BWFC WebFormsForm] Invalid dotnetRef or formElement');
+            return;
+        }
+
+        try {
+            const formData = await window.bwfc.webFormsForm.readFormData(formElement);
+            await dotnetRef.invokeMethodAsync('ReceiveFormDataFromJs', formData);
+        } catch (error) {
+            console.error('[BWFC WebFormsForm] Error submitting form:', error);
+        }
+    };
+
+})();
+```
+
+**Key Points:**
+
+1. **registerForm():** Called from `OnAfterRenderAsync()` in WebFormsForm. Stores reference for later cleanup.
+2. **readFormData():** Reads `FormData` from DOM, converts to key-value pairs, handles multi-value fields.
+3. **unregisterForm():** Cleanup on component dispose.
+4. **Multi-value support:** Uses `Dictionary<string, StringValues>` — JS returns arrays, C# FormShim knows how to handle them.
+5. **No auto-post:** Module does NOT submit the form. That's the component's job (`HandleSubmit` or `OnSubmit` callback).
+
+---
+
+### 5. WebFormsPageBase Integration
+
+**Change:** Override `Request` property to support form population in interactive mode.
+
+```csharp
+// In WebFormsPageBase.cs
+
+[Inject] private RequestShim _requestShim { get; set; } = null!;
+
+/// <summary>
+/// Compatibility shim for Web Forms <c>Request</c> object.
+/// In interactive mode, caches the FormShim instance so that WebFormsForm
+/// component mutations are visible to subsequent Request.Form accesses.
+/// </summary>
+protected RequestShim Request
+    => _requestShim;
+
+/// <summary>
+/// Internal method called by WebFormsForm via event callback.
+/// Populates Request.Form with submitted form data in interactive mode.
+/// </summary>
+[JSInvokable]
+public Task SetFormDataFromWebFormsForm(Dictionary<string, StringValues> formData)
+{
+    _requestShim.SetFormData(formData);
+    StateHasChanged(); // Trigger re-render
+    return Task.CompletedTask;
+}
+```
+
+**How it flows in interactive mode:**
+
+1. User submits `<WebFormsForm>`
+2. `HandleSubmit()` calls `OnSubmit.InvokeAsync(formData)`
+3. Page component's `OnSubmit` parameter is bound to page's method
+4. Page calls `_requestShim.SetFormData(formData)` (now available via Request.Form)
+5. Page's event handler accesses `Request.Form["fieldName"]` — gets the submitted data
+6. `StateHasChanged()` triggers re-render
+
+**Alternative (Less Coupled):**
+
+If tight coupling to WebFormsForm is undesirable, instead expose a public method on WebFormsPageBase that children can call:
+
+```csharp
+/// <summary>
+/// Called by WebFormsForm component to populate Request.Form data in interactive mode.
+/// </summary>
+public void SetRequestFormData(Dictionary<string, StringValues> formData)
+{
+    _requestShim.SetFormData(formData);
+}
+```
+
+Then in page components, bind `<WebFormsForm OnSubmit="Page.SetRequestFormData">`.
+
+---
+
+### 6. Migration Story — What Markup Changes?
+
+**Old Web Forms (Server-side form POST):**
+```html
+<form runat="server">
+    <asp:TextBox runat="server" ID="TextBox1" />
+    <asp:Button runat="server" Text="Submit" OnClick="Button1_Click" />
+</form>
+
+<!-- Code-behind -->
+protected void Button1_Click(object sender, EventArgs e)
+{
+    string value = Request.Form["TextBox1"];
+    // ...
+}
+```
+
+**Blazor SSR (identical):**
+```razor
+<WebFormsForm>
+    <input type="text" name="TextBox1" />
+    <button type="submit">Submit</button>
+</WebFormsForm>
+
+<!-- Page code -->
+protected override async Task OnInitializedAsync()
+{
+    if (IsPostBack)
+    {
+        string value = Request.Form["TextBox1"];
+        // ...
+    }
+}
+```
+
+**Blazor ServerInteractive (NEW — with WebFormsForm):**
+```razor
+<WebFormsForm @ref="FormComponent" OnSubmit="HandleFormSubmit">
+    <input type="text" name="TextBox1" />
+    <button type="submit">Submit</button>
+</WebFormsForm>
+
+<!-- Page code -->
+private WebFormsForm? FormComponent { get; set; }
+
+private async Task HandleFormSubmit(Dictionary<string, StringValues> formData)
+{
+    // Manually invoke SetRequestFormData, OR
+    // RequestShim has already been populated by WebFormsForm's OnSubmit
+    string value = Request.Form["TextBox1"];
+    // ...
+    await InvokeAsync(StateHasChanged);
+}
+```
+
+**Key Insight:** Migration is seamless. The only visible difference is the addition of an `OnSubmit` callback handler to wire form submission to page state. For SSR pages migrating to ServerInteractive, this is typically a small change.
+
+---
+
+### 7. Key Design Decisions & Rationale
+
+#### A. Why not use form POST in interactive mode?
+
+In Blazor Server, the page **is** a persistent WebSocket connection. HTTP form POST doesn't apply — all interactions flow through `IJSRuntime.InvokeAsync()` and `[JSInvokable]` methods. There's no POST body, no IFormCollection. We must bridge via interop.
+
+#### B. Why cache FormShim in RequestShim?
+
+SSR pages create a fresh RequestShim on every request (stateless HTTP). Interactive pages keep a single RequestShim for the component's lifetime. Caching ensures that mutations by WebFormsForm are visible on subsequent `Request.Form` accesses — critical for code like:
+
+```csharp
+protected override async Task OnInitializedAsync()
+{
+    if (IsPostBack && Request.Form.ContainsKey("TextBox1"))
+    {
+        // Request.Form must be populated from the prior Submit
+    }
+}
+```
+
+Without caching, `Request.Form` would return a new empty FormShim each time, and subsequent accesses would see nothing.
+
+#### B. Why a separate constructor for FormShim?
+
+Overloading constructors is simpler and more explicit than a factory method. We have two legitimate ways to construct a FormShim:
+- `new FormShim(IFormCollection?)` — SSR with HttpContext
+- `new FormShim(Dictionary<string, StringValues>)` — Interactive via JS interop
+
+Both are valid; constructor overloading makes both visible in IntelliSense.
+
+#### D. Why `@onsubmit` instead of raw JS event listener?
+
+In Blazor, `@onsubmit` is the idiomatic pattern for form submission. It integrates with component lifecycle and handles preventDefault. Raw JS event listeners would work but are less discoverable and harder to test with bUnit.
+
+#### E. Why `OnSubmit` callback instead of automatic wiring?
+
+A component shouldn't assume a parent's Request.Form population logic. Some pages may want to validate, transform, or reject form data before populating. An `EventCallback` parameter gives flexibility — pages can opt-in to specific behavior.
+
+#### F. Why two JS methods (`registerForm` + `readFormData`)?
+
+Separation of concerns:
+- `registerForm()` just tracks component references for cleanup
+- `readFormData()` is pure function logic — can be called from multiple contexts (event handler, manual button, etc.)
+
+This pattern is consistent with the postback bridge (`registerPostBackTarget`, `__doPostBack`).
+
+---
+
+### 8. Testing Strategy
+
+#### bUnit Tests (Component-level)
+
+- **Test 1:** SSR mode — renders `<form method="post" action="...">` with no interop setup
+- **Test 2:** Interactive mode — renders `<form @onsubmit="...">` with FormElement reference
+- **Test 3:** OnSubmit callback fires with correct FormData dictionary when form is submitted
+- **Test 4:** Multi-value fields (e.g., `<input type="checkbox" name="check" value="a" /> <input type="checkbox" name="check" value="b" />`) captured as array in FormData
+- **Test 5:** Child content renders correctly inside `<form>`
+- **Test 6:** HTML attributes (class, id, data-*) applied to `<form>` element
+
+#### Playwright Integration Tests
+
+- **Test 1:** User fills text input, submits form, page's OnSubmit fires, Request.Form contains submitted data
+- **Test 2:** User selects multiple checkboxes with same name, submits, Request.Form.GetValues() returns all values
+- **Test 3:** User submits empty form, Request.Form.Count is 0 (no fields)
+- **Test 4:** Form submission in SSR mode doesn't involve JS interop (just POST)
+- **Test 5:** JavaScript console has no errors
+
+---
+
+## Open Questions & Follow-ups
+
+1. **Who instantiates WebFormsForm?** Is it typically the page component, or a user control? Scope needs clarification for testing.
+
+2. **Form ID and naming:** Should WebFormsForm accept an ID parameter and enforce uniqueness? Web Forms forms typically have `id="form1"`.
+
+3. **Hidden fields:** Web Forms often use hidden `__VIEWSTATE` and `__EVENTVALIDATION` fields. Should WebFormsForm auto-generate these? Or should pages manually add them? (Recommendation: manually via `@code`).
+
+4. **Multiple forms:** Can a page have multiple WebFormsForm components? If so, each should be independent (separate JS interop tracking).
+
+5. **Async form submissions:** Should WebFormsForm support AJAX-style async post in the future (without full page reload)? Current design enables this but doesn't implement it.
+
+---
+
+## Implementation Checklist
+
+- [ ] Add `FormMethod` enum (`Enums/FormMethod.cs`)
+- [ ] Update `FormShim.cs` — dual-mode constructor + `SetFormData()` method
+- [ ] Update `RequestShim.cs` — cache FormShim + `SetFormData()` method
+- [ ] Create `Components/WebFormsForm.razor` component
+- [ ] Create `wwwroot/js/bwfc-webformsform.js` module
+- [ ] Update `WebFormsPageBase.cs` — integrate form data population
+- [ ] Write bUnit tests (8–10 test cases)
+- [ ] Write Playwright integration tests (5 test cases)
+- [ ] Create sample page (`Components/Pages/ControlSamples/WebFormsForm/Index.razor`)
+- [ ] Update mkdocs.yml navigation
+- [ ] Update component reference docs
+- [ ] Update README with WebFormsForm link
+
+---
+
+## Success Criteria
+
+✅ `<WebFormsForm>` component renders correctly in both SSR and ServerInteractive modes  
+✅ `Request.Form["field"]` returns submitted values in interactive mode  
+✅ `Request.Form.GetValues("field")` works for multi-value fields  
+✅ All 8+ bUnit tests pass  
+✅ All 5+ Playwright tests pass  
+✅ Sample page demonstrates form submission and data access  
+✅ Zero regressions in existing tests  
+✅ Documentation is clear and complete
+
+
+---
+
+# WebFormsForm must inherit ComponentBase explicitly
+
+**Author:** Rogue (QA)  
+**Date:** 2026-07  
+**Scope:** WebFormsForm.razor, RequestShim.cs  
+**Issue:** #533
+
+## Decision
+
+Any `.razor` component in the main project that should NOT be a Web Forms control must explicitly declare `@inherits ComponentBase` to override the project-level `_Imports.razor` (which specifies `@inherits BaseWebFormsComponent`).
+
+## Bugs Found
+
+1. **WebFormsForm.razor** — Missing `@inherits ComponentBase` caused it to inherit `BaseWebFormsComponent` via `_Imports.razor`. Both classes had `[Parameter(CaptureUnmatchedValues = true)]`, throwing `ThrowForMultipleCaptureUnmatchedValuesParameters` at render time. Fixed by adding `@inherits ComponentBase`.
+
+2. **RequestShim.cs line 79** — `new FormShim(null)` was ambiguous between `FormShim(IFormCollection?)` and `FormShim(Dictionary<string, StringValues>)` after the dual-mode constructor was added. Fixed by casting to `(IFormCollection?)null`.
+
+## Impact
+
+Both fixes are required for the WebFormsForm component to render at all. Without them, any page using `<WebFormsForm>` crashes at component initialization.
+
+
+---
+
+
+
+# Decision: WebFormsForm Interactive Tests Use WaitForAsync Pattern
+
+**Date:** 2025-07-25
+**Author:** Colossus
+**Status:** Implemented
+
+## Context
+
+The `/migration/webforms-form` demo page runs in interactive Blazor Server mode (no `[ExcludeFromInteractiveRouting]`). Unlike the SSR `/migration/request-form` page which uses HTTP POST + page reload, this page submits via SignalR/JS interop and re-renders in place.
+
+## Decision
+
+Interactive form submission tests use `WaitForAsync(Visible)` on result elements rather than `WaitForLoadStateAsync(NetworkIdle)`. The URL assertion uses `ToHaveURLAsync` to confirm no navigation occurred. This establishes the pattern for all future interactive migration demo tests.
+
+## Affected Files
+
+- `samples/AfterBlazorServerSide.Tests/ControlSampleTests.cs` — 1 new InlineData
+- `samples/AfterBlazorServerSide.Tests/Migration/WebFormsFormTests.cs` — new file, 4 tests
+
+
+---
+
+# Decision: WebFormsForm Demo — Interactive Companion to RequestFormDemo
+
+**Author:** Jubilee  
+**Date:** 2026-07-17  
+**Status:** Proposed
+
+## Context
+
+The `RequestFormDemo.razor` sample uses `[ExcludeFromInteractiveRouting]` for SSR-only `Request.Form` access. The new `<WebFormsForm>` component enables the same `Request.Form["key"]` API in **interactive** render mode via JS interop. A companion demo page is needed.
+
+## Decision
+
+Created `WebFormsFormDemo.razor` at `/migration/webforms-form` that:
+- Runs in interactive mode (no `[ExcludeFromInteractiveRouting]`)
+- Uses `<WebFormsForm OnSubmit="HandleFormSubmit">` + `SetRequestFormData(e)` pattern
+- Presents a 3-stage migration progression: SSR Form → WebFormsForm → EditForm
+- Mirrors the same visual style (card layout, results table, code comparison) as `RequestFormDemo.razor`
+
+Added `WebFormsForm` entry to `ComponentCatalog.cs` under Migration Helpers.
+
+## Implications
+
+- New sample page is discoverable in sidebar navigation under Migration Helpers.
+- The 3-stage migration table (SSR → WebFormsForm → EditForm) establishes a recommended progression for form migration guidance across the project.
+
+
+---
+
+
