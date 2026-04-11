@@ -93,8 +93,36 @@ if (Request.Form.Count > 0) { /* process form */ }
 | Mode | Behavior |
 |------|----------|
 | SSR (Static Server Rendering) | Full access — wraps `HttpContext.Request.Form` |
-| Interactive Blazor Server | Returns empty — logs warning on first access |
+| Interactive Blazor Server | Use `<WebFormsForm>` component to enable access (see below) |
 | Non-form requests (JSON, etc.) | Returns empty — exceptions caught gracefully |
+
+### Interactive Mode: Using WebFormsForm
+
+In interactive Blazor Server mode (WebSocket-based), HTTP requests do not occur, so `Request.Form` is initially empty. To enable form submissions and `Request.Form` access in interactive pages, use the **`<WebFormsForm>` component**:
+
+```razor
+@inherits WebFormsPageBase
+
+<WebFormsForm OnSubmit="HandleSubmit">
+    <input type="text" name="username" />
+    <input type="password" name="password" />
+    <button type="submit">Login</button>
+</WebFormsForm>
+
+@code {
+    private void HandleSubmit(FormSubmitEventArgs e)
+    {
+        // Inject form data into Request.Form shim
+        SetRequestFormData(e);
+        
+        // Now Request.Form is populated with submitted values
+        string username = Request.Form["username"] ?? "";
+        string password = Request.Form["password"] ?? "";
+    }
+}
+```
+
+The `<WebFormsForm>` component captures form data via JavaScript interop and injects it into the `Request.Form` shim, allowing migrated code-behind to work unchanged. See [WebFormsForm](WebFormsForm.md) for detailed documentation and examples.
 
 ## Graceful Degradation
 

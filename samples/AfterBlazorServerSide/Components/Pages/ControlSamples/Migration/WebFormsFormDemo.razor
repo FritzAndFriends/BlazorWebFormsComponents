@@ -1,0 +1,313 @@
+@page "/migration/webforms-form"
+@using BlazorWebFormsComponents
+@inherits WebFormsPageBase
+
+<PageTitle>WebFormsForm Interactive Demo</PageTitle>
+
+<h2>WebFormsForm — Interactive Mode</h2>
+
+<p>This sample demonstrates the <code>&lt;WebFormsForm&gt;</code> component that captures form data
+   via <strong>JS interop</strong> in interactive mode, then populates <code>Request.Form</code>
+   through <code>SetRequestFormData</code>. This gives you the same
+   <code>Request.Form["field"]</code> API from Web Forms — but in a fully interactive Blazor page.</p>
+
+<div class="alert alert-warning">
+    <strong>⚡ Interactive Mode:</strong> Unlike the
+    <a href="/migration/request-form">SSR Request.Form demo</a>, this page runs in
+    <strong>interactive render mode</strong>. The <code>&lt;WebFormsForm&gt;</code> component
+    intercepts the HTML form submit, reads all field values via JavaScript interop,
+    and delivers them to your C# handler as <code>FormSubmitEventArgs</code>.
+</div>
+
+<hr />
+
+<h3>Try It — Submit the Form</h3>
+<p>Fill in the fields below and click <strong>Submit Form</strong>. The handler calls
+   <code>SetRequestFormData(e)</code> so that <code>Request.Form["field"]</code> works
+   exactly like Web Forms.</p>
+
+<div class="card" data-audit-control="webforms-form-input">
+    <div class="card-body">
+        <h5 class="card-title">User Profile Form</h5>
+        <WebFormsForm OnSubmit="HandleFormSubmit">
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username"
+                       placeholder="Enter your username"
+                       value="@(submittedUsername ?? "")" />
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="text" class="form-control" id="email" name="email"
+                       placeholder="Enter your email"
+                       value="@(submittedEmail ?? "")" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Favorite Colors</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="colors" value="Red"
+                           id="colorRed" checked="@IsColorSelected("Red")" />
+                    <label class="form-check-label" for="colorRed">Red</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="colors" value="Green"
+                           id="colorGreen" checked="@IsColorSelected("Green")" />
+                    <label class="form-check-label" for="colorGreen">Green</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="colors" value="Blue"
+                           id="colorBlue" checked="@IsColorSelected("Blue")" />
+                    <label class="form-check-label" for="colorBlue">Blue</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="colors" value="Yellow"
+                           id="colorYellow" checked="@IsColorSelected("Yellow")" />
+                    <label class="form-check-label" for="colorYellow">Yellow</label>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Form</button>
+        </WebFormsForm>
+    </div>
+</div>
+
+@if (isPostBack)
+{
+    <div class="card border-success mt-3" data-audit-control="webforms-form-results">
+        <div class="card-body">
+            <h5 class="card-title text-success">✅ Form Submitted — Request.Form Values</h5>
+            <table class="table table-sm table-bordered" style="max-width: 600px;">
+                <thead>
+                    <tr>
+                        <th>API Call</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Request.Form["username"]</code></td>
+                        <td><strong>@(submittedUsername ?? "(null)")</strong></td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form["email"]</code></td>
+                        <td><strong>@(submittedEmail ?? "(null)")</strong></td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form.GetValues("colors")</code></td>
+                        <td>
+                            <strong>
+                                @(submittedColors != null
+                                    ? string.Join(", ", submittedColors)
+                                    : "(null — no checkboxes selected)")
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form.Count</code></td>
+                        <td><strong>@formFieldCount</strong></td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form.AllKeys</code></td>
+                        <td><strong>@string.Join(", ", formKeys)</strong></td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form.ContainsKey("username")</code></td>
+                        <td><strong>@containsUsername</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<hr />
+
+<h3>Before / After Code Comparison</h3>
+
+<h4>1. Form Markup</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h5>Before (Web Forms)</h5>
+        <pre><code>&lt;form runat="server"&gt;
+    &lt;asp:TextBox ID="txtUsername" runat="server" /&gt;
+    &lt;asp:Button ID="btnSubmit" runat="server"
+        OnClick="btnSubmit_Click" Text="Submit" /&gt;
+&lt;/form&gt;</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>After (Blazor with BWFC)</h5>
+        <pre><code>&lt;WebFormsForm OnSubmit="HandleFormSubmit"&gt;
+    &lt;input type="text" name="username" /&gt;
+    &lt;button type="submit"&gt;Submit&lt;/button&gt;
+&lt;/WebFormsForm&gt;</code></pre>
+    </div>
+</div>
+
+<h4 class="mt-3">2. Reading Form Values in the Handler</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h5>Before (Web Forms)</h5>
+        <pre><code>protected void btnSubmit_Click(object sender, EventArgs e)
+{
+    string username = Request.Form["username"];
+    string email = Request.Form["email"];
+    if (username != null)
+    {
+        lblGreeting.Text = "Hello, " + username;
+    }
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>After (Blazor with BWFC)</h5>
+        <pre><code>private void HandleFormSubmit(FormSubmitEventArgs e)
+{
+    SetRequestFormData(e);
+    string username = Request.Form["username"];
+    string email = Request.Form["email"];
+    if (username != null)
+    {
+        greeting = "Hello, " + username;
+    }
+}</code></pre>
+    </div>
+</div>
+
+<h4 class="mt-3">3. Multi-Value Fields (GetValues)</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h5>Before (Web Forms)</h5>
+        <pre><code>// Get all selected checkbox values
+string[] colors = Request.Form.GetValues("colors");
+if (colors != null)
+{
+    foreach (string color in colors)
+    {
+        // process each selected color
+    }
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>After (Blazor with BWFC)</h5>
+        <pre><code>// Same call works after SetRequestFormData!
+string[] colors = Request.Form.GetValues("colors");
+if (colors != null)
+{
+    foreach (string color in colors)
+    {
+        // process each selected color
+    }
+}
+// TODO(bwfc-general): Migrate to @@bind with
+// List&lt;string&gt; for interactive checkbox groups.</code></pre>
+    </div>
+</div>
+
+<hr />
+
+<h3>Migration Guidance</h3>
+<p>The <code>&lt;WebFormsForm&gt;</code> component is the <strong>interactive counterpart</strong> to
+   the SSR-based <code>Request.Form</code> shim. Together they form a progression:</p>
+
+<div class="card mt-3" data-audit-control="webforms-form-migration-guidance">
+    <div class="card-body">
+        <h5 class="card-title">Migration Path: Forms</h5>
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th>Stage</th>
+                    <th>Technique</th>
+                    <th>Render Mode</th>
+                    <th>How It Works</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>1. SSR Form</strong></td>
+                    <td><code>&lt;form method="post"&gt;</code> + <code>Request.Form</code></td>
+                    <td>Static SSR</td>
+                    <td>Real HTTP POST; form data in <code>IFormCollection</code>. See <a href="/migration/request-form">Request.Form demo</a>.</td>
+                </tr>
+                <tr class="table-active">
+                    <td><strong>2. WebFormsForm</strong></td>
+                    <td><code>&lt;WebFormsForm OnSubmit&gt;</code> + <code>SetRequestFormData</code></td>
+                    <td>Interactive</td>
+                    <td>JS interop reads DOM; populates <code>Request.Form</code> in C#. <em>(This page.)</em></td>
+                </tr>
+                <tr>
+                    <td><strong>3. EditForm</strong></td>
+                    <td><code>&lt;EditForm Model&gt;</code> + <code>@@bind-Value</code></td>
+                    <td>Interactive</td>
+                    <td>Full Blazor model binding with validation. <em>(Target state.)</em></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h5 class="mt-3">When to Use Each</h5>
+        <ul>
+            <li><strong>Stage 1 (SSR):</strong> Use when pages can stay in static rendering —
+                simplest migration with zero JS.</li>
+            <li><strong>Stage 2 (WebFormsForm):</strong> Use when you need interactive render mode
+                but aren't ready to rewrite form handling to <code>EditForm</code>.
+                Your existing <code>Request.Form["key"]</code> code keeps working.</li>
+            <li><strong>Stage 3 (EditForm):</strong> The target state. Migrate here when you're
+                ready for full Blazor model binding, validation, and two-way binding.</li>
+        </ul>
+
+        <p class="text-muted mb-0">
+            <strong>Tip:</strong> Add <code>// TODO(bwfc-general): Migrate to EditForm + @@bind</code>
+            comments alongside your <code>WebFormsForm</code> code to track what still needs updating.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>Source Code</h3>
+<pre><code>@@page "/migration/webforms-form"
+@@using BlazorWebFormsComponents
+@@inherits WebFormsPageBase
+
+&lt;WebFormsForm OnSubmit="HandleFormSubmit"&gt;
+    &lt;input type="text" name="username" /&gt;
+    &lt;input type="text" name="email" /&gt;
+    &lt;input type="checkbox" name="colors" value="Red" /&gt;
+    &lt;button type="submit"&gt;Submit&lt;/button&gt;
+&lt;/WebFormsForm&gt;
+
+@@code {
+    private bool isPostBack;
+    private string? submittedUsername;
+
+    private void HandleFormSubmit(FormSubmitEventArgs e)
+    {
+        SetRequestFormData(e);
+        isPostBack = true;
+        submittedUsername = Request.Form["username"];
+        // Request.Form.GetValues("colors") for multi-value
+    }
+}</code></pre>
+
+@code {
+    private bool isPostBack;
+    private string? submittedUsername;
+    private string? submittedEmail;
+    private string[]? submittedColors;
+    private int formFieldCount;
+    private string[] formKeys = Array.Empty<string>();
+    private bool containsUsername;
+
+    private void HandleFormSubmit(FormSubmitEventArgs e)
+    {
+        SetRequestFormData(e);
+
+        isPostBack = true;
+        submittedUsername = Request.Form["username"];
+        submittedEmail = Request.Form["email"];
+        submittedColors = Request.Form.GetValues("colors");
+        formFieldCount = Request.Form.Count;
+        formKeys = Request.Form.AllKeys;
+        containsUsername = Request.Form.ContainsKey("username");
+    }
+
+    private bool IsColorSelected(string color)
+        => submittedColors?.Contains(color) == true;
+}

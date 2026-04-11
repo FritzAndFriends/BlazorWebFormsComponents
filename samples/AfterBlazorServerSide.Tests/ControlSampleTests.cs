@@ -250,6 +250,7 @@ public class ControlSampleTests
     // Migration Shim Sample Pages
     [Theory]
     [InlineData("/migration/request-form")]
+    [InlineData("/migration/webforms-form")]
     public async Task MigrationPage_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);

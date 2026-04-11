@@ -187,6 +187,7 @@ nav:
     - ViewState: UtilityFeatures/ViewState.md
     - ViewState and PostBack Shim: UtilityFeatures/ViewStateAndPostBack.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
+    - WebFormsForm: UtilityFeatures/WebFormsForm.md
   - Migration:
       - Getting Started: Migration/readme.md
       - Strangler Fig Pattern: Migration/StranglerFigPattern.md
