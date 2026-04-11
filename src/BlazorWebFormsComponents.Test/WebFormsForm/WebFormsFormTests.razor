@@ -1,0 +1,198 @@
+@code {
+
+	[Fact]
+	public void WebFormsForm_RendersFormElement()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm>
+				<input type="text" name="field1" />
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void WebFormsForm_DefaultMethod_IsPost()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm>
+				<input type="text" />
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.GetAttribute("method").ShouldBe("post");
+	}
+
+	[Fact]
+	public void WebFormsForm_MethodGet_SetsFormMethodAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm Method="FormMethod.Get">
+				<input type="text" />
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.GetAttribute("method").ShouldBe("get");
+	}
+
+	[Fact]
+	public void WebFormsForm_ActionParameter_SetsFormAction()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm Action="/submit">
+				<input type="submit" />
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.GetAttribute("action").ShouldBe("/submit");
+	}
+
+	[Fact]
+	public void WebFormsForm_ChildContent_RendersInsideForm()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm>
+				<p>Child paragraph</p>
+				<input type="text" name="name" />
+				<button type="submit">Go</button>
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.InnerHtml.ShouldContain("<p>Child paragraph</p>");
+		form.QuerySelectorAll("input").Count().ShouldBe(1);
+		form.QuerySelectorAll("button").Count().ShouldBe(1);
+	}
+
+	[Fact]
+	public void WebFormsForm_HtmlAttributes_CssClass_AppliedToForm()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm class="form-horizontal styled">
+				<input type="text" />
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.GetAttribute("class").ShouldBe("form-horizontal styled");
+	}
+
+	[Fact]
+	public void WebFormsForm_HtmlAttributes_Id_AppliedToForm()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm id="loginForm">
+				<input type="text" />
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.GetAttribute("id").ShouldBe("loginForm");
+	}
+
+	[Fact]
+	public void WebFormsForm_HtmlAttributes_DataAttribute_AppliedToForm()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm data-testid="my-form">
+				<input type="text" />
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.GetAttribute("data-testid").ShouldBe("my-form");
+	}
+
+	[Fact]
+	public void WebFormsForm_MultipleHtmlAttributes_AllApplied()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm id="regForm" class="styled" data-mode="edit">
+				<input type="text" />
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.GetAttribute("id").ShouldBe("regForm");
+		form.GetAttribute("class").ShouldBe("styled");
+		form.GetAttribute("data-mode").ShouldBe("edit");
+	}
+
+	[Fact]
+	public void WebFormsForm_NoChildContent_RendersEmptyForm()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm />
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.ShouldNotBeNull();
+		form.InnerHtml.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void WebFormsForm_MethodPost_SetsFormMethodAttribute()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm Method="FormMethod.Post">
+				<input type="text" />
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		form.GetAttribute("method").ShouldBe("post");
+	}
+
+	[Fact]
+	public void WebFormsForm_NestedElements_RendersCorrectly()
+	{
+		// Arrange & Act
+		var cut = Render(
+			@<WebFormsForm>
+				<div class="form-group">
+					<label>Name</label>
+					<input type="text" name="name" />
+				</div>
+				<div class="form-group">
+					<label>Email</label>
+					<input type="email" name="email" />
+				</div>
+			</WebFormsForm>
+		);
+
+		// Assert
+		var form = cut.Find("form");
+		var groups = form.QuerySelectorAll("div.form-group");
+		groups.Count().ShouldBe(2);
+		var inputs = form.QuerySelectorAll("input");
+		inputs.Count().ShouldBe(2);
+	}
+
+}

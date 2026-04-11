@@ -516,3 +516,20 @@ Conventions discovered: SessionShim uses Shouldly assertions + xUnit `[Fact]` (m
 - Fully-qualified `BlazorWebFormsComponents.BaseWebFormsComponent` required — test project has a `BaseWebFormsComponent/` folder creating namespace ambiguity. Same for `System.EventArgs` vs `EventArgs/` folder.
 - `dotnet test --filter` uses `|` for OR (not `OR` keyword) in vstest filter expressions.
 
+### FormShim & WebFormsForm Tests (Issue #533)
+
+**39 new tests — all passing.** Created 2 test files covering FormShim dual-mode support and WebFormsForm component rendering.
+
+**Test files created:**
+- `FormShimTests.cs` (27 tests, all pass): Dual-mode coverage for SSR (IFormCollection) and interactive (Dictionary<string, StringValues>) paths. Tests indexer, GetValues, AllKeys, Count, ContainsKey for both modes plus null/empty. SetFormData mutation tests for interactive mode (populate, replace, multi-value preservation).
+- `WebFormsForm/WebFormsFormTests.razor` (12 tests, all pass): bUnit rendering tests — form element renders, default method is POST, Method/Action parameters, ChildContent renders inside form, HtmlAttributes (class, id, data-*), multiple attributes, empty form, nested elements.
+
+**Bug found and fixed:**
+- `WebFormsForm.razor` was missing `@inherits ComponentBase`, causing it to inherit `BaseWebFormsComponent` via `_Imports.razor`. Both `BaseWebFormsComponent` and `WebFormsForm` had `[Parameter(CaptureUnmatchedValues = true)]`, causing `ThrowForMultipleCaptureUnmatchedValuesParameters` at render time. Fixed by adding explicit `@inherits ComponentBase`.
+- `RequestShim.cs` line 79: `new FormShim(null)` was ambiguous between `FormShim(IFormCollection?)` and `FormShim(Dictionary<string, StringValues>)`. Fixed by casting to `(IFormCollection?)null`.
+
+**Key patterns:**
+- FormShim tests are pure C# xUnit (no bUnit needed) — use `new FormCollection(dict)` for SSR mock data.
+- WebFormsForm tests use `.razor` bUnit pattern inheriting `BlazorWebFormsTestContext`.
+- Any `.razor` component in the main project that should NOT inherit `BaseWebFormsComponent` must have explicit `@inherits ComponentBase` to override the project-level `_Imports.razor`.
+
