@@ -2,7 +2,7 @@
 
 **Migrate your ASP.NET Web Forms application to Blazor — systematically, not heroically.**
 
-This toolkit packages everything you need to take a Web Forms app and bring it to Blazor using the [BlazorWebFormsComponents](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents) (BWFC) library. It combines automated scripts, Copilot skills, and a decision-making agent into a three-layer pipeline that handles ~85% of migration work mechanically or with AI assistance, leaving you to focus on the architecture decisions that actually need a human.
+This toolkit packages everything you need to take a Web Forms app and bring it to Blazor using the [BlazorWebFormsComponents](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents) (BWFC) library. It combines automated scripts, shim infrastructure, Copilot skills, and a decision-making agent into a three-layer pipeline that handles ~90% of migration work mechanically or with AI assistance, leaving you to focus on the architecture decisions that actually need a human.
 
 - **NuGet Package:** <https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents>
 - **GitHub Repository:** <https://github.com/FritzAndFriends/BlazorWebFormsComponents>
@@ -43,7 +43,7 @@ Copy these into your project's `.github/skills/` directory so Copilot can use th
 
 | Skill | Description |
 |---|---|
-| [`bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | **Core markup migration** — control translation, expression conversion, data binding, code-behind lifecycle, and Master Page to Layout conversion. Covers Layer 2 structural transforms (~45% of migration work). |
+| [`bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | **Core markup migration** — control translation, expression conversion, data binding, code-behind lifecycle, and Master Page to Layout conversion. Covers Layer 2 structural transforms (~30% of migration work). |
 | [`bwfc-identity-migration/SKILL.md`](skills/bwfc-identity-migration/SKILL.md) | **Identity & auth migration** — OWIN to ASP.NET Core auth middleware, login page migration, BWFC login controls, role-based authorization, and AuthorizeView patterns. |
 | [`bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) | **Data access & architecture migration** — EF6 to EF Core, DataSource controls to service injection, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json. Covers Layer 3 architecture decisions. |
 | [`l3-performance-optimization/SKILL.md`](skills/l3-performance-optimization/SKILL.md) | **Post-migration performance optimization** — async/await modernization, `AsNoTracking()`, `IDbContextFactory`, `[StreamRendering]`, `@key` directives, and .NET 10 patterns. Optional pass after the app builds and runs. |
@@ -55,7 +55,7 @@ Copy these to your project root. Requires PowerShell 7.0+.
 | Script | Description |
 |---|---|
 | [`bwfc-scan.ps1`](scripts/bwfc-scan.ps1) | **Scanner** — inventories your Web Forms project, identifies controls, counts pages, and outputs a migration readiness report. Run this first. |
-| [`bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) | **Mechanical transformer** — Layer 1 automated transforms: strips `asp:` prefixes, removes `runat="server"`, converts expressions, renames `.aspx`→`.razor`. Handles ~40% of migration work deterministically. |
+| [`bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) | **Mechanical transformer** — Layer 1 automated transforms: strips `asp:` prefixes, removes `runat="server"`, converts expressions, renames `.aspx`→`.razor`. Combined with BWFC shim infrastructure, handles ~60% of migration work deterministically. |
 
 ---
 
@@ -65,9 +65,9 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 
 | Layer | What | How | Coverage |
 |---|---|---|---|
-| **Layer 1** — Automated | Tag prefix removal, `runat` removal, expression conversion, file renaming | [`scripts/bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) | ~40% of work |
-| **Layer 2** — Copilot-Assisted | Data binding rewiring, layout conversion, lifecycle method migration | [`skills/bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | ~45% of work |
-| **Layer 3** — Architecture Decisions | Identity, EF Core, session state, third-party integrations | [`skills/bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) + human judgment | ~15% of work |
+| **Layer 1** — Automated | Tag prefix removal, `runat` removal, expression conversion, file renaming, shim infrastructure | [`scripts/bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) + `AddBlazorWebFormsComponents()` | ~60% of work |
+| **Layer 2** — Copilot-Assisted | Data binding rewiring, layout conversion, lifecycle method signatures, event handlers | [`skills/bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | ~30% of work |
+| **Layer 3** — Architecture Decisions | Identity, EF Core, third-party integrations | [`skills/bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) + human judgment | ~10% of work |
 | **L3-opt** — Performance (optional) | Async/await, `AsNoTracking`, `IDbContextFactory`, .NET 10 patterns | [`skills/l3-performance-optimization/SKILL.md`](skills/l3-performance-optimization/SKILL.md) | After app is functional |
 
 **Start here:** [QUICKSTART.md](QUICKSTART.md) — the linear "just tell me what to do" path.
@@ -83,6 +83,8 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 4. Verify    →  dotnet build && dotnet run
 ```
 
+**Shim infrastructure:** `AddBlazorWebFormsComponents()` + `@inherits WebFormsPageBase` enables `Response.Redirect`, `Session["key"]`, `IsPostBack`, `Page.Title`, `Request.QueryString`, `Cache`, `Server.MapPath`, and `ClientScript` to work AS-IS — no manual conversion of these APIs is needed.
+
 ---
 
 ## Documentation
@@ -91,7 +93,7 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 |---|---|
 | [**README.md**](README.md) | You are here — overview and entry point |
 | [**QUICKSTART.md**](QUICKSTART.md) | Step-by-step: scan → migrate → verify |
-| [**CONTROL-COVERAGE.md**](CONTROL-COVERAGE.md) | Full 58-component coverage table with complexity ratings |
+| [**CONTROL-COVERAGE.md**](CONTROL-COVERAGE.md) | Full 58-component coverage table with complexity ratings + shim infrastructure inventory |
 | [**METHODOLOGY.md**](METHODOLOGY.md) | Three-layer pipeline deep-dive |
 | [**CHECKLIST.md**](CHECKLIST.md) | Per-page migration checklist template |
 | [**copilot-instructions-template.md**](copilot-instructions-template.md) | Drop-in `.github/copilot-instructions.md` for your project |
@@ -119,8 +121,8 @@ Based on the [WingtipToys proof-of-concept](../planning-docs/WINGTIPTOYS-MIGRATI
 | Approach | Estimated Time | Per-Page Average |
 |---|---|---|
 | Manual rewrite (no BWFC) | 60–80 hours | ~2–2.5 hours |
-| **BWFC + three-layer pipeline** | **18–26 hours** | **~35–45 minutes** |
-| BWFC + pipeline + AI agents | ~4.5 hours | ~8 minutes |
+| **BWFC + three-layer pipeline** | **16–24 hours** | **~30–40 minutes** |
+| BWFC + pipeline + AI agents | ~4 hours | ~7 minutes |
 
 That's a **55–70% reduction** in migration effort.
 

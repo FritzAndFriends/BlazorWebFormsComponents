@@ -11,8 +11,9 @@ For the full control translation rules (attribute mappings, code examples, befor
 | Metric | Value |
 |---|---|
 | Primary Web Forms controls | **58** |
-| Supporting components (field columns, styles, infrastructure, helpers) | **95** |
-| **Total Razor components shipped** | **153** |
+| Supporting components (field columns, styles, infrastructure, helpers) | **96** |
+| **Total Razor components shipped** | **154** |
+| Migration shims (compile-compatible APIs) | **14** |
 | Web Forms control categories covered | **9** (Editor, Data, Validation, Navigation, Login, AJAX, Infrastructure, Field Columns, Style Sub-Components) |
 | Enums | **54** |
 | Utility/infrastructure C# classes | **197+** |
@@ -287,6 +288,32 @@ builder.Services.AddBlazorWebFormsComponents();
 | **BlazorWebFormsHead** | Adds BWFC script tag to `<head>` via HeadContent |
 | **Eval** | Data-binding helper for `DataBinder.Eval()` expressions |
 | **WebFormsForm** | Interactive form component — captures form data via JS interop and feeds FormShim |
+
+---
+
+## Infrastructure & Shim Components
+
+BWFC provides a comprehensive shim layer that enables Web Forms API calls to compile and function in Blazor without code changes. All shims are auto-registered by `AddBlazorWebFormsComponents()` and auto-wired on `WebFormsPageBase`.
+
+| Component | Web Forms API Preserved | How It Works |
+|---|---|---|
+| **WebFormsPageBase** | `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack` | Base class for all pages via `@inherits` in `_Imports.razor` |
+| **ResponseShim** | `Response.Redirect("~/path")` | Auto-strips `~/` prefix and `.aspx` extension; uses `NavigationManager` internally |
+| **RequestShim** | `Request.Url`, `Request.QueryString["key"]`, `Request.Cookies` | Reads current URL and query parameters from `NavigationManager` |
+| **FormShim** | `Request.Form["key"]`, `Request.Form.AllKeys`, `Request.Form.Count` | Dual-mode SSR+Interactive; requires `<WebFormsForm>` wrapper |
+| **SessionShim** | `Session["key"]`, `Session.Clear()`, `Session.Remove()` | Scoped in-memory dictionary — per-circuit lifetime |
+| **CacheShim** | `Cache["key"]`, `Cache.Insert()`, `Cache.Remove()` | Singleton in-memory cache |
+| **ServerShim** | `Server.MapPath("~/path")`, `Server.HtmlEncode()`, `Server.UrlEncode()` | Maps virtual paths; delegates encoding to `WebUtility` |
+| **ClientScriptShim** | `Page.ClientScript.RegisterStartupScript()`, `RegisterClientScriptBlock()` | Registers scripts via JS interop |
+| **ScriptManagerShim** | `ScriptManager.GetCurrent(Page)`, `RegisterStartupScript()` | Compatibility shim for ScriptManager API |
+| **ViewStateDictionary** | `ViewState["key"]` dictionary access | In-memory dictionary (not serialized to page) |
+| **PostBack support** | `__doPostBack()`, `IPostBackEventHandler`, `PostBackEventArgs` | PostBack event support with JS interop |
+| **ConfigurationManager** | `ConfigurationManager.AppSettings["key"]`, `ConnectionStrings["name"]` | Bridges to ASP.NET Core `IConfiguration`; call `app.UseConfigurationManagerShim()` |
+| **BundleConfig** | `BundleTable.Bundles.Add()`, `ScriptBundle`, `StyleBundle` | No-op compile shim — compiles but does nothing |
+| **RouteConfig** | `RouteTable.Routes.MapPageRoute()`, `Routes.Ignore()` | No-op compile shim — compiles but does nothing |
+| **WebFormsForm** | `<form>` POST data capture | Blazor component — wraps forms to feed `FormShim` |
+
+> **Key insight:** With `AddBlazorWebFormsComponents()` + `@inherits WebFormsPageBase`, code-behind files using `Response.Redirect`, `Session`, `Request`, `IsPostBack`, `Page.Title`, `Cache`, `Server.MapPath`, or `ClientScript` **compile and run without modification**. This shifts ~20% of previously-manual Layer 2 work into automatic Layer 1 coverage.
 
 ### Migration Shims (14)
 

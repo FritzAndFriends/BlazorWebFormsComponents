@@ -240,3 +240,23 @@ TC19 (lifecycle) and TC20/TC21 (event handlers) are dedicated test cases for the
 3. When changing the TodoHeader, ALL 13 code-behind expected files must be regenerated — use a temp console project referencing the CLI to regenerate via the actual pipeline
 4. `UsingStripTransform` already handles `System.Web.Optimization` and `System.Web.Routing` via its `WebUsingsRegex` pattern — no extra work needed for BundleConfig/RouteConfig namespaces
 5. "Guidance-only" transforms (detect + TODO comment) are the right pattern when shims make original code compile unchanged on WebFormsPageBase
+
+### Shim-First Documentation Update (2026-04-13)
+
+**Task**: Update all 5 migration-toolkit docs (METHODOLOGY.md, CHECKLIST.md, QUICKSTART.md, README.md, CONTROL-COVERAGE.md) to reflect the "shim-first" migration paradigm.
+
+**Key Changes**:
+- Pipeline coverage percentages updated: L1 ~60% (was ~40%), L2 ~30% (was ~45%), L3 ~10% (was ~15%)
+- METHODOLOGY.md: Added "Shim Infrastructure" subsection to Layer 1, "What Shims Handle Automatically" table to Layer 2, "Shim Path vs. Native Blazor Path" comparison box, removed Session from L3 decisions
+- CHECKLIST.md: Added L1 shim setup items (AddBlazorWebFormsComponents, @inherits, WebFormsForm), marked Response.Redirect/Session/IsPostBack/Page.Title/Request.QueryString/Cache as "✅ works AS-IS", added "Optional: Refactor to Native Blazor" section
+- QUICKSTART.md: Added shim callout in Step 4 and Step 6, updated transform table removing shim-handled items, added WebFormsForm guidance
+- README.md: Updated coverage percentages, time estimates, added shim bullet in Quick Overview
+- CONTROL-COVERAGE.md: Added "Infrastructure & Shim Components" section with full 15-row table, updated supporting component count to 96 (total 154)
+
+**Key Decisions**:
+1. Session["key"] moved from Layer 3 architecture decision to "works AS-IS" — SessionShim provides in-memory dictionary. Persistent/distributed session is still an architecture decision but basic usage compiles unchanged.
+2. Response.Redirect removed from Layer 2 manual transforms — ResponseShim handles it automatically including ~/prefix and .aspx stripping.
+3. Added "Optional: Refactor to Native Blazor" as a post-verification section in the checklist — acknowledges shims are a valid long-term choice, not just a crutch.
+4. Time estimates reduced: Layer 2 with Copilot from 2-4 hours to 1-3 hours reflecting reduced manual work.
+
+**Files Modified**: migration-toolkit/METHODOLOGY.md, CHECKLIST.md, QUICKSTART.md, README.md, CONTROL-COVERAGE.md

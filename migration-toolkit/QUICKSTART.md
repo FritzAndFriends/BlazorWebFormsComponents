@@ -97,6 +97,8 @@ The `@inherits` line makes every page inherit from `WebFormsPageBase`, which pro
 builder.Services.AddBlazorWebFormsComponents();
 ```
 
+> **This single call registers ALL shims automatically.** After this, `Response.Redirect`, `Session["key"]`, `Request.QueryString`, `Cache["key"]`, `Server.MapPath`, `ClientScript`, and `ViewState` all work AS-IS in your migrated code-behind files — no manual conversion needed.
+
 **Layout (`MainLayout.razor`)** — add the Page render component:
 ```razor
 <BlazorWebFormsComponents.Page />
@@ -133,16 +135,24 @@ Alternatively, point Copilot at the BWFC migration skill directly:
 
 Open each migrated `.razor` file and work through the structural transforms that the script couldn't handle. These are the patterns Copilot handles well with the migration skill:
 
+> 💡 **Many Web Forms API calls now compile unchanged thanks to BWFC shims.** `Response.Redirect`, `Session["key"]`, `IsPostBack`, `Page.Title`, `Request.QueryString`, `Cache`, and `Server.MapPath` all work AS-IS — no conversion needed. Focus Layer 2 effort on data binding, templates, and event handler signatures.
+
 | Transform | What To Do |
 |---|---|
 | `SelectMethod` → `Items` | Replace `SelectMethod="GetProducts"` with `Items="products"`, load data in `OnInitializedAsync` |
 | `ItemType` → `TItem` | Already done by Layer 1, but verify generic type parameter is correct |
 | Template context | Add `Context="Item"` to `<ItemTemplate>`, `<EditItemTemplate>`, etc. |
-| Code-behind lifecycle | Convert `Page_Load` → `OnInitializedAsync`; `IsPostBack` works AS-IS via `WebFormsPageBase` |
+| Code-behind lifecycle | Convert `Page_Load(object sender, EventArgs e)` signature → `OnInitializedAsync`; `IsPostBack` inside works AS-IS |
 | Event handlers | Convert `void Btn_Click(object sender, EventArgs e)` → `void Btn_Click()` |
-| Navigation | Replace `Response.Redirect("~/path")` → `NavigationManager.NavigateTo("/path")` |
-| Form wrappers | Remove `<form runat="server">`, use `<EditForm>` where validation is needed |
+| Form wrappers | Remove `<form runat="server">`; use `<WebFormsForm>` if page uses `Request.Form`, or `<EditForm>` for validation |
 | Master Page → Layout | Convert to `@inherits LayoutComponentBase` with `@Body` |
+
+> **If your pages use `Request.Form`**, wrap the form content in `<WebFormsForm>` — this component captures form POST data and feeds the `FormShim` so `Request.Form["key"]` works in your code-behind.
+
+The following are **no longer Layer 2 work** — they work AS-IS via shims:
+- ~~`Response.Redirect("~/path")` → `NavigationManager.NavigateTo`~~ → works via ResponseShim
+- ~~`Session["key"]` → mark for Layer 3~~ → works via SessionShim
+- ~~`Page.Title` conversion~~ → works via WebFormsPageBase
 
 Look for `<!-- TODO: BWFC-MIGRATE -->` comments left by the migration script — these mark items that need manual attention.
 
@@ -153,7 +163,7 @@ Look for `<!-- TODO: BWFC-MIGRATE -->` comments left by the migration script —
 These are the decisions that need a human (or a human + the migration agent):
 
 - **Data access:** Replace `SqlDataSource`/`ObjectDataSource` with injected services
-- **Session state:** Convert `Session["key"]` to scoped services or `ProtectedSessionStorage`
+- **Session state:** Convert `Session["key"]` to scoped services or `ProtectedSessionStorage` (if you need persistence — basic usage works AS-IS via SessionShim)
 - **Authentication:** Migrate ASP.NET Membership/Identity to ASP.NET Core Identity
 - **EF6 → EF Core:** Update DbContext, register with DI, adjust LINQ queries
 - **Global.asax → Program.cs:** Convert lifecycle hooks to middleware
