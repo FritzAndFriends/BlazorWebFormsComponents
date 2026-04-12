@@ -21,6 +21,8 @@ BlazorWebFormsComponents is a library providing Blazor components that emulate A
 
 📌 Team update (2026-04-12): All migration transforms pipeline infrastructure complete — 17 transforms (added 3: ConfigurationManager, RequestForm, ServerShim), 373/373 tests passing, expected files regenerated. WingtipToys analysis shows WebFormsPageBase enables 31 pages to eliminate manual shim wiring. — decided by Psylocke, Forge, Bishop
 
+📌 Team update (2026-04-12): CLI tool references were added by Coordinator to all 4 migration-toolkit docs missing them (METHODOLOGY.md, CHECKLIST.md, README.md), ensuring consistent tool naming and linking across all migration-toolkit documentation. — decided by Coordinator
+
 ### Shim Inventory & CLI Transform Update (2026-04-12)
 
 **Task**: Build a runtime parser that reads ASP.NET Web Forms .skin files and converts them into ThemeConfiguration objects.
