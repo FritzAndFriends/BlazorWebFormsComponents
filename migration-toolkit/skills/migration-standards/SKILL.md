@@ -75,14 +75,24 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 | `Title` | Delegates to `IPageService.Title` — `Page.Title = "X"` works unchanged |
 | `MetaDescription` | Delegates to `IPageService.MetaDescription` |
 | `MetaKeywords` | Delegates to `IPageService.MetaKeywords` |
-| `IsPostBack` | Always returns `false` — `if (!IsPostBack)` always enters block |
+| `IsPostBack` | SSR GET → `false`, SSR POST → `true`, Interactive first render → `false`, subsequent → `true` |
 | `Page` | Returns `this` — enables `Page.Title = "X"` dot syntax |
+| `Request` | `RequestShim` — `Request.QueryString`, `Request.Cookies`, `Request.Url`, `Request.Form` |
+| `Response` | `ResponseShim` — `Response.Redirect()` (auto-strips `~/` and `.aspx`), `Response.Cookies` |
+| `Server` | `ServerShim` — `Server.MapPath()`, `Server.HtmlEncode()`, `Server.UrlEncode()` |
+| `Session` | `SessionShim` — `Session["key"]` indexer with `ISession` sync + in-memory fallback |
+| `Cache` | `CacheShim` — `Cache["key"]` indexer, `Cache.Insert()` with expiration, `Cache.Remove()` |
+| `ViewState` | `ViewStateDictionary` — per-component `ViewState["key"]` indexer |
+| `ClientScript` | `ClientScriptShim` — `RegisterStartupScript()`, `RegisterClientScriptBlock()`, `GetPostBackEventReference()` |
+| `PostBack` event | `EventHandler<PostBackEventArgs>` — raised when `__doPostBack()` fires from JavaScript |
+| `ResolveUrl()` | Strips `~/` prefix and `.aspx` extensions |
+| `GetRouteUrl()` | Route URL generation via `LinkGenerator` |
+| `IsHttpContextAvailable` | Guards code that requires HTTP-level features (cookies, headers) |
 
 **What is NOT provided (forces proper Blazor migration):**
 
-- `Page.Request` — use `IHttpContextAccessor` or `NavigationManager`
-- `Page.Response` — use `NavigationManager` for redirects
-- `Page.Session` — use scoped DI services
+- `Page.Application` — use singleton DI services
+- `Page.Trace` — use `ILogger<T>`
 
 **When to still use `@inject IPageService`:** Non-page components (e.g., a shared header or sidebar) that need access to page metadata should inject `IPageService` directly. `WebFormsPageBase` only applies to routable pages.
 
@@ -145,9 +155,10 @@ The script should preserve the attribute and annotate the signature change neede
 
 > **⚠️ DO NOT convert SelectMethod to Items= binding.** When the original Web Forms markup uses `SelectMethod`, the migrated Blazor markup MUST preserve `SelectMethod` as a delegate reference. Converting to `Items=` loses the native BWFC data-binding pattern and defeats the purpose of drop-in replacement. The ONLY acceptable alternative is when the original Web Forms markup used `DataSource` (not `SelectMethod`), in which case `Items=` is correct.
 
-### Session State → Scoped Services
+### Session State → SessionShim → Scoped Services
 
-- **Phase 2 quick-start:** Use `SessionShim` (`builder.Services.AddSessionShim()`) for immediate `Session["key"]` compatibility — code-behind works unchanged via `WebFormsPageBase.Session`
+- **Phase 1 compile-compat:** `SessionShim` is auto-registered by `AddBlazorWebFormsComponents()` — `Session["key"]` code-behind works unchanged via `WebFormsPageBase.Session`. Backed by ASP.NET Core `ISession` in SSR mode; falls back to in-memory `ConcurrentDictionary` in interactive mode.
+- **Phase 1 API surface:** `Session["key"]` indexer (get/set), `Session.Get<T>(key)`, `Session.Remove(key)`, `Session.Clear()`, `Session.ContainsKey(key)`, `Session.Count`
 - **Final migration:** Replace `Session["key"]` with a scoped DI service for durable state
 - Use `IHttpContextAccessor` for cookie-based persistence when needed
 - Register in `Program.cs` with `builder.Services.AddScoped<TService>()`
@@ -217,6 +228,14 @@ BWFC ships shims that let migrated business logic and `App_Start` files compile 
 | **ConfigurationManager** | `BlazorWebFormsComponents` | `AppSettings["key"]` → reads from `IConfiguration`. `ConnectionStrings["name"]` → reads from `IConfiguration.GetConnectionString()`. |
 | **BundleTable / Bundle / ScriptBundle / StyleBundle** | `System.Web.Optimization` | No-op stubs. `BundleTable.Bundles.Add(...)` compiles and does nothing. `App_Start/BundleConfig.cs` compiles as-is. |
 | **RouteTable / RouteCollection** | `System.Web.Routing` | No-op stubs. `RouteTable.Routes.MapPageRoute(...)` compiles and does nothing. `App_Start/RouteConfig.cs` compiles as-is. |
+| **SessionShim** | `BlazorWebFormsComponents` | `Session["key"]` indexer, `.Get<T>()`, `.Remove()`, `.Clear()`. Backed by `ISession` + in-memory fallback. Auto-registered. |
+| **CacheShim** | `BlazorWebFormsComponents` | `Cache["key"]` indexer, `Cache.Insert()` with absolute/sliding expiration, `Cache.Get<T>()`, `Cache.Remove()`. Wraps `IMemoryCache`. Auto-registered. |
+| **ServerShim** | `BlazorWebFormsComponents` | `Server.MapPath()`, `Server.HtmlEncode()`, `Server.HtmlDecode()`, `Server.UrlEncode()`, `Server.UrlDecode()`. Wraps `IWebHostEnvironment` + `WebUtility`. Auto-registered. |
+| **RequestShim** | `BlazorWebFormsComponents` | `Request.QueryString`, `Request.Cookies`, `Request.Url`, `Request.Form`. Falls back to `NavigationManager` for QueryString/Url when HttpContext unavailable. |
+| **ResponseShim** | `BlazorWebFormsComponents` | `Response.Redirect()` (auto-strips `~/` and `.aspx`), `Response.Cookies`. Wraps `NavigationManager` + `HttpContext`. |
+| **FormShim** | `BlazorWebFormsComponents` | `Request.Form["key"]`, `.GetValues()`, `.AllKeys`, `.Count`, `.ContainsKey()`. Wraps `IFormCollection` or JS interop data. Populated by `<WebFormsForm>`. |
+| **ClientScriptShim** | `BlazorWebFormsComponents` | `RegisterStartupScript()`, `RegisterClientScriptBlock()`, `RegisterClientScriptInclude()`, `GetPostBackEventReference()`, `GetCallbackEventReference()`. Queues scripts, flushes via `IJSRuntime`. Auto-registered. |
+| **ScriptManagerShim** | `BlazorWebFormsComponents` | `ScriptManager.GetCurrent(page)` pattern, delegates all `RegisterXxx` calls to `ClientScriptShim`. Auto-registered. |
 
 **ConfigurationManager setup:**
 
@@ -266,9 +285,15 @@ This applies to **both L1-generated scaffolding and L2 Copilot-generated code**.
 | `Page_Init` | `OnInitialized` | Phase 1: compiles as-is; **Phase 2: transform** | Sync initialization |
 | `Page_PreInit` | `OnInitializedAsync` (early) | Phase 2 | Theme setup |
 | `Page_PreRender` | `OnAfterRenderAsync(bool firstRender)` | Phase 1: compiles as-is; **Phase 2: transform** | Guard with `if (firstRender)` to avoid render loops |
-| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase`; L1 script auto-unwraps simple guards | Phase 1 | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
+| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase`; L1 script auto-unwraps simple guards | Phase 1 | SSR: checks HTTP method (GET→false, POST→true). Interactive: first render→false, subsequent→true. `if (IsPostBack)` without `!` runs in POST/subsequent renders — review for correctness. |
 | `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | Phase 1 | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
-| `Response.Redirect` | `NavigationManager.NavigateTo()` | Phase 2 | Inject `NavigationManager` |
+| `Response.Redirect` | `Response.Redirect("~/Page.aspx")` works AS-IS via `ResponseShim` | Phase 1 | Auto-strips `~/` prefix and `.aspx` extension. Uses `NavigationManager.NavigateTo()` internally. |
+| `Request.Form` | `Request.Form["key"]` works AS-IS via `FormShim` | Phase 1 | Use `<WebFormsForm OnSubmit="SetRequestFormData">` to populate in interactive mode. SSR mode uses native `IFormCollection`. |
+| `Request.QueryString` | `Request.QueryString["key"]` works AS-IS via `RequestShim` | Phase 1 | Always parses from `NavigationManager.Uri` — correct in both SSR and interactive modes. |
+| `Session["key"]` | `Session["key"]` works AS-IS via `SessionShim` | Phase 1 | In-memory fallback in interactive mode; syncs with `ISession` when available. |
+| `Cache["key"]` | `Cache["key"]` works AS-IS via `CacheShim` | Phase 1 | `Cache.Insert()` supports absolute and sliding expiration. Wraps `IMemoryCache`. |
+| `Server.MapPath` | `Server.MapPath("~/path")` works AS-IS via `ServerShim` | Phase 1 | `~/` maps to wwwroot. Other paths relative to ContentRootPath. |
+| `Page.ClientScript` | `ClientScript.RegisterStartupScript(...)` works AS-IS via `ClientScriptShim` | Phase 1 | Queues scripts, flushes via `IJSRuntime` in `OnAfterRenderAsync`. Also supports `GetPostBackEventReference()`. |
 
 > **Phase 2 lifecycle transforms:** After Phase 1 produces compilable code with original `Page_Load`/`Page_Init`/`Page_PreRender` signatures, Phase 2 converts these to proper Blazor lifecycle overrides. See `bwfc-migration` skill for full before/after examples.
 

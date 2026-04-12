@@ -330,15 +330,21 @@ BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of t
 
 ---
 
-## 3. Session State → Scoped Services
+## 3. Session State → SessionShim → Scoped Services
 
 **Web Forms:** `Session["key"]` dictionary accessed anywhere.
-**Blazor:** Scoped services via DI. For browser persistence, use `ProtectedSessionStorage`.
+**Blazor Phase 1:** `SessionShim` (auto-registered by `AddBlazorWebFormsComponents()`) provides `Session["key"]` access unchanged via `WebFormsPageBase.Session`. Backed by `ISession` in SSR mode; in-memory `ConcurrentDictionary` fallback in interactive mode.
+**Blazor Final:** Scoped services via DI. For browser persistence, use `ProtectedSessionStorage`.
+
+> **Phase 1 quick-start:** No code changes needed. `WebFormsPageBase.Session` delegates to `SessionShim` automatically. For non-page components, inject `SessionShim` directly: `@inject SessionShim Session`.
 
 ```csharp
-// Web Forms
+// Web Forms — works unchanged in Blazor via SessionShim
 Session["ShoppingCart"] = cart;
 var cart = (ShoppingCart)Session["ShoppingCart"];
+
+// SessionShim also supports typed access:
+var cart = Session.Get<ShoppingCart>("ShoppingCart");
 ```
 
 ```csharp
@@ -424,8 +430,8 @@ Web Forms `SelectMethod` returns `IQueryable` synchronously. Blazor services sho
 // RIGHT: return await db.Products.ToListAsync();
 ```
 
-### No ConfigurationManager
-`ConfigurationManager.AppSettings["key"]` doesn't exist. Inject `IConfiguration` or use the Options pattern.
+### ConfigurationManager Shim Available
+`ConfigurationManager.AppSettings["key"]` works via BWFC's `ConfigurationManager` shim. Call `app.UseConfigurationManagerShim()` in `Program.cs` to bind it to `IConfiguration`. For new code, prefer injecting `IConfiguration` or using the Options pattern.
 
 ### Static Helpers with HttpContext
 Web Forms often has static helper classes that access `HttpContext.Current`. These must be refactored to accept dependencies via constructor injection.

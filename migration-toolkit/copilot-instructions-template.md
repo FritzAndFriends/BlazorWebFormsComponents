@@ -60,8 +60,9 @@ When migrating Web Forms markup to Blazor using BWFC, apply these rules in order
 ### 3. Convert Data Binding
 
 - Replace `ItemType="Namespace.Type"` with `TItem="Type"`
-- Replace `SelectMethod="MethodName"` with `Items="propertyName"` (collections) or `DataItem="propertyName"` (single record)
-- Load data in `OnInitializedAsync`:
+- **When original used `SelectMethod`:** Preserve as delegate reference: `SelectMethod="@service.GetItems"` (BWFC's `DataBoundComponent` auto-populates `Items`)
+- **When original used `DataSource`/`DataBind()`:** Replace with `Items="propertyName"` (collections) or `DataItem="propertyName"` (single record)
+- Load data in `OnInitializedAsync` (only when using `Items` binding):
 
 ```csharp
 @inject IYourService YourService
@@ -73,6 +74,8 @@ protected override async Task OnInitializedAsync()
     items = await YourService.GetItemsAsync();
 }
 ```
+
+> ⚠️ Do NOT convert `SelectMethod` to `Items=` binding — BWFC natively supports `SelectMethod` as a delegate.
 
 ### 4. Convert Templates
 
@@ -89,12 +92,17 @@ Add `Context="Item"` to all data templates:
 | Web Forms | Blazor |
 |---|---|
 | `Page_Load(sender, e)` | `OnInitializedAsync()` |
-| `if (!IsPostBack)` | Works AS-IS via `WebFormsPageBase` (always enters block); optionally simplify |
+| `if (!IsPostBack)` | Works AS-IS via `WebFormsPageBase`; optionally simplify |
 | `Page_PreRender` | `OnParametersSetAsync()` |
-| `Response.Redirect("~/path")` | `NavigationManager.NavigateTo("/path")` |
+| `Response.Redirect("~/path")` | Works AS-IS via `ResponseShim` (auto-strips `~/` and `.aspx`); or use `NavigationManager.NavigateTo("/path")` |
 | `Page.Title = "X"` | Works AS-IS via `WebFormsPageBase` |
-| `Session["key"]` | Scoped service or `ProtectedSessionStorage` |
-| `ViewState["key"]` | Component field (automatic in Blazor) |
+| `Session["key"]` | Works AS-IS via `SessionShim`; or use scoped service / `ProtectedSessionStorage` |
+| `Request.Form["key"]` | Works AS-IS via `FormShim` + `<WebFormsForm>` component |
+| `Request.QueryString["key"]` | Works AS-IS via `RequestShim`; or use `[SupplyParameterFromQuery]` |
+| `Server.MapPath("~/path")` | Works AS-IS via `ServerShim` |
+| `Cache["key"]` | Works AS-IS via `CacheShim` |
+| `Page.ClientScript.RegisterStartupScript(...)` | Works AS-IS via `ClientScriptShim` |
+| `ViewState["key"]` | Works AS-IS via `ViewStateDictionary`; or use component field |
 
 ### 6. Convert Event Handlers
 
@@ -196,14 +204,16 @@ When Copilot encounters these attributes during migration, remove them without c
 
 ## Common Gotchas
 
-1. **No ViewState** — Blazor components maintain state in fields/properties. Replace `ViewState["key"]` with a component field.
-2. **IsPostBack works AS-IS** — `WebFormsPageBase` provides `IsPostBack` (always `false`), so `if (!IsPostBack)` compiles and runs correctly. Optionally simplify by removing the check since the block always executes.
+1. **No ViewState** — Blazor components maintain state in fields/properties. `ViewStateDictionary` shim available for compile-compat via `WebFormsPageBase.ViewState`.
+2. **IsPostBack works AS-IS** — `WebFormsPageBase` provides `IsPostBack` (SSR: checks HTTP method; Interactive: tracks render count). `if (!IsPostBack)` compiles and runs correctly.
 3. **No DataSource controls** — `SqlDataSource`, `ObjectDataSource`, `EntityDataSource` must be replaced with injected services.
 4. **Template Context** — In Web Forms, `Item` is implicitly available. In BWFC, add `Context="Item"` on template elements.
 5. **ID Rendering** — Blazor doesn't generate client IDs like `ctl00_MainContent_Grid`. If CSS/JS targets these IDs, switch to class selectors.
 6. **String formatting** — Replace `<%#: string.Format("{0:C}", Item.Price) %>` with `@Item.Price.ToString("C")`.
 7. **TextBox TextMode** — The value is `Multiline` (not `MultiLine`) in BWFC.
 8. **Visibility** — `Visible="false"` works in BWFC, but prefer `@if (condition)` for dynamic visibility.
+9. **ClientScript migration** — `Page.ClientScript.RegisterStartupScript()` works via `ClientScriptShim`. For new code, prefer `IJSRuntime`.
+10. **Form POST data** — Use `<WebFormsForm OnSubmit="SetRequestFormData">` to enable `Request.Form["key"]` in interactive mode.
 
 ---
 

@@ -95,7 +95,7 @@ private void SubmitBtn_Click()
 
 | Web Forms | Blazor |
 |-----------|--------|
-| `Response.Redirect("~/path")` | `NavigationManager.NavigateTo("/path")` |
+| `Response.Redirect("~/path")` | Works AS-IS via `ResponseShim` (auto-strips `~/` and `.aspx`); or use `NavigationManager.NavigateTo("/path")` |
 | `Response.RedirectToRoute(...)` | `NavigationManager.NavigateTo($"/path/{param}")` |
 | `Server.Transfer("~/page.aspx")` | `NavigationManager.NavigateTo("/page")` |
 

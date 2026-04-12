@@ -286,7 +286,24 @@ When testing component properties or state, use `FindComponent<T>()`:
 3. **Minimal API Surface**: Focus on essential features, not full Web Forms API
 4. **No DataSources**: Use repository pattern instead of Web Forms DataSource controls
 5. **No ViewState**: Store state in private fields or session (ViewState property exists but is syntax-only)
-6. **No Postback**: Blazor's event model replaces postback
+6. **PostBack Compatibility**: `WebFormsPageBase` provides `IsPostBack`, `PostBack` event, and `__doPostBack()` JS interop bridge
+
+## Migration Shims
+
+The library provides compile-compatibility shims on `WebFormsPageBase` so migrated code-behind compiles unchanged:
+
+- **`Page.Request`** — `RequestShim` wrapping QueryString, Cookies, Url, Form (via `FormShim`)
+- **`Page.Response`** — `ResponseShim` wrapping `Redirect()` (auto-strips `~/` and `.aspx`) and Cookies
+- **`Page.Session`** — `SessionShim` with `ISession` sync and in-memory fallback
+- **`Page.Server`** — `ServerShim` wrapping `MapPath()`, `HtmlEncode()`, `UrlEncode()`
+- **`Page.Cache`** — `CacheShim` wrapping `IMemoryCache` with absolute/sliding expiration
+- **`Page.ClientScript`** — `ClientScriptShim` for `RegisterStartupScript()`, `RegisterClientScriptBlock()`, `GetPostBackEventReference()`
+- **`Page.ViewState`** — `ViewStateDictionary` per-component dictionary
+- **`<WebFormsForm>`** — Component enabling `Request.Form["key"]` in interactive mode via JS interop
+- **`ScriptManagerShim`** — `ScriptManager.GetCurrent(page)` pattern delegating to `ClientScriptShim`
+- **`ConfigurationManager`** — `AppSettings["key"]` and `ConnectionStrings["name"]` from `IConfiguration`
+
+All shims are auto-registered by `builder.Services.AddBlazorWebFormsComponents()` in `Program.cs`.
 
 ## Components Requiring Implementation
 

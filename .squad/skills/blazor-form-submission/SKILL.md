@@ -134,3 +134,29 @@ function submitForm(formId) {
 ```
 
 This keeps the `onclick` attribute clean and the logic reusable across auth forms.
+
+---
+
+## BWFC WebFormsForm Component (Preferred for Migration)
+
+Since this skill was written, BWFC added a `<WebFormsForm>` component that captures form POST data via JS interop and exposes it through `Request.Form["key"]` on `WebFormsPageBase`. This is now the **preferred approach** for migrating Web Forms pages that use `Request.Form`:
+
+```razor
+<WebFormsForm OnSubmit="SetRequestFormData">
+    <input type="text" name="email" />
+    <button type="submit">Submit</button>
+</WebFormsForm>
+
+@code {
+    protected override void OnFormSubmitted()
+    {
+        var email = Request.Form["email"];
+        // Process form data using familiar Web Forms patterns
+    }
+}
+```
+
+**When to use WebFormsForm vs other patterns:**
+- **WebFormsForm** — Migrating Web Forms pages that use `Request.Form[]` or `Page_Load` with form data. Minimal code changes.
+- **Pattern 1 (Anchor + POST)** — Auth forms that need HTTP cookie handling via minimal API endpoints.
+- **Pattern 2 (EditForm)** — New Blazor-native forms or forms being modernized beyond compile-compat.
