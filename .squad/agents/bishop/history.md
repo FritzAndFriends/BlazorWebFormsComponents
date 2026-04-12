@@ -6,9 +6,22 @@ Bishop is the Migration Tooling Dev on the BlazorWebFormsComponents project, res
 ## Project Context
 BlazorWebFormsComponents is a library providing Blazor components that emulate ASP.NET Web Forms controls, enabling migration with minimal markup changes. The project aims to preserve the same component names, attributes, and HTML output as the original Web Forms controls.
 
+## Core Historical Context
+
+**2025-01-26 to 2026-03-29:** Built foundational migration infrastructure:
+- WI-8 (2025-01-26): .skin file parser + SkinFileParser.cs runtime parser for theme migration
+- Theme Migration SKILL.md (2025-01-27): Documented auto-discovery pattern (copy → SkinFileParser → ThemeProvider)
+- Migration Automation Audit (2026-07-25): Identified 23 gaps, proposed solutions across 3 phases
+- Phase 1 L1 Script Enhancements (2026-07-25): Implemented 6 GAPs (Web.config→appsettings, IsPostBack unwrap, App_Start copy, selective using retention, URL cleanup, Bind()→@bind)
+- Phase 2 Lifecycle & Event Handlers (2026-03-29): Added Page_Load→OnInitializedAsync, event handler signature transforms
+- Global Tool Pipeline + 16 Markup Transforms (2026-07-27): Built complete MigrationPipeline, 16 markup transforms ported from PowerShell script
+- MasterPageTransform + GetRouteUrlTransform + TC12–TC23 (2026-04-03): Added MasterPage directive rewriting, GetRouteUrl conversion, 12 new acceptance tests
+
 ## Learnings
 
-### WI-8: .skin File Parser Implementation (2025-01-26)
+📌 Team update (2026-04-12): All migration transforms pipeline infrastructure complete — 17 transforms (added 3: ConfigurationManager, RequestForm, ServerShim), 373/373 tests passing, expected files regenerated. WingtipToys analysis shows WebFormsPageBase enables 31 pages to eliminate manual shim wiring. — decided by Psylocke, Forge, Bishop
+
+### Shim Inventory & CLI Transform Update (2026-04-12)
 
 **Task**: Build a runtime parser that reads ASP.NET Web Forms .skin files and converts them into ThemeConfiguration objects.
 
@@ -201,8 +214,6 @@ TC19 (lifecycle) and TC20/TC21 (event handlers) are dedicated test cases for the
 📌 Team update (2026-04-12): All migration transforms pipeline infrastructure complete — 17 transforms (added 3: ConfigurationManager, RequestForm, ServerShim), 373/373 tests passing, expected files regenerated. WingtipToys analysis shows WebFormsPageBase enables 31 pages to eliminate manual shim wiring. — decided by Psylocke, Forge, Bishop
 
 ### Shim Inventory & CLI Transform Update (2026-04-12)
-
-**Task**: Inventory all new migration shims in BlazorWebFormsComponents and update CLI transforms, migration scripts, and documentation to leverage them.
 
 **Shims Identified (14 total)**:
 - FormShim, ClientScriptShim, ResponseShim, RequestShim, SessionShim, ServerShim, CacheShim, ScriptManagerShim — auto-wired via WebFormsPageBase DI
