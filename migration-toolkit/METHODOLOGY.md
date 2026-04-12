@@ -11,7 +11,8 @@
 │    Layer 1           │    │    Layer 2           │    │    Layer 3           │
 │    AUTOMATED         │───▶│    COPILOT-ASSISTED  │───▶│    ARCHITECTURE      │
 │    + SHIMS           │    │                      │    │                      │
-│  bwfc-migrate.ps1    │    │  Copilot + Skill     │    │  Human + Copilot     │
+│  webforms-to-blazor   │    │  Copilot + Skill     │    │  Human + Copilot     │
+│  CLI or PS1 script    │    │                      │    │                      │
 │  ~60% of work        │    │  ~30% of work        │    │  ~10% of work        │
 │  ~30 seconds         │    │  ~1–3 hours          │    │  ~8–12 hours         │
 │  100% accuracy       │    │  High accuracy       │    │  Requires judgment   │
@@ -25,7 +26,7 @@ Each layer handles a different *kind* of work, not just a different *amount*. Th
 
 | Layer | Intelligence Required | Tool | Error Rate |
 |---|---|---|---|
-| Layer 1 | None — pure regex/pattern matching | PowerShell script | ~0% (deterministic) |
+| Layer 1 | None — compiled transforms or regex matching | `webforms-to-blazor` CLI or PowerShell script | ~0% (deterministic) |
 | Layer 2 | Pattern recognition — knows BWFC control mappings | Copilot with migration skill | Low (guided by rules) |
 | Layer 3 | Judgment — understands your app's architecture | Human + Copilot with data migration skill | Varies (depends on decisions) |
 
@@ -55,9 +56,10 @@ The scan report tells you whether BWFC is a good fit before you invest time in m
 
 ## Layer 1: Automated Transforms
 
-**Tool:** [`scripts/bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1)
+**Primary tool:** [`webforms-to-blazor` CLI](../src/BlazorWebFormsComponents.Cli/) — 37 compiled C# transforms with 373 unit tests
+**Alternative:** [`scripts/bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1) — lightweight PowerShell regex transforms (no .NET SDK required)
 
-Layer 1 handles every transform that can be expressed as a regex find-and-replace. These are mechanical, deterministic, and 100% accurate. No human judgment needed.
+Layer 1 handles every transform that can be applied mechanically. The CLI tool applies compiled, unit-tested transforms with a migration report; the PowerShell script provides simpler regex-based transforms for quick starts.
 
 ### What Layer 1 Does
 

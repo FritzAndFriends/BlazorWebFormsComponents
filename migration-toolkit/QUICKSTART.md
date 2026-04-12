@@ -49,7 +49,15 @@ The scanner inventories every `.aspx`, `.ascx`, and `.master` file — extractin
 
 ## Step 3: Run Layer 1 — Automated Transforms
 
-The migration script handles the mechanical work: stripping `asp:` prefixes, removing `runat="server"`, converting expressions, renaming files, and scaffolding the Blazor project:
+Layer 1 applies mechanical transforms deterministically. Use either the CLI tool (recommended) or the PowerShell script:
+
+**Option A: CLI tool** (37 compiled transforms, migration report):
+
+```bash
+dotnet run --project src/BlazorWebFormsComponents.Cli -- migrate -i "C:\src\MyWebFormsApp" -o "C:\src\MyBlazorApp"
+```
+
+**Option B: PowerShell script** (lightweight, no build required):
 
 ```powershell
 .\scripts\bwfc-migrate.ps1 -Path "C:\src\MyWebFormsApp" -Output "C:\src\MyBlazorApp"
@@ -71,6 +79,10 @@ The migration script handles the mechanical work: stripping `asp:` prefixes, rem
 **Dry-run first** to preview changes without writing files:
 
 ```powershell
+# CLI: use the --dry-run flag
+dotnet run --project src/BlazorWebFormsComponents.Cli -- migrate -i "C:\src\MyWebFormsApp" -o "C:\src\MyBlazorApp" --dry-run
+
+# PowerShell alternative:
 .\scripts\bwfc-migrate.ps1 -Path "C:\src\MyWebFormsApp" -Output "C:\src\MyBlazorApp" -WhatIf
 ```
 

@@ -20,9 +20,10 @@ You're a .NET developer who owns a Web Forms application and wants to migrate it
 | Requirement | Version | Why |
 |---|---|---|
 | .NET SDK | 10.0+ | Blazor Server target framework (.NET 10 Global Server Interactive) |
-| PowerShell | 7.0+ | Migration scripts require PowerShell Core |
+| PowerShell | 7.0+ | Scanner script and lightweight migration alternative |
 | BWFC NuGet package | Latest | `dotnet add package Fritz.BlazorWebFormsComponents` |
 | GitHub Copilot | Any tier | Used for Layer 2 structural transforms |
+| BWFC CLI tool | (included in repo) | Primary Layer 1 transforms — `webforms-to-blazor migrate` |
 
 ---
 
@@ -48,14 +49,13 @@ Copy these into your project's `.github/skills/` directory so Copilot can use th
 | [`bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) | **Data access & architecture migration** — EF6 to EF Core, DataSource controls to service injection, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json. Covers Layer 3 architecture decisions. |
 | [`l3-performance-optimization/SKILL.md`](skills/l3-performance-optimization/SKILL.md) | **Post-migration performance optimization** — async/await modernization, `AsNoTracking()`, `IDbContextFactory`, `[StreamRendering]`, `@key` directives, and .NET 10 patterns. Optional pass after the app builds and runs. |
 
-### `scripts/` — PowerShell Migration Scripts
+### `scripts/` — Migration Scripts & CLI Tool
 
-Copy these to your project root. Requires PowerShell 7.0+.
-
-| Script | Description |
+| Tool | Description |
 |---|---|
+| [`webforms-to-blazor` CLI](../src/BlazorWebFormsComponents.Cli/) | **Primary L1 tool** — 37 compiled C# transforms (16 markup + 11 code-behind + 10 directive/infrastructure) with 373 unit tests. Produces a `migration-report.json` with per-page readiness status. Run via `dotnet run --project src/BlazorWebFormsComponents.Cli -- migrate -i ./MyWebFormsApp -o ./MyBlazorApp`. |
 | [`bwfc-scan.ps1`](scripts/bwfc-scan.ps1) | **Scanner** — inventories your Web Forms project, identifies controls, counts pages, and outputs a migration readiness report. Run this first. |
-| [`bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) | **Mechanical transformer** — Layer 1 automated transforms: strips `asp:` prefixes, removes `runat="server"`, converts expressions, renames `.aspx`→`.razor`. Combined with BWFC shim infrastructure, handles ~60% of migration work deterministically. |
+| [`bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) | **Lightweight alternative** — PowerShell regex transforms for quick starts without building the CLI. Strips `asp:` prefixes, removes `runat="server"`, converts expressions, renames `.aspx`→`.razor`. |
 
 ---
 
@@ -65,7 +65,7 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 
 | Layer | What | How | Coverage |
 |---|---|---|---|
-| **Layer 1** — Automated | Tag prefix removal, `runat` removal, expression conversion, file renaming, shim infrastructure | [`scripts/bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) + `AddBlazorWebFormsComponents()` | ~60% of work |
+| **Layer 1** — Automated | Tag prefix removal, `runat` removal, expression conversion, file renaming, shim infrastructure | [`webforms-to-blazor` CLI](../src/BlazorWebFormsComponents.Cli/) or [`bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) + `AddBlazorWebFormsComponents()` | ~60% of work |
 | **Layer 2** — Copilot-Assisted | Data binding rewiring, layout conversion, lifecycle method signatures, event handlers | [`skills/bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | ~30% of work |
 | **Layer 3** — Architecture Decisions | Identity, EF Core, third-party integrations | [`skills/bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) + human judgment | ~10% of work |
 | **L3-opt** — Performance (optional) | Async/await, `AsNoTracking`, `IDbContextFactory`, .NET 10 patterns | [`skills/l3-performance-optimization/SKILL.md`](skills/l3-performance-optimization/SKILL.md) | After app is functional |
@@ -78,10 +78,12 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 
 ```
 1. Scan     →  ./scripts/bwfc-scan.ps1 -Path ./MyWebFormsApp -OutputFormat Markdown
-2. Transform →  ./scripts/bwfc-migrate.ps1 -Path ./MyWebFormsApp -Output ./MyBlazorApp
+2. Transform →  dotnet run --project src/BlazorWebFormsComponents.Cli -- migrate -i ./MyWebFormsApp -o ./MyBlazorApp
 3. Guide     →  Open in editor with Copilot + BWFC migration skill
 4. Verify    →  dotnet build && dotnet run
 ```
+
+> **Alternative:** If you don't have the BWFC source, use `./scripts/bwfc-migrate.ps1 -Path ./MyWebFormsApp -Output ./MyBlazorApp` for Layer 1.
 
 **Shim infrastructure:** `AddBlazorWebFormsComponents()` + `@inherits WebFormsPageBase` enables `Response.Redirect`, `Session["key"]`, `IsPostBack`, `Page.Title`, `Request.QueryString`, `Cache`, `Server.MapPath`, and `ClientScript` to work AS-IS — no manual conversion of these APIs is needed.
 

@@ -16,7 +16,7 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 **Complexity:** [Trivial / Easy / Medium / Complex]
 **Notes:** [Any page-specific context — what this page does, key controls used]
 
-### Layer 1 — Automated (bwfc-migrate.ps1)
+### Layer 1 — Automated (webforms-to-blazor CLI or bwfc-migrate.ps1)
 
 - [ ] File renamed (.aspx → .razor, .ascx → .razor, .master → .razor)
 - [ ] `<%@ Page %>` / `<%@ Control %>` / `<%@ Master %>` directive removed
