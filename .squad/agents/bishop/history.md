@@ -198,6 +198,8 @@ TC19 (lifecycle) and TC20/TC21 (event handlers) are dedicated test cases for the
 2. GetRouteUrl route-parameter extraction uses named capture groups to map `new { k = v }` anonymous objects; iteration order of anonymous-object properties must be preserved (C# doesn't guarantee it at runtime, but test data uses single-param routes to avoid ordering issues).
 3. ManualItem severity enum (`Info`, `Warning`, `Error`) maps to exit code: any `Error`-level item causes non-zero CLI exit, enabling CI gate integration.
 
+📌 Team update (2026-04-12): All migration transforms pipeline infrastructure complete — 17 transforms (added 3: ConfigurationManager, RequestForm, ServerShim), 373/373 tests passing, expected files regenerated. WingtipToys analysis shows WebFormsPageBase enables 31 pages to eliminate manual shim wiring. — decided by Psylocke, Forge, Bishop
+
 ### Shim Inventory & CLI Transform Update (2026-04-12)
 
 **Task**: Inventory all new migration shims in BlazorWebFormsComponents and update CLI transforms, migration scripts, and documentation to leverage them.
