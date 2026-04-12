@@ -76,7 +76,7 @@ public class TodoHeaderTransformTests
         var result = _transform.Apply("", TestMetadata(""));
 
         Assert.Contains("TODO(bwfc-navigation)", result);
-        Assert.Contains("NavigationManager", result);
+        Assert.Contains("ResponseShim", result);
     }
 
     [Fact]

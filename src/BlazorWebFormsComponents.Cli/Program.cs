@@ -54,8 +54,11 @@ class Program
         // Register code-behind transforms in order
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
         services.AddSingleton<ICodeBehindTransform, UsingStripTransform>();
+        services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();
+        services.AddSingleton<ICodeBehindTransform, RequestFormTransform>();
+        services.AddSingleton<ICodeBehindTransform, ServerShimTransform>();
         services.AddSingleton<ICodeBehindTransform, GetRouteUrlTransform>();
         services.AddSingleton<ICodeBehindTransform, SessionDetectTransform>();
         services.AddSingleton<ICodeBehindTransform, ViewStateDetectTransform>();

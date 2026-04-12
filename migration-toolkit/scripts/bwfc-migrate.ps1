@@ -126,6 +126,10 @@ function Invoke-BwfcPrescan {
         'BWFC012' = @{ Name = 'runat="server"'; Pattern = 'runat\s*=\s*"server"'; Description = 'runat="server" artifacts in strings/comments' }
         'BWFC013' = @{ Name = 'Response Object'; Pattern = 'Response\.(Write|WriteFile|Clear|Flush|End)\s*\('; Description = 'Response object method calls' }
         'BWFC014' = @{ Name = 'Request Object'; Pattern = 'Request\.(Form|Cookies|Headers|Files|QueryString|ServerVariables)\s*[\[\.]'; Description = 'Request object property access' }
+        'BWFC015' = @{ Name = 'Server Utility'; Pattern = 'Server\.(MapPath|HtmlEncode|HtmlDecode|UrlEncode|UrlDecode)\s*\('; Description = 'Server utility calls — use ServerShim on WebFormsPageBase' }
+        'BWFC016' = @{ Name = 'ConfigurationManager'; Pattern = 'ConfigurationManager\.(AppSettings|ConnectionStrings)\s*\['; Description = 'ConfigurationManager access — BWFC provides shim' }
+        'BWFC017' = @{ Name = 'ClientScript'; Pattern = '(Page\.)?ClientScript\.(RegisterStartupScript|RegisterClientScriptBlock|RegisterClientScriptInclude|GetPostBackEventReference)\s*\('; Description = 'ClientScript calls — use ClientScriptShim' }
+        'BWFC018' = @{ Name = 'Cache Access'; Pattern = '\bCache\s*\['; Description = 'Cache dictionary access — use CacheShim on WebFormsPageBase' }
     }
     
     $csFiles = Get-ChildItem -Path $SourcePath -Filter '*.cs' -Recurse -File
@@ -2456,11 +2460,15 @@ function Copy-CodeBehind {
 //   - Page_PreRender → OnAfterRenderAsync
 //   - IsPostBack checks → remove or convert to state logic
 //   - ViewState usage → component [Parameter] or private fields
-//   - Session/Cache access → inject IHttpContextAccessor or use DI
-//   - Response.Redirect → NavigationManager.NavigateTo
+//   - Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
+//   - Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
+//   - Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
+//   - Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
+//   - ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
+//   - ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
 //   - Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
 //   - Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   - ScriptManager code-behind references → remove (Blazor handles updates)
+//   - ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
 //   - UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
 //   - User controls → Blazor component references
 // =============================================================================

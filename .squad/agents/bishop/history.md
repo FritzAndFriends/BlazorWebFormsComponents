@@ -197,3 +197,33 @@ TC19 (lifecycle) and TC20/TC21 (event handlers) are dedicated test cases for the
 1. Master page filename → layout class name conversion must strip `~/`, directory path, and `.Master` extension, then PascalCase — a single regex replacement handles the common case but a helper method is cleaner for edge cases (spaces, hyphens).
 2. GetRouteUrl route-parameter extraction uses named capture groups to map `new { k = v }` anonymous objects; iteration order of anonymous-object properties must be preserved (C# doesn't guarantee it at runtime, but test data uses single-param routes to avoid ordering issues).
 3. ManualItem severity enum (`Info`, `Warning`, `Error`) maps to exit code: any `Error`-level item causes non-zero CLI exit, enabling CI gate integration.
+
+### Shim Inventory & CLI Transform Update (2026-04-12)
+
+**Task**: Inventory all new migration shims in BlazorWebFormsComponents and update CLI transforms, migration scripts, and documentation to leverage them.
+
+**Shims Identified (14 total)**:
+- FormShim, ClientScriptShim, ResponseShim, RequestShim, SessionShim, ServerShim, CacheShim, ScriptManagerShim — auto-wired via WebFormsPageBase DI
+- ConfigurationManager — static shim bridging `AppSettings`/`ConnectionStrings` to ASP.NET Core `IConfiguration`
+- WebFormsPageBase — ComponentBase subclass with shim properties
+- BundleConfig, RouteConfig — startup compatibility helpers
+- PostBackEventArgs, FormSubmitEventArgs — event models for `<WebFormsForm>`
+
+**New CLI Transforms Created**:
+1. **ConfigurationManagerTransform** (Order 110) — strips `using System.Configuration;` (BWFC shim replaces it), detects `AppSettings`/`ConnectionStrings` usage, emits guidance block
+2. **RequestFormTransform** (Order 320) — detects `Request.Form["key"]` patterns, emits FormShim + `<WebFormsForm>` guidance
+3. **ServerShimTransform** (Order 330) — detects `Server.MapPath()`, `Server.HtmlEncode()`, `Server.UrlEncode()`, `Server.UrlDecode()`, emits ServerShim guidance
+
+**Updated Files**:
+- `TodoHeaderTransform`: header now references all 14 shims with tagged TODO markers
+- `bwfc-migrate.ps1`: added BWFC015-018 scan patterns for Server utility, ConfigurationManager, ClientScript, Cache access
+- `CONTROL-COVERAGE.md`: added "Migration Shims (14)" section
+- `TestHelpers.cs`: registered 3 new transforms in test pipeline
+- All 13 expected `.razor.cs` test files regenerated
+
+**Key Learnings**:
+1. New transforms must be registered in BOTH `Program.cs` (DI) AND `TestHelpers.CreateDefaultPipeline()` — forgetting the test pipeline causes L1 integration test failures
+2. Transforms are sorted by `Order` property in `MigrationPipeline`, so list order in registration doesn't matter
+3. When changing the TodoHeader, ALL 13 code-behind expected files must be regenerated — use a temp console project referencing the CLI to regenerate via the actual pipeline
+4. `UsingStripTransform` already handles `System.Web.Optimization` and `System.Web.Routing` via its `WebUsingsRegex` pattern — no extra work needed for BundleConfig/RouteConfig namespaces
+5. "Guidance-only" transforms (detect + TODO comment) are the right pattern when shims make original code compile unchanged on WebFormsPageBase
