@@ -58,7 +58,7 @@ public class ServerShimTransform : ICodeBehindTransform
             }
 
             var guidanceBlock = "\n    " + GuidanceMarker + "\n"
-                + "    // TODO(bwfc-server): Server.* calls work via ServerShim on WebFormsPageBase.\n"
+                + "    // TODO(bwfc-server): Server.* calls work automatically via ServerShim on WebFormsPageBase.\n"
                 + $"    // Methods found: {string.Join(", ", methods)}\n"
                 + "    // For non-page classes, inject ServerShim via DI.\n"
                 + (hasMapPath ? "    // MapPath(\"~/path\") maps to IWebHostEnvironment.WebRootPath.\n" : "");

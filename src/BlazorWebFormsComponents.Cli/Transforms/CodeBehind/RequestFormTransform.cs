@@ -55,7 +55,7 @@ public class RequestFormTransform : ICodeBehindTransform
         if (!content.Contains(GuidanceMarker) && ClassOpenRegex.IsMatch(content))
         {
             var guidanceBlock = "\n    " + GuidanceMarker + "\n"
-                + "    // TODO(bwfc-form): Request.Form calls work via FormShim on WebFormsPageBase.\n"
+                + "    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.\n"
                 + "    // For interactive mode, wrap your form in <WebFormsForm OnSubmit=\"SetRequestFormData\">.\n"
                 + (keys.Count > 0 ? $"    // Form keys found: {string.Join(", ", keys)}\n" : "")
                 + "    // For non-page classes, inject RequestShim via DI.\n";

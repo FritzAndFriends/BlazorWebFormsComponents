@@ -92,8 +92,8 @@ public class ClientScriptTransform : ICodeBehindTransform
             !content.Contains("// TODO(bwfc-general): ClientScript calls preserved"))
         {
             var shimComment = hasScriptManagerCall
-                ? "\n    // TODO(bwfc-general): ClientScript calls preserved — uses ClientScriptShim + ScriptManagerShim. Inject @inject ClientScriptShim ClientScript and @inject ScriptManagerShim ScriptManager if not using BaseWebFormsComponent.\n"
-                : "\n    // TODO(bwfc-general): ClientScript calls preserved — uses ClientScriptShim. Inject @inject ClientScriptShim ClientScript if not using BaseWebFormsComponent.\n";
+                ? "\n    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.\n"
+                : "\n    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed).\n";
             content = ClassOpenRegex.Replace(content, "$1" + shimComment, 1);
         }
 
