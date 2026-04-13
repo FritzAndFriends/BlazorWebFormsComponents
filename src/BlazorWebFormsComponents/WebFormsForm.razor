@@ -1,7 +1,6 @@
 @namespace BlazorWebFormsComponents
 @inherits ComponentBase
 @using Microsoft.AspNetCore.Components
-@using Microsoft.AspNetCore.Http
 @using Microsoft.Extensions.Primitives
 @using Microsoft.JSInterop
 @implements IAsyncDisposable
@@ -32,7 +31,6 @@ else
     private bool _isInteractive;
     private IJSObjectReference? _jsModule;
 
-    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
     [Inject] private IJSRuntime JSRuntime { get; set; } = null!;
 
     /// <summary>
@@ -70,7 +68,17 @@ else
 
     protected override void OnInitialized()
     {
-        _isInteractive = HttpContextAccessor.HttpContext == null;
+        // _isInteractive starts false; set in OnAfterRender which only runs
+        // on interactive circuits (never during prerendering or static SSR).
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && !_isInteractive)
+        {
+            _isInteractive = true;
+            StateHasChanged();
+        }
     }
 
     private async Task HandleSubmit()
