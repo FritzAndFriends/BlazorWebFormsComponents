@@ -88,7 +88,7 @@ public class WebFormsFormTests
             await Assertions.Expect(submitButton).ToBeVisibleAsync();
 
             // Results section should NOT be visible before submission
-            var results = page.Locator("[data-audit-control='form-results'], .results-section, .card:has-text('Request.Form')").First;
+            var results = page.Locator("[data-audit-control='webforms-form-results']").First;
             await Assertions.Expect(results).Not.ToBeVisibleAsync(new() { Timeout = 3000 });
         }
         finally
@@ -134,7 +134,7 @@ public class WebFormsFormTests
             await submitButton.ClickAsync();
 
             // Wait for re-render — the results section should appear after SignalR round-trip
-            var resultsLocator = page.Locator("text=Request.Form").First;
+            var resultsLocator = page.Locator("[data-audit-control='webforms-form-results']").First;
             await resultsLocator.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 10000 });
 
             // Verify submitted name value appears in results
