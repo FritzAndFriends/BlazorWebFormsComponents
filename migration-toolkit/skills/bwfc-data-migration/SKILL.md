@@ -492,6 +492,9 @@ Web Forms `SelectMethod` returns `IQueryable` synchronously. Blazor services sho
 ### Static Helpers with HttpContext
 Web Forms often has static helper classes that access `HttpContext.Current`. These must be refactored to accept dependencies via constructor injection.
 
+### ThreadAbortException Dead Code Warning
+Web Forms throws `ThreadAbortException` when `Response.Redirect(url, true)` is called with `endResponse=true`. Blazor does **not** throw this exception — `ResponseShim.Redirect()` silently ignores the `endResponse` parameter. Any `catch (ThreadAbortException)` blocks become dead code after migration. Review and remove them. Code that runs AFTER `Response.Redirect(url, true)` **will execute** in Blazor (unlike Web Forms where execution stopped).
+
 ---
 
 ## ❌ Common Anti-Patterns to Avoid

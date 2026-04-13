@@ -56,6 +56,35 @@ The CLI tool emits structured `// TODO(bwfc-*)` comments and a JSON migration re
 | `ClientScript.RegisterStartupScript()` | ClientScriptShim | ✅ Yes | Injects JavaScript via JSRuntime |
 | `ViewState["key"]` | WebFormsPageBase | ✅ Yes | In-memory dictionary per component instance |
 
+### ⚠️ Server Methods WITHOUT Shims
+
+These Server.* methods have **no BWFC shim** and require manual rewriting:
+
+| Web Forms Pattern | Shim? | Migration Action |
+|-------------------|-------|-----------------|
+| `Server.Transfer("page.aspx")` | ❌ None | Replace with `NavigationManager.NavigateTo()`. Server.Transfer does server-side URL rewriting which doesn't exist in Blazor. |
+| `Server.GetLastError()` | ❌ None | Use `ILogger` and middleware-based error handling (`app.UseExceptionHandler`). |
+| `Server.ClearError()` | ❌ None | Error clearing is handled by middleware in ASP.NET Core. |
+| `HttpContext.Current.Session["key"]` | ❌ None | Replace with `Session["key"]` (on pages) or inject `SessionShim` via constructor DI (non-page classes). The CLI tool handles this automatically. |
+
+### ⚠️ Non-Page Classes
+
+Classes that use `Session["key"]`, `Response.Redirect()`, etc. but do **NOT** inherit from `WebFormsPageBase` must receive shims via **constructor DI**, not the base class:
+
+```csharp
+// Non-page class — inject shims via DI
+public class CartHelper
+{
+    private readonly SessionShim _session;
+    public CartHelper(SessionShim session) => _session = session;
+    public string GetCartId() => _session["CartId"]?.ToString();
+}
+```
+
+### ⚠️ ThreadAbortException Dead Code
+
+Web Forms throws `ThreadAbortException` when `Response.Redirect(url, true)` is called with `endResponse=true`. Blazor does **not** throw this exception. Any `catch (ThreadAbortException)` blocks become **dead code** after migration — review and remove them.
+
 ### Key Benefits of Shims
 
 1. **Minimal Code Changes** — Original Web Forms code works with ZERO changes in most cases

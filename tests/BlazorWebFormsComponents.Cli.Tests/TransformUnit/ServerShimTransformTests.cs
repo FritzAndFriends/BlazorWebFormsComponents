@@ -135,6 +135,104 @@ public class ServerShimTransformTests
     }
 
     [Fact]
+    public void DetectsServerTransfer_AddsNoShimTodo()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Process()
+        {
+            Server.Transfer(""~/OtherPage.aspx"");
+        }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("TODO(bwfc-server): Server.Transfer has NO SHIM", result);
+        Assert.Contains("NavigationManager.NavigateTo()", result);
+    }
+
+    [Fact]
+    public void DetectsServerGetLastError_AddsNoShimTodo()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Process()
+        {
+            var ex = Server.GetLastError();
+        }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("TODO(bwfc-server): Server.GetLastError has NO SHIM", result);
+        Assert.Contains("ILogger", result);
+    }
+
+    [Fact]
+    public void DetectsServerClearError_AddsNoShimTodo()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Process()
+        {
+            Server.ClearError();
+        }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("TODO(bwfc-server): Server.ClearError has NO SHIM", result);
+        Assert.Contains("middleware", result);
+    }
+
+    [Fact]
+    public void DetectsTransferAndMapPath_BothHandled()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Process()
+        {
+            var path = Server.MapPath(""~/uploads"");
+            Server.Transfer(""~/Other.aspx"");
+        }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("MapPath", result);
+        Assert.Contains("TODO(bwfc-server): Server.Transfer has NO SHIM", result);
+        Assert.Contains("TODO(bwfc-server): Server.* calls work via ServerShim", result);
+    }
+
+    [Fact]
+    public void ServerTransfer_Idempotent()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Process()
+        {
+            Server.Transfer(""~/Other.aspx"");
+        }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+        result = _transform.Apply(result, TestMetadata(result));
+
+        var count = result.Split("Server.Transfer has NO SHIM").Length - 1;
+        Assert.Equal(1, count);
+    }
+
+    [Fact]
     public void OrderIs330()
     {
         Assert.Equal(330, _transform.Order);

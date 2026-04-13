@@ -22,6 +22,11 @@ public class SessionDetectTransform : ICodeBehindTransform
         @"\bSession\s*\[",
         RegexOptions.Compiled);
 
+    // HttpContext.Current.Session[ — static accessor doesn't work in Blazor
+    private static readonly Regex HttpContextCurrentSessionRegex = new(
+        @"HttpContext\.Current\.Session\s*\[",
+        RegexOptions.Compiled);
+
     // Literal string key: Cache["ProductList"]
     private static readonly Regex CacheKeyRegex = new(
         @"\bCache\[""([^""]*)""\]",
@@ -42,6 +47,23 @@ public class SessionDetectTransform : ICodeBehindTransform
 
     public string Apply(string content, FileMetadata metadata)
     {
+        // Replace HttpContext.Current.Session[ with Session[ BEFORE detection
+        if (HttpContextCurrentSessionRegex.IsMatch(content))
+        {
+            content = HttpContextCurrentSessionRegex.Replace(content, "Session[");
+            // Add guidance about static accessor removal
+            if (!content.Contains("TODO(bwfc-session-state): HttpContext.Current.Session"))
+            {
+                var classMatch = ClassOpenRegex.Match(content);
+                if (classMatch.Success)
+                {
+                    var httpContextNote = "\n    // TODO(bwfc-session-state): HttpContext.Current.Session was replaced with Session[].\n"
+                        + "    // For non-page classes, inject SessionShim via constructor DI instead of using HttpContext.Current.\n";
+                    content = ClassOpenRegex.Replace(content, "$1" + httpContextNote, 1);
+                }
+            }
+        }
+
         // Detect patterns before any modifications
         var sessionLiteralMatches = SessionKeyRegex.Matches(content);
         var hasSession = SessionAccessRegex.IsMatch(content);

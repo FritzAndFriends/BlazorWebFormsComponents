@@ -267,6 +267,72 @@ namespace MyApp
     }
 
     [Fact]
+    public void DetectsHttpContextCurrentSession_ReplacesWithSession()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Load() { var x = HttpContext.Current.Session[""CartId""]; }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        // The actual code line should have HttpContext.Current.Session replaced
+        Assert.DoesNotContain(@"var x = HttpContext.Current.Session[""CartId""]", result);
+        Assert.Contains(@"var x = Session[""CartId""]", result);
+        Assert.Contains("TODO(bwfc-session-state): HttpContext.Current.Session was replaced", result);
+    }
+
+    [Fact]
+    public void HttpContextCurrentSession_StillInjectsSessionShim()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Load() { var x = HttpContext.Current.Session[""CartId""]; }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        // After replacement, Session[ is detected → [Inject] is added
+        Assert.Contains("[Inject] private SessionShim Session { get; set; }", result);
+    }
+
+    [Fact]
+    public void HttpContextCurrentSession_EmitsDiGuidanceForNonPage()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Load() { var x = HttpContext.Current.Session[""CartId""]; }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("non-page classes, inject SessionShim via constructor DI", result);
+    }
+
+    [Fact]
+    public void HttpContextCurrentSession_Idempotent()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Load() { var x = HttpContext.Current.Session[""CartId""]; }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+        result = _transform.Apply(result, TestMetadata(result));
+
+        var count = result.Split("HttpContext.Current.Session was replaced").Length - 1;
+        Assert.Equal(1, count);
+    }
+
+    [Fact]
     public void OrderIs400()
     {
         Assert.Equal(400, _transform.Order);

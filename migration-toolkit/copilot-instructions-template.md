@@ -214,6 +214,10 @@ When Copilot encounters these attributes during migration, remove them without c
 8. **Visibility** — `Visible="false"` works in BWFC, but prefer `@if (condition)` for dynamic visibility.
 9. **ClientScript migration** — `Page.ClientScript.RegisterStartupScript()` works via `ClientScriptShim`. For new code, prefer `IJSRuntime`.
 10. **Form POST data** — Use `<WebFormsForm OnSubmit="SetRequestFormData">` to enable `Request.Form["key"]` in interactive mode.
+11. **Server.Transfer has NO shim** — There is no BWFC shim for `Server.Transfer()`. Use `NavigationManager.NavigateTo()` instead. Server.Transfer does server-side URL rewriting which doesn't exist in Blazor.
+12. **Server.GetLastError/ClearError have NO shim** — Use `ILogger` and middleware-based error handling (`app.UseExceptionHandler`).
+13. **ThreadAbortException is dead code** — Web Forms throws `ThreadAbortException` on `Response.Redirect(url, true)`. Blazor does not. Any `catch (ThreadAbortException)` blocks are dead code after migration — review and remove.
+14. **HttpContext.Current doesn't work in Blazor** — Static `HttpContext.Current.Session["key"]` must be replaced with `Session["key"]` (on pages) or constructor-injected `SessionShim` (in non-page classes). The CLI tool handles this replacement automatically.
 
 ---
 
