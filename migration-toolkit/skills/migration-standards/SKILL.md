@@ -6,6 +6,24 @@ confidence: "medium"
 source: "earned"
 ---
 
+## ⛔ MANDATORY RULES — Read Before Any Migration Work
+
+1. **ALL migrated pages inherit WebFormsPageBase** via `@inherits BlazorWebFormsComponents.WebFormsPageBase` in `_Imports.razor`. This gives every page: Session, Response, Request, Server, Cache, ClientScript, ViewState, IsPostBack.
+
+2. **PRESERVE the original Web Forms API calls.** If the Web Forms code says `Session["CartId"]`, the Blazor code says `Session["CartId"]`. If it says `Response.Redirect("ShoppingCart.aspx")`, the Blazor code says `Response.Redirect("ShoppingCart")`. The shims handle the translation.
+
+3. **NEVER inject raw ASP.NET Core services** when a shim exists:
+   - ❌ `[Inject] IHttpContextAccessor` → ✅ Use `Request`, `Response`, `Session` properties
+   - ❌ `[Inject] NavigationManager` (for redirects) → ✅ Use `Response.Redirect()`
+   - ❌ `[Inject] IMemoryCache` → ✅ Use `Cache` property
+   - ❌ `HttpContext.Session["key"]` → ✅ Use `Session["key"]`
+
+4. **NEVER create Minimal API endpoints** to replace Web Forms page actions. If it was a page in Web Forms, it's a page in Blazor.
+
+5. **NEVER use cookies to replace Session.** If the original code used Session, use SessionShim.
+
+6. **`AddBlazorWebFormsComponents()`** in Program.cs registers ALL shims automatically.
+
 ## Context
 
 When migrating an ASP.NET Web Forms application to Blazor using BlazorWebFormsComponents, these standards define the canonical target architecture, tooling choices, and migration patterns. Established through five WingtipToys migration benchmark runs and codified as a directive by Jeffrey T. Fritz.
@@ -155,14 +173,40 @@ The script should preserve the attribute and annotate the signature change neede
 
 > **⚠️ DO NOT convert SelectMethod to Items= binding.** When the original Web Forms markup uses `SelectMethod`, the migrated Blazor markup MUST preserve `SelectMethod` as a delegate reference. Converting to `Items=` loses the native BWFC data-binding pattern and defeats the purpose of drop-in replacement. The ONLY acceptable alternative is when the original Web Forms markup used `DataSource` (not `SelectMethod`), in which case `Items=` is correct.
 
-### Session State → SessionShim → Scoped Services
+### Session State — SessionShim Is the Solution
 
-- **Phase 1 compile-compat:** `SessionShim` is auto-registered by `AddBlazorWebFormsComponents()` — `Session["key"]` code-behind works unchanged via `WebFormsPageBase.Session`. Backed by ASP.NET Core `ISession` in SSR mode; falls back to in-memory `ConcurrentDictionary` in interactive mode.
-- **Phase 1 API surface:** `Session["key"]` indexer (get/set), `Session.Get<T>(key)`, `Session.Remove(key)`, `Session.Clear()`, `Session.ContainsKey(key)`, `Session.Count`
-- **Final migration:** Replace `Session["key"]` with a scoped DI service for durable state
-- Use `IHttpContextAccessor` for cookie-based persistence when needed
-- Register in `Program.cs` with `builder.Services.AddScoped<TService>()`
-- Example: `Session["CartId"]` → `CartStateService` with cookie-based cart ID
+- **SessionShim is the PRIMARY solution for migrating Session state.** It's auto-registered by `AddBlazorWebFormsComponents()` — `Session["key"]` code-behind works unchanged via `WebFormsPageBase.Session`. Backed by ASP.NET Core `ISession` in SSR mode; falls back to in-memory `ConcurrentDictionary` in interactive mode.
+- **API surface:** `Session["key"]` indexer (get/set), `Session.Get<T>(key)`, `Session.Remove(key)`, `Session.Clear()`, `Session.ContainsKey(key)`, `Session.Count`
+- **When to upgrade:** Only replace `Session["key"]` with a scoped DI service when you need state persistence across browser sessions (e.g., server restarts, distributed servers, or cross-device access). For most migrations, SessionShim is sufficient.
+- **If upgrading to scoped services:** Use `IHttpContextAccessor` for cookie-based persistence when needed. Register in `Program.cs` with `builder.Services.AddScoped<TService>()`. Example: `Session["CartId"]` → `CartStateService` with cookie-based cart ID.
+
+**Example: SessionShim in action**
+
+```csharp
+// Web Forms
+protected void AddToCart_Click(object sender, EventArgs e)
+{
+    var cartId = (string)Session["CartId"];
+    if (string.IsNullOrEmpty(cartId))
+    {
+        cartId = Guid.NewGuid().ToString();
+        Session["CartId"] = cartId;
+    }
+    // ... use cartId
+}
+
+// Blazor with SessionShim — IDENTICAL API
+private async Task AddToCart_Click(MouseEventArgs e)
+{
+    var cartId = (string)Session["CartId"];
+    if (string.IsNullOrEmpty(cartId))
+    {
+        cartId = Guid.NewGuid().ToString();
+        Session["CartId"] = cartId;
+    }
+    // ... use cartId
+}
+```
 
 ### Blazor Enhanced Navigation
 
@@ -223,6 +267,8 @@ This is a BWFC-specific behavior that mirrors Web Forms' `TextBox` `TextChanged`
 
 BWFC ships shims that let migrated business logic and `App_Start` files compile without modification. These are part of the "Just Make It Compile" strategy — eliminate build errors first, then address runtime behavior.
 
+**These are DROP-IN replacements.** The goal is to preserve the original Web Forms API calls with minimal changes.
+
 | Shim | Namespace | What It Provides |
 |---|---|---|
 | **ConfigurationManager** | `BlazorWebFormsComponents` | `AppSettings["key"]` → reads from `IConfiguration`. `ConnectionStrings["name"]` → reads from `IConfiguration.GetConnectionString()`. |
@@ -236,6 +282,35 @@ BWFC ships shims that let migrated business logic and `App_Start` files compile 
 | **FormShim** | `BlazorWebFormsComponents` | `Request.Form["key"]`, `.GetValues()`, `.AllKeys`, `.Count`, `.ContainsKey()`. Wraps `IFormCollection` or JS interop data. Populated by `<WebFormsForm>`. |
 | **ClientScriptShim** | `BlazorWebFormsComponents` | `RegisterStartupScript()`, `RegisterClientScriptBlock()`, `RegisterClientScriptInclude()`, `GetPostBackEventReference()`, `GetCallbackEventReference()`. Queues scripts, flushes via `IJSRuntime`. Auto-registered. |
 | **ScriptManagerShim** | `BlazorWebFormsComponents` | `ScriptManager.GetCurrent(page)` pattern, delegates all `RegisterXxx` calls to `ClientScriptShim`. Auto-registered. |
+
+**Example: Before/After with Shims**
+
+```csharp
+// ===== Before (Web Forms) =====
+protected void Page_Load(object sender, EventArgs e)
+{
+    string rawId = Request.QueryString["ProductID"];
+    if (int.TryParse(rawId, out int productId))
+    {
+        var cart = new ShoppingCartActions();
+        cart.AddToCart(productId);
+    }
+    Response.Redirect("ShoppingCart.aspx");
+}
+
+// ===== After (Blazor with Shims) — NOTICE: Nearly identical =====
+protected override async Task OnInitializedAsync()
+{
+    string rawId = Request.QueryString["ProductID"];  // RequestShim
+    if (int.TryParse(rawId, out int productId))
+    {
+        await CartService.AddToCartAsync(productId);
+    }
+    Response.Redirect("ShoppingCart");  // ResponseShim — .aspx stripped automatically
+}
+```
+
+**Key observation:** The API calls (`Request.QueryString`, `Response.Redirect`) are **identical**. Only the lifecycle method (`Page_Load` → `OnInitializedAsync`) and service call pattern changed. This is the power of shims — migrate incrementally without rewriting everything.
 
 **ConfigurationManager setup:**
 
@@ -438,4 +513,124 @@ public partial class ProductList : WebFormsPageBase { }
 
 // ALSO RIGHT — for non-page components
 public partial class MyComponent : ComponentBase { }
+```
+
+### ❌ Creating Minimal API Endpoints to Replace Page Actions
+
+```csharp
+// WRONG — turning a Web Forms page into an API endpoint
+app.MapPost("/AddToCart", async (HttpContext context, int productId) =>
+{
+    // ... cart logic
+    return Results.Redirect("/ShoppingCart");
+});
+
+// RIGHT — keep it as a Blazor page with shims
+@page "/AddToCart"
+@inherits WebFormsPageBase
+
+@code {
+    [Parameter] [SupplyParameterFromQuery] public int ProductID { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await CartService.AddToCartAsync(ProductID);
+        Response.Redirect("ShoppingCart");  // Shim handles navigation
+    }
+}
+```
+
+### ❌ Injecting Raw ASP.NET Core Services When Shims Exist
+
+```csharp
+// WRONG — bypassing shims with raw services
+[Inject] private IHttpContextAccessor HttpContextAccessor { get; set; }
+[Inject] private NavigationManager NavManager { get; set; }
+[Inject] private IMemoryCache MemoryCache { get; set; }
+
+protected override void OnInitialized()
+{
+    var session = HttpContextAccessor.HttpContext.Session;
+    var cartId = session.GetString("CartId");
+    
+    MemoryCache.Set("key", value);
+    
+    NavManager.NavigateTo("/ShoppingCart");
+}
+
+// RIGHT — use shims from WebFormsPageBase
+@inherits WebFormsPageBase
+
+protected override void OnInitialized()
+{
+    var cartId = Session["CartId"];  // SessionShim
+    
+    Cache["key"] = value;  // CacheShim
+    
+    Response.Redirect("ShoppingCart");  // ResponseShim
+}
+```
+
+### ❌ Using Cookies to Replace Session
+
+```csharp
+// WRONG — replacing Session with cookies manually
+[Inject] private IHttpContextAccessor HttpContextAccessor { get; set; }
+
+protected override void OnInitialized()
+{
+    var cartId = HttpContextAccessor.HttpContext.Request.Cookies["CartId"];
+    if (string.IsNullOrEmpty(cartId))
+    {
+        cartId = Guid.NewGuid().ToString();
+        HttpContextAccessor.HttpContext.Response.Cookies.Append("CartId", cartId);
+    }
+}
+
+// RIGHT — use SessionShim
+@inherits WebFormsPageBase
+
+protected override void OnInitialized()
+{
+    var cartId = Session["CartId"];
+    if (string.IsNullOrEmpty(cartId))
+    {
+        cartId = Guid.NewGuid().ToString();
+        Session["CartId"] = cartId;
+    }
+}
+```
+
+### ❌ Using [ExcludeFromInteractiveRouting] to Work Around Interactive Mode
+
+```razor
+@* WRONG — fighting the Router instead of using shims *@
+@attribute [ExcludeFromInteractiveRouting]
+@page "/AddToCart"
+
+@* RIGHT — embrace interactive mode with shims *@
+@page "/AddToCart"
+@inherits WebFormsPageBase
+```
+
+### ❌ Adding onclick JavaScript Hacks to Bypass Blazor Routing
+
+```razor
+@* WRONG — using JavaScript to work around routing *@
+<a href="/ShoppingCart" onclick="window.location.href='/ShoppingCart'; return false;">
+    View Cart
+</a>
+
+@* RIGHT — use standard Blazor navigation or shims *@
+<a href="/ShoppingCart">View Cart</a>
+
+@* OR if you need programmatic redirect *@
+<Button Text="View Cart" OnClick="GoToCart" />
+
+@code {
+    private void GoToCart(MouseEventArgs e)
+    {
+        Response.Redirect("ShoppingCart");  // ResponseShim
+    }
+}
 ```

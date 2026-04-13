@@ -74,7 +74,9 @@ Layer 1 handles every transform that can be applied mechanically. The CLI tool a
 | File renaming (`.aspx` → `.razor`) | 33 | 100% |
 | Project scaffold (`.csproj`, `Program.cs`, `_Imports.razor`, `App.razor`) | Full | ✅ |
 
-`_Imports.razor` includes `@inherits BlazorWebFormsComponents.WebFormsPageBase` so that all converted pages get `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` without per-page injection. The layout scaffold includes `<BlazorWebFormsComponents.Page />` to render `<PageTitle>` and `<meta>` tags.
+The CLI generates `_Imports.razor` with `@inherits BlazorWebFormsComponents.WebFormsPageBase` so every page automatically gets `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack`, `Session`, `Response`, `Request`, `Server`, `Cache`, and `ClientScript` — with the same API as Web Forms. The layout scaffold includes `<BlazorWebFormsComponents.Page />` to render `<PageTitle>` and `<meta>` tags.
+
+The CLI also generates `Program.cs` with `builder.Services.AddBlazorWebFormsComponents()`, which registers all the shim infrastructure (SessionShim, ResponseShim, RequestShim, CacheShim, ServerShim, ClientScriptShim, ViewStateShim) automatically.
 
 ### Shim Infrastructure
 
@@ -125,6 +127,10 @@ After Layer 1, pages fall into three readiness categories:
 **Tool:** [Copilot migration skill](skills/bwfc-migration/SKILL.md)
 
 Layer 2 handles transforms that follow consistent patterns but require understanding control semantics. A human *could* do these mechanically, but it's tedious and error-prone. Copilot with the BWFC migration skill handles them reliably.
+
+**L2 Principle: Wire up data binding and lifecycle — NOT to replace shims with native patterns.**
+
+The shims ARE the L2 strategy. If the original Web Forms code says `Session["CartId"]`, the migrated code says `Session["CartId"]`. The shim makes this work. Don't reinvent what already exists. Layer 2 is about making data flow through the page and connecting event handlers — NOT about converting `Response.Redirect()` to `NavigationManager.NavigateTo()`. That's an optional Layer 3 optimization.
 
 ### What Shims Handle Automatically (no Layer 2 work needed)
 
@@ -183,9 +189,9 @@ Always review Copilot's changes before committing.
 > | Approach | When to Use | Example |
 > |---|---|---|
 > | **Shim path** (keep AS-IS) | Migration speed is the priority; code works correctly; team isn't ready to learn Blazor-native patterns yet | `Response.Redirect("~/Products")` — works via ResponseShim |
-> | **Native Blazor path** (refactor later) | Post-migration polish; team is comfortable with Blazor; want to reduce BWFC dependency | `NavigationManager.NavigateTo("/Products")` — native Blazor |
+> | **Native Blazor path** (refactor later) | **Layer 3 optimization** — post-migration polish; team is comfortable with Blazor; want to reduce BWFC dependency | `NavigationManager.NavigateTo("/Products")` — native Blazor |
 >
-> **Recommendation:** Use shims to get migrated fast, then refactor to native Blazor incrementally as your team builds Blazor expertise. Both paths produce working code.
+> **Recommendation:** Use shims to get migrated fast (Layer 2), then refactor to native Blazor incrementally in Layer 3 as your team builds Blazor expertise. Both paths produce working code. **Replacing shims with native patterns is OPTIONAL, not required.**
 
 ---
 
@@ -195,6 +201,8 @@ Always review Copilot's changes before committing.
 
 
 Layer 3 is the ~15% of migration work that requires understanding your application's architecture. No script or AI can make these decisions for you — but the data migration skill and Copilot can guide you through the options and trade-offs.
+
+**Important:** Replacing shims with native Blazor patterns (e.g., `Response.Redirect()` → `NavigationManager.NavigateTo()`) is an **OPTIONAL Layer 3 optimization**, not a migration requirement. Your app works with the shims. Native patterns are for teams that want to reduce BWFC dependency long-term.
 
 ### Common Layer 3 Decisions
 

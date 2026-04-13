@@ -40,7 +40,11 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] Event handlers converted to Blazor signatures (remove `sender`, `EventArgs`)
 - [ ] ✅ `Page_Load` / `IsPostBack` — works AS-IS via `WebFormsPageBase` (only signature `Page_Load(sender, e)` → `OnInitializedAsync` needs converting; `IsPostBack` inside works unchanged)
 - [ ] ✅ `Response.Redirect` — works AS-IS via ResponseShim (auto-strips `~/` and `.aspx`)
-- [ ] ✅ `Session["key"]` — works AS-IS via SessionShim (no longer needs Layer 3)
+- [ ] Session state: Use `Session["key"]` from `WebFormsPageBase` (SessionShim) — works in interactive mode ✅
+- [ ] ✅ Response.Redirect() calls work via ResponseShim
+- [ ] ✅ Request.QueryString[] calls work via RequestShim
+- [ ] No raw `IHttpContextAccessor` injected (use shim properties from `WebFormsPageBase` instead)
+- [ ] No Minimal API endpoints created for page actions (use shim methods instead; minimal APIs are ONLY for cookie auth operations)
 - [ ] ✅ `Page.Title` / `Page.MetaDescription` — works AS-IS via WebFormsPageBase
 - [ ] ✅ `Request.QueryString["key"]` — works AS-IS via RequestShim
 - [ ] ✅ `Cache["key"]` — works AS-IS via CacheShim
@@ -54,7 +58,9 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 
 - [ ] Data access pattern decided (injected service, EF Core, Dapper, etc.)
 - [ ] Data service implemented and registered in `Program.cs`
-- [ ] Session state: basic usage works AS-IS via SessionShim; if persistent/distributed state needed, replace with `ProtectedSessionStorage` or scoped service
+- [ ] Session state: basic usage works AS-IS via SessionShim; if persistent/distributed state needed, replace with `ProtectedSessionStorage` or scoped service (OPTIONAL — shim works correctly)
+- [ ] Response.Redirect: works AS-IS via ResponseShim; if removing BWFC dependency, replace with `NavigationManager.NavigateTo()` (OPTIONAL — shim works correctly)
+- [ ] Request.QueryString: works AS-IS via RequestShim; if cleaner Blazor pattern desired, replace with `[SupplyParameterFromQuery]` (OPTIONAL — shim works correctly)
 - [ ] Authentication/authorization wired (if page requires auth)
 - [ ] Third-party integrations ported (API calls, payment, etc.)
 - [ ] Route registered and tested (`@page` directive matches expected URL)

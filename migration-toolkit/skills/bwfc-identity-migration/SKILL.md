@@ -349,6 +349,22 @@ protected override async Task OnInitializedAsync()
 }
 ```
 
+### Session-Based Auth Data
+
+> **Note:** `WebFormsPageBase` provides a `Session` property (via `SessionShim`) that works in Blazor Server interactive mode. If your Web Forms code stores auth-related data in session (e.g., `Session["userCheckoutCompleted"]`, `Session["token"]`, `Session["cartId"]`), you can access it the same way in migrated Blazor code:
+>
+> ```csharp
+> // Web Forms
+> Session["userCheckoutCompleted"] = true;
+> if (Session["token"] is string token) { ... }
+> 
+> // Blazor (same pattern, SessionShim handles it)
+> Session["userCheckoutCompleted"] = true;
+> if (Session["token"] is string token) { ... }
+> ```
+>
+> `SessionShim` uses `IHttpContextAccessor` and `ISession` under the hood, but **you should not inject `IHttpContextAccessor` directly** when `WebFormsPageBase.Session` already provides the same access pattern. Keep the shim-based approach during initial migration — session-to-DI conversion is an optional L3 optimization step, not a Layer 1 or Layer 2 requirement.
+
 ---
 
 ## OWIN Middleware → ASP.NET Core Middleware

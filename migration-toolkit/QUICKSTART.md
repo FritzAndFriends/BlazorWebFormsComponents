@@ -102,14 +102,33 @@ After the migration script runs, verify these are in place (the script scaffolds
 @inherits BlazorWebFormsComponents.WebFormsPageBase
 ```
 
-The `@inherits` line makes every page inherit from `WebFormsPageBase`, which provides `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` — so Web Forms code-behind compiles unchanged.
+**This one line gives every page the Web Forms API:**
+- `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`
+- `IsPostBack` (false on first render, true on interactions)
+- `Session["key"]` (scoped in-memory dictionary)
+- `Response.Redirect("~/path")` (auto-strips `~/` and `.aspx`)
+- `Request.Url`, `Request.QueryString["key"]`, `Request.Form["key"]`
+- `Cache["key"]` (application-level cache)
+- `Server.MapPath("~/path")` (virtual → physical path)
+- `ClientScript.RegisterStartupScript(...)` (JS interop)
+
+Your Web Forms code-behind compiles **unchanged**. No manual conversion needed.
 
 **`Program.cs`** — register BWFC services:
 ```csharp
 builder.Services.AddBlazorWebFormsComponents();
 ```
 
-> **This single call registers ALL shims automatically.** After this, `Response.Redirect`, `Session["key"]`, `Request.QueryString`, `Cache["key"]`, `Server.MapPath`, `ClientScript`, and `ViewState` all work AS-IS in your migrated code-behind files — no manual conversion needed.
+**What this does:**
+- Registers `SessionShim` (scoped in-memory dictionary for `Session["key"]`)
+- Registers `ResponseShim` (handles `Response.Redirect`, `Response.Write`)
+- Registers `RequestShim` (provides `Request.QueryString`, `Request.Form`, `Request.Url`)
+- Registers `CacheShim` (in-memory application cache)
+- Registers `ServerShim` (provides `Server.MapPath`)
+- Registers `ClientScriptShim` (JS interop for `ClientScript.RegisterStartupScript`)
+- Registers `ViewStateShim` (compile-compatible dictionary)
+
+After this single call, all Web Forms APIs work AS-IS in your migrated code — no manual conversion required.
 
 **Layout (`MainLayout.razor`)** — add the Page render component:
 ```razor
@@ -166,6 +185,50 @@ The following are **no longer Layer 2 work** — they work AS-IS via shims:
 - ~~`Session["key"]` → mark for Layer 3~~ → works via SessionShim
 - ~~`Page.Title` conversion~~ → works via WebFormsPageBase
 
+### Using Shims (No Conversion Needed)
+
+**The shims preserve Web Forms API calls AS-IS.** Here's what works unchanged:
+
+```csharp
+// Session access — works exactly like Web Forms
+Session["CartId"] = cartId;
+var cartId = Session["CartId"];
+
+// Response.Redirect — auto-strips ~/ and .aspx
+Response.Redirect("~/Products");
+Response.Redirect("~/Product.aspx?id=5"); // becomes /Product/5 if routing configured
+
+// Request.QueryString — reads URL parameters
+var productId = Request.QueryString["id"];
+
+// Request.Form — reads form POST data (requires <WebFormsForm> wrapper)
+var username = Request.Form["username"];
+
+// IsPostBack — false on first render, true on interactions
+if (!IsPostBack)
+{
+    LoadInitialData();
+}
+
+// Page properties — auto-rendered by <Page /> component
+Page.Title = "Product Details";
+Page.MetaDescription = "View product details";
+
+// Cache — application-level cache
+Cache["RecentProducts"] = products;
+
+// Server.MapPath — virtual to physical path
+var filePath = Server.MapPath("~/App_Data/config.xml");
+```
+
+**Do NOT inject these services manually:**
+- ❌ `IHttpContextAccessor` — use `Request` property instead
+- ❌ `NavigationManager` (for redirects) — use `Response.Redirect()` instead
+- ❌ `IMemoryCache` — use `Cache` property instead
+- ❌ `IJSRuntime` (for startup scripts) — use `ClientScript.RegisterStartupScript()` instead
+
+The shim properties are already available via `WebFormsPageBase`. Injecting these services and manually converting is extra work that provides no migration benefit.
+
 Look for `<!-- TODO: BWFC-MIGRATE -->` comments left by the migration script — these mark items that need manual attention.
 
 ---
@@ -175,13 +238,58 @@ Look for `<!-- TODO: BWFC-MIGRATE -->` comments left by the migration script —
 These are the decisions that need a human (or a human + the migration agent):
 
 - **Data access:** Replace `SqlDataSource`/`ObjectDataSource` with injected services
-- **Session state:** Convert `Session["key"]` to scoped services or `ProtectedSessionStorage` (if you need persistence — basic usage works AS-IS via SessionShim)
+- **Session state:** Convert `Session["key"]` to scoped services or `ProtectedSessionStorage` (if you need persistence or distributed sessions — basic usage works AS-IS via SessionShim)
 - **Authentication:** Migrate ASP.NET Membership/Identity to ASP.NET Core Identity
 - **EF6 → EF Core:** Update DbContext, register with DI, adjust LINQ queries
 - **Global.asax → Program.cs:** Convert lifecycle hooks to middleware
 - **Third-party integrations:** Port to `HttpClient` pattern
+- **Shim replacement (OPTIONAL):** Replace `Response.Redirect()` with `NavigationManager.NavigateTo()`, `Session` with injected state services, etc. — this is a performance/modernization step, NOT a migration requirement
 
 > 📄 For interactive guidance, use the [Data Migration Skill](skills/bwfc-data-migration/SKILL.md)
+
+### Common Mistakes to Avoid
+
+**Anti-pattern #1: Manually converting shim-supported APIs**
+
+❌ **Wrong:**
+```csharp
+@inject NavigationManager Nav
+@code {
+    void GoToProducts() => Nav.NavigateTo("/Products");
+}
+```
+
+✅ **Correct (use the shim):**
+```csharp
+@code {
+    void GoToProducts() => Response.Redirect("~/Products");
+}
+```
+
+**Anti-pattern #2: Injecting services that shims already provide**
+
+❌ **Wrong:**
+```csharp
+@inject IHttpContextAccessor HttpContext
+@code {
+    var id = HttpContext.HttpContext.Request.Query["id"];
+}
+```
+
+✅ **Correct (use the shim):**
+```csharp
+@code {
+    var id = Request.QueryString["id"];
+}
+```
+
+**Anti-pattern #3: Treating shims as temporary scaffolding**
+
+❌ **Wrong mindset:** "I'll use shims to get it compiling, then replace them with 'real' Blazor code."
+
+✅ **Correct mindset:** "Shims are the migration strategy. They work correctly. Replacing them is an optional optimization I can do later if my team wants to reduce BWFC dependency."
+
+The shims ARE the solution, not a workaround.
 
 ---
 

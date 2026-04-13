@@ -5,6 +5,8 @@ description: "Post-migration async/await and .NET 10 performance optimization pa
 
 # L3: Post-Migration Performance Optimization
 
+> ⚠️ **WARNING: L3 optimization runs AFTER the app builds and works correctly. Do NOT apply L3 changes during initial migration. Use shims first (Session, Response, Request) for functional correctness, then optimize later if needed.**
+
 This skill is the **optional fourth step** in the migration pipeline. It applies after the app builds and runs correctly following L1 (automated), L2 (structural), and L3-architecture (data/identity) passes.
 
 **Related skills:**
@@ -455,6 +457,8 @@ public Product Product { get; set; } = default!;
 
 ## 5. Dependency Injection Best Practices
 
+> **Note:** During initial migration (L1/L2), keep shim usage (`Session`, `Response`, `Request` from `WebFormsPageBase`). These work correctly and provide the same patterns as Web Forms. L3 optimization **may** replace shims with native Blazor patterns (`NavigationManager`, scoped services, `IMemoryCache`), but ONLY after the app is verified working. Premature shim removal during L1/L2 migration breaks functionality and makes debugging harder.
+
 ### 5a. `@inject DbContext` → `IDbContextFactory<T>` ✅ Safe
 
 Direct `DbContext` injection (`AddDbContext`) uses a scoped lifetime that matches a Blazor circuit, not a request. Long-lived circuits accumulate tracked entities and can serve stale data. `IDbContextFactory` creates short-lived contexts per operation.
@@ -641,6 +645,21 @@ protected override async Task OnInitializedAsync()
 ```
 
 Async patterns surface errors that were previously hidden. Fix all build errors first.
+
+### ❌ Prematurely Replacing Shims with Native Patterns During L1/L2 Migration
+
+```csharp
+// WRONG — removing shims before app builds and works
+Session["key"] → inject scoped service (during L1/L2)
+Response.Redirect() → NavigationManager.NavigateTo() (during L1/L2)
+Request.QueryString[] → [SupplyParameterFromQuery] (during L1/L2)
+
+// RIGHT — use shims first, optimize later
+Layer 1/2: Use Session["key"], Response.Redirect(), Request.QueryString[] (shims work correctly)
+Layer 3 (optional): Convert to native patterns ONLY after app is verified working
+```
+
+Shim-based code is functionally correct. Replacing shims prematurely breaks the build and makes debugging harder.
 
 ### ❌ Adding `AsNoTracking()` to Write Operations
 

@@ -27,6 +27,22 @@ You're a .NET developer who owns a Web Forms application and wants to migrate it
 
 ---
 
+## Key Principle: Shim-First Migration
+
+**The goal is to preserve the original Web Forms API calls, not rewrite them.**
+
+When you migrate with BWFC:
+
+- Pages inherit from `WebFormsPageBase`, which provides `Session`, `Response`, `Request`, `Server`, `Cache`, and `ClientScript` — **all with the SAME API as Web Forms**
+- Your code-behind continues to use `Response.Redirect("~/Products")`, `Session["CartId"]`, `Request.QueryString["key"]`, and `IsPostBack` — no changes needed
+- `AddBlazorWebFormsComponents()` in `Program.cs` registers all the shim infrastructure automatically
+
+**This means:** If the original Web Forms code says `Session["CartId"]`, the migrated code says `Session["CartId"]`. The shim makes it work. You are not converting to `IMemoryCache`, `NavigationManager`, or `IHttpContextAccessor` — those are native Blazor patterns that you can adopt *later* if desired, but they are not required for migration.
+
+Shims get your app compiling and running **fast**. Refactoring to native Blazor patterns is an optional Layer 3 optimization, not a migration requirement.
+
+---
+
 ## How to Use This Toolkit
 
 1. **Copy the `skills/` folder** into your project's `.github/skills/` directory.
@@ -65,10 +81,10 @@ Migration isn't one step — it's three layers that handle different kinds of wo
 
 | Layer | What | How | Coverage |
 |---|---|---|---|
-| **Layer 1** — Automated | Tag prefix removal, `runat` removal, expression conversion, file renaming, shim infrastructure | [`webforms-to-blazor` CLI](../src/BlazorWebFormsComponents.Cli/) or [`bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) + `AddBlazorWebFormsComponents()` | ~60% of work |
-| **Layer 2** — Copilot-Assisted | Data binding rewiring, layout conversion, lifecycle method signatures, event handlers | [`skills/bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | ~30% of work |
+| **Layer 1** — Automated | Tag prefix removal, `runat` removal, expression conversion, file renaming, **shim infrastructure setup** (`_Imports.razor` with `@inherits WebFormsPageBase`, `Program.cs` with `AddBlazorWebFormsComponents()`) | [`webforms-to-blazor` CLI](../src/BlazorWebFormsComponents.Cli/) or [`bwfc-migrate.ps1`](scripts/bwfc-migrate.ps1) | ~60% of work |
+| **Layer 2** — Copilot-Assisted | Data binding rewiring, layout conversion, lifecycle method signatures, event handlers — **uses shims to preserve Web Forms patterns** (`Response.Redirect`, `Session`, `Request`, `IsPostBack` all work AS-IS) | [`skills/bwfc-migration/SKILL.md`](skills/bwfc-migration/SKILL.md) | ~30% of work |
 | **Layer 3** — Architecture Decisions | Identity, EF Core, third-party integrations | [`skills/bwfc-data-migration/SKILL.md`](skills/bwfc-data-migration/SKILL.md) + human judgment | ~10% of work |
-| **L3-opt** — Performance (optional) | Async/await, `AsNoTracking`, `IDbContextFactory`, .NET 10 patterns | [`skills/l3-performance-optimization/SKILL.md`](skills/l3-performance-optimization/SKILL.md) | After app is functional |
+| **L3-opt** — Performance (optional) | Async/await, `AsNoTracking`, `IDbContextFactory`, .NET 10 patterns, **optionally replacing shims with native Blazor patterns** | [`skills/l3-performance-optimization/SKILL.md`](skills/l3-performance-optimization/SKILL.md) | After app is functional |
 
 **Start here:** [QUICKSTART.md](QUICKSTART.md) — the linear "just tell me what to do" path.
 
