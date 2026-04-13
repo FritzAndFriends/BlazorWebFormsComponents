@@ -67,6 +67,13 @@ public class RequestShim
 	{
 		get
 		{
+			// If SetFormData() was called (WebFormsForm submit), return the cached
+			// interop-backed shim even when HttpContext is available (Blazor Server
+			// SignalR circuits always have an HttpContext, but its Request.Form is
+			// from the original WebSocket upgrade, not the interactive form submit).
+			if (_cachedFormShim != null)
+				return _cachedFormShim;
+
 			if (_httpContext != null)
 			{
 				try
@@ -80,10 +87,7 @@ public class RequestShim
 				}
 			}
 
-			// Interactive mode: cache and reuse so SetFormData() persists
-			if (_cachedFormShim != null)
-				return _cachedFormShim;
-
+			// Interactive mode without prior SetFormData call
 			if (!_formWarned)
 			{
 				_logger.LogWarning(
