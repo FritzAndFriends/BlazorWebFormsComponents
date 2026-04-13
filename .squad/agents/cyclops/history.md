@@ -987,3 +987,12 @@ foreach (var warning in warnings) {
 - `@onsubmit:preventDefault` prevents default form submission in interactive mode
 
 **Build:** ✅ 0 errors on net8.0;net9.0;net10.0
+
+### Playwright Locator Fix for WebFormsFormTests (2025-07-15)
+
+**Summary:** Fixed two failing Playwright tests in `WebFormsFormTests.cs` where locators were matching the always-visible migration guidance card instead of the actual results card.
+
+**Key Learning — data-audit-control naming convention:**
+- Demo pages use `data-audit-control` attributes prefixed with the component name, e.g. `webforms-form-results` not just `form-results`.
+- Always use the exact `[data-audit-control='...']` selector in Playwright tests rather than fuzzy text-based locators like `text=Request.Form` or `:has-text()`, which can match unrelated visible sections.
+- When a section is conditionally rendered (e.g., gated by `@if (isPostBack)`), the test locator must target that specific section's attribute, not generic text that may appear elsewhere on the page.

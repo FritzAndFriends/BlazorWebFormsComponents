@@ -77,10 +77,10 @@ public class WebFormsFormTests
             });
 
             // Form inputs should be visible (name and email)
-            var nameInput = page.Locator("input[name='name'], input#name, input[id*='name' i]").First;
+            var nameInput = page.Locator("input[name='username'], input#username").First;
             await Assertions.Expect(nameInput).ToBeVisibleAsync();
 
-            var emailInput = page.Locator("input[name='email'], input#email, input[id*='email' i]").First;
+            var emailInput = page.Locator("input[name='email'], input#email").First;
             await Assertions.Expect(emailInput).ToBeVisibleAsync();
 
             // Submit button should be visible
@@ -115,13 +115,19 @@ public class WebFormsFormTests
                 Timeout = 30000
             });
 
+            // Wait for Blazor Server interactive circuit — the WebFormsForm component
+            // renders data-interactive="true" only after the circuit is established.
+            // Without this wait, the prerendered form lacks @onsubmit:preventDefault
+            // and clicking submit causes a full-page POST that resets component state.
+            await page.WaitForSelectorAsync("form[data-interactive]", new() { Timeout = 10000 });
+
             // Fill in the name field
-            var nameInput = page.Locator("input[name='name'], input#name, input[id*='name' i]").First;
+            var nameInput = page.Locator("input[name='username'], input#username").First;
             await nameInput.FillAsync("TestUser");
             await page.Keyboard.PressAsync("Tab");
 
             // Fill in the email field
-            var emailInput = page.Locator("input[name='email'], input#email, input[id*='email' i]").First;
+            var emailInput = page.Locator("input[name='email'], input#email").First;
             await emailInput.FillAsync("test@example.com");
             await page.Keyboard.PressAsync("Tab");
 
@@ -167,8 +173,11 @@ public class WebFormsFormTests
                 Timeout = 30000
             });
 
+            // Wait for Blazor Server interactive circuit
+            await page.WaitForSelectorAsync("form[data-interactive]", new() { Timeout = 10000 });
+
             // Fill a field and submit
-            var nameInput = page.Locator("input[name='name'], input#name, input[id*='name' i]").First;
+            var nameInput = page.Locator("input[name='username'], input#username").First;
             await nameInput.FillAsync("NavigationTest");
             await page.Keyboard.PressAsync("Tab");
 
