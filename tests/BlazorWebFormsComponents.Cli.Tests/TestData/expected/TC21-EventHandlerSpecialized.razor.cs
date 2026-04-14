@@ -23,10 +23,10 @@ namespace MyApp
 {
     public partial class TC21_EventHandlerSpecialized
     {
-    // TODO(bwfc-general): ClientScript calls preserved — uses ClientScriptShim + ScriptManagerShim. Inject @inject ClientScriptShim ClientScript and @inject ScriptManagerShim ScriptManager if not using BaseWebFormsComponent.
+    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
     // --- Request.Form Migration ---
-    // TODO(bwfc-form): Request.Form calls work via FormShim on WebFormsPageBase.
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
     // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.

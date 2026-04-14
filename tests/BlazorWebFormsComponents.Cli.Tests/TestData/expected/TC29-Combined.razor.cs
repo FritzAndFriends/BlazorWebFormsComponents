@@ -20,7 +20,7 @@
 // =============================================================================
 
 // --- Session State Migration ---
-// TODO(bwfc-session-state): SessionShim auto-wired via [Inject] — Session["key"] calls compile against the shim's indexer.
+// TODO(bwfc-session-state): Session["key"] calls work automatically via SessionShim on WebFormsPageBase.
 // Session keys found: LastVisit
 // Options for long-term replacement:
 //   (1) ProtectedSessionStorage (Blazor Server) — persists across circuits
@@ -33,17 +33,17 @@ namespace MyApp
 {
     public partial class TC29_Combined
     {
-    // TODO(bwfc-general): ClientScript calls preserved — uses ClientScriptShim + ScriptManagerShim. Inject @inject ClientScriptShim ClientScript and @inject ScriptManagerShim ScriptManager if not using BaseWebFormsComponent.
-
-    [Inject] private SessionShim Session { get; set; }
+    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
     // --- Request.Form Migration ---
-    // TODO(bwfc-form): Request.Form calls work via FormShim on WebFormsPageBase.
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
     // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
-    [Inject] private NavigationManager NavigationManager { get; set; } // TODO(bwfc-navigation): Add @using Microsoft.AspNetCore.Components to _Imports.razor if needed
+    // --- Response.Redirect Migration ---
+    // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
+    // For non-page classes, inject ResponseShim via DI.
 
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
@@ -62,7 +62,7 @@ namespace MyApp
         protected void SaveButton_Click()
         {
             // Save logic
-            NavigationManager.NavigateTo("/Confirmation.aspx");
+            Response.Redirect("/Confirmation");
         }
 
         private void BindGrid()

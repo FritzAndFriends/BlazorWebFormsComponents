@@ -28,7 +28,7 @@
 // Note: BaseWebFormsComponent.ViewState exists as an [Obsolete] compatibility shim.
 
 // --- Session State Migration ---
-// TODO(bwfc-session-state): SessionShim auto-wired via [Inject] — Session["key"] calls compile against the shim's indexer.
+// TODO(bwfc-session-state): Session["key"] calls work automatically via SessionShim on WebFormsPageBase.
 // Session keys found: LastVisitDate
 // Options for long-term replacement:
 //   (1) ProtectedSessionStorage (Blazor Server) — persists across circuits
@@ -42,17 +42,17 @@ namespace ContosoAdmin
 {
     public partial class Dashboard
     {
-    // TODO(bwfc-general): ClientScript calls preserved — uses ClientScriptShim + ScriptManagerShim. Inject @inject ClientScriptShim ClientScript and @inject ScriptManagerShim ScriptManager if not using BaseWebFormsComponent.
-
-    [Inject] private SessionShim Session { get; set; }
+    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
     // --- Request.Form Migration ---
-    // TODO(bwfc-form): Request.Form calls work via FormShim on WebFormsPageBase.
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
     // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
-    [Inject] private NavigationManager NavigationManager { get; set; } // TODO(bwfc-navigation): Add @using Microsoft.AspNetCore.Components to _Imports.razor if needed
+    // --- Response.Redirect Migration ---
+    // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
+    // For non-page classes, inject ResponseShim via DI.
 
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
@@ -88,19 +88,19 @@ namespace ContosoAdmin
         protected void Export_Click()
         {
             var reportPath = GetRouteUrl( /* TODO(bwfc-route-url): converted from Page route lookup – ensure page inherits WebFormsPageBase */ "ReportRoute", new { format = "csv" });
-            NavigationManager.NavigateTo(reportPath) /* TODO(bwfc-navigation): Verify navigation target */;
+            Response.Redirect(reportPath);
         }
 
         protected void Refresh_Click()
         {
-            NavigationManager.NavigateTo("/Admin/Dashboard.aspx");
+            Response.Redirect("/Admin/Dashboard");
         }
 
         protected void Users_RowCommand(GridViewCommandEventArgs e)
         {
             if (e.CommandName == "Select")
             {
-                NavigationManager.NavigateTo("/Admin/UserDetail?id=" + e.CommandArgument) /* TODO(bwfc-navigation): Verify navigation target */;
+                Response.Redirect("/Admin/UserDetail?id=" + e.CommandArgument);
             }
         }
 
