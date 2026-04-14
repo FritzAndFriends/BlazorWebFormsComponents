@@ -209,7 +209,7 @@ public class ServerShimTransformTests
 
         Assert.Contains("MapPath", result);
         Assert.Contains("TODO(bwfc-server): Server.Transfer has NO SHIM", result);
-        Assert.Contains("TODO(bwfc-server): Server.* calls work via ServerShim", result);
+        Assert.Contains("TODO(bwfc-server): Server.* calls work automatically via ServerShim on WebFormsPageBase", result);
     }
 
     [Fact]

@@ -35,7 +35,7 @@ public class RequestFormTransformTests
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Contains("TODO(bwfc-form)", result);
-        Assert.Contains("FormShim", result);
+        Assert.Contains("RequestShim", result);
         Assert.Contains("WebFormsForm", result);
         Assert.Contains("txtName", result);
     }
