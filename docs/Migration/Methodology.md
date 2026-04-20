@@ -33,7 +33,7 @@ Each layer handles a different *kind* of work, not just a different *amount*. Th
 
 Before migrating anything, scan your project to understand what you're working with.
 
-**Tool:** [`scripts/bwfc-scan.ps1`](../scripts/bwfc-scan.ps1)
+**Tool:** [`scripts/bwfc-scan.ps1`](https://github.com/FritzAndFriends/BlazorWebFormsComponents/tree/dev/scripts/bwfc-scan.ps1)
 
 **Input:** Your Web Forms project directory
 **Output:** A readiness report showing:
@@ -53,8 +53,8 @@ The scan report tells you whether BWFC is a good fit before you invest time in m
 
 ## Layer 1: Automated Transforms
 
-**Primary tool:** [`webforms-to-blazor` CLI](../src/BlazorWebFormsComponents.Cli/) — 37 compiled C# transforms with 373 unit tests
-**Alternative:** [`scripts/bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1) — lightweight PowerShell regex transforms (no .NET SDK required)
+**Primary tool:** [`webforms-to-blazor` CLI](https://github.com/FritzAndFriends/BlazorWebFormsComponents/tree/dev/src/BlazorWebFormsComponents.Cli/) — 37 compiled C# transforms with 373 unit tests
+**Alternative:** [`scripts/bwfc-migrate.ps1`](https://github.com/FritzAndFriends/BlazorWebFormsComponents/tree/dev/scripts/bwfc-migrate.ps1) — lightweight PowerShell regex transforms (no .NET SDK required)
 
 Layer 1 handles every transform that can be applied mechanically. The CLI tool applies compiled, unit-tested transforms with a migration report; the PowerShell script provides simpler regex-based transforms for quick starts.
 
@@ -115,7 +115,7 @@ After Layer 1, pages fall into three readiness categories:
 | ⚠️ Needs Layer 2 | ~64% | Structural transforms needed — Copilot handles these |
 | ❌ Needs Layer 3 | ~24% | Architecture decisions required — human judgment needed |
 
-> These percentages are from the [WingtipToys proof-of-concept](../planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md). Your mileage will vary based on how much DataSource/auth/session-state your app uses.
+> These percentages are from the [WingtipToys proof-of-concept](https://github.com/FritzAndFriends/BlazorWebFormsComponents/tree/dev/planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md). Your mileage will vary based on how much DataSource/auth/session-state your app uses.
 
 ---
 
@@ -270,7 +270,7 @@ Don't skip layers. Don't try to do Layer 3 work in Layer 1. The pipeline is desi
 
 ## Time Estimates
 
-Based on the [WingtipToys proof-of-concept](../planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md) (33 pages, 230+ control instances):
+Based on the [WingtipToys proof-of-concept](https://github.com/FritzAndFriends/BlazorWebFormsComponents/tree/dev/planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md) (33 pages, 230+ control instances):
 
 | Layer | Solo Developer | With Copilot/Agents |
 |---|---|---|
@@ -290,6 +290,6 @@ Layer 3 time varies the most because it depends on your application's complexity
 - [Quick Start](QuickStart.md) — the linear "just do it" path through all three layers
 - [Control Coverage](ControlCoverage.md) — what's covered at each complexity level
 - [Migration Checklist](ChecklistTemplate.md) — per-page tracking template organized by layer
-- [Executive report](../planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md) — WingtipToys metrics source
+- [Executive report](https://github.com/FritzAndFriends/BlazorWebFormsComponents/tree/dev/planning-docs/WINGTIPTOYS-MIGRATION-EXECUTIVE-REPORT.md) — WingtipToys metrics source
 
 

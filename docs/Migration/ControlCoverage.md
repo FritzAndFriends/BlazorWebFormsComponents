@@ -420,7 +420,7 @@ DataSource controls are deliberately not covered. They represent a Web Forms-spe
 - [Quick Start](QuickStart.md) — step-by-step migration guide
 - [Methodology](Methodology.md) — why these complexity ratings matter
 - [Copilot Skills](CopilotSkills/Overview.md) — condensed rules for Copilot
-- [Full migration skill](skills/bwfc-migration/SKILL.md) — complete attribute mappings and code examples
+- [Full migration skill](https://github.com/FritzAndFriends/BlazorWebFormsComponents/tree/dev/migration-toolkit/skills/bwfc-migration/SKILL.md) — complete attribute mappings and code examples
 
 
 
