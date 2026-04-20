@@ -54,8 +54,10 @@ class Program
         // Register code-behind transforms in order
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
         services.AddSingleton<ICodeBehindTransform, UsingStripTransform>();
+        services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();
+        services.AddSingleton<ICodeBehindTransform, ClassNameAlignTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();
         services.AddSingleton<ICodeBehindTransform, RequestFormTransform>();
         services.AddSingleton<ICodeBehindTransform, ServerShimTransform>();
@@ -81,6 +83,8 @@ class Program
         // I/O
         services.AddSingleton<OutputWriter>();
         services.AddSingleton<SourceScanner>();
+        services.AddSingleton<StaticFileCopier>();
+        services.AddSingleton<SourceFileCopier>();
 
         // Pipeline
         services.AddSingleton<MigrationPipeline>();

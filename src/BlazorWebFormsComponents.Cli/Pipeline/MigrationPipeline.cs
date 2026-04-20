@@ -17,6 +17,8 @@ public class MigrationPipeline
     private readonly ShimGenerator _shimGenerator;
     private readonly WebConfigTransformer _webConfigTransformer;
     private readonly OutputWriter _outputWriter;
+    private readonly StaticFileCopier? _staticFileCopier;
+    private readonly SourceFileCopier? _sourceFileCopier;
 
     /// <summary>
     /// Full constructor for DI — used by the CLI commands.
@@ -28,7 +30,9 @@ public class MigrationPipeline
         GlobalUsingsGenerator globalUsings,
         ShimGenerator shimGenerator,
         WebConfigTransformer webConfigTransformer,
-        OutputWriter outputWriter)
+        OutputWriter outputWriter,
+        StaticFileCopier staticFileCopier,
+        SourceFileCopier sourceFileCopier)
     {
         _markupTransforms = markupTransforms.OrderBy(t => t.Order).ToList();
         _codeBehindTransforms = codeBehindTransforms.OrderBy(t => t.Order).ToList();
@@ -37,6 +41,8 @@ public class MigrationPipeline
         _shimGenerator = shimGenerator;
         _webConfigTransformer = webConfigTransformer;
         _outputWriter = outputWriter;
+        _staticFileCopier = staticFileCopier;
+        _sourceFileCopier = sourceFileCopier;
     }
 
     /// <summary>
@@ -88,7 +94,22 @@ public class MigrationPipeline
             }
         }
 
-        // Step 4: Generate report
+        // Step 4: Copy static files (CSS, JS, images, fonts) to wwwroot/
+        if (_staticFileCopier != null)
+        {
+            report.StaticFilesCopied = _staticFileCopier.CopyStaticFiles(
+                context.SourcePath, context.OutputPath, context.Options.Verbose);
+        }
+
+        // Step 5: Copy non-page source files (Models, Logic, etc.) with namespace transforms
+        if (_sourceFileCopier != null)
+        {
+            var sourceCount = await _sourceFileCopier.CopySourceFilesAsync(
+                context.SourcePath, context.OutputPath, context.SourceFiles, context.Options.Verbose);
+            report.FilesWritten += sourceCount;
+        }
+
+        // Step 6: Generate report
         report.GeneratedFiles.AddRange(_outputWriter.WrittenFiles);
         report.FilesWritten = _outputWriter.WrittenFiles.Count;
 

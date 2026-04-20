@@ -40,7 +40,7 @@ using System;
 // using System.Configuration; // BWFC provides ConfigurationManager shim
 namespace ContosoAdmin
 {
-    public partial class Dashboard
+    public partial class TC31_ComplexCodeBehind
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 

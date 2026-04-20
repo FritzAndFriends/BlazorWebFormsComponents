@@ -42,6 +42,8 @@ public class PipelineIntegrationTests : IDisposable
         var markupTransforms = (IReadOnlyList<BlazorWebFormsComponents.Cli.Transforms.IMarkupTransform>)markupField.GetValue(transforms)!;
         var codeBehindTransforms = (IReadOnlyList<BlazorWebFormsComponents.Cli.Transforms.ICodeBehindTransform>)codeBehindField.GetValue(transforms)!;
 
+        var outputWriter = writer ?? new OutputWriter();
+
         return new MigrationPipeline(
             markupTransforms,
             codeBehindTransforms,
@@ -49,7 +51,9 @@ public class PipelineIntegrationTests : IDisposable
             new GlobalUsingsGenerator(),
             new ShimGenerator(),
             new WebConfigTransformer(),
-            writer ?? new OutputWriter());
+            outputWriter,
+            new StaticFileCopier(outputWriter),
+            new SourceFileCopier(outputWriter, codeBehindTransforms));
     }
 
     private (string inputDir, string outputDir) CreateTempProjectDir(
