@@ -11,6 +11,13 @@ public class FileMetadata
     public required string OriginalContent { get; init; }
     public string? CodeBehindContent { get; set; }
     public Dictionary<string, string> DataBindMap { get; set; } = new();
+
+    /// <summary>
+    /// Maps control ID → Blazor component type name (e.g., "lblStatus" → "Label", "gvData" → "GridView&lt;object&gt;").
+    /// Populated by ComponentRefMarkupTransform, consumed by ComponentRefCodeBehindTransform.
+    /// </summary>
+    public Dictionary<string, string> ComponentRefs { get; set; } = new();
+
     public string FileName => Path.GetFileNameWithoutExtension(SourceFilePath);
 }
 

@@ -46,6 +46,7 @@ class Program
         services.AddSingleton<IMarkupTransform, AspPrefixTransform>();
         services.AddSingleton<IMarkupTransform, AttributeStripTransform>();
         services.AddSingleton<IMarkupTransform, EventWiringTransform>();
+        services.AddSingleton<IMarkupTransform, ComponentRefMarkupTransform>();
         services.AddSingleton<IMarkupTransform, UrlReferenceTransform>();
         services.AddSingleton<IMarkupTransform, TemplatePlaceholderTransform>();
         services.AddSingleton<IMarkupTransform, AttributeNormalizeTransform>();
@@ -58,6 +59,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();
         services.AddSingleton<ICodeBehindTransform, ClassNameAlignTransform>();
+        services.AddSingleton<ICodeBehindTransform, ComponentRefCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();
         services.AddSingleton<ICodeBehindTransform, RequestFormTransform>();
         services.AddSingleton<ICodeBehindTransform, ServerShimTransform>();
