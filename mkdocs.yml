@@ -190,6 +190,9 @@ nav:
     - WebFormsForm: UtilityFeatures/WebFormsForm.md
   - Migration:
       - Getting Started: Migration/readme.md
+      - Quick Start Guide: Migration/QuickStart.md
+      - Three-Layer Methodology: Migration/Methodology.md
+      - Control Coverage: Migration/ControlCoverage.md
       - Strangler Fig Pattern: Migration/StranglerFigPattern.md
       - Phase 1 - Compilation Shims:
           - ConfigurationManager: Migration/Phase1-ConfigurationManager.md
@@ -218,6 +221,12 @@ nav:
           - Deferred Controls: Migration/DeferredControls.md
           - Themes and Skins: Migration/ThemesAndSkins.md
           - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
+      - Copilot Skills (AI-Assisted):
+          - Overview: Migration/CopilotSkills/Overview.md
+          - Core Migration: Migration/CopilotSkills/CoreMigration.md
+          - Identity & Auth: Migration/CopilotSkills/IdentityMigration.md
+          - Data & Architecture: Migration/CopilotSkills/DataMigration.md
+      - Migration Checklist Template: Migration/ChecklistTemplate.md
   - Migration Tests:
       - Overview: migration-tests/README.md
       - WingtipToys 2026-03-04: migration-tests/wingtiptoys-2026-03-04/report.md

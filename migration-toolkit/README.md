@@ -1,5 +1,7 @@
 # BWFC Migration Toolkit
 
+> 📖 **Full documentation:** [fritzandfriends.github.io/BlazorWebFormsComponents/](https://fritzandfriends.github.io/BlazorWebFormsComponents/) — the comprehensive migration guide, methodology, and component reference.
+
 **Migrate your ASP.NET Web Forms application to Blazor — systematically, not heroically.**
 
 This toolkit packages everything you need to take a Web Forms app and bring it to Blazor using the [BlazorWebFormsComponents](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents) (BWFC) library. It combines automated scripts, shim infrastructure, Copilot skills, and a decision-making agent into a three-layer pipeline that handles ~90% of migration work mechanically or with AI assistance, leaving you to focus on the architecture decisions that actually need a human.
