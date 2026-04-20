@@ -6,19 +6,29 @@ on:
       - 'main'
       - 'dev'
       - 'v*'
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'mkdocs.yml'
+    paths:
+      - 'src/**'
+      - 'samples/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - '.github/workflows/build.yml'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'nuget.config'
   pull_request:
     branches:
       - 'main'
       - 'dev'
       - 'v*'
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'mkdocs.yml'
+    paths:
+      - 'src/**'
+      - 'samples/**'
+      - 'tests/**'
+      - 'scripts/**'
+      - '.github/workflows/build.yml'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'nuget.config'
   workflow_dispatch:
 
 

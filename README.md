@@ -8,14 +8,24 @@ A collection of Blazor components that are drop-in replacements for the ASP.NET 
 
 [Live Samples running on Azure](https://blazorwebformscomponents.azurewebsites.net)
 
+## Documentation Site
+
+The [documentation site](https://fritzandfriends.github.io/BlazorWebFormsComponents/) covers every component, migration guides, and the Three-Layer Methodology for moving Web Forms apps to Blazor.
+
+### Docs Homepage
+![Docs Site Homepage](docs/images/docs-site-homepage.png)
+
+### Migration Methodology with Mermaid Diagrams
+![Migration Methodology](docs/images/docs-site-migration.png)
+
 ## Sample Site
 
-The sample site showcases all components with interactive examples, code snippets, and a searchable catalog.
+The [live sample site](https://blazorwebformscomponents.azurewebsites.net) showcases all components with interactive examples, code snippets, and a searchable catalog.
 
 ### Homepage & Component Catalog
 ![Sample Site Homepage](docs/images/sample-site-homepage.png)
 
-### GridView with Interactive Data
+### GridView with Paging
 ![GridView Sample](docs/images/sample-site-gridview.png)
 
 ### Chart Component with Chart.js
