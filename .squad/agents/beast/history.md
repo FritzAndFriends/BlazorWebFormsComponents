@@ -94,6 +94,31 @@
 - Three-tab format (Before/After/Alternative) works well for complex migration scenarios with multiple approaches
 - Consistent tab naming ("Web Forms" / "Blazor") improves developer navigation across multiple documentation pages
 
+## Learnings — Documentation Consolidation Audit (2026-03-XX)
+
+**Session (by Beast):**
+- Conducted comprehensive audit of all documentation locations: 471 total markdown files across docs/, dev-docs/, migration-toolkit/, and root level
+- Key findings:
+  - `docs/` (170 files, ~1.9 MB) published to GitHub Pages ✅
+  - `dev-docs/` (285 files, ~10 MB) internal/archival, not published
+  - `migration-toolkit/` (16 files) valuable methodology but hidden from main site
+  - Current MkDocs + Material theme working perfectly; no technology change needed
+
+- Evaluated three consolidation approaches:
+  - Option A (MkDocs-Only): Integrate migration-toolkit into docs/Migration/ — RECOMMENDED ⭐
+    - Achieves goal of single unified website
+    - ~3 hours implementation, zero deployment risk
+    - Current docs.yml workflow unchanged
+    - Makes migration strategies discoverable to end users
+  - Option B (Docusaurus/Hugo): Too much effort for gains; requires complete rewrite + new tooling
+  - Option C (Hybrid sites): Contradicts "single website" goal; increases maintenance
+
+- GitHub Pages hosting confirmed optimal: gh-pages branch strategy works well. Versioning (via `mike`) can be added later if needed (low priority for now)
+
+- **Key insight:** Consolidation is primarily a discoverability/navigation problem, not a technology problem. MkDocs handles everything needed. Focus should be on integrating content into coherent nav structure.
+
+- Full consolidation plan documented with step-by-step implementation, risk assessment, and maintenance guidelines: `.squad/decisions/inbox/beast-docs-consolidation-plan.md`
+
 ## Learnings — WebFormsForm Documentation (2026-XX)
 
 **Session (by Beast):**

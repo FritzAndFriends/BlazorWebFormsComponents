@@ -21,7 +21,55 @@ Forge has been Lead/Web Forms Reviewer since 2026-02-10. Key historical context:
 
 ## Learnings
 
-📌 **Team update (2026-04-12):** Shim documentation comprehensive across skills & CLI — SelectMethod contradiction resolved (prefer delegate), IsPostBack/PostBack clarified, SessionShim confirmed P0 blocker for WingtipToys, 3 CLI transforms added (ConfigurationManager, RequestForm, ServerShim), 373/373 tests passing. — decided by Psylocke, Forge, Bishop
+📌 **Project Re-Evaluation (2026-04-13):** All 52 components ship-ready. Migration toolkit mature (14 shims, 37 CLI transforms, 388 tests passing). Ready for v0.19.0 release pending documentation consolidation (P0 gap: migration-toolkit/ docs scattered across 3 locations, need sync). Remaining gaps: Layer 1 validation, unsupported control warnings, identity sample, EF6→EF Core automation. Post-release priorities clear. Full assessment: .squad/decisions/inbox/forge-project-reevaluation.md — decided by Forge
+
+### Project Transition Analysis (2026-04-13)
+
+**Key Finding: Project Phase Shift Complete**
+
+The BlazorWebFormsComponents project has successfully transitioned from "building components" (Milestones 1–17) to "making migration easy and reliable" (current phase, Milestone 18+). All 52 buildable components are complete, tested, documented, and live. The focus now shifts to operational maturity:
+
+**What's Done (Component Layer):**
+- 52/52 buildable Web Forms components shipped
+- 2/2 components intentionally deferred (Substitution, Xml — no Blazor equivalent)
+- All controls documented with interactive samples
+- Test coverage: 388 CLI tests passing; component unit tests presumed good (not counted in current run)
+- Live samples active at blazorwebformscomponents.azurewebsites.net
+
+**What's Done (Migration Shim Infrastructure):**
+- 14 shims mature: WebFormsPageBase, RequestShim, ResponseShim, SessionShim, ClientScriptShim, CacheShim, ServerShim, ConfigurationManager, FormShim, ViewStateDictionary, WebFormsForm, PostBack, BundleConfig, RouteConfig
+- Dual-mode support (SSR + interactive Blazor Server) complete for FormShim, SessionShim
+- All shims tested via WingtipToys (96.6% coverage, 178 control instances) and Contoso benchmarks (97.5% pass rate)
+
+**What's Done (Migration Toolkit):**
+- Layer 1: bwfc-migrate.ps1 + CLI tool with 37 deterministic transforms, 373 unit tests, migration report schema
+- Layer 2: 5 Copilot skills (bwfc-migration, identity, data, performance, standards) with shim-first guidance
+- Layer 3: WebFormsPageBase pattern proven on real applications
+- Gap detection added (Server.Transfer, HttpContext.Current.Session, ThreadAbortException)
+
+**What's NOT Done Yet (Post-Release Work):**
+- Layer 1 validation script (bwfc-validate.ps1) — detects syntax errors, unsupported controls, generates coverage report
+- Extended gap detection — currently covers 3 high-priority gaps; needs expansion to DataSourceID, MailDefinition, etc.
+- Test coverage reporting — metric unknown; need code coverage dashboards (target ≥90%)
+- Documentation consolidation — migration-toolkit/ docs scattered across 3 locations (migration-toolkit/, .squad/skills/, .github/), need single source of truth
+- Identity pattern sample — bwfc-identity-migration skill exists but not proven on real app
+
+**Strategic Decision Made:**
+The project is **release-ready for v0.19.0** but recommend holding for 1–2 weeks to consolidate documentation and write release notes. Code quality is excellent; DX polish is worth the delay.
+
+**Timeline Recommendation:**
+- **This week:** Release hold; fix P0 gaps (doc consolidation, changelog)
+- **Weeks 1–4 post-release:** Layer 1 validation, extended gap detection, test coverage dashboards
+- **Weeks 5–8:** Identity sample app, EF6→EF Core automation
+- **Weeks 9–12:** Optional: NuGet static asset migration, team collaboration templates
+
+**Key Metrics (Post-Release Success Indicators):**
+- Migration success rate: ≥95% for typical CRUD apps (measured via Contoso + WingtipToys benchmarks)
+- Time per page: Reduce from 0.5–1 hr to 0.25–0.5 hrs with better validation + identity patterns
+- Support questions: <2 "documentation confusion" issues/month
+- Code coverage: ≥90% by v0.20.0
+
+**Artifact:** Full assessment written to .squad/decisions/inbox/forge-project-reevaluation.md (6 sections: current state, gaps, release readiness, next priorities, metrics, recommendations)
 
 ### WingtipToys Shim Gap Analysis (2026-03-30)
 

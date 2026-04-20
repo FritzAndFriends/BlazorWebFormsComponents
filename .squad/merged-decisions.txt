@@ -1,0 +1,178 @@
+
+---
+
+### 2026-04-07: User Directive  Avoid Security Topics
+
+**By:** Jeffrey T. Fritz (via Copilot)  
+**Date:** 2026-04-07  
+**Status:** Directive  
+
+**What**
+
+Avoid security topics (auth, identity, FormsAuthentication, Membership/Roles) for now — they can get gnarly.
+
+**Why**
+
+User request. Captured for team memory to avoid scope creep on complex authentication/identity patterns.
+
+---
+
+### 2026-07-24: SSR Opt-Out Pattern via ExcludeFromInteractiveRouting
+
+**By:** Cyclops  
+**Date:** 2026-07-24  
+**Status:** Implemented  
+
+**What**
+
+Modified App.razor to use HttpContext.AcceptsInteractiveRouting() for conditional render mode assignment. Pages that need SSR add @attribute [ExcludeFromInteractiveRouting]  the standard Microsoft pattern for .NET 8+.
+
+**Why**
+
+The sample app uses @rendermode="InteractiveServer" on <Routes> in App.razor, meaning all pages run interactively via SignalR. Pages that need real HTTP POST (like the Request.Form demo) can't function because there's no form data in interactive mode.
+
+**Impact**
+
+Non-breaking. All existing pages continue as InteractiveServer. Only pages explicitly decorated with the attribute will render as SSR. Any future sample page or migration demo that needs real HTTP request/response semantics (form POSTs, Request.Form, Request.Cookies during POST, etc.) should use this same attribute.
+
+---
+
+### 2026-07-31: FormShim wraps IFormCollection with Null-Safe Degradation
+
+**By:** Cyclops  
+**Date:** 2026-07-31  
+**Status:** Implemented  
+
+**What**
+
+Created FormShim as a public class (not an interface implementation) that wraps IFormCollection? and provides NameValueCollection-like API. The RequestShim.Form property follows the same graceful degradation pattern as Cookies:
+
+1. **SSR mode (HttpContext available):** wraps HttpContext.Request.Form via FormShim
+2. **Non-form-encoded requests:** catches InvalidOperationException  returns empty FormShim(null)
+3. **Interactive mode (no HttpContext):** logs warning once  returns empty FormShim(null)
+
+**Why**
+
+Migrated Web Forms code-behind frequently uses Request.Form["fieldName"] to read POST data. The existing RequestShim had Cookies, QueryString, and Url but no Form.
+
+FormShim targets NameValueCollection semantics (Web Forms API), not IFormCollection (ASP.NET Core API). The indexer, GetValues(), AllKeys surface matches what migrated code actually calls. Implementing IFormCollection would add unnecessary API surface and file upload concerns.
+
+**Impact**
+
+- Unblocks any migrated code-behind that reads Request.Form["key"]
+- No breaking changes  new property on existing class
+
+---
+
+### 2026-04-13: Documentation Consolidation Plan  Option A Recommended
+
+**By:** Beast (Technical Writer)  
+**Date:** 2026-04-13  
+**Status:** Recommended  
+**Requested by:** Jeffrey T. Fritz
+
+**What**
+
+Consolidate 471 markdown files scattered across 4 documentation locations under a single MkDocs site. **Option A (MkDocs-Only)** is recommended:
+
+- Keep docs/ folder (170 files) as-is (already published to GitHub Pages)
+- Integrate migration-toolkit/ (16 files) into docs/Migration/ section
+- Keep dev-docs/ internal (285 files; don't publish)
+- Update mkdocs.yml to include new Migration subsections: Quick Start, Methodology, Copilot Skills, Control Coverage, Checklist
+
+**Why**
+
+BlazorWebFormsComponents currently has only the docs/ folder published. The migration-toolkit/ contains critical methodology and skill documentation that should be discoverable by end users. dev-docs/ is internal research/architecture  not suitable for public consumption.
+
+Option A achieves unified documentation without breaking existing infrastructure:
+-  Minimal changes (file moves + mkdocs.yml updates)
+-  No new tooling (MkDocs already works perfectly)
+-  Migration methodology becomes discoverable
+-  Skill frontmatter auto-linked in nav
+-  Backward compatible with current CI/CD
+-  Timeline: 23 hours
+
+Alternatives rejected:
+- **Option B (Docusaurus/Hugo):** Overkill. Requires rewrite, team learning curve, breaks existing workflow. Defer if BWFC needs versioning post-release.
+- **Option C (Hybrid two-site):** Contradicts goal of single website; doubles maintenance and SEO complexity.
+
+**Implementation Steps**
+
+1. Copy migration-toolkit/*.md into docs/Migration/ (2 hrs)
+2. Update mkdocs.yml nav to add Copilot Skills section (30 min)
+3. Test MkDocs build (30 min)
+4. Update docs/README.md with new structure
+5. Update CI/CD if needed (none needed; docs.yml continues to work)
+
+**Impact**
+
+- Single unified documentation site for components + migration methodology + CLI/skills
+- 16 migration-toolkit files now discoverable
+- dev-docs remains internal (add .gitignore rule)
+- migration-toolkit/scripts/ linked from docs (users copy whole folder)
+
+---
+
+### 2026-04-13: Project Re-Evaluation  Release Readiness Assessment
+
+**By:** Forge (Lead / Web Forms Reviewer)  
+**Date:** 2026-04-13  
+**Status:** Assessment  
+**Requested by:** Jeffrey T. Fritz
+
+**What**
+
+Comprehensive assessment of BlazorWebFormsComponents project status: all 52 buildable components are shipped, 14 shims mature, CLI has 37 transforms with 388 passing tests, migration toolkit proven on ContosoUniversity and WingtipToys. **Project is release-ready within 46 weeks if prioritized correctly.**
+
+**Key Metrics**
+
+- **Components:** 52 total (25 editor, 9 data, 8 validation, 3 navigation, 7 login controls)  all ship-ready
+- **Shims:** 14 (WebFormsPageBase, RequestShim, ResponseShim, SessionShim, ClientScriptShim, CacheShim, ServerShim, ConfigurationManager, BundleConfig, RouteConfig, FormShim, ViewStateDictionary, WebFormsForm, PostBack infrastructure)
+- **CLI Transforms:** 37 deterministic transforms; 388 tests passing (373 for transforms)
+- **Integration Tests:** Playwright acceptance suite on AfterBlazorServerSide (live at blazorwebformscomponents.azurewebsites.net)
+- **Migration Benchmarks:** Contoso run 22 (97.5% pass, 52 pages); WingtipToys (178 control instances, 96.6% coverage)
+- **Documentation:** 90% ready; MkDocs live with all components documented
+
+**Release Blockers**
+
+None identified. Project is release-ready once prioritized.
+
+**High-Priority Gaps (P0)**
+
+1. **Migration Toolkit Documentation Sync**  Skills docs scattered across 3 locations (.squad/skills/, migration-toolkit/skills/, decisions.md); recommend merge + sync (46 hrs)
+2. **CLI Tool Lifecycle Documentation**  README outdated; unclear when to use CLI vs. PS script (23 hrs)
+3. **Layer 1 Validation Script Missing**  No wfc-validate.ps1; unsupported controls produce no warnings (68 hrs)
+4. **Unsupported Control Detection**  DataSource, Wizard, ScriptManager, ProxyWebPartManager, etc. not flagged (4–5 hrs)
+
+**Strategic Priorities (Post-Release)**
+
+**Phase A (Weeks 14: Documentation & Stabilization)**
+- Fix documentation sync (Gap 1)
+- Update CLI README (Gap 2)
+- Archive dev-docs from publication (separate branch or .gitignore)
+
+**Phase B (Weeks 58: Testing & Validation Depth)**
+- Implement Layer 1 validation script (Gap 3)
+- Add test coverage reporting to CI (Gap 5)
+- Create identity pattern sample (Gap 7)
+
+**Phase C (Weeks 912: Toolkit Enhancement)**
+- Enhance gap detection for unsupported controls (Gap 4)
+- Resolve SelectMethod handling ambiguity (Gap 6)
+- Extract EDMXEF Core converter (Gap 8)
+
+**Phase D (Weeks 13+: Long-Term)**
+- Implement NuGet static asset migration (Gap 9; low priority)
+- Add Layer 2 progress tracking UI (Gap 10; low priority)
+
+**Why**
+
+Project shifted from component-building to operational readiness. Focus is now on documentation quality, migration toolkit polish, and release procedures. All technical debt is known and prioritized. Next 6 weeks should focus on P0 gaps (documentation + validation) before declaring 1.0.0 stable.
+
+**Impact**
+
+- Release v0.19.0  v1.0.0 achievable in 46 weeks
+- Documentation consolidation (Beast/scribe merge) unblocks migration toolkit visibility
+- Validation script catches real-world gaps early (improves customer experience)
+- Test coverage reporting gives confidence in quality
+
