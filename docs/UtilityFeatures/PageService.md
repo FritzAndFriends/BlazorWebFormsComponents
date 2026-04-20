@@ -30,19 +30,19 @@ These properties automatically updated the HTML `<title>` and `<meta>` elements 
 
 The Page system uses three complementary pieces:
 
+```mermaid
+flowchart LR
+    A["<b>WebFormsPageBase</b>\n<i>(code-behind API)</i>\n\n• Title\n• MetaDescription\n• MetaKeywords\n• IsPostBack\n• Page (self-ref)"]
+    B["<b>IPageService</b>\n<i>(scoped bridge)</i>\n\n• Title\n• MetaDescription\n• MetaKeywords\n• Change events"]
+    C["<b>WebFormsPage</b>\n<i>(layout wrapper)</i>\n\n• &lt;PageTitle&gt;\n• &lt;meta&gt; tags\n• NamingContainer\n• ThemeProvider"]
+
+    A -->|writes| B -->|reads| C
+
+    style A fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style B fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style C fill:#fff3e0,stroke:#e65100,stroke-width:2px
 ```
-┌──────────────────────┐       ┌──────────────────┐       ┌──────────────────┐
-│   WebFormsPageBase   │       │   IPageService    │       │  WebFormsPage    │
-│   (code-behind API)  │──────▶│   (scoped bridge) │──────▶│  (layout wrapper)│
-│                      │ writes│                   │ reads │                  │
-│ • Title              │       │ • Title           │       │ • <PageTitle>    │
-│ • MetaDescription    │       │ • MetaDescription │       │ • <meta> tags    │
-│ • MetaKeywords       │       │ • MetaKeywords    │       │ • NamingContainer│
-│ • IsPostBack         │       │ • Change events   │       │ • ThemeProvider  │
-│ • Page (self-ref)    │       │                   │       │                  │
-└──────────────────────┘       └──────────────────┘       └──────────────────┘
-     Your pages inherit              DI service               In your layout
-```
+*Your pages inherit _ _ _ _ DI service _ _ _ _ In your layout*
 
 | Piece | Role | Where it lives |
 |---|---|---|

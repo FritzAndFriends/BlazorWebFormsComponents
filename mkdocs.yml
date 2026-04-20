@@ -42,7 +42,11 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.tabbed:
       alternate_style: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
@@ -54,6 +58,7 @@ plugins:
       glob:
         - "_overrides/*"
         - "Dockerfile"
+        - "migration-tests/*"
   - git-revision-date-localized:
       type: iso_datetime
   - macros
@@ -227,9 +232,6 @@ nav:
           - Identity & Auth: Migration/CopilotSkills/IdentityMigration.md
           - Data & Architecture: Migration/CopilotSkills/DataMigration.md
       - Migration Checklist Template: Migration/ChecklistTemplate.md
-  - Migration Tests:
-      - Overview: migration-tests/README.md
-      - WingtipToys 2026-03-04: migration-tests/wingtiptoys-2026-03-04/report.md
   - Analyzers:
       - BWFC022: Analyzers/BWFC022.md
       - BWFC023: Analyzers/BWFC023.md

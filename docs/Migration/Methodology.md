@@ -6,20 +6,17 @@
 
 ## Pipeline Overview
 
-```
-┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
-│    Layer 1           │    │    Layer 2           │    │    Layer 3           │
-│    AUTOMATED         │───▶│    COPILOT-ASSISTED  │───▶│    ARCHITECTURE      │
-│    + SHIMS           │    │                      │    │                      │
-│  webforms-to-blazor   │    │  Copilot + Skill     │    │  Human + Copilot     │
-│  CLI or PS1 script    │    │                      │    │                      │
-│  ~60% of work        │    │  ~30% of work        │    │  ~10% of work        │
-│  ~30 seconds         │    │  ~1–3 hours          │    │  ~8–12 hours         │
-│  100% accuracy       │    │  High accuracy       │    │  Requires judgment   │
-└─────────────────────┘    └─────────────────────┘    └─────────────────────┘
-         │                          │                          │
-    Mechanical                 Structural                 Semantic
-    transforms                 transforms                 decisions
+```mermaid
+flowchart LR
+    L1["<b>Layer 1</b>\nAUTOMATED + SHIMS\n\n<i>webforms-to-blazor</i>\n<i>CLI or PS1 script</i>\n\n~60% of work\n~30 seconds\n100% accuracy"]
+    L2["<b>Layer 2</b>\nCOPILOT-ASSISTED\n\n<i>Copilot + Skill</i>\n\n~30% of work\n~1–3 hours\nHigh accuracy"]
+    L3["<b>Layer 3</b>\nARCHITECTURE\n\n<i>Human + Copilot</i>\n\n~10% of work\n~8–12 hours\nRequires judgment"]
+
+    L1 -->|Structural\ntransforms| L2 -->|Semantic\ndecisions| L3
+
+    style L1 fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style L2 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style L3 fill:#fff3e0,stroke:#e65100,stroke-width:2px
 ```
 
 Each layer handles a different *kind* of work, not just a different *amount*. The boundary between layers is defined by what type of intelligence is required:
