@@ -5,7 +5,7 @@ public partial class Forgot
 {
     private string Email { get; set; } = "";
 
-    private void Forgot_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void Forgot_Click(EventArgs e)
     {
         // TODO: Implement with UserManager
     }

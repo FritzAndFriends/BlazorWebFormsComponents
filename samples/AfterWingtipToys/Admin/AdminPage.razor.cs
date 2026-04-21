@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using WingtipToys.Data;
 using WingtipToys.Models;
 
 namespace WingtipToys.Admin;
@@ -30,14 +31,14 @@ public partial class AdminPage
             _removeStatus = "Product removed!";
     }
 
-    private async Task AddProductButton_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private async Task AddProductButton_Click(EventArgs e)
     {
         // TODO: Implement file upload and product add with IWebHostEnvironment for image saving
         _addStatus = "TODO: File upload not yet implemented in Blazor migration";
         await Task.CompletedTask;
     }
 
-    private async Task RemoveProductButton_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private async Task RemoveProductButton_Click(EventArgs e)
     {
         // TODO: Read selected value from DropDownRemoveProduct and remove product
         // using var db = DbFactory.CreateDbContext();

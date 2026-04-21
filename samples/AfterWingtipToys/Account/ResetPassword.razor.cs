@@ -6,7 +6,7 @@ public partial class ResetPassword
     private string Email { get; set; } = "";
     private string Password { get; set; } = "";
 
-    private void Reset_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void Reset_Click(EventArgs e)
     {
         // TODO: Implement with UserManager
     }

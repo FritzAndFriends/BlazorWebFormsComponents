@@ -6,7 +6,7 @@ public partial class Login
     private string Email { get; set; } = "";
     private string Password { get; set; } = "";
 
-    private void LogIn(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void LogIn(EventArgs e)
     {
         // TODO: Implement with SignInManager
     }

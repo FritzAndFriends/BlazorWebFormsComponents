@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using WingtipToys.Data;
 using WingtipToys.Models;
 
 namespace WingtipToys.Checkout;
@@ -20,7 +21,7 @@ public partial class CheckoutReview
         await Task.CompletedTask;
     }
 
-    private void CheckoutConfirm_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void CheckoutConfirm_Click(EventArgs e)
     {
         // TODO: Implement PayPal DoCheckoutPayment flow
         NavigationManager.NavigateTo("/CheckoutComplete");

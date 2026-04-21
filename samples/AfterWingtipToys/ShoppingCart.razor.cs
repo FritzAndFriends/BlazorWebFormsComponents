@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using WingtipToys.Data;
 using WingtipToys.Models;
 
 namespace WingtipToys;
@@ -47,13 +48,15 @@ public partial class ShoppingCart
     private IQueryable<CartItem> GetShoppingCartItems(
         int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
     {
-        using var db = DbFactory.CreateDbContext();
+        var db = DbFactory.CreateDbContext();
         var cartId = GetCartId();
         var query = db.ShoppingCartItems
             .Where(c => c.CartId == cartId)
             .Include(c => c.Product);
         totalRowCount = query.Count();
-        return query;
+        var results = query.ToList();
+        db.Dispose();
+        return results.AsQueryable();
     }
 
     private string GetCartId()
@@ -69,13 +72,13 @@ public partial class ShoppingCart
         return newCartId;
     }
 
-    private async Task UpdateBtn_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private async Task UpdateBtn_Click(EventArgs e)
     {
         // TODO: Implement cart update logic — read quantities from form, update DB
         await LoadCart();
     }
 
-    private void CheckoutBtn_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void CheckoutBtn_Click(EventArgs e)
     {
         // TODO: Implement PayPal checkout start — store payment amount and redirect
         NavigationManager.NavigateTo("/CheckoutStart");

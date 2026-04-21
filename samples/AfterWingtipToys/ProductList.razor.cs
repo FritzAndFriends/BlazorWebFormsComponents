@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using WingtipToys.Data;
 using WingtipToys.Models;
 
 namespace WingtipToys;
@@ -17,7 +18,7 @@ public partial class ProductList
     private IQueryable<Product> GetProducts(
         int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
     {
-        using var db = DbFactory.CreateDbContext();
+        var db = DbFactory.CreateDbContext();
         IQueryable<Product> query = db.Products.Include(p => p.Category);
 
         if (CategoryId.HasValue && CategoryId > 0)
@@ -32,7 +33,9 @@ public partial class ProductList
         }
 
         totalRowCount = query.Count();
-        return query;
+        var results = query.ToList();
+        db.Dispose();
+        return results.AsQueryable();
     }
 
     protected override async Task OnInitializedAsync()

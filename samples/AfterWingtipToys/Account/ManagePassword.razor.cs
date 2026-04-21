@@ -5,12 +5,12 @@ public partial class ManagePassword
 {
     private string Password { get; set; } = "";
 
-    private void SetPassword_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void SetPassword_Click(EventArgs e)
     {
         // TODO: Implement with UserManager
     }
 
-    private void ChangePassword_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void ChangePassword_Click(EventArgs e)
     {
         // TODO: Implement with UserManager
     }

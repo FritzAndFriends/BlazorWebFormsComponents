@@ -6,7 +6,7 @@ public partial class RegisterExternalLogin
     private string ProviderName { get; set; } = "";
     private string Email { get; set; } = "";
 
-    private void LogIn_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void LogIn_Click(EventArgs e)
     {
         // TODO: Implement with UserManager/SignInManager
     }

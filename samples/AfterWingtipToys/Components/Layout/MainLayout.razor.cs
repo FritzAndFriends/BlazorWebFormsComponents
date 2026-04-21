@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
+using WingtipToys.Data;
 using WingtipToys.Models;
 
 namespace WingtipToys.Components.Layout;

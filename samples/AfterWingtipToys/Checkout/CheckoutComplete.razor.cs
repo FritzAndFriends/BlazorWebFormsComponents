@@ -17,7 +17,7 @@ public partial class CheckoutComplete
         await Task.CompletedTask;
     }
 
-    private void Continue_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void Continue_Click(EventArgs e)
     {
         NavigationManager.NavigateTo("/");
     }

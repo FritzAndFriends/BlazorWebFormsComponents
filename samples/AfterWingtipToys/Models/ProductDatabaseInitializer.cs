@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
+using WingtipToys.Data;
+
 namespace WingtipToys.Models;
 
 public static class ProductDatabaseInitializer

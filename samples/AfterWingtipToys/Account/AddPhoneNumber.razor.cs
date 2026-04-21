@@ -5,7 +5,7 @@ public partial class AddPhoneNumber
 {
     private string Phone { get; set; } = "";
 
-    private void PhoneNumber_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+    private void PhoneNumber_Click(EventArgs e)
     {
         // TODO: Implement with UserManager
     }
