@@ -17569,3 +17569,55 @@ Project shifted from component-building to operational readiness. Focus is now o
 - Test coverage reporting gives confidence in quality
 
 
+
+---
+
+### Decision: Updated .targets Global Usings for Validations and Identity Namespaces
+
+**Date:** 2025-07-15  
+**Decided by:** Cyclops (Component Dev)  
+**Status:** Implemented
+
+## Context
+
+The Fritz.BlazorWebFormsComponents NuGet package uses .targets files to inject global using directives into consuming projects, enabling migrated Web Forms code-behinds to compile with minimal changes. Two issues were identified:
+
+1. **Missing Validations namespace:** 10 CS0246 compiler errors occurred when migrated code used `RequiredFieldValidator` and `RegularExpressionValidator` without explicit using statements
+2. **Identity namespace ambiguity:** The `BlazorWebFormsComponents.Identity` namespace contains shim types (IdentityUser, IdentityResult, UserLoginInfo) with identical names to `Microsoft.AspNetCore.Identity` types, causing CS0104 ambiguity errors in real migration projects that reference both
+
+## Decision
+
+Modified both .targets files (build/ and buildTransitive/) to:
+
+1. **Add** `<Using Include="BlazorWebFormsComponents.Validations" />` to global usings
+2. **Remove** `<Using Include="BlazorWebFormsComponents.Identity" />` from global usings
+
+The migration CLI will inject `using BlazorWebFormsComponents.Identity;` statements on a per-file basis only into files that actually need the Identity shims, avoiding the global namespace pollution.
+
+## Final Global Usings
+
+```xml
+<ItemGroup>
+  <Using Include="BlazorWebFormsComponents" />
+  <Using Include="BlazorWebFormsComponents.LoginControls" />
+  <Using Include="BlazorWebFormsComponents.Validations" />
+  <Using Include="BlazorWebFormsComponents.EntityFramework" />
+</ItemGroup>
+```
+
+## Rationale
+
+- **Validations:** Validation controls are extremely common in Web Forms applications (almost every form has at least one validator). Making them globally available reduces friction during migration.
+- **Identity:** The Identity shims are only needed in specific scenarios (membership/login pages, user management). Making them opt-in via CLI injection prevents type ambiguity while still supporting the migration path.
+
+## Files Modified
+
+- `src/BlazorWebFormsComponents/build/Fritz.BlazorWebFormsComponents.targets`
+- `src/BlazorWebFormsComponents/buildTransitive/Fritz.BlazorWebFormsComponents.targets`
+
+Both files maintained identical content to ensure consistent behavior for transitive and direct package references.
+
+## Verification
+
+Build completed successfully with 0 errors and 358 warnings (expected baseline).
+

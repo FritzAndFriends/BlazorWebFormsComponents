@@ -262,3 +262,79 @@ TC19 (lifecycle) and TC20/TC21 (event handlers) are dedicated test cases for the
 4. Time estimates reduced: Layer 2 with Copilot from 2-4 hours to 1-3 hours reflecting reduced manual work.
 
 **Files Modified**: migration-toolkit/METHODOLOGY.md, CHECKLIST.md, QUICKSTART.md, README.md, CONTROL-COVERAGE.md
+## Learnings
+
+### MethodNameCollisionTransform Implementation (2026-04-13)
+
+**Task**: Created MethodNameCollisionTransform to resolve CS0542 compiler errors when methods have the same name as their enclosing class (e.g., class Forgot with method void Forgot()).
+
+**Architecture: MarkupContent Bridge Pattern**:
+1. Modified FileMetadata.cs to add MarkupContent property  a nullable string that code-behind transforms can read and modify
+2. Modified MigrationPipeline.ProcessSourceFileAsync to set metadata.MarkupContent = markup AFTER markup transforms, BEFORE code-behind transforms
+3. Pipeline now writes metadata.MarkupContent ?? markup as final markup, allowing code-behind transforms to retroactively update markup
+4. This solves a fundamental problem: code-behind transforms run AFTER markup transforms, so they couldn't update markup references... until now
+
+**Transform Logic** (Order 215, after ClassNameAlignTransform at 210):
+1. Extract class name from partial class (\w+) pattern
+2. Find methods matching class name with return types (void/Task/Task<T>/async variants)  excludes constructors
+3. Rename method to On{ClassName} in code-behind (signature + internal calls)
+4. Update metadata.MarkupContent  replace "@{ClassName}" with "@On{ClassName}" in markup attribute values
+
+**Test Coverage** (9 tests, all passing):
+- Method collision renamed (void Forgot()  void OnForgot())
+- Markup content updated (OnClick="@Forgot"  OnClick="@OnForgot")
+- Non-colliding methods unchanged
+- No class name found  unchanged
+- Async Task methods handled
+- Constructors NOT renamed (only methods with return types)
+- Task<T> generic return types supported
+- Transform order is 215
+- Internal method calls updated (this.Forgot()  this.OnForgot())
+
+**Key Design Decisions**:
+1. MarkupContent is optional  transforms that don't need cross-layer updates don't set/read it
+2. Pipeline uses ?? markup fallback to preserve backward compatibility if no code-behind transform modifies MarkupContent
+3. Transform only replaces in attribute value contexts ("@ClassName") to avoid false positives in text content
+4. Constructor detection: look for return type (void/Task) to distinguish from parameterless constructors (no return type)
+5. DirectCall pattern has context-aware logic to avoid replacing class declaration occurrences
+
+**Files Modified**:
+- src/BlazorWebFormsComponents.Cli/Pipeline/FileMetadata.cs  added MarkupContent property
+- src/BlazorWebFormsComponents.Cli/Pipeline/MigrationPipeline.cs  set MarkupContent, use finalMarkup
+- src/BlazorWebFormsComponents.Cli/Transforms/CodeBehind/MethodNameCollisionTransform.cs  new transform
+- src/BlazorWebFormsComponents.Cli/Program.cs  registered transform (after ClassNameAlignTransform)
+- 	ests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs  registered in test pipeline
+- 	ests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/MethodNameCollisionTransformTests.cs  9 unit tests
+
+**Impact**: Fixes Forgot.aspx scenario where ClassNameAlignTransform renames class to match filename, creating name collision with existing method.
+
+
+## IdentityUsingTransform Creation (2026-04-13)
+
+**Task**: Create IdentityUsingTransform that conditionally adds 'using BlazorWebFormsComponents.Identity;' to code-behind files that reference BWFC Identity shim types, replacing the global using that was removed from the .targets file.
+
+**Implementation**:
+- **Transform**: src/BlazorWebFormsComponents.Cli/Transforms/CodeBehind/IdentityUsingTransform.cs
+  - Order 103 (after UsingStripTransform at 100, before EntityFrameworkTransform at 105)
+  - Detects BWFC-specific types: ApplicationUserManager, ApplicationSignInManager, SignInStatus, IdentityDbContext, DefaultAuthenticationTypes
+  - Also detects IdentityUser, IdentityResult, UserLoginInfo BUT only adds BWFC using if they're NOT fully-qualified as Microsoft.AspNetCore.Identity.*  prevents collision with direct ASP.NET Core Identity usage
+  - Fully-qualified check prevents false positives when code uses actual ASP.NET Core Identity types
+  - Inserts using after last existing using directive (same pattern as EntityFrameworkTransform)
+- **Registration**: Added to both Program.cs DI container and TestHelpers.CreateDefaultPipeline() test pipeline (between UsingStrip and EntityFramework)
+- **Tests**: tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/IdentityUsingTransformTests.cs with 19 test cases covering all BWFC shim types, duplicate prevention, fully-qualified exclusion, and insertion behavior
+
+**Key Learnings**:
+1. Must use 'var' instead of explicit types ('bool', 'int') for local variables  enforced by IDE0007 analyzer in this codebase
+2. Multi-line fluent calls like Regex.Matches(...).Count trigger the explicit type checker  split into two lines with intermediate 'var matches' to satisfy the analyzer
+3. Fully-qualified type detection is critical  can't just look for "IdentityUser" in content, must exclude Microsoft.AspNetCore.Identity.IdentityUser references to avoid injecting BWFC using when code uses ASP.NET Core Identity directly
+4. Transform order matters: UsingStrip (100) removes old usings  IdentityUsing (103) adds BWFC Identity using  EntityFramework (105) adds EF Core using  ensures clean using block with only needed BWFC and modern namespaces
+
+**Tests**: All 19 tests passed (file-level type detection, duplicate prevention, fully-qualified exclusion, insertion behavior, Order/Name properties)
+
+**Files Created**:
+- src/BlazorWebFormsComponents.Cli/Transforms/CodeBehind/IdentityUsingTransform.cs
+- tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/IdentityUsingTransformTests.cs
+
+**Files Modified**:
+- src/BlazorWebFormsComponents.Cli/Program.cs (DI registration)
+- tests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs (test pipeline registration)

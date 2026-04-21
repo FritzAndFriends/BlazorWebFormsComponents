@@ -996,3 +996,21 @@ foreach (var warning in warnings) {
 - Demo pages use `data-audit-control` attributes prefixed with the component name, e.g. `webforms-form-results` not just `form-results`.
 - Always use the exact `[data-audit-control='...']` selector in Playwright tests rather than fuzzy text-based locators like `text=Request.Form` or `:has-text()`, which can match unrelated visible sections.
 - When a section is conditionally rendered (e.g., gated by `@if (isPostBack)`), the test locator must target that specific section's attribute, not generic text that may appear elsewhere on the page.
+**Summary:** Fixed both .targets files by adding Validations namespace and removing Identity namespace to prevent CS0104 ambiguity errors.
+
+**Files Modified:**
+- `build/Fritz.BlazorWebFormsComponents.targets` - Replaced `BlazorWebFormsComponents.Identity` global using with `BlazorWebFormsComponents.Validations`
+- `buildTransitive/Fritz.BlazorWebFormsComponents.targets` - Identical change
+
+**Rationale:**
+- **Validations added:** Fixes 10 CS0246 errors where RequiredFieldValidator and RegularExpressionValidator types were not found. These validators are common in migrated Web Forms code and should be globally available.
+- **Identity removed:** The Identity namespace defines shim types (IdentityUser, IdentityResult, UserLoginInfo) with identical names to Microsoft.AspNetCore.Identity types. Real migration projects reference both, causing CS0104 ambiguity errors. The migration CLI will inject BlazorWebFormsComponents.Identity usings on a per-file basis only where needed.
+
+**Final Global Usings:**
+- BlazorWebFormsComponents
+- BlazorWebFormsComponents.LoginControls
+- BlazorWebFormsComponents.Validations
+- BlazorWebFormsComponents.EntityFramework
+
+**Build:** 0 errors, 358 warnings (expected)
+
