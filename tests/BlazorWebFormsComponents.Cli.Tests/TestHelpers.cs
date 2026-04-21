@@ -190,10 +190,12 @@ public static class TestHelpers
         {
             new TodoHeaderTransform(),
             new UsingStripTransform(),
+            new IdentityUsingTransform(),
             new EntityFrameworkTransform(),
             new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),
             new ClassNameAlignTransform(),
+            new MethodNameCollisionTransform(),
             new ComponentRefCodeBehindTransform(),
             new ResponseRedirectTransform(),
             new RequestFormTransform(),

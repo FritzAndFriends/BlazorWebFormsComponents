@@ -18,6 +18,12 @@ public class FileMetadata
     /// </summary>
     public Dictionary<string, string> ComponentRefs { get; set; } = new();
 
+    /// <summary>
+    /// Markup content after markup transforms. Set by pipeline before code-behind transforms.
+    /// Code-behind transforms may modify this to update markup references (e.g., method renames).
+    /// </summary>
+    public string? MarkupContent { get; set; }
+
     public string FileName => Path.GetFileNameWithoutExtension(SourceFilePath);
 }
 

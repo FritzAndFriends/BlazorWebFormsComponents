@@ -55,10 +55,12 @@ class Program
         // Register code-behind transforms in order
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
         services.AddSingleton<ICodeBehindTransform, UsingStripTransform>();
+        services.AddSingleton<ICodeBehindTransform, IdentityUsingTransform>();
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();
         services.AddSingleton<ICodeBehindTransform, ClassNameAlignTransform>();
+        services.AddSingleton<ICodeBehindTransform, MethodNameCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();
         services.AddSingleton<ICodeBehindTransform, RequestFormTransform>();

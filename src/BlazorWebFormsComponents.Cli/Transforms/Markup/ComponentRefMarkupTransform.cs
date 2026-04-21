@@ -30,7 +30,8 @@ public class ComponentRefMarkupTransform : IMarkupTransform
     {
         "GridView", "DetailsView", "DropDownList", "BulletedList",
         "Repeater", "ListView", "FormView", "RadioButtonList",
-        "CheckBoxList", "ListBox", "DataList", "DataGrid"
+        "CheckBoxList", "ListBox", "DataList", "DataGrid",
+        "RequiredFieldValidator", "CompareValidator", "RangeValidator"
     };
 
     public string Apply(string content, FileMetadata metadata)

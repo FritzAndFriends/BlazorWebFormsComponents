@@ -203,6 +203,9 @@ public class MigrationPipeline
             markup = transform.Apply(markup, metadata);
         }
 
+        // Set markup content for code-behind transforms to reference/modify
+        metadata.MarkupContent = markup;
+
         // Code-behind pipeline
         string? codeBehind = null;
         if (sourceFile.HasCodeBehind && metadata.CodeBehindContent != null)
@@ -214,8 +217,11 @@ public class MigrationPipeline
             }
         }
 
+        // Use potentially modified markup content from code-behind transforms
+        var finalMarkup = metadata.MarkupContent ?? markup;
+
         // Write markup output
-        await _outputWriter.WriteFileAsync(sourceFile.OutputPath, markup,
+        await _outputWriter.WriteFileAsync(sourceFile.OutputPath, finalMarkup,
             $"Converted {Path.GetFileName(sourceFile.MarkupPath)}");
 
         // Write code-behind output
