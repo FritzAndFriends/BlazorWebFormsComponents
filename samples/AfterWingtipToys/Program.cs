@@ -5,8 +5,7 @@ using WingtipToys.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
 
 builder.Services.AddBlazorWebFormsComponents();
 
@@ -37,13 +36,13 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.MapStaticAssets();
 app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapRazorComponents<WingtipToys.Components.App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<WingtipToys.Components.App>();
 
 app.Run();

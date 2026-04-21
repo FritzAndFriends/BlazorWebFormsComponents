@@ -1,7 +1,6 @@
 @page "/AddToCart"
 @using Microsoft.EntityFrameworkCore
 
-@inject NavigationManager NavigationManager
 @inject IDbContextFactory<ProductContext> DbFactory
 @inject IHttpContextAccessor HttpContextAccessor
 
@@ -37,7 +36,7 @@
             await db.SaveChangesAsync();
         }
 
-        NavigationManager.NavigateTo("/ShoppingCart");
+        HttpContextAccessor.HttpContext?.Response.Redirect("/ShoppingCart");
     }
 
     private string GetCartId()
