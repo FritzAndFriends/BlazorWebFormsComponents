@@ -52,7 +52,7 @@ if (warnings.Any())
     Console.WriteLine("Theme validation warnings:");
     foreach (var warning in warnings)
     {
-        Console.WriteLine($"  ⚠️  {warning}");
+        Console.WriteLine($"  ΓÜá∩╕Å  {warning}");
     }
 }
 ```
@@ -60,9 +60,9 @@ if (warnings.Any())
 Expected output:
 ```
 Theme validation warnings:
-  ⚠️  Unknown control type 'UnknownWidget' in theme configuration. This may be a typo or unsupported control.
-  ⚠️  Unknown sub-style 'InvalidStyle' in default skin for 'GridView'. Known sub-styles for GridView: HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, PagerStyle, EditRowStyle, SelectedRowStyle, EmptyDataRowStyle
+  ΓÜá∩╕Å  Unknown control type 'UnknownWidget' in theme configuration. This may be a typo or unsupported control.
+  ΓÜá∩╕Å  Unknown sub-style 'InvalidStyle' in default skin for 'GridView'. Known sub-styles for GridView: HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, PagerStyle, EditRowStyle, SelectedRowStyle, EmptyDataRowStyle
 ```
 
 ## Build Status
-✅ Build succeeded with 0 errors
+Γ£à Build succeeded with 0 errors

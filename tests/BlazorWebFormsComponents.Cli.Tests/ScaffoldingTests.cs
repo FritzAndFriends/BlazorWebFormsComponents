@@ -49,6 +49,24 @@ public class ScaffoldingTests : IDisposable
     }
 
     [Fact]
+    public void ProjectScaffolder_UsesProjectReference_WhenOutputIsInsideRepo()
+    {
+        var repoRoot = Path.Combine(_tempDir, "repo");
+        var srcDir = Path.Combine(repoRoot, "src", "BlazorWebFormsComponents");
+        var outputDir = Path.Combine(repoRoot, "samples", "AfterTestApp");
+
+        Directory.CreateDirectory(srcDir);
+        Directory.CreateDirectory(outputDir);
+        File.WriteAllText(Path.Combine(srcDir, "BlazorWebFormsComponents.csproj"), "<Project />");
+
+        var result = _scaffolder.Scaffold(repoRoot, outputDir, "TestApp");
+        var csproj = result.Files["csproj"].Content;
+
+        Assert.Contains(@"<ProjectReference Include=""..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj"" />", csproj);
+        Assert.DoesNotContain(@"<PackageReference Include=""Fritz.BlazorWebFormsComponents"" Version=""*"" />", csproj);
+    }
+
+    [Fact]
     public void ProjectScaffolder_CsprojFileName_MatchesProjectName()
     {
         var result = _scaffolder.Scaffold(_tempDir, _tempDir, "MyWebApp");
@@ -89,15 +107,19 @@ public class ScaffoldingTests : IDisposable
         var imports = result.Files["imports"].Content;
 
         // Standard Blazor usings
+        Assert.Contains("@namespace TestApp", imports);
         Assert.Contains("@using Microsoft.AspNetCore.Components.Web", imports);
         Assert.Contains("@using Microsoft.AspNetCore.Components.Forms", imports);
         Assert.Contains("@using Microsoft.AspNetCore.Components.Routing", imports);
         Assert.Contains("@using Microsoft.JSInterop", imports);
         // BWFC usings
         Assert.Contains("@using BlazorWebFormsComponents", imports);
+        Assert.Contains("@using BlazorWebFormsComponents.Enums", imports);
+        Assert.Contains("@using BlazorWebFormsComponents.Validations", imports);
         Assert.DoesNotContain("@using static Microsoft.AspNetCore.Components.Web.RenderMode", imports);
         // Project namespace
-        Assert.Contains("@using TestApp", imports);
+        Assert.Contains("@using global::TestApp", imports);
+        Assert.Contains("@using global::TestApp.Models", imports);
         // WebFormsPageBase inherits
         Assert.Contains("@inherits BlazorWebFormsComponents.WebFormsPageBase", imports);
     }

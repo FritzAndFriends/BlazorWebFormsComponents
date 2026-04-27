@@ -1,19 +1,25 @@
 @page "/control-samples/masterpage"
 @layout MainLayout
+@rendermode InteractiveServer
 
-<PageTitle>MasterPage Migration Example</PageTitle>
+<PageTitle>MasterPage Migration Bridge</PageTitle>
 
-<h2>MasterPage to Blazor Layout Migration</h2>
+<h2>MasterPage — Migration Bridge</h2>
 
 <div class="alert alert-info">
-    <strong>Note:</strong> This page demonstrates how Web Forms MasterPages are replaced by Blazor Layouts.
+    <strong>Migration Bridge:</strong> BWFC provides <code>MasterPage</code>, <code>ContentPlaceHolder</code>, and
+    <code>Content</code> components so migrated Web Forms pages compile and run with minimal markup changes.
+    Named placeholder slots work exactly as in <code>.master</code> files.
 </div>
 
 <h3>Concept Overview</h3>
 
 <p>
-    In ASP.NET Web Forms, <code>MasterPages</code> provided a template for consistent page structure.
-    In Blazor, this is achieved through <strong>Layout Components</strong>.
+    In ASP.NET Web Forms, <code>MasterPages</code> provided a template for consistent page structure,
+    with named <code>&lt;asp:ContentPlaceHolder&gt;</code> slots that child pages filled via
+    <code>&lt;asp:Content ContentPlaceHolderID="…"&gt;</code>.
+    In Blazor, this is achieved through <strong>Layout Components</strong>. The BWFC bridge
+    lets migrated pages keep that familiar structure while you modernize incrementally.
 </p>
 
 <div class="row mt-4">
@@ -120,65 +126,170 @@
     </div>
 </div>
 
-<h3 class="mt-5">Using MasterPage Components (Migration Helper)</h3>
+<h3 class="mt-5">Live Demo: Practical Migration Bridge</h3>
 
 <p>
-    For gradual migration, BlazorWebFormsComponents provides <code>MasterPage</code> and 
-    <code>ContentPlaceHolder</code> components that emulate Web Forms syntax:
+    This demo simulates a typical <code>Site.Master</code> file converted to a BWFC
+    <code>MasterPage</code> bridge. Three named placeholders (<code>MainContent</code>,
+    <code>Sidebar</code>, and <code>Footer</code>) are defined in the master layout.
+    The <code>Content</code> components below (which represent what a migrated
+    <code>.aspx</code> child page would contain) fill two of those slots;
+    <code>Footer</code> keeps its default.
 </p>
 
-<div class="card">
-    <div class="card-header bg-info text-white">
-        <h5>Bridge Components (Temporary Migration Aid)</h5>
+<div data-audit-control="MasterPage-1">
+<MasterPage>
+    <div style="border: 2px solid #6c757d; border-radius: 6px; overflow: hidden; font-family: sans-serif;">
+        <div style="background-color: #343a40; color: white; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center;">
+            <strong>🏢 Contoso — Site.Master Header</strong>
+            <small style="opacity:.7; font-size:.8em;">Migrated from Site.Master</small>
+        </div>
+        <div style="display: flex; min-height: 140px;">
+            <div style="flex: 1; padding: 16px; min-width: 0;">
+                <ContentPlaceHolder ID="MainContent">
+                    <p><em>(Default MainContent — no child page override)</em></p>
+                </ContentPlaceHolder>
+            </div>
+            <div style="width: 200px; border-left: 1px solid #dee2e6; padding: 12px; background: #f8f9fa; flex-shrink: 0;">
+                <strong>Sidebar</strong>
+                <ContentPlaceHolder ID="Sidebar">
+                    <ul style="padding-left: 1rem; margin: 6px 0; font-size: .9em;">
+                        <li>Default link A</li>
+                        <li>Default link B</li>
+                    </ul>
+                </ContentPlaceHolder>
+            </div>
+        </div>
+        <div style="background: #f8f9fa; border-top: 1px solid #dee2e6; padding: 6px 16px; font-size: .85em; color: #6c757d;">
+            <ContentPlaceHolder ID="Footer">
+                &copy; 2026 Contoso. All rights reserved. <em>(default footer from Site.Master)</em>
+            </ContentPlaceHolder>
+        </div>
     </div>
-    <div class="card-body">
-        <pre><code>&lt;MasterPage&gt;
-    &lt;div class="header"&gt;
-        &lt;h1&gt;My Site&lt;/h1&gt;
+
+    @* The Content components below live in the child page (.aspx) in Web Forms.
+       In the migrated Blazor component, they are siblings inside MasterPage. *@
+    <Content ContentPlaceHolderID="MainContent">
+        <h4 style="margin:0 0 8px;">Products</h4>
+        <p style="margin:0 0 8px;">
+            This content was injected by a <code>Content</code> component
+            targeting <code>MainContent</code> — just like
+            <code>&lt;asp:Content ContentPlaceHolderID="MainContent"&gt;</code> in Web Forms.
+        </p>
+        <ul style="margin:0; padding-left:1.2rem;">
+            <li>Widget Pro — $19.99</li>
+            <li>Widget Lite — $9.99</li>
+            <li>Widget Max — $34.99</li>
+        </ul>
+    </Content>
+    <Content ContentPlaceHolderID="Sidebar">
+        <strong>Categories</strong>
+        <ul style="padding-left: 1rem; margin: 6px 0; font-size: .9em;">
+            <li><a href="#">Electronics</a></li>
+            <li><a href="#">Clothing</a></li>
+            <li><a href="#">Books</a></li>
+        </ul>
+    </Content>
+</MasterPage>
+</div>
+
+<pre><code>@* Site.Master → MasterPage bridge *@
+
+&lt;MasterPage&gt;
+    &lt;div class="site-header"&gt;Contoso — Site Header&lt;/div&gt;
+    &lt;div class="layout"&gt;
+        &lt;div class="main"&gt;
+            &lt;ContentPlaceHolder ID="MainContent"&gt;
+                &lt;p&gt;Default main content&lt;/p&gt;
+            &lt;/ContentPlaceHolder&gt;
+        &lt;/div&gt;
+        &lt;div class="sidebar"&gt;
+            &lt;ContentPlaceHolder ID="Sidebar"&gt;
+                &lt;ul&gt;&lt;li&gt;Default link A&lt;/li&gt;&lt;/ul&gt;
+            &lt;/ContentPlaceHolder&gt;
+        &lt;/div&gt;
     &lt;/div&gt;
-    
-    &lt;ContentPlaceHolder ID="MainContent"&gt;
-        &lt;p&gt;Default content&lt;/p&gt;
-    &lt;/ContentPlaceHolder&gt;
-    
     &lt;div class="footer"&gt;
-        &lt;p&gt;Footer&lt;/p&gt;
+        &lt;ContentPlaceHolder ID="Footer"&gt;
+            &amp;copy; 2026 Contoso. All rights reserved.
+        &lt;/ContentPlaceHolder&gt;
     &lt;/div&gt;
+
+    @* Child page Content components (was MyPage.aspx in Web Forms): *@
+    &lt;Content ContentPlaceHolderID="MainContent"&gt;
+        &lt;h4&gt;Products&lt;/h4&gt;
+        &lt;p&gt;Content injected from the child page.&lt;/p&gt;
+    &lt;/Content&gt;
+    &lt;Content ContentPlaceHolderID="Sidebar"&gt;
+        &lt;strong&gt;Categories&lt;/strong&gt;
+        &lt;ul&gt;&lt;li&gt;Electronics&lt;/li&gt;&lt;li&gt;Clothing&lt;/li&gt;&lt;/ul&gt;
+    &lt;/Content&gt;
+    @* Footer not overridden — shows Site.Master default *@
 &lt;/MasterPage&gt;</code></pre>
 
-        <h5 class="mt-4">With Head Parameter (NEW!)</h5>
-        <p>The MasterPage component now includes a <code>Head</code> parameter that automatically wraps content in <code>&lt;HeadContent&gt;</code>. You can include <code>&lt;title&gt;</code> elements directly:</p>
-        <pre><code>&lt;MasterPage&gt;
+<h3 class="mt-5">Live Demo: Head Parameter (Web Forms <code>&lt;head runat="server"&gt;</code>)</h3>
+
+<p>
+    The <code>Head</code> parameter maps to Blazor's <code>&lt;HeadContent&gt;</code>.
+    Use it when migrating pages that inject <code>&lt;link&gt;</code> or <code>&lt;meta&gt;</code>
+    tags into the master page's <code>&lt;head runat="server"&gt;</code>.
+</p>
+
+<div data-audit-control="MasterPage-2">
+<MasterPage>
+    <Head>
+        @* In a real migrated page this would inject <title>, <link>, or <meta> into the <head>. *@
+        @* HeadContent is active — open browser DevTools to verify the <head> injection. *@
+        <meta name="description" content="BWFC MasterPage Head demo" />
+    </Head>
+    <ChildContent>
+        <div style="border: 1px solid #17a2b8; border-radius: 4px; padding: 12px;">
+            <p>
+                The <code>Head</code> parameter is active. A <code>&lt;meta name="description"&gt;</code>
+                tag has been injected into this page's <code>&lt;head&gt;</code> via
+                <code>&lt;HeadContent&gt;</code>. Open browser DevTools → Elements to verify.
+            </p>
+        </div>
+    </ChildContent>
+</MasterPage>
+</div>
+
+<pre><code>&lt;MasterPage&gt;
     &lt;Head&gt;
-        &lt;title&gt;My Page - Site Name&lt;/title&gt;
-        &lt;link href="css/site.css" rel="stylesheet" /&gt;
-        &lt;meta name="description" content="My site" /&gt;
+        &lt;title&gt;My Page — Contoso&lt;/title&gt;
+        &lt;link href="css/mypage.css" rel="stylesheet" /&gt;
+        &lt;meta name="description" content="My page description" /&gt;
     &lt;/Head&gt;
     &lt;ChildContent&gt;
-        &lt;div class="header"&gt;
-            &lt;h1&gt;My Site&lt;/h1&gt;
-        &lt;/div&gt;
-        
         &lt;ContentPlaceHolder ID="MainContent"&gt;
-            &lt;p&gt;Default content&lt;/p&gt;
+            Default content
         &lt;/ContentPlaceHolder&gt;
     &lt;/ChildContent&gt;
 &lt;/MasterPage&gt;</code></pre>
 
-        <div class="alert alert-success mt-3">
-            <strong>New Feature:</strong> The <code>Head</code> parameter provides a convenient bridge 
-            between Web Forms' <code>&lt;head runat="server"&gt;</code> and Blazor's <code>&lt;HeadContent&gt;</code>. 
-            You can include <code>&lt;title&gt;</code> elements directly in the Head content, 
-            just like in Web Forms, and they will be rendered correctly in the document's <code>&lt;head&gt;</code> section.
-        </div>
-
-        <div class="alert alert-warning mt-3">
-            <strong>Recommendation:</strong> Use native Blazor layouts for new development. 
-            The MasterPage components are provided for easier migration but should be 
-            replaced with standard Blazor layouts as part of your modernization effort.
-        </div>
-    </div>
+<div class="alert alert-success mt-3">
+    <strong>Migration Tip:</strong> <code>&lt;head runat="server"&gt;</code> in the original
+    <code>.master</code> file becomes the <code>Head</code> parameter. Child page
+    <code>&lt;asp:Content ContentPlaceHolderID="HeadContent"&gt;</code> becomes a
+    <code>&lt;Content ContentPlaceHolderID="HeadContent"&gt;</code> inside the MasterPage.
+    For page titles, prefer <code>&lt;PageTitle&gt;My Page&lt;/PageTitle&gt;</code> on its own.
 </div>
+
+<div class="alert alert-warning mt-3">
+    <strong>Recommendation:</strong> Use native Blazor layouts for new development.
+    The MasterPage bridge components are provided for easier migration but should be
+    replaced with standard Blazor layouts as part of your modernization effort.
+</div>
+
+<h3 class="mt-5">Using MasterPage Components (Migration Helper)</h3>
+
+<p>
+    For gradual migration, BlazorWebFormsComponents provides <code>MasterPage</code>,
+    <code>ContentPlaceHolder</code>, and <code>Content</code> components that emulate
+    Web Forms syntax. See the dedicated sample pages for deeper dives:
+    <a href="/ControlSamples/ContentPlaceHolder">ContentPlaceHolder</a> ·
+    <a href="/ControlSamples/Content">Content</a>.
+</p>
 
 <h3 class="mt-5">Critical Difference: HTML Head Management</h3>
 

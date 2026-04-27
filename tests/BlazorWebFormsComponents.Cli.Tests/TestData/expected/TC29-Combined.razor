@@ -1,6 +1,8 @@
 @page "/TC29-Combined"
 <PageTitle>Combined Test</PageTitle>
 @using System.Collections.Generic
+<Site>
+<Content ContentPlaceHolderID="MainContent">
     <h1>@(PageTitle)</h1>
     <GridView ItemType="object" id="ProductGrid" AutoGenerateColumns="false" CssClass="table">
         <Columns>
@@ -9,3 +11,5 @@
     </GridView>
     <Button id="SaveButton" Text="Save" OnClick="@SaveButton_Click" CssClass="btn" />
     <HyperLink id="HelpLink" NavigateUrl="/Help.aspx" Text="Help" />
+</Content>
+</Site>

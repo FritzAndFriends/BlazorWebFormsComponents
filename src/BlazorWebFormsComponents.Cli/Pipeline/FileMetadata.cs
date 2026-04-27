@@ -9,6 +9,8 @@ public class FileMetadata
     public required string OutputFilePath { get; init; }
     public required FileType FileType { get; init; }
     public required string OriginalContent { get; init; }
+    public string? OutputRootPath { get; init; }
+    public string? ProjectNamespace { get; init; }
     public string? CodeBehindContent { get; set; }
     public Dictionary<string, string> DataBindMap { get; set; } = new();
 

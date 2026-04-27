@@ -10,5 +10,9 @@
 
 @if (Visible)
 {
-	@ChildContent
+	<CascadingValue Value="this" IsFixed="false">
+		<CascadingValue Value="Context" IsFixed="false">
+			@ChildContent
+		</CascadingValue>
+	</CascadingValue>
 }

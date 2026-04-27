@@ -195,6 +195,7 @@ public static class TestHelpers
             new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),
             new ClassNameAlignTransform(),
+            new NamespaceAlignTransform(),
             new MethodNameCollisionTransform(),
             new ComponentRefCodeBehindTransform(),
             new ResponseRedirectTransform(),

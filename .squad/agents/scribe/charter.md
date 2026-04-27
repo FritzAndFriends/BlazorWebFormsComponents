@@ -11,18 +11,18 @@
 
 ## What I Own
 
-- `.ai-team/log/` — session logs (what happened, who worked, what was decided)
-- `.ai-team/decisions.md` — the shared decision log all agents read (canonical, merged)
-- `.ai-team/decisions/inbox/` — decision drop-box (agents write here, I merge)
-- Cross-agent context propagation — when one agent's decision affects another
+- `.squad/log/` ΓÇö session logs (what happened, who worked, what was decided)
+- `.squad/decisions.md` ΓÇö the shared decision log all agents read (canonical, merged)
+- `.squad/decisions/inbox/` ΓÇö decision drop-box (agents write here, I merge)
+- Cross-agent context propagation ΓÇö when one agent's decision affects another
 
 ## How I Work
 
-**Worktree awareness:** Use the `TEAM ROOT` provided in the spawn prompt to resolve all `.ai-team/` paths. If no TEAM ROOT is given, run `git rev-parse --show-toplevel` as fallback. Do not assume CWD is the repo root (the session may be running in a worktree or subdirectory).
+**Worktree awareness:** Use the `TEAM ROOT` provided in the spawn prompt to resolve all `.squad/` paths. If no TEAM ROOT is given, run `git rev-parse --show-toplevel` as fallback. Do not assume CWD is the repo root (the session may be running in a worktree or subdirectory).
 
 After every substantial work session:
 
-1. **Log the session** to `.ai-team/log/{YYYY-MM-DD}-{topic}.md`:
+1. **Log the session** to `.squad/log/{YYYY-MM-DD}-{topic}.md`:
    - Who worked
    - What was done
    - Decisions made
@@ -30,8 +30,8 @@ After every substantial work session:
    - Brief. Facts only.
 
 2. **Merge the decision inbox:**
-   - Read all files in `.ai-team/decisions/inbox/`
-   - APPEND each decision's contents to `.ai-team/decisions.md`
+   - Read all files in `.squad/decisions/inbox/`
+   - APPEND each decision's contents to `.squad/decisions.md`
    - Delete each inbox file after merging
 
 3. **Deduplicate and consolidate decisions.md:**
@@ -49,17 +49,17 @@ After every substantial work session:
 4. **Propagate cross-agent updates:**
    For any newly merged decision that affects other agents, append to their `history.md`:
    ```
-   📌 Team update ({date}): {summary} — decided by {Name}
+   ≡ƒôî Team update ({date}): {summary} ΓÇö decided by {Name}
    ```
 
-5. **Commit `.ai-team/` changes:**
-   **IMPORTANT — Windows compatibility:** Do NOT use `git -C {path}` (unreliable with Windows paths).
+5. **Commit `.squad/` changes:**
+   **IMPORTANT ΓÇö Windows compatibility:** Do NOT use `git -C {path}` (unreliable with Windows paths).
    Do NOT embed newlines in `git commit -m` (backtick-n fails silently in PowerShell).
    Instead:
    - `cd` into the team root first.
-   - Stage all `.ai-team/` files: `git add .ai-team/`
+   - Stage all `.squad/` files: `git add .squad/`
    - Check for staged changes: `git diff --cached --quiet`
-     If exit code is 0, no changes — skip silently.
+     If exit code is 0, no changes ΓÇö skip silently.
    - Write the commit message to a temp file, then commit with `-F`:
      ```
      $msg = @"
@@ -87,19 +87,19 @@ After every substantial work session:
 ## The Memory Architecture
 
 ```
-.ai-team/
-├── decisions.md          # Shared brain — all agents read this (merged by Scribe)
-├── decisions/
-│   └── inbox/            # Drop-box — agents write decisions here in parallel
-├── orchestration-log/    # Per-spawn log entries
-├── log/                  # Session history — searchable record
-└── agents/
-    ├── forge/history.md
-    ├── cyclops/history.md
-    ├── beast/history.md
-    ├── jubilee/history.md
-    ├── rogue/history.md
-    └── ...
+.squad/
+Γö£ΓöÇΓöÇ decisions.md          # Shared brain ΓÇö all agents read this (merged by Scribe)
+Γö£ΓöÇΓöÇ decisions/
+Γöé   ΓööΓöÇΓöÇ inbox/            # Drop-box ΓÇö agents write decisions here in parallel
+Γö£ΓöÇΓöÇ orchestration-log/    # Per-spawn log entries
+Γö£ΓöÇΓöÇ log/                  # Session history ΓÇö searchable record
+ΓööΓöÇΓöÇ agents/
+    Γö£ΓöÇΓöÇ forge/history.md
+    Γö£ΓöÇΓöÇ cyclops/history.md
+    Γö£ΓöÇΓöÇ beast/history.md
+    Γö£ΓöÇΓöÇ jubilee/history.md
+    Γö£ΓöÇΓöÇ rogue/history.md
+    ΓööΓöÇΓöÇ ...
 ```
 
 - **decisions.md** = what the team agreed on (shared, merged by Scribe)

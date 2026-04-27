@@ -1,6 +1,8 @@
 @page "/TC29-AuthenticatedPage"
 <PageTitle>Account Dashboard</PageTitle>
 @using System.Web.Security
+<Site>
+<Content ContentPlaceHolderID="MainContent">
     <h1>Account Dashboard</h1>
     <AuthorizeView>
         <NotAuthorized>
@@ -24,3 +26,5 @@
         </Authorized>
         @* TODO(bwfc-identity): Convert RoleGroups to policy-based AuthorizeView *@
     </AuthorizeView>
+</Content>
+</Site>

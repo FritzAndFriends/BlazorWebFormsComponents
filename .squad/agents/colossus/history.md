@@ -2,8 +2,6 @@
 
 <!-- ⚠ Summarized 2026-02-28 by Scribe — entries before 2026-02-26 archived below as summaries. Full early history in history-archive.md -->
 
-📌 Team update (2026-04-02): Phase 5 L1 acceptance test expansion complete — 6 new test cases (TC24-TC29) for edge case coverage, pipeline registration fix for manual-item categorization. 322 total L1 tests (0 failures). All CLI transforms verified in integration testing. Ready for merge to feature/global-tool-port. — decided by Scribe
-
 ## Core Context
 
 Integration test engineer. Built test coverage from M1 through M19. 130+ integration tests (smoke + interaction) covering all milestone sample pages. Key patterns established: `WaitUntilState.DOMContentLoaded` for async-bound components, `Filter(HasTextString)` for specific element targeting, ISO timestamp filtering for console errors, `PressSequentiallyAsync` + Tab for Blazor Server inputs. LoginControls pages require `@using BlazorWebFormsComponents.LoginControls`. Never use external image URLs. Full early history in `history-archive.md`.
@@ -38,8 +36,6 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
 ## Team Updates (Current)
 
-📌 Team update (2026-03-17): #471 & #472 resolved. GUID IDs removed from CheckBox/RadioButton/RadioButtonList; L1 script test suite 100% passing. FileUpload already compliant. May need CheckBoxList audit. — decided by Cyclops
-
 📌 Team update (2026-02-26): WebFormsPage unified wrapper — inherits NamingContainer, adds Theme cascading — decided by Jeffrey T. Fritz, Forge
 📌 Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity — decided by Jeffrey T. Fritz
 📌 Team update (2026-02-26): M15 HTML fidelity strategy — full audit pipeline re-run assigned to Colossus — decided by Forge
@@ -60,42 +56,7 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
  Team update (2026-03-02): M22 Copilot-Led Migration Showcase planned  decided by Forge
 
-## Phase 2 Playwright Tests (2026-07-24)
-
-Added 6 integration tests across 2 new files in `samples/AfterBlazorServerSide.Tests/Migration/`:
-
-**SessionDemoTests.cs** (5 tests for `/migration/session` — GAP-04 SessionShim):
-1. `Session_SetAndGetValue` — stores a value via input+button, verifies display updates
-2. `Session_CountIncrementsAfterStore` — stores 2 keys (string + int counter), verifies count ≥ 2
-3. `Session_ClearRemovesAllValues` — stores value, clicks Clear, verifies count=0 and display="(empty)"
-4. `Session_TypedCounter` — clicks Increment Counter 3×, verifies Session.Get<int> increments correctly
-5. `Session_PersistsAcrossNavigation` — stores value, navigates to home and back, verifies persistence
-
-**ConfigurationManagerTests.cs** (1 regression test for Phase 1):
-6. `ConfigurationManager_PageLoads` — loads page, checks heading, verifies AppSettings card renders, no errors
-
-Patterns used: `data-audit-control` attribute selectors for card targeting, `DOMContentLoaded` wait strategy, `FillAsync` + Tab for Blazor Server `@bind` inputs, `WaitForTimeoutAsync` for post-click re-render. Build green — 0 errors.
-
  Team update (2026-03-02): WingtipToys migration analysis complete  36 work items across 5 phases, FormView RenderOuterTable is only blocking gap  decided by Forge
-
-## WebFormsForm Interactive Demo Tests (2026-07-25)
-
-Added integration tests for `/migration/webforms-form` interactive demo page:
-
-**ControlSampleTests.cs** — 1 smoke test:
-- Added `[InlineData("/migration/webforms-form")]` to `MigrationPage_Loads_WithoutErrors` Theory group
-
-**Migration/WebFormsFormTests.cs** — 4 tests (new file):
-1. `WebFormsForm_PageLoads_Successfully` — smoke test with console error filtering
-2. `WebFormsForm_InitialLoad_ShowsFormWithoutResults` — render test verifying form inputs visible, no results pre-submit
-3. `WebFormsForm_SubmitForm_ShowsRequestFormValues` — interaction test: fills name/email, checks color checkbox, submits, verifies Request.Form values in results
-4. `WebFormsForm_SubmitForm_StaysOnSamePage` — verifies interactive mode doesn't navigate away on submit
-
-## Learnings
-
-- Interactive Blazor Server form pages re-render in place via SignalR — no HTTP POST/redirect. Use `WaitForAsync` on results elements instead of `WaitForLoadStateAsync(NetworkIdle)`.
-- For interactive pages, use `WaitForSelectorState.Visible` with generous timeout (10s) after button click to account for SignalR round-trip latency.
-- Flexible locators (`input[name='name'], input#name, input[id*='name' i]`) accommodate demo pages whose exact markup may vary.
 
  Team update (2026-03-02): Project reframed  final product is a migration acceleration system (tool/skill/agent), not just a component library. WingtipToys is proof-of-concept.  decided by Jeffrey T. Fritz
 
@@ -126,196 +87,14 @@ Added integration tests for `/migration/webforms-form` interactive demo page:
 
  Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast
 
- Team update (2026-03-06): CRITICAL  Git workflow: feature branches from dev, PRs target dev. NEVER push to or merge into upstream main (production releases only).  directed by Jeff Fritz
+ Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
 
- Team update (2026-03-06): CONTROL-COVERAGE.md updated  library ships 153 Razor components (was listed as 58). ContentPlaceHolder reclassified from 'Not Supported' to Infrastructure Controls. Reference updated CONTROL-COVERAGE.md for accurate component inventory.  decided by Forge
 
-� Team update (2026-03-06): LoginView is a native BWFC component  do NOT replace with AuthorizeView in migration guidance. Both migration-standards SKILL.md files (in .ai-team/skills/ and migration-toolkit/skills/) must be kept in sync. WebFormsPageBase patterns corrected in all supporting docs.  decided by Beast
+ Team update (2026-03-06): Layer 2 conventions established  Button OnClick uses EventArgs (not MouseEventArgs), code-behind class names must match .razor filenames exactly, use EF Core wildcard versions for .NET 10, CartStateService replaces Session, GridView needs explicit TItem  decided by Cyclops
 
- Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
 
+ Team update (2026-03-06): bwfc-migrate.ps1 uses -Path and -Output params (not -SourcePath/-DestinationPath). ProjectName is auto-detected  decided by Bishop
 
- Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
 
- Team update (2026-03-08): @using BlazorWebFormsComponents.LoginControls must be in every generated _Imports.razor  decided by Cyclops
-
-
- Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. Integration test Program.cs patterns updated  no longer need manual `AddHttpContextAccessor()`.  decided by Cyclops
-
-
- Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.
-
-
- Team update (2026-03-11): ItemType renames must cover ALL consumers (tests, samples, docs)  not just component source. CI may only surface first few errors.  decided by Cyclops
-
-### UpdatePanel Integration Test Coverage (2026-03-13)
-
-**Summary:** Added 3 Playwright interaction tests for UpdatePanel ContentTemplate enhancement. Tests cover Block mode, ContentTemplate syntax, and Inline mode with proper assertion patterns for Blazor state updates.
-
-**Tests added:**
-1. `UpdatePanel_BlockMode_RendersAsDivAndInteractsCorrectly` — Block mode (default), button click
-2. `UpdatePanel_ContentTemplate_RendersAndInteractsCorrectly` — Web Forms syntax, alert styling, interaction
-3. `UpdatePanel_InlineMode_RendersAndRefreshesCorrectly` — Inline mode (span), time display, Refresh button
-
-**Patterns:** `WaitUntilState.NetworkIdle` for page navigation (AJAX control standard), `Filter(HasTextString)` for element targeting (strict-mode safety), 500ms/1000ms waits for state updates, ISO timestamp console filtering, regex time validation.
-
-**Coverage:** 1 smoke test (existing) + 3 interaction tests = 4 total UpdatePanel tests, all passing.
-
-📌 Team update (2026-03-13): UpdatePanel integration tests complete — 3 interaction tests covering all rendering modes and interactive behaviors. All 4 UpdatePanel tests passing (1 smoke + 3 interaction). Follows established AJAX control test conventions.
-
-### Students GridView LEFT JOIN Fix + Test Timing Verification (2026-03-14)
-
-**Summary:** Verified Playwright test timing fixes already in place. `StudentsPageTests.cs` contains all required improvements: BlurAsync on last field, 1000ms post-click wait, 3-second retry loop.
-
-**Verification:** No new changes needed. Test infrastructure already stable and meets requirements.
-
-📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
-
-## Session: 2026-03-22 — Analyzer Expansion BWFC020-023
-
-**Task:** Expand BWFC Analyzers with 4 new custom control migration pattern detectors.
-
-**Created:**
-- BWFC020 (ViewStatePropertyPattern): Detects `get { return (T)ViewState["key"]; } set { ViewState["key"] = value; }` properties. Info severity. Code fix converts to `[Parameter] public T Name { get; set; }`.
-- BWFC021 (FindControlUsage): Detects `FindControl("id")` calls. Warning severity. Code fix replaces with `FindControlRecursive("id")`.
-- BWFC022 (PageClientScriptUsage): Detects `Page.ClientScript.*` usage. Warning severity. No code fix.
-- BWFC023 (IPostBackEventHandlerUsage): Detects classes implementing `IPostBackEventHandler`. Warning severity. No code fix.
-
-**Files created:** 6 analyzer source files, 4 test files. Updated `AnalyzerReleases.Unshipped.md` and `AllAnalyzersIntegrationTests.cs`.
-
-**Verification:** All 139 tests pass (was 130 before). Build clean.
-
-## Learnings
-
-- Text-based (`SourceText.Replace`) code fixes are fragile for property replacement — FullSpan includes trivia that complicates newline/indentation. Prefer the syntax tree approach: use `property.WithAccessorList()` + `AddAttributeLists()` without `NormalizeWhitespace()`. Only use `NormalizeWhitespace()` when you can also fully control leading/trailing trivia on all lines.
-- New "Migration" category introduced for BWFC020-023. Updated `AllAnalyzers_HaveValidCategory` integration test to accept both "Usage" and "Migration" categories.
-
-
-**Summary:** 40 tests total — 11 passed, 29 failed, 0 skipped (33.5s duration)
-
-**Breakdown by test class:**
-
-| Class | Total | Passed | Failed | Root Cause |
-|---|---|---|---|---|
-| NavigationTests | 11 | 2 | 9 | .aspx URLs → 404; `/` → 404; DB pages → 500 |
-| HomePageTests | 4 | 0 | 4 | `/Home.aspx` → 404 (missing middleware) |
-| AboutPageTests | 5 | 0 | 5 | `/About.aspx` → 404 (missing middleware) |
-| StudentsPageTests | 9 | 4 | 5 | `/Students.aspx` → 404; DB → 500 |
-| CoursesPageTests | 6 | 4 | 2 | `/Courses.aspx` → 404; DB → 500 |
-| InstructorsPageTests | 5 | 1 | 4 | `/Instructors.aspx` → 404; DB → 500 |
-
-**⚠ 4 of 11 "passed" tests are vacuously true** — guard clauses (`if element.Count > 0`) skip assertions when page is 404.
-
-**Three root causes identified:**
-
-1. **Missing `app.UseBlazorWebFormsComponents()` middleware** (affects 20+ tests): Program.cs calls `AddBlazorWebFormsComponents()` for DI but never calls `UseBlazorWebFormsComponents()` in the middleware pipeline. Without this, `.aspx` URL rewriting is absent — all test navigations to `/Home.aspx`, `/About.aspx`, etc. return 404. This is a **Phase 2/3 (L2 transform) gap**.
-
-2. **SQL Server LocalDB unavailable** (affects 3 `AllPages_ReturnHttp200` tests + cascading): `/Students`, `/Courses`, `/Instructors` return HTTP 500 because the `ContosoUniversity` database doesn't exist or the connection string targets `(localdb)\mssqllocaldb`. This is an **infrastructure/seed-data gap** — not a migration defect.
-
-3. **No root route `/`** (affects 6 `NavLink_NavigatesToCorrectPage` tests): Tests start at `BaseUrl + "/"` which returns 404 — no `@page "/"` route exists. Navigation link tests can't find any elements.
-
-**Infrastructure notes:**
-- `--no-launch-profile` required to honor `ASPNETCORE_URLS`; launchSettings.json overrides to ports 5000/5001
-- Playwright Chromium installed successfully; browser automation works
-- App starts in ~2s, Production mode by default with `--no-launch-profile`
-
-### UpdatePanel Integration Tests (2026-03-13)
-
-**Summary:** Added 3 interaction tests for the UpdatePanel component after ContentTemplate RenderFragment parameter was added.
-
-**Tests added to `InteractiveComponentTests.cs`:**
-1. `UpdatePanel_BlockMode_RendersAsDivAndInteractsCorrectly` — Verifies Block mode (default) renders as a `<div>`, content displays correctly, and button clicks update the counter.
-2. `UpdatePanel_ContentTemplate_RendersAndInteractsCorrectly` — Verifies Web Forms `<ContentTemplate>` syntax works, alert div renders with correct styling, and button interaction updates the counter.
-3. `UpdatePanel_InlineMode_RendersAndRefreshesCorrectly` — Verifies Inline mode renders as a `<span>` wrapper, time display is visible, and Refresh button triggers Blazor re-render with updated time value.
-
-**Patterns followed:**
-- Used `WaitUntilState.NetworkIdle` for page navigation (consistent with AJAX control patterns)
-- Used `Filter(new() { HasTextString = "..." })` pattern for specific element targeting to avoid strict-mode violations
-- Used `500ms` wait after button clicks for Blazor state updates (conservative for CI stability)
-- Used `1000ms` wait for time refresh test to ensure seconds change
-- Console error filtering: ISO timestamp pattern + "Failed to load resource" (standard pattern)
-- Regex pattern `@"\d{1,2}:\d{2}:\d{2} (AM|PM)"` to verify time format without asserting exact equality (time changes between reads)
-
-**Coverage:**
-- Smoke test already existed: `[InlineData("/ControlSamples/UpdatePanel")]` in `AjaxControl_Loads_WithoutErrors` Theory group (line 234, ControlSampleTests.cs)
-- 3 new interaction tests verify all three rendering modes (Block, ContentTemplate, Inline) and their interactive behaviors
-- All 8 UpdatePanel tests passing (5 smoke + 3 interaction)
-
-
-📌 Team update (2026-03-16): Playwright infrastructure confirmed shipping. Unblocks HTML Fidelity dimension for Component Health Dashboard v1. — Forge
-
-### Validator + New Page Integration Tests (2026-03-17)
-
-**Summary:** Added 14 new integration tests — 11 interaction tests and 3 smoke tests.
-
-**Smoke tests added to `ControlSampleTests.cs`:**
-- `[InlineData("/ControlSamples/Content")]`, `[InlineData("/ControlSamples/ContentPlaceHolder")]`, `[InlineData("/ControlSamples/View")]` in `UtilityFeature_Loads_WithoutErrors` Theory group.
-
-**Interaction tests added to `InteractiveComponentTests.cs`:**
-1. `CompareValidator_InvalidValue_ShowsError` — submits "5" (not > 10), asserts error text appears
-2. `CompareValidator_ValidValue_SubmitsSuccessfully` — submits "15", asserts no error
-3. `RangeValidator_OutOfRange_ShowsError` — submits "1800" (below 1900–2100), asserts error
-4. `RangeValidator_InRange_SubmitsSuccessfully` — submits "2000", asserts no error
-5. `RegularExpressionValidator_NonMatching_ShowsError` — submits "abc" (not 5-digit), asserts error
-6. `RegularExpressionValidator_Matching_SubmitsSuccessfully` — submits "12345", asserts no error
-7. `CustomValidator_InvalidValue_ShowsError` — submits "Banana" (doesn't start with A), asserts error
-8. `CustomValidator_ValidValue_SubmitsSuccessfully` — submits "Apple", asserts no error
-9. `ValidationSummary_InvalidSubmit_ShowsSummaryWithMultipleErrors` — submits empty, asserts summary header + error messages
-10. `Content_Renders_MasterPageDemoElements` — verifies heading and content rendered
-11. `ContentPlaceHolder_Renders_DemoContent` — verifies heading and content rendered
-12. `View_ClickThrough_ChangesVisibleContent` — verifies initial view, clicks button, checks content persists
-
-**Patterns:** Used `data-audit-control` locators for all validators, `PressSequentiallyAsync` + `Tab` for input fields, `TextContentAsync()` on container + `Assert.Contains`/`DoesNotContain` for error text validation, `#region` blocks per component. Content/ContentPlaceHolder/View tests written defensively since pages are being created in parallel by Jubilee.
-
-**Files modified:**
-- `samples/AfterBlazorServerSide.Tests/ControlSampleTests.cs` — 3 new `[InlineData]` entries
-- `samples/AfterBlazorServerSide.Tests/InteractiveComponentTests.cs` — 11 new `[Fact]` methods
-
-### Theming Sections 7 & 8 Integration Tests (2026-03-22)
-
-**Summary:** Added 2 Playwright interaction tests for upcoming Theming page enhancements (Sections 7 & 8 being built by Jubilee).
-
-**Tests added to `InteractiveComponentTests.cs`:**
-1. `Theming_ThemeMode_StyleSheetThemeVsTheme` — Navigates to /ControlSamples/Theming, verifies Section 7 (ThemeMode) has an h3 heading matching "ThemeMode" or "Theme Mode", confirms both StyleSheetTheme and Theme panels are rendered with text content assertions, and checks at least 2 buttons exist across both panels.
-2. `Theming_SubStyles_GridViewHeaderAndFooter` — Navigates to /ControlSamples/Theming, verifies Section 8 (sub-styles/data controls) has an h3 heading, confirms a `<table>` (GridView) is present in that section, and asserts the table has `<th>` header cells.
-
-**Patterns:**
-- Used `HasTextRegex` with case-insensitive regex for heading matching — resilient to "ThemeMode" vs "Theme Mode" naming.
-- Used `.Filter(new() { Has = heading })` to scope assertions to the correct `.demo-container` section.
-- Used `?? string.Empty` on `TextContentAsync()` to eliminate CS8602 null reference warning.
-- Tests are written defensively to work once Jubilee adds Sections 7 & 8 — they will fail with clear messages until those sections land.
-
-**Coverage:** 1 smoke test (existing) + 1 existing interaction test + 2 new interaction tests = 4 total Theming tests.
-
-
-## Session: L1 Integration Test Cases for Phase 1 Enhancements (2026-03-29 00:07)
-
-Added 3 new test cases to migration-toolkit/tests/ for L1 script Phase 1 enhancements:
-- **TC16-IsPostBackGuard**: Tests IsPostBack guard unwrapping (GAP-06)  verifies the script removes if (!IsPostBack) { } wrappers and adds explanatory comment
-- **TC17-BindExpression**: Tests Bind()  @bind-Value transform (GAP-13)  verifies <%# Bind("Prop") %> becomes @bind-Value="context.Prop"
-- **TC18-UrlCleanup**: Tests .aspx URL cleanup (GAP-20)  verifies Response.Redirect() arguments have .aspx extensions removed and tilde converted to slash
-
-All 3 tests passing. Test suite now has 18 test cases (was 15). Pass rate 78% (14/18), line accuracy 98.2%.
-
-**Key learnings:**
-- L1 test discovery: Run-L1Tests.ps1 discovers test cases by scanning inputs/ for *.aspx files, expects corresponding .razor in expected/ directory
-- Test input format: TC##-Name.aspx + optional TC##-Name.aspx.cs for code-behind
-- Expected output format: TC##-Name.razor + optional TC##-Name.razor.cs for code-behind expectations
-- Test runner uses normalized line-by-line comparison (trims trailing whitespace, normalizes line endings, removes trailing blank lines)
-- Important: Expected files must match ACTUAL script output including:
-  - Extra indentation/whitespace preserved from AST transformations (e.g., IsPostBack unwrapping leaves original indentation)
-  - ItemType="object" attributes added by script to FormView/DropDownList
-  - Standard TODO comment header in .razor.cs files
-  - Removal of : System.Web.UI.Page base class from partial classes
-- URL cleanup transform only applies to Response.Redirect() call arguments, not to arbitrary string literals containing URLs
-- To verify exact output: copy input files to temp directory, run bwfc-migrate.ps1 on directory (not individual file), examine generated .razor/.razor.cs files
-
-## PostBack Demo Integration Tests (Phase 2)
-
-**Date:** 2026-07-23
-**Task:** Write Playwright integration tests for `/postback-demo` page (Phase 2 of ClientScript migration).
-**File created:** `samples/AfterBlazorServerSide.Tests/Migration/PostBackTests.cs`
-**Tests:** 3 tests — PostBack button trigger, PostBack hyperlink click, ScriptManager startup script registration.
-**Status:** Compiles clean (0 errors). Demo page not yet created by Jubilee — tests will pass once the page exists.
-**Patterns used:** Same `[Collection(nameof(PlaywrightCollection))]` + `PlaywrightFixture` pattern as all other migration tests. 30s navigation timeout, 10s element wait, 2s post-action settle for CI reliability. `try/finally` with `page.CloseAsync()`.
-**Commit:** `0c75aba2` on `feature/clientscript-phase2`
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+ Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz

@@ -1,18 +1,14 @@
-@inherits LayoutComponentBase
-@* TODO(bwfc-master-page): Review head content extraction for App.razor *@
-
 @using System.Web.Optimization
-<!DOCTYPE html>
-<html lang="en">
-<head>
+@* TODO(bwfc-master-page): CSS <link> refs from <head> — move to App.razor: /Content/bootstrap.min.css, /Content/Site.css *@
+
+<MasterPage>
+<Head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Contoso University - @(Page.Title)</title>
-    <link href="/Content/bootstrap.min.css" rel="stylesheet" />
-    <link href="/Content/Site.css" rel="stylesheet" />
     @* Custom styles for the university theme *@
-</head>
-<body>
+</Head>
+<ChildContent>
     <form id="mainForm">
         <nav class="navbar navbar-default">
             <div class="container">
@@ -34,12 +30,13 @@
             </div>
         </nav>
         <div class="container body-content">
-            @Body
+            <ContentPlaceHolder id="MainContent">
+            </ContentPlaceHolder>
             <hr />
             <footer>
                 <p>&copy; @(DateTime.Now.Year) - Contoso University</p>
             </footer>
         </div>
     </form>
-</body>
-</html>
+</ChildContent>
+</MasterPage>

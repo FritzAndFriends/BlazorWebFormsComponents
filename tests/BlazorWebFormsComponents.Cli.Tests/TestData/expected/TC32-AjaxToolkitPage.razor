@@ -1,5 +1,7 @@
 @page "/TC32-AjaxToolkitPage"
 <PageTitle>Customer Management</PageTitle>
+<Site>
+<Content ContentPlaceHolderID="MainContent">
     <h1>Customer Management</h1>
     <TabContainer id="TabContainer1" ActiveTabIndex="0" CssClass="tabs">
         <TabPanel id="TabSearch" HeaderText="Search">
@@ -41,3 +43,5 @@
         PopupControlID="pnlModal" CancelControlID="btnCancel" />
     @* Rating control has no BWFC equivalent *@
     @* TODO(bwfc-ajax-toolkit): Convert ajaxToolkit:Rating — no BWFC equivalent yet *@
+</Content>
+</Site>

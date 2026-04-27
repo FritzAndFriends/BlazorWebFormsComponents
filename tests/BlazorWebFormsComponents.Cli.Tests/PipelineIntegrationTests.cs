@@ -1,5 +1,6 @@
 using System.Reflection;
 using BlazorWebFormsComponents.Cli.Config;
+using BlazorWebFormsComponents.Cli.Interop;
 using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Pipeline;
 using BlazorWebFormsComponents.Cli.Scaffolding;
@@ -53,7 +54,12 @@ public class PipelineIntegrationTests : IDisposable
             new WebConfigTransformer(),
             outputWriter,
             new StaticFileCopier(outputWriter),
-            new SourceFileCopier(outputWriter, codeBehindTransforms));
+            new SourceFileCopier(outputWriter, codeBehindTransforms),
+            new AppStartCopier(outputWriter),
+            new AppAssetInjector(outputWriter),
+            new NuGetStaticAssetExtractor(new PowerShellScriptRunner()),
+            new EdmxConverterBridge(new PowerShellScriptRunner()),
+            new RedirectHandlerAnnotator(outputWriter));
     }
 
     private (string inputDir, string outputDir) CreateTempProjectDir(
@@ -475,6 +481,125 @@ public class PipelineIntegrationTests : IDisposable
 
         Assert.True(File.Exists(Path.Combine(outputDir, "WebFormsShims.cs")));
         Assert.True(File.Exists(Path.Combine(outputDir, "IdentityShims.cs")));
+    }
+
+    [Fact]
+    public async Task FullMigration_InjectsDetectedCssAndScriptsIntoAppRazor()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir();
+        Directory.CreateDirectory(Path.Combine(inputDir, "Content"));
+        File.WriteAllText(Path.Combine(inputDir, "Content", "site.css"), "body { color: red; }");
+        Directory.CreateDirectory(Path.Combine(inputDir, "Scripts"));
+        File.WriteAllText(Path.Combine(inputDir, "Scripts", "jquery-3.7.1.js"), "window.jqueryLoaded = true;");
+        File.WriteAllText(Path.Combine(inputDir, "Site.Master"), """
+            <%@ Master Language="C#" %>
+            <html>
+            <head>
+                <link rel="stylesheet" href="https://cdn.example.com/site.css" />
+                <script src="https://cdn.example.com/site.js"></script>
+            </head>
+            <body>
+                <asp:ContentPlaceHolder ID="MainContent" runat="server" />
+            </body>
+            </html>
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false },
+            SourceFiles = sourceFiles
+        };
+
+        await pipeline.ExecuteAsync(context);
+
+        var appRazor = File.ReadAllText(Path.Combine(outputDir, "Components", "App.razor"));
+        Assert.Contains("/Content/site.css", appRazor);
+        Assert.Contains("https://cdn.example.com/site.css", appRazor);
+        Assert.Contains("/Scripts/jquery-3.7.1.js", appRazor);
+    }
+
+    [Fact]
+    public async Task FullMigration_CopiesAppStartFilesToProjectRoot()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir();
+        Directory.CreateDirectory(Path.Combine(inputDir, "App_Start"));
+        File.WriteAllText(Path.Combine(inputDir, "App_Start", "RouteConfig.cs"), """
+            using System.Web.Routing;
+
+            public class RouteConfig
+            {
+            }
+            """);
+        File.WriteAllText(Path.Combine(inputDir, "App_Start", "WebApiConfig.cs"), """
+            public class WebApiConfig
+            {
+            }
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false },
+            SourceFiles = sourceFiles
+        };
+
+        var report = await pipeline.ExecuteAsync(context);
+
+        Assert.True(File.Exists(Path.Combine(outputDir, "RouteConfig.cs")));
+        Assert.True(File.Exists(Path.Combine(outputDir, "WebApiConfig.cs")));
+        Assert.Contains("Blazor has no App_Start convention", File.ReadAllText(Path.Combine(outputDir, "RouteConfig.cs")));
+        Assert.Contains(report.ManualItems, item => item.Category == "AppStart");
+    }
+
+    [Fact]
+    public async Task FullMigration_AnnotatesProgramForRedirectHandlerPages()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir();
+        File.WriteAllText(Path.Combine(inputDir, "CheckoutStart.aspx"), """
+            <%@ Page Language="C#" AutoEventWireup="true" CodeBehind="CheckoutStart.aspx.cs" Inherits="TestApp.CheckoutStart" %>
+            """);
+        File.WriteAllText(Path.Combine(inputDir, "CheckoutStart.aspx.cs"), """
+            using System;
+
+            namespace TestApp
+            {
+                public partial class CheckoutStart
+                {
+                    protected void Page_Load(object sender, EventArgs e)
+                    {
+                        Response.Redirect("~/Checkout/Start.aspx");
+                    }
+                }
+            }
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false },
+            SourceFiles = sourceFiles
+        };
+
+        await pipeline.ExecuteAsync(context);
+
+        var program = File.ReadAllText(Path.Combine(outputDir, "Program.cs"));
+        Assert.Contains("CheckoutStart was a redirect handler", program);
     }
 
     // ───────────────────────────────────────────────────────────────

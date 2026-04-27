@@ -69,13 +69,13 @@ Team update (2026-02-28): GetCssClassOrNull() uses IsNullOrEmpty not IsNullOrWhi
 
 **Layer 2+3 Benchmark:** 563s (~9.4 min) total. Clean build after 3 rounds. Account pages copied from reference. Key transforms: SelectMethod to Items, Page_Load to OnInitializedAsync, Session to scoped services, EF6 to EF Core. ~9 min with Copilot vs 4-8 hours manual.
 
-<!-- Summarized 2026-03-04 by Scribe — covers team updates and script enhancements 2026-03-02 through 2026-03-04 -->
+<!-- Summarized 2026-03-04 by Scribe ΓÇö covers team updates and script enhancements 2026-03-02 through 2026-03-04 -->
 
 ### Script & Toolkit Summary (2026-03-02 through 2026-03-04)
 
 **Team context:** PRs target upstream (not fork). Migration toolkit restructured into self-contained migration-toolkit/ package. Migration Run 2 validated 11/11 features (PR #418 critical). Project reframed as migration system. M22 planned. ListView CRUD first, Themes last.
 
-**Script enhancements (bwfc-migrate.ps1):** ConvertFrom-MasterPage (6 transforms: @inherits injection, document wrapper strip, ContentPlaceHolder→@Body, ScriptManager removal, HeadContent extraction, layout path remap). New-AppRazorScaffold (App.razor + Routes.razor). Eval format-string regex (`Eval("prop","{0:fmt}")` → `@context.prop.ToString("fmt")`). String.Format regex (`String.Format("{0:fmt}",Item.Prop)` → `@($"{context.Prop:fmt}")`). Regex ordering: specific patterns before general. ScriptManager uses `(?s)`, ContentPlaceHolder uses `(?si)`.
+**Script enhancements (bwfc-migrate.ps1):** ConvertFrom-MasterPage (6 transforms: @inherits injection, document wrapper strip, ContentPlaceHolderΓåÆ@Body, ScriptManager removal, HeadContent extraction, layout path remap). New-AppRazorScaffold (App.razor + Routes.razor). Eval format-string regex (`Eval("prop","{0:fmt}")` ΓåÆ `@context.prop.ToString("fmt")`). String.Format regex (`String.Format("{0:fmt}",Item.Prop)` ΓåÆ `@($"{context.Prop:fmt}")`). Regex ordering: specific patterns before general. ScriptManager uses `(?s)`, ContentPlaceHolder uses `(?si)`.
 
 <!-- Summarized 2026-03-05 by Scribe -- covers GetRouteUrl through migration-toolkit sync -->
 
@@ -94,61 +94,61 @@ Team updates: Migration report 3-level traversal (Beast). Run 5 reports need Wor
 
 ## Archived 2026-03-12 (entries from 2026-03-12 through 2025-07-25)
 
-### L1 Script — Web.config Database Provider Auto-Detection (2026-03-12)
+### L1 Script ΓÇö Web.config Database Provider Auto-Detection (2026-03-12)
 
 Added `Find-DatabaseProvider` function to `bwfc-migrate.ps1` that parses Web.config `<connectionStrings>` to detect the actual database provider. Three-pass detection: (1) explicit `providerName` attribute, (2) connection string content patterns like `(LocalDB)` or `Server=`, (3) EntityClient inner `provider=` extraction for EF6 EDMX connections. Returns matching EF Core package name and provider method. Falls back to SQL Server when no Web.config or no connectionStrings found.
 
 **Changes:**
 - `Find-DatabaseProvider` function added between Logging and Project Scaffolding regions
-- Uses `GetAttribute()` for XML attribute access (StrictMode-safe — `$entry.providerName` throws under `Set-StrictMode -Version Latest`)
+- Uses `GetAttribute()` for XML attribute access (StrictMode-safe ΓÇö `$entry.providerName` throws under `Set-StrictMode -Version Latest`)
 - Package reference in csproj scaffold now uses detected package instead of hardcoded SqlServer
 - Program.cs scaffold includes detected connection string in commented-out `AddDbContextFactory` line (both identity and models-only paths)
 - `[DatabaseProvider]` review item added to migration summary when provider detected from Web.config
-- Provider mapping: SqlClient→SqlServer, SQLite→Sqlite, Npgsql→PostgreSQL, MySqlClient→MySQL
+- Provider mapping: SqlClientΓåÆSqlServer, SQLiteΓåÆSqlite, NpgsqlΓåÆPostgreSQL, MySqlClientΓåÆMySQL
 
 **Key learning:** PowerShell `Set-StrictMode -Version Latest` throws on missing XML element properties. Use `$element.GetAttribute('attrName')` (returns '' if missing) instead of `$element.attrName` for optional XML attributes.
 
 
  Team update (2026-03-12): Database provider auto-detection consolidated  Jeff directive + Beast skill reframe + Cyclops Find-DatabaseProvider implementation merged into single decision. L1 script now auto-detects provider from Web.config.  decided by Jeffrey T. Fritz, Beast, Cyclops
 
-### Fix: TItem → ItemType in Tests and Samples (2026-03-12)
+### Fix: TItem ΓåÆ ItemType in Tests and Samples (2026-03-12)
 
-The `ItemType` standardization (renaming `TItem`/`TItemType` → `ItemType` across 13 component files) was not applied to test files or sample pages. This caused CI failures on PR #425 with `RZ10001` (type cannot be inferred) and `CS0411` (type arguments cannot be inferred) errors for `RadioButtonList` and `BulletedList` — but the problem was actually much wider.
+The `ItemType` standardization (renaming `TItem`/`TItemType` ΓåÆ `ItemType` across 13 component files) was not applied to test files or sample pages. This caused CI failures on PR #425 with `RZ10001` (type cannot be inferred) and `CS0411` (type arguments cannot be inferred) errors for `RadioButtonList` and `BulletedList` ΓÇö but the problem was actually much wider.
 
 **Root cause:** Components declare `@typeparam ItemType` but tests and samples still referenced `TItem=`. The Razor compiler couldn't match the generic parameter name.
 
-**Fix:** Renamed `TItem=` → `ItemType=` across 43 files:
+**Fix:** Renamed `TItem=` ΓåÆ `ItemType=` across 43 files:
 - 36 test files: RadioButtonList (7), BulletedList (7), CheckBoxList (6), DropDownList (7), ListBox (8), ToolTipTests (1)
 - 7 sample files: ControlSamples pages for all 5 list controls, plus AfterWingtipToys account pages
 
-**Key learning:** When standardizing generic type parameter names on components, the rename must also cover all test files, sample pages, and documentation code blocks — not just the component source. CI may only surface the first few errors, hiding the full scope.
+**Key learning:** When standardizing generic type parameter names on components, the rename must also cover all test files, sample pages, and documentation code blocks ΓÇö not just the component source. CI may only surface the first few errors, hiding the full scope.
 
-### L2 Automation Shims — 4 S-sized Library Enhancements (2026-07-25)
+### L2 Automation Shims ΓÇö 4 S-sized Library Enhancements (2026-07-25)
 
 Implemented 4 OPPs from Forge's L2 automation analysis to eliminate recurring manual L2 fixes:
 
-**OPP-2 (Unit implicit string conversion):** Replaced `explicit operator Unit(string)` (which only handled bare integers) with `implicit operator Unit(string s) => Unit.Parse(s)`. Now `Width="125px"` just works in Razor markup — no `@(Unit.Parse(...))` wrapper needed. `Unit.Parse` already handled all CSS unit formats (px, em, %, pt, etc.).
+**OPP-2 (Unit implicit string conversion):** Replaced `explicit operator Unit(string)` (which only handled bare integers) with `implicit operator Unit(string s) => Unit.Parse(s)`. Now `Width="125px"` just works in Razor markup ΓÇö no `@(Unit.Parse(...))` wrapper needed. `Unit.Parse` already handled all CSS unit formats (px, em, %, pt, etc.).
 
 **OPP-3 (ResponseShim):** Created `ResponseShim.cs` wrapping `NavigationManager`. Strips `~/` prefix and `.aspx` extension from URLs. Exposed as `protected ResponseShim Response` on `WebFormsPageBase`. Now `Response.Redirect("~/Products.aspx")` compiles and navigates correctly.
 
 **OPP-5 (ViewState on WebFormsPageBase):** Added `Dictionary<string, object> ViewState` with `[Obsolete]` warning. Page code-behind using `ViewState["key"]` compiles unchanged. `BaseWebFormsComponent` already had this (line ~145); now page base does too.
 
-**OPP-6 (GetRouteUrl on WebFormsPageBase):** Added `GetRouteUrl(string routeName, object routeParameters)` using injected `LinkGenerator` + `IHttpContextAccessor` — same pattern as `GetRouteUrlHelper` extension on `BaseWebFormsComponent`. Strips `.aspx` from route names.
+**OPP-6 (GetRouteUrl on WebFormsPageBase):** Added `GetRouteUrl(string routeName, object routeParameters)` using injected `LinkGenerator` + `IHttpContextAccessor` ΓÇö same pattern as `GetRouteUrlHelper` extension on `BaseWebFormsComponent`. Strips `.aspx` from route names.
 
 **Key learnings:**
-- `Unit.Parse()` already handles all CSS unit formats via the `Unit(string, CultureInfo, UnitType)` constructor — no new parsing needed.
+- `Unit.Parse()` already handles all CSS unit formats via the `Unit(string, CultureInfo, UnitType)` constructor ΓÇö no new parsing needed.
 - `WebFormsPageBase` did NOT have `NavigationManager`, `LinkGenerator`, or `IHttpContextAccessor` injections prior to this change. Added all three.
-- The explicit string-to-Unit operator was effectively dead code — no tests or consuming code used the `(Unit)"string"` cast syntax.
+- The explicit string-to-Unit operator was effectively dead code ΓÇö no tests or consuming code used the `(Unit)"string"` cast syntax.
 
 
  Team update (2026-03-11): L2 automation shims (OPP-2, 3, 5, 6) implemented by Cyclops on WebFormsPageBase  Unit implicit string, Response.Redirect shim, ViewState, GetRouteUrl. OPP-1/OPP-4 deferred.  decided by Forge (analysis), Cyclops (implementation)
 
 ### OPP-1: EnumParameter<T> Wrapper Struct (2026-07-25)
 
-Implemented `EnumParameter<T>` — a `readonly struct` enabling Blazor component enum parameters to accept both enum values and bare string values. This is the #1 L2 fix by volume: every migrated enum attribute like `GridLines="None"` previously required `@(GridLines.None)` Razor expression syntax.
+Implemented `EnumParameter<T>` ΓÇö a `readonly struct` enabling Blazor component enum parameters to accept both enum values and bare string values. This is the #1 L2 fix by volume: every migrated enum attribute like `GridLines="None"` previously required `@(GridLines.None)` Razor expression syntax.
 
 **New file:** `src/BlazorWebFormsComponents/Enums/EnumParameter.cs`
-- Implicit conversions: `T → EnumParameter<T>`, `string → EnumParameter<T>` (case-insensitive parse), `EnumParameter<T> → T`
+- Implicit conversions: `T ΓåÆ EnumParameter<T>`, `string ΓåÆ EnumParameter<T>` (case-insensitive parse), `EnumParameter<T> ΓåÆ T`
 - Equality operators for `EnumParameter<T>` vs `T` and `T` vs `EnumParameter<T>`
 - Implements `IEquatable<EnumParameter<T>>` and `IEquatable<T>`
 
@@ -158,18 +158,18 @@ Implemented `EnumParameter<T>` — a `readonly struct` enabling Blazor component
 
 **Skipped (abstract class hierarchies, not enums):** DataListEnum, RepeatLayout, ButtonType, TreeViewImageSet, ValidationSummaryDisplayMode
 
-**Skipped (nullable):** `Docking?` on ChartLegend/ChartTitle — wrapping nullable enum params in `EnumParameter<T>?` requires separate handling.
+**Skipped (nullable):** `Docking?` on ChartLegend/ChartTitle ΓÇö wrapping nullable enum params in `EnumParameter<T>?` requires separate handling.
 
 **Key learnings / gotchas:**
 1. **Switch expressions break.** C# pattern matching does NOT use user-defined implicit conversions. Every `switch (Property)` or `Property switch { EnumVal => ... }` must become `Property.Value switch { ... }`. This was the biggest source of internal code changes (~15 switch expressions updated).
 2. **Shouldly `.ShouldBe()` breaks.** Extension methods like `ShouldBe` can't resolve through implicit conversions on structs. Tests need `property.Value.ShouldBe(EnumVal)`. Affected: ListView/SortingEvents, ScriptManager/ScriptManagerTests, UpdatePanel/UpdatePanelTests, Localize/InheritsLiteral.
 3. **"Color Color" rule still works.** When property name matches enum type name (e.g., `GridLines` property of type `EnumParameter<GridLines>`), C# still resolves `GridLines.None` in case labels to the enum type via the "Color Color" disambiguation rule.
-4. **Default values work unchanged.** `= GridLines.None` compiles because the implicit `T → EnumParameter<T>` conversion handles the assignment.
+4. **Default values work unchanged.** `= GridLines.None` compiles because the implicit `T ΓåÆ EnumParameter<T>` conversion handles the assignment.
 5. **`ToString()` is transparent.** The struct's `ToString()` delegates to `Value.ToString()`, so existing `property.ToString().ToLowerInvariant()` patterns work unchanged.
 6. **Equality comparisons are safe.** The `==` and `!=` operators between `EnumParameter<T>` and `T` handle `if (Property == EnumVal)` without needing `.Value`.
 
 **Test files needing updates (for Rogue):**
-- `ListView/SortingEvents.razor` — `SortDirection.ShouldBe()` → `.Value.ShouldBe()`
-- `ScriptManager/ScriptManagerTests.razor` — `ScriptMode.ShouldBe()` → `.Value.ShouldBe()`
-- `UpdatePanel/UpdatePanelTests.razor` — `RenderMode/UpdateMode.ShouldBe()` → `.Value.ShouldBe()`
-- `Localize/InheritsLiteral.razor` — overload resolution failure on `ShouldBe`
+- `ListView/SortingEvents.razor` ΓÇö `SortDirection.ShouldBe()` ΓåÆ `.Value.ShouldBe()`
+- `ScriptManager/ScriptManagerTests.razor` ΓÇö `ScriptMode.ShouldBe()` ΓåÆ `.Value.ShouldBe()`
+- `UpdatePanel/UpdatePanelTests.razor` ΓÇö `RenderMode/UpdateMode.ShouldBe()` ΓåÆ `.Value.ShouldBe()`
+- `Localize/InheritsLiteral.razor` ΓÇö overload resolution failure on `ShouldBe`

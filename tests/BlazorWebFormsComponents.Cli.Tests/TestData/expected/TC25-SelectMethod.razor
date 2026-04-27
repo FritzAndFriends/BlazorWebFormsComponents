@@ -3,7 +3,6 @@
 <ListView id="ProductList"
     TItem="Product"
     SelectMethod="GetProducts">
-@* TODO(bwfc-select-method): Convert SelectMethod="GetProducts" to a code-behind method that sets Items property *@
     <ItemTemplate>
         <tr>
             <td><%# Item.Name %></td>
@@ -13,13 +12,12 @@
 <FormView id="DetailView"
     TItem="Product"
     SelectMethod="GetProduct"
-@* TODO(bwfc-select-method): Convert SelectMethod="GetProduct" to a code-behind method that sets Items property *@
     InsertMethod="InsertProduct"
-@* TODO(bwfc-select-method): Convert InsertMethod="InsertProduct" to a code-behind method that sets Items property *@
+@* TODO(bwfc-select-method): Review InsertMethod="InsertProduct" migration for BWFC event/CRUD handling *@
     UpdateMethod="UpdateProduct"
-@* TODO(bwfc-select-method): Convert UpdateMethod="UpdateProduct" to a code-behind method that sets Items property *@
+@* TODO(bwfc-select-method): Review UpdateMethod="UpdateProduct" migration for BWFC event/CRUD handling *@
     DeleteMethod="DeleteProduct">
-@* TODO(bwfc-select-method): Convert DeleteMethod="DeleteProduct" to a code-behind method that sets Items property *@
+@* TODO(bwfc-select-method): Review DeleteMethod="DeleteProduct" migration for BWFC event/CRUD handling *@
     <ItemTemplate>
         <span><%# Item.Description %></span>
     </ItemTemplate>

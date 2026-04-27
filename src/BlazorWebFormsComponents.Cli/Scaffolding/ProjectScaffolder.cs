@@ -34,7 +34,7 @@ public class ProjectScaffolder
         result.Files["csproj"] = new ScaffoldFile
         {
             RelativePath = $"{projectName}.csproj",
-            Content = GenerateCsproj(projectName, hasModels, hasIdentity, dbProvider)
+            Content = GenerateCsproj(projectName, outputRoot, hasModels, hasIdentity, dbProvider)
         };
 
         result.Files["program"] = new ScaffoldFile
@@ -89,7 +89,7 @@ public class ProjectScaffolder
                File.Exists(Path.Combine(sourcePath, "Register.aspx"));
     }
 
-    private static string GenerateCsproj(string projectName, bool hasModels, bool hasIdentity, DatabaseProviderInfo dbProvider)
+    private static string GenerateCsproj(string projectName, string outputRoot, bool hasModels, bool hasIdentity, DatabaseProviderInfo dbProvider)
     {
         var additionalPackages = "";
         if (hasModels)
@@ -104,6 +104,8 @@ public class ProjectScaffolder
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore\" Version=\"10.0.0\" />";
         }
 
+        var bwfcReference = ResolveBwfcReference(outputRoot);
+
         return $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
@@ -114,11 +116,32 @@ public class ProjectScaffolder
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Fritz.BlazorWebFormsComponents"" Version=""*"" />{additionalPackages}
+{bwfcReference}{additionalPackages}
   </ItemGroup>
 
 </Project>
 ";
+    }
+
+    private static string ResolveBwfcReference(string outputRoot)
+    {
+        var outputFullPath = Path.GetFullPath(outputRoot);
+        var current = new DirectoryInfo(outputFullPath);
+
+        while (current is not null)
+        {
+            var candidate = Path.Combine(current.FullName, "src", "BlazorWebFormsComponents", "BlazorWebFormsComponents.csproj");
+            if (File.Exists(candidate))
+            {
+                var relativePath = Path.GetRelativePath(outputFullPath, candidate)
+                    .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                return $@"    <ProjectReference Include=""{relativePath}"" />";
+            }
+
+            current = current.Parent;
+        }
+
+        return @"    <PackageReference Include=""Fritz.BlazorWebFormsComponents"" Version=""*"" />";
     }
 
     private static string GenerateProgramCs(string projectName, bool hasModels, bool hasIdentity, DatabaseProviderInfo dbProvider)
@@ -195,7 +218,8 @@ app.Run();
 
     private static string GenerateImportsRazor(string projectName)
     {
-        return $@"@using System.Net.Http
+        return $@"@namespace {projectName}
+@using System.Net.Http
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -203,9 +227,11 @@ app.Run();
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
 @using BlazorWebFormsComponents.LoginControls
-@using {projectName}
-@using {projectName}.Models
+@using BlazorWebFormsComponents.Validations
+@using global::{projectName}
+@using global::{projectName}.Models
 @inherits BlazorWebFormsComponents.WebFormsPageBase
 ";
     }

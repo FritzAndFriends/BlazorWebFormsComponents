@@ -82,6 +82,64 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Resolve-BwfcCliProject {
+    param([string]$StartPath)
+
+    $currentDir = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($StartPath))
+    while ($null -ne $currentDir) {
+        $candidate = Join-Path $currentDir.FullName 'src\BlazorWebFormsComponents.Cli\BlazorWebFormsComponents.Cli.csproj'
+        if (Test-Path $candidate) {
+            return $candidate
+        }
+
+        $currentDir = $currentDir.Parent
+    }
+
+    throw "Could not locate BlazorWebFormsComponents.Cli.csproj from '$StartPath'."
+}
+
+$cliProject = Resolve-BwfcCliProject -StartPath $PSScriptRoot
+
+$cliArgs = @(
+    'run',
+    '--project', $cliProject,
+    '--'
+)
+
+if ($Prescan) {
+    $cliArgs += @(
+        'prescan',
+        '--input', $Path
+    )
+}
+else {
+    $cliArgs += @(
+        'migrate',
+        '--input', $Path,
+        '--output', $Output,
+        '--overwrite'
+    )
+
+    if ($SkipProjectScaffold) {
+        $cliArgs += '--skip-scaffold'
+    }
+
+    if ($WhatIfPreference) {
+        $cliArgs += '--dry-run'
+    }
+
+    if ($VerbosePreference -eq 'Continue') {
+        $cliArgs += '--verbose'
+    }
+}
+
+& dotnet @cliArgs
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+
+return
+
 #region --- Configuration ---
 
 $WebFormsExtensions = @('.aspx', '.ascx', '.master')
@@ -130,6 +188,7 @@ function Invoke-BwfcPrescan {
         'BWFC016' = @{ Name = 'ConfigurationManager'; Pattern = 'ConfigurationManager\.(AppSettings|ConnectionStrings)\s*\['; Description = 'ConfigurationManager access — BWFC provides shim' }
         'BWFC017' = @{ Name = 'ClientScript'; Pattern = '(Page\.)?ClientScript\.(RegisterStartupScript|RegisterClientScriptBlock|RegisterClientScriptInclude|GetPostBackEventReference)\s*\('; Description = 'ClientScript calls — use ClientScriptShim' }
         'BWFC018' = @{ Name = 'Cache Access'; Pattern = '\bCache\s*\['; Description = 'Cache dictionary access — use CacheShim on WebFormsPageBase' }
+        'BWFC021' = @{ Name = 'ContentPlaceHolder/MasterPage'; Pattern = '<asp:ContentPlaceHolder|MasterPageFile\s*='; Description = 'Master page placeholder relationships — will be preserved as BWFC ContentPlaceHolder/Content components' }
     }
     
     $csFiles = Get-ChildItem -Path $SourcePath -Filter '*.cs' -Recurse -File
@@ -410,6 +469,18 @@ function New-ProjectScaffold {
         $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore`" Version=`"10.0.0`" />"
     }
 
+    $bwfcReference = '<PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />'
+    $currentDir = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($OutputRoot))
+    while ($null -ne $currentDir) {
+        $candidate = Join-Path $currentDir.FullName 'src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj'
+        if (Test-Path $candidate) {
+            $relative = [System.IO.Path]::GetRelativePath([System.IO.Path]::GetFullPath($OutputRoot), $candidate) -replace '/', '\'
+            $bwfcReference = "<ProjectReference Include=`"$relative`" />"
+            break
+        }
+        $currentDir = $currentDir.Parent
+    }
+
     # .csproj
     $csprojContent = @"
 <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -422,7 +493,7 @@ function New-ProjectScaffold {
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />${additionalPackages}
+    ${bwfcReference}${additionalPackages}
   </ItemGroup>
 
 </Project>

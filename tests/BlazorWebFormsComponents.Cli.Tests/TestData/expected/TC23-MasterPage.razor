@@ -1,17 +1,16 @@
-@inherits LayoutComponentBase
-@* TODO(bwfc-master-page): Review head content extraction for App.razor *@
+@* TODO(bwfc-master-page): CSS <link> refs from <head> — move to App.razor: /Content/Site.css *@
 
-<!DOCTYPE html>
-<html>
-<head>
+<MasterPage>
+<Head>
     <title>My Site</title>
-    <link href="/Content/Site.css" rel="stylesheet" />
-</head>
-<body>
+</Head>
+<ChildContent>
     <form id="form1">
         <div class="container">
-            @Body
+            <ContentPlaceHolder id="MainContent">
+                <p>Default content</p>
+            </ContentPlaceHolder>
         </div>
     </form>
-</body>
-</html>
+</ChildContent>
+</MasterPage>

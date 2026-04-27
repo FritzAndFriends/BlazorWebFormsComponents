@@ -43,7 +43,8 @@ public class SourceFileCopier
         string sourcePath,
         string outputPath,
         IReadOnlyList<SourceFile> pageFiles,
-        bool verbose)
+        bool verbose,
+        ISet<string>? additionalExcludedFiles = null)
     {
         if (!Directory.Exists(sourcePath))
             return 0;
@@ -64,6 +65,9 @@ public class SourceFileCopier
 
             // Skip code-behind files (already processed)
             if (codeBehindPaths.Contains(fullPath))
+                continue;
+
+            if (additionalExcludedFiles is not null && additionalExcludedFiles.Contains(fullPath))
                 continue;
 
             var relativePath = Path.GetRelativePath(sourcePath, file);

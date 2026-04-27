@@ -4,16 +4,17 @@ using BlazorWebFormsComponents.Cli.Pipeline;
 namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 
 /// <summary>
-/// Detects SelectMethod, InsertMethod, UpdateMethod, and DeleteMethod attributes on data-bound
-/// controls. Preserves the attribute as-is and adds a TODO comment for delegate conversion.
+/// Preserves SelectMethod on BWFC data-bound controls because DataBoundComponent already
+/// supports delegate-style SelectMethod binding in markup. Insert/Update/Delete methods
+/// still need manual review and therefore get TODO comments.
 /// </summary>
 public class SelectMethodTransform : IMarkupTransform
 {
     public string Name => "SelectMethod";
     public int Order => 520;
 
-    private static readonly Regex MethodAttrRegex = new(
-        @"(SelectMethod|InsertMethod|UpdateMethod|DeleteMethod)=""([^""]+)""",
+    private static readonly Regex CrudMethodAttrRegex = new(
+        @"(InsertMethod|UpdateMethod|DeleteMethod)=""([^""]+)""",
         RegexOptions.Compiled);
 
     public string Apply(string content, FileMetadata metadata)
@@ -25,13 +26,13 @@ public class SelectMethodTransform : IMarkupTransform
         {
             result.Add(line);
 
-            var matches = MethodAttrRegex.Matches(line);
+            var matches = CrudMethodAttrRegex.Matches(line);
             foreach (Match match in matches)
             {
                 var attrName = match.Groups[1].Value;
                 var methodName = match.Groups[2].Value;
                 result.Add(
-                    $"@* TODO(bwfc-select-method): Convert {attrName}=\"{methodName}\" to a code-behind method that sets Items property *@");
+                    $"@* TODO(bwfc-select-method): Review {attrName}=\"{methodName}\" migration for BWFC event/CRUD handling *@");
             }
         }
 

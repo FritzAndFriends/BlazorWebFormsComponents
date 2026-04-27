@@ -1,6 +1,8 @@
 @page "/TC30-DataDrivenPage"
 <PageTitle>Product Catalog</PageTitle>
 @using ContosoStore.Models
+<Site>
+<Content ContentPlaceHolderID="MainContent">
     <h1>Product Catalog</h1>
     @* Product search and filter controls *@
     <div class="search-bar">
@@ -18,7 +20,6 @@
     @* TODO(bwfc-datasource): Implement IdsProductsDataService to replace SqlDataSource *@
     <h2>Featured Products</h2>
     <Repeater id="rptFeatured" TItem="Product" SelectMethod="GetFeaturedProducts">
-@* TODO(bwfc-select-method): Convert SelectMethod="GetFeaturedProducts" to a code-behind method that sets Items property *@
         <ItemTemplate>
             <div class="product-card">
                 <h4>@context.ProductName</h4>
@@ -26,6 +27,8 @@
             </div>
         </ItemTemplate>
     </Repeater>
+</Content>
+</Site>
 
 @code {
     // TODO(bwfc-datasource): Replace dsProductsData with real data from injected service

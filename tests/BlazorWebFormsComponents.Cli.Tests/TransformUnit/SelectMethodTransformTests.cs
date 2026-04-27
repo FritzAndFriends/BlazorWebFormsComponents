@@ -4,7 +4,8 @@ using BlazorWebFormsComponents.Cli.Transforms.Markup;
 namespace BlazorWebFormsComponents.Cli.Tests.TransformUnit;
 
 /// <summary>
-/// Unit tests for SelectMethodTransform — preserves data-method attributes and adds TODO comments.
+/// Unit tests for SelectMethodTransform — preserves SelectMethod as working BWFC markup
+/// and only adds TODO comments for CRUD method attributes that still need review.
 /// </summary>
 public class SelectMethodTransformTests
 {
@@ -31,13 +32,12 @@ public class SelectMethodTransformTests
     }
 
     [Fact]
-    public void AddsSelectMethodTodo()
+    public void PreservesSelectMethodWithoutTodo()
     {
         var input = @"<GridView SelectMethod=""GetItems"" />";
         var result = _transform.Apply(input, MakeMetadata());
 
-        Assert.Contains(@"SelectMethod=""GetItems""", result);
-        Assert.Contains(@"TODO(bwfc-select-method): Convert SelectMethod=""GetItems"" to a code-behind method that sets Items property", result);
+        Assert.Equal(input, result);
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public class SelectMethodTransformTests
         var result = _transform.Apply(input, MakeMetadata());
 
         Assert.Contains(@"InsertMethod=""AddItem""", result);
-        Assert.Contains(@"TODO(bwfc-select-method): Convert InsertMethod=""AddItem"" to a code-behind method that sets Items property", result);
+        Assert.Contains(@"TODO(bwfc-select-method): Review InsertMethod=""AddItem"" migration for BWFC event/CRUD handling", result);
     }
 
     [Fact]
@@ -57,7 +57,7 @@ public class SelectMethodTransformTests
         var result = _transform.Apply(input, MakeMetadata());
 
         Assert.Contains(@"UpdateMethod=""SaveChanges""", result);
-        Assert.Contains(@"TODO(bwfc-select-method): Convert UpdateMethod=""SaveChanges""", result);
+        Assert.Contains(@"TODO(bwfc-select-method): Review UpdateMethod=""SaveChanges"" migration for BWFC event/CRUD handling", result);
     }
 
     [Fact]
@@ -67,7 +67,7 @@ public class SelectMethodTransformTests
         var result = _transform.Apply(input, MakeMetadata());
 
         Assert.Contains(@"DeleteMethod=""RemoveItem""", result);
-        Assert.Contains(@"TODO(bwfc-select-method): Convert DeleteMethod=""RemoveItem""", result);
+        Assert.Contains(@"TODO(bwfc-select-method): Review DeleteMethod=""RemoveItem"" migration for BWFC event/CRUD handling", result);
     }
 
     [Fact]
@@ -80,17 +80,17 @@ public class SelectMethodTransformTests
     }
 
     [Fact]
-    public void HandlesMutipleMethodAttributesOnSameLine()
+    public void HandlesMutipleCrudMethodAttributesOnSameLine()
     {
         var input = @"<GridView SelectMethod=""GetItems"" InsertMethod=""AddItem"" DeleteMethod=""RemoveItem"" />";
         var result = _transform.Apply(input, MakeMetadata());
 
         var lines = result.Split('\n');
         var todoLines = lines.Where(l => l.Contains("TODO(bwfc-select-method)")).ToList();
-        Assert.Equal(3, todoLines.Count);
-        Assert.Contains(todoLines, l => l.Contains(@"SelectMethod=""GetItems"""));
+        Assert.Equal(2, todoLines.Count);
         Assert.Contains(todoLines, l => l.Contains(@"InsertMethod=""AddItem"""));
         Assert.Contains(todoLines, l => l.Contains(@"DeleteMethod=""RemoveItem"""));
+        Assert.Contains(@"SelectMethod=""GetItems""", lines[0]);
     }
 
     [Fact]
@@ -103,9 +103,9 @@ public class SelectMethodTransformTests
     }
 
     [Fact]
-    public void TodoAppearsAfterOriginalLine()
+    public void CrudTodoAppearsAfterOriginalLine()
     {
-        var input = @"<GridView SelectMethod=""GetItems"" />";
+        var input = @"<GridView SelectMethod=""GetItems"" DeleteMethod=""DeleteItem"" />";
         var result = _transform.Apply(input, MakeMetadata());
 
         var lines = result.Split('\n');
@@ -115,11 +115,11 @@ public class SelectMethodTransformTests
     }
 
     [Fact]
-    public void IncludesActualMethodNameInTodo()
+    public void LeavesStandaloneSelectMethodUntouched()
     {
         var input = @"<ListView SelectMethod=""LoadCustomers"" />";
         var result = _transform.Apply(input, MakeMetadata());
 
-        Assert.Contains("LoadCustomers", result);
+        Assert.Equal(input, result);
     }
 }

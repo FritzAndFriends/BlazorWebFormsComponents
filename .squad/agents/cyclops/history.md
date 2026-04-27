@@ -5,1012 +5,143 @@
 - **Stack:** C#, Blazor, .NET, ASP.NET Web Forms, bUnit, xUnit, MkDocs, Playwright
 - **Created:** 2026-02-10
 
-## Core Context
-
-**Role:** Component Developer & Lead Toolsmith  
-**Expertise:** Blazor component implementation, L1/L2 migration scripts, custom controls, data binding, Web Forms patterns
-
-### Key Responsibilities
-- Core component development and pattern establishment (BaseWebFormsComponent, DataBoundComponent, TemplatedWebControl)
-- Migration toolkit engineering (L1 script: bwfc-migrate.ps1; L2 transforms)
-- Custom control migration patterns (WebControl, DataBoundWebControl, TemplatedWebControl base classes)
-- EDMX parser integration for EF6  EF Core migrations
-
-📌 **Team update (2026-04-11):** WebFormsForm (Issue #533) complete — FormSubmitEventArgs created by Coordinator. Cyclops built WebFormsForm.razor + ES module JS interop (bwfc-webformsform.js). Rogue delivered 39 bUnit tests (FormShimTests.cs, WebFormsFormTests.razor). FormShim dual-mode support enabled (IFormCollection + Dictionary<string,StringValues>). RequestShim SetRequestFormData() accepts form event args. @inherits ComponentBase fix applied to WebFormsForm. All 4 agents synchronized. Wave 2 (Jubilee/Beast/Colossus) ready. — decided by Coordinator
-
-📌 **Team update (2026-03-27):** Multi-targeting #516 implemented and validated. BlazorWebFormsComponents now ships net8.0;net9.0;net10.0. All 2606 tests pass × 3 TFMs = 7818 total. Zero code changes, conditional package versions only. CI matrix configured. Ready for GA release. — decided by Forge & Cyclops
-
-### Active Projects
-- L1 Script (bwfc-migrate.ps1): 15/15 test suite (100%), covers 5 core patterns (GetRouteUrl, ContentWrappers, WebFormsAttributes, DataSourceID, Response.Redirect)
-- UpdatePanel enhancement: BaseStyledComponent with ContentTemplate RenderFragment, 24 tests, 0 warnings
-- Students GridView LEFT JOIN fix: Fixed data-loss bug in enrollment display
-- EDMXEF Core parser: Standalone script + L1 integration, handles Model1.edmx  5 entities, 4 FK relationships
-- HttpHandlerBase implementation: 7 files, IEndpointConventionBuilder pattern, 94 tests passing
-
-### Recent Deliverables (2026-03)
-- Issue #472: L1 Script bug fixes (3 bugs fixed, test suite 7/10  15/15)
-- Issue #451: UpdatePanel ContentTemplate feature
-- Issue #475: Students GridView LEFT JOIN fix
-- Issue #488: EDMXEF Core parser + L1 integration
-- HttpHandlerBase: 7-file Handlers/ structure, Session markers, build 0 errors
-
-### Pattern Standards
-1. **Component Base Classes:**
-   - BaseWebFormsComponent: Standard controls (properties, events)
-   - BaseStyledComponent: Style + CssClass support
-   - DataBoundComponent: Data binding (DataSource, DataBind(), ItemDataBound)
-   - TemplatedWebControl: RenderFragment templates (RenderTemplate helper)
-   - WebControl, DataBoundWebControl, TemplatedWebControl: Custom control base classes
-
-2. **L1 Script Architecture:**
-   - Modular conversion functions (scope-specific regexes)
-   - Lookahead validation to prevent false-positive conversions
-   - Test-driven bug fixes; new patterns need test case coverage
-   - ItemType standardization across all data-bound controls
-
-3. **EDMX Migration:**
-   - Parse 3 XML sections in order: C-S Mapping  CSDL  SSDL
-   - Generate entities with EF Core annotations ([Key], [Required], [MaxLength], etc.)
-   - Generate DbContext with OnModelCreating() fluent chains
-   - Skip-existing behavior for re-runs
-
-### Quality Metrics
-- 15/15 L1 tests (100% pass rate)
-- 94 migration tests passing across all runs
-- 0 build errors post-update
-- 24/24 UpdatePanel tests passing
-- Cross-browser acceptance tests (Playwright)
-
----
-## Active Decisions & Alerts
-
-📌 **Team update (2026-03-24):** ViewState Phase 1 implementation complete & merged — `feature/viewstate-postback-shim` ready. ViewStateDictionary core, mode-adaptive IsPostBack, SSR hidden field round-trip, IDataProtectionProvider integration, CryptographicException fallback. All 2588 tests pass (2 breaking contracts fixed by Coordinator). Phase 2 (SSR persistence integration) approved. — decided by Cyclops
-
-📌 **Team update (2026-03-17):** HttpHandlerBase implementation validated by Rogue — 94 tests passing, all adapter patterns verified correct. Commit 040fbad5 (15 files, 3218 insertions) on feature/httphandler-base ready for integration. — decided by Rogue
-
-📌 **Team update (2026-03-17):** Fixed #471 (GUID IDs) and #472 (L1 script). CheckBox/RadioButton/RadioButtonList now use ClientID exclusively; no GUID fallbacks. L1 script test suite: 7/10 → 15/15 (100%). All 2105 tests pass. — decided by Cyclops
-
-📌 **Team update (2026-03-16):** Forge reviewed Component Health Dashboard PRD; 3 errata items identified before Cyclops implementation. (1) Appendix A: ToolTip base class error. (2) tools/WebFormsPropertyCounter/ doesn't exist—use MSDN curation as Phase 1 primary. (3) Acceptance criterion #9 needs verification (Login controls had 0 bUnit tests as of 2026-03-15). See decisions.md for full details. — decided by Forge
-
 ## Learnings
 
 <!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
 
-<!-- ⚠ Summarized 2026-03-06 by Scribe — older entries archived -->
+### Core Context (2026-02-10 through 2026-02-27)
 
-### Archived Sessions
+**M1M3 components:** Calendar (enum fix, async events), ImageMap (BaseStyledComponent, Guid IDs), FileUpload (InputFile integration, path sanitization), PasswordRecovery (3-step wizard), DetailsView (DataBoundComponent<T>, auto-field reflection, 10 events), Chart (BaseStyledComponent, CascadingValue "ParentChart", JS interop via ChartJsInterop, ChartConfigBuilder pure static).
 
-- Core Context (2026-02-10 through 2026-02-27)
-- M17-M20 Wave 1 Context (2026-02-27 through 2026-03-01)
-- M20 Theming through Migration Benchmarks (2026-03-01 through 2026-03-04)
-- Script & Toolkit Summary (2026-03-02 through 2026-03-04)
-- GetRouteUrl, Run 5 & Toolkit Sync Summary (2026-03-04 through 2026-03-05)
+**M6 base class fixes:** DataBoundComponent chain  BaseStyledComponent (14 data controls). BaseListControl<TItem> for 5 list controls (DataTextFormatString, AppendDataBoundItems). CausesValidation on CheckBox/RadioButton/TextBox. Label AssociatedControlID switches spanlabel. Login/ChangePassword/CreateUserWizard  BaseStyledComponent. Validator ControlToValidate dual-path: ForwardRef + string ID via reflection.
 
-<!-- ⚠ Summarized 2026-03-07 by Scribe — entries from 2026-03-05 through 2026-03-07 (pre-Run 11) archived -->
+**M6 Menu overhaul:**  BaseStyledComponent. Selection tracking (SelectedItem/SelectedValue, MenuItemClick, MenuItemDataBound). MenuEventArgs, MaximumDynamicDisplayLevels, Orientation enum + CSS horizontal class. MenuLevelStyle lists. StaticMenuStyle sub-component + IMenuStyleContainer interface. RenderFragment parameters for all menu styles. RenderingMode=Table added (M14) with inline Razor for AngleSharp compatibility.
 
-- Run 6 Script Enhancements (2026-03-05)
-- @rendermode Scaffold Fix (2026-03-05)
-- WebFormsPageBase Implementation (2026-03-05)
-- WebFormsPage IPageService Consolidation (2026-03-05)
-- LoginView Migration Script Fix (2026-03-06)
-- Run 9 Script Fixes — 9 RF items (2026-03-06)
-- Layer 2 AfterWingtipToys Build Conversion (2026-03-06)
+**M7 style sub-components:** GridView (8), DetailsView (10), FormView (7), DataGrid (7)  all CascadingParameter + UiTableItemStyle. Style priority: Edit > Selected > Alternating > Row. TreeView: TreeNodeStyle + 6 sub-components, selection, ExpandAll/CollapseAll, FindNode, ExpandDepth, NodeIndent. GridView: selection, 10 display props. FormView/DetailsView events + PagerTemplate + Caption. DataGrid paging/sorting. ListView 10 CRUD events + EditItemTemplate/InsertItemTemplate. Panel BackImageUrl. Login Orientation + TextLayout. Shared PagerSettings (12 props, IPagerSettingsContainer) for GridView/FormView/DetailsView.
 
-### Summary (2026-03-05 through 2026-03-07 pre-Run 11)
+**M8 bug fixes:** Menu JS null guard + Calendar conditional scope + Menu auto-ID (`menu_{GetHashCode():x}`).
 
-Run 6: 4 script enhancements (TFM, SelectMethod TODO, wwwroot copy, stubs). @rendermode fix: removed standalone directive from _Imports.razor scaffold — `@rendermode` is a directive *attribute* for component instances only. WebFormsPageBase: `ComponentBase` subclass with `Page => this`, Title/MetaDescription/MetaKeywords delegates, `IsPostBack => false`. WebFormsPage consolidation: merged Page.razor head rendering into WebFormsPage via Option B. LoginView script fix: `<asp:LoginView>` → `<LoginView>` (not AuthorizeView), preserve template names. Run 9: 9 script fixes (Models copy, DbContext transform, EF6→EF Core, redirect detection, Program.cs boilerplate, Page Title extraction, QueryString/RouteData annotations, ListView GroupItemCount, csproj packages). Layer 2: full AfterWingtipToys conversion — key pattern: layout code-behind class name MUST match .razor filename. Auth pages use plain HTML forms with HTTP endpoints.
+**M9 migration-fidelity:** ToolTip  BaseStyledComponent (removed from 8, added title="@ToolTip" to 32 components). ValidationSummary comma-split fix (IndexOf + Substring). SkinID boolstring. TreeView NodeImage fallback restructured (ShowExpandCollapse + ExpandCollapseImage helper).
 
-<!-- summarized 2026-03-11 by Scribe -- entries from 2026-03-07 through 2026-03-08 (Runs 11-13, script fixes) archived -->
+**M10 Theming:** ControlSkin (nullable props, StyleSheetTheme semantics). ThemeConfiguration (case-insensitive keys, empty-string default skin, GetSkin returns null). ThemeProvider as CascadingValue wrapper. SkinID="" default, EnableTheming=true, [Obsolete] removed. CascadingParameter in BaseStyledComponent, ApplySkin in OnParametersSet. LoginView/PasswordRecovery  BaseStyledComponent.
 
-- Run 11 -- Complete WingtipToys Migration from Scratch (2026-03-07)
-- Run 11 Script Fixes -- Fix 1 (Invoke-ScriptAutoDetection) & Fix 2 (Convert-TemplatePlaceholders) (2026-03-07)
-- Run 12 -- Complete WingtipToys Migration from Scratch (2026-03-07)
-- LoginView Namespace Fix (2026-03-07)
-- Run 13 -- Full WingtipToys Migration Pipeline, 25/25 tests (2026-03-08)
+**M15 HTML fidelity fixes:** Button `<input>` rendering. BulletedList `<span>` removal + `<ol>` CSS-only (no HTML type attr, GetStartAttribute returns int?). LinkButton class + aspNetDisabled. Image longdesc conditional. Calendar structural (tbody, width:14%, day titles, abbr headers, align center, border-collapse, navigation sub-table). FileUpload clean ID. CheckBox span verified. GridView UseAccessibleHeader default falsetrue. 27 test files updated for Button `<input>`. 10 new tests. All 1283 pass.
 
-### Summary (2026-03-07 through 2026-03-08)
+**M16:** LoginView wrapper `<div>` for styles (#352). ClientIDMode enum (Inherit/AutoID/Static/Predictable) on BaseWebFormsComponent. ComponentIdGenerator refactored: GetEffectiveClientIDMode(), BuildAutoID(), BuildPredictableID(). UseCtl00Prefix only in AutoID mode. NamingContainer auto-sets AutoID when UseCtl00Prefix=true.
 
-Run 11: Fresh WingtipToys migration from scratch (105 files, 0 errors). Key patterns: root-level `_Imports.razor` for pages outside `Components/`, partial classes must NOT specify `: ComponentBase` with `@inherits WebFormsPageBase`, auth pages use plain HTML forms to HTTP endpoints. Run 11 script fixes: `Invoke-ScriptAutoDetection` (JS files to wwwroot/Scripts/ with correct dependency order) and `Convert-TemplatePlaceholders` (placeholder elements to `@context`). Run 12: Full pipeline with Layer 2, established dual DbContext pattern (later superseded by factory-only in Run 13). LoginView namespace fix: `@using BlazorWebFormsComponents.LoginControls` required in `_Imports.razor` -- added to script template. Run 13: 25/25 tests passed (100%). Confirmed patterns: SSR default, `data-enhance-nav="false"` for minimal API links, `data-enhance="false"` for auth forms, `AddDbContextFactory` only (no dual registration), middleware order `UseAuthentication -> UseAuthorization -> UseAntiforgery`, logout must use `<a>` not `<button>`.
+**Key patterns:** Orientation enum collides with parameter name  use `Enums.Orientation.Vertical`. `_ = callback.InvokeAsync()` for render-time events. `Path.GetFileName()` for file save security. CI secret-gating: env var indirection. Null-returning helpers for conditional HTML attributes. aspNetDisabled class for disabled controls. Always test default parameter values explicitly.
 
-Team updates (2026-03-07 through 2026-03-08): Coordinator must not perform domain work; FreshWingtipToys must not be committed; migration-standards updated with Static Asset Checklist/ListView Placeholder/Action Links; migration order: fresh project first; SSR default with InteractiveServer opt-in; enhanced nav bypass for minimal API; DbContext factory-only; middleware order confirmed; logout uses link not button.
 
-<!-- ⚠ Summarized 2026-03-11 by Scribe — entries from 2026-03-11 (ServiceCollectionExtensions through L2 structural transform) archived -->
+<!--  Summarized 2026-03-01 by Scribe  covers M17-M20 Wave 1 -->
 
-- ServiceCollectionExtensions Enhancement (2026-03-11)
-- Run 18a/18b/18c — Test-UnconvertiblePage False-Positive Investigation (2026-03-11)
-- P0 Migration Script Fixes (2026-03-11)
-- Standardize Generic Type Params to ItemType (2026-03-11)
-- Layer 2 Structural Transform - AfterWingtipToys (2026-03-11)
 
-### Summary (2026-03-11 pre-Run 20)
+<!-- Summarized 2026-03-05 by Scribe -- covers M17-M20 through Run 6 enhancements -->
 
-ServiceCollectionExtensions: Added `AddHttpContextAccessor()` auto-registration, `BlazorWebFormsComponentsOptions` with `EnableAspxUrlRewriting`, `UseBlazorWebFormsComponents()` middleware, `AspxRewriteMiddleware` for `.aspx` → clean URL 301 redirects. Run 18: Fixed `Test-UnconvertiblePage` false positives — 'Checkout' matched button IDs, 'PayPal' matched image URLs. Both now path-based. ShoppingCart.razor restored to full GridView markup. P0 fixes: (1) Eliminated `Test-UnconvertiblePage` — always returns `$false`, pages get TODO annotations instead of stubs. (2) `[Parameter]` regex fix — TODO on separate line, eliminates 6 CS errors. ItemType standardization: renamed all `TItemType`/`TItem` → `ItemType` across 13 files, 0 build errors. L2 AfterWingtipToys: ~60 files transformed, 0 errors, 58 RZ10012 warnings. Key gotchas: class name must match .razor filename, `@inject`/`[Inject]` duplication, `#hexcolor` → `@("...")`, `LoggedInTemplate` has no typed context.
+### M17 through Run 6 Summary (2026-02-27 through 2026-03-05)
 
-Team updates (2026-03-11): Migration tests reorganized to `project/runNN/`. Mandatory L1→L2 pipeline with no fixes between layers. All generics standardized to `ItemType`. Test-UnconvertiblePage eliminated. Run 18 improvements prioritized by Forge.
+**M17 AJAX audit fixes:** EnablePartialRendering default true. Scripts collection. UpdateProgress CssClass + display modes. ScriptReference gained ScriptMode/NotifyScriptLoaded. M18 bugs (#380/#382/#383) verified already fixed in M15. CheckBox bare input id (#386). MenuItemStyle SetFontsFromAttributes (#360). LinkButton CssClass verified correct (Issue #379).
 
-### UpdatePanel ContentTemplate Enhancement (2026-03-13)
+**Issue #387 normalizer:** 4 enhancements (case-insensitive pairing, boolean attrs, empty style strip, GUID placeholders). Pipeline: regex > style > empty > boolean > GUID > attr sort > artifact > whitespace.
 
-**Summary:** ContentTemplate RenderFragment parameter added to UpdatePanel; base class changed to BaseStyledComponent; dual syntax support (Web Forms + Blazor); all 24 tests pass.
+**Theming (#364/#365):** SkinBuilder expression trees for nested property access. ThemeConfiguration ForControl() fluent API. CascadingValue by type (unnamed). WebColor.FromHtml(). Theme wiring: CascadingParameter `CascadedTheme` on BaseWebFormsComponent. ApplySkin chain. FontInfo auto-sync. WebFormsPage cascades Theme ?? CascadedTheme.
 
-**Impact:** Eliminates RZ10012 warnings during migration. UpdatePanel now supports full styling capabilities. No breaking changes.
+**Release & ListView:** Unified release.yml (single workflow, tag-based version). ListView #406 EditItemTemplate (closure + @key fix). #356 CRUD events (ItemCreated per-item, ItemCommand fires before specific). EventArgs gained IOrderedDictionary. FormView RenderOuterTable parameter.
 
-📌 Team update (2026-03-13): UpdatePanel enhancement complete — ContentTemplate parameter + BaseStyledComponent base class + dual syntax support. Cyclops (component), Rogue (12 tests, 10 pass now), Jubilee (sample page + ComponentList update), Colossus (3 interaction tests). All 4 UpdatePanel integration tests passing. Decisions merged to decisions.md.
+**CSS fixes:** 7 WingtipToys visual fixes. Playwright blocks file://, use HTTP. Get-NetTCPConnection for PID cleanup.
 
-### Students GridView LEFT JOIN Fix + Test Timing (2026-03-14)
+**Layer 1 benchmark:** scan 0.9s, migrate 2.4s, 276 transforms, 338 build errors (code-behind). Layer 2+3: 563s total, clean build after 3 rounds.
 
-**Summary:** Fixed data-loss bug in `GetJoinedTableData()` by replacing INNER JOIN with LEFT JOIN. Verified Playwright test timing already correct.
+**Script enhancements:** ConvertFrom-MasterPage (6 transforms), New-AppRazorScaffold, Eval format-string regex, String.Format regex. Run 5: GetRouteUrl 4 overloads, 309 transforms, 6 new enhancements. Toolkit sync: migration-toolkit/ canonical, 47KB bwfc-migrate.ps1 synced. Run 6: 4 enhancements (TFM net10.0, SelectMethod BWFC-aware, wwwroot copy, compilable stubs). Bug: @rendermode in _Imports invalid.
 
-**Impact:** Students without enrollments now visible in GridView. Blazor Server form submission timing stable.
+Team updates (2026-02-27-05): Branching workflow, issues via PR refs, AJAX controls, theming, release.yml, toolkit restructured, PRs upstream, standards formalized, Run 2/5/6 validated.
 
-📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
 
-### L1 Script Bug Fixes + Test Coverage Expansion (#472)
+<!-- Summarized 2026-03-06 by Scribe -- covers @rendermode fix through On-prefix aliases -->
 
-**Summary:** Fixed 3 bugs in bwfc-migrate.ps1 that caused test failures, added 5 new test cases covering all five L1 patterns from issue #472. Test suite: 7/10 → 15/15 (100%), line accuracy: 94.3% → 100%.
+<!-- Summarized 2026-03-06 by Scribe -- covers 2026-03-05 implementation through ShoppingCart fix -->
 
-**Bugs fixed:**
-1. `ConvertFrom-GetRouteUrl` — `Eval()` regex was global instead of scoped to GetRouteUrl lines. Corrupted `<%#: Eval("Name") %>` expressions by stripping the Eval wrapper but leaving `<%#: %>` delimiters. Fix: only apply Eval→context conversion on lines containing `GetRouteUrl`.
-2. `ConvertFrom-ContentWrappers` — `\s*\r?\n?` after `>` consumed leading indentation of the next line. Fix: changed to `[ \t]*\r?\n?` (horizontal whitespace only).
-3. `Remove-WebFormsAttributes` — ItemType fallback regex `(?![^>]*ItemType=)` didn't check for `TItem=`, so tags that already had `ItemType` converted to `TItem` got a duplicate `ItemType="object"`. Fix: lookahead now checks `(?![^>]*(?:ItemType|TItem)=)`.
+### 2026-03-05 through 2026-03-06 Implementation Summary
 
-**New test cases:**
-- TC11-BoolEnumUnit: boolean lowercase, enum type-qualifying, unit px-stripping
-- TC12-DataSourceID: DataSourceID removal + data source control → TODO replacement
-- TC13-ResponseRedirect: Response.Redirect → NavigationManager.NavigateTo in code-behind
-- TC14-SessionDetect: Session["key"] detection with migration guidance block
-- TC15-ViewState: ViewState["key"] detection with private field suggestions
+**@rendermode fix:** Removed standalone `@rendermode InteractiveServer` from _Imports.razor scaffold -- it's a directive *attribute* on component instances, not a standalone directive.
 
-**Test harness enhancements:** Extended Run-L1Tests.ps1 to copy `.aspx.cs` inputs and compare `.razor.cs` expected output, enabling code-behind transform verification.
+**WebFormsPageBase:** Abstract base class inheriting `ComponentBase`. Delegates Title/MetaDescription/MetaKeywords to IPageService. `IsPostBack => false`, `Page => this`. **WebFormsPage consolidation:** Merged Page.razor head-rendering (Option B). Optional IPageService via `ServiceProvider.GetService<>()`. RenderPageHead parameter (default true). IDisposable for event unsubscription.
 
-**Key files:** `migration-toolkit/scripts/bwfc-migrate.ps1`, `migration-toolkit/tests/Run-L1Tests.ps1`, `migration-toolkit/tests/inputs/TC11-TC15*`, `migration-toolkit/tests/expected/TC11-TC15*`
+**On-prefix aliases:** 50 `[Parameter] EventCallback` aliases across 7 data components. Pattern: two independent properties + coalescing at invocation.
 
-### Run 22 L1 Script Fixes — 5 Migration Toolkit Improvements (2026-03-14)
+**Run 8 Layer 2 WingtipToys:** Full Layer 2 migration of `samples/Run8WingtipToys/` -- 8 files created (EF Core models, DbContext, CartStateService), 14 modified (csproj, Program.cs, layouts, pages), 3 deleted, 26 stub files fixed. Clean build. Key patterns: IDbContextFactory, SupplyParameterFromQuery, CartStateService scoped DI, ListView `Items=`, FormView `RenderOuterTable="false"`.
 
-**Summary:** Implemented 5 script fixes identified from ContosoUniversity Run 22 (39/40 tests, 97.5% pass rate): (1) Strip ContentTemplate wrappers to eliminate RZ10012 warnings, (2) Add dual `@page` routes for home pages (e.g., `/Home` + `/`), (3) Extract PageTitle from TitleContent placeholders, (4) Convert `ID=` to `id=` for HTML compatibility, (5) Add `[DatabaseGenerated(Computed)]` support to EDMX parser.
+**ShoppingCart BWFC fix:** Replaced plain HTML table with BWFC GridView in Run8 + AfterWingtipToys. AfterWingtipToys reference was wrong (plain HTML). Run 7's ShoppingCart.razor is gold standard.
 
-**Files Modified:**
-- `migration-toolkit/scripts/bwfc-migrate.ps1` (Fixes 1-4)
-- `migration-toolkit/scripts/Convert-EdmxToEfCore.ps1` (Fix 5)
+Team updates: @rendermode fix (PR #419), EF Core 10.0.3, WebFormsPageBase shipped, WebFormsPage consolidation, event handler audit, ShoppingCart regression test, BWFC preservation mandatory.
 
-**Key Implementation Details:**
-- **Fix 1 (ContentTemplate):** Added after asp: prefix removal in `ConvertFrom-AspPrefix` — strips `<ContentTemplate>` wrapper tags while preserving content. UpdatePanel component accepts ContentTemplate as RenderFragment parameter, but L1 output is cleaner without wrapper tags.
-- **Fix 2 (Home Routes):** Added `$isHomePage` detection in `ConvertFrom-PageDirective` for Home.aspx/Default.aspx/Index.aspx — generates both `@page "/Home"` and `@page "/"` directives. Ensures root URL routing works.
-- **Fix 3 (TitleContent):** Added regex in `ConvertFrom-ContentWrappers` to extract title from `<asp:Content ContentPlaceHolderID="TitleContent">` blocks. Stored in `$script:ExtractedTitleFromContent`, consumed by `ConvertFrom-PageDirective` as fallback when `Title` attribute absent. Complements existing Title attribute extraction (Run 9 RF-10).
-- **Fix 4 (ID → id):** Added in `Remove-WebFormsAttributes` after ItemType processing — broad regex replacement of `ID="value"` to `id="value"`. BWFC components accept both, so safe replacement. Ensures CSS/JS selectors work.
-- **Fix 5 (EDMX Computed):** Added `IsComputed` property to entity metadata, generated `[DatabaseGenerated(DatabaseGeneratedOption.Computed)]` annotation in entity files. Mirrors existing `IsIdentity` pattern. Prevents EF Core errors on computed columns.
+ Team update (2026-03-05): BWFC control preservation is mandatory -- all migration output must use BWFC components, never flatten to raw HTML -- decided by Jeffrey T. Fritz, Forge, Cyclops
 
-**Expected Impact:**
-- Eliminates 3 RZ10012 warnings (ContentTemplate)
-- Fixes 3 HomePageTests (root URL routing)
-- Improves browser tab titles (SEO + UX)
-- Fixes selector failures from ID casing
-- Prevents EF Core computed column errors
+ Team update (2026-03-05): LoginView redesigned to delegate to AuthorizeView -- decided by Forge
+ Team update (2026-03-05): LoginStatus flagged for AuthorizeView redesign  decided by Forge
 
-**Gotchas:**
-- Fix 3 uses script-scoped variable to pass data between functions — must clear `$script:ExtractedTitleFromContent` after use to avoid cross-file pollution
-- Fix 2 checks `$isHomePage -and $route -ne '/'` to avoid duplicate `@page "/"` directives
-- Fix 1 placed after closing tag removal to avoid interfering with asp: prefix stripping
+- **LoginStatus AuthorizeView redesign:** Replaced manual `AuthenticationStateProvider` injection + `OnInitializedAsync` auth check + `UserAuthenticated` bool with `<AuthorizeView>` delegation (same pattern as LoginView). Removed unused `CalculatedStyle` property and `BlazorComponentUtilities` using. Added null guard on `LoginHandle` so missing `LoginPageUrl` doesn't throw. Updated `LoginPageUrl` comment to explain it's a Blazor adaptation (Web Forms used `FormsAuthentication.LoginUrl`). LogoutAction abstract class → enum conversion left for separate PR per team decision. Build clean.
 
-📌 Team update (2026-03-14): Run 22 L1 script fixes implemented by Cyclops — 5 improvements targeting RZ10012 warnings, home page routing, PageTitle extraction, ID normalization, and EDMX computed properties. Decision document written to `.squad/decisions/inbox/cyclops-l1-script-fixes.md`.
+### P0 Event Handler Fixes (2026-03-06)
 
+All 7 P0 items from Forge's audit implemented:
+- **P0-1** Repeater: 3 events added (ItemCommand, ItemCreated, ItemDataBound) — had ZERO before
+- **P0-2** DataList: 7 events added + ItemDataBound bare alias. Renamed internal `ItemDataBound()` → `ItemDataBoundInternal()` to avoid parameter collision
+- **P0-3/P0-4** GridView: RowDataBound + RowCreated added, bare RowCommand alias, ButtonField.razor.cs updated to coalesce
+- **P0-5** DetailsView: ItemCreated added
+- **P0-6** FormView: OnItemInserted type fixed (FormViewInsertEventArgs → FormViewInsertedEventArgs), 6 bare CRUD aliases added
+- **P0-7** SelectMethod: moved from OnAfterRender(firstRender) to OnParametersSet(), added RefreshSelectMethod()
 
+New EventArgs: `RepeaterCommandEventArgs`, `RepeaterItemEventArgs`, `DataListCommandEventArgs`, `GridViewRowEventArgs`, `FormViewInsertedEventArgs`.
 
-- Run 20 L1 Script Fixes — SelectMethod Preservation + Review Item Noise Reduction (2026-03-12)
-- Run 21 — Layer 2 Structural Transform AfterWingtipToys (2026-03-11)
-- Layer 2 Structural Transform — AfterContosoUniversity (2026-03-12)
-- L1 Script SQLite → SQL Server Fix (2026-03-12)
+**Pattern:** When `[Parameter]` name collides with internal method, rename method with `*Internal` suffix — never rename the parameter.
 
-### Summary (2026-03-11 through 2026-03-12)
 
-Run 20 L1 fixes: `ConvertFrom-SelectMethod` was stripping SelectMethod from markup — fixed to preserve it with TODO for L2 delegate conversion. ContentPlaceHolder and GetRouteUrl review items updated to reference BWFC components. Run 21 WingtipToys L2: 44 files, 0 errors. SelectMethod delegate conversion on 4 data pages (`SelectMethod="@GetProducts"` etc.), all code-behinds to async lifecycle, enum/type Razor escaping (`@GridLines.Vertical`), account pages stubbed for Identity migration. CU L2: 0 errors, 5 models to EF Core, 5 BLL classes with IDbContextFactory, EDMX artifacts deleted, raw SQL → LINQ. L1 script: SQLite package/example replaced with SqlServer/LocalDB.
+ Team update (2026-03-06): Forge's Event Handler Fidelity Audit merged to decisions.md (P0 items all resolved by Cyclops, tested by Rogue). 11 P1 and 7 P2 items remain for future work.  decided by Forge, implemented by Cyclops
 
-**Key gotchas (combined):** Code-behind class name MUST match .razor filename. Code-behind files need explicit usings (don't inherit _Imports.razor). Don't duplicate `@inject`/`[Inject]`. `#hexcolor` → `@("#hexcolor")`. `Unit` params are bare integers. BWFC uses `Sorting` EventCallback (not `OnSorting`). `CommandField` doesn't exist — use `ButtonField`. `TextBox Text` expects `string`. `TemplateField` in DetailsView needs `ItemType`. Style sub-components: `<RowStyleContent><GridViewRowStyle .../></RowStyleContent>`. `SortedAscendingCellStyle` not in BWFC. L1 must not strip attributes BWFC supports.
 
+ Team update (2026-03-05): Run 9 BWFC review APPROVED with 2 findings  ImageButtonraw img in ShoppingCart (P0, OnClick lost), HyperLink dropped in Manage (P2). ImageButton fix needed.  decided by Forge
 
- Team update (2026-03-11): NEVER default to SQLite; SelectMethod MUST be preserved as SelectHandler<ItemType> delegates. All skill files hardened, L1 script now scaffolds SQL Server.  decided by Jeffrey T. Fritz, Beast, Cyclops
+- **Squad Places comments (2026-03-05):** Posted 2 comments on Breaking Bad squad's articles (Terrarium .NET 3.5→10 migration). Comment 1 on "Leaf-to-Root Migration" (artifact 5979f2ed): shared base class hierarchy cascade experience (ToolTip fix hitting 32 components/27 tests), SelectMethod lifecycle challenges, naming collision rule (*Internal suffix). Comment 2 on "ASMX SOAP to Minimal APIs" (artifact 8e18dfe3): shared "map one-to-one first" philosophy, System.Text.Json PascalCase/camelCase pain at C#/JS boundary, BinaryFormatter removal forcing ViewState redesign, interest in Terrarium's real-time simulation API.
 
+ Team update (2026-03-06): Run 10 preservation 92.7% (164/177)  NEEDS WORK. ImageButtonimg still persists in ShoppingCart (P0). DropDownList AppendDataBoundItems verification assigned to Cyclops (P2-2). Layer 1 script bugs consolidated (ItemType fix, validator params, base class stripping all implemented).  decided by Forge, Bishop
 
- Team update (2026-03-11): ContosoUniversity L2 confirmed SQL Server LocalDB exclusively. Earlier SQLite attempt was rejected. IDbContextFactory pattern with SqlServer provider is canonical.  decided by Cyclops
+📌 Team update (2026-03-06): migration-toolkit is end-user distributable; migration skills belong in migration-toolkit/skills/ not .squad/skills/ — decided by Jeffrey T. Fritz
 
+### Run 7 Layer 2 WingtipToys (AfterWingtipToys)
 
- Team update (2026-03-11): Database provider guidance reframed  lead with 'detect and match original provider' instead of 'NEVER substitute'. L1 auto-detection connects to L2 verification.  decided by Beast (requested by Jeffrey T. Fritz)
+**Build rounds:** 2 (round 1 had 7 errors, round 2 was clean 0/0)
 
-<!-- ⚠ Summarized 2026-03-12 by Scribe — Database provider, ItemType fix, L2 shims, OPP-1 archived -->
+**Layer 2 fix categories applied:**
 
-- L1 Script — Web.config Database Provider Auto-Detection (2026-03-12)
-- Fix: TItem → ItemType in Tests and Samples (2026-03-12)
-- L2 Automation Shims — 4 S-sized Library Enhancements (2026-07-25)
-- OPP-1: EnumParameter<T> Wrapper Struct (2026-07-25)
+1. **Project Configuration:** Changed csproj from NuGet `Fritz.BlazorWebFormsComponents` to project reference. Added EF Core SQLite packages with wildcard version `10.0.0-*`. Added `RootNamespace=WingtipToys`. Fixed Program.cs: AddHttpContextAccessor before AddBlazorWebFormsComponents, EF Core DbContextFactory registration, ShoppingCartService/CartStateService DI, database EnsureCreated+seed. Fixed _Imports.razor: added BlazorWebFormsComponents.Enums, Microsoft.EntityFrameworkCore, WingtipToys.Models/Data/Services namespaces.
 
-### Summary (2026-03-12)
+2. **Data Layer:** Created Models/ (Product, Category, CartItem, Order, OrderDetail) matching original Web Forms models with nullable reference types. Created Data/ProductContext.cs with EF Core DbContext, DbSets, and HasData seed (16 products, 5 categories). SQLite provider.
 
-L1 script: Added Find-DatabaseProvider parsing Web.config connectionStrings (3-pass: providerName, connection string patterns, EntityClient inner provider). Maps SqlClient→SqlServer, SQLite→Sqlite, Npgsql→PostgreSQL. Uses GetAttribute() for StrictMode safety. TItem→ItemType: 43 files renamed (36 tests + 7 samples) after CI failures from generic param mismatch. L2 shims (OPP-2,3,5,6): Unit implicit string conversion (Parse all CSS units), ResponseShim (strips ~/ and .aspx), ViewState dict with [Obsolete], GetRouteUrl via LinkGenerator+HttpContextAccessor. OPP-1 EnumParameter<T>: readonly struct with implicit string→enum conversion for 55 files across 46 components. Gotchas: switch expressions need .Value, Shouldly needs .Value.ShouldBe(), nullable enums need separate handling.
+3. **Services:** Created ShoppingCartService (IDbContextFactory-based, async CRUD), CartStateService (cookie-based cart ID via IHttpContextAccessor).
 
+4. **Identity/Auth Stubs:** Register.razor has UserName, Email, Password, ConfirmPassword fields with BWFC TextBox/Button/Label components. Login.razor has Email, Password, RememberMe fields. Both wire to MockAuthService/MockAuthenticationStateProvider.
 
+5. **Code-Behind Rewrites (33 files):** All .razor.cs files rewritten from raw Web Forms (System.Web, OWIN, Microsoft.AspNet.Identity) to Blazor ComponentBase. Key patterns: IDbContextFactory injection, SupplyParameterFromQuery, OnParametersSetAsync for query-driven data, NavigationManager.NavigateTo for redirects.
 
+6. **Markup Fixes:** ListView GroupTemplate/LayoutTemplate placeholders → @context. Removed GetRouteUrl calls → href with query params. Removed <%# %> expressions → @context. Fixed ImageButton → Button. Removed runat artifacts. Fixed category links to use /ProductList?id=N. ShoppingCart preserved as BWFC GridView with TItem, Items, editable TextBox, CheckBox, Update/Checkout buttons.
 
+7. **Misc Cleanup:** Removed <friendlyUrls:ViewSwitcher/>, cleaned Mobile layout, stubbed all Account/Checkout pages, AdminPage wired with EF Core data loading.
 
- Team update (2026-03-12): ResponseShim.Redirect null URL bug reported by Rogue — throws NullReferenceException instead of ArgumentNullException. Add null guard.  reported by Rogue (QA)
+**Build round 1 errors (7):**
+- CS0103 `Title` not found → class name `_Default` didn't match razor file `Default.razor`
+- CS0103 `_categories`/`_cartCount` not found → MainLayout code-behind was class `SiteMaster` in wrong namespace
+- CS1503 type mismatch (4x) → BWFC Button OnClick is `EventCallback<EventArgs>`, not `MouseEventArgs`
 
- Team update (2026-03-12): Cookie shims must use graceful degradation (Pattern B+), not exceptions. NullResponseCookies for no-op writes, EmptyRequestCookieCollection for null reads, both with ILogger warnings. CookiesAvailable bool escape hatch.  decided by Jeffrey T. Fritz
- Team update (2026-03-12): PageTitle deduplication  Page.Title via IPageService is single source of truth. Remove inline <PageTitle> from 5 AfterWingtipToys files. Fix Default.razor.cs "Home Page"  "Welcome". L1 script: inject BWFC-MIGRATE marker. L2: consume marker, never invent values.  decided by Forge (analysis), approved by Jeffrey T. Fritz
- Team update (2026-03-12): Render mode guards  add IsHttpContextAvailable and RequireHttpContext() to WebFormsPageBase. Guard GetRouteUrl. HttpContext != null is the guard, RendererInfo for diagnostics only.  decided by Forge
+**Build round 2:** 0 errors, 0 warnings. Clean.
 
-### Run 20 — ContosoUniversity L2 + Phase 3 Build Validation (2026-07-25)
+**Key patterns discovered:**
+- BWFC Button.OnClick is `EventCallback<EventArgs>` (not MouseEventArgs) — all click handlers must use `EventArgs`
+- Code-behind partial class name MUST match the .razor filename exactly (no underscore prefix for Default)
+- Layout code-behind namespace must match Components/Layout/ path → `WingtipToys.Components.Layout`
+- EF Core wildcard version `10.0.0-*` avoids NU1603 warnings for preview packages
 
-**Scope:** Full Layer 2 structural transform + build validation of ContosoUniversity sample from raw L1 output to 0-error Blazor Server app.
+ Team update (2026-03-06): bwfc-migrate.ps1 uses -Path and -Output params (not -SourcePath/-DestinationPath). ProjectName is auto-detected  decided by Bishop
 
-**Build iterations:** 4 (NuGet auth → ProjectReference, style content wrappers, BoundField ItemType, color/enum types → 0 errors)
 
-**Key transforms (39 files touched):**
-- 5 EF6 model classes cleaned (removed SuppressMessage, auto-generated comments, added nullable annotations)
-- EF Core DbContext rewritten (removed DbModelBuilder, EF6 imports, cleaned to pure EF Core)
-- 4 BLL classes fully rewritten with IDbContextFactory<ContosoUniversityEntities> DI pattern, raw SQL replaced with LINQ
-- 3 new DTO model classes created (EnrollmentStat, StudentListItem, StudentInfo) — anonymous objects don't work with BWFC data binding
-- Program.cs: full DI registration (DbContextFactory + 4 BLL services), SQL Server LocalDB connection
-- _Imports.razor: added ContosoUniversity.Models + ContosoUniversity.BLL usings
-- App.razor: added @rendermode="InteractiveServer" to HeadOutlet and Routes
-- MainLayout.razor: fixed .aspx links → Blazor routes, removed duplicate jQuery CDN ref
-- 5 page code-behinds: Page_Load → OnInitialized, injected BLL services via [Inject], SelectMethod delegates matching SelectHandler<ItemType> signature
-- 5 page razor files: removed ScriptManager/UpdatePanel wrappers, removed ajaxToolkit, replaced CommandField mentions, fixed all data binding
-
-**Deleted:** Model1.cs, Model1.Designer.cs, Models/Enrollmet_Logic.cs (duplicate), BLL/Students_Logic.cs (duplicate), old BLL classes (4)
-
-**Key gotchas confirmed:**
-- GridView/DetailsView style elements MUST use `*Content` wrappers: `<HeaderStyleContent><GridViewHeaderStyle .../></HeaderStyleContent>`. Direct `<HeaderStyle>` is invalid.
-- Inner style component names follow pattern: `GridView{StyleName}Style` / `DetailsView{StyleName}Style`
-- Colors on WebControl attributes (BackColor, ForeColor, BorderColor) are `WebColor` type — use `WebColor.White`, `WebColor.Black` etc.
-- Enum attributes (GridLines, BorderStyle, HorizontalAlign) wrapped in `EnumParameter<T>` — pass as `@("None")` or use static member
-- BoundField inside GridView/DetailsView needs EXPLICIT `ItemType="..."` — CascadingTypeParameter doesn't auto-infer for BoundField
-- PackageReference to Fritz.BlazorWebFormsComponents fails without GitHub Packages auth — use ProjectReference in dev
-- BLL namespace must be consistent: standardized to `ContosoUniversity.BLL` (uppercase matching folder name)
-- Anonymous objects from LINQ projections don't work with BWFC data binding — create typed DTOs instead
-
-### EDMX→EF Core Parser Script (2026-07-25)
-
-**Scope:** New standalone `Convert-EdmxToEfCore.ps1` script + integration into `bwfc-migrate.ps1` Models section.
-
-**What was built:**
-- `Convert-EdmxToEfCore.ps1` — parses EDMX XML (SSDL/CSDL/C-S Mapping) and generates EF Core entity .cs files with full data annotations + DbContext with `OnModelCreating()` FK relationships and cascade deletes
-- Integrated into `bwfc-migrate.ps1` at the Models Copy section: detects `.edmx` files, generates EF Core code, skips EDMX artifacts (`*.Designer.cs`, T4 bootstrap), then proceeds with normal `.cs` copy for any user-added models
-
-**Tested against:** ContosoUniversity `Model1.edmx` (357 lines, 5 entities, 4 associations, all cascade delete). Output: 5 entity files + `ContosoUniversityEntities.cs` DbContext. All annotations correct: `[Key]`, `[DatabaseGenerated(Identity)]`, `[Required]`, `[MaxLength]`, `[Table("Courses")]` for Cours→Courses mismatch, navigation properties (virtual single refs + ICollection).
-
-**Key implementation details:**
-- XML parsing uses `XmlNamespaceManager` with `SelectNodes()`/`SelectSingleNode()` — EDMX has 6+ XML namespaces
-- `annotation:StoreGeneratedPattern` attribute requires namespace-qualified `GetAttribute()` call
-- C-S Mapping is the key to entity→table name mismatches (e.g., `Cours`→`Courses`)
-- Entity files skip generation when target .cs already exists (idempotent)
-- DbContext groups FK relationships by dependent entity for clean `modelBuilder.Entity<T>()` blocks
-- L1 integration uses `$edmxGeneratedFiles` tracking array to prevent the existing .cs copy loop from overwriting generated files
-
-### UpdatePanel ContentTemplate Enhancement (2026-MM-DD)
-
-**Task:** Add `ContentTemplate` RenderFragment parameter to UpdatePanel and verify InteractiveServer render mode approach.
-
-**Changes made:**
-1. **Added ContentTemplate parameter** to `UpdatePanel.razor.cs`:
-   - `[Parameter] public RenderFragment ContentTemplate { get; set; }`
-   - Updated XML doc comments to clarify ContentTemplate is Web Forms equivalent
-   - ChildContent remains for Blazor-style syntax
-
-2. **Updated UpdatePanel.razor** to render `ContentTemplate ?? ChildContent`:
-   - Both `<ContentTemplate>` and `<ChildContent>` syntaxes now work
-   - Eliminates RZ10012 warnings during L1 migration
-
-3. **Changed base class** from `BaseWebFormsComponent` to `BaseStyledComponent`:
-   - Web Forms UpdatePanel in .NET 4.0+ supports `class` attribute via Attributes["class"]
-   - This gives UpdatePanel access to CssClass, Style, ToolTip, and other styling properties
-   - Matches Web Forms behavior more accurately
-
-4. **Added CSS/Style attributes** to rendered markup:
-   - Both div and span variants now render `class="@CssClass" style="@Style" title="@ToolTip"`
-
-5. **Render mode decision**: Did NOT add `@attribute [RenderModeInteractiveServer]`
-   - Added code comment explaining why: library components should not force render modes
-   - Consuming apps control render mode at App.razor or page level
-   - While UpdatePanel's purpose was interactivity in Web Forms, in Blazor this is an app-level concern
-
-6. **Updated sample page** (`samples/AfterBlazorServerSide/Components/Pages/ControlSamples/UpdatePanel/Default.razor`):
-   - Added "Web Forms ContentTemplate Syntax" section demonstrating `<ContentTemplate>` usage
-   - Shows both syntaxes work (ChildContent and ContentTemplate)
-   - Added interactive counter for ContentTemplate example
-
-7. **All 24 tests pass** including new TDD tests for ContentTemplate functionality
-
-**Key learnings:**
-- UpdatePanel should inherit from BaseStyledComponent, not BaseWebFormsComponent, because .NET 4.0+ Web Forms UpdatePanel supports CSS class attributes
-- RenderFragment parameters with `??` fallback pattern enable dual syntax support (Web Forms and Blazor idioms)
-- Library components should not force render modes - that's an app-level architectural decision
-
-### L1 Script ContentTemplate Audit (2026-07-25)
-
-**Task:** Verify L1 migration script handles UpdatePanel + ContentTemplate correctly after the ContentTemplate RenderFragment enhancement.
-
-**Findings:**
-- L1 script (`bwfc-migrate.ps1`) has **no ContentTemplate stripping logic** — `ContentTemplate` was never an `asp:` prefixed tag, so `ConvertFrom-AspPrefix` never touched it. It passes through L1 untouched. Correct behavior.
-- `CODE-TRANSFORMS.md` and `SKILL.md` — no UpdatePanel/ContentTemplate references, no stripping guidance. Clean.
-- `CONTROL-REFERENCE.md` — already updated with proper ContentTemplate documentation from previous work. Clean.
-
-**One fix made:** Code-behind TODO header (line 1404) said "UpdatePanel / ScriptManager references → remove" — misleading now that UpdatePanel is a real BWFC component. Split into two lines: ScriptManager → remove, UpdatePanel → BWFC preserved (remove only code-behind API calls).
-
-### M20 Base Class Fixes (2026-03-07)
-
-**Issue #16 — ToolTip promoted to BaseWebFormsComponent:**
-- Moved `ToolTip` property from `BaseStyledComponent` to `BaseWebFormsComponent` so all ~40 components get it, not just styled ones.
-- Removed duplicate `ToolTip` declarations from `ChartSeries.razor.cs` and `MenuItem.razor.cs` (they inherit from BaseWebFormsComponent).
-- `DataPoint.cs` and `TreeNode.razor.cs` keep their own `ToolTip` — DataPoint is a plain class, TreeNode inherits ComponentBase directly.
-- `BaseStyledComponent.ApplyThemeSkin` still references `ToolTip` via inheritance — no changes needed there.
-
-**Issues #15, #17, #18 — Already implemented:**
-- AccessKey was already in BaseWebFormsComponent (line 139).
-- BaseDataBoundComponent already inherits BaseStyledComponent (not BaseWebFormsComponent directly).
-- Image and Label already inherit BaseStyledComponent.
-- All 1550 tests pass after changes.
-📌 Team update (2026-03-14): M20 Batch 6 orchestration spawn — Forge designing component health dashboard, Cyclops advancing L1 script fixes, Rogue building L1 test harness — decided by Scribe
-
-### L1 Script ~40% → ~60% Automation Coverage (#28)
-
-**Summary:** Added 5 new transformation capabilities to `bwfc-migrate.ps1`, pushing L1 automation coverage from ~40% to ~60%.
-
-**New transforms — Markup (Normalize-AttributeValues + Add-DataSourceIDWarning):**
-1. **Boolean normalization:** `Visible="True"` → `Visible="true"`, `Enabled="False"` → `Enabled="false"`. Excludes text-content attributes (Text, Title, Value, etc.) to avoid false positives.
-2. **Enum type-qualifying:** 18 attribute→enum mappings (GridLines→GridLines, BorderStyle→BorderStyle, TextMode→TextBoxMode, etc.). `GridLines="Both"` → `GridLines="@GridLines.Both"` so Razor evaluates the C# enum directly instead of relying on EnumParameter<T> string parsing.
-3. **Unit normalization:** `Width="100px"` → `Width="100"` for Width, Height, BorderWidth, CellPadding, CellSpacing. Only strips "px" — other units (%, em, pt) preserved since they carry distinct meaning.
-4. **DataSourceID warnings:** Removes `DataSourceID="..."` attributes and replaces data source control declarations (`<SqlDataSource>`, `<ObjectDataSource>`, etc.) with `@* TODO *@` comments. Uses `(?s)` single-line regex to handle multi-line tags containing `<%$ ... %>` expressions.
-
-**New transforms — Code-behind (enhanced Copy-CodeBehind):**
-5. **Response.Redirect → NavigationManager.NavigateTo:** 4 patterns (literal URL, literal+bool, expression, expression+bool). Strips `~/` prefix from literal URLs. Preserves `.aspx` in URLs (AspxRewriteMiddleware handles rewriting). Injects `[Inject] NavigationManager` into the class.
-6. **Session["key"] detection:** Collects unique session keys, inserts migration guidance block (ProtectedSessionStorage, scoped service, cascading parameter options).
-7. **ViewState["key"] detection:** Collects unique ViewState keys, generates suggested private field declarations, notes the [Obsolete] compatibility shim.
-
-**Pipeline placement:** New markup transforms run after Convert-TemplatePlaceholders and before blank-line cleanup. Code-behind transforms run after existing [RouteData]/[QueryString] conversion and before file write.
-
-**Key gotchas:**
-- Data source control regex uses `(?s)` mode because tags span lines and contain `%>` from Web Forms expressions, which breaks `[^>]*` patterns.
-- Boolean exclusion list prevents false positives on attributes like Text="True" or Title="False".
-- Enum map only includes unambiguous attribute→enum mappings; ambiguous ones like SelectionMode (Calendar vs List) and Mode are skipped.
-- Session/ViewState blocks are inserted after the `=====` TODO header marker using LastIndexOf, not prepended, to keep the file well-organized.
-
-
-### BlazorAjaxToolkitComponents Project Structure (2026-03-14)
-
-**Summary:** Created the BlazorAjaxToolkitComponents class library project at `src/BlazorAjaxToolkitComponents/`. This is the new home for Blazor components emulating ASP.NET Ajax Control Toolkit controls. Project references BlazorWebFormsComponents and includes Microsoft.JSInterop for client-side behaviors.
-
-**Files Created:**
-- `BlazorAjaxToolkitComponents.csproj`  Razor class library, net10.0, NuGet metadata matching existing patterns
-- `BaseExtenderComponent.cs`  Stub base class with TargetControlID + IJSRuntime injection (full design pending Forge)
-- `_Imports.razor`  Common usings
-- `README.md`  Project overview
-
-**Key Decisions:**
-- Package ID is `BlazorAjaxToolkitComponents` (no Fritz. prefix  distinct from the base library)
-- Depends on `BlazorWebFormsComponents` via ProjectReference
-- Uses `Microsoft.JSInterop` (not Microsoft.AspNetCore.Components.Web's JS) since toolkit extenders need direct JS interop
-- BaseExtenderComponent extends ComponentBase directly (not BaseWebFormsComponent)  extenders are behavioral attachments, not visual controls
-
- Team update: BlazorAjaxToolkitComponents project created by Cyclops. PR #71 targeting dev. Branch `squad/441-ajax-toolkit-project`. Fixes #441 (M24: Ajax Toolkit Components).
-### ConfirmButtonExtender & FilteredTextBoxExtender Implementation (2026-03-15)
-
-**Summary:** Implemented two Ajax Control Toolkit extender components with full JS interop lifecycle. Updated BaseExtenderComponent from minimal stub to production-ready base class. PR #462 targeting upstream dev.
-
-**BaseExtenderComponent changes:**
-- Full JS module lifecycle: abstract JsModulePath, JsCreateFunction, GetBehaviorProperties()
-- OnAfterRenderAsync initializes behavior on firstRender when Enabled=true
-- BehaviorID and Enabled parameters
-- IAsyncDisposable with proper cleanup (disposes behavior, then module)
-- SSR-safe: catches JSException and JSDisconnectedException during all JS calls
-- TargetControlID passed as string to JS for document.getElementById() resolution (pragmatic v1, no BaseWebFormsComponent dependency)
-
-**ConfirmButtonExtender (#451):** Pure C# class (no .razor needed since extenders render no HTML). ConfirmText, ConfirmOnFormSubmit, DisplayModalPopupID parameters. JS intercepts click, shows window.confirm(), prevents event on cancel.
-
-**FilteredTextBoxExtender (#450):** FilterType flags enum (Numbers, LowercaseLetters, UppercaseLetters, Custom), ValidChars, InvalidChars, FilterMode enum, FilterInterval. JS blocks keystrokes on keypress, strips invalid chars on paste with debounced cleanup.
-
-**Key decisions:**
-- Extenders are pure .cs classes, not .razor files (they render zero HTML)
-- Kept ComponentBase inheritance per task spec (not BaseWebFormsComponent) for lightweight v1
-- JS modules use Map-based behavior registry with create/update/dispose exports
-- FilterType is [Flags] enum so filter types can be combined (e.g., Numbers | LowercaseLetters)
-- BlazorAjaxToolkitComponents project does NOT enable nullable context, so no nullable annotations
-
-Team update: ConfirmButtonExtender and FilteredTextBoxExtender implemented by Cyclops. PR #462 targeting upstream dev. Branch squad/451-450-confirm-filtered-extenders. Fixes #451, #450.
-
-### ModalPopupExtender & CollapsiblePanelExtender Implementation (2026-03-16)
-**Summary:** Implemented two more Ajax Control Toolkit extender components following established patterns from ConfirmButton/FilteredTextBox. Both inherit BaseExtenderComponent, use pure .cs classes (no .razor), and follow the JS module lifecycle pattern.
-
-## Learnings
-
-### Theme Mode System Implementation (2026-03-16, Issue #369)
-**Implemented:** WI-1 (ThemeMode enum), WI-3 (Container EnableTheming propagation), WI-4 (Runtime theme switching support)
-
-**Files modified:**
-- Created: `Theming/ThemeMode.cs` — enum with StyleSheetTheme (defaults) vs Theme (overrides)
-- Modified: `ThemeConfiguration.cs` — added Mode property + WithMode() fluent API
-- Modified: `ThemeProvider.razor` — added Mode parameter, syncs to Theme.Mode in OnParametersSet
-- Modified: `BaseWebFormsComponent.cs` — added IsThemingEnabledByAncestors() for container propagation, updated ApplyThemeSkin signature to accept ThemeMode
-- Modified: `BaseStyledComponent.cs` — dual-mode ApplyThemeSkin implementation (StyleSheetTheme vs Theme)
-
-**Pattern details:**
-1. **ThemeMode.StyleSheetTheme (default):** Sets default values only — explicit component property values take precedence. This preserves backward compatibility with existing components.
-2. **ThemeMode.Theme:** Theme overrides all property values, even explicitly set ones. Matches Web Forms Page.Theme behavior (most common usage).
-3. **Container propagation:** IsThemingEnabledByAncestors() walks the Parent chain to check EnableTheming. O(depth) operation but control trees are shallow.
-4. **Runtime switching:** Works via Blazor's CascadingValue change detection when ThemeProvider.Theme is assigned a NEW ThemeConfiguration instance. Mutating in-place won't trigger re-renders.
-
-**Key implementation choices:**
-- Default mode is StyleSheetTheme to preserve backward compatibility with existing themes
-- Theme mode only overrides properties when skin actually has a value (non-default/non-null check)
-- ThemeProvider syncs its Mode parameter to ThemeConfiguration.Mode in OnParametersSet
-- Container-level EnableTheming propagation checks entire ancestor chain before applying themes
-
-Build verified: 0 errors, 4 warnings (restore warnings, not code issues).
-
-**ModalPopupExtender (#446):** PopupControlID, BackgroundCssClass, OkControlID, CancelControlID, OnOkScript, OnCancelScript, DropShadow, Drag, PopupDragHandleControlID. JS creates overlay backdrop, centers popup with fixed positioning, traps focus within modal, supports Escape key close, and optional mouse-drag repositioning via drag handle.
-
-**CollapsiblePanelExtender (#447):** CollapseControlID, ExpandControlID (same ID = toggle), Collapsed, CollapsedSize, ExpandedSize, CollapsedText, ExpandedText, TextLabelID, ExpandDirection enum (Vertical/Horizontal), AutoCollapse, AutoExpand, ScrollContents. JS uses CSS transitions on height/width with smart initial-state setup (no transition on first paint, then enables animation).
-
-**New enum:** ExpandDirection (Vertical=0, Horizontal=1) in Enums/ folder.
-
-**Key patterns followed:**
-- Same module path convention: ./_content/BlazorAjaxToolkitComponents/js/{kebab-name}.js
-- Same JS exports: createBehavior, updateBehavior, disposeBehavior with Map-based registry
-- OnOkScript/OnCancelScript executed via 
-ew Function(script)() with try/catch safety
-- CollapsiblePanel measures natural size via scrollHeight when ExpandedSize=0 (auto)
-- XML docs file updated with all new members
-
-Team update: ModalPopupExtender and CollapsiblePanelExtender implemented by Cyclops. Branch squad/446-447-modal-collapsible-extenders. Fixes #446, #447.
-
-### ComponentHealthService Implementation (2026-03-16)
-
-**Summary:** Built the core `ComponentHealthService` in `src/BlazorWebFormsComponents/Diagnostics/` per PRD §7. Four files created: `ImplementationStatus.cs` (enum), `ComponentHealthReport.cs` (data model), `ReferenceBaselines.cs` (JSON loader), `ComponentHealthService.cs` (reflection + scoring engine). DI registration via `AddComponentHealthDashboard()` added to `ServiceCollectionExtensions.cs`.
-
-**Key Implementation Details:**
-- **Property/Event Counter (§5.4):** Walks inheritance chain with DeclaredOnly, stops at BaseWebFormsComponent/BaseStyledComponent/BaseDataBoundComponent/DataBoundComponent<>. Uses GetGenericTypeDefinition() for generic base matching. Skips [Obsolete], [CascadingParameter], RenderFragment/RenderFragment<T>, AdditionalAttributes, ChildContent, ChildComponents. EventCallback/EventCallback<T> counted as events only.
-- **Component Discovery (§5.1-5.2):** Reflects over BWFC assembly, matches against tracked components list. Falls back to hardcoded 56-component list when `dev-docs/tracked-components.json` doesn't exist.
-- **File Detection (§7.4):** Scans test project directories/files for component names, docs/ for matching .md files, ComponentCatalog.cs for sample page registration.
-- **Score Computation (§4.1):** Weighted average (Props 30%, Events 15%, Tests 20%, Docs 15%, Sample 10%, Status 10%). Missing baselines excluded and weights re-distributed. Scores capped at 100%. 0/0 treated as 1.0.
-- **Baselines Loading:** ReferenceBaselines.LoadFromFile() gracefully handles missing/malformed JSON.
-- **Project enforces `var` over explicit types** via IDE0007 as error — all code uses var.
-
-**Files Created:**
-- `src/BlazorWebFormsComponents/Diagnostics/ImplementationStatus.cs`
-- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthReport.cs`
-- `src/BlazorWebFormsComponents/Diagnostics/ReferenceBaselines.cs`
-- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthService.cs`
-
-**Files Modified:**
-- `src/BlazorWebFormsComponents/ServiceCollectionExtensions.cs` (added AddComponentHealthDashboard extension)
-
-**Build verified:** 0 errors, 99 pre-existing warnings.
-
-### Fix GUID-based IDs (#471) (2026-03-17)
-
-**Summary:** Removed GUID-based fallback IDs from CheckBox, RadioButton, and RadioButtonList. When developer sets `ID="X"`, rendered HTML uses that ID exactly (with `_N` suffixes for list items). When no ID is set, no `id`/`for` attributes are rendered — no GUID pollution in the DOM.
-
-**Pattern:** `ComponentIdGenerator.GetClientID(this)` via `ClientID` property is the single source of truth for element IDs. Components should never generate their own GUIDs for HTML `id` attributes. Radio group `name` attribute is the only acceptable GUID fallback (required for mutual exclusion when no developer ID or GroupName is set).
-
-**Key decisions:**
-- FileUpload already correct — no changes needed (only renders id when ClientID present)
-- RadioButton keeps GUID fallback exclusively for `EffectiveGroupName` (radio `name` attribute), not for `id`
-- RadioButtonList `GetInputId(index)` returns null when no ClientID, preserving clean HTML
-- 7 tests updated to match new behavior; all 2105 tests pass
-
-**Files Modified:**
-- `src/BlazorWebFormsComponents/CheckBox.razor.cs` (removed GUID, use ClientID directly)
-- `src/BlazorWebFormsComponents/RadioButton.razor.cs` (removed GUID for id, kept for group name)
-- `src/BlazorWebFormsComponents/RadioButtonList.razor.cs` (GetInputId uses ClientID with suffix)
-- `src/BlazorWebFormsComponents.Test/CheckBox/IDRendering.razor` (updated WithoutID tests)
-- `src/BlazorWebFormsComponents.Test/CheckBox/Text.razor` (LabelForAttribute test uses ID)
-- `src/BlazorWebFormsComponents.Test/RadioButton/IDRendering.razor` (updated WithoutID tests)
-- `src/BlazorWebFormsComponents.Test/RadioButton/Text.razor` (LabelForAttribute test uses ID)
-- `src/BlazorWebFormsComponents.Test/RadioButtonList/TextAlignTests.razor` (tests use developer ID)
-- `src/BlazorWebFormsComponents.Test/RadioButtonList/StableIds.razor` (WithoutID expects no id attr)
-
-
-### ASHX and AXD URL Handling Middleware (#423)
-
-**Summary:** Extended UseBlazorWebFormsComponents() middleware to handle legacy .ashx (HTTP handler) and .axd (Web Resource) URL patterns per issue #423.
-
-**Changes:**
-- BlazorWebFormsComponentsOptions: Added EnableAshxHandling (default: true), EnableAxdHandling (default: true), and AshxRedirectMappings dictionary for custom .ashx redirects.
-- AshxHandlerMiddleware: Intercepts .ashx requests. Returns 410 Gone by default; 301 redirect if a custom mapping exists in AshxRedirectMappings.
-- AxdHandlerMiddleware: Intercepts .axd requests. Returns 404 for WebResource/ScriptResource/Trace.axd; 410 Gone for ChartImg.axd.
-- ServiceCollectionExtensions.UseBlazorWebFormsComponents(): Conditionally registers both new middleware alongside existing AspxRewriteMiddleware.
-
-**Impact:** Existing .aspx rewriting unchanged. All three middleware classes follow the same internal pattern (constructor injection, Invoke method, early return on match). ar used everywhere per IDE0007 rule. Build: 0 errors.
-### HttpHandlerBase Implementation for Issue #473 (2026-07-25)
-
-**Summary:** Implemented core HttpHandlerBase feature — 7 new files in src/BlazorWebFormsComponents/Handlers/ enabling migration of ASP.NET Web Forms .ashx handlers to ASP.NET Core with minimal code changes.
-
-**Files created:**
-1. `HttpHandlerBase.cs` — Abstract base class with `ProcessRequestAsync(HttpHandlerContext)` and virtual `IsReusable` (default false)
-2. `HttpHandlerContext.cs` — Adapter wrapping ASP.NET Core HttpContext with Request/Response/Server/Session/User/Items properties
-3. `HttpHandlerRequest.cs` — Request adapter with NameValueCollection-based QueryString/Form/Headers, `this[key]` indexer (checks QS then Form), Files, InputStream, Url, RawUrl, etc.
-4. `HttpHandlerResponse.cs` — Response adapter with sync Write/BinaryWrite (safe sync-over-async), async variants, AddHeader/AppendHeader, Clear, Redirect, Flush, and `[Obsolete] End()` that sets IsEnded flag
-5. `HttpHandlerServer.cs` — Server utilities with MapPath (`~/` → WebRootPath, other → ContentRootPath), HtmlEncode/Decode, UrlEncode/Decode, and `Transfer()` → NotSupportedException with migration guidance
-6. `RequiresSessionStateAttribute.cs` — Marker attribute; when present, MapHandler calls `Session.LoadAsync()` before ProcessRequestAsync
-7. `HandlerEndpointExtensions.cs` — Three `MapHandler<T>` overloads on IEndpointRouteBuilder: explicit path, convention-based (strips Handler suffix → .ashx), multi-path
-
-**Key decisions:**
-- Return type is `IEndpointConventionBuilder` (not `RouteHandlerBuilder`) because `endpoints.Map(pattern, RequestDelegate)` returns `IEndpointConventionBuilder`. All chaining methods (.RequireAuthorization, .RequireCors) work on this interface.
-- No AshxHandlerMiddleware exists to modify — the existing middleware is AspxRewriteMiddleware (handles .aspx URLs only). Middleware coordination deferred until AshxHandlerMiddleware is created.
-- Namespace is `BlazorWebFormsComponents` (root) per spec requirement that migrated code uses `using BlazorWebFormsComponents;`
-- HttpHandlerRequest caches NameValueCollections lazily to avoid rebuilding on each access
-- Form/Files properties safely check `HasFormContentType` before accessing Request.Form to avoid exceptions on non-form requests
-- Session exposed as lazy property on HttpHandlerContext — throws standard ASP.NET Core error if session middleware not configured
-
-**Build:** 0 errors, all pre-existing warnings only.
-
-
-
-### Fix AfterBlazorServerSide Sample Compilation Errors (2026-03-17)
-
-**Summary:** Fixed 4 compilation errors in the AfterBlazorServerSide sample project introduced by merge of upstream/main into dev (PR #475).
-
-**Errors fixed:**
-1. **CS1503** in ImageButton/Index.razor — OnClick handlers used MouseEventArgs but ButtonBaseComponent.OnClick is EventCallback<EventArgs>. Changed both handlers to accept EventArgs.
-2. **CS0103** in FormView/Simple.razor and FormView/Edit.razor — markup referenced WidgetFormView_PageIndexChanging but no such method existed. Added stub handlers with correct PageChangedEventArgs signature.
-3. **CS1503** in GridView/Selection.razor — SelectedIndexChanged handler took int but component expects EventCallback<GridViewSelectEventArgs>. Changed handler (and code example) to accept GridViewSelectEventArgs.
-
-**Key insight:** Always check the base class parameter types — ImageButton inherits OnClick from ButtonBaseComponent which uses EventArgs, not MouseEventArgs. GridView's SelectedIndexChanged was recently changed to GridViewSelectEventArgs (matching Web Forms behavior).
-
-### BWFC013 + BWFC014 Analyzer Implementation (2026-03-20)
-
-**Summary:** Implemented two new Roslyn analyzers following established patterns (ResponseRedirect/Session as templates).
-
-- **BWFC013 ResponseObjectUsageAnalyzer:** Detects Response.Write(), WriteFile(), Clear(), Flush(), End() via InvocationExpression + ImmutableHashSet method matching. Code fix replaces with TODO comment.
-- **BWFC014 RequestObjectUsageAnalyzer:** Detects Request.Form/Cookies/Headers/QueryString/ServerVariables["key"] via ElementAccessExpression, and Request.Files via SimpleMemberAccessExpression. Code fix replaces with TODO comment.
-- Both analyzers use xpressionText.EndsWith(".Response") / .EndsWith(".Request") pattern to match 	his.Response, HttpContext.Current.Response, and any *.Response prefix.
-- 21 new tests (10 for BWFC013, 11 for BWFC014): 5+6 positive, 3+3 negative, 2+2 code fix tests.
-- Updated AllAnalyzersIntegrationTests ExpectedIds and analyzer count (810).
-- Updated AnalyzerReleases.Unshipped.md with both rules.
-- All 111 tests pass (90 existing + 21 new).
-
-**Key patterns:** Code fix uses EmptyStatement with SyntaxFactory.EndOfLine("\r\n") between comment trivia and semicolon. BWFC014 registers for both ElementAccessExpression (indexed properties) and SimpleMemberAccessExpression (direct properties like Files), with parent-check to avoid double-reporting.
-
-
- **Team update (2026-03-20):** BWFC013/BWFC014 analyzers + architecture (6 files, 21 tests, 111 passing, commit b267b854). PR #487 opened on upstream. Next analyzer ID: BWFC015.  decided by Cyclops
-
-### NuGet Analyzer Integration + L1 Prescan Switch (2026-03-20)
-
-**Summary:** Two tasks completed on feature/analyzer-sprint1:
-
-1. **NuGet Analyzer Integration** — Added ProjectReference from BlazorWebFormsComponents.csproj to BlazorWebFormsComponents.Analyzers.csproj with `PrivateAssets="all" ReferenceOutputAssembly="false" OutputItemType="Analyzer"`. Consumers now get Roslyn analyzers automatically when referencing the main NuGet package.
-
-2. **L1/L2 Pipeline Pre-Scan** — Added `-Prescan` switch to `bwfc-migrate.ps1`. Scans source .cs files for 9 BWFC analyzer patterns (BWFC001-005, 011-014) and outputs JSON summary with file-level detail + human-readable breakdown. Early return — no migration transforms executed.
-
-**Verification:** Build succeeds (0 errors), all 111 analyzer tests pass, prescan tested against src/ (1,092 matches across 176 files).
-
-
-### CI Workflow: Analyzer Tests Added (2026-03-20)
-
-**Summary:** Updated .github/workflows/build.yml to restore, build, run, upload, and publish analyzer test results alongside the existing unit tests. Also replaced the squad-ci.yml placeholder with real dotnet restore/build/test commands covering both test suites, including setup-dotnet for .NET 10. YAML validated with Python yaml parser.
-
-### Focus() Method on BaseWebFormsComponent (2026-03-22)
-
-**Summary:** Added public virtual void Focus() to BaseWebFormsComponent matching the ASP.NET Web Forms Control.Focus() API. Uses fire-and-forget JS interop (_ = JsRuntime.InvokeVoidAsync("bwfc.Page.Focus", ClientID))  same discard pattern validators use. Null-guards JsRuntime for SSR pre-render safety. Added wfc.Page.Focus(elementId) JS function to both Basepage.js (IIFE global) and Basepage.module.js (ES module export + window binding). Build: 0 errors. CustomControl tests: 63/63 pass.
-
-### DepartmentPortal Custom Controls Migration (2026-03-22)
-
-**Summary:** Migrated all 7 custom controls from `samples/DepartmentPortal/Code/Controls/` to Blazor components in `samples/AfterDepartmentPortal/Components/Controls/`. Each control inherits from the appropriate BWFC CustomControls base class (WebControl, DataBoundWebControl, or TemplatedWebControl).
-
-**Controls migrated:**
-- **StarRating** (WebControl)  ViewState[Parameter], TagKey=Span, star rendering with color params
-- **NotificationBell** (WebControl)  TagKey=Div, EventCallback<NotificationEventArgs>, drawer rendering
-- **EmployeeCard** (WebControl)  CompositeControlflat RenderContents, photo/info/details link
-- **EmployeeDataGrid** (DataBoundWebControl)  PerformDataBinding override, paging/sorting/search
-- **DepartmentBreadcrumb** (WebControl)  IPostBackEventHandler removed, EventCallback<BreadcrumbEventArgs>
-- **PollQuestion** (WebControl)  IPostBackEventHandler removed, EventCallback<PollVoteEventArgs>, radio buttons
-- **SectionPanel** (TemplatedWebControl)  ITemplateRenderFragment, RenderTemplate() helper for header/content/footer
-
-**Also created:** BreadcrumbEventArgs.cs, NotificationEventArgs.cs, PollVoteEventArgs.cs
-
-**Pages updated:** Dashboard.razor (SectionPanel, PollQuestion, NotificationBell), Employees.razor (EmployeeDataGrid with sample data)
-
-**Key patterns applied:** var everywhere (IDE0007), WebUtility.HtmlEncode instead of HttpUtility, Blazor route URLs instead of .aspx, `new()` target-typed syntax.
-
-**Build:** 0 errors, 0 warnings (excluding pre-existing NU1510 from upstream deps).
-### ViewState + IsPostBack Phase 1 Core Infrastructure (2026-03-24)
-
-**Summary:** Implemented Phase 1 of the ViewState/PostBack shim per Forge's architecture proposal. Created ViewStateDictionary class implementing IDictionary<string, object?> with null-safe indexer (Web Forms compat), type-safe convenience methods, IsDirty tracking, and IDataProtector-based Serialize/Deserialize with JsonElement type coercion. Updated BaseWebFormsComponent: ViewState upgraded from Dictionary to ViewStateDictionary, [Obsolete] removed, IsPostBack with mode-adaptive logic (SSR checks HTTP method, Interactive tracks _hasInitialized), CurrentRenderMode/IsHttpContextAvailable, RenderViewStateField, IDataProtectionProvider injection, ViewState deserialization from form POST. Updated WebFormsPageBase similarly. Created WebFormsRenderMode enum.
-
-**Key decisions:**
-- IDataProtectionProvider is injected as nullable (null-safe)  backward compat for apps that don't register DataProtection
-- ViewState deserialization happens BEFORE OnInit/OnLoad events in OnInitializedAsync  matches Web Forms lifecycle
-- CryptographicException from tampered payloads silently fails to empty ViewState (fail-safe)
-- Component ID for hidden field uses the developer-set `ID` parameter (`__bwfc_viewstate_{ID}`)
-- `var` used everywhere per IDE0007 enforcement
-
-**Files created:** ViewStateDictionary.cs, WebFormsRenderMode.cs
-**Files modified:** BaseWebFormsComponent.cs, WebFormsPageBase.cs
-**Build:** 0 errors, 122 warnings (all pre-existing)
-
-### Multi-Targeting net8.0/net9.0/net10.0 (Issue #516)
-
-**Scope:** Ship NuGet assemblies for net8.0, net9.0, and net10.0 so teams on .NET 8 LTS or .NET 9 can consume the library.
-
-**Changes:**
-- `Directory.Build.props`: Added TFM-conditional `AspNetCoreVersion`/`BlazorWebAssemblyVersion` (8.0.0 for net8.0, 9.0.0 for net9.0). Unconditional 10.0.0 defaults remain for single-target sample projects.
-- `BlazorWebFormsComponents.csproj`: `TargetFramework` → `TargetFrameworks` (net8.0;net9.0;net10.0). `FrameworkReference` and version-variable `PackageReference` items auto-resolve per TFM.
-- `BlazorAjaxToolkitComponents.csproj`: Same multi-target change (required because tests reference it).
-- `BlazorWebFormsComponents.Test.csproj`: Multi-targeted + `TestHost` version switched to `$(AspNetCoreVersion)` for per-TFM resolution.
-- `.github/workflows/build.yml`: SDK setup now installs 8.0.x, 9.0.x, and 10.0.x.
-- `SharedSampleObjects` unchanged — its `netstandard2.0` TFM already satisfies net8.0/net9.0.
-
-**Key learnings:**
-- .NET 10 SDK (global.json pinned) can build for older TFMs — no SDK matrix needed locally
-- `FrameworkReference Include="Microsoft.AspNetCore.App"` auto-resolves per TFM with no conditionals
-- Collection expression `= []` (C# 12) compiles on net8.0+ — no compatibility issue
-- bUnit 2.5.3 successfully builds and runs against all three TFMs
-- NU1510 "will not be pruned" warnings are informational — pre-existing, not caused by multi-targeting
-- `Microsoft.AspNetCore.Routing` 2.2.0 (NuGet) works across all TFMs
-
-**Build:** 0 errors across 3×3 project/TFM combos. **Tests:** 2606 × 3 TFMs = 7818 executions, all pass.
-## Learnings
-
-### WI-2: Sub-Component Style Theming (2025-01-25)
-
-**Summary:** Extended the theming system to support sub-component styles (HeaderStyle, RowStyle, AlternatingRowStyle, etc.) on all 5 data controls (GridView, DetailsView, FormView, DataGrid, DataList). Sub-styles enable theme authors to configure child styles through the skin fluent API without needing to use style RenderFragments.
-
-**Implementation:**
-- Extended ControlSkin.cs with SubStyles Dictionary<string, TableItemStyle>
-- Added SkinBuilder.SubStyle(styleName, configure) fluent method
-- Created BaseWebFormsComponent.ApplySubStyle helper that respects ThemeMode semantics (Theme=override, StyleSheetTheme=default)
-- Overrode ApplyThemeSkin in all 5 data controls to apply sub-styles from skin
-
-**Technical decisions:**
-- SubStyles dictionary uses StringComparer.OrdinalIgnoreCase for case-insensitive lookups
-- ApplySubStyle returns TableItemStyle (not ref parameter) because properties have internal setters that can't be passed by ref
-- Theme mode replaces entire sub-style object; StyleSheetTheme mode merges properties only if not already set
-- Style names match exact Web Forms property names (HeaderStyle, RowStyle, ItemStyle, etc.)
-
-**Sub-styles per control:**
-- GridView (8): HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, PagerStyle, EditRowStyle, SelectedRowStyle, EmptyDataRowStyle
-- DetailsView (10): HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, CommandRowStyle, EditRowStyle, InsertRowStyle, FieldHeaderStyle, EmptyDataRowStyle, PagerStyle
-- FormView (7): HeaderStyle, RowStyle, EditRowStyle, InsertRowStyle, FooterStyle, PagerStyle, EmptyDataRowStyle
-- DataGrid (7): HeaderStyle, ItemStyle, AlternatingItemStyle, FooterStyle, PagerStyle, SelectedItemStyle, EditItemStyle
-- DataList (5): HeaderStyle, FooterStyle, ItemStyle, AlternatingItemStyle, SeparatorStyle
-
-**Files modified:** ControlSkin.cs, SkinBuilder.cs, BaseWebFormsComponent.cs, GridView.razor.cs, DetailsView.razor.cs, FormView.razor.cs, DataGrid.razor.cs, DataList.razor.cs
-
-**Build:** 0 errors, warnings as baseline (all pre-existing)
-
-### WI-9 JSON Theme Format + WI-10 CSS Bundling (2026-03-28)
-
-**Summary:** Added JSON-based theme format as alternative to C# fluent API, plus CSS file bundling support in ThemeConfiguration and ThemeProvider.
-
-**Files Created:**
-- `src/BlazorWebFormsComponents/Theming/JsonThemeLoader.cs` — Static class with FromJson/FromJsonFile/ToJson methods + 5 custom JsonConverters (WebColor, Unit, FontUnit, BorderStyle, FontInfo) for System.Text.Json
-
-**Files Modified:**
-- `src/BlazorWebFormsComponents/Theming/ThemeConfiguration.cs` — Added CssFiles property + WithCssFile/WithCssFiles fluent API
-- `src/BlazorWebFormsComponents/Theming/ThemeProvider.razor` — Added HeadContent block to render <link> elements for CSS files
-
-**Implementation Details:**
-
-**JsonThemeLoader:**
-- Uses System.Text.Json (project standard) with camelCase naming policy
-- Custom converters handle Web Forms types:
-  - WebColorConverter: accepts HTML color names and hex values
-  - UnitConverter: accepts strings like "100px", "50%"
-  - FontUnitConverter: accepts strings like "14px", "Large"
-  - BorderStyleConverter: enum with case-insensitive parsing
-  - FontInfoConverter: object with Bold, Italic, Underline, Name, Names, Size
-- Property names in JSON are camelCase
-- "default" key maps to default skin (empty SkinID)
-- Named skins use their SkinID as key
-- Supports SubStyles dictionary for data control sections (HeaderStyle, RowStyle, etc.)
-
-**JSON Schema:**
-``json
-{
-  "mode": "StyleSheetTheme",
-  "cssFiles": ["css/theme.css", "css/gridview.css"],
-  "controls": {
-    "Button": {
-      "default": {
-        "backColor": "#507CD1",
-        "foreColor": "White",
-        "font": { "bold": true }
-      },
-      "DangerButton": {
-        "backColor": "Red",
-        "foreColor": "White",
-        "cssClass": "btn-danger"
-      }
-    }
-  }
-}
-``
-
-**CSS Bundling:**
-- ThemeConfiguration.CssFiles: List<string> property
-- WithCssFile(path): adds single file
-- WithCssFiles(params string[]): adds multiple files
-- ThemeProvider renders <link> elements in <HeadContent> component (Microsoft.AspNetCore.Components.Web, .NET 8+)
-- Only renders when CssFiles is non-null and has items
-
-**Build Status:** 0 errors, 124 warnings (existing)
-
-**Key Gotcha:** TableItemStyle properties use EnumParameter<BorderStyle> and non-nullable Unit — conversion from nullable DTOs requires HasValue checks before assignment.
-
-**Next Steps:** Consider adding validation for CSS file paths, JSON schema documentation, example theme files.
-
----
-
-### WI-14: Theme Validation & Diagnostics (2026-03-28)
-
-**Task:** Add validation and diagnostic logging to the theming system to help developers identify misconfigured themes.
-
-**Files Created:**
-- src/BlazorWebFormsComponents/Theming/ThemeDiagnostics.cs
-
-**Files Modified:**
-- src/BlazorWebFormsComponents/BaseWebFormsComponent.cs
-
-**Implementation Details:**
-
-**ThemeDiagnostics class:**
-- KnownControlTypes: IReadOnlySet<string> with 60+ control names from the library
-- KnownSubStyles: IReadOnlyDictionary mapping control types to their valid sub-style names
-  - GridView: HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, PagerStyle, EditRowStyle, SelectedRowStyle, EmptyDataRowStyle
-  - DetailsView: HeaderStyle, RowStyle, AlternatingRowStyle, FooterStyle, CommandRowStyle, EditRowStyle, InsertRowStyle, FieldHeaderStyle, EmptyDataRowStyle, PagerStyle
-  - FormView: HeaderStyle, RowStyle, EditRowStyle, InsertRowStyle, FooterStyle, PagerStyle, EmptyDataRowStyle
-  - DataGrid: HeaderStyle, ItemStyle, AlternatingItemStyle, FooterStyle, PagerStyle, SelectedItemStyle, EditItemStyle
-  - DataList: HeaderStyle, FooterStyle, ItemStyle, AlternatingItemStyle, SeparatorStyle
-  - Menu, TreeView, Calendar: appropriate style names for each
-- Validate(ThemeConfiguration): returns List<string> of warnings
-  - Uses reflection to access internal _skins field in ThemeConfiguration
-  - Rule 1: Warns about unknown control types not in KnownControlTypes
-  - Rule 2: Warns about unknown sub-style names for controls that support sub-styles
-  - Rule 3: Warns about empty skins (no properties set)
-  - Also warns if control doesn't support sub-styles but skin defines them
-
-**BaseWebFormsComponent.OnParametersSet enhancement:**
-- After GetSkin() call, checks if skin is null AND SkinID is not empty
-- Logs warning: "Theme skin '{SkinID}' not found for control type '{TypeName}'"
-- Uses existing Logger property (ILogger<BaseWebFormsComponent> injected via ServiceProvider)
-- Helps developers catch typos in SkinID attributes
-
-**Build Status:** ✅ 0 errors, existing warnings
-
-**Key Learning:** Reflection is necessary to validate themes since ThemeConfiguration's _skins dictionary is private. The Validate method provides comprehensive diagnostic output without breaking encapsulation.
-
-**Usage Example:**
-`csharp
-var theme = new ThemeConfiguration().ForControl("Button", b => b.WithBackColor("Red"));
-var warnings = ThemeDiagnostics.Validate(theme);
-foreach (var warning in warnings) {
-    Console.WriteLine(warning);
-}
-`
-
-**Next Steps:** Consider exposing a public API on ThemeConfiguration to enumerate skins without reflection, or document that validation requires reflection access.
-
-### Theme Auto-Discovery in AddBlazorWebFormsComponents (2026-03)
-
-**Task:** Minimize migration script effort for Web Forms themes — if `App_Themes/` is copied to `wwwroot/App_Themes/`, everything should work with zero extra `Program.cs` configuration.
-
-**Implementation:**
-- `BlazorWebFormsComponentsOptions`: Added `ThemesPath` (string?, defaults null = auto-discover "App_Themes") and `ThemeMode` (defaults StyleSheetTheme)
-- `ServiceCollectionExtensions.AddBlazorWebFormsComponents`: Registers `ThemeConfiguration` as singleton via factory using `IWebHostEnvironment.WebRootPath` at resolution time. Auto-discovers `.skin` files via `SkinFileParser.ParseThemeFolder()` and CSS files via `Directory.GetFiles("*.css", AllDirectories)`. Empty `ThemeConfiguration` registered when no App_Themes folder exists.
-- `ThemeProvider.razor`: Injects `IServiceProvider` (always available, avoids test breakage) and resolves `ThemeConfiguration` as DI fallback. Explicit `Theme` parameter always wins. Uses `EffectiveTheme` private field for both CSS rendering and CascadingValue.
-
-**Key Design Decisions:**
-- Used `IServiceProvider.GetService<ThemeConfiguration>()` instead of direct `[Inject] ThemeConfiguration` to avoid breaking 2,685 existing tests that don't register the service
-- Used `sp.GetService<IWebHostEnvironment>()` (nullable) instead of `GetRequiredService` to gracefully handle environments without web hosting
-- Empty string `ThemesPath` explicitly disables auto-discovery; null means use default "App_Themes"
-
-**Build:** ✅ 0 errors, 135 warnings (all pre-existing)
-**Tests:** ✅ 2,685 passed, 0 failed, 0 skipped
-
-### Phase 1 Library Shims (2026-07-28)
-
-**Task:** Implement three migration shims to eliminate the most common compilation blockers in migrated Web Forms apps.
-
-**Files created:**
-- ConfigurationManager.cs: Static shim shadowing System.Configuration.ConfigurationManager via namespace. AppSettings[key] reads AppSettings:{key} then {key} from IConfiguration. ConnectionStrings[name] reads via GetConnectionString(). Initialized by app.UseConfigurationManagerShim().
-- BundleConfig.cs: No-op stubs in System.Web.Optimization for Bundle/ScriptBundle/StyleBundle/BundleTable/BundleCollection.
-- RouteConfig.cs: No-op stubs in System.Web.Routing for RouteCollection/RouteTable.
-- Updated ServiceCollectionExtensions.cs with UseConfigurationManagerShim(this WebApplication app).
-
-**Key decisions:**
-- ConfigurationManager is static (like EF6 Database shim) because the Web Forms API is static. Uses WebApplication.Configuration for initialization.
-- Namespace shadowing via .targets global using avoids needing a type alias in the .targets file.
-- AppSettings fallback order: AppSettings:{key} first (structured), then {key} directly (flat).
-- BundleConfig/RouteConfig use original System.Web.* namespaces so existing using statements work unchanged.
-
-**Build:** 0 errors on net8.0;net9.0;net10.0 (438 warnings, all pre-existing)
-
-### GAP-04: SessionShim — Session["key"] Drop-In Replacement (2026-07-28)
-
-**Task:** Implement `SessionShim` as a scoped service providing dictionary-style `Session["key"]` access for migrated Web Forms code.
-
-**Files created/modified:**
-- `SessionShim.cs`: Scoped service with `object? this[string key]` indexer, `Get<T>(key)` typed helper, `Remove()`, `Clear()`, `ContainsKey()`, `Count`. Uses `ISession` with JSON serialization when HTTP context is available; falls back to `ConcurrentDictionary` in interactive Blazor Server mode. Logs one-time warning on fallback.
-- `ServiceCollectionExtensions.cs`: Added `AddDistributedMemoryCache()`, `AddSession()`, `AddScoped<SessionShim>()` to `AddBlazorWebFormsComponents()`.
-- `WebFormsPageBase.cs`: Added `[Inject] SessionShim _sessionShim` and `protected SessionShim Session` property so `Session["key"]` works in any page inheriting WebFormsPageBase.
-
-**Key decisions:**
-- System.Text.Json for serialization (zero external deps, consistent with project).
-- `IHttpContextAccessor` is optional constructor parameter — graceful degradation, no throws.
-- `TryGetSession` catches `InvalidOperationException` for cases where session middleware is not configured.
-- One-time `ILogger.LogWarning` on fallback so devs get visibility without log spam.
-- `ISession.Keys` requires `System.Linq` for `Any()`/`Count()` — must include the using.
-
-**Build:** ✅ 0 errors on net8.0;net9.0;net10.0
-
-### Phase 1B: ManualItem Structured Report Schema (G12/G13)
-
-**Summary:** Replaced flat `List<string> ManualItems` in `MigrationReport` with structured `List<ManualItem>` using a C# record that carries file, line, category (bwfc-* slug), description, and severity. This enables Copilot L2 orchestration to parse manual items programmatically.
-
-**Files changed:**
-- `src/BlazorWebFormsComponents.Cli/Pipeline/ManualItem.cs` — new record type
-- `src/BlazorWebFormsComponents.Cli/Pipeline/MigrationReport.cs` — `List<ManualItem>`, `AddManualItem()` convenience method, camelCase JSON serialization
-- `src/BlazorWebFormsComponents.Cli/Pipeline/MigrationPipeline.cs` — updated sole call site to use `AddManualItem`
-- `tests/BlazorWebFormsComponents.Cli.Tests/PipelineIntegrationTests.cs` — updated assertions for structured ManualItem and camelCase JSON
-
-**Technical decisions:**
-- `ManualItem` is a positional record: `ManualItem(File, Line, Category, Description, Severity)`
-- JSON uses `JsonNamingPolicy.CamelCase` for consistent API-friendly output
-- `AddManualItem` defaults severity to `"medium"` for convenience
-- Category values follow bwfc-* slug convention (bwfc-session-state, bwfc-general, etc.)
-
-**Build:** ✅ 0 errors, 124 tests pass
-
-### Phase 3A G17: ConfigurationManagerShim Verification (2026-07)
-
-**Task:** Verify ConfigurationManager shim (Gap G17) — already implemented in Phase 1.
-
-**Status:** Shim already exists at `src/BlazorWebFormsComponents/ConfigurationManager.cs` with full test coverage at `src/BlazorWebFormsComponents.Test/ConfigurationManagerTests.cs` (9 tests, all passing).
-
-**API surface:**
-- `ConfigurationManager.AppSettings["key"]` → reads `AppSettings:{key}` with fallback to `{key}` from `IConfiguration`
-- `ConfigurationManager.ConnectionStrings["name"]` → returns `ConnectionStringSettings` via `IConfiguration.GetConnectionString()`
-- `ConfigurationManager.Initialize(IConfiguration)` → static binding, called via `app.UseConfigurationManagerShim()`
-- Supporting types: `AppSettingsCollection`, `ConnectionStringSettingsCollection`, `ConnectionStringSettings`
-
-**Key pattern:** Static class (like Web Forms original), initialized once at startup. Lives in `BlazorWebFormsComponents` namespace so `.targets` global using shadows `System.Configuration.ConfigurationManager`.
-
-### Phase 1A: TODO Comment Convention Standardization (2026-04-02)
-
-**Summary:** Standardized all emitted TODO comments across 8 CLI transform/scaffolding files to use the `TODO(bwfc-{category}):` prefix format. This enables Copilot L2 skill matching by providing a parseable, consistent pattern.
-
-**Convention:**
-- C# output (.razor.cs): `// TODO(bwfc-{category}): {description}`
-- C# inline (within expressions): `/* TODO(bwfc-{category}): {description} */`
-- Razor output (.razor): `@* TODO(bwfc-{category}): {description} *@`
-
-**Category slugs:** bwfc-general, bwfc-lifecycle, bwfc-ispostback, bwfc-viewstate, bwfc-session-state, bwfc-navigation, bwfc-datasource, bwfc-identity, bwfc-ajax-toolkit, bwfc-expression, bwfc-master-page, bwfc-login-view, bwfc-select-method, bwfc-route-url.
-
-**Files changed (transforms):**
-- TodoHeaderTransform.cs  11-item checklist header now uses category-prefixed TODOs
-- PageLifecycleTransform.cs  3 TODOs  `bwfc-lifecycle`
-- IsPostBackTransform.cs  3 TODOs  `bwfc-ispostback` (inline `/* */` converted to `//` on own line)
-- ResponseRedirectTransform.cs  3 TODOs  `bwfc-navigation` (inline expression TODOs stay `/* */`)
-- AjaxToolkitPrefixTransform.cs  2 TODOs  `bwfc-ajax-toolkit`
-- DataSourceIdTransform.cs  2 TODOs  `bwfc-datasource`
-- ShimGenerator.cs  1 TODO  `bwfc-identity`
-- ProjectScaffolder.cs  5 TODOs  `bwfc-datasource`, `bwfc-identity`, `bwfc-session-state`, `bwfc-general`
-
-**Files changed (test expectations):** 18 expected output files updated across tests/ and migration-toolkit/tests/.
-
-**Build:** 0 errors. **Tests:** 124/124 pass.
-
-### ClientScript Analyzer Enhancement — Phase 1 (2026-07-30)
-
-**Summary:** Enhanced BWFC022, BWFC023 with pattern-specific TODO guidance and created new BWFC024 (ScriptManagerUsageAnalyzer). Phase 1 of the approved ClientScript Migration Strategy from PRD.
-
-**BWFC022 changes:**
-- Parameterized MessageFormat: `"Page.ClientScript{0} is not available in Blazor. {1}"`
-- Added `GetMethodSpecificGuidance()` that inspects the parent `MemberAccessExpressionSyntax` to determine which ClientScript method is called
-- 5 specific patterns: RegisterStartupScript → IJSRuntime/OnAfterRenderAsync, RegisterClientScriptInclude → layout script tag, RegisterClientScriptBlock → InvokeVoidAsync, GetPostBackEventReference → @onclick/EventCallback, fallback → generic IJSRuntime
-
-**BWFC023 changes:**
-- Enhanced message with 3-step migration path: remove interface, replace RaisePostBackEvent with EventCallback<T>, use @onclick handlers
-
-**BWFC024 (new):**
-- Detects ScriptManager.{GetCurrent, SetFocus, RegisterStartupScript, RegisterClientScriptBlock, RegisterAsyncPostBackControl} static calls
-- Method-specific guidance for each pattern (ElementReference/FocusAsync for SetFocus, remove for RegisterAsyncPostBackControl, etc.)
-- Instance methods on local variables correctly NOT flagged (e.g. `sm.RegisterAsyncPostBackControl`)
-
-**Tests:** 172 analyzer tests pass (was 159). 13 new tests added across BWFC022/023/024.
-
-**Key technical decision:** Used parameterized `MessageFormat` with `{0}/{1}` args rather than separate DiagnosticDescriptor per method. Keeps single BWFC022 ID for all Page.ClientScript patterns, differentiated by message content. Existing tests without `.WithMessage()` continue to pass; new tests verify exact messages.
-
-### ClientScriptShim Implementation (2026-07-30)
-
-**Summary:** Built `ClientScriptShim` — a scoped service emulating `Page.ClientScript` (`ClientScriptManager`) from Web Forms. Follows the same queue-and-flush pattern used in Web Forms: methods like `RegisterStartupScript` queue scripts into dictionaries keyed for deduplication, and `FlushAsync(IJSRuntime)` executes them via `eval` after render.
-
-**Files created:** `src/BlazorWebFormsComponents/ClientScriptShim.cs`
-
-**Files modified:**
-- `ServiceCollectionExtensions.cs` — registered `ClientScriptShim` as scoped service after `CacheShim`
-- `BaseWebFormsComponent.cs` — added lazy-resolved `ClientScript` property (same pattern as `JsInterop`), added auto-flush call in `OnAfterRenderAsync`
-
-**API surface:**
-- `RegisterStartupScript(Type, string, string, bool)` / `RegisterStartupScript(Type, string, string)`
-- `IsStartupScriptRegistered(Type, string)`
-- `RegisterClientScriptBlock(Type, string, string, bool)` / `IsClientScriptBlockRegistered(Type, string)`
-- `RegisterClientScriptInclude(string, string)` / `RegisterClientScriptInclude(Type, string, string)` / `IsClientScriptIncludeRegistered(string)`
-- `FlushAsync(IJSRuntime)` — executes queued scripts/blocks via eval, loads includes via dynamic script tag injection
-- Unsupported: `GetPostBackEventReference`, `GetPostBackClientHyperlink`, `GetCallbackEventReference` throw `NotSupportedException` with migration guidance
-
-**Design decisions:**
-- Script tag stripping uses compiled Regex for perf; strips `<script>` wrappers when `addScriptTags=true`
-- Three separate dictionaries for startup scripts, blocks, and includes — mirrors Web Forms' separate registries
-- Flush runs blocks before startup scripts (Web Forms page lifecycle order)
-- Includes loaded via dynamic `<script>` element creation in eval
-- Auto-flush happens every render (not just firstRender) so scripts registered in event handlers work correctly
-- Build: 0 errors across net8.0/net9.0/net10.0
-
-### ClientScript Phase 2: PostBack + ScriptManager Runtime (2026-07-17)
-
-**Summary:** Replaced NotSupportedException stubs with working PostBack/Callback implementations. Created full JS interop bridge for __doPostBack and ScriptManager.GetCurrent() pattern.
-
-**Files Created:**
-- PostBackEventArgs.cs, ScriptManagerShim.cs, bwfc-postback.js
-
-**Files Modified:**
-- ClientScriptShim.cs: 3 methods now return working JS strings; added ResolveControlId
-- WebFormsPageBase.cs: IAsyncDisposable, ClientScript, PostBack event, JSInvokable handlers, OnAfterRenderAsync registration
-- ServiceCollectionExtensions.cs: ScriptManagerShim DI registration
-- ClientScriptShimTests.cs: Updated tests for new behavior + null edge cases
-
-**Technical Decisions:**
-- Inline JS bootstrap avoids race conditions with external script loading
-- ResolveControlId prefers BaseWebFormsComponent.ID, falls back to type name
-- ScriptManagerShim: both DI and static GetCurrent() factory
-- PostBack target ID: TypeName_HashCode for per-instance uniqueness
-
-**Build:** 0 errors, 32 tests pass x 3 TFMs
-
-### Issue #533: WebFormsForm Component (2026-07)
-
-**Summary:** Built `WebFormsForm` component enabling `Request.Form` to work in both SSR and interactive Blazor Server modes.
-
-**Files Created:**
-- `FormMethod.cs` — enum (Get=0, Post=1)
-- `WebFormsForm.razor` — dual-mode form component (SSR: plain form; interactive: JS interop submit handler)
-- `wwwroot/js/bwfc-webformsform.js` — ES module exporting `readFormData(formElement)` that reads FormData from DOM
-
-**Files Modified:**
-- `FormShim.cs` — Added `_interopData` dictionary field, new `FormShim(Dictionary<string, StringValues>)` constructor, `SetFormData()` method. All members (indexer, GetValues, AllKeys, Count, ContainsKey) now check `_interopData` when `_form` is null.
-- `RequestShim.cs` — Added `_cachedFormShim` field for interactive mode persistence. Form getter caches the shim so SetFormData survives. Warning message updated to mention `<WebFormsForm>`. Added `SetFormData()` method.
-- `WebFormsPageBase.cs` — Changed `Request` from always-new to cached `_requestShim` field. Added `SetRequestFormData()` public method. Added `using Microsoft.Extensions.Primitives`.
-
-**Design Decisions:**
-- JS file is ES module (matching Basepage.module.js pattern), loaded via `IJSObjectReference` import
-- FormShim dual-source: `IFormCollection` for SSR, `Dictionary<string, StringValues>` for interop
-- RequestShim caches FormShim in interactive mode so form data persists across accesses
-- WebFormsForm detects interactive mode via `HttpContext == null` pattern (consistent with WebFormsPageBase)
-- `@onsubmit:preventDefault` prevents default form submission in interactive mode
-
-**Build:** ✅ 0 errors on net8.0;net9.0;net10.0
-
-### Playwright Locator Fix for WebFormsFormTests (2025-07-15)
-
-**Summary:** Fixed two failing Playwright tests in `WebFormsFormTests.cs` where locators were matching the always-visible migration guidance card instead of the actual results card.
-
-**Key Learning — data-audit-control naming convention:**
-- Demo pages use `data-audit-control` attributes prefixed with the component name, e.g. `webforms-form-results` not just `form-results`.
-- Always use the exact `[data-audit-control='...']` selector in Playwright tests rather than fuzzy text-based locators like `text=Request.Form` or `:has-text()`, which can match unrelated visible sections.
-- When a section is conditionally rendered (e.g., gated by `@if (isPostBack)`), the test locator must target that specific section's attribute, not generic text that may appear elsewhere on the page.
-**Summary:** Fixed both .targets files by adding Validations namespace and removing Identity namespace to prevent CS0104 ambiguity errors.
-
-**Files Modified:**
-- `build/Fritz.BlazorWebFormsComponents.targets` - Replaced `BlazorWebFormsComponents.Identity` global using with `BlazorWebFormsComponents.Validations`
-- `buildTransitive/Fritz.BlazorWebFormsComponents.targets` - Identical change
-
-**Rationale:**
-- **Validations added:** Fixes 10 CS0246 errors where RequiredFieldValidator and RegularExpressionValidator types were not found. These validators are common in migrated Web Forms code and should be globally available.
-- **Identity removed:** The Identity namespace defines shim types (IdentityUser, IdentityResult, UserLoginInfo) with identical names to Microsoft.AspNetCore.Identity types. Real migration projects reference both, causing CS0104 ambiguity errors. The migration CLI will inject BlazorWebFormsComponents.Identity usings on a per-file basis only where needed.
-
-**Final Global Usings:**
-- BlazorWebFormsComponents
-- BlazorWebFormsComponents.LoginControls
-- BlazorWebFormsComponents.Validations
-- BlazorWebFormsComponents.EntityFramework
-
-**Build:** 0 errors, 358 warnings (expected)
-
+ Team update (2026-03-06): Forge produced 5 library improvement recommendations (L1-L5) assigned to Cyclops  L1: Response.Redirect shim on WebFormsPageBase (HIGH), L2: Request.QueryString shim (MEDIUM), L3: DataBind() no-op (LOW-MED), L4: form-submit.js helper (MEDIUM), L5: WebFormsSessionService (MEDIUM). Recommended Cycle 2: L1  decided by Forge
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
