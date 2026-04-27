@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
@@ -69,6 +70,21 @@ MasterContext.SetContent(ContentPlaceHolderID, ChildContent);
 // IReadOnlyDictionary view stays in sync for diagnostics / tests.
 if (ParentMasterPage != null)
 ParentMasterPage.Context.SetContent(ContentPlaceHolderID, ChildContent);
+}
+
+/// <summary>
+/// Clears the registered slot so the <see cref="ContentPlaceHolder"/> falls back
+/// to its default content when this <see cref="Content"/> component is removed
+/// from the render tree (e.g., behind an <c>@if</c> toggle).
+/// </summary>
+protected override async ValueTask Dispose(bool disposing)
+{
+if (disposing && !string.IsNullOrEmpty(ContentPlaceHolderID))
+{
+MasterContext?.SetContent(ContentPlaceHolderID, null);
+ParentMasterPage?.Context.SetContent(ContentPlaceHolderID, null);
+}
+await base.Dispose(disposing);
 }
 }
 
