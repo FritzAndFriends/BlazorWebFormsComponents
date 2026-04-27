@@ -56,10 +56,10 @@ The scan report tells you whether BWFC is a good fit before you invest time in m
 
 ## Layer 1: Automated Transforms
 
-**Primary tool:** [`webforms-to-blazor` CLI](../src/BlazorWebFormsComponents.Cli/) — 37 compiled C# transforms with 373 unit tests
-**Alternative:** [`scripts/bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1) — lightweight PowerShell regex transforms (no .NET SDK required)
+**Primary tool:** [`webforms-to-blazor` CLI](../src/BlazorWebFormsComponents.Cli/) — compiled C# transforms that scaffold a **.NET 10 Blazor Web App using static server-side rendering (SSR)**
+**Alternative:** [`scripts/bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1) — lightweight PowerShell regex transforms that target the same **.NET 10 Blazor SSR** output
 
-Layer 1 handles every transform that can be applied mechanically. The CLI tool applies compiled, unit-tested transforms with a migration report; the PowerShell script provides simpler regex-based transforms for quick starts.
+Layer 1 handles every transform that can be applied mechanically. The CLI tool applies compiled, unit-tested transforms with a migration report; the PowerShell script provides simpler regex-based transforms for quick starts. **Both tools standardize on .NET 10 Blazor SSR as the migration target — not global interactive Blazor Server mode.**
 
 ### What Layer 1 Does
 
@@ -74,7 +74,7 @@ Layer 1 handles every transform that can be applied mechanically. The CLI tool a
 | File renaming (`.aspx` → `.razor`) | 33 | 100% |
 | Project scaffold (`.csproj`, `Program.cs`, `_Imports.razor`, `App.razor`) | Full | ✅ |
 
-The CLI generates `_Imports.razor` with `@inherits BlazorWebFormsComponents.WebFormsPageBase` so every page automatically gets `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack`, `Session`, `Response`, `Request`, `Server`, `Cache`, and `ClientScript` — with the same API as Web Forms. The layout scaffold includes `<BlazorWebFormsComponents.Page />` to render `<PageTitle>` and `<meta>` tags.
+The CLI generates `_Imports.razor` with `@inherits BlazorWebFormsComponents.WebFormsPageBase` so every page automatically gets `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack`, `Session`, `Response`, `Request`, `Server`, `Cache`, and `ClientScript` — with the same API as Web Forms. The scaffolded app targets **static SSR on .NET 10**, preserving the Web Forms request/response lifecycle by default.
 
 The CLI also generates `Program.cs` with `builder.Services.AddBlazorWebFormsComponents()`, which registers all the shim infrastructure (SessionShim, ResponseShim, RequestShim, CacheShim, ServerShim, ClientScriptShim, ViewStateShim) automatically.
 

@@ -98,7 +98,7 @@ class Program
 
     private static Command BuildMigrateCommand()
     {
-        var migrateCommand = new Command("migrate", "Full project migration from Web Forms to Blazor");
+        var migrateCommand = new Command("migrate", "Full project migration from Web Forms to Blazor SSR on .NET 10");
 
         var inputOption = new Option<string>(
             aliases: ["--input", "-i"],
@@ -107,12 +107,12 @@ class Program
 
         var outputOption = new Option<string>(
             aliases: ["--output", "-o"],
-            description: "Output Blazor project directory (required)")
+            description: "Output .NET 10 Blazor SSR project directory (required)")
         { IsRequired = true };
 
         var skipScaffoldOption = new Option<bool>(
             name: "--skip-scaffold",
-            description: "Skip .csproj, Program.cs, _Imports.razor generation",
+            description: "Skip .NET 10 Blazor SSR scaffold generation (.csproj, Program.cs, _Imports.razor, App.razor, Routes.razor)",
             getDefaultValue: () => false);
 
         var dryRunOption = new Option<bool>(
@@ -191,7 +191,7 @@ class Program
 
     private static Command BuildConvertCommand()
     {
-        var convertCommand = new Command("convert", "Single file conversion from Web Forms to Blazor");
+        var convertCommand = new Command("convert", "Single file conversion from Web Forms to a Blazor SSR-compatible Razor file");
 
         var inputOption = new Option<string>(
             aliases: ["--input", "-i"],

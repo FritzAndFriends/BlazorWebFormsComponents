@@ -1,6 +1,6 @@
 # WebForms to Blazor CLI Tool
 
-The `webforms-to-blazor` CLI is a powerful command-line tool that automates the first phase of your Web Forms to Blazor migration. It performs deterministic, pattern-based transformations on your Web Forms markup and code-behind to produce Blazor-ready code.
+The `webforms-to-blazor` CLI is a powerful command-line tool that automates the first phase of your Web Forms to Blazor migration. It performs deterministic, pattern-based transformations on your Web Forms markup and code-behind to produce Blazor-ready code and a **.NET 10 Blazor Web App scaffold configured for static server-side rendering (SSR)**.
 
 ## What It Does
 
@@ -10,7 +10,7 @@ This tool **reduces manual migration effort** by:
 - Converting ASP.NET server controls to BWFC components
 - Replacing Web Forms expressions with Blazor syntax
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
-- Scaffolding a new Blazor project structure with shims and services
+- Scaffolding a new .NET 10 Blazor SSR project structure with shims and services
 
 The tool processes `.aspx`, `.ascx`, and `.master` files in a fixed sequence, ensuring each transformation builds on the previous one correctly.
 
@@ -41,7 +41,7 @@ webforms-to-blazor --help
 ### Convert a Single File
 
 ```bash
-webforms-to-blazor migrate --input ProductCard.ascx --output ./BlazorComponents
+webforms-to-blazor convert --input ProductCard.ascx --output ./BlazorComponents
 ```
 
 ### Convert a Whole Project
@@ -54,34 +54,34 @@ The tool will:
 1. Scan all `.aspx`, `.ascx`, and `.master` files
 2. Apply 33 transforms in sequence
 3. Generate a migration report
-4. Scaffold supporting files (Program.cs, shims, handlers)
+4. Scaffold supporting files for a .NET 10 Blazor SSR app (Program.cs, App.razor, shims, handlers)
 
 ## Two Commands
 
 ### `migrate` — Full Project Migration
 
-Transforms an entire Web Forms project to Blazor with scaffolding.
+Transforms an entire Web Forms project to **.NET 10 Blazor SSR** with scaffolding.
 
 ```bash
 webforms-to-blazor migrate \
   --input ./MyWebFormsProject \
-  --output ./MyBlazorProject \
-  --database SqlServer \
-  --scaffold
+  --output ./MyBlazorProject
 ```
 
 **Key Options:**
 
 - `--input <path>` — Web Forms project root (required)
-- `--output <path>` — Blazor output directory (required)
-- `--database <provider>` — SqlServer, Sqlite, Postgres, Oracle (scaffolds appropriate connection setup)
-- `--scaffold` — Generate Program.cs, _Imports.razor, App.razor, and shims
+- `--output <path>` — .NET 10 Blazor SSR output directory (required)
+- `--skip-scaffold` — Skip generating the .NET 10 Blazor SSR scaffold
 - `--dry-run` — Preview changes without writing files
+- `--verbose` / `-v` — Show detailed per-file transform logging
+- `--overwrite` — Overwrite existing files in the output directory
+- `--report <path>` — Write the JSON migration report to a specific file
 
 **Output:**
 - Converted `.razor` files
 - Converted `.razor.cs` code-behind
-- Generated `Program.cs` with shim registration
+- Generated `Program.cs` with shim registration for static SSR on .NET 10
 - Migration report (`migration-report.json`)
 
 ### `convert` — File-Level Transformation
@@ -98,7 +98,7 @@ webforms-to-blazor convert \
 
 - `--input <path>` — Single `.ascx` or `.aspx` file (required)
 - `--output <path>` — Output file path
-- `--dry-run` — Preview transformation
+- `--overwrite` — Overwrite an existing generated file
 
 ## Transform Categories
 
@@ -155,9 +155,7 @@ After running the CLI:
 # 1. Scan and transform
 webforms-to-blazor migrate \
   --input ./MyApp.Web \
-  --output ./MyApp.Blazor \
-  --database SqlServer \
-  --scaffold
+  --output ./MyApp.Blazor
 
 # 2. Review migration report
 cat MyApp.Blazor/migration-report.json | jq '.manualItems[] | select(.severity == "Error")'

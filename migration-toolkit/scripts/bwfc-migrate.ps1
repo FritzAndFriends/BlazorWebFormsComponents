@@ -443,7 +443,6 @@ function New-ProjectScaffold {
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.LoginControls
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
 @using $ProjectName.Models
 @inherits BlazorWebFormsComponents.WebFormsPageBase
@@ -452,12 +451,12 @@ function New-ProjectScaffold {
     # Program.cs
     $programContent = @"
 // TODO: Review and adjust this generated Program.cs for your application needs.
+// Generated for .NET 10 Blazor static SSR. Keep interactive render modes opt-in and page-specific.
 using BlazorWebFormsComponents;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
 
 builder.Services.AddBlazorWebFormsComponents();
 
@@ -473,8 +472,7 @@ app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseAntiforgery();
 
-app.MapRazorComponents<$ProjectName.Components.App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<$ProjectName.Components.App>();
 
 app.Run();
 "@
@@ -627,10 +625,9 @@ function New-AppRazorScaffold {
     <HeadOutlet />
 </head>
 
-@* SSR by default — add @rendermode="InteractiveServer" to pages that need interactivity *@
+@* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
 <body>
     <Routes />
-    <script src="_framework/blazor.web.js"></script>
 </body>
 
 </html>
@@ -861,7 +858,7 @@ function Invoke-ScriptAutoDetection {
         return
     }
 
-    # Inject <script> tags into App.razor before closing </body> (after blazor.web.js)
+    # Inject <script> tags into App.razor before closing </body>
     $appContent = Get-Content -Path $appRazorPath -Raw
     $injectionBlock = "    @* Auto-detected JS files from Scripts/ *@`n" + ($scriptTags -join "`n") + "`n"
     if ($appContent -match '</body>') {

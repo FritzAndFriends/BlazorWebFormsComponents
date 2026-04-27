@@ -1,6 +1,6 @@
 Migration might not be the correct term for this process, it could appear to be more of a rewrite using Blazor. In this article, you will learn how to get started rewriting your Web Forms application using Blazor with the Blazor Web Forms Components package.
 
-The output project from this operation will be a .NET Core 3.1 project running server-side Blazor.  This is the current desired result as this is the supported LTS version of .NET Core and Blazor that was published in December 2019.  With the schedule of .NET releases (as of Feb. 2020), we should expect to update to the next LTS version, .NET 6 between November 2021 and November 2022.
+The output project from this operation should be a **.NET 10 Blazor Web App using static server-side rendering (SSR)**. BWFC migrations target SSR by default because it preserves the Web Forms request/response model — including `HttpContext`, cookies, redirects, and form posts — while still giving you a clean path to add interactivity only where it is truly needed.
 
 ## Step 0 - Acknowledgement
 
@@ -66,15 +66,13 @@ There is a separate [strategy document](NET-Standard.md) with instructions to mi
 
 **A side benefit**: this is a good architecture practice that should allow you to test your business logic independently from your web project.  Try starting a unit test project with xUnit, NUnit or MSTest to exercise some of your business logic.  You will be able to run your tests either in the Visual Studio Test Runner or at the command line using `dotnet test`
 
-## Step 3 - Create a new Blazor Server Project
+## Step 3 - Create a new .NET 10 Blazor SSR Project
 
-Create your new Blazor Server-Side project either in Visual Studio 2019, Visual Studio for Mac, or at the command line.  With Visual Studio, follow these steps:
+Create your new **.NET 10 Blazor Web App configured for static SSR**. The `webforms-to-blazor` CLI and `bwfc-migrate.ps1` scaffolds already target this setup automatically.
 
 >> ADD IMAGES
 
-At the command-line you can execute the following command to create your Blazor Server-Side project:
-
-`dotnet new blazorserver -f netcoreapp3.1 -o <<DESTINATION FOLDER>>`
+If you are creating the host manually, choose the .NET 10 Blazor Web App template and keep the app in static SSR mode as your migration baseline. Do **not** start from global interactive server mode.
 
 Add a NuGet reference to the BlazorWebFormsComponents package on the command-line as follows:
 
@@ -84,7 +82,7 @@ Next, add references to the projects converted to .NET Standard in the previous 
 
 >> ADD IMAGES
 
-On the command-line you can add references using the dotnet CLI tools in your Blazor Server-Side project folder with syntax like:
+On the command-line you can add references using the dotnet CLI tools in your .NET 10 Blazor project folder with syntax like:
 
 `dotnet add reference ../MyLibrary`
 
@@ -98,7 +96,7 @@ This will allow you to reference the components from the library directly.  With
 
 ## Step 4 - Master Pages
 
-Master Pages in Web Forms are a combination of two concepts in Blazor: a host page and a Blazor layout.  In Blazor Server-Side the host page is a razor page by default in `Pages/_Host.cshtml` that bootstraps the Blazor application and hosts all static CSS and JavaScript references.
+Master Pages in Web Forms are a combination of two concepts in Blazor: the app shell and a Blazor layout. In a .NET 10 Blazor SSR app, `Components/App.razor` defines the document shell and hosts your static CSS and JavaScript references.
 
 You will want to place any CSS or JavaScript references from your MasterPages into this host page.  The rest of your MasterPage layout inside the `BODY` tag will need to be migrated to a layout razor file.  In the simplest scenario where you have one MasterPage with *ONLY* HTML content and it has one main content area, you will want to overwrite the content in `Shared/MainLayout.razor`
 

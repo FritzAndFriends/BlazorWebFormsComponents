@@ -161,19 +161,18 @@ function New-ProjectScaffold {
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
-@using $ProjectName
+    @using $ProjectName
 "@
 
     # Program.cs
     $programContent = @"
 // TODO: Review and adjust this generated Program.cs for your application needs.
+// Generated for .NET 10 Blazor static SSR. Keep interactive render modes opt-in and page-specific.
 using BlazorWebFormsComponents;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
 
 builder.Services.AddBlazorWebFormsComponents();
 
@@ -189,8 +188,7 @@ app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseAntiforgery();
 
-app.MapRazorComponents<$ProjectName.Components.App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<$ProjectName.Components.App>();
 
 app.Run();
 "@
@@ -256,12 +254,12 @@ function New-AppRazorScaffold {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <HeadOutlet />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
-    <script src="_framework/blazor.web.js"></script>
+    @* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
+    <Routes />
 </body>
 
 </html>

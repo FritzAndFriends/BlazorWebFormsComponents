@@ -46,12 +46,12 @@ Portions of the [original .NET Framework](https://github.com/microsoft/reference
 
 ## Migration CLI Tool
 
-The **`webforms-to-blazor` CLI tool** automates the first phase of Web Forms to Blazor migration. It applies deterministic transforms to your markup and code-behind, removing boilerplate and converting patterns:
+The **`webforms-to-blazor` CLI tool** automates the first phase of Web Forms to Blazor migration. It applies deterministic transforms to your markup and code-behind, removing boilerplate and converting patterns into a **.NET 10 Blazor Web App scaffolded for static server-side rendering (SSR)**:
 
 ```bash
 # Full project migration
 dotnet tool install --global Fritz.WebFormsToBlazor
-webforms-to-blazor migrate --input ./MyWebFormsProject --output ./MyBlazorProject --scaffold
+webforms-to-blazor migrate --input ./MyWebFormsProject --output ./MyBlazorProject
 
 # Or convert individual files
 webforms-to-blazor convert --input ProductCard.ascx --output ProductCard.razor
@@ -62,7 +62,7 @@ webforms-to-blazor convert --input ProductCard.ascx --output ProductCard.razor
 - Removes `asp:` prefixes: `<asp:Button>` → `<Button>`
 - Converts expressions: `<%: Model.Name %>` → `@(Model.Name)`
 - Detects patterns: Injects TODO comments for Copilot L2 automation
-- Scaffolds projects: Generates Program.cs, shims, and services
+- Scaffolds projects: Generates a .NET 10 Blazor SSR Program.cs, App.razor, shims, and services
 
 **See the [CLI Tool Documentation](docs/cli/index.md) for:**
 - [Transform Reference](docs/cli/transforms.md) — All 33 transforms with before/after examples

@@ -166,12 +166,12 @@ public class ProjectScaffolder
         }
 
         return $@"// TODO(bwfc-general): Review and adjust this generated Program.cs for your application needs.
+// Generated for .NET 10 Blazor static SSR. Keep interactive render modes opt-in and page-specific.
 using BlazorWebFormsComponents;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
 
 builder.Services.AddBlazorWebFormsComponents();
 {identityServiceBlock}
@@ -187,8 +187,7 @@ app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseAntiforgery();
 {identityMiddlewareBlock}
-app.MapRazorComponents<{projectName}.Components.App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<{projectName}.Components.App>();
 
 app.Run();
 ";
@@ -205,7 +204,6 @@ app.Run();
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.LoginControls
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using {projectName}
 @using {projectName}.Models
 @inherits BlazorWebFormsComponents.WebFormsPageBase
@@ -224,10 +222,9 @@ app.Run();
     <HeadOutlet />
 </head>
 
-@* SSR by default — add @rendermode=""InteractiveServer"" to pages that need interactivity *@
+@* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
 <body>
     <Routes />
-    <script src=""_framework/blazor.web.js""></script>
 </body>
 
 </html>

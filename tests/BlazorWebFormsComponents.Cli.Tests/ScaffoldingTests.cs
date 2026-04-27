@@ -65,7 +65,8 @@ public class ScaffoldingTests : IDisposable
 
         Assert.Contains("AddBlazorWebFormsComponents()", program);
         Assert.Contains("AddRazorComponents()", program);
-        Assert.Contains("AddInteractiveServerComponents()", program);
+        Assert.DoesNotContain("AddInteractiveServerComponents()", program);
+        Assert.Contains("Generated for .NET 10 Blazor static SSR", program);
         Assert.Contains("using BlazorWebFormsComponents;", program);
     }
 
@@ -77,7 +78,7 @@ public class ScaffoldingTests : IDisposable
         var program = result.Files["program"].Content;
 
         Assert.Contains("MapRazorComponents<TestApp.Components.App>()", program);
-        Assert.Contains("AddInteractiveServerRenderMode()", program);
+        Assert.DoesNotContain("AddInteractiveServerRenderMode()", program);
     }
 
     [Fact]
@@ -94,6 +95,7 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("@using Microsoft.JSInterop", imports);
         // BWFC usings
         Assert.Contains("@using BlazorWebFormsComponents", imports);
+        Assert.DoesNotContain("@using static Microsoft.AspNetCore.Components.Web.RenderMode", imports);
         // Project namespace
         Assert.Contains("@using TestApp", imports);
         // WebFormsPageBase inherits
@@ -110,7 +112,8 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("<Routes />", appRazor);
         Assert.Contains("<HeadOutlet />", appRazor);
         Assert.Contains("<!DOCTYPE html>", appRazor);
-        Assert.Contains("blazor.web.js", appRazor);
+        Assert.DoesNotContain("blazor.web.js", appRazor);
+        Assert.Contains("Generated for .NET 10 static SSR migration output", appRazor);
     }
 
     [Fact]
