@@ -1,81 +1,29 @@
 @page "/ProductList"
 <PageTitle>Products</PageTitle>
-	<section>
-        <div>
-            <hgroup>
-                <h2>@(Page.Title)</h2>
-            </hgroup>
 
-            <ListView ID="productList" 
-                DataKeyNames="ProductID" GroupItemCount="4"
-                ItemType="Product" SelectMethod="@GetProducts">
-                <EmptyDataTemplate>
-                    <table >
-                        <tr>
-                            <td>No data was returned.</td>
-                        </tr>
-                    </table>
-                </EmptyDataTemplate>
-                <EmptyItemTemplate>
-                    <td/>
-                </EmptyItemTemplate>
-                <GroupTemplate>
-                    <tr id="itemPlaceholderContainer">
-                        @context
-                    </tr>
-                </GroupTemplate>
-                <ItemTemplate Context="context">
-                    <td>
-                        <table>
-                            <tr>
-                                <td>
-                                    <a href="/ProductDetails?ProductID=@context.ProductID">
-                                    <image src='/Catalog/Images/Thumbs/@context.ImagePath'
-                                      width="100" height="75" border="1" />
-                                  </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="/ProductDetails?ProductID=@context.ProductID">
-                                      @context.ProductName
-                                    </a>
-                                    <br />
-                                    <span>
-                                        <b>Price: </b>@($"{context.UnitPrice:c}")
-                                    </span>
-                                    <br />
-                                    <a href="/AddToCart?productID=@context.ProductID" data-enhance-nav="false">               
-                                        <span class="ProductListItem">
-                                            <b>Add To Cart</b>
-                                        </span>           
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                            </tr>
-                        </table>
-                    </td>
-                </ItemTemplate>
-                <LayoutTemplate>
-                    <table style="width:100%;">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table id="groupPlaceholderContainer" style="width:100%">
-                                        @context
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                            </tr>
-                            <tr></tr>
-                        </tbody>
-                    </table>
-                </LayoutTemplate>
-            </ListView>
+@if (!string.IsNullOrEmpty(Heading))
+{
+    <h2>@Heading</h2>
+}
+
+<div class="row">
+    @foreach (var product in Products)
+    {
+        <div class="col-sm-6 col-md-3">
+            <div class="thumbnail">
+                <a href="/ProductDetails?productID=@product.ProductID">
+                    <img src="/Catalog/Images/Thumbs/@product.ImagePath" alt="@product.ProductName" />
+                </a>
+                <div class="caption">
+                    <h4>
+                        <a href="/ProductDetails?productID=@product.ProductID">@product.ProductName</a>
+                    </h4>
+                    <p><strong>Price:</strong> @($"{product.UnitPrice:c}")</p>
+                    <p>
+                        <a class="btn btn-default" href="/AddToCart?productID=@product.ProductID">Add To Cart</a>
+                    </p>
+                </div>
+            </div>
         </div>
-    </section>
-
+    }
+</div>

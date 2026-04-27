@@ -1,27 +1,33 @@
 @page "/ProductDetails"
 <PageTitle>Product Details</PageTitle>
-<FormView ID="productDetail" ItemType="Product" SelectMethod="@GetProduct" RenderOuterTable="false">
-        <ItemTemplate Context="context">
-            <div>
-                <h1>@context.ProductName</h1>
-            </div>
-            <br />
-            <table>
-                <tr>
-                    <td>
-                        <img src="/Catalog/Images/@context.ImagePath" style="border:solid; height:300px" alt="@context.ProductName"/>
-                    </td>
-                    <td>&nbsp;</td>  
-                    <td style="vertical-align: top; text-align:left;">
-                        <b>Description:</b><br />@context.Description
-                        <br />
-                        <span><b>Price:</b>&nbsp;@($"{context.UnitPrice:c}")</span>
-                        <br />
-                        <span><b>Product Number:</b>&nbsp;@context.ProductID</span>
-                        <br />
-                    </td>
-                </tr>
-            </table>
-        </ItemTemplate>
-    </FormView>
 
+@if (Product is null)
+{
+    <div class="alert alert-warning">
+        The requested product could not be found.
+    </div>
+}
+else
+{
+    <div>
+        <h1>@Product.ProductName</h1>
+    </div>
+    <br />
+    <table>
+        <tr>
+            <td>
+                <img src="/Catalog/Images/@Product.ImagePath" style="border:solid; height:300px" alt="@Product.ProductName" />
+            </td>
+            <td>&nbsp;</td>
+            <td style="vertical-align: top; text-align:left;">
+                <b>Description:</b><br />@Product.Description
+                <br />
+                <span><b>Price:</b>&nbsp;@($"{Product.UnitPrice:c}")</span>
+                <br />
+                <span><b>Product Number:</b>&nbsp;@Product.ProductID</span>
+                <br /><br />
+                <a class="btn btn-primary" href="/AddToCart?productID=@Product.ProductID">Add To Cart</a>
+            </td>
+        </tr>
+    </table>
+}

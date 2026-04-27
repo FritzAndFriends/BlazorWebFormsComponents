@@ -1,17 +1,16 @@
 @page "/Confirm"
 <PageTitle>Account Confirmation</PageTitle>
-<h2>@(Title).</h2>
+    <h2>@(Title).</h2>
 
     <div>
-        <PlaceHolder ID="successPanel" Visible="true">
+        <PlaceHolder id="successPanel" @ref="successPanel" Visible="true">
             <p>
-                Thank you for confirming your account. Click <HyperLink ID="login" NavigateUrl="/Account/Login">here</HyperLink>  to login             
+                Thank you for confirming your account. Click <HyperLink id="login" @ref="login" NavigateUrl="/Account/Login">here</HyperLink>  to login             
             </p>
         </PlaceHolder>
-        <PlaceHolder ID="errorPanel" Visible="false">
+        <PlaceHolder id="errorPanel" @ref="errorPanel" Visible="false">
             <p class="text-danger">
                 An error has occurred.
             </p>
         </PlaceHolder>
     </div>
-

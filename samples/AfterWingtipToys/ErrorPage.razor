@@ -1,29 +1,26 @@
 @page "/ErrorPage"
-<h2>Error:</h2>
+<PageTitle></PageTitle>
+    <h2>Error:</h2>
     <p></p>
-    <Label ID="FriendlyErrorMsg" Text="@_friendlyErrorMsg" Font-Size="Large" style="color: red"></Label>
+    <Label id="FriendlyErrorMsg" @ref="FriendlyErrorMsg" Text="Label" Font-Size="Large" style="color: red"></Label>
 
-    @if (_showDetails)
-    {
-    <Panel ID="DetailedErrorPanel">
+    <Panel id="DetailedErrorPanel" @ref="DetailedErrorPanel" Visible="false">
         <p>&nbsp;</p>
         <h4>Detailed Error:</h4>
         <p>
-            <Label ID="ErrorDetailedMsg" Text="@_errorDetailedMsg" Font-Size="Small" /><br />
+            <Label id="ErrorDetailedMsg" @ref="ErrorDetailedMsg" Font-Size="Small" /><br />
         </p>
 
         <h4>Error Handler:</h4>
         <p>
-            <Label ID="ErrorHandlerLabel" Text="@_errorHandler" Font-Size="Small" /><br />
+            <Label id="ErrorHandler" @ref="ErrorHandler" Font-Size="Small" /><br />
         </p>
 
         <h4>Detailed Error Message:</h4>
         <p>
-            <Label ID="InnerMessage" Text="@_innerMessage" Font-Size="Small" /><br />
+            <Label id="InnerMessage" @ref="InnerMessage" Font-Size="Small" /><br />
         </p>
         <p>
-            <Label ID="InnerTrace" Text="@_innerTrace" />
+            <Label id="InnerTrace" @ref="InnerTrace"  />
         </p>
     </Panel>
-    }
-

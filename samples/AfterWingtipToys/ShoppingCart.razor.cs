@@ -1,86 +1,33 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
-using WingtipToys.Data;
 using WingtipToys.Models;
+using WingtipToys.Services;
 
 namespace WingtipToys;
 
 public partial class ShoppingCart
 {
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
-    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private CartService Cart { get; set; } = default!;
 
-    private List<CartItem> _cartItems = new();
-    private string _cartTotal = "";
-    private string _totalLabelText = "Order Total: ";
-    private string _cartTitle = "Shopping Cart";
-    private bool _showButtons = true;
+    private IReadOnlyList<CartItem> Items { get; set; } = Array.Empty<CartItem>();
+    private decimal Total { get; set; }
+    private string Heading { get; set; } = "Shopping Cart";
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnParametersSet()
     {
-        await LoadCart();
-    }
-
-    private async Task LoadCart()
-    {
-        using var db = DbFactory.CreateDbContext();
-        var cartId = GetCartId();
-        _cartItems = await db.ShoppingCartItems
-            .Where(c => c.CartId == cartId)
-            .Include(c => c.Product)
-            .ToListAsync();
-
-        var cartTotal = _cartItems.Sum(c => c.Quantity * (c.Product?.UnitPrice ?? 0));
-        if (cartTotal > 0)
+        if (int.TryParse(Request.QueryString["removeProductId"], out var removeProductId))
         {
-            _cartTotal = string.Format("{0:c}", cartTotal);
-        }
-        else
-        {
-            _totalLabelText = "";
-            _cartTotal = "";
-            _cartTitle = "Shopping Cart is Empty";
-            _showButtons = false;
-        }
-    }
-
-    private IQueryable<CartItem> GetShoppingCartItems(
-        int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-    {
-        var db = DbFactory.CreateDbContext();
-        var cartId = GetCartId();
-        var query = db.ShoppingCartItems
-            .Where(c => c.CartId == cartId)
-            .Include(c => c.Product);
-        totalRowCount = query.Count();
-        var results = query.ToList();
-        db.Dispose();
-        return results.AsQueryable();
-    }
-
-    private string GetCartId()
-    {
-        var httpContext = HttpContextAccessor.HttpContext;
-        if (httpContext?.Request.Cookies.TryGetValue("CartId", out var cartId) == true && !string.IsNullOrEmpty(cartId))
-        {
-            return cartId;
+            Cart.RemoveItem(removeProductId);
         }
 
-        var newCartId = Guid.NewGuid().ToString();
-        httpContext?.Response.Cookies.Append("CartId", newCartId, new CookieOptions { Expires = DateTimeOffset.Now.AddDays(30) });
-        return newCartId;
-    }
+        if (string.Equals(Request.QueryString["action"], "update", StringComparison.OrdinalIgnoreCase) &&
+            int.TryParse(Request.QueryString["productId"], out var productId) &&
+            int.TryParse(Request.QueryString["quantity"], out var quantity))
+        {
+            Cart.UpdateQuantity(productId, quantity);
+        }
 
-    private async Task UpdateBtn_Click(EventArgs e)
-    {
-        // TODO: Implement cart update logic — read quantities from form, update DB
-        await LoadCart();
-    }
-
-    private void CheckoutBtn_Click(EventArgs e)
-    {
-        // TODO: Implement PayPal checkout start — store payment amount and redirect
-        NavigationManager.NavigateTo("/CheckoutStart");
+        Items = Cart.GetItems();
+        Total = Cart.GetTotal();
+        Heading = Items.Count == 0 ? "Shopping Cart is Empty" : "Shopping Cart";
     }
 }

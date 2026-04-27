@@ -1,51 +1,32 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
-using WingtipToys.Data;
+using Microsoft.AspNetCore.Components.Routing;
 using WingtipToys.Models;
+using WingtipToys.Services;
 
 namespace WingtipToys;
 
 public partial class ProductDetails
 {
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+    [Inject] private CatalogService Catalog { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
 
-    [SupplyParameterFromQuery(Name = "ProductID")]
-    public int? ProductId { get; set; }
+    private Product? Product { get; set; }
 
-    [SupplyParameterFromQuery(Name = "productName")]
-    public string? ProductName { get; set; }
-
-    private IQueryable<Product> GetProduct(
-        int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    protected override void OnParametersSet()
     {
-        var db = DbFactory.CreateDbContext();
-        IQueryable<Product> query = db.Products;
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
-        if (ProductId.HasValue && ProductId > 0)
+        int? productId = null;
+        if (query.TryGetValue("productID", out var idValue) && int.TryParse(idValue, out var parsedId))
         {
-            query = query.Where(p => p.ProductID == ProductId);
-        }
-        else if (!string.IsNullOrEmpty(ProductName))
-        {
-            query = query.Where(p =>
-                string.Compare(p.ProductName, ProductName) == 0);
-        }
-        else
-        {
-            totalRowCount = 0;
-            db.Dispose();
-            return Enumerable.Empty<Product>().AsQueryable();
+            productId = parsedId;
         }
 
-        totalRowCount = query.Count();
-        var results = query.ToList();
-        db.Dispose();
-        return results.AsQueryable();
-    }
+        var productName = query.TryGetValue("productName", out var nameValue)
+            ? nameValue.ToString()
+            : null;
 
-    protected override async Task OnInitializedAsync()
-    {
-        Page.Title = "Product Details";
-        await Task.CompletedTask;
+        Product = Catalog.GetProduct(productId, productName);
     }
 }

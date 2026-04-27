@@ -1,38 +1,37 @@
 @page "/Forgot"
 <PageTitle>Forgot password</PageTitle>
-<h2>@(Title).</h2>
+    <h2>@(Title).</h2>
 
     <div class="row">
         <div class="col-md-8">
-            <PlaceHolder id="loginForm">
+            <PlaceHolder id="loginForm" @ref="loginForm">
                 <div class="form-horizontal">
                     <h4>Forgot your password?</h4>
                     <hr />
-                    <PlaceHolder ID="ErrorMessage" Visible="false">
+                    <PlaceHolder id="ErrorMessage" @ref="ErrorMessage" Visible="false">
                         <p class="text-danger">
-                            <Literal ID="FailureText" />
+                            <Literal id="FailureText" @ref="FailureText" />
                         </p>
                     </PlaceHolder>
                     <div class="form-group">
                         <Label AssociatedControlID="Email" CssClass="col-md-2 control-label">Email</Label>
                         <div class="col-md-10">
-                            <TextBox ID="Email" CssClass="form-control" TextMode="TextBoxMode.Email" />
+                            <TextBox id="Email" @ref="Email" CssClass="form-control" TextMode="@TextBoxMode.Email" />
                             <RequiredFieldValidator ControlToValidate="Email"
                                 CssClass="text-danger" ErrorMessage="The email field is required." />
                         </div>
                     </div>
                     <div class="form-group">
                         <div class="col-md-offset-2 col-md-10">
-                            <Button OnClick="@Forgot_Click" Text="Submit" CssClass="btn btn-default" />
+                            <Button OnClick="@OnForgot" Text="Submit" CssClass="btn btn-default" />
                         </div>
                     </div>
                 </div>
             </PlaceHolder>
-            <PlaceHolder ID="DisplayEmail" Visible="false">
+            <PlaceHolder id="DisplayEmail" @ref="DisplayEmail" Visible="false">
                 <p class="text-info">
                     Please check your email to reset your password.
                 </p>
             </PlaceHolder>
         </div>
     </div>
-

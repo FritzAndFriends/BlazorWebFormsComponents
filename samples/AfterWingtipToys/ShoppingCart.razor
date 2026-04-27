@@ -1,52 +1,57 @@
 @page "/ShoppingCart"
-<div id="ShoppingCartTitle" class="ContentHead"><h1>@_cartTitle</h1></div>
-    <GridView ID="CartList" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
-        ItemType="CartItem" SelectMethod="@GetShoppingCartItems" 
-        CssClass="table table-striped table-bordered" >
-        <Columns>
-        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />        
-        <BoundField DataField="Product.ProductName" HeaderText="Name" />        
-        <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
-        <TemplateField HeaderText="Quantity">            
-                <ItemTemplate Context="context">
-                    <TextBox ID="PurchaseQuantity" Width="40" Text="@context.Quantity.ToString()"></TextBox> 
-                </ItemTemplate>        
-        </TemplateField>    
-        <TemplateField HeaderText="Item Total">            
-                <ItemTemplate Context="context">
-                    @($"{(Convert.ToDouble(context.Quantity) * Convert.ToDouble(context.Product?.UnitPrice ?? 0)):c}")
-                </ItemTemplate>
-        </TemplateField> 
-        <TemplateField HeaderText="Remove Item">            
-                <ItemTemplate>
-                    <CheckBox id="Remove"></CheckBox>
-                </ItemTemplate>        
-        </TemplateField>    
-        </Columns>    
-    </GridView>
+<PageTitle></PageTitle>
+<PageTitle>Shopping Cart</PageTitle>
+
+<div class="ContentHead">
+    <h1>@Heading</h1>
+</div>
+
+@if (Items.Count == 0)
+{
+    <p>Your shopping cart is empty.</p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Price (each)</th>
+                <th>Quantity</th>
+                <th>Item Total</th>
+                <th>Remove Item</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Items)
+            {
+                <tr>
+                    <td>@item.ProductId</td>
+                    <td>@item.Product?.ProductName</td>
+                    <td>@($"{item.Product?.UnitPrice:c}")</td>
+                    <td>
+                        <form method="get" action="/ShoppingCart" class="form-inline">
+                            <input type="hidden" name="action" value="update" />
+                            <input type="hidden" name="productId" value="@item.ProductId" />
+                            <input class="form-control" style="width: 80px" type="text" name="quantity" value="@item.Quantity" />
+                            <button class="btn btn-default" type="submit">Update</button>
+                        </form>
+                    </td>
+                    <td>@($"{(item.Quantity * (decimal)(item.Product?.UnitPrice ?? 0d)):c}")</td>
+                    <td>
+                        <form method="get" action="/ShoppingCart">
+                            <input type="hidden" name="removeProductId" value="@item.ProductId" />
+                            <button class="btn btn-link" type="submit">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
     <div>
         <p></p>
-        <strong>
-            <Label ID="LabelTotalText" Text="@_totalLabelText"></Label>
-            <Label ID="lblTotal" Text="@_cartTotal"></Label>
-        </strong> 
+        <strong>Order Total: @($"{Total:c}")</strong>
     </div>
-    <br />
-    @if (_showButtons)
-    {
-    <table> 
-    <tr>
-      <td>
-        <Button ID="UpdateBtn" Text="Update" OnClick="@UpdateBtn_Click" />
-      </td>
-      <td>
-        <ImageButton ID="CheckoutImageBtn" 
-                      ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
-                      Width="145" AlternateText="Check out with PayPal" 
-                      OnClick="@CheckoutBtn_Click" 
-                      BorderWidth="0" />
-      </td>
-    </tr>
-    </table>
-    }
-
+}

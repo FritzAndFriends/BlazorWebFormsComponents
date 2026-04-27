@@ -1,24 +1,130 @@
-using Microsoft.AspNetCore.Components;
+// =============================================================================
+// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
+//
+// Common transforms needed (use the BWFC Copilot skill for assistance):
+//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
+//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
+//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
+//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
+//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
+//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
+//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
+//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
+//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
+//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
+//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
+//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
+//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
+//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
+//   TODO(bwfc-general): User controls → Blazor component references
+// =============================================================================
 
-namespace WingtipToys.Checkout;
+// --- Session State Migration ---
+// TODO(bwfc-session-state): Session["key"] calls work automatically via SessionShim on WebFormsPageBase.
+// Session keys found: userCheckoutCompleted, token, payerId, payment_amt, currentOrderId, currentOrderID
+// Options for long-term replacement:
+//   (1) ProtectedSessionStorage (Blazor Server) — persists across circuits
+//   (2) Scoped service via DI — lifetime matches user circuit
+//   (3) Cascading parameter from a root-level state provider
+// See: https://learn.microsoft.com/aspnet/core/blazor/state-management
 
-public partial class CheckoutComplete
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using WingtipToys.Models;
+
+namespace WingtipToys.Checkout
 {
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+  public partial class CheckoutComplete
+  {
+    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
-    private string _transactionId = "";
+    // --- Request.Form Migration ---
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
+    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
+    // Form keys found: key
+    // For non-page classes, inject RequestShim via DI.
+
+    // --- Response.Redirect Migration ---
+    // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
+    // For non-page classes, inject ResponseShim via DI.
+
+    private Button Continue = default!;
+    private Label TransactionId = default!;
+    // --- ConfigurationManager Migration ---
+    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
+    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO: Implement PayPal DoCheckoutPayment confirmation
-        // Original used Session["token"], Session["payerId"], Session["payment_amt"]
-        // and NVPAPICaller.DoCheckoutPayment() to finalize order
-        _transactionId = "TODO: PayPal checkout not yet migrated";
-        await Task.CompletedTask;
+        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
+        await base.OnInitializedAsync();
+
+            // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
+      // Verify user has completed the checkout process.
+          if ((string)Session["userCheckoutCompleted"] != "true")
+          {
+            Session["userCheckoutCompleted"] = string.Empty;
+            Response.Redirect("CheckoutError.aspx?" + "Desc=Unvalidated%20Checkout.");
+          }
+
+          NVPAPICaller payPalCaller = new NVPAPICaller();
+
+          string retMsg = "";
+          string token = "";
+          string finalPaymentAmount = "";
+          string PayerID = "";
+          NVPCodec decoder = new NVPCodec();
+
+          token = Session["token"].ToString();
+          PayerID = Session["payerId"].ToString();
+          finalPaymentAmount = Session["payment_amt"].ToString();
+
+          bool ret = payPalCaller.DoCheckoutPayment(finalPaymentAmount, token, PayerID, ref decoder, ref retMsg);
+          if (ret)
+          {
+            // Retrieve PayPal confirmation value.
+            string PaymentConfirmation = decoder["PAYMENTINFO_0_TRANSACTIONID"].ToString();
+            TransactionId.Text = PaymentConfirmation;
+
+
+            ProductContext _db = new ProductContext();
+            // Get the current order id.
+            int currentOrderId = -1;
+            if (Session["currentOrderId"] != string.Empty)
+            {
+              currentOrderId = Convert.ToInt32(Session["currentOrderID"]);
+            }
+            Order myCurrentOrder;
+            if (currentOrderId >= 0)
+            {
+              // Get the order based on order id.
+              myCurrentOrder = _db.Orders.Single(o => o.OrderId == currentOrderId);
+              // Update the order to reflect payment has been completed.
+              myCurrentOrder.PaymentTransactionId = PaymentConfirmation;
+              // Save to DB.
+              _db.SaveChanges();
+            }
+
+            // Clear shopping cart.
+            using (WingtipToys.Logic.ShoppingCartActions usersShoppingCart =
+                new WingtipToys.Logic.ShoppingCartActions())
+            {
+              usersShoppingCart.EmptyCart();
+            }
+
+            // Clear order id.
+            Session["currentOrderId"] = string.Empty;
+          }
+          else
+          {
+            Response.Redirect("CheckoutError.aspx?" + retMsg);
+          }
     }
 
-    private void Continue_Click(EventArgs e)
+    protected void Continue_Click()
     {
-        NavigationManager.NavigateTo("/");
+      Response.Redirect("/Default");
     }
+  }
 }

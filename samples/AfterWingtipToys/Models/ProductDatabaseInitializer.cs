@@ -1,21 +1,14 @@
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-using WingtipToys.Data;
-
-namespace WingtipToys.Models;
-
-public static class ProductDatabaseInitializer
+namespace WingtipToys.Models
 {
-    public static void Seed(ProductContext context)
+  public class ProductDatabaseInitializer : DropCreateDatabaseIfModelChanges<ProductContext>
+  {
+    protected override void Seed(ProductContext context)
     {
-        context.Database.EnsureCreated();
-
-        if (context.Products.Any())
-            return;
-
-        GetCategories().ForEach(c => context.Categories.Add(c));
-        GetProducts().ForEach(p => context.Products.Add(p));
-        context.SaveChanges();
+      GetCategories().ForEach(c => context.Categories.Add(c));
+      GetProducts().ForEach(p => context.Products.Add(p));
     }
 
     private static List<Category> GetCategories()
@@ -206,4 +199,5 @@ public static class ProductDatabaseInitializer
 
       return products;
     }
+  }
 }

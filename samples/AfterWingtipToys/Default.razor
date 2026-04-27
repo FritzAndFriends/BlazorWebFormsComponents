@@ -1,8 +1,29 @@
 @page "/"
-<PageTitle>Welcome</PageTitle>
-<h1>@(Title).</h1>
-        <h2>Wingtip Toys can help you find the perfect gift.</h2>
-        <p class="lead">We're all about transportation toys. You can order 
-                any of our toys today. Each toy listing has detailed 
-                information to help you choose the right toy.</p>
+<PageTitle>Home</PageTitle>
 
+<div class="jumbotron" style="min-height: 260px; padding: 48px 60px;">
+    <h1>Wingtip Toys</h1>
+    <p class="lead">
+        Wingtip Toys can help you find the perfect gift. Browse our transportation-themed
+        catalog, review detailed product pages, and build a shopping cart without leaving
+        the migrated Blazor app.
+    </p>
+    <p>
+        <a class="btn btn-primary btn-lg" href="/ProductList">Shop now</a>
+    </p>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <h2>Cars, planes, trucks, and more</h2>
+        <p>Browse the same catalog images and product descriptions that powered the original Web Forms sample.</p>
+    </div>
+    <div class="col-md-4">
+        <h2>Migration benchmark target</h2>
+        <p>This run keeps the generated WingtipToys project shape while repairing the catalog, cart, and account flows in place.</p>
+    </div>
+    <div class="col-md-4">
+        <h2>Ready for Playwright</h2>
+        <p>The site ships with Bootstrap styling, responsive navigation, and working product imagery for the acceptance suite.</p>
+    </div>
+</div>

@@ -4,15 +4,21 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <BwfcMigrationMode>true</BwfcMigrationMode>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="BundleConfig.cs;IdentityConfig.cs;RouteConfig.cs;Startup.Auth.cs;Models\IdentityModels.cs;Models\ProductContext.cs;Models\ProductDatabaseInitializer.cs;Logic\**\*.cs;Site.razor.cs;Site.Mobile.razor.cs;ViewSwitcher.razor.cs;ErrorPage.razor.cs;Account\AddPhoneNumber.razor.cs;Account\Confirm.razor.cs;Account\Forgot.razor.cs;Account\Lockout.razor.cs;Account\ManageLogins.razor.cs;Account\ManagePassword.razor.cs;Account\OpenAuthProviders.razor.cs;Account\RegisterExternalLogin.razor.cs;Account\ResetPassword.razor.cs;Account\ResetPasswordConfirmation.razor.cs;Account\TwoFactorAuthenticationSignIn.razor.cs;Account\VerifyPhoneNumber.razor.cs;Admin\**\*.cs;Checkout\**\*.cs" />
+    <Content Remove="Site.razor;Site.Mobile.razor;ViewSwitcher.razor;ErrorPage.razor;Account\AddPhoneNumber.razor;Account\Confirm.razor;Account\Forgot.razor;Account\Lockout.razor;Account\ManageLogins.razor;Account\ManagePassword.razor;Account\OpenAuthProviders.razor;Account\RegisterExternalLogin.razor;Account\ResetPassword.razor;Account\ResetPasswordConfirmation.razor;Account\TwoFactorAuthenticationSignIn.razor;Account\VerifyPhoneNumber.razor;Admin\**\*.razor;Checkout\**\*.razor" />
   </ItemGroup>
 
 </Project>

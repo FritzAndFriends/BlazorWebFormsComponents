@@ -1,47 +1,80 @@
-using WingtipToys.Data;
 using BlazorWebFormsComponents;
-using Microsoft.EntityFrameworkCore;
-using WingtipToys.Models;
+using System.Text.Json;
+using WingtipToys.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents();
-
 builder.Services.AddBlazorWebFormsComponents();
-
-builder.Services.AddDbContextFactory<ProductContext>(options =>
-    options.UseSqlite("Data Source=wingtiptoys.db"));
-
-builder.Services.AddHttpContextAccessor();
-
-// Minimal auth services so pages using AuthorizeView/CascadingAuthenticationState don't crash.
-// Full Identity is not yet configured — all users appear anonymous.
-builder.Services.AddAuthorization();
-builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddAuthentication().AddCookie();
+builder.Services.AddSingleton<CatalogService>();
+builder.Services.AddSingleton<UserStoreService>();
+builder.Services.AddScoped<CartService>();
 
 var app = builder.Build();
 
-// Seed the database
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<ProductContext>();
-    ProductDatabaseInitializer.Seed(context);
-}
-
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 app.MapStaticAssets();
+app.UseSession();
 app.UseAntiforgery();
+app.UseConfigurationManagerShim();
+app.UseBlazorWebFormsComponents();
 
-app.UseAuthentication();
-app.UseAuthorization();
+app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserStoreService users) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var email = form["email"].ToString().Trim();
+    var password = form["password"].ToString();
+    var confirmPassword = form["confirmPassword"].ToString();
+
+    if (string.IsNullOrWhiteSpace(email))
+    {
+        return Results.Redirect("/Account/Register?error=Email%20is%20required.");
+    }
+
+    if (string.IsNullOrWhiteSpace(password))
+    {
+        return Results.Redirect("/Account/Register?error=Password%20is%20required.");
+    }
+
+    if (!string.Equals(password, confirmPassword, StringComparison.Ordinal))
+    {
+        return Results.Redirect("/Account/Register?error=Passwords%20do%20not%20match.");
+    }
+
+    if (!users.TryRegister(email, password))
+    {
+        return Results.Redirect("/Account/Register?error=An%20account%20with%20that%20email%20already%20exists.");
+    }
+
+    context.Session.SetString(UserStoreService.CurrentUserSessionKey, JsonSerializer.Serialize(email));
+    return Results.Redirect("/");
+}).DisableAntiforgery();
+
+app.MapPost("/Account/LoginHandler", async (HttpContext context, UserStoreService users) =>
+{
+    var form = await context.Request.ReadFormAsync();
+    var email = form["email"].ToString().Trim();
+    var password = form["password"].ToString();
+
+    if (!users.ValidateCredentials(email, password))
+    {
+        return Results.Redirect("/Account/Login?error=Invalid%20login%20attempt");
+    }
+
+    context.Session.SetString(UserStoreService.CurrentUserSessionKey, JsonSerializer.Serialize(email));
+    return Results.Redirect("/");
+}).DisableAntiforgery();
+
+app.MapGet("/Account/Logout", (HttpContext context) =>
+{
+    context.Session.Remove(UserStoreService.CurrentUserSessionKey);
+    return Results.Redirect("/");
+});
 
 app.MapRazorComponents<WingtipToys.Components.App>();
 

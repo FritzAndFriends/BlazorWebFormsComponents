@@ -1,46 +1,36 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
-using WingtipToys.Data;
+using Microsoft.AspNetCore.Components.Routing;
 using WingtipToys.Models;
+using WingtipToys.Services;
 
 namespace WingtipToys;
 
 public partial class ProductList
 {
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+    [Inject] private CatalogService Catalog { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
 
-    [SupplyParameterFromQuery(Name = "id")]
-    public int? CategoryId { get; set; }
+    private IReadOnlyList<Product> Products { get; set; } = Array.Empty<Product>();
+    private string Heading { get; set; } = "Products";
 
-    [SupplyParameterFromQuery(Name = "categoryName")]
-    public string? CategoryName { get; set; }
-
-    private IQueryable<Product> GetProducts(
-        int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    protected override void OnParametersSet()
     {
-        var db = DbFactory.CreateDbContext();
-        IQueryable<Product> query = db.Products.Include(p => p.Category);
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
 
-        if (CategoryId.HasValue && CategoryId > 0)
+        int? categoryId = null;
+        if (query.TryGetValue("id", out var idValue) && int.TryParse(idValue, out var parsedId))
         {
-            query = query.Where(p => p.CategoryID == CategoryId);
+            categoryId = parsedId;
         }
 
-        if (!string.IsNullOrEmpty(CategoryName))
-        {
-            query = query.Where(p =>
-                string.Compare(p.Category!.CategoryName, CategoryName) == 0);
-        }
+        var categoryName = query.TryGetValue("category", out var categoryValue)
+            ? categoryValue.ToString()
+            : null;
 
-        totalRowCount = query.Count();
-        var results = query.ToList();
-        db.Dispose();
-        return results.AsQueryable();
-    }
-
-    protected override async Task OnInitializedAsync()
-    {
-        Page.Title = "Products";
-        await Task.CompletedTask;
+        Products = Catalog.GetProducts(categoryId, categoryName);
+        Heading = string.IsNullOrWhiteSpace(categoryName)
+            ? "Products"
+            : $"{categoryName} Products";
     }
 }
