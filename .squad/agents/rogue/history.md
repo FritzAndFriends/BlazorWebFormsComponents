@@ -28,6 +28,33 @@
 ### Key Test Patterns
 
 - **Validator Display:** EditForm + InputText + RequiredFieldValidator. Static  visibility:hidden, Dynamic  display:none, None  always display:none. SetFocusOnError uses JSInterop.SetupVoid/VerifyInvoke.
+
+### 2026-04-27: MasterPageContext Unit & Transform Test Coverage
+
+**Task:** Add unit test coverage for MasterPageContext discovery and Layer 1 transform validation for MasterPage/Content/ContentPlaceHolder preservation.
+
+**Unit tests added:**
+- `src/BlazorWebFormsComponents.Test/MasterPage/Context.razor` — MasterPageContext discovery via cascading parameter
+- `src/BlazorWebFormsComponents.Test/Content/Registration.razor` — Content component registration with parent
+- `src/BlazorWebFormsComponents.Test/ContentPlaceHolder/Lookup.razor` — ContentPlaceHolder parent resolution via context lookup
+- `src/BlazorWebFormsComponents.Test/MasterPage/NestedHierarchy.razor` — multi-level Content/ContentPlaceHolder nesting validation
+
+**All tests passing:** 4/4 unit tests complete, build clean.
+
+**Transform test coverage:**
+- Verified Layer 1 migration toolkit correctly transforms Master/Content/ContentPlaceHolder markup
+- Validated preservation of ContentPlaceHolder IDs across ASP.NET → Blazor transform
+- Confirmed no false-positive BWFC component flattening in nested hierarchies
+- Test-MasterPagePreservation command integration verified
+
+**Validation commands executed:**
+```powershell
+dotnet test src/BlazorWebFormsComponents.Test
+bwfc-migrate.ps1 -Path samples/WingtipToys -Output samples/Test-MasterPageOutput
+Test-MasterPagePreservation -Path samples/Test-MasterPageOutput
+```
+
+**All commands completed successfully with no errors.**
 - **BaseListControl:** GetItems() applies DataTextFormatString to both static and data-bound items. AppendDataBoundItems=false replaces static items.
 - **Menu:** FindAll("li a") to exclude skip-link. JSInterop.Mode = Loose. `Orientation ori = Orientation.Horizontal;` variable pattern avoids Razor collision.
 - **Login controls:** AuthenticationStateProvider + NavigationManager mocks. LoginView uses fully-qualified type to avoid ambiguity.

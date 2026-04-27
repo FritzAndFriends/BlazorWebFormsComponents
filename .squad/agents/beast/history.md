@@ -25,6 +25,22 @@
 
 **M17 AJAX docs (6 pages):** Timer, ScriptManager, ScriptManagerProxy, UpdatePanel, UpdateProgress, Substitution. New "AJAX Controls" nav section in mkdocs.yml. Migration stub doc pattern established (warning admonition + ignored props + include→remove lifecycle). Substitution moved from deferred to implemented.
 
+### 2026-04-27: MasterPages.md Documentation Update
+
+**Task:** Document MasterPageContext architecture and Master/Content/ContentPlaceHolder migration patterns in docs/Migration/MasterPages.md.
+
+**Changes delivered:**
+- Created comprehensive MasterPages.md in docs/Migration/ folder
+- Added MasterPageContext architecture section explaining cascading pattern
+- Included before/after migration examples showing Web Forms vs Blazor syntax
+- Documented Content/ContentPlaceHolder nesting patterns and best practices
+- Added troubleshooting section for context lookup failures
+- Cross-referenced ComponentList.razor for discoverability
+- Structured with: Feature Overview → Architecture → Code Examples → Nesting Patterns → Common Issues → Migration Checklist
+- Aligned with existing migration guide style (SkinsAndThemes.md pattern)
+
+**Pattern consistency:** Matches Beast's established separation: SkinsAndThemes.md (strategy) vs SkinsAndThemesGuide.md (practical). MasterPages.md is the practical implementation guide.
+
 **Issue #359 doc updates (5 pages):** ChangePassword and PagerSettings verified complete. FormView got CRUD events + NOT Supported section. DetailsView got full style sub-component elements. DataGrid paging section enhanced. Pattern: DataGrid is the only pageable control without PagerSettings.
 
 **M10 Skins & Themes Guide:** Created `docs/Migration/SkinsAndThemes.md` — practical guide coexisting with `ThemesAndSkins.md` (strategy). Convention: separate "Guide" vs "Strategy" docs with clear nav labels.

@@ -29,6 +29,29 @@
 
 **M15 audit markers (#384):** 10 pages updated with data-audit-control wrappers. 2 new pages (DataPager, LoginView). Validator samples only first variant marked.
 
+### 2026-04-27: MasterPage Sample Page & Component Catalog Updates
+
+**Task:** Create MasterPage sample page and update component catalog for discovery.
+
+**Changes delivered:**
+- **Sample page created:** samples/AfterBlazorServerSide/Components/Pages/ControlSamples/MasterPage/Index.razor
+- Demonstrates multi-level Content nesting patterns
+- Shows ContentPlaceHolder usage with MasterPageContext
+- Includes @ref usage for context validation
+- Sample data aligns with SharedSampleObjects conventions
+
+**Component catalog updates:**
+- Added MasterPage entry to ComponentList.razor
+- Added MasterPage sidebar entry to NavMenu.razor
+- Alphabetical ordering maintained throughout nav sections
+- @page route: /ControlSamples/MasterPage matches standard conventions
+- Updated docs/ComponentList (if present) with MasterPage entry
+
+**Discoverability verified:**
+- Sample page link appears in sidebar navigation
+- ComponentList.razor includes MasterPage with proper categorization
+- Navigation integrates with existing structure (no breaking changes)
+
 **Key patterns:** ComponentCatalog.cs entries: (Name, Category, Route, Description, SubPages?, Keywords?). SubPages appended to base Route for nav. Components without Index.razor use specific sub-page route. Entries grouped by category, alphabetical within. SharedSampleObjects is single source for data parity. data-audit-control markers must be preserved on all audited sections.
 
  Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz

@@ -271,3 +271,34 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 **Estimated coverage improvement:** 70% → 88% L1 mechanical coverage after P0+P1+P2
 
 **Decision:** `.squad/decisions/inbox/forge-cli-gap-analysis.md`
+
+### 2026-04-27: MasterPageContext Pattern Approval
+
+**Task:** Review MasterPageContext implementation batch (Cyclops, Bishop, Beast, Jubilee, Rogue, Colossus) for MasterPage/Content/ContentPlaceHolder component bridge.
+
+**Architecture approved:**
+- CascadingValue<MasterPageContext> pattern enables discoverable parent-child hierarchy
+- MasterPageContext wraps component tree, propagates MasterPage instance
+- Content/ContentPlaceHolder locate parent via cascading parameter injection (no direct references)
+- Supports multi-level nesting without tight coupling
+- Mirrors Blazor AuthenticationState pattern for consistency
+
+**Implementation verified:** 
+- All three components (MasterPage, Content, ContentPlaceHolder) cooperate through MasterPageContext service
+- Thread-safe context operations
+- Dynamic registration/unregistration supported
+- Unit tests cover context discovery, registration, parent resolution, nested hierarchies
+- Transform coverage: Layer 1 migration toolkit recognizes MasterPage nesting, preserves structure
+- Sample page demonstrates multi-level Content nesting
+- Playwright integration tests passing (timing fixed for NetworkIdle wait)
+- Build: 0 errors, 0 warnings
+
+**Batch status:** ✅ APPROVED
+- Cyclops implementation complete + unit tested
+- Bishop CLI/PowerShell updates synced to migration-toolkit
+- Beast documentation updated in docs/Migration/MasterPages.md
+- Jubilee sample page + catalog entry complete
+- Rogue transform coverage + validation passing
+- Colossus Playwright tests passing with timing fix
+
+**Decision:** No new team decision inbox items. All work aligned with existing architectural consensus (CascadingValue precedent from M10 AuthenticationState, MasterPageContext pattern aligns with Blazor conventions).

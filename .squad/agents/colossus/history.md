@@ -28,6 +28,36 @@ Added 5 smoke test InlineData entries (M9 audit gaps: ListView/CrudOperations, L
 
 ## Summary: PR #377 DetailsView Integration Test Fix (2026-02-26)
 
+- DetailsView smoke + interaction tests initially waited for DOMContentLoaded
+- FormView/DetailsView bind data in OnAfterRenderAsync — DOMContentLoaded fires before data binding completes
+- Switched targeted DetailsView interaction tests to WaitUntilState.NetworkIdle
+- Ensures cascading parameters resolve and FormView/DetailsView data renders
+- Pattern now reused for similar async-bound components
+
+### 2026-04-27: MasterPageContext Integration Testing & Timing Fix
+
+**Task:** Add Playwright integration tests for MasterPage component bridge and fix timing issues.
+
+**Test coverage added:**
+- `tests/Integration/MasterPageTests.cs` — MasterPage smoke and interaction tests
+- Validates MasterPage renders without error
+- Content/ContentPlaceHolder placeholder content displays correctly
+- Nested hierarchy renders all levels with proper cascading
+- MasterPageContext discovery validates parent-child chain
+
+**Playwright timing fix applied:**
+- Changed generic smoke test to `WaitUntilState.NetworkIdle` (from default DOMContentLoaded)
+- Ensures asynchronous cascading parameter resolution completes before assertions
+- Eliminates race condition where ContentPlaceHolder context wasn't available yet
+- Same pattern used successfully for DetailsView (PR #377)
+- Impact: Test now waits for all network activity (CSS/JS) to complete before assertions
+
+**Test results:**
+- ✅ All MasterPage integration tests passing
+- ✅ No console errors specific to component tree
+- ✅ ContentPlaceHolder content visible and interactive
+- ✅ Timing fix eliminates flaky test failures
+
 Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs after DetailsView sample pages migrated to Product model. All 7 DetailsView integration tests passing.
 
 ## Summary: M17 AJAX Control Integration Tests (2026-02-27)

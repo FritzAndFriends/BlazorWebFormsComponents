@@ -29,6 +29,25 @@
 
 **Key Layer 2 patterns:** `@inherits WebFormsPageBase` conflicts with `: ComponentBase` — must remove explicit base. Layout files need `: LayoutComponentBase`. `AddHttpContextAccessor()` before `AddBlazorWebFormsComponents()`. Stub model pattern for unavailable types (UserLoginInfo, OrderShipInfo). Stub page cleanup ~60% of L2 effort.
 
+### 2026-04-27: CLI & PowerShell Migration Path Updates for MasterPage
+
+**Task:** Update bwfc-migrate.ps1 and associated CLI components to preserve MasterPage/Content/ContentPlaceHolder component trees during Layer 1 transformation.
+
+**Changes delivered:**
+- Enhanced bwfc-migrate.ps1 with MasterPage/Content/ContentPlaceHolder aware transforms
+- Added Test-MasterPagePreservation validation to verify MasterPage structure integrity post-transform
+- CLI now recognizes MasterPage nesting patterns and preserves them intact
+- PowerShell migration path includes ContentPlaceHolder ID preservation
+- Content components correctly reference owning ContentPlaceHolder IDs
+- Cascading context properly wired in transformed output
+
+**Validation commands added:**
+- Test-MasterPagePreservation — validates MasterPage structure post-transform
+- Confirms Content components reference correct ContentPlaceHolder IDs
+- Validates cascading context is properly wired
+
+**Integration:** Tested against Layer 1 output. MasterPage nesting patterns survive full transformation pipeline intact. Test coverage added by Rogue.
+
 ## Learnings
 
 ### Cycle 3 Fixes Applied (Bishop) — Script + Auth Services
