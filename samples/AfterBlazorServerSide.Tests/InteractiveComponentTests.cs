@@ -4290,7 +4290,7 @@ public class InteractiveComponentTests
         {
             await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ContentPlaceHolder", new PageGotoOptions
             {
-                WaitUntil = WaitUntilState.DOMContentLoaded,
+                WaitUntil = WaitUntilState.NetworkIdle,
                 Timeout = 30000
             });
 
