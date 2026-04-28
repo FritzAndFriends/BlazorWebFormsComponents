@@ -66,12 +66,17 @@
                 <p>&copy; 2013 - Wingtip Toys</p>
             </footer>
         </div>
-
-        @ChildContent
     </ChildContent>
+    <ChildComponents>
+        @ChildComponents
+        @ChildContent
+    </ChildComponents>
 </MasterPage>
 
 @code {
+    [Parameter]
+    public RenderFragment? ChildComponents { get; set; }
+
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 

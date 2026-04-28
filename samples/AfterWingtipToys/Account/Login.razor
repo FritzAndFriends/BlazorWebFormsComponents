@@ -1,44 +1,52 @@
 @page "/Account/Login"
+@inject NavigationManager Navigation
 
 <PageTitle>Login</PageTitle>
 <Site>
-    <Content ContentPlaceHolderID="MainContent">
-        <h1>Login</h1>
-        @if (Registered.GetValueOrDefault() != 0)
-        {
-            <p class="text-success">Registration succeeded. Please log in.</p>
-        }
-        @if (!string.IsNullOrWhiteSpace(Error))
-        {
-            <p class="text-danger">@Error</p>
-        }
-        <form method="get" action="/Account/PerformLogin" class="form-horizontal">
-            <div class="form-group">
-                <label class="col-md-2 control-label" for="login-email">Email</label>
-                <div class="col-md-10">
-                    <input id="login-email" name="email" type="email" class="form-control" required />
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>Login</h1>
+            @if (Registered.GetValueOrDefault() != 0)
+            {
+                <p class="text-success">Registration succeeded. Please log in.</p>
+            }
+            @if (!string.IsNullOrWhiteSpace(Error))
+            {
+                <p class="text-danger">@Error</p>
+            }
+            <form method="get" action="/Account/PerformLogin" class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="login-email">Email</label>
+                    <div class="col-md-10">
+                        <input id="login-email" name="email" type="email" class="form-control" required />
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-md-2 control-label" for="login-password">Password</label>
-                <div class="col-md-10">
-                    <input id="login-password" name="password" type="password" class="form-control" required />
+                <div class="form-group">
+                    <label class="col-md-2 control-label" for="login-password">Password</label>
+                    <div class="col-md-10">
+                        <input id="login-password" name="password" type="password" class="form-control" required />
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <div class="col-md-offset-2 col-md-10">
-                    <button type="submit" class="btn btn-default">Log in</button>
+                <div class="form-group">
+                    <div class="col-md-offset-2 col-md-10">
+                        <button type="submit" class="btn btn-default">Log in</button>
+                    </div>
                 </div>
-            </div>
-        </form>
-        <p><a href="/Account/Register">Register as a new user</a></p>
-    </Content>
+            </form>
+            <p><a href="/Account/Register">Register as a new user</a></p>
+        </Content>
+    </ChildComponents>
 </Site>
 
 @code {
-    [SupplyParameterFromQuery]
-    public string? Error { get; set; }
+    private string? Error => GetQueryValue("error");
 
-    [SupplyParameterFromQuery]
-    public int? Registered { get; set; }
+    private int? Registered => int.TryParse(GetQueryValue("registered"), out var registered) ? registered : null;
+
+    private string? GetQueryValue(string key)
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        return query.TryGetValue(key, out var value) ? value.ToString() : null;
+    }
 }

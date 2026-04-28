@@ -119,9 +119,19 @@ public class ScaffoldingTests : IDisposable
         Assert.DoesNotContain("@using static Microsoft.AspNetCore.Components.Web.RenderMode", imports);
         // Project namespace
         Assert.Contains("@using global::TestApp", imports);
-        Assert.Contains("@using global::TestApp.Models", imports);
         // WebFormsPageBase inherits
         Assert.Contains("@inherits BlazorWebFormsComponents.WebFormsPageBase", imports);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_GeneratesModelsUsing_WhenModelsExist()
+    {
+        Directory.CreateDirectory(Path.Combine(_tempDir, "Models"));
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var imports = result.Files["imports"].Content;
+
+        Assert.Contains("@using global::TestApp.Models", imports);
     }
 
     [Fact]
@@ -148,6 +158,17 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("<Router", routes);
         Assert.Contains("RouteView", routes);
         Assert.Contains("FocusOnNavigate", routes);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_GeneratesMainLayout()
+    {
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+
+        var layout = result.Files["layout"].Content;
+
+        Assert.Contains("@inherits LayoutComponentBase", layout);
+        Assert.Contains("@Body", layout);
     }
 
     [Fact]
@@ -214,8 +235,9 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("imports", result.Files.Keys);
         Assert.Contains("app", result.Files.Keys);
         Assert.Contains("routes", result.Files.Keys);
+        Assert.Contains("layout", result.Files.Keys);
         Assert.Contains("launchSettings", result.Files.Keys);
-        Assert.Equal(6, result.Files.Count);
+        Assert.Equal(7, result.Files.Count);
     }
 
     // ───────────────────────────────────────────────────────────────

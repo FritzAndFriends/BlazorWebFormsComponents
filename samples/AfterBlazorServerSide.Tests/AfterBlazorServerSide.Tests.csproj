@@ -19,7 +19,14 @@
 
   <ItemGroup>
     <ProjectReference Include="../AfterBlazorServerSide/AfterBlazorServerSide.csproj" />
+    <ProjectReference Include="../AfterWingtipToys/WingtipToys.csproj" />
   </ItemGroup>
+
+  <Target Name="BuildPlaywrightHostsInRelease" BeforeTargets="VSTest">
+    <MSBuild Projects="../AfterBlazorServerSide/AfterBlazorServerSide.csproj;../AfterWingtipToys/WingtipToys.csproj"
+             Targets="Build"
+             Properties="Configuration=Release" />
+  </Target>
 
   <ItemGroup>
     <Using Include="Xunit" />

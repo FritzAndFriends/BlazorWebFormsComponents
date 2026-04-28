@@ -80,6 +80,7 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         var pageTitle = ToTitle(fileName);
         var formMarkup = BuildNormalizedAccountMarkup(context.Markup, fileName, pageTitle);
         var rewritten = ReplacePrimaryContent(context.Markup, formMarkup);
+        rewritten = EnsureAccountQueryParameters(rewritten, fileName);
 
         return new SemanticPatternResult(
             rewritten,
@@ -91,6 +92,7 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
     {
         var contentInner = ExtractPrimaryContent(markup);
         var fields = ExtractFields(contentInner);
+        var formAction = GetFormAction(fileName);
         var buttonMatch = ButtonRegex.Match(contentInner);
         var buttonAttributes = buttonMatch.Success
             ? ParseAttributes(buttonMatch.Value)
@@ -106,7 +108,27 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         builder.AppendLine($"<h1>{pageTitle}</h1>");
         builder.AppendLine("@* TODO(bwfc-identity): Wire this account page to ASP.NET Core Identity or your app's authentication service. *@");
         builder.AppendLine("@* TODO(bwfc-identity): Recreate validation and submit handling with EditForm, minimal APIs, or an equivalent SSR-safe endpoint. *@");
-        builder.AppendLine("<form method=\"post\" class=\"form-horizontal\">");
+        if (fileName.Equals("Login", StringComparison.OrdinalIgnoreCase))
+        {
+            builder.AppendLine("@if (Registered.GetValueOrDefault() != 0)");
+            builder.AppendLine("{");
+            builder.AppendLine("    <p class=\"text-success\">Registration succeeded. Please log in.</p>");
+            builder.AppendLine("}");
+        }
+
+        builder.AppendLine("@if (!string.IsNullOrWhiteSpace(Error))");
+        builder.AppendLine("{");
+        builder.AppendLine("    <p class=\"text-danger\">@Error</p>");
+        builder.AppendLine("}");
+        builder.AppendLine($"<form method=\"{GetFormMethod(fileName)}\" action=\"{formAction}\" class=\"form-horizontal\">");
+
+        if (fileName.Equals("Login", StringComparison.OrdinalIgnoreCase))
+        {
+            builder.AppendLine("    @if (!string.IsNullOrWhiteSpace(ReturnUrl))");
+            builder.AppendLine("    {");
+            builder.AppendLine("        <input type=\"hidden\" name=\"returnUrl\" value=\"@ReturnUrl\" />");
+            builder.AppendLine("    }");
+        }
 
         foreach (var field in fields)
         {
@@ -304,6 +326,17 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         : fileName.Equals("Register", StringComparison.OrdinalIgnoreCase) ? "Register"
         : "Submit";
 
+    private static string GetFormAction(string fileName) =>
+        fileName.Equals("Login", StringComparison.OrdinalIgnoreCase) ? "/Account/PerformLogin"
+        : fileName.Equals("Register", StringComparison.OrdinalIgnoreCase) ? "/Account/PerformRegister"
+        : $"/Account/{fileName}Handler";
+
+    private static string GetFormMethod(string fileName) =>
+        fileName.Equals("Login", StringComparison.OrdinalIgnoreCase)
+        || fileName.Equals("Register", StringComparison.OrdinalIgnoreCase)
+            ? "get"
+            : "post";
+
     private static string ToTitle(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -327,6 +360,56 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
                 m => m.Groups["name"].Value,
                 m => m.Groups["value"].Value,
                 StringComparer.OrdinalIgnoreCase);
+
+    private static string EnsureAccountQueryParameters(string markup, string fileName)
+    {
+        var parameterLines = new List<string>();
+        AddParameterIfMissing(markup, parameterLines, "Error", "error", "string?");
+
+        if (fileName.Equals("Login", StringComparison.OrdinalIgnoreCase))
+        {
+            AddParameterIfMissing(markup, parameterLines, "Registered", "registered", "int?");
+            AddParameterIfMissing(markup, parameterLines, "ReturnUrl", "returnUrl", "string?");
+        }
+
+        if (parameterLines.Count == 0)
+        {
+            return markup;
+        }
+
+        var parameterBlock = string.Join(Environment.NewLine + Environment.NewLine, parameterLines);
+        var codeIndex = markup.LastIndexOf("@code", StringComparison.Ordinal);
+        if (codeIndex < 0)
+        {
+            return $"{markup.TrimEnd()}{Environment.NewLine}{Environment.NewLine}@code {{{Environment.NewLine}{parameterBlock}{Environment.NewLine}}}";
+        }
+
+        var openBraceIndex = markup.IndexOf('{', codeIndex);
+        var closeBraceIndex = markup.LastIndexOf('}');
+        if (openBraceIndex < 0 || closeBraceIndex <= openBraceIndex)
+        {
+            return $"{markup.TrimEnd()}{Environment.NewLine}{Environment.NewLine}@code {{{Environment.NewLine}{parameterBlock}{Environment.NewLine}}}";
+        }
+
+        var body = markup.Substring(openBraceIndex + 1, closeBraceIndex - openBraceIndex - 1).Trim('\r', '\n');
+        var rewrittenBody = string.IsNullOrWhiteSpace(body)
+            ? parameterBlock
+            : $"{body}{Environment.NewLine}{Environment.NewLine}{parameterBlock}";
+
+        return markup[..codeIndex]
+               + $"@code {{{Environment.NewLine}{rewrittenBody}{Environment.NewLine}}}"
+               + markup[(closeBraceIndex + 1)..];
+    }
+
+    private static void AddParameterIfMissing(string markup, ICollection<string> parameterLines, string propertyName, string queryName, string type)
+    {
+        if (Regex.IsMatch(markup, $@"\b{Regex.Escape(propertyName)}\b\s*\{{\s*get\s*;\s*set\s*;\s*\}}", RegexOptions.IgnoreCase))
+        {
+            return;
+        }
+
+        parameterLines.Add($"    [Parameter, SupplyParameterFromQuery(Name = \"{queryName}\")] public {type} {propertyName} {{ get; set; }}");
+    }
 
     private sealed record AccountField(string Id, string Label, string InputType, string CssClass, bool IsCheckbox);
 }

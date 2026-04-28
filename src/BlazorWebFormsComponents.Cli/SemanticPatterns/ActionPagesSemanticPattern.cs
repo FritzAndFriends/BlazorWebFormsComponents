@@ -114,17 +114,17 @@ public sealed class ActionPagesSemanticPattern : ISemanticPattern
     private static string BuildMarkup(string existingMarkup, ActionPageCandidate candidate)
     {
         var pageDirective = SemanticPatternUtilities.ExtractPageDirective(existingMarkup, candidate.PageName);
-        var title = $"{candidate.PageName} handler";
+        var endpointRoute = GetEndpointRoute(candidate.PageName);
+        var title = candidate.PageName;
         var builder = new StringBuilder();
         builder.AppendLine(pageDirective);
-        builder.AppendLine("@inject NavigationManager Navigation");
         builder.AppendLine();
         builder.AppendLine($"<PageTitle>{title}</PageTitle>");
         builder.AppendLine();
-        builder.AppendLine("<div class=\"alert alert-warning\">");
-        builder.AppendLine($"    <h1>{candidate.PageName} needs an SSR action rewrite</h1>");
-        builder.AppendLine(
-            "    <p>Web Forms used this page as an action-only endpoint. Move the side effect into a scoped service or minimal API endpoint, then redirect after the action succeeds.</p>");
+        builder.AppendLine("<div class=\"alert alert-warning\" role=\"status\">");
+        builder.AppendLine($"    <h1>{candidate.PageName}</h1>");
+        builder.AppendLine("    <p>This migrated page preserves the original action-on-navigation contract by posting to a generated HTTP endpoint as soon as the shell renders.</p>");
+        builder.AppendLine($"    <p>{Marker}: move the original side effect into the generated endpoint or a scoped service before removing this helper page.</p>");
         if (candidate.QueryKeys.Length > 0)
         {
             builder.AppendLine(
@@ -143,13 +143,23 @@ public sealed class ActionPagesSemanticPattern : ISemanticPattern
         }
 
         builder.AppendLine("</div>");
-
-        if (!string.IsNullOrEmpty(candidate.RedirectTarget))
+        builder.AppendLine();
+        builder.AppendLine($"<form id=\"bwfc-action-pages-form\" method=\"post\" action=\"{endpointRoute}\">");
+        foreach (var queryKey in candidate.QueryKeys)
         {
-            builder.AppendLine();
-        builder.AppendLine(
-            $"<p><a class=\"btn btn-primary\" href=\"{candidate.RedirectTarget}\">Continue to {candidate.RedirectTarget.TrimStart('/')}</a></p>");
+            var propertyName = SemanticPatternUtilities.ToPropertyName(queryKey);
+            builder.AppendLine($"    <input type=\"hidden\" name=\"{queryKey}\" value=\"@{propertyName}\" />");
         }
+
+        builder.AppendLine("    <noscript>");
+        builder.AppendLine("        <p>This page normally continues automatically. JavaScript is disabled, so use the button below.</p>");
+        builder.AppendLine($"        <button type=\"submit\" class=\"btn btn-primary\">Continue {candidate.PageName}</button>");
+        builder.AppendLine("    </noscript>");
+        builder.AppendLine("</form>");
+        builder.AppendLine();
+        builder.AppendLine("<script>");
+        builder.AppendLine("document.getElementById('bwfc-action-pages-form')?.submit();");
+        builder.AppendLine("</script>");
 
         builder.AppendLine();
         builder.AppendLine("@code {");
@@ -165,26 +175,16 @@ public sealed class ActionPagesSemanticPattern : ISemanticPattern
             builder.AppendLine();
         }
 
+        builder.AppendLine($"    private const string HandlerRoute = \"{endpointRoute}\";");
         if (!string.IsNullOrEmpty(candidate.RedirectTarget))
         {
-            builder.AppendLine(
-                $"    private const string RedirectTarget = \"{candidate.RedirectTarget}\";");
-            builder.AppendLine();
+            builder.AppendLine($"    private const string RedirectTarget = \"{candidate.RedirectTarget}\";");
         }
-
-        builder.AppendLine("    protected override void OnParametersSet()");
-        builder.AppendLine("    {");
-        builder.AppendLine(
-            $"        // {Marker}: move the original Web Forms side effect out of {candidate.PageName} and into a scoped service or minimal API endpoint.");
-        if (!string.IsNullOrEmpty(candidate.RedirectTarget))
-        {
-            builder.AppendLine(
-                "        // After the action succeeds, call Navigation.NavigateTo(RedirectTarget, replace: true).");
-        }
-        builder.AppendLine("    }");
         builder.Append('}');
         return builder.ToString();
     }
+
+    internal static string GetEndpointRoute(string pageName) => $"/__bwfc/actions/{pageName}";
 
     private sealed record ActionPageCandidate(
         string PageName,

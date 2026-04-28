@@ -46,7 +46,7 @@ public class ProjectScaffolder
         result.Files["imports"] = new ScaffoldFile
         {
             RelativePath = "_Imports.razor",
-            Content = GenerateImportsRazor(projectName)
+            Content = GenerateImportsRazor(projectName, hasModels)
         };
 
         result.Files["app"] = new ScaffoldFile
@@ -59,6 +59,12 @@ public class ProjectScaffolder
         {
             RelativePath = Path.Combine("Components", "Routes.razor"),
             Content = GenerateRoutesRazor()
+        };
+
+        result.Files["layout"] = new ScaffoldFile
+        {
+            RelativePath = Path.Combine("Components", "Layout", "MainLayout.razor"),
+            Content = GenerateMainLayoutRazor()
         };
 
         result.Files["launchSettings"] = new ScaffoldFile
@@ -216,8 +222,13 @@ app.Run();
 ";
     }
 
-    private static string GenerateImportsRazor(string projectName)
+    private static string GenerateImportsRazor(string projectName, bool hasModels)
     {
+        var modelsUsing = hasModels
+            ? $@"
+@using global::{projectName}.Models"
+            : string.Empty;
+
         return $@"@namespace {projectName}
 @using System.Net.Http
 @using Microsoft.AspNetCore.Authorization
@@ -230,8 +241,7 @@ app.Run();
 @using BlazorWebFormsComponents.Enums
 @using BlazorWebFormsComponents.LoginControls
 @using BlazorWebFormsComponents.Validations
-@using global::{projectName}
-@using global::{projectName}.Models
+@using global::{projectName}{modelsUsing}
 @inherits BlazorWebFormsComponents.WebFormsPageBase
 ";
     }
@@ -265,6 +275,16 @@ app.Run();
         <FocusOnNavigate RouteData=""routeData"" Selector=""h1"" />
     </Found>
 </Router>
+";
+    }
+
+    private static string GenerateMainLayoutRazor()
+    {
+        return @"@inherits LayoutComponentBase
+
+<main>
+    @Body
+</main>
 ";
     }
 

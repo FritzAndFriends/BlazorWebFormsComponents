@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using System;
 using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
@@ -21,6 +22,8 @@ namespace BlazorWebFormsComponents
 	/// </remarks>
 	public partial class Content : ContentBase
 	{
+		private string _registeredContentPlaceHolderId;
+
 		/// <summary>The content fragment to inject into the matching placeholder.</summary>
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
@@ -55,7 +58,18 @@ namespace BlazorWebFormsComponents
 			}
 
 			var context = MasterContext ?? ParentMasterPage?.Context;
+			if (string.Equals(_registeredContentPlaceHolderId, ContentPlaceHolderID, StringComparison.OrdinalIgnoreCase))
+			{
+				return;
+			}
+
+			if (!string.IsNullOrWhiteSpace(_registeredContentPlaceHolderId))
+			{
+				context?.SetContent(_registeredContentPlaceHolderId, null);
+			}
+
 			context?.SetContent(ContentPlaceHolderID, ChildContent);
+			_registeredContentPlaceHolderId = ContentPlaceHolderID;
 		}
 
 		/// <summary>
@@ -65,10 +79,10 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		protected override async ValueTask Dispose(bool disposing)
 		{
-			if (disposing && !string.IsNullOrWhiteSpace(ContentPlaceHolderID))
+			if (disposing && !string.IsNullOrWhiteSpace(_registeredContentPlaceHolderId))
 			{
 				var context = MasterContext ?? ParentMasterPage?.Context;
-				context?.SetContent(ContentPlaceHolderID, null);
+				context?.SetContent(_registeredContentPlaceHolderId, null);
 			}
 
 			await base.Dispose(disposing);

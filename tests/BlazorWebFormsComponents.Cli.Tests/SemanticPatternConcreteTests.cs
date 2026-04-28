@@ -50,11 +50,12 @@ public class SemanticPatternConcreteTests
             FileType.Page);
 
         Assert.Contains("TODO(bwfc-identity)", result.Markup);
-        Assert.Contains("<form method=\"post\" class=\"form-horizontal\">", result.Markup);
+        Assert.Contains("<form method=\"get\" action=\"/Account/PerformLogin\" class=\"form-horizontal\">", result.Markup);
         Assert.Contains("type=\"email\"", result.Markup);
         Assert.Contains("type=\"password\"", result.Markup);
         Assert.Contains("type=\"checkbox\"", result.Markup);
         Assert.Contains("Register as a new user", result.Markup);
+        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", result.Markup);
         Assert.DoesNotContain("<RequiredFieldValidator", result.Markup);
     }
 
@@ -175,6 +176,8 @@ public class SemanticPatternConcreteTests
             result.AppliedPatterns.Select(p => p.PatternId).ToArray());
         Assert.Contains("<ChildComponents>", result.Markup);
         Assert.Contains("TODO(bwfc-identity)", result.Markup);
+        Assert.Contains("method=\"get\"", result.Markup);
+        Assert.Contains("action=\"/Account/PerformRegister\"", result.Markup);
         Assert.DoesNotContain("<ValidationSummary", result.Markup);
         Assert.Equal(2, report.SemanticPatternsApplied);
     }
