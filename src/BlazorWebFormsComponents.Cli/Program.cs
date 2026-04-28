@@ -4,6 +4,7 @@ using BlazorWebFormsComponents.Cli.Interop;
 using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Pipeline;
 using BlazorWebFormsComponents.Cli.Scaffolding;
+using BlazorWebFormsComponents.Cli.SemanticPatterns;
 using BlazorWebFormsComponents.Cli.Transforms;
 using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 using BlazorWebFormsComponents.Cli.Transforms.Directives;
@@ -100,9 +101,30 @@ class Program
         services.AddSingleton<SourceFileCopier>();
         services.AddSingleton<AppStartCopier>();
 
-        // Pipeline
-        services.AddSingleton<RedirectHandlerAnnotator>();
-        services.AddSingleton<MigrationPipeline>();
+         // Pipeline
+          services.AddSingleton<RedirectHandlerAnnotator>();
+         // Registration order is significant when patterns share the same Order value.
+         services.AddSingleton<ISemanticPattern, QueryDetailsSemanticPattern>();
+         services.AddSingleton<ISemanticPattern, MasterContentContractsSemanticPattern>();
+         services.AddSingleton<ISemanticPattern, ActionPagesSemanticPattern>();
+         services.AddSingleton<ISemanticPattern, AccountPagesSemanticPattern>();
+         services.AddSingleton<SemanticPatternCatalog>();
+        services.AddSingleton(sp => new MigrationPipeline(
+            sp.GetServices<IMarkupTransform>(),
+            sp.GetServices<ICodeBehindTransform>(),
+            sp.GetRequiredService<SemanticPatternCatalog>(),
+            sp.GetRequiredService<ProjectScaffolder>(),
+            sp.GetRequiredService<GlobalUsingsGenerator>(),
+            sp.GetRequiredService<ShimGenerator>(),
+            sp.GetRequiredService<WebConfigTransformer>(),
+            sp.GetRequiredService<OutputWriter>(),
+            sp.GetRequiredService<StaticFileCopier>(),
+            sp.GetRequiredService<SourceFileCopier>(),
+            sp.GetRequiredService<AppStartCopier>(),
+            sp.GetRequiredService<AppAssetInjector>(),
+            sp.GetRequiredService<NuGetStaticAssetExtractor>(),
+            sp.GetRequiredService<EdmxConverterBridge>(),
+            sp.GetRequiredService<RedirectHandlerAnnotator>()));
 
         return services.BuildServiceProvider();
     }

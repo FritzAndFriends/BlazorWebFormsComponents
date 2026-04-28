@@ -115,4 +115,46 @@
 		var masterPage = cut.FindComponent<MasterPage>().Instance;
 		masterPage.ContentSections.ContainsKey("Main").ShouldBeTrue();
 	}
+
+	[Fact]
+	public void Content_InChildComponents_InjectsIntoPlaceholderInChildContent()
+	{
+		var cut = Render(@<MasterPage>
+			<ChildContent>
+				<div class="shell">
+					<ContentPlaceHolder ID="MainContent">
+						<p class="default">Default content</p>
+					</ContentPlaceHolder>
+				</div>
+			</ChildContent>
+			<ChildComponents>
+				<Content ContentPlaceHolderID="MainContent">
+					<h2 class="injected">Injected from ChildComponents</h2>
+				</Content>
+			</ChildComponents>
+		</MasterPage>);
+
+		cut.Find(".injected").TextContent.ShouldBe("Injected from ChildComponents");
+		cut.Markup.ShouldNotContain("Default content");
+	}
+
+	[Fact]
+	public void ContentPlaceHolder_DefaultContent_RemainsWhenChildComponentsDoNotTargetSlot()
+	{
+		var cut = Render(@<MasterPage>
+			<ChildContent>
+				<ContentPlaceHolder ID="MainContent">
+					<p class="default">Default main</p>
+				</ContentPlaceHolder>
+			</ChildContent>
+			<ChildComponents>
+				<Content ContentPlaceHolderID="Sidebar">
+					<span class="sidebar">Sidebar content</span>
+				</Content>
+			</ChildComponents>
+		</MasterPage>);
+
+		cut.Find(".default").TextContent.ShouldBe("Default main");
+		cut.Markup.ShouldNotContain("sidebar");
+	}
 }

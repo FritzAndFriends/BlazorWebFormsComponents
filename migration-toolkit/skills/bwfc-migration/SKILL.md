@@ -440,7 +440,7 @@ The `--report` flag generates a JSON file that drives L2 decisions:
 After L1 completes, read the migration report (`migration-report.json`). For each TODO category, apply the corresponding transforms below.
 
 > ⚠️ **MANDATORY — READ BEFORE STARTING L2:** Open and read **all three** child documents:
-> - **[CODE-TRANSFORMS.md](CODE-TRANSFORMS.md)** — Lifecycle mapping, event handlers, data binding, Master Page → Layout
+> - **[CODE-TRANSFORMS.md](CODE-TRANSFORMS.md)** — Lifecycle mapping, event handlers, data binding, Master Page → Shell
 > - **[CONTROL-REFERENCE.md](CONTROL-REFERENCE.md)** — 58 BWFC component translation tables
 > - **[AJAX-TOOLKIT.md](AJAX-TOOLKIT.md)** — Ajax Control Toolkit extender migration (14 components)
 
@@ -973,9 +973,9 @@ See **[CONTROL-REFERENCE.md](CONTROL-REFERENCE.md)** for the full translation ta
 
 | Web Forms | Blazor |
 |-----------|--------|
-| `<asp:Content ContentPlaceHolderID="MainContent">` | (remove — page body IS the content) |
-| `<asp:Content ContentPlaceHolderID="HeadContent">` | `<HeadContent>` ... `</HeadContent>` |
-| `<asp:ContentPlaceHolder ID="MainContent" />` | `@Body` (in layout) |
+| `<asp:Content ContentPlaceHolderID="MainContent">` | `<Content ContentPlaceHolderID="MainContent">` inside `<ChildComponents>` |
+| `<asp:Content ContentPlaceHolderID="HeadContent">` | Prefer page-level `<HeadContent>` or shell `<Head>` depending on ownership |
+| `<asp:ContentPlaceHolder ID="MainContent" />` | `<ContentPlaceHolder ID="MainContent" />` inside `<ChildContent>` |
 
 ### Route URL Conversion
 
@@ -986,36 +986,49 @@ See **[CONTROL-REFERENCE.md](CONTROL-REFERENCE.md)** for the full translation ta
 | `GetRouteUrl("Route", new { id = Item.ID })` | `@($"/Products/{context.ID}")` or `GetRouteUrlHelper` |
 | `Response.Redirect("~/Products")` | `NavigationManager.NavigateTo("/Products")` |
 
-### Master Page → Blazor Layout
+### Master Page → BWFC Shell
 
 ```razor
 @* Before: <%@ Master Language="C#" CodeBehind="Site.master.cs" %> *@
 @* After: *@
-@inherits LayoutComponentBase
+<MasterPage>
+    <Head>
+        <title>@(Page.Title)</title>
+    </Head>
+    <ChildContent>
+        <header>
+            <nav><Menu ... /></nav>
+        </header>
+        <main>
+            <ContentPlaceHolder ID="MainContent" />
+        </main>
+        <footer>© @DateTime.Now.Year</footer>
 
-<BlazorWebFormsComponents.Page />
+        @ChildContent
+    </ChildContent>
+</MasterPage>
 
-<header>
-    <nav><Menu ... /></nav>
-</header>
-<main>@Body</main>
-<footer>© @DateTime.Now.Year</footer>
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
 ```
 
 **Key changes:**
-- `<form runat="server">` → `<div>` (preserves CSS block formatting context)
-- `<asp:ContentPlaceHolder ID="MainContent">` → `@Body`
+- `<form runat="server">` → removed from the shell wrapper
+- `<asp:ContentPlaceHolder ID="MainContent">` → `<ContentPlaceHolder ID="MainContent">`
 - `<asp:ScriptManager>` → `<ScriptManager />` (renders nothing)
-- CSS `<link>` from master `<head>` → `App.razor` `<head>` section
+- CSS/meta/title from master `<head>` → shell `<Head>` content
+- Child-page content sections should live under `<ChildComponents>`
 
-> **Tip:** Use `<WebFormsPage>@Body</WebFormsPage>` as the layout wrapper for NamingContainer, theming, and head rendering in one component.
+> **Tip:** Collapse to native `@layout` + `@Body` only after the migrated shell truly behaves like a single-slot layout. Until then, keep the BWFC shell contract intact.
 
 ---
 
 ## Reference Documents
 
 - **[CONTROL-REFERENCE.md](CONTROL-REFERENCE.md)** — 58 component translation tables, structural components, theming, custom control base classes
-- **[CODE-TRANSFORMS.md](CODE-TRANSFORMS.md)** — Lifecycle mapping, event handlers, data binding, navigation, Master Page → Layout
+- **[CODE-TRANSFORMS.md](CODE-TRANSFORMS.md)** — Lifecycle mapping, event handlers, data binding, navigation, Master Page → Shell
 - **[AJAX-TOOLKIT.md](AJAX-TOOLKIT.md)** — Ajax Control Toolkit extender migration (14 components)
 
 ---

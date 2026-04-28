@@ -119,11 +119,12 @@ private void Button_Click() { }
 - Replace `~/` with `/` in all URL references
 - Replace `NavigateUrl="~/path"` with `NavigateUrl="/path"`
 
-### 8. Convert Master Page → Layout
+### 8. Normalize Master Page Shells
 
-- `<asp:ContentPlaceHolder ID="MainContent">` → `@Body`
-- Add `@inherits LayoutComponentBase` to the layout file
-- `<asp:ScriptManager>` → `<ScriptManager />` (renders nothing — correct)
+- Keep migrated master-page structure in `<MasterPage>` with `<ChildContent>`
+- Preserve named `<ContentPlaceHolder ID="...">` regions and their default content
+- Group child-page overrides under `<ChildComponents>` as `<Content ContentPlaceHolderID="...">`
+- Refactor to native `@layout` + `@Body` later only when the shell becomes a true single-slot layout
 
 ---
 

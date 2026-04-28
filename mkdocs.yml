@@ -72,6 +72,7 @@ nav:
   - Themes and Skins: themes-and-skins.md
   - CLI Tool:
     - Overview: cli/index.md
+    - Semantic Pattern Catalog: cli/semantic-pattern-catalog.md
     - Transform Reference: cli/transforms.md
     - TODO Categories: cli/todo-conventions.md
     - Report Format: cli/report.md

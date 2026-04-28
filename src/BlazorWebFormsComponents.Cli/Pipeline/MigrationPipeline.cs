@@ -1,7 +1,9 @@
 using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Scaffolding;
+using BlazorWebFormsComponents.Cli.SemanticPatterns;
 using BlazorWebFormsComponents.Cli.Transforms;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorWebFormsComponents.Cli.Pipeline;
 
@@ -24,13 +26,16 @@ public class MigrationPipeline
     private readonly NuGetStaticAssetExtractor? _nuGetStaticAssetExtractor;
     private readonly EdmxConverterBridge? _edmxConverterBridge;
     private readonly RedirectHandlerAnnotator? _redirectHandlerAnnotator;
+    private readonly SemanticPatternCatalog _semanticPatternCatalog;
 
     /// <summary>
     /// Full constructor for DI — used by the CLI commands.
     /// </summary>
+    [ActivatorUtilitiesConstructor]
     public MigrationPipeline(
         IEnumerable<IMarkupTransform> markupTransforms,
         IEnumerable<ICodeBehindTransform> codeBehindTransforms,
+        SemanticPatternCatalog semanticPatternCatalog,
         ProjectScaffolder scaffolder,
         GlobalUsingsGenerator globalUsings,
         ShimGenerator shimGenerator,
@@ -46,6 +51,7 @@ public class MigrationPipeline
     {
         _markupTransforms = markupTransforms.OrderBy(t => t.Order).ToList();
         _codeBehindTransforms = codeBehindTransforms.OrderBy(t => t.Order).ToList();
+        _semanticPatternCatalog = semanticPatternCatalog;
         _scaffolder = scaffolder;
         _globalUsings = globalUsings;
         _shimGenerator = shimGenerator;
@@ -65,10 +71,12 @@ public class MigrationPipeline
     /// </summary>
     public MigrationPipeline(
         IEnumerable<IMarkupTransform> markupTransforms,
-        IEnumerable<ICodeBehindTransform> codeBehindTransforms)
+        IEnumerable<ICodeBehindTransform> codeBehindTransforms,
+        IEnumerable<ISemanticPattern>? semanticPatterns = null)
     {
         _markupTransforms = markupTransforms.OrderBy(t => t.Order).ToList();
         _codeBehindTransforms = codeBehindTransforms.OrderBy(t => t.Order).ToList();
+        _semanticPatternCatalog = new SemanticPatternCatalog(semanticPatterns ?? []);
         _scaffolder = null!;
         _globalUsings = null!;
         _shimGenerator = null!;
@@ -139,7 +147,7 @@ public class MigrationPipeline
         if (_sourceFileCopier != null)
         {
             var sourceCount = await _sourceFileCopier.CopySourceFilesAsync(
-                context.SourcePath, context.OutputPath, context.SourceFiles, context.Options.Verbose, excludedSourceFiles);
+                context.SourcePath, context.OutputPath, context.SourceFiles, context.Options.Verbose, report, excludedSourceFiles);
             report.FilesWritten += sourceCount;
         }
 
@@ -283,7 +291,16 @@ public class MigrationPipeline
         }
 
         // Use potentially modified markup content from code-behind transforms
-        var finalMarkup = metadata.MarkupContent ?? markup;
+        var semanticResult = _semanticPatternCatalog.Apply(
+            context,
+            sourceFile,
+            metadata,
+            metadata.MarkupContent ?? markup,
+            codeBehind,
+            report);
+
+        var finalMarkup = semanticResult.Markup;
+        codeBehind = semanticResult.CodeBehind;
 
         // Write markup output
         await _outputWriter.WriteFileAsync(sourceFile.OutputPath, finalMarkup,
@@ -292,9 +309,14 @@ public class MigrationPipeline
         // Write code-behind output
         if (codeBehind != null)
         {
-            var codeOutputPath = sourceFile.OutputPath + ".cs";
+            var relativeMarkupPath = Path.GetRelativePath(context.OutputPath, sourceFile.OutputPath);
+            var codeOutputPath = Path.Combine(
+                context.OutputPath,
+                "migration-artifacts",
+                "codebehind",
+                relativeMarkupPath + ".cs.txt");
             await _outputWriter.WriteFileAsync(codeOutputPath, codeBehind,
-                $"Code-behind for {Path.GetFileName(sourceFile.MarkupPath)}");
+                $"Manual code-behind artifact for {Path.GetFileName(sourceFile.MarkupPath)}");
         }
 
         report.FilesProcessed++;

@@ -9,7 +9,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `ChildContent` — the master page template layout containing ContentPlaceHolder controls
 - `Head` — optional head content automatically wrapped in HeadContent component (for `<title>`, `<meta>`, `<link>`, etc.)
 - `Visible` — controls whether the entire master page is rendered
-- Content and ContentPlaceHolder registration and management
+- Host-driven named section management through `MasterPageContext`
 - Support for multiple content sections via named ContentPlaceHolders
 - Automatic `<title>` element handling in Head content
 
@@ -88,28 +88,38 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
             <title>My Site - Home</title>
             <link rel="stylesheet" href="css/site.css" />
         </Head>
-        
+
         <ChildContent>
             <div class="header">
                 <h1>My Website</h1>
             </div>
-            
+
             <ContentPlaceHolder ID="MainContent">
                 <p>Default content</p>
             </ContentPlaceHolder>
-            
+
             <div class="footer">
                 <p>&copy; 2024 My Company</p>
             </div>
         </ChildContent>
-        
-        <Content ContentPlaceHolderID="MainContent">
-            <h2>Welcome to my page!</h2>
-        </Content>
+
+        <ChildComponents>
+            <Content ContentPlaceHolderID="MainContent">
+                <h2>Welcome to my page!</h2>
+            </Content>
+        </ChildComponents>
     </MasterPage>
     ```
 
 ## Blazor Usage Examples
+
+### Recommended migration pattern
+
+Use `MasterPage` as the shell host:
+
+1. Put shell structure and `ContentPlaceHolder` regions in `ChildContent`
+2. Put page overrides in `ChildComponents`
+3. Leave default placeholder content in the shell for incremental migration
 
 ### Basic MasterPage with Layout Template
 
@@ -195,24 +205,26 @@ The `Head` parameter allows you to define head content (title, meta tags, styles
         </main>
     </ChildContent>
     
-    <Content ContentPlaceHolderID="PageTitle">
-        <h1>Article Title</h1>
-    </Content>
-    
-    <Content ContentPlaceHolderID="Sidebar">
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/articles">Articles</a></li>
-            </ul>
-        </nav>
-    </Content>
-    
-    <Content ContentPlaceHolderID="MainContent">
-        <article>
-            <p>Article content here</p>
-        </article>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="PageTitle">
+            <h1>Article Title</h1>
+        </Content>
+        
+        <Content ContentPlaceHolderID="Sidebar">
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/articles">Articles</a></li>
+                </ul>
+            </nav>
+        </Content>
+        
+        <Content ContentPlaceHolderID="MainContent">
+            <article>
+                <p>Article content here</p>
+            </article>
+        </Content>
+    </ChildComponents>
 </MasterPage>
 ```
 

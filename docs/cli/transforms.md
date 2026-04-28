@@ -1,6 +1,6 @@
 # Transform Reference
 
-This page documents all 33 transforms applied by the `webforms-to-blazor` CLI tool. Transforms are applied in a fixed sequence to ensure correct output.
+This page documents the flat markup and code-behind transforms applied by the `webforms-to-blazor` CLI tool. They run in a fixed sequence before the separate **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** pass.
 
 ## Transform Execution Order
 
@@ -8,11 +8,11 @@ This page documents all 33 transforms applied by the `webforms-to-blazor` CLI to
 |-------|------|------|----------|---------|
 | 10 | TodoHeader | Code-Behind | Meta | Inject TODO guidance header |
 | 20 | PageDirective | Markup | Directive | Convert `<%@ Page %>` → `@page` |
-| 30 | MasterDirective | Markup | Directive | Convert `<%@ Master %>` → Blazor layout |
+| 30 | MasterDirective | Markup | Directive | Convert `<%@ Master %>` → BWFC master shell |
 | 40 | ControlDirective | Markup | Directive | Convert `<%@ Control %>` → `@inherits` |
 | 50 | RegisterDirective | Markup | Directive | Handle `<%@ Register %>` for custom controls |
 | 60 | ImportDirective | Markup | Directive | Convert `<%@ Import %>` → `@using` |
-| 250 | MasterPageTransform | Markup | Markup | Convert `<asp:ContentPlaceHolder>` → `@Body` |
+| 250 | MasterPageTransform | Markup | Markup | Convert master markup to runnable `<MasterPage>` shell syntax |
 | 300 | ContentWrapperTransform | Markup | Markup | Wrap loose content in `<div>` if needed |
 | 310 | FormWrapperTransform | Markup | Markup | Convert `<form runat="server">` to Blazor form |
 | 400 | ExpressionTransform | Markup | Markup | Convert `<%: %>`, `<%= %>` to `@()` |
@@ -71,7 +71,7 @@ This page documents all 33 transforms applied by the `webforms-to-blazor` CLI to
 
 ### 2. MasterDirective (Order: 30)
 
-**Converts Master Page directives to Blazor layout components.**
+**Converts Master Page directives to BWFC shell components.**
 
 **Web Forms:**
 ```html
@@ -80,17 +80,18 @@ This page documents all 33 transforms applied by the `webforms-to-blazor` CLI to
 
 **Output:**
 ```razor
-@inherits LayoutComponentBase
-<div>
-  @Body
-</div>
+<MasterPage>
+  <ChildContent>
+    @ChildContent
+  </ChildContent>
+</MasterPage>
 ```
 
 **What It Does:**
-- Replaces `<%@ Master %>` with `@inherits LayoutComponentBase`
-- Converts `<asp:ContentPlaceHolder>` to `@Body`
-- Strips `runat="server"` from head/form tags
-- Adds TODO for complex head content extraction
+- Removes the Web Forms master directive
+- Hands off to `MasterPageTransform` to build a runnable BWFC shell
+- Preserves the master/content contract instead of forcing immediate `@Body` conversion
+- Leaves later native-layout cleanup as a follow-up decision
 
 ---
 
@@ -167,13 +168,14 @@ This page documents all 33 transforms applied by the `webforms-to-blazor` CLI to
 
 ### 6. MasterPageTransform (Order: 250)
 
-**Converts master page layout elements to Blazor.**
+**Converts master page markup to the runnable BWFC shell contract.**
 
 **Details:**
-- Replaces `<asp:ContentPlaceHolder>` blocks with `@Body`
-- Strips `runat="server"` from `<head>` and `<form>` tags
-- Injects `@inherits LayoutComponentBase`
-- Adds TODO comment for head content review
+- Converts `<asp:ContentPlaceHolder>` blocks to named `<ContentPlaceHolder ID="...">` components
+- Strips `runat="server"` from `<head>` and unwraps server-form shells
+- Preserves `<head>` content inside BWFC `<Head>`
+- Emits `<MasterPage>` with explicit `<ChildContent>` and nested `@ChildContent`
+- Adds TODO guidance for shell-specific assets and auth/cart chrome
 
 **Example:**
 ```html
@@ -188,15 +190,22 @@ This page documents all 33 transforms applied by the `webforms-to-blazor` CLI to
 </form>
 
 <!-- After -->
-@inherits LayoutComponentBase
-@* TODO(bwfc-master-page): Review head content extraction for App.razor *@
+@* TODO(bwfc-master-page): Review shell scripts, bundle references, and auth/cart chrome for SSR-safe migration. *@
 
-<head>
-  <title>Site Master</title>
-</head>
-<form>
-  @Body
-</form>
+<MasterPage>
+  <Head>
+    <title>Site Master</title>
+  </Head>
+  <ChildContent>
+    <ContentPlaceHolder ID="ContentPlaceHolder1">Default content</ContentPlaceHolder>
+    @ChildContent
+  </ChildContent>
+</MasterPage>
+
+@code {
+  [Parameter]
+  public RenderFragment? ChildContent { get; set; }
+}
 ```
 
 ---

@@ -11,7 +11,7 @@ public static class ComponentCatalog
         // Utility Controls
         new("Content", "Utility", "/ControlSamples/Content", "Provides content to ContentPlaceHolder regions in master page layouts"),
         new("ContentPlaceHolder", "Utility", "/ControlSamples/ContentPlaceHolder", "Defines replaceable content regions in master page layouts"),
-        new("MasterPage", "Utility", "/control-samples/masterpage", "Master page template support for consistent layouts"),
+        new("MasterPage", "Utility", "/control-samples/masterpage", "Recommended MasterPage shell pattern with ChildContent placeholders, ChildComponents content sections, and head bridging"),
         new("Localize", "Utility", "/ControlSamples/Localize", "Localization and resource string rendering"),
         new("MultiView", "Utility", "/ControlSamples/MultiView", "Container for multiple View controls with switching"),
         new("View", "Utility", "/ControlSamples/View", "Container panel within a MultiView, visible one at a time"),

@@ -92,15 +92,15 @@ public class MasterPageTransformTests
     }
 
     [Fact]
-    public void ExtractsCssLinksToTodoComment()
+    public void PreservesCssLinksInsideHeadParameter()
     {
         var input = "<head runat=\"server\">\n" +
                     "    <link href=\"/Content/site.css\" rel=\"stylesheet\" />\n" +
                     "</head>\n<body></body>";
 
         var result = _transform.Apply(input, MasterMetadata);
-        Assert.Contains("site.css", result.Split('\n').First(l => l.Contains("TODO")));
-        Assert.DoesNotContain("<link href=\"/Content/site.css\"", result);
+        Assert.Contains("<Head>", result);
+        Assert.Contains("<link href=\"/Content/site.css\" rel=\"stylesheet\" />", result);
     }
 
     [Fact]
@@ -156,8 +156,8 @@ public class MasterPageTransformTests
         var input = "<form id=\"form1\" runat=\"server\">\n    <div>content</div>\n</form>";
 
         var result = _transform.Apply(input, MasterMetadata);
-        Assert.Contains("<form id=\"form1\">", result);
-        Assert.DoesNotContain("runat=\"server\"", result.Substring(result.IndexOf("<form")));
+        Assert.DoesNotContain("<form", result);
+        Assert.Contains("<div>content</div>", result);
     }
 
     [Fact]
@@ -189,12 +189,24 @@ public class MasterPageTransformTests
         Assert.Contains("<MasterPage>", result);
         Assert.Contains("</MasterPage>", result);
         Assert.Contains("<ContentPlaceHolder ID=\"MainContent\"", result);
-        Assert.Contains("<form id=\"form1\">", result);
+        Assert.DoesNotContain("<form id=\"form1\">", result);
         Assert.DoesNotContain("asp:ContentPlaceHolder", result);
         Assert.DoesNotContain("runat=\"server\"", result);
         Assert.DoesNotContain("@inherits LayoutComponentBase", result);
-        Assert.DoesNotContain("@Body", result);
+        Assert.Contains("@ChildContent", result);
         Assert.Contains("TODO(bwfc-master-page)", result);
+    }
+
+    [Fact]
+    public void EmitsChildContentParameterAndRendersIt()
+    {
+        var input = "<html><body><asp:ContentPlaceHolder ID=\"MainContent\" runat=\"server\" /></body></html>";
+
+        var result = _transform.Apply(input, MasterMetadata);
+
+        Assert.Contains("@ChildContent", result);
+        Assert.Contains("[Parameter]", result);
+        Assert.Contains("public RenderFragment? ChildContent { get; set; }", result);
     }
 
     [Fact]

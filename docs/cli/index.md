@@ -9,10 +9,12 @@ This tool **reduces manual migration effort** by:
 - Removing boilerplate Web Forms directives and syntax
 - Converting ASP.NET server controls to BWFC components
 - Replacing Web Forms expressions with Blazor syntax
+- Applying semantic page-pattern rewrites after the core transform pass
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
+- Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
 - Scaffolding a new .NET 10 Blazor SSR project structure with shims and services
 
-The tool processes `.aspx`, `.ascx`, and `.master` files in a fixed sequence, ensuring each transformation builds on the previous one correctly.
+The tool processes `.aspx`, `.ascx`, and `.master` files in a fixed sequence, then applies a bounded semantic pattern catalog so each higher-level rewrite builds on a normalized page shape.
 
 ## Installation
 
@@ -52,9 +54,10 @@ webforms-to-blazor migrate --input ./MyWebFormsProject --output ./MyBlazorProjec
 
 The tool will:
 1. Scan all `.aspx`, `.ascx`, and `.master` files
-2. Apply 33 transforms in sequence
-3. Generate a migration report
-4. Scaffold supporting files for a .NET 10 Blazor SSR app (Program.cs, App.razor, shims, handlers)
+2. Apply the ordered markup and code-behind transform pipeline
+3. Apply semantic page-pattern rewrites for known recurring Web Forms shapes
+4. Generate a migration report
+5. Scaffold supporting files for a .NET 10 Blazor SSR app (Program.cs, App.razor, shims, handlers)
 
 ## Two Commands
 
@@ -80,7 +83,7 @@ webforms-to-blazor migrate \
 
 **Output:**
 - Converted `.razor` files
-- Converted `.razor.cs` code-behind
+- Quarantined manual code-behind and risky legacy source artifacts under `migration-artifacts\`
 - Generated `Program.cs` with shim registration for static SSR on .NET 10
 - Migration report (`migration-report.json`)
 
@@ -102,13 +105,13 @@ webforms-to-blazor convert \
 
 ## Transform Categories
 
-The tool applies **33 transforms** organized in three groups:
+The tool applies an ordered transform pipeline and then a semantic pattern catalog:
 
 1. **Directives** (5) — Page, Master, Control, Register, Import directives
 2. **Markup** (19) — Controls, expressions, templates, data binding
 3. **Code-Behind** (9) — Using statements, base classes, lifecycle, event handlers
 
-See **[Transform Reference](transforms.md)** for complete details on each transform, including before/after examples.
+See **[Transform Reference](transforms.md)** for the flat transform list and **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** for the bounded semantic pass that runs afterward.
 
 ## TODO Comments and L2 Automation
 
@@ -171,6 +174,7 @@ copilot /webforms-migration
 ## Next Steps
 
 - **[Transform Reference](transforms.md)** — See what each transform does with before/after examples
+- **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** — Understand when page-shape rewrites belong in the isolated semantic pass
 - **[TODO Conventions](todo-conventions.md)** — Understand the TODO categories for L2 automation
 - **[Report Schema](report.md)** — Interpret the migration report
 - **[Migration Strategies](../Migration/Strategies.md)** — Learn the full migration approach

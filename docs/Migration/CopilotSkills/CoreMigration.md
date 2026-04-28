@@ -162,19 +162,24 @@ protected void AddToCart_Click()
 </html>
 ```
 
-**Blazor Layout:**
+**BWFC Shell:**
 
 ```razor
-@inherits LayoutComponentBase
+<MasterPage>
+    <Head>
+        <title>@Title</title>
+    </Head>
+    <ChildContent>
+        <header>Shared shell</header>
+        <ContentPlaceHolder ID="MainContent" />
+        @ChildContent
+    </ChildContent>
+</MasterPage>
 
-<html>
-<head>
-    <PageTitle>@Title</PageTitle>
-</head>
-<body>
-    @Body
-</body>
-</html>
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
 ```
 
 **Content Page Conversion:**
@@ -189,10 +194,13 @@ protected void AddToCart_Click()
 
 ```razor
 <!-- Blazor -->
-@page "/Welcome"
-@layout MainLayout
-
-<h1>Welcome</h1>
+<SiteShell>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>Welcome</h1>
+        </Content>
+    </ChildComponents>
+</SiteShell>
 ```
 
 ---
@@ -255,8 +263,8 @@ to complete the migration of ProductList.razor. Focus on data binding and event 
 When working on a specific file:
 
 ```
-Apply the BWFC migration skill to convert this Master Page to a Blazor Layout. 
-Preserve the content placeholders as @Body and handle the navigation menu.
+Apply the BWFC migration skill to convert this Master Page to the BWFC shell architecture.
+Keep the shell in ChildContent, preserve named ContentPlaceHolder regions, and group page overrides under ChildComponents.
 ```
 
 ### Option 3: Pattern-Specific Questions

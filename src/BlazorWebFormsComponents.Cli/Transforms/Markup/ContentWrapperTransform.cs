@@ -28,6 +28,9 @@ public class ContentWrapperTransform : IMarkupTransform
 
     public string Apply(string content, FileMetadata metadata)
     {
+        if (metadata.FileType == FileType.Master)
+            return content;
+
         // Convert <asp:Content ... ContentPlaceHolderID="X" ...> → <Content ContentPlaceHolderID="X">
         content = ContentOpenRegex.Replace(content, m =>
             $"<Content ContentPlaceHolderID=\"{m.Groups[1].Value}\">");

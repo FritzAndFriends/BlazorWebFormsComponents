@@ -7,8 +7,9 @@ namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 /// <summary>
 /// Converts .master files to BWFC MasterPage component syntax.
 /// Preserves named ContentPlaceHolder relationships using BWFC &lt;ContentPlaceHolder ID="X"&gt;,
-/// wraps layout body in &lt;MasterPage&gt;, extracts CSS &lt;link&gt; refs for App.razor,
-/// and strips the outer HTML document scaffold (DOCTYPE / html / body).
+/// emits a runnable shell contract with a <c>ChildContent</c> parameter, preserves
+/// head content inside BWFC <c>&lt;Head&gt;</c>, and strips the outer HTML document
+/// scaffold plus server-form wrappers.
 /// </summary>
 public class MasterPageTransform : IMarkupTransform
 {
@@ -30,9 +31,14 @@ public class MasterPageTransform : IMarkupTransform
         @"\bID\s*=\s*""([^""]*)""",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    // runat="server" on <head> and <form> tags
+    // runat="server" on <head> tags
     private static readonly Regex HeadRunatRegex = new(
         @"(<head\b[^>]*?)\s+runat\s*=\s*""server""([^>]*>)",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    // Server form wrappers should not survive into the generated master-page shell.
+    private static readonly Regex ServerFormBlockRegex = new(
+        @"[ \t]*<form\b([^>]*?)\s+runat\s*=\s*""server""([^>]*)>([\s\S]*?)</form>[ \t]*\r?\n?",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     private static readonly Regex FormRunatRegex = new(
@@ -65,16 +71,6 @@ public class MasterPageTransform : IMarkupTransform
         @"[ \t]*<head\b[^>]*>([\s\S]*?)</head>[ \t]*\r?\n?",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    // CSS <link rel="stylesheet"> elements (full line)
-    private static readonly Regex CssLinkRegex = new(
-        @"[ \t]*<link\b[^>]*\brel\s*=\s*""stylesheet""[^>]*/?>[ \t]*\r?\n?",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
-    // href="..." value extraction
-    private static readonly Regex LinkHrefRegex = new(
-        @"\bhref\s*=\s*""([^""]*)""",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
     public string Apply(string content, FileMetadata metadata)
     {
         if (metadata.FileType != FileType.Master)
@@ -83,8 +79,9 @@ public class MasterPageTransform : IMarkupTransform
         // Normalise line endings for consistent regex behaviour
         content = content.Replace("\r\n", "\n");
 
-        // Step 1: Strip runat="server" from <head> and <form> structural tags
+        // Step 1: Strip runat="server" from <head> and unwrap server-form shells
         content = HeadRunatRegex.Replace(content, "$1$2");
+        content = ServerFormBlockRegex.Replace(content, m => m.Groups[3].Value.Trim('\n', '\r') + "\n");
         content = FormRunatRegex.Replace(content, "$1$2");
 
         // Step 2: Convert block ContentPlaceHolder → named BWFC component (preserve default content)
@@ -104,26 +101,20 @@ public class MasterPageTransform : IMarkupTransform
             return $"<ContentPlaceHolder ID=\"{id}\" />\n";
         });
 
-        // Step 4: Extract <head> section — split CSS links (→ App.razor) from other head content
+        // Step 4: Extract <head> section and preserve it in BWFC <Head>
         string? headContent = null;
-        var cssLinks = new List<string>();
 
         var headMatch = HeadSectionRegex.Match(content);
         if (headMatch.Success)
         {
             var innerHead = headMatch.Groups[1].Value;
-
-            foreach (Match linkMatch in CssLinkRegex.Matches(innerHead))
-            {
-                var hrefMatch = LinkHrefRegex.Match(linkMatch.Value);
-                var href = hrefMatch.Success ? hrefMatch.Groups[1].Value : linkMatch.Value.Trim();
-                cssLinks.Add(href.Replace("~/", "/"));
-            }
-
-            // Remove CSS links; keep the rest for the <Head> parameter
-            var cleanHead = CssLinkRegex.Replace(innerHead, "").Trim('\n', '\r');
+            var cleanHead = innerHead
+                .Replace("~/", "/")
+                .Trim('\n', '\r');
             if (!string.IsNullOrWhiteSpace(cleanHead))
+            {
                 headContent = cleanHead;
+            }
 
             content = HeadSectionRegex.Replace(content, "");
         }
@@ -162,9 +153,8 @@ public class MasterPageTransform : IMarkupTransform
         if (directives.Length > 0)
             sb.Append(directives.ToString());
 
-        var todoMsg = cssLinks.Count > 0
-            ? $"@* TODO(bwfc-master-page): CSS <link> refs from <head> — move to App.razor: {string.Join(", ", cssLinks)} *@"
-            : "@* TODO(bwfc-master-page): Review head content extraction for App.razor *@";
+        const string todoMsg =
+            "@* TODO(bwfc-master-page): Review shell scripts, bundle references, and auth/cart chrome for SSR-safe migration. *@";
 
         sb.AppendLine(todoMsg);
         sb.AppendLine();
@@ -176,16 +166,32 @@ public class MasterPageTransform : IMarkupTransform
             sb.AppendLine(headContent);
             sb.AppendLine("</Head>");
             sb.AppendLine("<ChildContent>");
-            sb.AppendLine(bodyContent);
+            if (!string.IsNullOrWhiteSpace(bodyContent))
+            {
+                sb.AppendLine(bodyContent);
+            }
+            sb.AppendLine("@ChildContent");
             sb.AppendLine("</ChildContent>");
             sb.AppendLine("</MasterPage>");
         }
         else
         {
             sb.AppendLine("<MasterPage>");
-            sb.AppendLine(bodyContent);
+            sb.AppendLine("<ChildContent>");
+            if (!string.IsNullOrWhiteSpace(bodyContent))
+            {
+                sb.AppendLine(bodyContent);
+            }
+            sb.AppendLine("@ChildContent");
+            sb.AppendLine("</ChildContent>");
             sb.AppendLine("</MasterPage>");
         }
+
+        sb.AppendLine();
+        sb.AppendLine("@code {");
+        sb.AppendLine("    [Parameter]");
+        sb.AppendLine("    public RenderFragment? ChildContent { get; set; }");
+        sb.AppendLine("}");
 
         return sb.ToString();
     }

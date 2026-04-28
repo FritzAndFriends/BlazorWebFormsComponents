@@ -67,6 +67,7 @@ Layer 1 handles every transform that can be applied mechanically. The CLI tool a
 | Expression conversions (`<%: %>` → `@()`) | ~35 | 100% |
 | `ItemType` → `TItem` conversions | 8 | 100% |
 | Content wrapper removals (`<asp:Content>`) | 28 | 100% |
+| Runnable master-page shell generation | Master pages | 100% |
 | URL conversions (`~/` → `/`) | All | 100% |
 | File renaming (`.aspx` → `.razor`) | 33 | 100% |
 | Project scaffold (`.csproj`, `Program.cs`, `_Imports.razor`, `App.razor`) | Full | ✅ |
@@ -101,7 +102,7 @@ This means that code-behind files referencing `Response.Redirect`, `Session`, `R
 - Convert code-behind lifecycle methods like `Page_Load` signature (requires semantic understanding)
 - Replace DataSource controls (requires architecture decisions)
 - Wire authentication (requires knowing your auth strategy)
-- Convert Master Pages to layouts (partially — removes directives but doesn't create `@Body`)
+- Collapse migrated master pages all the way to final native `@layout` / `@Body` layouts
 
 These are intentionally left for Layer 2 and Layer 3.
 
@@ -152,9 +153,18 @@ These items were previously Layer 2 manual transforms but are now handled AS-IS 
 | Lifecycle methods | `Page_Load(object sender, EventArgs e)` signature | `OnInitializedAsync` (the `IsPostBack` inside works AS-IS) |
 | Event handlers | `void Btn_Click(object sender, EventArgs e)` | `void Btn_Click()` |
 | Form wrappers | `<form runat="server">` | Removed, or `<WebFormsForm>` for Request.Form, or `<EditForm>` for validation |
-| Layout conversion | `<asp:ContentPlaceHolder ID="MainContent">` | `@Body` |
+| Master/content contract normalization | Page-specific `<asp:Content>` sections | `<ChildComponents><Content ContentPlaceHolderID="..." />...</ChildComponents>` |
+| Optional native layout cleanup | Single-slot `<MasterPage>` shell | `@layout` + `@Body` when the shell has truly become a single body slot |
 | Query parameters | `[QueryString] int? id` | `[SupplyParameterFromQuery]` |
 | Route parameters | `[RouteData] int id` | `@page "/path/{id:int}"` + `[Parameter]` |
+
+For master pages, the current migration strategy is:
+
+1. **Layer 1** emits a runnable BWFC shell using `<MasterPage>`, optional `<Head>`, and `<ChildContent>`.
+2. **Layer 2** normalizes child pages so their named regions become `<Content>` blocks grouped under `<ChildComponents>`.
+3. **Layer 3** optionally simplifies the result to native Blazor layouts when only a single body slot remains and the named-section bridge is no longer needed.
+
+To keep this extensible, recurring page-shape rewrites should live in an isolated **[semantic pattern catalog](../cli/semantic-pattern-catalog.md)** rather than being added as one-off regex transforms. Each pattern can then be introduced as its own matcher/applicator pair with targeted fixtures and docs.
 
 ### How to Use Layer 2
 

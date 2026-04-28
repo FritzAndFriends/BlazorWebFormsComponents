@@ -18,6 +18,7 @@ public class MigrationReport
     public int FilesProcessed { get; set; }
     public int FilesWritten { get; set; }
     public int TransformsApplied { get; set; }
+    public int SemanticPatternsApplied { get; set; }
     public int ScaffoldFilesGenerated { get; set; }
     public int StaticFilesCopied { get; set; }
     public List<string> Errors { get; } = [];
@@ -43,6 +44,7 @@ public class MigrationReport
             FilesProcessed,
             FilesWritten,
             TransformsApplied,
+            SemanticPatternsApplied,
             ScaffoldFilesGenerated,
             StaticFilesCopied,
             ErrorCount = Errors.Count,
@@ -67,6 +69,7 @@ public class MigrationReport
         Console.WriteLine($"  Files processed:    {FilesProcessed}");
         Console.WriteLine($"  Files written:      {FilesWritten}");
         Console.WriteLine($"  Transforms applied: {TransformsApplied}");
+        Console.WriteLine($"  Semantic patterns:  {SemanticPatternsApplied}");
         Console.WriteLine($"  Scaffold files:     {ScaffoldFilesGenerated}");
         Console.WriteLine($"  Static files:       {StaticFilesCopied}");
 

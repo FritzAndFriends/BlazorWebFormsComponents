@@ -8,7 +8,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 - `ID` — identifier to match with Content control's ContentPlaceHolderID
 - `ChildContent` — default content to display if no Content control provides a replacement
-- Auto-registration with parent MasterPage component
+- Resolves named content from the nearest MasterPage host
 - Renders content provided by child pages via Content controls, or falls back to default ChildContent
 
 ## Web Forms Features NOT Supported
@@ -63,7 +63,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
     </MasterPage>
     ```
 
-ContentPlaceHolder components are placed within the ChildContent of a MasterPage component. They automatically register with the parent MasterPage.
+ContentPlaceHolder components live in the shell's `ChildContent`. The MasterPage host re-renders when matching `Content` sections change, so the placeholder itself stays a thin reader over the current named-section registry.
 
 ### Multiple ContentPlaceHolders
 
@@ -138,9 +138,11 @@ ContentPlaceHolder renders either the content provided by a child page's Content
             <p>Default</p>
         </ContentPlaceHolder>
     </ChildContent>
-    <Content ContentPlaceHolderID="Main">
-        <p>Custom Content</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="Main">
+            <p>Custom Content</p>
+        </Content>
+    </ChildComponents>
 </MasterPage>
 ```
 

@@ -146,12 +146,11 @@ public class ContentWrapperTransformTests
     }
 
     [Fact]
-    public void AppliesOnMasterFiles()
+    public void SkipsMasterFiles()
     {
-        // ContentWrapperTransform has no file-type guard — it applies to everything.
         var input = "<asp:Content ContentPlaceHolderID=\"Main\" runat=\"server\"><p>master</p></asp:Content>";
         var result = _transform.Apply(input, MasterMeta());
-        Assert.DoesNotContain("<asp:Content", result);
+        Assert.Equal(input, result);
     }
 
     [Fact]

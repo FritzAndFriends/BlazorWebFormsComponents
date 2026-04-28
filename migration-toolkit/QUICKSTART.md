@@ -176,7 +176,7 @@ Open each migrated `.razor` file and work through the structural transforms that
 | Code-behind lifecycle | Convert `Page_Load(object sender, EventArgs e)` signature → `OnInitializedAsync`; `IsPostBack` inside works AS-IS |
 | Event handlers | Convert `void Btn_Click(object sender, EventArgs e)` → `void Btn_Click()` |
 | Form wrappers | Remove `<form runat="server">`; use `<WebFormsForm>` if page uses `Request.Form`, or `<EditForm>` for validation |
-| Master Page → Layout | Convert to `@inherits LayoutComponentBase` with `@Body` |
+| Master Page shell | Convert to runnable `<MasterPage>` + `<ChildContent>` first; normalize page sections under `<ChildComponents>` |
 
 > **If your pages use `Request.Form`**, wrap the form content in `<WebFormsForm>` — this component captures form POST data and feeds the `FormShim` so `Request.Form["key"]` works in your code-behind.
 

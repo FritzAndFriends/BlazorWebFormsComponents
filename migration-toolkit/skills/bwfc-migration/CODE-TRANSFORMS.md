@@ -167,7 +167,7 @@ For FormView, DetailsView:
 
 ---
 
-## Master Page → Layout Migration
+## Master Page → Shell Migration
 
 ### Web Forms Master Page
 
@@ -194,31 +194,61 @@ For FormView, DetailsView:
 </html>
 ```
 
-### Blazor Layout Equivalent
+### BWFC Migration Shell
 
 ```razor
-@inherits LayoutComponentBase
+<MasterPage>
+    <Head>
+        <title>@(Page.Title)</title>
+    </Head>
+    <ChildContent>
+        <header>
+            <nav><Menu ... /></nav>
+        </header>
+        <main>
+            <ContentPlaceHolder ID="MainContent" />
+        </main>
+        <footer>© @DateTime.Now.Year</footer>
 
-<header>
-    <nav><Menu ... /></nav>
-</header>
-<main>
-    @Body
-</main>
-<footer>© @DateTime.Now.Year</footer>
+        @ChildContent
+    </ChildContent>
+</MasterPage>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
 ```
 
 **Key changes:**
-- `<%@ Master %>` → `@inherits LayoutComponentBase`
-- `<form runat="server">` → replaced with `<div>` (preserves `id` attribute and CSS block formatting context)
-- `<asp:ContentPlaceHolder ID="MainContent">` → `@Body`
-- `<asp:ScriptManager>` → `<ScriptManager />` (renders nothing)
-- CSS `<link>` elements from master page `<head>` → `App.razor` `<head>` section (relative `href` paths must be rewritten to absolute, e.g., `CSS/style.css` → `/CSS/style.css`, because `<HeadContent>` resolves from the page URL)
-- `<head runat="server">` content → `<HeadContent>` in layout or `App.razor`
+- `<%@ Master %>` becomes a runnable BWFC shell component
+- `<form runat="server">` is removed from the shell wrapper
+- `<asp:ContentPlaceHolder ID="X">` stays as `<ContentPlaceHolder ID="X">` so named regions and defaults survive
+- `<head runat="server">` content moves into the shell's `<Head>` block
+- `@ChildContent` is appended inside `<ChildContent>` so nested page content can still flow through the shell
+- Child-page overrides should be grouped under `<ChildComponents>` as `<Content ContentPlaceHolderID="...">...</Content>`
 
-> **Alternative:** For a more gradual migration, BWFC provides `<MasterPage>`, `<Content>`, and `<ContentPlaceHolder>` components that preserve Web Forms-style markup. Use these as a stepping stone, then refactor to native Blazor layouts when ready.
+> **Why this strategy exists:** forcing every master page directly into `@layout` / `@Body` loses too much information for real Web Forms apps. The BWFC shell preserves familiar tags, named regions, fallback content, and head content while still behaving like a Blazor-hosted section model.
 
 > **Tip:** Use `<WebFormsPage>@Body</WebFormsPage>` as the layout wrapper instead of plain `@Body` to get NamingContainer (ID scoping), theming, and head rendering in one component.
+
+### Recommended child-page shape
+
+```razor
+<SiteShell>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>Products</h1>
+        </Content>
+
+        <Content ContentPlaceHolderID="Sidebar">
+            <p>Contextual links</p>
+        </Content>
+    </ChildComponents>
+</SiteShell>
+```
+
+Use native `@layout` + `@Body` later only after the migrated shell has effectively collapsed to a single body slot.
 
 ### Nested Master Pages → Nested Layouts
 

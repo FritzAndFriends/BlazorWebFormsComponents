@@ -44,7 +44,7 @@ Apply these standards to:
 | Project template | `dotnet new blazor --interactivity Server` |
 | Render mode | Global Server Interactive (see [Render Mode Placement](#render-mode-placement) below) |
 | Base class | `WebFormsPageBase` for pages (`@inherits` in `_Imports.razor`); `ComponentBase` for non-page components |
-| Layout | `MainLayout.razor` with `@inherits LayoutComponentBase` and `@Body` |
+| Layout | Native `MainLayout.razor` with `@Body` for single-slot pages; BWFC `<MasterPage>` shell + `<ChildComponents>` for migrated master/content pages |
 
 ### Render Mode Placement
 

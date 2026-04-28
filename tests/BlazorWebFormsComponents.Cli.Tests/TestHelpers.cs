@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.SemanticPatterns;
 using BlazorWebFormsComponents.Cli.Transforms;
 using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 using BlazorWebFormsComponents.Cli.Transforms.Directives;
@@ -148,6 +149,17 @@ public static class TestHelpers
     }
 
     /// <summary>
+    /// Creates the semantic pattern catalog used by both isolated and full-pipeline tests.
+    /// </summary>
+    public static IReadOnlyList<ISemanticPattern> CreateDefaultSemanticPatterns() =>
+    [
+        new QueryDetailsSemanticPattern(),
+        new MasterContentContractsSemanticPattern(),
+        new ActionPagesSemanticPattern(),
+        new AccountPagesSemanticPattern()
+    ];
+
+    /// <summary>
     /// Creates a fully configured MigrationPipeline with all markup and code-behind
     /// transforms registered in the canonical order.
     /// </summary>
@@ -212,6 +224,6 @@ public static class TestHelpers
             new UrlCleanupTransform(),
         };
 
-        return new MigrationPipeline(markupTransforms, codeBehindTransforms);
+        return new MigrationPipeline(markupTransforms, codeBehindTransforms, CreateDefaultSemanticPatterns());
     }
 }

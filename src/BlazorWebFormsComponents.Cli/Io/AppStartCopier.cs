@@ -30,17 +30,21 @@ public class AppStartCopier
             foreach (var file in Directory.EnumerateFiles(appStartDir, "*.cs", SearchOption.TopDirectoryOnly))
             {
                 var relativePath = Path.GetRelativePath(sourcePath, file);
-                var destFile = Path.Combine(outputPath, Path.GetFileName(file));
+                var destFile = Path.Combine(
+                    outputPath,
+                    "migration-artifacts",
+                    "App_Start",
+                    Path.GetFileName(file) + ".txt");
                 var content = await File.ReadAllTextAsync(file);
                 content = TransformContent(content, Path.GetFileName(file), report, relativePath);
 
-                await _outputWriter.WriteFileAsync(destFile, content, $"App_Start: {relativePath}");
+                await _outputWriter.WriteFileAsync(destFile, content, $"Manual App_Start artifact: {relativePath}");
                 copied++;
             }
         }
 
         if (copied > 0)
-            Console.WriteLine($"  App_Start files copied: {copied}");
+            Console.WriteLine($"  App_Start files quarantined: {copied}");
 
         return copied;
     }

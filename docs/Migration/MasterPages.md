@@ -1,35 +1,43 @@
 # Master Pages Migration Guide
 
-**Master Pages** in ASP.NET Web Forms provide a way to create a consistent layout and structure across multiple pages in a web application. When migrating to Blazor, you have two paths:
+**Master Pages** in ASP.NET Web Forms provide a consistent shell across multiple pages. In BWFC migrations, there are now two deliberate targets:
 
-1. **Direct to Blazor Layouts** (Recommended) — Leverages native Blazor layout system
-2. **Gradual via BWFC Components** — Uses `MasterPage`, `Content`, and `ContentPlaceHolder` components as a stepping stone
+1. **Native Blazor layouts** — Best for simple single-body shells or after post-migration cleanup
+2. **BWFC MasterPage shell architecture** — Best for first-pass migrations, named regions, placeholder defaults, and minimal rewrite
 
-The **`webforms-to-blazor` CLI tool** automates master page migration to Blazor layouts. The BlazorWebFormsComponents library also provides components for manual gradual migration if needed.
+The **`webforms-to-blazor` CLI tool** now favors the **BWFC shell architecture first** for master/content migrations. That keeps `MasterPage`, `ContentPlaceHolder`, and `Content` relationships recognizable while the runtime behaves more like a Blazor layout host with named sections under the hood.
 
 Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.masterpage
 
+## Recommended Migration Strategy
+
+For migrated master pages, use this architecture first:
+
+1. Put the shared shell markup in `<MasterPage>` with explicit `<Head>` and `<ChildContent>`.
+2. Keep each named region as a `<ContentPlaceHolder ID="...">`, including any default content.
+3. Put page-specific overrides in `<Content>` blocks grouped under `<ChildComponents>`.
+4. Refactor to native `@layout` + `@Body` later only when the page really behaves like a single-slot Blazor layout.
+
+This strategy keeps the migration-facing tags close to Web Forms while aligning the runtime with a Blazor-style shell host and named sections.
+
 ## Automated Migration with the webforms-to-blazor CLI Tool
 
-The **`webforms-to-blazor` CLI tool** automates the transformation of master pages to Blazor layouts. This is the **recommended and fastest migration path**.
+The **`webforms-to-blazor` CLI tool** automates the first-pass master-page conversion. The current strategy is to produce a **runnable BWFC shell contract** instead of forcing every master page directly into `@layout` / `@Body`.
 
 ### What the CLI Tool Does
 
 The tool performs these transformations automatically:
 
-| Web Forms | Blazor Output | Notes |
-|-----------|---------------|-------|
-| `<%@ Master Language="C#" %>` | `@inherits LayoutComponentBase` | Directive conversion |
-| `.Master` file → `.razor` file | Layout component file | File renamed with layout naming convention |
-| `<form runat="server">` → `<div>` | `<div>` wrapper (preserves CSS block context) | Removes server-side form |
-| `<asp:ContentPlaceHolder ID="MainContent" />` | `@Body` | Main content area replacement |
-| `<asp:ScriptManager />` | `<ScriptManager />` (renders nothing) | Becomes no-op BWFC component |
-| `<head runat="server">` content | Moved to `App.razor` `<head>` | Static CSS/meta moved; dynamic content → `<HeadContent>` |
+| Web Forms | Migration Output | Notes |
+|-----------|------------------|-------|
+| `<%@ Master Language="C#" %>` | `.razor` shell component using `<MasterPage>` | Runnable BWFC shell, not an immediate `@layout` conversion |
+| `.Master` file → `.razor` file | Shell component file | Preserves master/content relationships |
+| `<form runat="server">` | Server form wrapper removed | Inner shell content is preserved |
+| `<asp:ContentPlaceHolder ID="X" />` | `<ContentPlaceHolder ID="X" />` | Named regions and defaults stay intact |
+| `<head runat="server">` content | `<Head>` inside `<MasterPage>` | Bridges to Blazor `HeadContent` behavior |
 | CSS `<link href="~/..." />` | `<link href="/..." />` | Paths rewritten to absolute (root-relative) |
-| `<%: Page.Title %>` | `<PageTitle>` component in pages | Set dynamically per page |
-| Child pages with `<%@ Page MasterPageFile="..." %>` | Pages with `@layout LayoutName` | Directive conversion, content un-wrapped |
-| `<asp:Content ContentPlaceHolderID="MainContent">` | Content becomes page body | Wrapper removed, content extracted to page |
-| `<asp:Content ContentPlaceHolderID="HeadContent">` | `<HeadContent>` in page | Converted to Blazor head content |
+| Child shell body | `<ChildContent> ... @ChildContent </ChildContent>` | The shell renders its own structure, then nested child content |
+| Child pages with `<%@ Page MasterPageFile="..." %>` | Remain attached to the generated shell contract | Later transforms can normalize page sections further |
 
 ### Example: CLI Tool Output
 
@@ -65,38 +73,45 @@ The tool performs these transformations automatically:
 </asp:Content>
 ```
 
-**Output - Blazor Layout (MainLayout.razor):**
+**Output - BWFC Shell Component (Site.razor):**
 
 ```razor
-@inherits LayoutComponentBase
+<MasterPage>
+    <Head>
+        <title>My Site</title>
+        <link href="/css/site.css" rel="stylesheet" />
+    </Head>
+    <ChildContent>
+        <header>Header</header>
+        <main>
+            <ContentPlaceHolder ID="MainContent" />
+        </main>
+        <footer>Footer</footer>
 
-<header>Header</header>
-<main>
-    @Body
-</main>
-<footer>Footer</footer>
+        @ChildContent
+    </ChildContent>
+</MasterPage>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
 ```
 
-**Output - Blazor Page (Products.razor):**
+**Recommended child-page shape after page normalization:**
 
 ```razor
-@page "/products"
-@layout MainLayout
-
-<PageTitle>Products - My Site</PageTitle>
-
-<h1>Products</h1>
+<SiteShell>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <PageTitle>Products - My Site</PageTitle>
+            <h1>Products</h1>
+        </Content>
+    </ChildComponents>
+</SiteShell>
 ```
 
-**App.razor receives CSS links:**
-
-```razor
-<head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="/css/site.css" />
-    <HeadOutlet />
-</head>
-```
+The CLI's first responsibility is to produce a **runnable shell**. Converting that shell all the way down to native `@layout` / `@Body` is a later cleanup step when the master page has effectively become a single-slot layout.
 
 ### Using the CLI Tool
 
@@ -109,11 +124,10 @@ webforms-to-blazor migrate --input ./MyWebFormsProject --output ./MyBlazorProjec
 ```
 
 The tool automatically:
-- Converts all `.master` files to `.razor` layouts
-- Updates all `.aspx` pages to use `@layout` directive
-- Generates `App.razor` with proper `<head>` configuration
-- Moves CSS links to `App.razor`
-- Unwraps `<asp:Content>` tags
+- Converts `.master` files to runnable BWFC shell components
+- Preserves named `ContentPlaceHolder` regions and their default content
+- Lifts `<head runat="server">` content into the shell's `<Head>` block
+- Removes server-form wrappers from the shell
 - Creates a complete .NET 10 Blazor SSR project scaffold
 
 See the **[webforms-to-blazor CLI Documentation](../cli/index.md)** for full details.
@@ -194,7 +208,7 @@ Pages use the `@layout` directive:
 
 ## Using BWFC MasterPage Components for Gradual Migration
 
-While the CLI tool is the recommended approach, the BlazorWebFormsComponents library provides `MasterPage`, `Content`, and `ContentPlaceHolder` components for **gradual manual migration**. This approach is useful when:
+While the CLI tool is the recommended approach, the BlazorWebFormsComponents library provides `MasterPage`, `Content`, and `ContentPlaceHolder` components for **gradual or migration-first master-page shells**. This approach is useful when:
 
 - You need to migrate incrementally without using the CLI tool
 - You want to keep Web Forms-style markup temporarily while refactoring other parts
@@ -203,37 +217,53 @@ While the CLI tool is the recommended approach, the BlazorWebFormsComponents lib
 !!! warning
     BWFC components are for **migration stepping stones only**. For new Blazor development, use native layouts. BWFC components add complexity with no functional benefit once fully migrated.
 
-### Creating a MasterPage
+### Recommended BWFC shell/page split
 
 ```razor
-<!-- SiteMasterPage.razor -->
+<!-- SiteShell.razor -->
 @using BlazorWebFormsComponents
 
 <MasterPage>
-    <div class="header">
-        <h1>My Website</h1>
-        <nav>
-            <!-- Navigation menu -->
-        </nav>
-    </div>
-    
-    <div class="main-content">
-        <ContentPlaceHolder ID="MainContent">
-            <p>Default content goes here</p>
-        </ContentPlaceHolder>
-    </div>
-    
-    <div class="sidebar">
-        <ContentPlaceHolder ID="Sidebar">
-            <p>Default sidebar content</p>
-        </ContentPlaceHolder>
-    </div>
-    
-    <div class="footer">
-        <p>&copy; @DateTime.Now.Year My Company</p>
-    </div>
+    <Head>
+        <link href="/css/site.css" rel="stylesheet" />
+    </Head>
+    <ChildContent>
+        <div class="header">
+            <h1>My Website</h1>
+        </div>
+
+        <main>
+            <ContentPlaceHolder ID="MainContent">
+                <p>Default content goes here</p>
+            </ContentPlaceHolder>
+        </main>
+
+        <aside>
+            <ContentPlaceHolder ID="Sidebar">
+                <p>Default sidebar content</p>
+            </ContentPlaceHolder>
+        </aside>
+    </ChildContent>
 </MasterPage>
 ```
+
+```razor
+<!-- Products.razor -->
+<SiteShell>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>Products</h1>
+            <p>Page body from the migrated child page.</p>
+        </Content>
+
+        <Content ContentPlaceHolderID="Sidebar">
+            <p>Page-specific sidebar links.</p>
+        </Content>
+    </ChildComponents>
+</SiteShell>
+```
+
+This is the preferred migration architecture because the shell owns structure and defaults, while the page contributes only named section overrides.
 
 ### MasterPage with Head Parameter (Migration Helper)
 
