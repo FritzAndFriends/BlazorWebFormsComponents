@@ -534,6 +534,23 @@ Use these for callouts:
     Critical information
 ```
 
+## Maintenance Matrix
+
+When making changes, ensure all related files are updated:
+
+| Change Made | Files to Update |
+|---|---|
+| **New component added** | `src/BlazorWebFormsComponents/ComponentName.razor` + `.razor.cs`, `src/BlazorWebFormsComponents.Test/ComponentName/*.razor` (tests), `samples/AfterBlazorServerSide/Pages/ControlSamples/ComponentName/*.razor` (sample), `docs/Category/ComponentName.md` (docs), `mkdocs.yml` (`nav:` entry), `README.md` (component link), `status.md` (status table) |
+| **Existing component modified** | Unit tests in `src/BlazorWebFormsComponents.Test/ComponentName/`, sample page if behavior changed, `docs/Category/ComponentName.md` if API changed |
+| **New migration shim added** | Shim class in `src/BlazorWebFormsComponents/`, register in `ServiceCollectionExtensions.cs` via `AddBlazorWebFormsComponents()`, update `docs/Migration/` guide, update `copilot-instructions.md` Migration Shims section |
+| **Base class changed** (`BaseWebFormsComponent`, `BaseStyledComponent`, `DataBoundComponent`) | Check all components inheriting from it — changes cascade to every component. Run full test suite. |
+| **CLI transform added** | Transform in `src/BlazorWebFormsComponents.Cli/`, test in `tests/BlazorWebFormsComponents.Cli.Tests/`, update `docs/cli/transforms.md`, update `docs/cli/index.md` transform count |
+| **Analyzer rule added** | Rule in `src/BlazorWebFormsComponents.Analyzers/`, test in `src/BlazorWebFormsComponents.Analyzers.Test/`, update `docs/Analyzers/` |
+| **Target framework changed** | `Directory.Build.props` (version properties), all `.csproj` files (`TargetFrameworks`), `global.json`, `.github/workflows/build.yml` (dotnet-version), `.github/copilot-setup-steps.yml` |
+| **Documentation added/changed** | `docs/` markdown file, `mkdocs.yml` (`nav:` entry if new), verify local build passes with `docker run --rm -v "$(pwd):/docs" mkdocs build --strict` |
+| **NuGet dependency changed** | `.csproj` file, `Directory.Build.props` if version is centralized there, test that all three target frameworks build |
+| **Project structure changed** | `AGENTS.md` (repository structure), `README.md`, `CONTRIBUTING.md`, `.github/copilot-instructions.md` (project structure section) |
+
 ## Contributing
 
 - All PRs require unit tests

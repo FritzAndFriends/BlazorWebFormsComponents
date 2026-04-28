@@ -1,0 +1,19 @@
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+    with:
+      fetch-depth: 0
+
+  - name: Setup .NET SDK
+    uses: actions/setup-dotnet@v4
+    with:
+      dotnet-version: |
+        8.0.x
+        9.0.x
+        10.0.x
+
+  - name: Restore dependencies
+    run: dotnet restore
+
+  - name: Build solution
+    run: dotnet build --configuration Release --no-restore
