@@ -1,33 +1,41 @@
 @page "/ProductDetails"
-<PageTitle>Product Details</PageTitle>
+@inject CatalogService Catalog
 
-@if (Product is null)
-{
-    <div class="alert alert-warning">
-        The requested product could not be found.
-    </div>
-}
-else
-{
-    <div>
-        <h1>@Product.ProductName</h1>
-    </div>
-    <br />
-    <table>
-        <tr>
-            <td>
-                <img src="/Catalog/Images/@Product.ImagePath" style="border:solid; height:300px" alt="@Product.ProductName" />
-            </td>
-            <td>&nbsp;</td>
-            <td style="vertical-align: top; text-align:left;">
-                <b>Description:</b><br />@Product.Description
-                <br />
-                <span><b>Price:</b>&nbsp;@($"{Product.UnitPrice:c}")</span>
-                <br />
-                <span><b>Product Number:</b>&nbsp;@Product.ProductID</span>
-                <br /><br />
-                <a class="btn btn-primary" href="/AddToCart?productID=@Product.ProductID">Add To Cart</a>
-            </td>
-        </tr>
-    </table>
+<PageTitle>Product Details</PageTitle>
+<Site>
+    <Content ContentPlaceHolderID="MainContent">
+        @if (Product is null)
+        {
+            <h1>Product not found</h1>
+            <p>The requested product could not be located.</p>
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-md-5">
+                    <img src="/Catalog/Images/@Product.ImagePath" alt="@Product.ProductName" class="img-responsive img-thumbnail" style="max-height: 360px; width: 100%; object-fit: contain;" />
+                </div>
+                <div class="col-md-7">
+                    <h1>@Product.ProductName</h1>
+                    <p>@Product.Description</p>
+                    <p><strong>Price:</strong> @($"{Product.UnitPrice:c}")</p>
+                    <p><strong>Product Number:</strong> @Product.ProductID</p>
+                    <div>
+                        <form method="get" action="/ShoppingCart" style="display: inline;">
+                            <input type="hidden" name="addProductId" value="@Product.ProductID" />
+                            <button type="submit" class="btn btn-primary">Add To Cart</button>
+                        </form>
+                        <a class="btn btn-default" href="/ProductList">Back to Products</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </Content>
+</Site>
+
+@code {
+    [SupplyParameterFromQuery(Name = "id")]
+    public int? ProductId { get; set; }
+
+    private Product? Product => ProductId.HasValue ? Catalog.GetProduct(ProductId.Value) : null;
 }

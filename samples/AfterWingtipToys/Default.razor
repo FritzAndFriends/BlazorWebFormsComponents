@@ -1,29 +1,18 @@
 @page "/"
-<PageTitle>Home</PageTitle>
 
-<div class="jumbotron" style="min-height: 260px; padding: 48px 60px;">
-    <h1>Wingtip Toys</h1>
-    <p class="lead">
-        Wingtip Toys can help you find the perfect gift. Browse our transportation-themed
-        catalog, review detailed product pages, and build a shopping cart without leaving
-        the migrated Blazor app.
-    </p>
-    <p>
-        <a class="btn btn-primary btn-lg" href="/ProductList">Shop now</a>
-    </p>
-</div>
-
-<div class="row">
-    <div class="col-md-4">
-        <h2>Cars, planes, trucks, and more</h2>
-        <p>Browse the same catalog images and product descriptions that powered the original Web Forms sample.</p>
-    </div>
-    <div class="col-md-4">
-        <h2>Migration benchmark target</h2>
-        <p>This run keeps the generated WingtipToys project shape while repairing the catalog, cart, and account flows in place.</p>
-    </div>
-    <div class="col-md-4">
-        <h2>Ready for Playwright</h2>
-        <p>The site ships with Bootstrap styling, responsive navigation, and working product imagery for the acceptance suite.</p>
-    </div>
-</div>
+<PageTitle>Welcome</PageTitle>
+<Site>
+    <Content ContentPlaceHolderID="MainContent">
+        <div class="jumbotron">
+            <h1>Wingtip Toys</h1>
+            <h2>Find the perfect transportation toy.</h2>
+            <p class="lead">
+                Browse boats, cars, planes, and trucks from the classic Wingtip catalog.
+                Each product page includes images, descriptions, and a quick path into the shopping cart.
+            </p>
+            <p>
+                <a class="btn btn-primary btn-lg" href="/ProductList">Browse Products</a>
+            </p>
+        </div>
+    </Content>
+</Site>

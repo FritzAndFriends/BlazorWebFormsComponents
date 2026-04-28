@@ -1,95 +1,103 @@
-using BlazorWebFormsComponents;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 using WingtipToys.Models;
 
 namespace WingtipToys.Services;
 
-public class CartService(SessionShim session, CatalogService catalog)
+public sealed class CartService
 {
-    private const string CartSessionKey = "WingtipCart";
+    private const string CartSessionKey = "Wingtip.Cart";
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
-    public void AddItem(int productId)
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly CatalogService _catalogService;
+
+    public CartService(IHttpContextAccessor httpContextAccessor, CatalogService catalogService)
     {
-        var cart = LoadCart();
-        var existing = cart.FirstOrDefault(line => line.ProductId == productId);
+        _httpContextAccessor = httpContextAccessor;
+        _catalogService = catalogService;
+    }
 
+    public IReadOnlyList<CartLine> GetItems()
+    {
+        return LoadRecords()
+            .Select(record => new CartLine(_catalogService.GetProduct(record.ProductId), record.Quantity))
+            .Where(line => line.Product is not null)
+            .Select(line => new CartLine(line.Product!, line.Quantity))
+            .ToList();
+    }
+
+    public int GetCount() => GetItems().Sum(item => item.Quantity);
+
+    public decimal GetTotal()
+    {
+        return GetItems().Sum(item => (decimal)(item.Product.UnitPrice ?? 0) * item.Quantity);
+    }
+
+    public void AddToCart(int productId)
+    {
+        var records = LoadRecords();
+        var existing = records.FirstOrDefault(record => record.ProductId == productId);
         if (existing is null)
         {
-            cart.Add(new CartLine { ProductId = productId, Quantity = 1 });
+            records.Add(new CartRecord { ProductId = productId, Quantity = 1 });
         }
         else
         {
-            existing.Quantity++;
+            existing.Quantity += 1;
         }
 
-        SaveCart(cart);
+        SaveRecords(records);
     }
 
     public void UpdateQuantity(int productId, int quantity)
     {
-        if (quantity < 1)
+        if (quantity <= 0)
         {
-            RemoveItem(productId);
+            Remove(productId);
             return;
         }
 
-        var cart = LoadCart();
-        var existing = cart.FirstOrDefault(line => line.ProductId == productId);
+        var records = LoadRecords();
+        var existing = records.FirstOrDefault(record => record.ProductId == productId);
         if (existing is null)
         {
             return;
         }
 
         existing.Quantity = quantity;
-        SaveCart(cart);
+        SaveRecords(records);
     }
 
-    public void RemoveItem(int productId)
+    public void Remove(int productId)
     {
-        var cart = LoadCart();
-        cart.RemoveAll(line => line.ProductId == productId);
-        SaveCart(cart);
+        var records = LoadRecords();
+        records.RemoveAll(record => record.ProductId == productId);
+        SaveRecords(records);
     }
 
-    public IReadOnlyList<CartItem> GetItems()
+    private List<CartRecord> LoadRecords()
     {
-        return LoadCart()
-            .Select(line =>
-            {
-                var product = catalog.GetProduct(line.ProductId, null);
-                return new CartItem
-                {
-                    ItemId = $"item-{line.ProductId}",
-                    CartId = "WingtipCart",
-                    ProductId = line.ProductId,
-                    Product = product!,
-                    Quantity = line.Quantity,
-                    DateCreated = DateTime.UtcNow
-                };
-            })
-            .Where(item => item.Product is not null)
-            .ToList();
+        var json = _httpContextAccessor.HttpContext?.Session.GetString(CartSessionKey);
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return [];
+        }
+
+        return JsonSerializer.Deserialize<List<CartRecord>>(json, JsonOptions) ?? [];
     }
 
-    public int GetCount() => LoadCart().Sum(line => line.Quantity);
-
-    public decimal GetTotal()
+    private void SaveRecords(List<CartRecord> records)
     {
-        return GetItems().Sum(item => (decimal)(item.Product?.UnitPrice ?? 0d) * item.Quantity);
+        _httpContextAccessor.HttpContext?.Session.SetString(CartSessionKey, JsonSerializer.Serialize(records, JsonOptions));
     }
 
-    private List<CartLine> LoadCart()
-    {
-        return session.Get<List<CartLine>>(CartSessionKey) ?? [];
-    }
+    public sealed record CartLine(Product Product, int Quantity);
 
-    private void SaveCart(List<CartLine> cart)
-    {
-        session[CartSessionKey] = cart;
-    }
-
-    private sealed class CartLine
+    private sealed class CartRecord
     {
         public int ProductId { get; set; }
+
         public int Quantity { get; set; }
     }
 }

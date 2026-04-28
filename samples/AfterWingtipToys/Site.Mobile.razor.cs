@@ -33,6 +33,9 @@ namespace WingtipToys
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
+    private ContentPlaceHolder FeaturedContent = default!;
+    private ContentPlaceHolder HeadContent = default!;
+    private ContentPlaceHolder MainContent = default!;
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.

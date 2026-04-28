@@ -40,6 +40,7 @@ namespace WingtipToys
 
     private ListView<Category> categoryList = default!;
     private Image Image1 = default!;
+    private ContentPlaceHolder MainContent = default!;
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.

@@ -17,3 +17,7 @@ global using Microsoft.AspNetCore.Components.Routing;
 // Identity infrastructure
 global using Microsoft.AspNetCore.Components.Authorization;
 global using Microsoft.AspNetCore.Identity;
+global using BlazorWebFormsComponents;
+global using BlazorWebFormsComponents.Enums;
+global using BlazorWebFormsComponents.LoginControls;
+global using BlazorWebFormsComponents.Validations;

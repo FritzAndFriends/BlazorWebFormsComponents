@@ -1,18 +1,22 @@
 @page "/Account/Manage"
-<PageTitle>Manage Account</PageTitle>
+@inject UserStoreService UserStore
 
-<h2>Manage Account</h2>
+<PageTitle>Manage your account</PageTitle>
+<Site>
+    <Content ContentPlaceHolderID="MainContent">
+        <h1>Manage your account</h1>
+        @if (string.IsNullOrWhiteSpace(CurrentUser))
+        {
+            <p>Please <a href="/Account/Login">log in</a> to manage your account.</p>
+        }
+        else
+        {
+            <p>You are signed in as <strong>@CurrentUser</strong>.</p>
+            <p><a href="/Account/Logout">Log out</a></p>
+        }
+    </Content>
+</Site>
 
-@if (string.IsNullOrWhiteSpace(CurrentUserEmail))
-{
-    <div class="alert alert-info">
-        You are not currently signed in.
-    </div>
-}
-else
-{
-    <p>Hello, <strong>@CurrentUserEmail</strong>!</p>
-    <p>
-        <a href="/Account/Logout">Log out</a>
-    </p>
+@code {
+    private string? CurrentUser => UserStore.GetCurrentUserEmail();
 }

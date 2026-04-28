@@ -1,40 +1,9 @@
-@page "/ManageLogins"
-<PageTitle></PageTitle>
-    <h2>Manage your external logins.</h2>
-    <PlaceHolder id="successMessage" @ref="successMessage" Visible="false">
-            <p class="text-success">@(SuccessMessage)</p>
-        </PlaceHolder>
-    <div>
-        <section id="externalLoginsForm">
+@page "/Account/ManageLogins"
 
-            <ListView
-                TItem="UserLoginInfo"
-                SelectMethod="GetLogins" DeleteMethod="RemoveLogin" DataKeyNames="LoginProvider,ProviderKey">
-@* TODO(bwfc-select-method): Review DeleteMethod="RemoveLogin" migration for BWFC event/CRUD handling *@
-
-                <LayoutTemplate>
-                    <h4>Registered Logins</h4>
-                    <table class="table">
-                        <tbody>
-                            @context
-                        </tbody>
-                    </table>
-
-                </LayoutTemplate>
-                <ItemTemplate>
-                    <tr>
-                        <td>@context.LoginProvider</td>
-                        <td>
-                            <Button Text="Remove" CommandName="Delete" CausesValidation="false"
-                                ToolTip='<%# "Remove this " + Item.LoginProvider + " login from your account" %>'
-                                Visible="<%# CanRemoveExternalLogins %>" CssClass="btn btn-default" />
-                        </td>
-                    </tr>
-                </ItemTemplate>
-            </ListView>
-
-        </section>
-    </div>
-    <div>
-        <OpenAuthProviders ReturnUrl="~/Account/ManageLogins" />
-    </div>
+<PageTitle>Manage your external logins</PageTitle>
+<Site>
+    <Content ContentPlaceHolderID="MainContent">
+        <h1>Manage external logins</h1>
+        <p>External login providers are not configured in the migrated benchmark sample.</p>
+    </Content>
+</Site>

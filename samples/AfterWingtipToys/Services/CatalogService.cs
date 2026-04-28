@@ -2,41 +2,35 @@ using WingtipToys.Models;
 
 namespace WingtipToys.Services;
 
-public class CatalogService
+public sealed class CatalogService
 {
     private readonly IReadOnlyList<Category> _categories;
     private readonly IReadOnlyList<Product> _products;
 
     public CatalogService()
     {
-        _categories = new List<Category>
-        {
-            new() { CategoryID = 1, CategoryName = "Cars", Description = "Cars" },
-            new() { CategoryID = 2, CategoryName = "Planes", Description = "Planes" },
-            new() { CategoryID = 3, CategoryName = "Trucks", Description = "Trucks" },
-            new() { CategoryID = 4, CategoryName = "Boats", Description = "Boats" },
-            new() { CategoryID = 5, CategoryName = "Rockets", Description = "Rockets" }
-        };
+        _categories =
+        [
+            new Category { CategoryID = 1, CategoryName = "Boats", Description = "Boats and ships" },
+            new Category { CategoryID = 2, CategoryName = "Cars", Description = "Cars and buses" },
+            new Category { CategoryID = 3, CategoryName = "Planes", Description = "Planes and rockets" },
+            new Category { CategoryID = 4, CategoryName = "Trucks", Description = "Trucks and work vehicles" }
+        ];
 
-        _products = new List<Product>
-        {
-            new() { ProductID = 1, ProductName = "Convertible Car", Description = "This convertible car is fast! The engine is powered by a neutrino based battery (not included). Power it up and let it go!", ImagePath = "carconvert.png", UnitPrice = 22.50, CategoryID = 1 },
-            new() { ProductID = 2, ProductName = "Old-time Car", Description = "There's nothing old about this toy car, except its looks. Compatible with other old toy cars.", ImagePath = "carearly.png", UnitPrice = 15.95, CategoryID = 1 },
-            new() { ProductID = 3, ProductName = "Fast Car", Description = "Yes this car is fast, but it also floats in water.", ImagePath = "carfast.png", UnitPrice = 32.99, CategoryID = 1 },
-            new() { ProductID = 4, ProductName = "Super Fast Car", Description = "Use this super fast car to entertain guests. Lights and doors work!", ImagePath = "carfaster.png", UnitPrice = 8.95, CategoryID = 1 },
-            new() { ProductID = 5, ProductName = "Old Style Racer", Description = "This old style racer can fly (with user assistance). Gravity controls flight duration. No batteries required.", ImagePath = "carracer.png", UnitPrice = 34.95, CategoryID = 1 },
-            new() { ProductID = 6, ProductName = "Ace Plane", Description = "Authentic airplane toy. Features realistic color and details.", ImagePath = "planeace.png", UnitPrice = 95.00, CategoryID = 2 },
-            new() { ProductID = 7, ProductName = "Glider", Description = "This fun glider is made from real balsa wood. Some assembly required.", ImagePath = "planeglider.png", UnitPrice = 4.95, CategoryID = 2 },
-            new() { ProductID = 8, ProductName = "Paper Plane", Description = "This paper plane is like no other paper plane. Some folding required.", ImagePath = "planepaper.png", UnitPrice = 2.95, CategoryID = 2 },
-            new() { ProductID = 9, ProductName = "Propeller Plane", Description = "Rubber band powered plane features two wheels.", ImagePath = "planeprop.png", UnitPrice = 32.95, CategoryID = 2 },
-            new() { ProductID = 10, ProductName = "Early Truck", Description = "This toy truck has a real gas powered engine. Requires regular tune ups.", ImagePath = "truckearly.png", UnitPrice = 15.00, CategoryID = 3 },
-            new() { ProductID = 11, ProductName = "Fire Truck", Description = "You will have endless fun with this one quarter sized fire truck.", ImagePath = "truckfire.png", UnitPrice = 26.00, CategoryID = 3 },
-            new() { ProductID = 12, ProductName = "Big Truck", Description = "This fun toy truck can be used to tow other trucks that are not as big.", ImagePath = "truckbig.png", UnitPrice = 29.00, CategoryID = 3 },
-            new() { ProductID = 13, ProductName = "Big Ship", Description = "Is it a boat or a ship? Let this floating vehicle decide by using its artificially intelligent computer brain!", ImagePath = "boatbig.png", UnitPrice = 95.00, CategoryID = 4 },
-            new() { ProductID = 14, ProductName = "Paper Boat", Description = "Floating fun for all! This toy boat can be assembled in seconds. Floats for minutes! Some folding required.", ImagePath = "boatpaper.png", UnitPrice = 4.95, CategoryID = 4 },
-            new() { ProductID = 15, ProductName = "Sail Boat", Description = "Put this fun toy sail boat in the water and let it go!", ImagePath = "boatsail.png", UnitPrice = 42.95, CategoryID = 4 },
-            new() { ProductID = 16, ProductName = "Rocket", Description = "This fun rocket will travel up to a height of 200 feet.", ImagePath = "rocket.png", UnitPrice = 122.95, CategoryID = 5 }
-        };
+        _products =
+        [
+            NewProduct(1, "Paper Boat", "A colorful paper boat for imaginative water adventures.", 1, "boatpaper.png", 8.99),
+            NewProduct(2, "Big Boat", "A classic toy boat with bold colors and durable construction.", 1, "boatbig.png", 14.99),
+            NewProduct(3, "Sail Boat", "A sail boat inspired by the original Wingtip catalog.", 1, "boatsail.png", 12.49),
+            NewProduct(4, "Red Bus", "A bright red bus ready for city routes.", 2, "busred.png", 10.99),
+            NewProduct(5, "Fast Car", "A speedy toy car with racing stripes.", 2, "carfast.png", 11.99),
+            NewProduct(6, "Racer", "A high-performance toy racer for the fastest laps.", 2, "carracer.png", 13.99),
+            NewProduct(7, "Ace Plane", "A stunt-ready prop plane with vivid graphics.", 3, "planeace.png", 15.49),
+            NewProduct(8, "Paper Plane", "A playful paper-style plane for flight fans.", 3, "planepaper.png", 7.99),
+            NewProduct(9, "Rocket", "A classic rocket toy for out-of-this-world play.", 3, "rocket.png", 16.99),
+            NewProduct(10, "Fire Truck", "A fire truck with ladder detail and bright paint.", 4, "truckfire.png", 13.49),
+            NewProduct(11, "Big Truck", "A durable truck built for heavy-duty hauling.", 4, "truckbig.png", 14.49)
+        ];
 
         foreach (var product in _products)
         {
@@ -46,37 +40,28 @@ public class CatalogService
 
     public IReadOnlyList<Category> GetCategories() => _categories;
 
-    public IReadOnlyList<Product> GetProducts(int? categoryId = null, string? categoryName = null)
+    public IReadOnlyList<Product> GetProducts(int? categoryId = null)
     {
-        IEnumerable<Product> query = _products;
-
-        if (categoryId.HasValue)
-        {
-            query = query.Where(product => product.CategoryID == categoryId.Value);
-        }
-
-        if (!string.IsNullOrWhiteSpace(categoryName))
-        {
-            query = query.Where(product =>
-                string.Equals(product.Category?.CategoryName, categoryName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        return query.ToList();
+        return categoryId.HasValue
+            ? _products.Where(product => product.CategoryID == categoryId.Value).ToList()
+            : _products;
     }
 
-    public Product? GetProduct(int? productId, string? productName)
+    public Product? GetProduct(int productId)
     {
-        if (productId.HasValue)
-        {
-            return _products.FirstOrDefault(product => product.ProductID == productId.Value);
-        }
+        return _products.FirstOrDefault(product => product.ProductID == productId);
+    }
 
-        if (!string.IsNullOrWhiteSpace(productName))
+    private static Product NewProduct(int id, string name, string description, int categoryId, string imagePath, double price)
+    {
+        return new Product
         {
-            return _products.FirstOrDefault(product =>
-                string.Equals(product.ProductName, productName, StringComparison.OrdinalIgnoreCase));
-        }
-
-        return null;
+            ProductID = id,
+            ProductName = name,
+            Description = description,
+            CategoryID = categoryId,
+            ImagePath = imagePath,
+            UnitPrice = price
+        };
     }
 }
