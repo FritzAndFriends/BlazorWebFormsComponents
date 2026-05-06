@@ -1,5 +1,8 @@
 @page "/ProductList"
-@page "/Category/{CategoryName}"
+@using Microsoft.AspNetCore.Components
+@using Microsoft.EntityFrameworkCore
+@inject ProductContext Db
+
 <PageTitle>Products</PageTitle>
 <Site>
 <Content ContentPlaceHolderID="MainContent">
@@ -10,8 +13,8 @@
             </hgroup>
 
             <ListView id="productList" @ref="productList"
-                DataKeyNames="ProductID" GroupItemCount="4"
-                TItem="Product" Items="Products">
+                      DataKeyNames="ProductID" GroupItemCount="4"
+                      TItem="Product" SelectItems="GetProductsQueryDetails_SelectItems">
                 <EmptyDataTemplate>
                     <table>
                         <tr>
@@ -27,28 +30,27 @@
                         @context
                     </tr>
                 </GroupTemplate>
-                <ItemTemplate Context="Item">
+                <ItemTemplate>
                     <td>
                         <table>
                             <tr>
                                 <td>
-                                    <a href="@($"/ProductDetails?ProductID={Item.ProductID}")">
-                                        <img src='@($"/Catalog/Images/Thumbs/{Item.ImagePath}")'
-                                             width="100" height="75" border="1" alt="@Item.ProductName" />
+                                    <a href="/ProductDetails?ProductID=@context.ProductID">
+                                        <img src="/Catalog/Images/Thumbs/@context.ImagePath" width="100" height="75" border="1" alt="@context.ProductName" />
                                     </a>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <a href="@($"/ProductDetails?ProductID={Item.ProductID}")">
-                                        @Item.ProductName
+                                    <a href="/ProductDetails?ProductID=@context.ProductID">
+                                        @context.ProductName
                                     </a>
                                     <br />
                                     <span>
-                                        <b>Price: </b>@($"{Item.UnitPrice:c}")
+                                        <b>Price: </b>@($"{context.UnitPrice:c}")
                                     </span>
                                     <br />
-                                    <a href="@($"/AddToCart?productID={Item.ProductID}")">
+                                    <a href="/AddToCart?productID=@context.ProductID">
                                         <span class="ProductListItem">
                                             <b>Add To Cart</b>
                                         </span>
@@ -83,3 +85,26 @@
     </section>
 </Content>
 </Site>
+
+@code {
+    private ListView<Product> productList = default!;
+
+    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name = "categoryName")] public string? CategoryName { get; set; }
+
+    private IEnumerable<Product> GetProductsQueryDetails_SelectItems(int maxRows, int startRowIndex, string sortByExpression)
+    {
+        var query = Db.Products.Include(p => p.Category).AsQueryable();
+
+        if (CategoryId is int categoryId && categoryId > 0)
+        {
+            query = query.Where(p => p.CategoryID == categoryId);
+        }
+        else if (!string.IsNullOrWhiteSpace(CategoryName))
+        {
+            query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
+        }
+
+        return query.ToList();
+    }
+}

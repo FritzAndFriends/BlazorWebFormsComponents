@@ -1,45 +1,26 @@
 using System;
-using System.Collections;
 using System.Collections.Specialized;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Data;
-using System.Configuration;
-using WingtipToys;
 using WingtipToys.Models;
-using System.Collections.Generic;
-using System.Linq;
 
 public class NVPAPICaller
 {
-  //Flag that determines the PayPal environment (live or sandbox)
   private const bool bSandbox = true;
   private const string CVV2 = "CVV2";
-
-  // Live strings.
   private string pEndPointURL = "https://api-3t.paypal.com/nvp";
   private string host = "www.paypal.com";
-
-  // Sandbox strings.
   private string pEndPointURL_SB = "https://api-3t.sandbox.paypal.com/nvp";
   private string host_SB = "www.sandbox.paypal.com";
-
   private const string SIGNATURE = "SIGNATURE";
   private const string PWD = "PWD";
   private const string ACCT = "ACCT";
-
-  //Replace <Your API Username> with your API Username
-  //Replace <Your API Password> with your API Password
-  //Replace <Your Signature> with your Signature
   public string APIUsername = "<Your API Username>";
   private string APIPassword = "<Your API Password>";
   private string APISignature = "<Your Signature>";
   private string Subject = "";
   private string BNCode = "PP-ECWizard";
-
-
-  //HttpWebRequest Timeout specified in milliseconds 
   private const int Timeout = 15000;
   private static readonly string[] SECURED_NVPS = new string[] { ACCT, CVV2, SIGNATURE, PWD };
 
@@ -71,7 +52,6 @@ public class NVPAPICaller
     encoder["PAYMENTREQUEST_0_PAYMENTACTION"] = "Sale";
     encoder["PAYMENTREQUEST_0_CURRENCYCODE"] = "USD";
 
-    // Get the Shopping Cart Products
     using (WingtipToys.Logic.ShoppingCartActions myCartOrders = new WingtipToys.Logic.ShoppingCartActions())
     {
       List<CartItem> myOrderList = myCartOrders.GetCartItems();
@@ -179,9 +159,8 @@ public class NVPAPICaller
   public string HttpCall(string NvpRequest)
   {
     string url = pEndPointURL;
-
     string strPost = NvpRequest + "&" + buildCredentialsNVPString();
-    strPost = strPost + "&BUTTONSOURCE=" + HttpUtility.UrlEncode(BNCode);
+    strPost = strPost + "&BUTTONSOURCE=" + Uri.EscapeDataString(BNCode);
 
     HttpWebRequest objRequest = (HttpWebRequest)WebRequest.Create(url);
     objRequest.Timeout = Timeout;
@@ -197,11 +176,9 @@ public class NVPAPICaller
     }
     catch (Exception e)
     {
-      // Log the exception.
       WingtipToys.Logic.ExceptionUtility.LogException(e, "HttpCall in PayPalFunction.cs");
     }
 
-    //Retrieve the Response returned from the NVP API call to PayPal.
     HttpWebResponse objResponse = (HttpWebResponse)objRequest.GetResponse();
     string result;
     using (StreamReader sr = new StreamReader(objResponse.GetResponseStream()))
@@ -252,8 +229,8 @@ public sealed class NVPCodec : NameValueCollection
     bool firstPair = true;
     foreach (string kv in AllKeys)
     {
-      string name = HttpUtility.UrlEncode(kv);
-      string value = HttpUtility.UrlEncode(this[kv]);
+      string name = Uri.EscapeDataString(kv);
+      string value = Uri.EscapeDataString(this[kv]);
       if (!firstPair)
       {
         sb.Append(AMPERSAND);
@@ -272,8 +249,8 @@ public sealed class NVPCodec : NameValueCollection
       string[] tokens = nvp.Split(EQUALS_CHAR_ARRAY);
       if (tokens.Length >= 2)
       {
-        string name = HttpUtility.UrlDecode(tokens[0]);
-        string value = HttpUtility.UrlDecode(tokens[1]);
+        string name = Uri.UnescapeDataString(tokens[0]);
+        string value = Uri.UnescapeDataString(tokens[1]);
         Add(name, value);
       }
     }
@@ -305,8 +282,9 @@ public sealed class NVPCodec : NameValueCollection
   {
     if (index < 0)
     {
-      throw new ArgumentOutOfRangeException("index", "index cannot be negative : " + index);
+      throw new ArgumentOutOfRangeException(nameof(index), "index cannot be negative : " + index);
     }
+
     return name + index;
   }
 }

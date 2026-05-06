@@ -11,49 +11,10 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.0-*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="IdentityConfig.cs" />
-    <Compile Remove="Startup.Auth.cs" />
-    <Compile Remove="BundleConfig.cs" />
-    <Compile Remove="Models\ProductDatabaseInitializer.cs" />
-    <Compile Remove="Account\**\*.razor.cs" />
-    <RazorComponent Remove="Account\**\*.razor" />
-    <Content Remove="Account\**\*.razor" />
-    <None Remove="Account\**\*.razor" />
-    <Compile Remove="Admin\AdminPage.razor.cs" />
-    <RazorComponent Remove="Admin\AdminPage.razor" />
-    <Content Remove="Admin\AdminPage.razor" />
-    <None Remove="Admin\AdminPage.razor" />
-    <Compile Remove="Checkout\**\*.razor.cs" />
-    <RazorComponent Remove="Checkout\**\*.razor" />
-    <Content Remove="Checkout\**\*.razor" />
-    <None Remove="Checkout\**\*.razor" />
-    <Compile Remove="Default.razor.cs" />
-    <Compile Remove="ErrorPage.razor.cs" />
-    <RazorComponent Remove="ErrorPage.razor" />
-    <Content Remove="ErrorPage.razor" />
-    <None Remove="ErrorPage.razor" />
-    <Compile Remove="Logic\ExceptionUtility.cs" />
-    <Compile Remove="Logic\PayPalFunctions.cs" />
-    <Compile Remove="Logic\RoleActions.cs" />
-    <Compile Remove="Models\IdentityModels.cs" />
-    <Compile Remove="RouteConfig.cs" />
-    <Compile Remove="ViewSwitcher.razor.cs" />
-    <RazorComponent Remove="ViewSwitcher.razor" />
-    <Content Remove="ViewSwitcher.razor" />
-    <None Remove="ViewSwitcher.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <RazorComponent Include="Account\Login.razor" />
-    <RazorComponent Include="Account\Register.razor" />
   </ItemGroup>
 
 </Project>

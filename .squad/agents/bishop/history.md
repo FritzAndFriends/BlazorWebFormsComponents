@@ -100,3 +100,13 @@
 - Full CLI test suite: 545 passed, 0 failed.
 - Key lesson: Avoid C# interpolated brace-escaping in transform return strings. Use plain concatenation instead.
 - Decision file: .squad\decisions\inbox\bishop-gap3-gap5-transforms.md
+
+### 2026-05-06T18:00:00-04:00: WingtipToys Migration Run 34 — First Run With New Transforms (Bishop)
+- Executed Run 34 benchmark validating ServerCodeBlockTransform (Order 510) and TemplateFieldChildComponentsTransform (Order 620).
+- Both transforms confirmed working in generated output. Two manual fixes from Run 33 eliminated automatically.
+- Initial build errors: 266 (vs. 252 in Run 33). Final: 0 errors. **25/25 acceptance tests passing.**
+- Key architectural learning: Blazor Server scoped services are NOT safe for cart state across the SSR pre-render → interactive circuit transition. When a Blazor Server component renders, `OnInitializedAsync` runs twice: once during SSR pre-render (with a temporary scoped container) and once when the interactive circuit connects (with a new scoped container). A cart stored only in a scoped service is lost at that boundary. Fix: store cart state in a singleton keyed by ASP.NET Core session cookie value (`CartSessionStore`), making it survive both HTTP redirects and circuit reconnections.
+- Key Playwright learning: `WaitForLoadStateAsync(NetworkIdle)` resolves when the HTTP response chain settles. The Blazor interactive circuit connects via WebSocket AFTER that. If a test clicks a Blazor `@onclick` button and immediately checks results after `NetworkIdle`, it may check before the Blazor event fires. Design server interactions as Minimal API HTTP endpoints (not Blazor event handlers) when they need to be testable with Playwright's `NetworkIdle` approach.
+- Cart endpoints pattern: `MapGet("/AddToCart", ...)` and `MapGet("/RemoveFromCart", ...)` in Program.cs handle cart mutations as HTTP round-trips that update `CartSessionStore` and redirect. The Blazor `ShoppingCart` component reads from the same singleton at pre-render time.
+- Ambiguous route conflict: Blazor `@page` directives and Minimal API `MapGet` both claim the same URL. Solution: remove `@page` from the Blazor component (keep the component for rendering use) and let the Minimal API own the route.
+- Report: dev-docs\migration-tests\wingtiptoys\run34\report.md

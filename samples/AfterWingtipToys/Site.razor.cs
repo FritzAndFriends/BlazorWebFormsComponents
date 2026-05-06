@@ -1,15 +1,23 @@
 using System.Linq;
+using BlazorWebFormsComponents;
+using Microsoft.AspNetCore.Components;
 using WingtipToys.Models;
-using WingtipToys.Services;
 
 namespace WingtipToys
 {
     public partial class Site
     {
-        private ListView<Category> categoryList = default!;
+        [Inject] private ProductContext Db { get; set; } = default!;
+
         private Image Image1 = default!;
+        private ListView<Category> categoryList = default!;
         private ContentPlaceHolder MainContent = default!;
 
-        protected IEnumerable<Category> Categories => new CatalogService().GetCategories();
+        public IQueryable<Category> GetCategories() => Db.Categories.AsQueryable();
+
+        private void Unnamed_LoggingOut()
+        {
+            Response.Redirect("/");
+        }
     }
 }

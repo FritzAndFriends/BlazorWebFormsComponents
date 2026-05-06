@@ -4,43 +4,8 @@
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
             <h2>Manage your external logins.</h2>
-            <PlaceHolder id="successMessage" @ref="successMessage" Visible="false">
-                    <p class="text-success">@(SuccessMessage)</p>
-                </PlaceHolder>
-            <div>
-                <section id="externalLoginsForm">
-
-                    <ListView
-                        TItem="UserLoginInfo"
-                        SelectMethod="GetLogins" DeleteMethod="RemoveLogin" DataKeyNames="LoginProvider,ProviderKey">
-        @* TODO(bwfc-select-method): Review DeleteMethod="RemoveLogin" migration for BWFC event/CRUD handling *@
-
-                        <LayoutTemplate>
-                            <h4>Registered Logins</h4>
-                            <table class="table">
-                                <tbody>
-                                    @context
-                                </tbody>
-                            </table>
-
-                        </LayoutTemplate>
-                        <ItemTemplate>
-                            <tr>
-                                <td>@context.LoginProvider</td>
-                                <td>
-                                    <Button Text="Remove" CommandName="Delete" CausesValidation="false"
-                                        ToolTip="@($"Remove this {context.LoginProvider} login from your account")"
-                                        Visible="@CanRemoveExternalLogins" CssClass="btn btn-default" />
-                                </td>
-                            </tr>
-                        </ItemTemplate>
-                    </ListView>
-
-                </section>
-            </div>
-            <div>
-                <OpenAuthProviders ReturnUrl="~/Account/ManageLogins" />
-            </div>
+            <p>No external login providers are configured for this migrated sample.</p>
+            <OpenAuthProviders ReturnUrl="~/Account/ManageLogins" />
         </Content>
     </ChildComponents>
 </Site>

@@ -1,41 +1,37 @@
 @page "/ProductDetails"
-@page "/Product/{ProductName}"
+@using WingtipToys.Models
 <PageTitle>Product Details</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            @if (Product is null)
-            {
-                <p>Product not found.</p>
-            }
-            else
+            @if (GetProduct().FirstOrDefault() is Product product)
             {
                 <div>
-                    <h1>@Product.ProductName</h1>
+                    <h1>@product.ProductName</h1>
                 </div>
                 <br />
                 <table>
                     <tr>
                         <td>
-                            <img src="@($"/Catalog/Images/{Product.ImagePath}")" style="border:solid; height:300px" alt="@Product.ProductName" />
+                            <img src="/Catalog/Images/@product.ImagePath" style="border:solid; height:300px" alt="@product.ProductName" />
                         </td>
                         <td>&nbsp;</td>
                         <td style="vertical-align: top; text-align:left;">
-                            <b>Description:</b><br />@Product.Description
+                            <b>Description:</b><br />@product.Description
                             <br />
-                            <span><b>Price:</b>&nbsp;@($"{Product.UnitPrice:c}")</span>
+                            <span><b>Price:</b>&nbsp;@($"{product.UnitPrice:c}")</span>
                             <br />
-                            <span><b>Product Number:</b>&nbsp;@Product.ProductID</span>
+                            <span><b>Product Number:</b>&nbsp;@product.ProductID</span>
                             <br />
+                            <a href="/AddToCart?productID=@product.ProductID">Add To Cart</a>
                             <br />
-                            <a href="@($"/AddToCart?productID={Product.ProductID}")">
-                                <span class="ProductListItem">
-                                    <b>Add To Cart</b>
-                                </span>
-                            </a>
                         </td>
                     </tr>
                 </table>
+            }
+            else
+            {
+                <p>Product not found.</p>
             }
         </Content>
     </ChildComponents>

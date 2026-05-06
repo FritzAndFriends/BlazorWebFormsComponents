@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
@@ -8,35 +11,37 @@ namespace WingtipToys
   {
     [Inject] private ProductContext Db { get; set; } = default!;
 
+    private FormView<Product> productDetail = default!;
+
     [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
     public int? ProductId { get; set; }
 
-    [Parameter]
+    [Parameter, SupplyParameterFromQuery(Name = "productName")]
     public string? ProductName { get; set; }
 
-    protected Product? Product { get; private set; }
-
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
-      await base.OnParametersSetAsync();
+      await base.OnInitializedAsync();
+    }
 
-      IQueryable<Product> query = Db.Products.AsNoTracking();
+    public IEnumerable<Product> GetProduct()
+    {
+      var query = Db.Products.Include(p => p.Category).AsQueryable();
 
-      if (ProductId.HasValue && ProductId.Value > 0)
+      if (ProductId.HasValue && ProductId > 0)
       {
         query = query.Where(p => p.ProductID == ProductId.Value);
       }
-      else if (!string.IsNullOrWhiteSpace(ProductName))
+      else if (!string.IsNullOrEmpty(ProductName))
       {
         query = query.Where(p => p.ProductName == ProductName);
       }
       else
       {
-        Product = null;
-        return;
+        return Enumerable.Empty<Product>();
       }
 
-      Product = await query.FirstOrDefaultAsync();
+      return query.ToList();
     }
   }
 }

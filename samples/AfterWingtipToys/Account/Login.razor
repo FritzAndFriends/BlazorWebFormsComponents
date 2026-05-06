@@ -1,4 +1,3 @@
-@page "/Login"
 @page "/Account/Login"
 <PageTitle>Log in</PageTitle>
 <Site>
@@ -8,12 +7,6 @@
     @if (Registered.GetValueOrDefault() != 0)
     {
         <p class="text-success">Registration succeeded. Please log in.</p>
-    }
-    @if (!string.IsNullOrWhiteSpace(LoggedIn))
-    {
-        <p class="text-success">Hello, @LoggedIn!</p>
-        <p><a href="/Account/Manage">Manage your account</a></p>
-        <p><a href="/">Log out</a></p>
     }
     @if (!string.IsNullOrWhiteSpace(Error))
     {
@@ -27,7 +20,7 @@
         <div class="form-group">
             <label class="col-md-2 control-label" for="email">Email</label>
             <div class="col-md-10">
-                <input id="email" name="Email" type="email" class="form-control" value="@LoggedIn" />
+                <input id="email" name="Email" type="email" class="form-control" />
             </div>
         </div>
         <div class="form-group">
@@ -58,10 +51,6 @@
 
 @code {
     [Parameter, SupplyParameterFromQuery(Name = "error")] public string? Error { get; set; }
-
     [Parameter, SupplyParameterFromQuery(Name = "registered")] public int? Registered { get; set; }
-
     [Parameter, SupplyParameterFromQuery(Name = "returnUrl")] public string? ReturnUrl { get; set; }
-
-    [Parameter, SupplyParameterFromQuery(Name = "loggedIn")] public string? LoggedIn { get; set; }
 }

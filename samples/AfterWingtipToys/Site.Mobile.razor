@@ -4,19 +4,19 @@
 <Head>
     <meta name="viewport" content="width=device-width" />
     <title></title>
-    <ContentPlaceHolder id="HeadContent" @ref="HeadContent" />
+    <ContentPlaceHolder id="HeadContent" />
 </Head>
 <ChildContent>
     @ChildComponents
     <div>
         <h1>Mobile Master Page</h1>
-        <ContentPlaceHolder id="FeaturedContent" @ref="FeaturedContent" />
+        <ContentPlaceHolder id="FeaturedContent" />
         <section class="content-wrapper main-content clear-fix">
-            <ContentPlaceHolder id="MainContent" @ref="MainContent" />
+            <ContentPlaceHolder id="MainContent" />
         </section>
-        <friendlyUrls:ViewSwitcher />
+        <ViewSwitcher />
     </div>
-    
+
 @ChildContent
 </ChildContent>
 </MasterPage>
@@ -27,4 +27,7 @@
 
     [Parameter]
     public RenderFragment? ChildComponents { get; set; }
+
+    [Parameter]
+    public RenderFragment? HeadPlaceholder { get; set; }
 }
