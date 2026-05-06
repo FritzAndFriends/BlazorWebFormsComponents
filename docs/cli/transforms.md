@@ -15,17 +15,21 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 250 | MasterPageTransform | Markup | Markup | Convert master markup to runnable `<MasterPage>` shell syntax |
 | 300 | ContentWrapperTransform | Markup | Markup | Wrap loose content in `<div>` if needed |
 | 310 | FormWrapperTransform | Markup | Markup | Convert `<form runat="server">` to Blazor form |
-| 400 | ExpressionTransform | Markup | Markup | Convert `<%: %>`, `<%= %>` to `@()` |
+| 500 | ExpressionTransform | Markup | Markup | Convert `<%: %>`, `<%= %>`, and inline data expressions to Razor |
+| 510 | ServerCodeBlockTransform | Markup | Markup | Convert `<% ... %>` statement blocks to Razor control flow |
 | 510 | LoginViewTransform | Markup | Markup | Convert `<asp:LoginView>` → `<AuthorizeView>` |
 | 520 | SelectMethodTransform | Markup | Markup | Flag SelectMethod/InsertMethod/etc. |
-| 610 | AjaxToolkitPrefixTransform | Markup | Markup | Remove `ajaxToolkit:` prefixes |
+| 600 | AjaxToolkitPrefixTransform | Markup | Markup | Remove `ajaxToolkit:` prefixes |
+| 610 | AspPrefixTransform | Markup | Markup | Remove `asp:` prefixes from controls |
+| 615 | DataBindingAttributeTransform | Markup | Markup | Convert `<%# ... %>` and `<%= ... %>` attribute values to `@(...)` |
 | 615 | ValidatorGenericTypeTransform | Markup | Markup | Add explicit `Type="string"` / `InputType="string"` defaults for generic BWFC validators |
-| 620 | AspPrefixTransform | Markup | Markup | Remove `asp:` prefixes from controls |
+| 620 | TemplateFieldChildComponentsTransform | Markup | Markup | Wrap TemplateField style children in `<ChildComponents>` |
 | 700 | AttributeStripTransform | Markup | Markup | Remove `runat="server"`, `AutoEventWireup` |
-| 750 | EventWiringTransform | Markup | Markup | Convert `OnClick="X"` → `OnClick="@X"` |
-| 780 | UrlReferenceTransform | Markup | Markup | Convert `~/` paths to `/` |
+| 710 | EventWiringTransform | Markup | Markup | Convert `OnClick="X"` → `OnClick="@X"` |
+| 720 | UrlReferenceTransform | Markup | Markup | Convert `~/` paths to `/` |
+| 750 | ComponentRefMarkupTransform | Markup | Markup | Convert control IDs to `@ref`-compatible component references |
 | 800 | TemplatePlaceholderTransform | Markup | Markup | Convert `Item` → `context` in templates |
-| 810 | AttributeNormalizeTransform | Markup | Markup | Normalize attribute values (booleans, enums) |
+| 810 | AttributeNormalizeTransform | Markup | Markup | Normalize attribute values (booleans, enums, units) |
 | 820 | DataSourceIdTransform | Markup | Markup | Replace DataSourceID with Items binding |
 | 30 | GetRouteUrlTransform | Code-Behind | Code-Behind | Flag `Page.GetRouteUrl()` calls |
 | 50 | GetRouteUrlTransform | Markup | Markup | Flag `<%: Page.GetRouteUrl() %>` expressions |
@@ -243,7 +247,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 9. ExpressionTransform (Order: 400)
+### 9. ExpressionTransform (Order: 500)
 
 **Converts Web Forms expression syntax to Blazor.**
 
@@ -356,7 +360,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 13. AspPrefixTransform (Order: 620)
+### 13. AspPrefixTransform (Order: 610)
 
 **Removes `asp:` prefix from all ASP.NET server controls.**
 
@@ -380,7 +384,28 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 14. AttributeStripTransform (Order: 700)
+### 14. DataBindingAttributeTransform (Order: 615)
+
+**Converts Web Forms data-binding expressions that appear inside attribute values.**
+
+**Web Forms:**
+```html
+<asp:HyperLink NavigateUrl='<%# Item.GetUrl() %>' Text='<%# Item.Name %>' />
+```
+
+**Output:**
+```razor
+<HyperLink NavigateUrl='@(Item.GetUrl())' Text='@(Item.Name)' />
+```
+
+**What It Does:**
+- Targets attribute values that still contain `<%# ... %>` or `<%= ... %>` after the core expression pass
+- Preserves surrounding attributes while replacing the value with a Razor `@(...)` expression
+- Switches quote style when necessary so embedded C# string literals remain valid Razor
+
+---
+
+### 15. AttributeStripTransform (Order: 700)
 
 **Removes Web Forms-specific attributes.**
 
@@ -401,7 +426,7 @@ Removes:
 
 ---
 
-### 15. EventWiringTransform (Order: 750)
+### 16. EventWiringTransform (Order: 710)
 
 **Converts Web Forms event handler syntax to Blazor.**
 
@@ -419,7 +444,7 @@ Removes:
 
 ---
 
-### 16. UrlReferenceTransform (Order: 780)
+### 17. UrlReferenceTransform (Order: 720)
 
 **Converts ASP.NET virtual paths to absolute URLs.**
 

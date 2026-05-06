@@ -11,6 +11,7 @@ This tool **reduces manual migration effort** by:
 - Replacing Web Forms expressions with Blazor syntax
 - Applying semantic page-pattern rewrites after the core transform pass
 - Injecting explicit validator generic arguments for BWFC validation components
+- Converting `<%# ... %>` data-binding expressions that appear inside attribute values into Razor `@(...)` expressions
 - Generating compile-safe stubs for markup-referenced members that are still missing after code-behind conversion
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
 - Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
@@ -110,7 +111,7 @@ webforms-to-blazor convert \
 The tool applies an ordered transform pipeline and then a semantic pattern catalog:
 
 1. **Directives** (5) — Page, Master, Control, Register, Import directives
-2. **Markup** (16) — Controls, expressions, templates, validator typing, data binding
+2. **Markup** (17) — Controls, expressions, templates, validator typing, data binding
 3. **Code-Behind** (23) — Using statements, base classes, lifecycle, event handlers, markup-driven safety stubs
 
 See **[Transform Reference](transforms.md)** for the flat transform list and **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** for the bounded semantic pass that runs afterward.

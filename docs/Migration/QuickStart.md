@@ -107,9 +107,9 @@ After the migration script runs, verify these are in place (the script scaffolds
 - `IsPostBack` (false on first render, true on interactions)
 - `Session["key"]` (scoped in-memory dictionary)
 - `Response.Redirect("~/path")` (auto-strips `~/` and `.aspx`)
-- `Request.Url`, `Request.QueryString["key"]`, `Request.Form["key"]`
+- `Request.Url`, `Request.QueryString["key"]`, `Request.QueryString.Get("key")`, `Request.Form["key"]`
 - `Cache["key"]` (application-level cache)
-- `Server.MapPath("~/path")` (virtual → physical path)
+- `Server.MapPath("~/path")`, `System.Web.HttpUtility.UrlEncode()`, `System.Web.HttpUtility.HtmlEncode()`
 - `ClientScript.RegisterStartupScript(...)` (JS interop)
 
 Your Web Forms code-behind compiles **unchanged**. No manual conversion needed.
@@ -200,6 +200,7 @@ Response.Redirect("~/Product.aspx?id=5"); // becomes /Product/5 if routing confi
 
 // Request.QueryString — reads URL parameters
 var productId = Request.QueryString["id"];
+var productName = Request.QueryString.Get("name");
 
 // Request.Form — reads form POST data (requires <WebFormsForm> wrapper)
 var username = Request.Form["username"];

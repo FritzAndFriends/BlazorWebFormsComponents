@@ -54,6 +54,7 @@ class Program
         services.AddSingleton<IMarkupTransform, SelectMethodTransform>();
         services.AddSingleton<IMarkupTransform, AjaxToolkitPrefixTransform>();
         services.AddSingleton<IMarkupTransform, AspPrefixTransform>();
+        services.AddSingleton<IMarkupTransform, DataBindingAttributeTransform>();
         services.AddSingleton<IMarkupTransform, ValidatorGenericTypeTransform>();
         services.AddSingleton<IMarkupTransform, TemplateFieldChildComponentsTransform>();
         services.AddSingleton<IMarkupTransform, AttributeStripTransform>();

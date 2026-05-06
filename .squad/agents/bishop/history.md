@@ -110,3 +110,10 @@
 - Cart endpoints pattern: `MapGet("/AddToCart", ...)` and `MapGet("/RemoveFromCart", ...)` in Program.cs handle cart mutations as HTTP round-trips that update `CartSessionStore` and redirect. The Blazor `ShoppingCart` component reads from the same singleton at pre-render time.
 - Ambiguous route conflict: Blazor `@page` directives and Minimal API `MapGet` both claim the same URL. Solution: remove `@page` from the Blazor component (keep the component for rendering use) and let the Minimal API own the route.
 - Report: dev-docs\migration-tests\wingtiptoys\run34\report.md
+
+### 2026-05-06T15:12:13-04:00: Run 34 gap shims and attribute-binding transform (Bishop)
+- BaseStyledComponent now accepts Width/Height as plain Razor strings (`"500"`, `"500px"`, `"50%"`) by storing string parameters and parsing them back to `Unit` for the internal `IStyle` contract. Legacy quoted `Unit.Pixel(200)` strings are still parsed so existing samples/tests keep working.
+- Added `BlazorWebFormsComponents.QueryStringExtensions.Get(string)` so migrated `Request.QueryString.Get("key")` code compiles against the existing `RequestShim.QueryString` collection without rewriting callers.
+- Added `System.Web.HttpUtility` compatibility methods (`UrlEncode`, `UrlDecode`, `HtmlEncode`, `HtmlDecode`) backed by `System.Net.WebUtility`. Tests had to use reflection because the test graph also references the legacy `System.Web.HttpUtility` package, which makes direct symbol references ambiguous.
+- Added CLI `DataBindingAttributeTransform` (Order 615) and registered it in production/test pipelines so attribute values like `NavigateUrl='<%# Item.GetUrl() %>'` become `NavigateUrl='@(Item.GetUrl())'` after prefix stripping.
+- Validation: `dotnet build src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj --nologo`, `dotnet test src\BlazorWebFormsComponents.Test --nologo` (2895 passing per target), and `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo` (552 passing).

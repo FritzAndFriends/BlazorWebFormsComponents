@@ -189,6 +189,7 @@ public static class TestHelpers
             // Order 600-620: Prefix stripping, validator typing, TemplateField wrapping
             new AjaxToolkitPrefixTransform(),
             new AspPrefixTransform(),
+            new DataBindingAttributeTransform(),
             new ValidatorGenericTypeTransform(),
             new TemplateFieldChildComponentsTransform(),
             // Order 700-750: Attributes & refs
