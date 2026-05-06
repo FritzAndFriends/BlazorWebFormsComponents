@@ -119,6 +119,7 @@ public class ProjectScaffolder
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BwfcMigrationMode>true</BwfcMigrationMode>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>

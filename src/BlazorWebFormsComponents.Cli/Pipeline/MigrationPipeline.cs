@@ -4,6 +4,8 @@ using BlazorWebFormsComponents.Cli.Scaffolding;
 using BlazorWebFormsComponents.Cli.SemanticPatterns;
 using BlazorWebFormsComponents.Cli.Transforms;
 using Microsoft.Extensions.DependencyInjection;
+using NativeEdmxToEfCoreConverter = BlazorWebFormsComponents.Cli.Services.EdmxToEfCoreConverter;
+using NativeNuGetStaticAssetExtractor = BlazorWebFormsComponents.Cli.Services.NuGetStaticAssetExtractor;
 
 namespace BlazorWebFormsComponents.Cli.Pipeline;
 
@@ -23,8 +25,8 @@ public class MigrationPipeline
     private readonly SourceFileCopier? _sourceFileCopier;
     private readonly AppStartCopier? _appStartCopier;
     private readonly AppAssetInjector? _appAssetInjector;
-    private readonly NuGetStaticAssetExtractor? _nuGetStaticAssetExtractor;
-    private readonly EdmxConverterBridge? _edmxConverterBridge;
+    private readonly NativeNuGetStaticAssetExtractor? _nuGetStaticAssetExtractor;
+    private readonly NativeEdmxToEfCoreConverter? _edmxConverterBridge;
     private readonly RedirectHandlerAnnotator? _redirectHandlerAnnotator;
     private readonly SemanticPatternCatalog _semanticPatternCatalog;
 
@@ -45,8 +47,8 @@ public class MigrationPipeline
         SourceFileCopier sourceFileCopier,
         AppStartCopier appStartCopier,
         AppAssetInjector appAssetInjector,
-        NuGetStaticAssetExtractor nuGetStaticAssetExtractor,
-        EdmxConverterBridge edmxConverterBridge,
+        NativeNuGetStaticAssetExtractor nuGetStaticAssetExtractor,
+        NativeEdmxToEfCoreConverter edmxConverterBridge,
         RedirectHandlerAnnotator redirectHandlerAnnotator)
     {
         _markupTransforms = markupTransforms.OrderBy(t => t.Order).ToList();
@@ -341,6 +343,8 @@ public class MigrationPipeline
         {
             content = transform.Apply(content, metadata);
         }
+
+        metadata.MarkupContent = content;
         return content;
     }
 

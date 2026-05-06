@@ -19,6 +19,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 510 | LoginViewTransform | Markup | Markup | Convert `<asp:LoginView>` → `<AuthorizeView>` |
 | 520 | SelectMethodTransform | Markup | Markup | Flag SelectMethod/InsertMethod/etc. |
 | 610 | AjaxToolkitPrefixTransform | Markup | Markup | Remove `ajaxToolkit:` prefixes |
+| 615 | ValidatorGenericTypeTransform | Markup | Markup | Add explicit `Type="string"` / `InputType="string"` defaults for generic BWFC validators |
 | 620 | AspPrefixTransform | Markup | Markup | Remove `asp:` prefixes from controls |
 | 700 | AttributeStripTransform | Markup | Markup | Remove `runat="server"`, `AutoEventWireup` |
 | 750 | EventWiringTransform | Markup | Markup | Convert `OnClick="X"` → `OnClick="@X"` |
@@ -38,6 +39,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 25 | ResponseRedirectTransform | Code-Behind | Code-Behind | Convert `Response.Redirect()` → `NavigationManager.NavigateTo()` |
 | 40 | DataBindTransform | Code-Behind | Code-Behind | Flag `DataBind()` calls |
 | 50 | UrlCleanupTransform | Code-Behind | Code-Behind | Clean URL literals in code |
+| 900 | MarkupReferencedMemberStubTransform | Code-Behind | Code-Behind | Add fallback fields, render-method stubs, and event handlers for markup references still missing from emitted partial classes |
 
 ---
 

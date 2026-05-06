@@ -4,6 +4,8 @@ using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Pipeline;
 using BlazorWebFormsComponents.Cli.Scaffolding;
 using BlazorWebFormsComponents.Cli.SemanticPatterns;
+using NativeEdmxToEfCoreConverter = BlazorWebFormsComponents.Cli.Services.EdmxToEfCoreConverter;
+using NativeNuGetStaticAssetExtractor = BlazorWebFormsComponents.Cli.Services.NuGetStaticAssetExtractor;
 using BlazorWebFormsComponents.Cli.Transforms;
 
 namespace BlazorWebFormsComponents.Cli.Tests;
@@ -111,8 +113,8 @@ public class SemanticPatternCatalogTests : IDisposable
             new SourceFileCopier(outputWriter, []),
             new AppStartCopier(outputWriter),
             new AppAssetInjector(outputWriter),
-            new NuGetStaticAssetExtractor(new PowerShellScriptRunner()),
-            new EdmxConverterBridge(new PowerShellScriptRunner()),
+            new NativeNuGetStaticAssetExtractor(),
+            new NativeEdmxToEfCoreConverter(),
             new RedirectHandlerAnnotator(outputWriter));
 
         var context = new MigrationContext

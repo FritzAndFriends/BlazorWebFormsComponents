@@ -45,6 +45,7 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("Fritz.BlazorWebFormsComponents", csproj);
         Assert.Contains("<TargetFramework>net10.0</TargetFramework>", csproj);
         Assert.Contains("<Nullable>enable</Nullable>", csproj);
+        Assert.Contains("<EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>", csproj);
         Assert.Contains("Microsoft.NET.Sdk.Web", csproj);
     }
 

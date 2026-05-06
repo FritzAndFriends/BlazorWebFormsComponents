@@ -68,3 +68,28 @@
 - Verified all tests passing before archival
 
 **Outcome:** All semantic pattern contracts approved and production-ready.
+
+## Learnings
+
+### 2026-05-05T15:02:36-04:00: CLI compile-surface hardening for migrated apps (Bishop)
+
+- `src\BlazorWebFormsComponents.Cli\Scaffolding\ProjectScaffolder.cs` now emits `<EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>` so copied legacy C# files are not blocked by repo-level IDE style analyzers during generated-app builds.
+- Validator generic arguments must match BWFC component generic parameter names, not generic Razor conventions: `RequiredFieldValidator` needs `Type="string"`, while `CompareValidator` and `RangeValidator` need `InputType="string"`. The deterministic transform lives in `src\BlazorWebFormsComponents.Cli\Transforms\Markup\ValidatorGenericTypeTransform.cs`.
+- Compiled `.razor.cs` emission is safer when the pipeline scans transformed markup for unresolved `@Method()`, `@_field`, and `OnClick="@Handler"` references and appends fallback stubs after the main code-behind transforms. The implementation lives in `src\BlazorWebFormsComponents.Cli\Transforms\CodeBehind\MarkupReferencedMemberStubTransform.cs` and depends on `MigrationPipeline.TransformMarkup()` persisting `metadata.MarkupContent`.
+- Regression coverage for these fixes lives in `tests\BlazorWebFormsComponents.Cli.Tests\TransformUnit\ValidatorGenericTypeTransformTests.cs`, `tests\BlazorWebFormsComponents.Cli.Tests\TransformUnit\MarkupReferencedMemberStubTransformTests.cs`, `tests\BlazorWebFormsComponents.Cli.Tests\TransformUnit\CompiledCodeBehindStubPipelineTests.cs`, and `tests\BlazorWebFormsComponents.Cli.Tests\ScaffoldingTests.cs`.
+- Verified command: `dotnet test .\tests\BlazorWebFormsComponents.Cli.Tests --nologo` (499 passed).
+
+### 2026-05-06T09:16:32-04:00: CLI-only deprecation audit for migration tooling (Bishop)
+
+- `migration-toolkit\scripts\bwfc-migrate.ps1` is now only a thin wrapper: it resolves the CLI project, forwards to `dotnet run --project ... -- migrate|prescan`, and returns before the legacy PowerShell implementation executes.
+- The C# `MigrationPipeline` already owns scaffold/config/markup/code-behind/static/source/App_Start/redirect orchestration, but it still bridges `Migrate-NugetStaticAssets.ps1` and `Convert-EdmxToEfCore.ps1` through `NuGetStaticAssetExtractor` and `EdmxConverterBridge`.
+- `bwfc-scan.ps1` still has no CLI equivalent; `PrescanAnalyzer` only covers C# migration-pattern scanning and currently omits the old PowerShell `BWFC021` master-page rule.
+- The deprecation roadmap is captured in `dev-docs\cli-migration-plan.md`, with P0 focus on removing internal PowerShell runtime dependencies and adding CLI-first replacements for scan/assets/edmx workflows.
+
+### 2026-05-06T10:08:56-04:00: Native CLI replacements for assets and EDMX helpers (Bishop)
+
+- Added native C# services at `src\BlazorWebFormsComponents.Cli\Services\NuGetStaticAssetExtractor.cs` and `src\BlazorWebFormsComponents.Cli\Services\EdmxToEfCoreConverter.cs`, and rewired `Program.cs` plus `MigrationPipeline` to use them instead of the PowerShell bridge classes.
+- The asset extractor now supports `packages.config` and top-level `PackageReference`, searches legacy `packages\` folders plus the global NuGet cache, writes `asset-manifest.json` and `AssetReferences.html`, and honors a manifest-only mode without copying files.
+- The EDMX converter now parses conceptual/mapping metadata with `System.Xml.Linq`, generates POCO entities plus a DbContext with relationship configuration, and returns graceful failures for missing or invalid EDMX input.
+- Added first-class CLI entrypoints for `scan`, `assets extract`, and `edmx convert`, then updated all four migration-toolkit PowerShell scripts with deprecation banners that point to the CLI command to use instead.
+- Regression coverage lives in `tests\BlazorWebFormsComponents.Cli.Tests\Services\NuGetStaticAssetExtractorTests.cs` and `tests\BlazorWebFormsComponents.Cli.Tests\Services\EdmxToEfCoreConverterTests.cs`; verified with `dotnet build src\BlazorWebFormsComponents.Cli\BlazorWebFormsComponents.Cli.csproj` and `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`.

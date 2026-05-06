@@ -7,6 +7,8 @@ using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Pipeline;
 using BlazorWebFormsComponents.Cli.Scaffolding;
 using BlazorWebFormsComponents.Cli.SemanticPatterns;
+using NativeEdmxToEfCoreConverter = BlazorWebFormsComponents.Cli.Services.EdmxToEfCoreConverter;
+using NativeNuGetStaticAssetExtractor = BlazorWebFormsComponents.Cli.Services.NuGetStaticAssetExtractor;
 
 namespace BlazorWebFormsComponents.Cli.Tests;
 
@@ -61,8 +63,8 @@ public class PipelineIntegrationTests : IDisposable
             new SourceFileCopier(outputWriter, codeBehindTransforms),
             new AppStartCopier(outputWriter),
             new AppAssetInjector(outputWriter),
-            new NuGetStaticAssetExtractor(new PowerShellScriptRunner()),
-            new EdmxConverterBridge(new PowerShellScriptRunner()),
+            new NativeNuGetStaticAssetExtractor(),
+            new NativeEdmxToEfCoreConverter(),
             new RedirectHandlerAnnotator(outputWriter));
     }
 

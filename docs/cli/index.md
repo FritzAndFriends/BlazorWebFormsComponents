@@ -10,9 +10,11 @@ This tool **reduces manual migration effort** by:
 - Converting ASP.NET server controls to BWFC components
 - Replacing Web Forms expressions with Blazor syntax
 - Applying semantic page-pattern rewrites after the core transform pass
+- Injecting explicit validator generic arguments for BWFC validation components
+- Generating compile-safe stubs for markup-referenced members that are still missing after code-behind conversion
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
 - Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
-- Scaffolding a new .NET 10 Blazor SSR project structure with shims and services
+- Scaffolding a new .NET 10 Blazor SSR project structure with shims, services, and relaxed code-style build enforcement for copied legacy files
 
 The tool processes `.aspx`, `.ascx`, and `.master` files in a fixed sequence, then applies a bounded semantic pattern catalog so each higher-level rewrite builds on a normalized page shape.
 
@@ -108,8 +110,8 @@ webforms-to-blazor convert \
 The tool applies an ordered transform pipeline and then a semantic pattern catalog:
 
 1. **Directives** (5) — Page, Master, Control, Register, Import directives
-2. **Markup** (19) — Controls, expressions, templates, data binding
-3. **Code-Behind** (9) — Using statements, base classes, lifecycle, event handlers
+2. **Markup** (16) — Controls, expressions, templates, validator typing, data binding
+3. **Code-Behind** (23) — Using statements, base classes, lifecycle, event handlers, markup-driven safety stubs
 
 See **[Transform Reference](transforms.md)** for the flat transform list and **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** for the bounded semantic pass that runs afterward.
 

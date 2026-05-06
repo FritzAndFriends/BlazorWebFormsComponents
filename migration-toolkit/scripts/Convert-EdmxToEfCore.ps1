@@ -1,3 +1,13 @@
+Write-Warning @"
+╔══════════════════════════════════════════════════════════════╗
+║  DEPRECATED: This script is deprecated.                     ║
+║  Use the CLI tool instead:                                  ║
+║    webforms-to-blazor edmx convert --input <src>            ║
+║      --output <out>                                         ║
+║  See: docs/cli/index.md                                     ║
+╚══════════════════════════════════════════════════════════════╝
+"@
+
 <#
 .SYNOPSIS
     Converts an Entity Framework 6 EDMX file to EF Core entity classes and DbContext.

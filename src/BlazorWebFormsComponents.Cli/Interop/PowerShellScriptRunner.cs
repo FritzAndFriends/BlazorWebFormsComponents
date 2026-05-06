@@ -1,45 +1,11 @@
-using System.Diagnostics;
-
 namespace BlazorWebFormsComponents.Cli.Interop;
 
+[Obsolete("The CLI no longer shells out to PowerShell. Use native C# services instead.")]
 public class PowerShellScriptRunner
 {
-    public async Task<PowerShellScriptResult> RunAsync(string scriptPath, IReadOnlyList<string> arguments)
+    public Task<PowerShellScriptResult> RunAsync(string scriptPath, IReadOnlyList<string> arguments)
     {
-        var shell = OperatingSystem.IsWindows() ? "powershell" : "pwsh";
-        var quotedArguments = string.Join(" ", arguments.Select(QuoteArgument));
-        var psi = new ProcessStartInfo
-        {
-            FileName = shell,
-            Arguments = $"-NoProfile -ExecutionPolicy Bypass -File {QuoteArgument(scriptPath)} {quotedArguments}",
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using var process = new Process { StartInfo = psi };
-        process.Start();
-
-        var stdoutTask = process.StandardOutput.ReadToEndAsync();
-        var stderrTask = process.StandardError.ReadToEndAsync();
-        await process.WaitForExitAsync();
-
-        return new PowerShellScriptResult(
-            process.ExitCode,
-            await stdoutTask,
-            await stderrTask);
-    }
-
-    private static string QuoteArgument(string value)
-    {
-        if (string.IsNullOrEmpty(value))
-            return "\"\"";
-
-        if (!value.Contains(' ') && !value.Contains('"'))
-            return value;
-
-        return $"\"{value.Replace("\"", "\\\"")}\"";
+        throw new NotSupportedException("PowerShell script execution has been removed from the CLI runtime.");
     }
 }
 

@@ -184,9 +184,10 @@ public static class TestHelpers
             // Order 510-520: Semantic controls
             new LoginViewTransform(),
             new SelectMethodTransform(),
-            // Order 600-610: Prefix stripping (Ajax before Asp)
+            // Order 600-620: Prefix stripping and validator typing
             new AjaxToolkitPrefixTransform(),
             new AspPrefixTransform(),
+            new ValidatorGenericTypeTransform(),
             // Order 700-750: Attributes & refs
             new AttributeStripTransform(),
             new EventWiringTransform(),
@@ -222,6 +223,7 @@ public static class TestHelpers
             new DataBindTransform(),
             new ClientScriptTransform(),
             new UrlCleanupTransform(),
+            new MarkupReferencedMemberStubTransform(),
         };
 
         return new MigrationPipeline(markupTransforms, codeBehindTransforms, CreateDefaultSemanticPatterns());
