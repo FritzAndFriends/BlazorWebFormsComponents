@@ -1,9 +1,54 @@
-@page "/Account/TwoFactorAuthenticationSignIn"
-
-<PageTitle>Two-factor authentication sign in</PageTitle>
+@page "/TwoFactorAuthenticationSignIn"
+<PageTitle>Two-Factor Authentication</PageTitle>
 <Site>
-    <Content ContentPlaceHolderID="MainContent">
-        <h1>Two-factor authentication sign in</h1>
-        <p>Two-factor authentication is not implemented in the migrated benchmark sample.</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+                <h2>@(Title).</h2>
+            <PlaceHolder id="sendcode" @ref="sendcode">
+                <section>
+                    <h4>Send verification code</h4>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            Select Two-Factor Authentication Provider:
+                    <DropDownList ItemType="object" id="Providers" @ref="Providers">
+                    </DropDownList>
+                            <Button Text="Submit" id="ProviderSubmit" @ref="ProviderSubmit" OnClick="@ProviderSubmit_Click" CssClass="btn btn-default" />
+                        </div>
+                    </div>
+                </section>
+            </PlaceHolder>
+            <PlaceHolder id="verifycode" @ref="verifycode" Visible="false">
+                <section>
+                    <h4>Enter verification code</h4>
+                    <hr />
+                    <HiddenField id="SelectedProvider" @ref="SelectedProvider" />
+                    <PlaceHolder id="ErrorMessage" @ref="ErrorMessage" Visible="false">
+                        <p class="text-danger">
+                            <Literal id="FailureText" @ref="FailureText" />
+                        </p>
+                    </PlaceHolder>
+                    <div class="form-group">
+                        <Label Text="Code:" AssociatedControlID="Code" CssClass="col-md-2 control-label" />
+                        <div class="col-md-10">
+                            <TextBox id="Code" @ref="Code" CssClass="form-control" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <div class="checkbox">
+                                <Label Text="Remember Browser" />
+                                <CheckBox Text="" id="RememberBrowser" @ref="RememberBrowser" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-offset-2 col-md-10">
+                            <Button Text="Submit" id="CodeSubmit" @ref="CodeSubmit" OnClick="@CodeSubmit_Click" CssClass="btn btn-default" />
+                        </div>
+                    </div>
+                </section>
+            </PlaceHolder>
+        </Content>
+    </ChildComponents>
 </Site>

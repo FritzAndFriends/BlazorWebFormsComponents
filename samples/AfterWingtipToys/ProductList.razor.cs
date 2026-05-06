@@ -1,71 +1,42 @@
-// =============================================================================
-// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
-//
-// Common transforms needed (use the BWFC Copilot skill for assistance):
-//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
-//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
-//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
-//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
-//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
-//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
-//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
-//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
-//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
-//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
-//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
-//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
-//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
-//   TODO(bwfc-general): User controls → Blazor component references
-// =============================================================================
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.AspNetCore.Components;
+using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
+
 namespace WingtipToys
 {
   public partial class ProductList
   {
-    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
-
-    // --- Request.Form Migration ---
-    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
-    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
-    // Form keys found: key
-    // For non-page classes, inject RequestShim via DI.
+    [Inject] private ProductContext Db { get; set; } = default!;
 
     private ListView<Product> productList = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
-    protected override async Task OnInitializedAsync()
+    [Parameter, SupplyParameterFromQuery(Name = "id")]
+    public int? CategoryId { get; set; }
+
+    [Parameter]
+    public string? CategoryName { get; set; }
+
+    protected IReadOnlyList<Product> Products { get; private set; } = [];
+
+    protected override async Task OnParametersSetAsync()
     {
-        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
-        await base.OnInitializedAsync();
+      await base.OnParametersSetAsync();
 
+      IQueryable<Product> query = Db.Products
+        .Include(p => p.Category)
+        .OrderBy(p => p.ProductID);
 
-    }
-
-    public IQueryable<Product> GetProducts(
-                        [QueryString("id")] int? categoryId,
-                        [RouteData] string categoryName)
-    {
-      var _db = new WingtipToys.Models.ProductContext();
-      IQueryable<Product> query = _db.Products;
-
-      if (categoryId.HasValue && categoryId > 0)
+      if (CategoryId.HasValue && CategoryId.Value > 0)
       {
-        query = query.Where(p => p.CategoryID == categoryId);
+        query = query.Where(p => p.CategoryID == CategoryId.Value);
       }
 
-      if (!String.IsNullOrEmpty(categoryName))
+      if (!string.IsNullOrWhiteSpace(CategoryName))
       {
-        query = query.Where(p =>
-                            String.Compare(p.Category.CategoryName,
-                            categoryName) == 0);
+        query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
       }
-      return query;
+
+      Products = await query.ToListAsync();
     }
   }
 }

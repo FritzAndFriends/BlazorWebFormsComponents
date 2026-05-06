@@ -1,0 +1,16 @@
+// TODO: Review — 'Startup.cs' was quarantined from the generated Blazor SSR compile surface.
+// TODO: Reason — Legacy bootstrap file 'Startup.cs' was quarantined from the generated compile surface.
+// TODO: Move or rewrite only the relevant pieces into Program.cs, services, middleware, or application code.
+
+using Microsoft.Owin;
+using Owin;
+
+[assembly: OwinStartupAttribute(typeof(WingtipToys.Startup))]
+namespace WingtipToys
+{
+    public partial class Startup {
+        public void Configuration(IAppBuilder app) {
+            ConfigureAuth(app);
+        }
+    }
+}

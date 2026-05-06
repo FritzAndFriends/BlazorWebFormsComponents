@@ -1,9 +1,25 @@
-@page "/Checkout/CheckoutError"
-
-<PageTitle>Checkout Error</PageTitle>
+@page "/CheckoutError"
+<PageTitle></PageTitle>
 <Site>
-    <Content ContentPlaceHolderID="MainContent">
-        <h1>Checkout Error</h1>
-        <p>Checkout is not implemented in the migrated benchmark sample.</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>Checkout Error</h1>
+            <p></p>
+        	<table id="ErrorTable">
+        		<tr>
+        			<td class="field"></td>
+        			<td>@(Request.QueryString.Get("ErrorCode"))</td>
+        		</tr>
+        		<tr>
+        			<td class="field"></td>
+        			<td>@(Request.QueryString.Get("Desc"))</td>
+        		</tr>
+        		<tr>
+        			<td class="field"></td>
+        			<td>@(Request.QueryString.Get("Desc2"))</td>
+        		</tr>
+        	</table>
+            <p></p>
+        </Content>
+    </ChildComponents>
 </Site>

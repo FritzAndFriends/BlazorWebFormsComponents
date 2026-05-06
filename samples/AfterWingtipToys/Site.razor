@@ -1,14 +1,23 @@
-@inject CatalogService Catalog
-@inject CartService Cart
-@inject UserStoreService UserStore
+@* TODO(bwfc-master-page): Review shell scripts, bundle references, and auth/cart chrome for SSR-safe migration. *@
 
 <MasterPage>
-    <Head>
-        <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-    </Head>
-    <ChildContent>
+<Head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(Page.Title) - Wingtip Toys</title>
+
+    <PlaceHolder>
+        @* Legacy Web Forms bundling removed for Blazor SSR. *@
+    </PlaceHolder>
+    @* Legacy CSS bundling removed for Blazor SSR. *@
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+</Head>
+<ChildContent>
+    @ChildComponents
+        <ScriptManager />
+
         <div class="navbar navbar-inverse navbar-fixed-top">
-            <div class="container-fluid" style="min-height: 70px;">
+            <div class="container">
                 <div class="navbar-header">
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
                         <span class="icon-bar"></span>
@@ -19,66 +28,58 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
+                        <li><a id="adminLink" visible="false"
+                          href="/Admin/AdminPage">Admin</a></li>
                         <li><a href="/">Home</a></li>
                         <li><a href="/About">About</a></li>
                         <li><a href="/Contact">Contact</a></li>
-                        <li><a href="/ProductList">ProductList</a></li>
-                        <li><a href="/ShoppingCart">Cart (@Cart.GetCount())</a></li>
+                        <li><a href="/ProductList">Products</a></li>
+                        <li><a href="/ShoppingCart" id="cartCount">&nbsp;</a></li>
                     </ul>
-                    @if (string.IsNullOrWhiteSpace(CurrentUserEmail))
-                    {
-                        <ul class="nav navbar-nav navbar-right">
-                            <li><a href="/Account/Register">Register</a></li>
-                            <li><a href="/Account/Login">Log in</a></li>
-                        </ul>
-                    }
-                    else
-                    {
-                        <ul class="nav navbar-nav navbar-right">
-                            <li><a href="/Account/Manage" title="Manage your account">Hello, @CurrentUserEmail!</a></li>
-                            <li><a href="/Account/Logout">Log out</a></li>
-                        </ul>
-                    }
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/Account/Register">Register</a></li>
+                        <li><a href="/Account/Login">Log in</a></li>
+                    </ul>
                 </div>
             </div>
         </div>
-
-        <div id="TitleContent" style="text-align: center; margin-top: 70px;">
+        <div id="TitleContent" style="text-align: center">
             <a href="/">
-                <img src="/Images/logo.jpg" alt="Wingtip Toys" />
+                <Image  id="Image1" @ref="Image1" ImageUrl="/Images/logo.jpg" BorderStyle="@BorderStyle.None" />
             </a>
             <br />
         </div>
-
-        <div id="CategoryMenu" style="text-align: center; margin-bottom: 20px;">
-            @foreach (var category in Catalog.GetCategories())
-            {
-                <span style="font-size: large; font-style: normal; margin: 0 8px;">
-                    <a href="/ProductList?id=@category.CategoryID">@category.CategoryName</a>
-                </span>
-            }
+        <div id="CategoryMenu" style="text-align: center">
+            <ListView id="categoryList" @ref="categoryList"
+                TItem="Category"
+                Items="Categories" >
+                <ItemTemplate Context="Item">
+                    <b style="font-size: large; font-style: normal">
+                    <a href="@($"/Category/{Uri.EscapeDataString(Item.CategoryName)}")">
+                        @Item.CategoryName
+                    </a>
+                    </b>
+                </ItemTemplate>
+                <ItemSeparatorTemplate>  |  </ItemSeparatorTemplate>
+            </ListView>
         </div>
-
-        <div class="container body-content" role="main" style="min-height: 420px;">
-            <ContentPlaceHolder ID="MainContent" />
+        <div class="container body-content">
+            <ContentPlaceHolder id="MainContent" @ref="MainContent">
+            </ContentPlaceHolder>
             <hr />
             <footer>
                 <p>&copy; 2013 - Wingtip Toys</p>
             </footer>
         </div>
-    </ChildContent>
-    <ChildComponents>
-        @ChildComponents
-        @ChildContent
-    </ChildComponents>
+    
+@ChildContent
+</ChildContent>
 </MasterPage>
 
 @code {
     [Parameter]
-    public RenderFragment? ChildComponents { get; set; }
-
-    [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
-    private string? CurrentUserEmail => UserStore.GetCurrentUserEmail();
+    [Parameter]
+    public RenderFragment? ChildComponents { get; set; }
 }

@@ -1,16 +1,11 @@
 @page "/ShoppingCart"
-@inject CartService Cart
-@inject NavigationManager Navigation
-
 <PageTitle>Shopping Cart</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            <div id="ShoppingCartTitle" class="ContentHead">
-                <h1>Shopping Cart</h1>
-            </div>
+            <div id="ShoppingCartTitle" class="ContentHead"><h1>@ShoppingCartTitleText</h1></div>
 
-            @if (Items.Count == 0)
+            @if (ShoppingCartItems.Count == 0)
             {
                 <p>Your shopping cart is empty.</p>
             }
@@ -28,23 +23,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var item in Items)
+                        @foreach (var item in ShoppingCartItems)
                         {
                             <tr>
-                                <td>@item.Product.ProductID</td>
-                                <td>@item.Product.ProductName</td>
-                                <td>@($"{item.Product.UnitPrice:c}")</td>
+                                <td>@item.ProductId</td>
+                                <td>@item.Product?.ProductName</td>
+                                <td>@($"{item.Product?.UnitPrice:c}")</td>
                                 <td>
-                                    <form method="get" action="/Cart/Update" class="form-inline">
-                                        <input type="hidden" name="productId" value="@item.Product.ProductID" />
-                                        <input type="number" min="1" name="quantity" value="@item.Quantity" class="form-control" style="width: 80px;" />
+                                    <form method="get" action="/ShoppingCart/Update">
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                        <input type="number" min="1" name="quantity" value="@item.Quantity" style="width:60px" />
                                         <button type="submit" class="btn btn-default">Update</button>
                                     </form>
                                 </td>
-                                <td>@($"{item.Product.UnitPrice * item.Quantity:c}")</td>
+                                <td>@($"{(Convert.ToDouble(item.Quantity) * Convert.ToDouble(item.Product?.UnitPrice ?? 0)):c}")</td>
                                 <td>
-                                    <form method="get" action="/Cart/Remove">
-                                        <input type="hidden" name="productId" value="@item.Product.ProductID" />
+                                    <form method="get" action="/ShoppingCart/Remove">
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
                                         <button type="submit" class="btn btn-link">Remove</button>
                                     </form>
                                 </td>
@@ -53,32 +48,10 @@
                     </tbody>
                 </table>
 
-                <p>
-                    <strong>Order Total:</strong> @($"{Cart.GetTotal():c}")
-                </p>
+                <div>
+                    <strong>Order Total: @OrderTotalText</strong>
+                </div>
             }
         </Content>
     </ChildComponents>
 </Site>
-
-@code {
-    private IReadOnlyList<CartService.CartLine> Items => Cart.GetItems();
-
-    protected override void OnParametersSet()
-    {
-        var addProductId = TryGetIntQueryValue("addProductId");
-        if (addProductId.HasValue)
-        {
-            Cart.AddToCart(addProductId.Value);
-        }
-    }
-
-    private int? TryGetIntQueryValue(string key)
-    {
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-        return query.TryGetValue(key, out var value) && int.TryParse(value, out var parsed)
-            ? parsed
-            : null;
-    }
-}

@@ -1,9 +1,16 @@
-@page "/Checkout/CheckoutComplete"
-
-<PageTitle>Checkout Complete</PageTitle>
+@page "/CheckoutComplete"
+<PageTitle></PageTitle>
 <Site>
-    <Content ContentPlaceHolderID="MainContent">
-        <h1>Checkout Complete</h1>
-        <p>Checkout is not implemented in the migrated benchmark sample.</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>Checkout Complete</h1>
+            <p></p>
+            <h3>Payment Transaction ID:</h3> <Label id="TransactionId" @ref="TransactionId"></Label>
+            <p></p>
+            <h3>Thank You!</h3>
+            <p></p>
+            <hr />
+            <Button id="Continue" @ref="Continue" Text="Continue Shopping" OnClick="@Continue_Click" />
+        </Content>
+    </ChildComponents>
 </Site>

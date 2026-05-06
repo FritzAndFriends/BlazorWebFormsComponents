@@ -1,9 +1,11 @@
 @page "/About"
-
 <PageTitle>About</PageTitle>
 <Site>
-    <Content ContentPlaceHolderID="MainContent">
-        <h1>About</h1>
-        <p>Wingtip Toys is a sample storefront focused on transportation-themed toys and a migration-friendly shopping experience.</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h2>@(Title).</h2>
+            <h3>Your application description page.</h3>
+            <p>Use this area to provide additional information.</p>
+        </Content>
+    </ChildComponents>
 </Site>

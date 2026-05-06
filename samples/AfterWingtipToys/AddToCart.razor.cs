@@ -49,22 +49,27 @@ namespace WingtipToys
         // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
         await base.OnInitializedAsync();
 
-      string rawId = Request.QueryString["ProductID"];
+      string rawId = Request.QueryString["ProductID"].ToString();
+      if (string.IsNullOrWhiteSpace(rawId))
+      {
+        rawId = Request.QueryString["productID"].ToString();
+      }
+
       int productId;
       if (!String.IsNullOrEmpty(rawId) && int.TryParse(rawId, out productId))
       {
         using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
         {
-          usersShoppingCart.AddToCart(Convert.ToInt16(rawId));
+          usersShoppingCart.AddToCart(productId);
         }
-
       }
       else
       {
         Debug.Fail("ERROR : We should never get to AddToCart.aspx without a ProductId.");
         throw new Exception("ERROR : It is illegal to load AddToCart.aspx without setting a ProductId.");
       }
-      Response.Redirect("ShoppingCart.aspx");
+
+      Response.Redirect("/ShoppingCart");
     }
   }
 }
