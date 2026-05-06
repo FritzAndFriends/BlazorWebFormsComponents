@@ -179,7 +179,8 @@ public static class TestHelpers
             // Order 300-310: Content/Form wrappers
             new ContentWrapperTransform(),
             new FormWrapperTransform(),
-            // Order 500: Expressions
+            // Order 490-500: Expressions
+            new DisplayExpressionTransform(),
             new ExpressionTransform(),
             // Order 510: Statement block conversion (before LoginViewTransform)
             new ServerCodeBlockTransform(),
@@ -208,7 +209,9 @@ public static class TestHelpers
             new TodoHeaderTransform(),
             new UsingStripTransform(),
             new IdentityUsingTransform(),
+            new HttpUtilityRewriteTransform(),
             new EntityFrameworkTransform(),
+            new EfContextConstructorTransform(),
             new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),
             new ClassNameAlignTransform(),

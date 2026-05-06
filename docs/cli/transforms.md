@@ -15,6 +15,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 250 | MasterPageTransform | Markup | Markup | Convert master markup to runnable `<MasterPage>` shell syntax |
 | 300 | ContentWrapperTransform | Markup | Markup | Wrap loose content in `<div>` if needed |
 | 310 | FormWrapperTransform | Markup | Markup | Convert `<form runat="server">` to Blazor form |
+| 490 | DisplayExpressionTransform | Markup | Markup | Normalize `<%#:` / `<%=:` display expressions and broken `@(: expr)` output to valid Razor |
 | 500 | ExpressionTransform | Markup | Markup | Convert `<%: %>`, `<%= %>`, and inline data expressions to Razor |
 | 510 | ServerCodeBlockTransform | Markup | Markup | Convert `<% ... %>` statement blocks to Razor control flow |
 | 510 | LoginViewTransform | Markup | Markup | Convert `<asp:LoginView>` → `<AuthorizeView>` |
@@ -43,6 +44,8 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 25 | ResponseRedirectTransform | Code-Behind | Code-Behind | Convert `Response.Redirect()` → `NavigationManager.NavigateTo()` |
 | 40 | DataBindTransform | Code-Behind | Code-Behind | Flag `DataBind()` calls |
 | 50 | UrlCleanupTransform | Code-Behind | Code-Behind | Clean URL literals in code |
+| 104 | HttpUtilityRewriteTransform | Code-Behind | Code-Behind | Rewrite `HttpUtility.*` calls to `WebUtility.*` and add `using System.Net;` |
+| 106 | EfContextConstructorTransform | Code-Behind | Code-Behind | Rewrite EF6 `base("name")` DbContext constructors to EF Core `DbContextOptions<TContext>` constructors |
 | 900 | MarkupReferencedMemberStubTransform | Code-Behind | Code-Behind | Add fallback fields, render-method stubs, and event handlers for markup references still missing from emitted partial classes |
 
 ---

@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Io;
 
@@ -9,6 +10,10 @@ namespace BlazorWebFormsComponents.Cli.Scaffolding;
 /// </summary>
 public class ProjectScaffolder
 {
+    private static readonly Regex SystemWebHttpUtilityPackageRegex = new(
+        @"^\s*<PackageReference Include=""System\.Web\.HttpUtility"".*?/?>\s*$\r?\n?",
+        RegexOptions.Compiled | RegexOptions.Multiline);
+
     private readonly DatabaseProviderDetector _dbDetector;
 
     public ProjectScaffolder(DatabaseProviderDetector dbDetector)
@@ -112,7 +117,7 @@ public class ProjectScaffolder
 
         var bwfcReference = ResolveBwfcReference(outputRoot);
 
-        return $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        var csproj = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -128,7 +133,12 @@ public class ProjectScaffolder
 
 </Project>
 ";
+
+        return StripUnsupportedPackages(csproj);
     }
+
+    private static string StripUnsupportedPackages(string csproj)
+        => SystemWebHttpUtilityPackageRegex.Replace(csproj, string.Empty);
 
     private static string ResolveBwfcReference(string outputRoot)
     {

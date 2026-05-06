@@ -16,12 +16,12 @@ public class ServerShimTests
     private const string ContentRoot = @"C:\app";
     private const string WebRoot = @"C:\app\wwwroot";
 
-    private ServerShim CreateShim(string? webRootPath = WebRoot)
+    private ServerShim CreateShim(string? webRootPath = WebRoot, MockNavigationManager? navigationManager = null)
     {
         var mockEnv = new Mock<IWebHostEnvironment>();
         mockEnv.Setup(e => e.ContentRootPath).Returns(ContentRoot);
         mockEnv.Setup(e => e.WebRootPath).Returns(webRootPath!);
-        return new ServerShim(mockEnv.Object);
+        return new ServerShim(mockEnv.Object, navigationManager);
     }
 
     #region MapPath
@@ -148,6 +148,37 @@ public class ServerShimTests
         var decoded = shim.UrlDecode(encoded);
 
         decoded.ShouldBe(original);
+    }
+
+    #endregion
+
+    #region Transfer / Error compatibility
+
+    [Fact]
+    public void GetLastError_ReturnsNull()
+    {
+        var shim = CreateShim();
+
+        shim.GetLastError().ShouldBeNull();
+    }
+
+    [Fact]
+    public void ClearError_DoesNotThrow()
+    {
+        var shim = CreateShim();
+
+        Should.NotThrow(() => shim.ClearError());
+    }
+
+    [Fact]
+    public void Transfer_NavigatesToTargetPath()
+    {
+        var nav = new MockNavigationManager();
+        var shim = CreateShim(navigationManager: nav);
+
+        shim.Transfer("/products/details");
+
+        nav.LastUri.ShouldBe("/products/details");
     }
 
     #endregion

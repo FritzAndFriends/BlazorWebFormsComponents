@@ -109,10 +109,11 @@ After the migration script runs, verify these are in place (the script scaffolds
 - `Response.Redirect("~/path")` (auto-strips `~/` and `.aspx`)
 - `Request.Url`, `Request.QueryString["key"]`, `Request.QueryString.Get("key")`, `Request.Form["key"]`
 - `Cache["key"]` (application-level cache)
-- `Server.MapPath("~/path")`, `System.Web.HttpUtility.UrlEncode()`, `System.Web.HttpUtility.HtmlEncode()`
+- `Server.MapPath("~/path")`, `Server.Transfer("~/path")`, `Server.GetLastError()`, `Server.ClearError()`
+- `System.Web.HttpUtility.UrlEncode()` and `HtmlEncode()` are rewritten by the CLI to `WebUtility.*`
 - `ClientScript.RegisterStartupScript(...)` (JS interop)
 
-Your Web Forms code-behind compiles **unchanged**. No manual conversion needed.
+Your Web Forms code-behind compiles with minimal manual conversion. Most preserved APIs stay unchanged, and `HttpUtility` calls are normalized automatically during Layer 1.
 
 **`Program.cs`** — register BWFC services:
 ```csharp
@@ -124,11 +125,11 @@ builder.Services.AddBlazorWebFormsComponents();
 - Registers `ResponseShim` (handles `Response.Redirect`, `Response.Write`)
 - Registers `RequestShim` (provides `Request.QueryString`, `Request.Form`, `Request.Url`)
 - Registers `CacheShim` (in-memory application cache)
-- Registers `ServerShim` (provides `Server.MapPath`)
+- Registers `ServerShim` (provides `Server.MapPath`, `Server.Transfer`, and error-method compatibility)
 - Registers `ClientScriptShim` (JS interop for `ClientScript.RegisterStartupScript`)
 - Registers `ViewStateShim` (compile-compatible dictionary)
 
-After this single call, all Web Forms APIs work AS-IS in your migrated code — no manual conversion required.
+After this single call, most Web Forms APIs work AS-IS in your migrated code. `HttpUtility` is handled by the CLI through inline `WebUtility` rewrites during Layer 1.
 
 **Layout (`MainLayout.razor`)** — add the Page render component:
 ```razor
@@ -166,7 +167,7 @@ Alternatively, point Copilot at the BWFC migration skill directly:
 
 Open each migrated `.razor` file and work through the structural transforms that the script couldn't handle. These are the patterns Copilot handles well with the migration skill:
 
-> 💡 **Many Web Forms API calls now compile unchanged thanks to BWFC shims.** `Response.Redirect`, `Session["key"]`, `IsPostBack`, `Page.Title`, `Request.QueryString`, `Cache`, and `Server.MapPath` all work AS-IS — no conversion needed. Focus Layer 2 effort on data binding, templates, and event handler signatures.
+> 💡 **Many Web Forms API calls now compile unchanged thanks to BWFC shims.** `Response.Redirect`, `Session["key"]`, `IsPostBack`, `Page.Title`, `Request.QueryString`, `Cache`, and `Server.*` all work AS-IS. `HttpUtility` is rewritten automatically to `WebUtility` during Layer 1. Focus Layer 2 effort on data binding, templates, and event handler signatures.
 
 | Transform | What To Do |
 |---|---|

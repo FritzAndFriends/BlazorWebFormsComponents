@@ -47,6 +47,7 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("<Nullable>enable</Nullable>", csproj);
         Assert.Contains("<EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>", csproj);
         Assert.Contains("Microsoft.NET.Sdk.Web", csproj);
+        Assert.DoesNotContain("System.Web.HttpUtility", csproj);
     }
 
     [Fact]

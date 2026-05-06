@@ -117,3 +117,18 @@
 - Added `System.Web.HttpUtility` compatibility methods (`UrlEncode`, `UrlDecode`, `HtmlEncode`, `HtmlDecode`) backed by `System.Net.WebUtility`. Tests had to use reflection because the test graph also references the legacy `System.Web.HttpUtility` package, which makes direct symbol references ambiguous.
 - Added CLI `DataBindingAttributeTransform` (Order 615) and registered it in production/test pipelines so attribute values like `NavigateUrl='<%# Item.GetUrl() %>'` become `NavigateUrl='@(Item.GetUrl())'` after prefix stripping.
 - Validation: `dotnet build src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj --nologo`, `dotnet test src\BlazorWebFormsComponents.Test --nologo` (2895 passing per target), and `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo` (552 passing).
+
+### 2026-05-06T16:54:14-0400 : WingtipToys Migration Run 35 � Benchmark after gap fixes (Bishop)
+- Executed fresh Run 35 benchmark on commit `a6fa2455bec610b01127ab852886263f80f4bb1e` from branch `feature/wingtip-next-features-review` using `migration-toolkit\scripts\bwfc-migrate.ps1`.
+- Final result: build succeeded and **25/25 Wingtip acceptance tests passed**; screenshots captured under `dev-docs\migration-tests\wingtiptoys\run35\images\`.
+- Gap #3 (string Width/Height) and Gap #4 (attribute databinding transform) helped immediately in fresh output; no new `Request.QueryString.Get(...)` compile blocker surfaced.
+- Gap #10 (`System.Web.HttpUtility`) still needs follow-up for real migrated apps that also reference the legacy `System.Web.HttpUtility` package; `Logic\PayPalFunctions.cs` required manual `WebUtility` substitutions to avoid symbol ambiguity.
+- Biggest remaining automation gaps were invalid Razor syntax in generated markup, unsupported master-page script/bundle constructs, EF6-style `ProductContext` constructor emission, and a long tail of unresolved account/admin/mobile compile-surface pages that had to be stubbed or simplified manually.
+- Report: `dev-docs\migration-tests\wingtiptoys\run35\report.md`
+
+### 2026-05-06T17:30:00-04:00: Run 35 gap transforms G1/G3/G8/G10 (Bishop)
+- Added CLI markup `DisplayExpressionTransform` (Order 490) so `<%#: expr %>`, `<%=: expr %>`, and broken `@(: expr)` output normalize to valid Razor `@(...)` before the broader expression pass.
+- Added code-behind transforms `HttpUtilityRewriteTransform` (Order 104) and `EfContextConstructorTransform` (Order 106); they now rewrite `HttpUtility.*` calls to `WebUtility.*`, add `using System.Net`, modernize EF6 `DbContext` string constructors to EF Core `DbContextOptions<TContext>`, and are included in `SourceFileCopier` so copied Models/Logic files are fixed too.
+- Extended `ServerShim` with `Transfer`, `GetLastError`, and `ClearError`, and updated `ServerShimTransform` guidance to treat those APIs as supported compatibility shims instead of dead-end TODOs.
+- Added focused regression tests for the new transforms, source-file copying, and ServerShim behavior; updated CLI docs plus migration docs so HttpUtility guidance now points to inline `WebUtility` rewrites rather than relying on the legacy shim package.
+- Validation: `dotnet build src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj --nologo`, `dotnet test src\BlazorWebFormsComponents.Test --nologo`, and `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`.

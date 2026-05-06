@@ -48,6 +48,7 @@ class Program
         services.AddSingleton<IMarkupTransform, MasterPageTransform>();
         services.AddSingleton<IMarkupTransform, ContentWrapperTransform>();
         services.AddSingleton<IMarkupTransform, FormWrapperTransform>();
+        services.AddSingleton<IMarkupTransform, DisplayExpressionTransform>();
         services.AddSingleton<IMarkupTransform, ExpressionTransform>();
         services.AddSingleton<IMarkupTransform, ServerCodeBlockTransform>();
         services.AddSingleton<IMarkupTransform, LoginViewTransform>();
@@ -69,7 +70,9 @@ class Program
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
         services.AddSingleton<ICodeBehindTransform, UsingStripTransform>();
         services.AddSingleton<ICodeBehindTransform, IdentityUsingTransform>();
+        services.AddSingleton<ICodeBehindTransform, HttpUtilityRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
+        services.AddSingleton<ICodeBehindTransform, EfContextConstructorTransform>();
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();
         services.AddSingleton<ICodeBehindTransform, ClassNameAlignTransform>();

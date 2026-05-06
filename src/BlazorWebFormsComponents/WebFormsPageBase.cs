@@ -245,7 +245,7 @@ public void SetRequestFormData(FormSubmitEventArgs e)
 /// Supports <c>Server.MapPath()</c>, <c>Server.HtmlEncode()</c>,
 /// <c>Server.UrlEncode()</c>, etc.
 /// </summary>
-protected ServerShim Server => new(WebHostEnvironment);
+protected ServerShim Server => new(WebHostEnvironment, NavigationManager);
 
 /// <summary>
 /// Compatibility shim for Web Forms <c>Cache</c> object
