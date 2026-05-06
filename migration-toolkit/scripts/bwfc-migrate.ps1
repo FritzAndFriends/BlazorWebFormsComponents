@@ -1,12 +1,3 @@
-Write-Warning @"
-╔══════════════════════════════════════════════════════════════╗
-║  DEPRECATED: This script is deprecated.                     ║
-║  Use the CLI tool instead:                                  ║
-║    webforms-to-blazor migrate --input <src> --output <out>  ║
-║  See: docs/cli/index.md                                     ║
-╚══════════════════════════════════════════════════════════════╝
-"@
-
 <#
 .SYNOPSIS
     Performs mechanical regex-based transforms on ASP.NET Web Forms files to produce Blazor-ready output.
@@ -87,6 +78,15 @@ param(
     [Parameter(HelpMessage = "Scan source files for BWFC analyzer patterns and output JSON summary without migrating")]
     [switch]$Prescan
 )
+
+Write-Warning @"
+╔══════════════════════════════════════════════════════════════╗
+║  DEPRECATED: This script is deprecated.                     ║
+║  Use the CLI tool instead:                                  ║
+║    webforms-to-blazor migrate --input <src> --output <out>  ║
+║  See: docs/cli/index.md                                     ║
+╚══════════════════════════════════════════════════════════════╝
+"@
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'

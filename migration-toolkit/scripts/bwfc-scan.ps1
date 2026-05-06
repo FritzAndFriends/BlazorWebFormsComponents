@@ -1,12 +1,3 @@
-Write-Warning @"
-╔══════════════════════════════════════════════════════════════╗
-║  DEPRECATED: This script is deprecated.                     ║
-║  Use the CLI tool instead:                                  ║
-║    webforms-to-blazor scan --input <src> --output <out>     ║
-║  See: docs/cli/index.md                                     ║
-╚══════════════════════════════════════════════════════════════╝
-"@
-
 <#
 .SYNOPSIS
     Scans a Web Forms project for migration readiness to BlazorWebFormsComponents.
@@ -61,6 +52,15 @@ param(
     [Parameter(Mandatory = $false, HelpMessage = "Path to write the output file.")]
     [string]$OutputFile
 )
+
+Write-Warning @"
+╔══════════════════════════════════════════════════════════════╗
+║  DEPRECATED: This script is deprecated.                     ║
+║  Use the CLI tool instead:                                  ║
+║    webforms-to-blazor scan --input <src> --output <out>     ║
+║  See: docs/cli/index.md                                     ║
+╚══════════════════════════════════════════════════════════════╝
+"@
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"

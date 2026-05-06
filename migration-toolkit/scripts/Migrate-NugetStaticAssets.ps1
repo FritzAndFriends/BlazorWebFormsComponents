@@ -1,13 +1,3 @@
-Write-Warning @"
-╔══════════════════════════════════════════════════════════════╗
-║  DEPRECATED: This script is deprecated.                     ║
-║  Use the CLI tool instead:                                  ║
-║    webforms-to-blazor assets extract --input <src>          ║
-║      --output <out>                                         ║
-║  See: docs/cli/index.md                                     ║
-╚══════════════════════════════════════════════════════════════╝
-"@
-
 <#
 .SYNOPSIS
     Extracts static assets (CSS, JS, fonts, images) from NuGet packages to wwwroot/lib/.
@@ -58,6 +48,16 @@ param(
 
     [switch]$ManifestOnly
 )
+
+Write-Warning @"
+╔══════════════════════════════════════════════════════════════╗
+║  DEPRECATED: This script is deprecated.                     ║
+║  Use the CLI tool instead:                                  ║
+║    webforms-to-blazor assets extract --input <src>          ║
+║      --output <out>                                         ║
+║  See: docs/cli/index.md                                     ║
+╚══════════════════════════════════════════════════════════════╝
+"@
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'

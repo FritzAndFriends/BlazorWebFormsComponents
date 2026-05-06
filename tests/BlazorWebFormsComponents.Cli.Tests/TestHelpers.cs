@@ -181,13 +181,16 @@ public static class TestHelpers
             new FormWrapperTransform(),
             // Order 500: Expressions
             new ExpressionTransform(),
+            // Order 510: Statement block conversion (before LoginViewTransform)
+            new ServerCodeBlockTransform(),
             // Order 510-520: Semantic controls
             new LoginViewTransform(),
             new SelectMethodTransform(),
-            // Order 600-620: Prefix stripping and validator typing
+            // Order 600-620: Prefix stripping, validator typing, TemplateField wrapping
             new AjaxToolkitPrefixTransform(),
             new AspPrefixTransform(),
             new ValidatorGenericTypeTransform(),
+            new TemplateFieldChildComponentsTransform(),
             // Order 700-750: Attributes & refs
             new AttributeStripTransform(),
             new EventWiringTransform(),

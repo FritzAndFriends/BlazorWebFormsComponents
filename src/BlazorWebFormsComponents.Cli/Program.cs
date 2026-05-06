@@ -49,11 +49,13 @@ class Program
         services.AddSingleton<IMarkupTransform, ContentWrapperTransform>();
         services.AddSingleton<IMarkupTransform, FormWrapperTransform>();
         services.AddSingleton<IMarkupTransform, ExpressionTransform>();
+        services.AddSingleton<IMarkupTransform, ServerCodeBlockTransform>();
         services.AddSingleton<IMarkupTransform, LoginViewTransform>();
         services.AddSingleton<IMarkupTransform, SelectMethodTransform>();
         services.AddSingleton<IMarkupTransform, AjaxToolkitPrefixTransform>();
         services.AddSingleton<IMarkupTransform, AspPrefixTransform>();
         services.AddSingleton<IMarkupTransform, ValidatorGenericTypeTransform>();
+        services.AddSingleton<IMarkupTransform, TemplateFieldChildComponentsTransform>();
         services.AddSingleton<IMarkupTransform, AttributeStripTransform>();
         services.AddSingleton<IMarkupTransform, EventWiringTransform>();
         services.AddSingleton<IMarkupTransform, ComponentRefMarkupTransform>();
