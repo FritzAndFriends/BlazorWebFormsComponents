@@ -93,3 +93,10 @@
 - The EDMX converter now parses conceptual/mapping metadata with `System.Xml.Linq`, generates POCO entities plus a DbContext with relationship configuration, and returns graceful failures for missing or invalid EDMX input.
 - Added first-class CLI entrypoints for `scan`, `assets extract`, and `edmx convert`, then updated all four migration-toolkit PowerShell scripts with deprecation banners that point to the CLI command to use instead.
 - Regression coverage lives in `tests\BlazorWebFormsComponents.Cli.Tests\Services\NuGetStaticAssetExtractorTests.cs` and `tests\BlazorWebFormsComponents.Cli.Tests\Services\EdmxToEfCoreConverterTests.cs`; verified with `dotnet build src\BlazorWebFormsComponents.Cli\BlazorWebFormsComponents.Cli.csproj` and `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`.
+
+### 2026-05-06T14:00:00-04:00: ServerCodeBlockTransform and TemplateFieldChildComponentsTransform (Bishop)
+- Implemented ServerCodeBlockTransform (Order 510). Converts Web Forms statement blocks to Razor control-flow.
+- Implemented TemplateFieldChildComponentsTransform (Order 620). Wraps TemplateField style child elements in ChildComponents blocks.
+- Full CLI test suite: 545 passed, 0 failed.
+- Key lesson: Avoid C# interpolated brace-escaping in transform return strings. Use plain concatenation instead.
+- Decision file: .squad\decisions\inbox\bishop-gap3-gap5-transforms.md
