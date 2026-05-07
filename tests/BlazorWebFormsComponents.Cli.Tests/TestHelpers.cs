@@ -178,6 +178,8 @@ public static class TestHelpers
     /// </summary>
     public static MigrationPipeline CreateDefaultPipeline()
     {
+        var quarantineDetector = new PageQuarantineDetector();
+
         var markupTransforms = new List<IMarkupTransform>
         {
             // Order 100-120: Directives
@@ -238,6 +240,7 @@ public static class TestHelpers
             new RequestFormTransform(),
             new ServerShimTransform(),
             new GetRouteUrlTransform(),
+            new CartSessionKeyTransform(),
             new SessionDetectTransform(),
             new ViewStateDetectTransform(),
             new IsPostBackTransform(),
@@ -246,7 +249,7 @@ public static class TestHelpers
             new DataBindTransform(),
             new ClientScriptTransform(),
             new UrlCleanupTransform(),
-            new CompileSurfaceStubTransform(),
+            new CompileSurfaceStubTransform(quarantineDetector),
             new MarkupReferencedMemberStubTransform(),
         };
 

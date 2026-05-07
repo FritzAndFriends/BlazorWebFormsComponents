@@ -7,6 +7,12 @@
 
 ## Learnings
 
+### 2026-05-07T13:58:11-04:00: Cart session-key QA
+
+- Added QA coverage for a new `CartSessionKeyTransform` that rewrites cart/basket `Session.Id` usage to a stable session-backed `cart-key` helper using BWFC `SessionShim` semantics.
+- Verified the transform is scoped to cart-oriented statements and leaves unrelated `Session.Id` usage untouched in the new unit coverage.
+- Full `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo` validation was blocked by unrelated workspace changes in `src\BlazorWebFormsComponents.Cli\Pipeline\PageQuarantineDetector.cs`, which currently fail the CLI project build before the new tests can execute.
+
 <!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
 
 ### Core Context (2026-02-10 through 2026-02-27)

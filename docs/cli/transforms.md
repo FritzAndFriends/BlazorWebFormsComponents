@@ -37,7 +37,8 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 820 | DataSourceIdTransform | Markup | Markup | Replace DataSourceID with Items binding |
 | 30 | GetRouteUrlTransform | Code-Behind | Code-Behind | Flag `Page.GetRouteUrl()` calls |
 | 50 | GetRouteUrlTransform | Markup | Markup | Flag `<%: Page.GetRouteUrl() %>` expressions |
-| 400 | SessionDetectTransform | Code-Behind | Code-Behind | Detect Session/Cache, inject shim references |
+| 390 | CartSessionKeyTransform | Code-Behind | Code-Behind | Replace cart/basket `Session.Id` usage with a stable session-backed `cart-key` helper |
+| 400 | SessionDetectTransform | Code-Behind | Code-Behind | Detect Session/Cache usage and emit shim guidance |
 | 410 | ViewStateDetectTransform | Code-Behind | Code-Behind | Detect ViewState usage, flag migration |
 | 500 | IsPostBackTransform | Code-Behind | Code-Behind | Unwrap `if (!IsPostBack)` guards |
 | 510 | PageLifecycleTransform | Code-Behind | Code-Behind | Convert Page_Load, Page_Init → Blazor lifecycle |
@@ -761,9 +762,43 @@ string url = Page.GetRouteUrl("ProductRoute", new { id = 123 });
 
 ---
 
+### CartSessionKeyTransform (Order: 390)
+
+**Rewrites cart and basket flows so they use a stable session-backed `cart-key` instead of the raw session identifier.**
+
+**Before:**
+```csharp
+var cart = _cartService.GetCart(Session.Id);
+```
+
+**After:**
+```csharp
+private string GetOrCreateCartKey()
+{
+    var cartKey = Session["cart-key"]?.ToString();
+    if (string.IsNullOrEmpty(cartKey))
+    {
+        cartKey = Guid.NewGuid().ToString();
+        Session["cart-key"] = cartKey;
+    }
+
+    return cartKey;
+}
+
+var cart = _cartService.GetCart(GetOrCreateCartKey());
+```
+
+**What It Does:**
+- Matches cart/basket-focused statements that still use `Session.Id` or `HttpContext.Session.Id`
+- Injects a single `GetOrCreateCartKey()` helper into the generated partial class
+- Keeps the migration on top of BWFC's existing `SessionShim` surface (`Session["cart-key"]`)
+- Leaves unrelated `Session.Id` usage alone to avoid over-matching
+
+---
+
 ### 25. SessionDetectTransform (Order: 400)
 
-**Detects Session/Cache usage and auto-wires SessionShim/CacheShim.**
+**Detects Session/Cache usage and emits shim guidance for `WebFormsPageBase`.**
 
 **Web Forms:**
 ```csharp
@@ -780,7 +815,7 @@ public class CheckoutPage : Page
 **Output:**
 ```csharp
 // --- Session State Migration ---
-// TODO(bwfc-session-state): SessionShim auto-wired via [Inject] — Session["CartId"] calls compile against the shim's indexer.
+// TODO(bwfc-session-state): Session["CartId"] calls work automatically via SessionShim on WebFormsPageBase.
 // Session keys found: CartId
 // Options for long-term replacement:
 //   (1) ProtectedSessionStorage (Blazor Server) — persists across circuits
@@ -789,16 +824,13 @@ public class CheckoutPage : Page
 // See: https://learn.microsoft.com/aspnet/core/blazor/state-management
 
 // --- Cache Migration ---
-// TODO(bwfc-session-state): CacheShim auto-wired via [Inject] — Cache["ProductList"] calls compile against the shim's indexer.
+// TODO(bwfc-session-state): Cache["ProductList"] calls work automatically via CacheShim on WebFormsPageBase.
 // Cache keys found: ProductList
 // CacheShim wraps IMemoryCache — items are per-server, not distributed.
 // For distributed caching, consider IDistributedCache.
 
-public class CheckoutPage : ComponentBase
+public class CheckoutPage : WebFormsPageBase
 {
-    [Inject] private SessionShim Session { get; set; }
-    [Inject] private CacheShim Cache { get; set; }
-
     private void LoadCart()
     {
         string cartId = (string)Session["CartId"];

@@ -86,6 +86,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, RequestFormTransform>();
         services.AddSingleton<ICodeBehindTransform, ServerShimTransform>();
         services.AddSingleton<ICodeBehindTransform, GetRouteUrlTransform>();
+        services.AddSingleton<ICodeBehindTransform, CartSessionKeyTransform>();
         services.AddSingleton<ICodeBehindTransform, SessionDetectTransform>();
         services.AddSingleton<ICodeBehindTransform, ViewStateDetectTransform>();
         services.AddSingleton<ICodeBehindTransform, IsPostBackTransform>();
@@ -94,7 +95,8 @@ class Program
         services.AddSingleton<ICodeBehindTransform, DataBindTransform>();
         services.AddSingleton<ICodeBehindTransform, ClientScriptTransform>();
         services.AddSingleton<ICodeBehindTransform, UrlCleanupTransform>();
-        services.AddSingleton<ICodeBehindTransform, CompileSurfaceStubTransform>();
+        services.AddSingleton<PageQuarantineDetector>();
+        services.AddSingleton<ICodeBehindTransform>(sp => new CompileSurfaceStubTransform(sp.GetRequiredService<PageQuarantineDetector>()));
         services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
 
         // Scaffolding
@@ -147,7 +149,8 @@ class Program
             sp.GetRequiredService<AppAssetInjector>(),
             sp.GetRequiredService<NativeNuGetStaticAssetExtractor>(),
             sp.GetRequiredService<NativeEdmxToEfCoreConverter>(),
-            sp.GetRequiredService<RedirectHandlerAnnotator>()));
+            sp.GetRequiredService<RedirectHandlerAnnotator>(),
+            sp.GetRequiredService<PageQuarantineDetector>()));
 
         return services.BuildServiceProvider();
     }

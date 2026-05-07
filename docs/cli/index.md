@@ -118,7 +118,7 @@ The tool applies an ordered transform pipeline and then a semantic pattern catal
 
 1. **Directives** (5) — Page, Master, Control, Register, Import directives
 2. **Markup** (21) — Controls, expressions, master-page script cleanup, display-expression cleanup, templates, validator typing, typed GridView columns, data binding
-3. **Code-Behind** (26) — Using statements, HttpUtility/EF modernization, base classes, lifecycle, event handlers, compile-surface stubs, markup-driven safety stubs
+3. **Code-Behind** (27) — Using statements, cart session-key stabilization, HttpUtility/EF modernization, base classes, lifecycle, event handlers, compile-surface stubs, markup-driven safety stubs
 
 See **[Transform Reference](transforms.md)** for the flat transform list and **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** for the bounded semantic pass that runs afterward.
 
@@ -129,7 +129,7 @@ The tool inserts TODO comments with standardized category slugs so Copilot L2 sk
 ```csharp
 // TODO(bwfc-lifecycle): Page_Load → OnInitializedAsync
 // TODO(bwfc-ispostback): Review IsPostBack guard for Blazor patterns
-// TODO(bwfc-session-state): SessionShim auto-wired via [Inject]
+// TODO(bwfc-session-state): Session["CartId"] calls work automatically via SessionShim on WebFormsPageBase
 ```
 
 See **[TODO Categories](todo-conventions.md)** for the complete list of 13 categories and how L2 automation uses them.
