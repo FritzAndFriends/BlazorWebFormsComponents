@@ -29,3 +29,7 @@
 - `src/BlazorWebFormsComponents.Cli/SemanticPatterns/MasterContentContractsSemanticPattern.cs`
 - `src/BlazorWebFormsComponents.Cli/SemanticPatterns/SemanticPatternMarkupHelpers.cs`
 - `tests/BlazorWebFormsComponents.Cli.Tests/SemanticPatternConcreteTests.cs`
+
+
+≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
+

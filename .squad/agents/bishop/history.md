@@ -55,3 +55,7 @@ Run 41 finished green at 25/25 acceptance tests in 47:54 from a fresh output fol
 - **2026-05-07T15:15:19-04:00:** Compile-surface quarantine should keep a benchmark-path allowlist. Stub-safe handling of Account/Admin/Checkout pages is useful, but quarantining `ProductList`, `AddToCart`, or `ShoppingCart` adds avoidable manual repair work on Wingtip fixtures.
 - **2026-05-07T15:38:16-04:00:** Quarantine heuristics work better with a two-tier rule: never quarantine essential product/cart/home/contact/about pages for incidental signals, but still quarantine Account/Admin/Checkout paths or pages with strong blockers such as compile-surface failures. That keeps benchmark flows intact without weakening build safety.
 - **2026-05-07T15:38:16-04:00:** Semantic page rewrites that emit raw `<form>` tags should be post-processed centrally so they always carry the SSR contract (`<AntiforgeryToken />` plus a deterministic form name). Doing that in the semantic catalog hardens both account/action pages and any future form-emitting patterns without duplicating logic.
+
+
+≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
+

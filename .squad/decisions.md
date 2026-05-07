@@ -688,3 +688,165 @@ All green. No regressions.
 1. **Content injection requires explicit CascadingValue<MasterPage>** — BaseWebFormsComponent's generic cascade is insufficient for type-based cascading parameter matching. Any BWFC component that wishes to be found by type (without a Name) must provide its own explicit `<CascadingValue Value="this">` in its `.razor` file. Prefer Named cascades (e.g., `Name="ParentMasterPage"`) for clarity, but the anonymous type-based cascade added here is consistent with how Blazor's `EditContext` is cascaded.
 
 2. **ContentWrapperTransform stub tests removed** — The three placeholder tests in `ContentWrapperTransformTests.cs` that asserted on the input string (not the transform output) were misleading. Real tests call `Apply()`. This pattern must not be used in future TDD stubs — use `[Fact(Skip = "...")]` instead so it's visible as pending.
+
+# Decision: Compile-Surface Quarantine for Non-Migratable Pages
+
+**Date:** 2026-05-07T13:58:11-04:00  
+**Author:** Bishop (Migration Tooling Dev)  
+**Requested by:** Jeffrey T. Fritz  
+**Status:** Proposed
+
+## Context
+
+Run 40 showed that the CLI still emitted dozens of non-benchmark pages whose generated markup or code-behind could not compile inside the migrated Blazor runtime. These pages were not the benchmark path, but they still blocked every end-to-end build until a human manually stubbed them.
+
+## Decision
+
+Add an explicit compile-surface quarantine step to the CLI page pipeline.
+
+### What the quarantine step does
+
+- Detects risky pages by feature bucket before or after transforms run:
+  - ASP.NET Identity / membership APIs
+  - payment or checkout integrations
+  - mobile-only pages and shells
+  - admin CRUD pages with 3+ legacy data-source bindings
+  - unresolved compile-surface blockers still flagged by the emission planner after transforms complete
+- Replaces quarantined `.razor` output with a build-safe placeholder that still routes and clearly explains the manual migration boundary.
+- Emits a minimal `.razor.cs` stub inheriting `BlazorWebFormsComponents.WebFormsPageBase` so the generated app still compiles.
+- Preserves transformed original code-behind under `migration-artifacts/codebehind/` when code-behind exists.
+- Writes `migration-artifacts/quarantine-manifest.json` with source-relative path, detected unsupported features, quarantine reason, and suggested migration approach.
+
+## Rationale
+
+The CLI should prefer a clean, buildable migrated surface over emitting broken pages that are known to require manual work. A manifest-backed quarantine step also makes deferred work explicit and scriptable for later L2/L3 repair passes.
+
+## Implementation Notes
+
+- `CompileSurfaceStubTransform` now delegates to shared quarantine detection so early high-confidence cases are stubbed consistently.
+- `MigrationPipeline` performs a late quarantine pass after semantic patterns, allowing normalized login/action pages to remain compile-safe when possible.
+- The late pass uses existing compile-surface emission-plan failures as another quarantine signal instead of silently dropping page code-behind from the build.
+
+## Validation
+
+- `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`
+
+## Follow-up
+
+- Consider feeding the manifest into migration-toolkit benchmark repair workflows so quarantined pages can be auto-prioritized for targeted L2 prompts.
+
+
+# Decision: Run 41 quarantine, static-file, and antiforgery hardening
+
+**Date:** 2026-05-07T15:38:16-04:00  
+**Author:** Bishop  
+**Requested by:** Jeffrey T. Fritz  
+**Status:** Proposed
+
+## Decision
+
+1. Add an essential-page allowlist to `PageQuarantineDetector` so benchmark-critical product, catalog, cart, shopping, home, about, and contact paths are not quarantined for incidental heuristic signals.
+2. Raise heuristic quarantine sensitivity so a single weak signal does not quarantine ordinary pages unless the path is clearly non-essential (`Account/`, `Admin/`, `Checkout/`, mobile shells) or the blocker is strong enough to break the compile surface.
+3. Generate `Program.cs` with `app.UseStaticFiles();` and `app.UseAntiforgery();` for all scaffolded SSR apps.
+4. Post-process semantic-pattern form output so generated `<form>`/`<EditForm>` markup receives `<AntiforgeryToken />` and a deterministic form name automatically.
+
+## Rationale
+
+Run 41 proved the CLI was over-quarantining core Wingtip pages, under-configuring the SSR scaffold for copied static assets, and leaving generated POST forms without the Blazor antiforgery contract. The chosen fix keeps benchmark paths runnable, preserves quarantine for true out-of-scope areas, and hardens generated SSR forms without duplicating form logic inside every semantic pattern.
+
+## Files
+
+- `src\BlazorWebFormsComponents.Cli\Pipeline\PageQuarantineDetector.cs`
+- `src\BlazorWebFormsComponents.Cli\Scaffolding\ProgramCsEmitter.cs`
+- `src\BlazorWebFormsComponents.Cli\SemanticPatterns\SemanticPatternCatalog.cs`
+- `src\BlazorWebFormsComponents.Cli\Transforms\Markup\FormAntiforgeryPostProcessor.cs`
+- `tests\BlazorWebFormsComponents.Cli.Tests\TransformUnit\PageQuarantineDetectorTests.cs`
+- `tests\BlazorWebFormsComponents.Cli.Tests\ScaffoldingTests.cs`
+- `tests\BlazorWebFormsComponents.Cli.Tests\SemanticPatternCatalogTests.cs`
+- `tests\BlazorWebFormsComponents.Cli.Tests\SemanticPatternConcreteTests.cs`
+- `tests\BlazorWebFormsComponents.Cli.Tests\PipelineIntegrationTests.cs`
+- `docs\cli\index.md`
+- `docs\cli\transforms.md`
+
+## Validation
+
+- `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`
+
+
+# Decision: Run 41 benchmark follow-up items
+
+**Date:** 2026-05-07T15:15:19-04:00  
+**Author:** Bishop (Migration Tooling Dev)  
+**Requested by:** Jeffrey T. Fritz  
+**Status:** Proposed
+
+## Context
+
+WingtipToys benchmark Run 41 finished green (25/25 acceptance tests), but only after manual repair of three fresh-output regressions that the cumulative fixes were supposed to reduce: benchmark-path pages were still quarantined, static assets served as zero-length responses under the generated runtime, and SSR cart postbacks still needed manual antiforgery/form-name wiring.
+
+## Decision
+
+Treat Run 41 as a successful benchmark with three prioritized follow-up items for the CLI/runtime scaffold:
+
+1. **Do not quarantine benchmark-critical commerce pages by default.**
+   - Preserve or explicitly allowlist pages like `ProductList`, `ProductDetails`, `AddToCart`, and `ShoppingCart` on Wingtip-style fixtures.
+   - Keep quarantine focused on non-benchmark account/admin/checkout/mobile/payment surfaces.
+
+2. **Prefer classic static-file middleware for migrated sample scaffolds that rely on `wwwroot` asset trees.**
+   - The Run 41 scaffold returned 200 with `Content-Length: 0` for `/Images/logo.jpg` and `/Catalog/Images/...` until `app.UseStaticFiles()` replaced `app.MapStaticAssets()`.
+   - Fresh benchmark runtimes should default to whichever path reliably serves legacy copied assets without additional repair.
+
+3. **Emit a complete SSR form-post contract for pages that use `Request.Form`.**
+   - Middleware: `app.UseAntiforgery()`
+   - Markup: `<AntiforgeryToken />`
+   - Form identity: explicit `@formname`
+   - Without all three, the shopping-cart update path either 400s or fails Playwright postback flows.
+
+## Evidence from Run 41
+
+- Final build: `samples\AfterWingtipToys\WingtipToys.csproj` succeeded with 31 warnings / 0 errors.
+- Final acceptance: `src\WingtipToys.AcceptanceTests` passed 25/25 against `https://localhost:5001`.
+- Quarantine evidence: `samples\AfterWingtipToys\migration-artifacts\quarantine-manifest.json`
+- Report: `dev-docs\migration-tests\wingtiptoys\run41\report.md`
+
+## Rationale
+
+Run 41 proved the benchmark can still end green while preserving BWFC controls, but the repair loop is paying for avoidable scaffolding mistakes instead of true migration complexity. Tightening quarantine scope, static asset serving, and SSR form-post emission should reduce future Wingtip repair time materially without weakening compile safety.
+
+
+# Decision: Stable cart session key for CLI transforms
+
+**Date:** 2026-05-07T13:58:11-04:00  
+**Author:** Rogue (QA Analyst)  
+**Requested by:** Jeffrey T. Fritz  
+**Status:** Proposed
+
+## Context
+
+Run 40 exposed a migration gap in benchmark cart flows: generated code that used `Session.Id` directly for cart lookups was not stable enough under Blazor SSR. Cart and basket code paths need an explicit session-backed identifier that survives the benchmark flow more reliably than the raw session ID.
+
+## Decision
+
+Add a dedicated CLI code-behind transform named `CartSessionKeyTransform` that:
+
+- targets cart/basket-oriented statements still using `Session.Id` or `HttpContext.Session.Id`
+- injects a single `GetOrCreateCartKey()` helper into the generated partial class
+- stores the stable value in `Session["cart-key"]`
+- rewrites matching cart service calls and cart ID assignments to use that helper
+- leaves unrelated `Session.Id` usage untouched to avoid over-matching
+
+## QA Notes
+
+- Added focused transform-unit coverage for cart assignment rewrites, cart service call rewrites, non-cart preservation, helper idempotence, and default-pipeline registration.
+- Updated CLI docs so the transform catalog and overview mention the new cart session-key stabilization step.
+- Full CLI test execution is currently blocked by unrelated workspace changes in `src\BlazorWebFormsComponents.Cli\Pipeline\PageQuarantineDetector.cs`, which fail the CLI build before the new tests can run.
+
+## Files Affected
+
+- `src/BlazorWebFormsComponents.Cli/Transforms/CodeBehind/CartSessionKeyTransform.cs`
+- `src/BlazorWebFormsComponents.Cli/Program.cs`
+- `tests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs`
+- `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/CartSessionKeyTransformTests.cs`
+- `docs/cli/index.md`
+- `docs/cli/transforms.md`
+
