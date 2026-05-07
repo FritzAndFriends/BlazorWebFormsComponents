@@ -128,3 +128,5 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
  Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
  Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz
+
+📌 Team update (2026-05-07T12:43): Run 40 complete — 25/25 acceptance tests, 21:55 runtime (-43% vs Run 39). RuntimeDetector/ProgramCsEmitter scaffold validated. BWFC controls preserved on acceptance path. Next focus: runtime scaffold automation, compile-surface debt reduction — decided by Bishop
