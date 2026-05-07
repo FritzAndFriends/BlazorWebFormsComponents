@@ -73,9 +73,9 @@ public class ComponentRefMarkupTransformTests
     }
 
     [Fact]
-    public void AddsRefToGenericGridView_WithTItem()
+    public void AddsRefToGenericGridView_WithItemType()
     {
-        var input = @"<GridView TItem=""Product"" id=""gvProducts"" />";
+        var input = @"<GridView ItemType=""Product"" id=""gvProducts"" />";
         var metadata = MetadataWithCodeBehind;
 
         var result = _transform.Apply(input, metadata);
@@ -223,7 +223,7 @@ public class ComponentRefMarkupTransformTests
         Assert.Equal("GridView<object>",
             ComponentRefMarkupTransform.ResolveFieldType("GridView", @"ItemType=""object"""));
         Assert.Equal("ListView<Product>",
-            ComponentRefMarkupTransform.ResolveFieldType("ListView", @"TItem=""Product"""));
+            ComponentRefMarkupTransform.ResolveFieldType("ListView", @"ItemType=""Product"""));
     }
 
     [Fact]

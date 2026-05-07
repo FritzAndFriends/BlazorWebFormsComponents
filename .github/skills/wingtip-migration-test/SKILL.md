@@ -128,6 +128,7 @@ Focus on:
 
 - Keeping the generated project shape in `samples\AfterWingtipToys\`
 - Preserving Web Forms semantics through BWFC shims where available
+- **NEVER replace generated BWFC data controls (`ListView`, `FormView`, `GridView`, `DataList`, `Repeater`) with manual HTML. Fix the generated markup to work with the BWFC component instead.**
 - Fixing build errors iteratively until the app runs cleanly enough for acceptance validation
 - Treating the migration toolkit as the thing under test; manual fixes should be documented as toolkit gaps
 

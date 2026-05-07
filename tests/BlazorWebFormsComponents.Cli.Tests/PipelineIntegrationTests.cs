@@ -407,7 +407,8 @@ public class PipelineIntegrationTests : IDisposable
         var report = await pipeline.ExecuteAsync(context);
 
         var markup = File.ReadAllText(Path.Combine(outputDir, "ProductDetails.razor"));
-        Assert.Contains("SelectItems=\"GetProductQueryDetails_SelectItems\"", markup);
+        Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", markup);
+        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", markup);
         Assert.Contains("SupplyParameterFromQuery(Name = \"ProductID\")", markup);
         Assert.True(report.SemanticPatternsApplied >= 1, $"Expected at least one semantic rewrite, got {report.SemanticPatternsApplied}");
         Assert.Contains(report.ManualItems, item => item.Category == "bwfc-query-details");

@@ -5,7 +5,7 @@ namespace BlazorWebFormsComponents.Cli.SemanticPatterns;
 
 /// <summary>
 /// Converts common Web Forms SelectMethod + QueryString/RouteData pages into
-/// SSR-friendly query-bound component properties plus a compile-safe SelectItems stub.
+/// SSR-friendly query-bound component properties plus a compile-safe SelectMethod wrapper.
 /// </summary>
 public sealed class QueryDetailsSemanticPattern : ISemanticPattern
 {
@@ -51,11 +51,11 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
             return SemanticPatternResult.FromContext(context);
         }
 
-        var wrapperMethodName = $"{candidate.Method.Name}QueryDetails_SelectItems";
+        var wrapperMethodName = $"{candidate.Method.Name}QueryDetails_SelectMethod";
         var rewrittenMarkup = SelectMethodRegex.Replace(
             context.Markup,
             match => string.Equals(match.Groups["method"].Value, candidate.Method.Name, StringComparison.Ordinal)
-                ? $@"SelectItems=""{wrapperMethodName}"""
+                ? $@"SelectMethod=""{wrapperMethodName}"""
                 : match.Value,
             1);
 
@@ -67,19 +67,19 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
             relativePath,
             0,
             "bwfc-query-details",
-            $"{candidate.Method.Name} was normalized to query-bound SelectItems scaffolding — port the original query into an injected service or DbContext.",
+            $"{candidate.Method.Name} was normalized to a query-bound SelectMethod wrapper — port the original query into an injected service or DbContext.",
             "medium");
 
         var codeBehind = context.CodeBehind;
         if (!string.IsNullOrEmpty(codeBehind) && !codeBehind.Contains(Marker, StringComparison.Ordinal))
         {
-            codeBehind = $"// {Marker}: {candidate.Method.Name} now binds through component query properties and a SelectItems stub in the generated .razor file.{Environment.NewLine}{codeBehind}";
+            codeBehind = $"// {Marker}: {candidate.Method.Name} now binds through component query properties and a SelectMethod wrapper in the generated .razor file.{Environment.NewLine}{codeBehind}";
         }
 
         return new SemanticPatternResult(
             rewrittenMarkup,
             codeBehind,
-            $"Normalized {candidate.Method.Name} to SelectItems with {candidate.BoundParameters.Count} query/route binding stub(s).");
+            $"Normalized {candidate.Method.Name} to SelectMethod with {candidate.BoundParameters.Count} query/route binding stub(s).");
     }
 
     private static QueryDetailsCandidate? FindCandidate(SemanticPatternContext context)
@@ -194,15 +194,16 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
 
         builder.AppendLine();
         builder.AppendLine(
-            $"    private IEnumerable<{candidate.ItemType}> {wrapperMethodName}(int maxRows, int startRowIndex, string sortByExpression)");
+            $"    private global::System.Linq.IQueryable<{candidate.ItemType}> {wrapperMethodName}(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)");
         builder.AppendLine("    {");
+        builder.AppendLine("        totalRowCount = 0;");
         builder.AppendLine(
             $"        // {Marker}: {candidate.ControlType} now binds through component properties instead of Web Forms method-parameter binding.");
         builder.AppendLine(
             $"        // Manual boundary: port {candidate.Method.Name} from the migration-artifacts code-behind file into an injected service or DbContext-backed query.");
         builder.AppendLine(
             $"        // Bound inputs: {string.Join(", ", candidate.BoundParameters.Select(static p => $"{p.BindingName} → {p.PropertyName} ({p.Kind})"))}.");
-        builder.AppendLine($"        return Enumerable.Empty<{candidate.ItemType}>();");
+        builder.AppendLine($"        return new global::System.Linq.EnumerableQuery<{candidate.ItemType}>(global::System.Array.Empty<{candidate.ItemType}>());");
         builder.AppendLine("    }");
         builder.Append('}');
         return builder.ToString();

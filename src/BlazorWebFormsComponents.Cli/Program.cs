@@ -64,6 +64,7 @@ class Program
         services.AddSingleton<IMarkupTransform, ComponentRefMarkupTransform>();
         services.AddSingleton<IMarkupTransform, UrlReferenceTransform>();
         services.AddSingleton<IMarkupTransform, TemplatePlaceholderTransform>();
+        services.AddSingleton<IMarkupTransform, TemplateContextTransform>();
         services.AddSingleton<IMarkupTransform, AttributeNormalizeTransform>();
         services.AddSingleton<IMarkupTransform, DataSourceIdTransform>();
 

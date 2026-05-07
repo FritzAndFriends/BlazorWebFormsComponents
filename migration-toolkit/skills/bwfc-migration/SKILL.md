@@ -38,6 +38,13 @@ The CLI tool emits structured `// TODO(bwfc-*)` comments and a JSON migration re
 
 **ALWAYS inherit from `WebFormsPageBase` (via `_Imports.razor`) and use the Web Forms shims.** The BlazorWebFormsComponents library provides shims that make Web Forms patterns work AS-IS in Blazor — no manual rewrites needed.
 
+## ⛔ CRITICAL DATA-CONTROL RULE
+
+- **NEVER replace `<asp:ListView>`, `<asp:FormView>`, `<asp:GridView>`, `<asp:DataList>`, or `<asp:Repeater>` with manual HTML, hand-built `<table>` markup, or `@foreach` loops.**
+- **ALWAYS migrate these controls to the BWFC component of the same name:** `<ListView>`, `<FormView>`, `<GridView>`, `<DataList>`, `<Repeater>`.
+- These data-bound BWFC components already exist and are the **correct migration target**.
+- If generated BWFC markup is malformed or does not compile, **repair the BWFC markup**. **Do not** flatten the control into manual HTML.
+
 ### Web Forms Patterns That Work Via Shims
 
 | Web Forms Pattern | Shim | Works In Interactive Mode? | Notes |

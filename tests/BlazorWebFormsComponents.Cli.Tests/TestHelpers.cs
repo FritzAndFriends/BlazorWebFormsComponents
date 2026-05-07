@@ -201,6 +201,7 @@ public static class TestHelpers
             new UrlReferenceTransform(),
             // Order 800-820: Normalize & templates
             new TemplatePlaceholderTransform(),
+            new TemplateContextTransform(),
             new AttributeNormalizeTransform(),
             new DataSourceIdTransform(),
         };

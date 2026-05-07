@@ -26,11 +26,12 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 615 | DataBindingAttributeTransform | Markup | Markup | Convert `<%# ... %>` and `<%= ... %>` attribute values to `@(...)` |
 | 615 | ValidatorGenericTypeTransform | Markup | Markup | Add explicit `Type="string"` / `InputType="string"` defaults for generic BWFC validators |
 | 620 | TemplateFieldChildComponentsTransform | Markup | Markup | Wrap TemplateField style children in `<ChildComponents>` |
-| 700 | AttributeStripTransform | Markup | Markup | Remove `runat="server"`, `AutoEventWireup` |
+| 700 | AttributeStripTransform | Markup | Markup | Remove `runat="server"`, preserve BWFC `ItemType`, add generic fallbacks |
 | 710 | EventWiringTransform | Markup | Markup | Convert `OnClick="X"` → `OnClick="@X"` |
 | 720 | UrlReferenceTransform | Markup | Markup | Convert `~/` paths to `/` |
 | 750 | ComponentRefMarkupTransform | Markup | Markup | Convert control IDs to `@ref`-compatible component references |
-| 800 | TemplatePlaceholderTransform | Markup | Markup | Convert `Item` → `context` in templates |
+| 800 | TemplatePlaceholderTransform | Markup | Markup | Replace template placeholder elements with the layout/group render fragment context |
+| 805 | TemplateContextTransform | Markup | Markup | Add `Context="Item"` to typed item templates and rewrite `@context` → `@Item` |
 | 810 | AttributeNormalizeTransform | Markup | Markup | Normalize attribute values (booleans, enums, units) |
 | 820 | DataSourceIdTransform | Markup | Markup | Replace DataSourceID with Items binding |
 | 30 | GetRouteUrlTransform | Code-Behind | Code-Behind | Flag `Page.GetRouteUrl()` calls |
@@ -436,21 +437,27 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ### 15. AttributeStripTransform (Order: 700)
 
-**Removes Web Forms-specific attributes.**
+**Removes Web Forms-specific attributes and preserves BWFC generic typing.**
 
 Removes:
 - `runat="server"`
 - `AutoEventWireup="true|false"`
-- `EnableEventValidation="true|false"`
+- `EnableViewState="true|false"`
 - `ViewStateMode="Enabled|Disabled|Inherit"`
+- `ClientIDMode="..."`
+
+Also:
+- normalizes `ItemType="Namespace.Product"` → `ItemType="Product"`
+- adds `ItemType="object"` to generic BWFC controls when no type was present
+- converts `ID="..."` → `id="..."`
 
 **Example:**
 ```html
 <!-- Before -->
-<asp:TextBox ID="txt1" runat="server" AutoEventWireup="true" ViewStateMode="Disabled" />
+<asp:GridView ID="ProductsGrid" ItemType="Contoso.Models.Product" runat="server" />
 
 <!-- After -->
-<TextBox ID="txt1" />
+<GridView id="ProductsGrid" ItemType="Product" />
 ```
 
 ---
@@ -505,30 +512,53 @@ Handles 8 URL attributes:
 
 ---
 
-### 17. TemplatePlaceholderTransform (Order: 800)
+### 18. TemplatePlaceholderTransform (Order: 800)
 
-**Converts `Item` placeholder to `context` in Blazor templates.**
+**Replaces Web Forms placeholder elements with the Blazor render-fragment placeholder.**
 
-Blazor uses `context` to reference the template context variable. Web Forms uses `Item`.
+This transform targets placeholder tags such as `itemPlaceholder`, `groupPlaceholder`, and similar generated template markers so BWFC `LayoutTemplate` and `GroupTemplate` blocks render the nested fragment correctly.
 
 **Example:**
 ```html
-<!-- Before (GridView template) -->
+<!-- Before -->
+<LayoutTemplate>
+  <table>
+    <tr id="itemPlaceholder" runat="server"></tr>
+  </table>
+</LayoutTemplate>
+
+<!-- After -->
+<LayoutTemplate>
+  <table>
+    @context
+  </table>
+</LayoutTemplate>
+```
+
+---
+
+### 19. TemplateContextTransform (Order: 805)
+
+**Adds `Context="Item"` to typed item templates and rewrites generated `@context` references to `@Item`.**
+
+This keeps BWFC data controls aligned with Web Forms naming so generated `<ListView>`, `<FormView>`, `<GridView>`, `<DataList>`, and `<Repeater>` templates stay on the component model instead of being flattened into manual HTML.
+
+**Example:**
+```html
+<!-- Before -->
 <ItemTemplate>
-  <td><%# Item.Name %></td>
-  <td><%# Item.Price %></td>
+  <TextBox Text="@context.Name" />
 </ItemTemplate>
 
 <!-- After -->
-<ItemTemplate>
-  <td>@context.Name</td>
-  <td>@context.Price</td>
+<ItemTemplate Context="Item">
+  <TextBox Text="@Item.Name" />
 </ItemTemplate>
 ```
 
 ---
 
-### 18. AttributeNormalizeTransform (Order: 810)
+### 20. AttributeNormalizeTransform (Order: 810)
 
 **Normalizes attribute values to Blazor syntax.**
 
@@ -549,7 +579,7 @@ Converts:
 
 ---
 
-### 19. DataSourceIdTransform (Order: 820)
+### 21. DataSourceIdTransform (Order: 820)
 
 **Replaces DataSourceID with Items binding and scaffolds data properties.**
 

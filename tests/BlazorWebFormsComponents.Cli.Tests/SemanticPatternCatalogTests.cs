@@ -170,7 +170,7 @@ public class SemanticPatternCatalogTests : IDisposable
             """
             @page "/ProductDetails"
 
-            <FormView TItem="Product" SelectMethod="GetProduct" />
+            <FormView ItemType="Product" SelectMethod="GetProduct" />
             """,
             """
             using WingtipToys.Models;
@@ -187,7 +187,8 @@ public class SemanticPatternCatalogTests : IDisposable
             """,
             report);
 
-        Assert.Contains("SelectItems=\"GetProductQueryDetails_SelectItems\"", result.Markup);
+        Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", result.Markup);
+        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", result.Markup);
         Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public int? ProductId { get; set; }", result.Markup);
         Assert.Contains("public string? ProductName { get; set; }", result.Markup);
         Assert.Contains("TODO(bwfc-query-details)", result.Markup);
