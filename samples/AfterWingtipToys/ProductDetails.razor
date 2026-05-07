@@ -1,38 +1,51 @@
 @page "/ProductDetails"
-@using WingtipToys.Models
+@using WingtipToys.Services
+@inject CatalogService CatalogService
+
 <PageTitle>Product Details</PageTitle>
+
 <Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-            @if (GetProduct().FirstOrDefault() is Product product)
-            {
-                <div>
-                    <h1>@product.ProductName</h1>
-                </div>
-                <br />
-                <table>
-                    <tr>
-                        <td>
-                            <img src="/Catalog/Images/@product.ImagePath" style="border:solid; height:300px" alt="@product.ProductName" />
-                        </td>
-                        <td>&nbsp;</td>
-                        <td style="vertical-align: top; text-align:left;">
-                            <b>Description:</b><br />@product.Description
-                            <br />
-                            <span><b>Price:</b>&nbsp;@($"{product.UnitPrice:c}")</span>
-                            <br />
-                            <span><b>Product Number:</b>&nbsp;@product.ProductID</span>
-                            <br />
-                            <a href="/AddToCart?productID=@product.ProductID">Add To Cart</a>
-                            <br />
-                        </td>
-                    </tr>
-                </table>
-            }
-            else
-            {
-                <p>Product not found.</p>
-            }
-        </Content>
-    </ChildComponents>
+    <FormView Items="@ProductItems" ItemType="Product" Context="Item" RenderOuterTable="false" EmptyDataText="Product not found.">
+        <ItemTemplate>
+            <div>
+                <h1>@Item.ProductName</h1>
+            </div>
+            <br />
+            <table>
+                <tr>
+                    <td>
+                        <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName" />
+                    </td>
+                    <td>&nbsp;</td>
+                    <td style="vertical-align: top; text-align:left;">
+                        <b>Description:</b><br />@Item.Description
+                        <br />
+                        <span><b>Price:</b>&nbsp;@(String.Format("{0:c}", Item.UnitPrice))</span>
+                        <br />
+                        <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
+                        <br /><br />
+                        <a data-enhance-nav="false" class="btn btn-primary" href="/AddToCart?productID=@Item.ProductID">Add To Cart</a>
+                    </td>
+                </tr>
+            </table>
+        </ItemTemplate>
+    </FormView>
 </Site>
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "productID")]
+    public int? ProductId { get; set; }
+
+    private IReadOnlyList<Product> ProductItems { get; set; } = Array.Empty<Product>();
+
+    protected override void OnParametersSet()
+    {
+        if (!ProductId.HasValue && int.TryParse(Request.QueryString["productID"], out var requestedProductId))
+        {
+            ProductId = requestedProductId;
+        }
+
+        var product = CatalogService.GetProduct(ProductId);
+        ProductItems = product is null ? Array.Empty<Product>() : new[] { product };
+    }
+}

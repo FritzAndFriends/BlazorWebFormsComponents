@@ -2,5 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace WingtipToys.Account
 {
-    public partial class VerifyPhoneNumber : BlazorWebFormsComponents.WebFormsPageBase { }
+    public partial class VerifyPhoneNumber
+    {
+    }
 }

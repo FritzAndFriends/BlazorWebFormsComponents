@@ -1,33 +1,18 @@
-@* TODO(bwfc-master-page): Review shell scripts, bundle references, and auth/cart chrome for SSR-safe migration. *@
-
 <MasterPage>
-<Head>
-    <meta name="viewport" content="width=device-width" />
-    <title></title>
-    <ContentPlaceHolder id="HeadContent" />
-</Head>
-<ChildContent>
-    @ChildComponents
-    <div>
-        <h1>Mobile Master Page</h1>
-        <ContentPlaceHolder id="FeaturedContent" />
+    <Head>
+        <meta name="viewport" content="width=device-width" />
+    </Head>
+    <ChildContent>
         <section class="content-wrapper main-content clear-fix">
-            <ContentPlaceHolder id="MainContent" />
+            <ContentPlaceHolder ID="MainContent" />
         </section>
-        <ViewSwitcher />
-    </div>
-
-@ChildContent
-</ChildContent>
+    </ChildContent>
+    <ChildComponents>
+        @ChildComponents
+    </ChildComponents>
 </MasterPage>
 
 @code {
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
-
-    [Parameter]
     public RenderFragment? ChildComponents { get; set; }
-
-    [Parameter]
-    public RenderFragment? HeadPlaceholder { get; set; }
 }

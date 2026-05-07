@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 namespace WingtipToys
 {
     public partial class ViewSwitcher
@@ -65,7 +66,7 @@ namespace WingtipToys
                 return;
             }
             var url = GetRouteUrl(switchViewRouteName, new { view = AlternateView, __FriendlyUrls_SwitchViews = true });
-            url += "?ReturnUrl=" + HttpUtility.UrlEncode(Request.RawUrl);
+            url += "?ReturnUrl=" + WebUtility.UrlEncode(Request.RawUrl);
             SwitchUrl = url;
         }
     }

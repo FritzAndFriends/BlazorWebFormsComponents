@@ -1,10 +1,8 @@
+using Microsoft.AspNetCore.Components;
+
 namespace WingtipToys.Account
 {
-    public partial class Confirm : BlazorWebFormsComponents.WebFormsPageBase
+    public partial class Confirm
     {
-        private string Title { get; set; } = "Confirm";
-        private PlaceHolder successPanel = default!;
-        private HyperLink login = default!;
-        private PlaceHolder errorPanel = default!;
     }
 }

@@ -1,20 +1,17 @@
 @page "/ProductList"
-@using Microsoft.AspNetCore.Components
-@using Microsoft.EntityFrameworkCore
-@inject ProductContext Db
+@using WingtipToys.Services
+@inject CatalogService CatalogService
 
 <PageTitle>Products</PageTitle>
+
 <Site>
-<Content ContentPlaceHolderID="MainContent">
     <section>
         <div>
             <hgroup>
-                <h2>@(Page.Title)</h2>
+                <h2>Products</h2>
             </hgroup>
 
-            <ListView id="productList" @ref="productList"
-                      DataKeyNames="ProductID" GroupItemCount="4"
-                      TItem="Product" SelectItems="GetProductsQueryDetails_SelectItems">
+            <ListView Items="@Products" DataKeyNames="ProductID" GroupItemCount="4" ItemType="Product" Context="Item">
                 <EmptyDataTemplate>
                     <table>
                         <tr>
@@ -23,11 +20,11 @@
                     </table>
                 </EmptyDataTemplate>
                 <EmptyItemTemplate>
-                    <td />
+                    <td></td>
                 </EmptyItemTemplate>
-                <GroupTemplate>
-                    <tr id="itemPlaceholderContainer">
-                        @context
+                <GroupTemplate Context="itemPlaceholder">
+                    <tr>
+                        @itemPlaceholder
                     </tr>
                 </GroupTemplate>
                 <ItemTemplate>
@@ -35,25 +32,19 @@
                         <table>
                             <tr>
                                 <td>
-                                    <a href="/ProductDetails?ProductID=@context.ProductID">
-                                        <img src="/Catalog/Images/Thumbs/@context.ImagePath" width="100" height="75" border="1" alt="@context.ProductName" />
+                                    <a href="/ProductDetails?productID=@Item.ProductID">
+                                        <img src="/Catalog/Images/Thumbs/@Item.ImagePath" width="100" height="75" border="1" alt="@Item.ProductName" />
                                     </a>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <a href="/ProductDetails?ProductID=@context.ProductID">
-                                        @context.ProductName
-                                    </a>
+                                    <a href="/ProductDetails?productID=@Item.ProductID">@Item.ProductName</a>
                                     <br />
-                                    <span>
-                                        <b>Price: </b>@($"{context.UnitPrice:c}")
-                                    </span>
+                                    <span><b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))</span>
                                     <br />
-                                    <a href="/AddToCart?productID=@context.ProductID">
-                                        <span class="ProductListItem">
-                                            <b>Add To Cart</b>
-                                        </span>
+                                    <a data-enhance-nav="false" href="/AddToCart?productID=@Item.ProductID">
+                                        <span class="ProductListItem"><b>Add To Cart</b></span>
                                     </a>
                                 </td>
                             </tr>
@@ -63,48 +54,32 @@
                         </table>
                     </td>
                 </ItemTemplate>
-                <LayoutTemplate>
+                <LayoutTemplate Context="itemPlaceholder">
                     <table style="width:100%;">
                         <tbody>
                             <tr>
                                 <td>
-                                    <table id="groupPlaceholderContainer" style="width:100%">
-                                        @context
+                                    <table style="width:100%">
+                                        @itemPlaceholder
                                     </table>
                                 </td>
                             </tr>
-                            <tr>
-                                <td></td>
-                            </tr>
-                            <tr></tr>
                         </tbody>
                     </table>
                 </LayoutTemplate>
             </ListView>
         </div>
     </section>
-</Content>
 </Site>
 
 @code {
-    private ListView<Product> productList = default!;
+    [Parameter, SupplyParameterFromQuery(Name = "categoryId")]
+    public int? CategoryId { get; set; }
 
-    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
-    [Parameter, SupplyParameterFromQuery(Name = "categoryName")] public string? CategoryName { get; set; }
+    private IReadOnlyList<Product> Products { get; set; } = Array.Empty<Product>();
 
-    private IEnumerable<Product> GetProductsQueryDetails_SelectItems(int maxRows, int startRowIndex, string sortByExpression)
+    protected override void OnParametersSet()
     {
-        var query = Db.Products.Include(p => p.Category).AsQueryable();
-
-        if (CategoryId is int categoryId && categoryId > 0)
-        {
-            query = query.Where(p => p.CategoryID == categoryId);
-        }
-        else if (!string.IsNullOrWhiteSpace(CategoryName))
-        {
-            query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
-        }
-
-        return query.ToList();
+        Products = CatalogService.GetProducts(CategoryId);
     }
 }

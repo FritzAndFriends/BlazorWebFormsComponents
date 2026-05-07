@@ -84,7 +84,7 @@ namespace WingtipToys.Checkout
 
             var myOrder = new Order();
             myOrder.OrderDate = Convert.ToDateTime(decoder["TIMESTAMP"].ToString());
-            myOrder.Username = string.Empty;
+            myOrder.Username = User.Identity.Name;
             myOrder.FirstName = decoder["FIRSTNAME"].ToString();
             myOrder.LastName = decoder["LASTNAME"].ToString();
             myOrder.Address = decoder["SHIPTOSTREET"].ToString();
@@ -128,7 +128,7 @@ namespace WingtipToys.Checkout
                 // Create a new OrderDetail object.
                 var myOrderDetail = new OrderDetail();
                 myOrderDetail.OrderId = myOrder.OrderId;
-                myOrderDetail.Username = string.Empty;
+                myOrderDetail.Username = User.Identity.Name;
                 myOrderDetail.ProductId = myOrderList[i].ProductId;
                 myOrderDetail.Quantity = myOrderList[i].Quantity;
                 myOrderDetail.UnitPrice = myOrderList[i].Product.UnitPrice;

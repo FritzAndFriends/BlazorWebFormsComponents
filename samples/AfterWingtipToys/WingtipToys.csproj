@@ -17,4 +17,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="**\*.razor.cs" />
+    <Compile Remove="Logic\**\*.cs" />
+  </ItemGroup>
+
 </Project>

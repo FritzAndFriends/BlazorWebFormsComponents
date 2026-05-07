@@ -2,5 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace WingtipToys.Account
 {
-    public partial class ResetPassword : BlazorWebFormsComponents.WebFormsPageBase { }
+    public partial class ResetPassword
+    {
+    }
 }

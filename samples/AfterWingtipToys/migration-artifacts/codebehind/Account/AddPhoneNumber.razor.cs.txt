@@ -26,6 +26,7 @@ using WingtipToys.Models;
 
 using BlazorWebFormsComponents.Identity;
 
+using System.Net;
 namespace WingtipToys.Account
 {
     public partial class AddPhoneNumber
@@ -63,7 +64,7 @@ namespace WingtipToys.Account
                 manager.SmsService.Send(message);
             }
 
-            Response.Redirect("/Account/VerifyPhoneNumber?PhoneNumber=" + HttpUtility.UrlEncode(PhoneNumber.Text));
+            Response.Redirect("/Account/VerifyPhoneNumber?PhoneNumber=" + WebUtility.UrlEncode(PhoneNumber.Text));
         }
     }
 }

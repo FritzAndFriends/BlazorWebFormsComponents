@@ -1,14 +1,12 @@
 @page "/Account/Register"
 <PageTitle>Register</PageTitle>
 <Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
     <h1>Register</h1>
     @if (!string.IsNullOrWhiteSpace(Error))
     {
         <p class="text-danger">@Error</p>
     }
-    <form method="get" action="/Account/PerformRegister" class="form-horizontal">
+    <form method="post" action="/Account/PerformRegister" class="form-horizontal" data-enhance-nav="false">
         <div class="form-group">
             <label class="col-md-2 control-label" for="email">Email</label>
             <div class="col-md-10">
@@ -34,8 +32,6 @@
         </div>
     </form>
     <p><a href="/Account/Login">Already have an account? Sign in</a></p>
-</Content>
-    </ChildComponents>
 </Site>
 
 @code {

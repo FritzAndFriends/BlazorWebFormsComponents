@@ -1,4 +1,4 @@
-// TODO(bwfc-query-details): GetProducts now binds through component query properties and a SelectItems stub in the generated .razor file.
+// TODO(bwfc-query-details): GetProducts now binds through component query properties and a SelectMethod wrapper in the generated .razor file.
 // =============================================================================
 // TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
 //
