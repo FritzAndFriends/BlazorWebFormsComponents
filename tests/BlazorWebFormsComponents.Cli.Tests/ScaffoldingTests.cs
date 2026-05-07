@@ -16,7 +16,7 @@ public class ScaffoldingTests : IDisposable
     {
         _tempDir = Path.Combine(Path.GetTempPath(), $"bwfc-scaffold-{Guid.NewGuid():N}");
         Directory.CreateDirectory(_tempDir);
-        _scaffolder = new ProjectScaffolder(new DatabaseProviderDetector());
+        _scaffolder = TestHelpers.CreateDefaultScaffolder();
     }
 
     public void Dispose()
@@ -224,7 +224,122 @@ public class ScaffoldingTests : IDisposable
         var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
 
         Assert.True(result.HasModels);
-        Assert.Contains("EntityFrameworkCore", result.Files["csproj"].Content);
+        Assert.False(result.RuntimeProfile.NeedsEntityFramework);
+        Assert.DoesNotContain("EntityFrameworkCore", result.Files["csproj"].Content);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_DetectsDbContext_AndGeneratesEntityFrameworkRuntimeWiring()
+    {
+        Directory.CreateDirectory(Path.Combine(_tempDir, "Models"));
+        File.WriteAllText(Path.Combine(_tempDir, "Models", "CatalogContext.cs"), """
+            using Microsoft.EntityFrameworkCore;
+
+            namespace TestApp.Models;
+
+            public class CatalogContext : DbContext
+            {
+                public CatalogContext(DbContextOptions<CatalogContext> options)
+                    : base(options)
+                {
+                }
+            }
+            """);
+        File.WriteAllText(Path.Combine(_tempDir, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <connectionStrings>
+                <add name="CatalogConnection" connectionString="Server=(localdb)\\MSSQLLocalDB;Database=Catalog;" providerName="System.Data.SqlClient" />
+              </connectionStrings>
+            </configuration>
+            """);
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.True(result.RuntimeProfile.NeedsEntityFramework);
+        Assert.Equal("CatalogContext", result.RuntimeProfile.DbContextClassName);
+        Assert.Contains("CatalogConnection", result.RuntimeProfile.ConnectionStringNames);
+        Assert.Contains("AddDbContext<global::TestApp.Models.CatalogContext>", program);
+        Assert.Contains("GetConnectionString(\"CatalogConnection\")", program);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_DetectsSessionUsage_AndGeneratesSessionRuntimeWiring()
+    {
+        File.WriteAllText(Path.Combine(_tempDir, "Default.aspx.cs"), """
+            namespace TestApp;
+
+            public partial class _Default
+            {
+                public void AddToCart()
+                {
+                    Session["CartId"] = "cart-123";
+                }
+            }
+            """);
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.True(result.RuntimeProfile.NeedsSession);
+        Assert.Contains("builder.Services.AddSession(options =>", program);
+        Assert.Contains("app.UseSession();", program);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_DetectsIdentityPages_AndGeneratesIdentityRuntimeWiring()
+    {
+        Directory.CreateDirectory(Path.Combine(_tempDir, "Account"));
+        File.WriteAllText(Path.Combine(_tempDir, "Account", "Login.aspx"), "<%@ Page Language=\"C#\" %>");
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.True(result.RuntimeProfile.NeedsIdentity);
+        Assert.Contains("AddDefaultIdentity<IdentityUser>", program);
+        Assert.Contains("app.UseAuthentication();", program);
+        Assert.Contains("app.UseAuthorization();", program);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_EmitsApplicationStartReviewNotes_WhenGlobalAsaxPatternsDetected()
+    {
+        File.WriteAllText(Path.Combine(_tempDir, "Global.asax.cs"), """
+            using System.Web.Routing;
+
+            namespace TestApp;
+
+            public class Global : System.Web.HttpApplication
+            {
+                protected void Application_Start()
+                {
+                    RouteConfig.RegisterRoutes(RouteTable.Routes);
+                    AuthConfig.RegisterOpenAuth();
+                }
+            }
+            """);
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.Contains("RouteConfig.RegisterRoutes", result.RuntimeProfile.ApplicationStartPatterns);
+        Assert.Contains("AuthConfig.RegisterOpenAuth", result.RuntimeProfile.ApplicationStartPatterns);
+        Assert.Contains("Review legacy Application_Start registrations", program);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_GeneratesMinimalProgram_WhenNoRuntimeSignalsDetected()
+    {
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.False(result.RuntimeProfile.NeedsEntityFramework);
+        Assert.False(result.RuntimeProfile.NeedsSession);
+        Assert.False(result.RuntimeProfile.NeedsIdentity);
+        Assert.DoesNotContain("AddDbContext<", program);
+        Assert.DoesNotContain("AddSession(options =>", program);
+        Assert.DoesNotContain("AddDefaultIdentity<IdentityUser>", program);
     }
 
     [Fact]

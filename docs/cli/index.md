@@ -21,6 +21,7 @@ This tool **reduces manual migration effort** by:
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
 - Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
 - Scaffolding a new .NET 10 Blazor SSR project structure with shims, services, and relaxed code-style build enforcement for copied legacy files
+- Detecting common runtime needs from the source app (DbContext classes, session usage, Account pages, and Global.asax startup hooks) and wiring matching `Program.cs` services/middleware automatically
 
 The tool processes `.aspx`, `.ascx`, and `.master` files in a fixed sequence, then applies a bounded semantic pattern catalog so each higher-level rewrite builds on a normalized page shape.
 
@@ -92,7 +93,7 @@ webforms-to-blazor migrate \
 **Output:**
 - Converted `.razor` files
 - Quarantined manual code-behind and risky legacy source artifacts under `migration-artifacts\`
-- Generated `Program.cs` with shim registration for static SSR on .NET 10
+- Generated `Program.cs` with shim registration for static SSR on .NET 10 plus detected runtime wiring for EF Core, session state, identity, and legacy `Application_Start` review notes
 - Migration report (`migration-report.json`)
 
 ### `convert` — File-Level Transformation

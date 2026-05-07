@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.Scaffolding;
 using BlazorWebFormsComponents.Cli.SemanticPatterns;
 using BlazorWebFormsComponents.Cli.Transforms;
 using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
@@ -158,6 +160,17 @@ public static class TestHelpers
         new ActionPagesSemanticPattern(),
         new AccountPagesSemanticPattern()
     ];
+
+    public static RuntimeDetector CreateDefaultRuntimeDetector() =>
+        new([
+            new EntityFrameworkRuntimeSignalDetector(),
+            new SessionRuntimeSignalDetector(),
+            new IdentityRuntimeSignalDetector(),
+            new GlobalAsaxRuntimeSignalDetector()
+        ]);
+
+    public static ProjectScaffolder CreateDefaultScaffolder() =>
+        new(new DatabaseProviderDetector(), CreateDefaultRuntimeDetector(), new ProgramCsEmitter());
 
     /// <summary>
     /// Creates a fully configured MigrationPipeline with all markup and code-behind

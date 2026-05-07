@@ -97,6 +97,12 @@ class Program
         services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
 
         // Scaffolding
+        services.AddSingleton<IRuntimeSignalDetector, EntityFrameworkRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, SessionRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, IdentityRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, GlobalAsaxRuntimeSignalDetector>();
+        services.AddSingleton<RuntimeDetector>();
+        services.AddSingleton<ProgramCsEmitter>();
         services.AddSingleton<ProjectScaffolder>();
         services.AddSingleton<GlobalUsingsGenerator>();
         services.AddSingleton<ShimGenerator>();

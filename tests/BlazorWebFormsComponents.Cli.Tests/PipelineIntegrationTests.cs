@@ -54,7 +54,7 @@ public class PipelineIntegrationTests : IDisposable
             markupTransforms,
             codeBehindTransforms,
             new SemanticPatternCatalog(TestHelpers.CreateDefaultSemanticPatterns()),
-            new ProjectScaffolder(new DatabaseProviderDetector()),
+            TestHelpers.CreateDefaultScaffolder(),
             new GlobalUsingsGenerator(),
             new ShimGenerator(),
             new WebConfigTransformer(),
@@ -589,7 +589,7 @@ public class PipelineIntegrationTests : IDisposable
     public void Scaffold_GeneratesProjectFiles()
     {
         var (inputDir, outputDir) = CreateTempProjectDir();
-        var scaffolder = new ProjectScaffolder(new DatabaseProviderDetector());
+        var scaffolder = TestHelpers.CreateDefaultScaffolder();
 
         var result = scaffolder.Scaffold(inputDir, outputDir, "TestApp");
 
@@ -608,7 +608,7 @@ public class PipelineIntegrationTests : IDisposable
     public async Task Scaffold_WritesFilesToDisk()
     {
         var (inputDir, outputDir) = CreateTempProjectDir();
-        var scaffolder = new ProjectScaffolder(new DatabaseProviderDetector());
+        var scaffolder = TestHelpers.CreateDefaultScaffolder();
         var writer = new OutputWriter { DryRun = false };
 
         var result = scaffolder.Scaffold(inputDir, outputDir, "TestApp");

@@ -104,7 +104,7 @@ public class SemanticPatternCatalogTests : IDisposable
             [new AppendMarkupTransform()],
             [new AppendCodeBehindTransform()],
             new SemanticPatternCatalog([new VerifyAndAppendSemanticPattern()]),
-            new ProjectScaffolder(new DatabaseProviderDetector()),
+            TestHelpers.CreateDefaultScaffolder(),
             new GlobalUsingsGenerator(),
             new ShimGenerator(),
             new WebConfigTransformer(),
