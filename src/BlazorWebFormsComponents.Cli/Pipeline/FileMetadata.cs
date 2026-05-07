@@ -25,6 +25,8 @@ public class FileMetadata
     /// Code-behind transforms may modify this to update markup references (e.g., method renames).
     /// </summary>
     public string? MarkupContent { get; set; }
+    public string? CompileSurfaceStubReason { get; set; }
+    public string? CompileSurfaceOriginalCodeBehind { get; set; }
 
     public string FileName => Path.GetFileNameWithoutExtension(SourceFilePath);
 }

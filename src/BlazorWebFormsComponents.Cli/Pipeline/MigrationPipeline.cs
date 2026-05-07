@@ -312,20 +312,27 @@ public class MigrationPipeline
         if (codeBehind != null)
         {
             var emissionPlan = PageCodeBehindEmissionPlanner.Create(metadata, finalMarkup, codeBehind);
+            var relativeMarkupPath = Path.GetRelativePath(context.OutputPath, sourceFile.OutputPath);
+            var codeOutputPath = Path.Combine(
+                context.OutputPath,
+                "migration-artifacts",
+                "codebehind",
+                relativeMarkupPath + ".cs.txt");
 
             if (emissionPlan.EmitToCompileSurface)
             {
                 await _outputWriter.WriteFileAsync(sourceFile.OutputPath + ".cs", codeBehind,
                     $"Converted code-behind for {Path.GetFileName(sourceFile.MarkupPath)}");
+
+                if (!string.IsNullOrWhiteSpace(emissionPlan.ArtifactContent) && !string.IsNullOrWhiteSpace(emissionPlan.ArtifactReason))
+                {
+                    await _outputWriter.WriteFileAsync(codeOutputPath, emissionPlan.ArtifactContent,
+                        $"Manual code-behind artifact for {Path.GetFileName(sourceFile.MarkupPath)}");
+                    report.AddManualItem(Path.GetRelativePath(context.SourcePath, sourceFile.MarkupPath), 0, "bwfc-compile-surface", emissionPlan.ArtifactReason);
+                }
             }
             else
             {
-                var relativeMarkupPath = Path.GetRelativePath(context.OutputPath, sourceFile.OutputPath);
-                var codeOutputPath = Path.Combine(
-                    context.OutputPath,
-                    "migration-artifacts",
-                    "codebehind",
-                    relativeMarkupPath + ".cs.txt");
                 await _outputWriter.WriteFileAsync(codeOutputPath, codeBehind,
                     $"Manual code-behind artifact for {Path.GetFileName(sourceFile.MarkupPath)}");
             }

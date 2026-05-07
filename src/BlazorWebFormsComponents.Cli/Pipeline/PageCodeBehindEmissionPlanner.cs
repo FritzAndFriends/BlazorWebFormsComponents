@@ -33,6 +33,11 @@ internal static partial class PageCodeBehindEmissionPlanner
             return Artifact("Only page code-behind is emitted into the compile surface.");
         }
 
+        if (!string.IsNullOrWhiteSpace(metadata.CompileSurfaceStubReason) && !string.IsNullOrWhiteSpace(metadata.CompileSurfaceOriginalCodeBehind))
+        {
+            return Stub(metadata.CompileSurfaceStubReason!, metadata.CompileSurfaceOriginalCodeBehind!);
+        }
+
         if (!PartialClassRegex.IsMatch(codeBehind))
         {
             return Artifact("Transformed code-behind did not produce a compilable partial class.");
@@ -57,8 +62,9 @@ internal static partial class PageCodeBehindEmissionPlanner
         return Compile();
     }
 
-    private static CodeBehindEmissionPlan Compile() => new(true, null);
-    private static CodeBehindEmissionPlan Artifact(string reason) => new(false, reason);
+    private static CodeBehindEmissionPlan Compile() => new(true, null, null);
+    private static CodeBehindEmissionPlan Stub(string reason, string artifactContent) => new(true, reason, artifactContent);
+    private static CodeBehindEmissionPlan Artifact(string reason) => new(false, reason, null);
 }
 
-internal sealed record CodeBehindEmissionPlan(bool EmitToCompileSurface, string? ArtifactReason);
+internal sealed record CodeBehindEmissionPlan(bool EmitToCompileSurface, string? ArtifactReason, string? ArtifactContent);

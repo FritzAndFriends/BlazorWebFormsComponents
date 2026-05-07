@@ -46,6 +46,7 @@ class Program
         services.AddSingleton<IMarkupTransform, ImportDirectiveTransform>();
         services.AddSingleton<IMarkupTransform, RegisterDirectiveTransform>();
         services.AddSingleton<IMarkupTransform, MasterPageTransform>();
+        services.AddSingleton<IMarkupTransform, ScriptManagerStripTransform>();
         services.AddSingleton<IMarkupTransform, ContentWrapperTransform>();
         services.AddSingleton<IMarkupTransform, FormWrapperTransform>();
         services.AddSingleton<IMarkupTransform, DisplayExpressionTransform>();
@@ -91,6 +92,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, DataBindTransform>();
         services.AddSingleton<ICodeBehindTransform, ClientScriptTransform>();
         services.AddSingleton<ICodeBehindTransform, UrlCleanupTransform>();
+        services.AddSingleton<ICodeBehindTransform, CompileSurfaceStubTransform>();
         services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
 
         // Scaffolding

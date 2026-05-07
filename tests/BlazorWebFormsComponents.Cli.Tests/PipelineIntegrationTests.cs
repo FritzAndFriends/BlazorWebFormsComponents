@@ -321,6 +321,54 @@ public class PipelineIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task Pipeline_EmitsCompileSurfaceStubAndArtifactsOriginalCodeBehind_ForInfrastructurePages()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir(includeWebConfig: false, includeCodeBehind: false);
+        Directory.CreateDirectory(Path.Combine(inputDir, "Account"));
+
+        File.WriteAllText(Path.Combine(inputDir, "Account", "Manage.aspx"), """
+            <%@ Page Title="Manage" Language="C#" AutoEventWireup="true" CodeBehind="Manage.aspx.cs" Inherits="TestApp.Account.Manage" %>
+            <asp:Label ID="StatusLabel" runat="server" Text="Manage" />
+            """);
+        File.WriteAllText(Path.Combine(inputDir, "Account", "Manage.aspx.cs"), """
+            using Microsoft.AspNet.Identity;
+
+            namespace TestApp.Account
+            {
+                public partial class Manage
+                {
+                }
+            }
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false, SkipScaffold = true },
+            SourceFiles = sourceFiles
+        };
+
+        var report = await pipeline.ExecuteAsync(context);
+
+        var markupPath = Path.Combine(outputDir, "Account", "Manage.razor");
+        var codeBehindPath = Path.Combine(outputDir, "Account", "Manage.razor.cs");
+        var artifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "Account", "Manage.razor.cs.txt");
+
+        Assert.Empty(report.Errors);
+        Assert.True(File.Exists(markupPath));
+        Assert.True(File.Exists(codeBehindPath));
+        Assert.True(File.Exists(artifactPath));
+        Assert.Contains("This page is under migration", File.ReadAllText(markupPath));
+        Assert.Contains("public partial class Manage : ComponentBase", File.ReadAllText(codeBehindPath));
+        Assert.Contains(report.ManualItems, item => item.Category == "bwfc-compile-surface" && item.File == Path.Combine("Account", "Manage.aspx"));
+    }
+
+    [Fact]
     public async Task Pipeline_QueryDetailsPattern_RewritesMarkupWithQueryStub()
     {
         var (inputDir, outputDir) = CreateTempProjectDir(includeWebConfig: false, includeCodeBehind: false);

@@ -174,8 +174,9 @@ public static class TestHelpers
             // Order 200-210: Imports & Registers
             new ImportDirectiveTransform(),
             new RegisterDirectiveTransform(),
-            // Order 250: Master page layout conversion
+            // Order 250-255: Master page shell cleanup
             new MasterPageTransform(),
+            new ScriptManagerStripTransform(),
             // Order 300-310: Content/Form wrappers
             new ContentWrapperTransform(),
             new FormWrapperTransform(),
@@ -230,6 +231,7 @@ public static class TestHelpers
             new DataBindTransform(),
             new ClientScriptTransform(),
             new UrlCleanupTransform(),
+            new CompileSurfaceStubTransform(),
             new MarkupReferencedMemberStubTransform(),
         };
 

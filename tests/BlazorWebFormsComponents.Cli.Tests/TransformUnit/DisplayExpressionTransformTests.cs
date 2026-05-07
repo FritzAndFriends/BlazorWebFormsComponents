@@ -63,6 +63,30 @@ public class DisplayExpressionTransformTests
     }
 
     [Fact]
+    public void ConvertsStringFormatDisplayExpressionToParenthesizedRazor()
+    {
+        var result = _transform.Apply("<span><%#: String.Format(\"{0:c}\", Item.UnitPrice) %></span>", TestMetadata);
+
+        Assert.Equal("<span>@(String.Format(\"{0:c}\", Item.UnitPrice))</span>", result);
+    }
+
+    [Fact]
+    public void ConvertsComplexStringFormatDisplayExpressionToParenthesizedRazor()
+    {
+        var result = _transform.Apply("<span><%#: String.Format(\"{0:c}\", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice)))%></span>", TestMetadata);
+
+        Assert.Equal("<span>@(String.Format(\"{0:c}\", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))</span>", result);
+    }
+
+    [Fact]
+    public void LeavesBindExpressionsForDataBindingAttributeTransform()
+    {
+        var result = _transform.Apply("<span><%#: Bind(\"Name\") %></span>", TestMetadata);
+
+        Assert.Equal("<span><%#: Bind(\"Name\") %></span>", result);
+    }
+
+    [Fact]
     public void LeavesEvalExpressionsForExpressionTransform()
     {
         var result = _transform.Apply("<span><%#: Eval(\"Name\") %></span>", TestMetadata);
@@ -102,5 +126,22 @@ public class DisplayExpressionTransformTests
         var result = pipeline.TransformMarkup("<ItemTemplate><%#: item.GetPrice() %></ItemTemplate>", metadata);
 
         Assert.Contains("@(item.GetPrice())", result);
+    }
+
+    [Fact]
+    public void PipelineConvertsStringFormatDisplayExpression()
+    {
+        var pipeline = TestHelpers.CreateDefaultPipeline();
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Product.aspx",
+            OutputFilePath = "Product.razor",
+            FileType = FileType.Page,
+            OriginalContent = string.Empty
+        };
+
+        var result = pipeline.TransformMarkup("<ItemTemplate><%#: String.Format(\"{0:c}\", Item.UnitPrice) %></ItemTemplate>", metadata);
+
+        Assert.Contains("@(String.Format(\"{0:c}\", Item.UnitPrice))", result);
     }
 }

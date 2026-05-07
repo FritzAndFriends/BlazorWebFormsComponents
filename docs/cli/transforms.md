@@ -13,6 +13,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 50 | RegisterDirective | Markup | Directive | Handle `<%@ Register %>` for custom controls |
 | 60 | ImportDirective | Markup | Directive | Convert `<%@ Import %>` → `@using` |
 | 250 | MasterPageTransform | Markup | Markup | Convert master markup to runnable `<MasterPage>` shell syntax |
+| 255 | ScriptManagerStripTransform | Markup | Markup | Remove `ScriptManager`, bundle references, and `Scripts.Render(...)` placeholders from master pages |
 | 300 | ContentWrapperTransform | Markup | Markup | Wrap loose content in `<div>` if needed |
 | 310 | FormWrapperTransform | Markup | Markup | Convert `<form runat="server">` to Blazor form |
 | 490 | DisplayExpressionTransform | Markup | Markup | Normalize `<%#:` / `<%=:` display expressions and broken `@(: expr)` output to valid Razor |
@@ -46,6 +47,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 50 | UrlCleanupTransform | Code-Behind | Code-Behind | Clean URL literals in code |
 | 104 | HttpUtilityRewriteTransform | Code-Behind | Code-Behind | Rewrite `HttpUtility.*` calls to `WebUtility.*` and add `using System.Net;` |
 | 106 | EfContextConstructorTransform | Code-Behind | Code-Behind | Rewrite EF6 `base("name")` DbContext constructors to EF Core `DbContextOptions<TContext>` constructors |
+| 850 | CompileSurfaceStubTransform | Code-Behind | Code-Behind | Replace Account/Admin and infrastructure-heavy pages with build-safe stubs while preserving transformed originals in `migration-artifacts\codebehind\` |
 | 900 | MarkupReferencedMemberStubTransform | Code-Behind | Code-Behind | Add fallback fields, render-method stubs, and event handlers for markup references still missing from emitted partial classes |
 
 ---
@@ -219,7 +221,19 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 7. ContentWrapperTransform (Order: 300)
+### 7. ScriptManagerStripTransform (Order: 255)
+
+**Removes Web Forms-only script infrastructure from master pages.**
+
+**Details:**
+- Replaces `<asp:ScriptManager>...</asp:ScriptManager>` blocks with `@* Framework scripts are managed by Blazor — no ScriptManager needed. *@`
+- Removes `<webopt:bundlereference ... />` tags
+- Removes `<asp:PlaceHolder runat="server">` wrappers that only contain `Scripts.Render(...)`
+- Collapses excess blank lines left behind by the cleanup
+
+---
+
+### 8. ContentWrapperTransform (Order: 300)
 
 **Wraps loose content in a div if necessary.**
 
@@ -227,7 +241,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 8. FormWrapperTransform (Order: 310)
+### 9. FormWrapperTransform (Order: 310)
 
 **Converts Web Forms form tags to Blazor EditForm or plain HTML form.**
 
@@ -250,7 +264,19 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 9. ExpressionTransform (Order: 500)
+### 10. DisplayExpressionTransform (Order: 490)
+
+**Normalizes Web Forms display-expression syntax before broader expression handling.**
+
+**Details:**
+- Converts `<%#: expr %>` to idiomatic Razor output
+- Leaves `Bind(...)` and `Eval(...)` for later specialized handling
+- Converts complex expressions such as `String.Format(...)` to parenthesized Razor `@( ... )`
+- Repairs broken generated `@(: expr)` output
+
+---
+
+### 11. ExpressionTransform (Order: 500)
 
 **Converts Web Forms expression syntax to Blazor.**
 
@@ -276,7 +302,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 10. LoginViewTransform (Order: 510)
+### 12. LoginViewTransform (Order: 510)
 
 **Converts LoginView to Blazor AuthorizeView.**
 
@@ -321,7 +347,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 11. SelectMethodTransform (Order: 520)
+### 13. SelectMethodTransform (Order: 520)
 
 **Flags data source method attributes for conversion.**
 
@@ -886,6 +912,29 @@ string imageUrl = "~/images/logo.png";
 string redirectUrl = "/products/list";
 string imageUrl = "/images/logo.png";
 ```
+
+---
+
+### 32. CompileSurfaceStubTransform (Order: 850)
+
+**Emits build-safe stubs for Account/Admin and infrastructure-heavy pages.**
+
+**Details:**
+- Detects pages that still depend on ASP.NET Identity, OWIN, OpenAuth provider base types, or external payment-service namespaces such as PayPal and Stripe
+- Replaces the generated markup with a visible migration placeholder page
+- Emits a minimal `ComponentBase` partial class so the generated app still builds
+- Preserves the transformed original code-behind under `migration-artifacts\codebehind\` and records a `bwfc-compile-surface` manual item
+
+---
+
+### 33. MarkupReferencedMemberStubTransform (Order: 900)
+
+**Adds compile-safe fallback members for identifiers that remain referenced from markup.**
+
+**Details:**
+- Scans the transformed markup for missing `@Method()`, `@_field`, and event-handler references
+- Appends minimal stubs only when the emitted partial class does not already declare the member
+- Keeps the compile surface moving while leaving explicit TODO comments for the real migration work
 
 ---
 

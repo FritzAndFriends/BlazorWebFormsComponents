@@ -133,8 +133,33 @@
 - Added focused regression tests for the new transforms, source-file copying, and ServerShim behavior; updated CLI docs plus migration docs so HttpUtility guidance now points to inline `WebUtility` rewrites rather than relying on the legacy shim package.
 - Validation: `dotnet build src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj --nologo`, `dotnet test src\BlazorWebFormsComponents.Test --nologo`, and `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`.
 
+### 2026-05-06T18:55:09-04:00: WingtipToys Migration Run 36 — benchmark after G1/G3/G8/G10 validation (Bishop)
+- Executed fresh Run 36 benchmark on commit `aa8f70cbea53ed86734e6b550167248c63b86304` from branch `feature/wingtip-next-features-review` using `migration-toolkit\scripts\bwfc-migrate.ps1`; final result was **25/25 acceptance tests passing** with screenshots under `dev-docs\migration-tests\wingtiptoys\run36\images\`.
+- Total runtime dropped to `00:10:12` and Layer 2/3 repair time dropped to `00:05:37`, a meaningful improvement over Run 35 (`00:17:34` total, `00:10:03` repair).
+- G3 removed the old `ProductContext : base("WingtipToys")` constructor-definition blocker, but generated callers still emitted `new ProductContext()` and need a follow-up call-site transform.
+- G8 removed missing-method compile errors for `Server.GetLastError()` / `Server.ClearError()`, but generated code still emits the old `Server.Transfer(path, true)` shape, so either an overload or a rewrite is still needed.
+- G10 removed live compiled-source `HttpUtility` blockers from the benchmark app; remaining `HttpUtility` references were only left in quarantined `migration-artifacts` text files.
+- G1 reduced the error surface by eliminating the broken `@(: expr)` class, but a raw `<%#:` expression still leaked into `ShoppingCart.razor`, so templated display-expression cleanup is not complete yet.
+- Biggest remaining benchmark gaps were the unsupported master-page script/bundle shell, unresolved account/admin/checkout compile surfaces, and the need for a lightweight runtime scaffold (catalog/cart/auth) to validate the acceptance path quickly.
+- Report: `dev-docs\migration-tests\wingtiptoys\run36\report.md`
+
 ### 2026-05-06T21:33:09-04:00: DisplayExpressionTransform emits idiomatic Razor for simple expressions (Bishop)
-- DisplayExpressionTransform now classifies dotted identifier chains with a dedicated regex helper and emits @expr for simple display expressions while preserving @(expr) for method calls, operators, and other complex expressions.
-- Updated focused coverage in tests\\BlazorWebFormsComponents.Cli.Tests\\TransformUnit\\DisplayExpressionTransformTests.cs for simple and complex cases, plus pipeline assertions for both shapes.
-- Updated L1 expected fixtures TC06-Expressions.razor and TC30-DataDrivenPage.razor to reflect idiomatic Razor output in generated markup.
-- Validation: dotnet test tests\\BlazorWebFormsComponents.Cli.Tests --nologo --filter DisplayExpression (9 passing) and dotnet test tests\\BlazorWebFormsComponents.Cli.Tests --nologo (573 passing).
+- `src\BlazorWebFormsComponents.Cli\Transforms\Markup\DisplayExpressionTransform.cs` now classifies dotted identifier chains with a dedicated regex helper and emits `@expr` for simple display expressions while preserving `@(expr)` for method calls, operators, and other complex expressions.
+- Updated focused coverage in `tests\BlazorWebFormsComponents.Cli.Tests\TransformUnit\DisplayExpressionTransformTests.cs` for simple and complex cases, plus pipeline assertions for both shapes.
+- Updated L1 expected fixtures `tests\BlazorWebFormsComponents.Cli.Tests\TestData\expected\TC06-Expressions.razor` and `tests\BlazorWebFormsComponents.Cli.Tests\TestData\expected\TC30-DataDrivenPage.razor` to reflect idiomatic Razor output in generated markup.
+- Validation: `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo --filter "DisplayExpression"` (9 passing) and `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo` (573 passing).
+
+### 2026-05-06T22:04:10-04:00: WingtipToys Migration Run 37 — benchmark after DisplayExpressionTransform idiomatic output (Bishop)
+- Executed fresh Run 37 benchmark on commit `d35ff5c114bf834081cb38685a445599f86fe053` from branch `feature/wingtip-next-features-review` using `migration-toolkit\scripts\bwfc-migrate.ps1`; final result was **25/25 acceptance tests passing** with screenshots under `dev-docs\migration-tests\wingtiptoys\run37\images\`.
+- The simple-expression `@expr` improvement showed up in fresh output (`@Item.ProductName` style markup was cleaner than earlier parenthesized output), but it did **not** reduce end-to-end repair time because invalid templated markup, master-page shell output, compile-surface pages, and unfinished auth/runtime scaffolding still dominated the benchmark.
+- A raw `<%#:` display expression still leaked into `ShoppingCart.razor`, confirming the current transform does not yet cover all templated display-expression shapes.
+- Generated `ListView` / `FormView` output still shipped malformed HTML, wrong item-context references, and unsupported child-content structure, so the benchmark path remained blocked until those pages were rewritten manually.
+- Large `Account/*`, `Admin/*`, and `Checkout/*` routable surfaces still arrived as uncompilable compile-surface debt. The fastest repair path was still aggressive page simplification/stubbing around the acceptance-tested flow.
+
+### 2026-05-06T22:13:18-04:00: Run 37 gap fixes G1/G2/G4 for CLI output hardening (Bishop)
+- `DisplayExpressionTransform` now allows `String.Format(...)` through the display-expression path by excluding only `Bind(...)` and `Eval(...)`; `<%#: String.Format(...) %>` now becomes valid Razor `@(String.Format(...))` instead of leaking raw Web Forms syntax.
+- Added markup `ScriptManagerStripTransform` (Order 255) immediately after `MasterPageTransform`. It strips `<asp:ScriptManager>...</asp:ScriptManager>`, `<webopt:bundlereference ... />`, and `Scripts.Render(...)` placeholders from `.master` output, replacing the ScriptManager block with a single Blazor guidance comment and collapsing excess blank lines.
+- Added code-behind `CompileSurfaceStubTransform` (Order 850) plus `PageCodeBehindEmissionPlanner`/`MigrationPipeline` support for dual output: infrastructure-heavy pages now emit a build-safe `.razor`/`.razor.cs` stub into the compile surface while preserving the transformed pre-stub code-behind under `migration-artifacts\codebehind\` and recording a `bwfc-compile-surface` manual item.
+- Login.aspx and Register.aspx remain explicitly exempt from compile-surface stubbing so the existing account semantic pattern and acceptance-path auth scaffolding continue to run.
+- Updated CLI docs (`docs\cli\index.md`, `docs\cli\transforms.md`) and added focused regression coverage in `DisplayExpressionTransformTests`, `ScriptManagerStripTransformTests`, `CompileSurfaceStubTransformTests`, and `PipelineIntegrationTests`.
+- Validation sequence: baseline `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --no-restore --nologo` (573 passing), after G1 (577 passing), after G2 (582 passing), after G4/final docs/tests (588 passing).

@@ -11,7 +11,7 @@ namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 public class DisplayExpressionTransform : IMarkupTransform
 {
     private static readonly Regex DisplayExpressionRegex = new(
-        @"<%#:(?!\s*(?:Bind|Eval|String\.Format)\()\s*(.*?)\s*%>",
+        @"<%#:(?!\s*(?:Bind|Eval)\()\s*(.*?)\s*%>",
         RegexOptions.Compiled | RegexOptions.Singleline);
 
     private static readonly Regex ColonEqualsExpressionRegex = new(

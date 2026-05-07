@@ -9,13 +9,15 @@ This tool **reduces manual migration effort** by:
 - Removing boilerplate Web Forms directives and syntax
 - Converting ASP.NET server controls to BWFC components
 - Replacing Web Forms expressions with Blazor syntax
-- Normalizing `<%#:` / `<%=:` display expressions and broken `@(: expr)` output to valid Razor `@(...)`
+- Normalizing `<%#:` / `<%=:` display expressions, including `String.Format(...)`, and broken `@(: expr)` output to valid Razor `@(...)`
+- Stripping Web Forms-only master-page script infrastructure such as `ScriptManager`, bundle references, and `Scripts.Render(...)` placeholders
 - Applying semantic page-pattern rewrites after the core transform pass
 - Injecting explicit validator generic arguments for BWFC validation components
 - Converting `<%# ... %>` data-binding expressions that appear inside attribute values into Razor `@(...)` expressions
 - Rewriting legacy `HttpUtility.*` calls inline to `WebUtility.*`
 - Upgrading EF6-style `DbContext` string constructors to EF Core `DbContextOptions<TContext>` constructors
 - Generating compile-safe stubs for markup-referenced members that are still missing after code-behind conversion
+- Emitting build-safe compile-surface page stubs for Account/Admin or infrastructure-heavy pages while preserving the transformed originals under `migration-artifacts\codebehind\`
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
 - Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
 - Scaffolding a new .NET 10 Blazor SSR project structure with shims, services, and relaxed code-style build enforcement for copied legacy files
@@ -114,8 +116,8 @@ webforms-to-blazor convert \
 The tool applies an ordered transform pipeline and then a semantic pattern catalog:
 
 1. **Directives** (5) — Page, Master, Control, Register, Import directives
-2. **Markup** (18) — Controls, expressions, display-expression cleanup, templates, validator typing, data binding
-3. **Code-Behind** (25) — Using statements, HttpUtility/EF modernization, base classes, lifecycle, event handlers, markup-driven safety stubs
+2. **Markup** (19) — Controls, expressions, master-page script cleanup, display-expression cleanup, templates, validator typing, data binding
+3. **Code-Behind** (26) — Using statements, HttpUtility/EF modernization, base classes, lifecycle, event handlers, compile-surface stubs, markup-driven safety stubs
 
 See **[Transform Reference](transforms.md)** for the flat transform list and **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** for the bounded semantic pass that runs afterward.
 
