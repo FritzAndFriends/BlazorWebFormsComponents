@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace WingtipToys.Account
 {
-    public partial class ManagePassword
+    public partial class ManagePassword 
     {
     }
 }

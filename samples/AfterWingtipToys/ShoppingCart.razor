@@ -1,90 +1,79 @@
 @page "/ShoppingCart"
-@using Microsoft.AspNetCore.Http
-@using BlazorWebFormsComponents.Enums
-@using WingtipToys.Services
-@inject CartService CartService
+@rendermode InteractiveServer
+@inject CartSessionStore CartStore
+@inject IHttpContextAccessor HttpContextAccessor
 
 <PageTitle>Shopping Cart</PageTitle>
-
 <Site>
-    <div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <div id="ShoppingCartTitle" class="ContentHead"><h1>@ShoppingCartTitle</h1></div>
 
-    @if (CartItems.Count == 0)
-    {
-        <p>Your shopping cart is empty.</p>
-    }
-    else
-    {
-        <form method="post" action="/ShoppingCart/Update" data-enhance-nav="false">
-            <GridView AutoGenerateColumns="false" ShowFooter="false" GridLines="@GridLines.Vertical" CellPadding="4"
-                      ItemType="CartItem" Items="@CartItems" CssClass="table table-striped table-bordered">
-                <Columns>
-                    <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
-                    <BoundField DataField="Product.ProductName" HeaderText="Name" />
-                    <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
-                    <TemplateField HeaderText="Quantity">
-                        <ItemTemplate Context="Item">
-                            <input type="text" name="qty_@Item.ProductId" value="@Item.Quantity" class="form-control" style="width:60px" />
-                        </ItemTemplate>
-                    </TemplateField>
-                    <TemplateField HeaderText="Item Total">
-                        <ItemTemplate Context="Item">
-                            @(String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))
-                        </ItemTemplate>
-                    </TemplateField>
-                    <TemplateField HeaderText="Remove Item">
-                        <ItemTemplate Context="Item">
-                            <a data-enhance-nav="false" href="/RemoveFromCart?productID=@Item.ProductId">Remove</a>
-                        </ItemTemplate>
-                    </TemplateField>
-                </Columns>
-            </GridView>
-
-            <div>
-                <p></p>
-                <strong>Order Total: @String.Format("{0:c}", Total)</strong>
-            </div>
-            <br />
-            <table>
-                <tr>
-                    <td>
-                        <button type="submit" class="btn btn-default">Update</button>
-                    </td>
-                    <td>
-                        <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" width="145" alt="Check out with PayPal" />
-                    </td>
-                </tr>
-            </table>
-        </form>
-    }
+            @if (CartItems.Count == 0)
+            {
+                <p>Your shopping cart is empty.</p>
+            }
+            else
+            {
+                <form method="get" action="/ShoppingCart/Update">
+                    <GridView id="CartList"
+                              AutoGenerateColumns="false"
+                              ShowFooter="true"
+                              GridLines="@GridLines.Vertical"
+                              CellPadding="4"
+                              ItemType="CartItem"
+                              Items="CartItems"
+                              CssClass="table table-striped table-bordered">
+                        <Columns>
+                            <BoundField ItemType="CartItem" DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
+                            <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Name" />
+                            <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
+                            <TemplateField ItemType="CartItem" HeaderText="Quantity">
+                                <ItemTemplate Context="Item">
+                                    <input type="text" name="qty-@Item.ProductId" value="@Item.Quantity" class="form-control" style="width:60px" />
+                                </ItemTemplate>
+                            </TemplateField>
+                            <TemplateField ItemType="CartItem" HeaderText="Item Total">
+                                <ItemTemplate Context="Item">
+                                    @(String.Format("{0:c}", Item.Quantity * (Item.Product.UnitPrice ?? 0)))
+                                </ItemTemplate>
+                            </TemplateField>
+                            <TemplateField ItemType="CartItem" HeaderText="Remove Item">
+                                <ItemTemplate Context="Item">
+                                    <a class="btn btn-link" href="/ShoppingCart/Remove?productId=@Item.ProductId">Remove</a>
+                                </ItemTemplate>
+                            </TemplateField>
+                        </Columns>
+                    </GridView>
+                    <div>
+                        <p></p>
+                        <strong>Order Total: @TotalText</strong>
+                    </div>
+                    <br />
+                    <table>
+                        <tr>
+                            <td>
+                                <button type="submit" class="btn btn-default">Update</button>
+                            </td>
+                            <td>
+                                <a class="btn btn-primary" href="/Checkout/CheckoutStart">Check out with PayPal</a>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            }
+        </Content>
+    </ChildComponents>
 </Site>
 
 @code {
-    private IReadOnlyList<CartItem> CartItems { get; set; } = Array.Empty<CartItem>();
-    private decimal Total { get; set; }
+    private string? CartKey => HttpContextAccessor.HttpContext?.Session.GetString("cart-key");
 
-    protected override void OnParametersSet()
-    {
-        var cartId = GetCartId();
-        CartItems = CartService.GetItems(cartId);
-        Total = CartService.GetTotal(cartId);
-    }
+    private IReadOnlyList<CartItem> CartItems => string.IsNullOrWhiteSpace(CartKey)
+        ? Array.Empty<CartItem>()
+        : CartStore.GetCartItems(CartKey);
 
-    private string GetCartId()
-    {
-        if (!string.IsNullOrWhiteSpace(Context?.User?.Identity?.Name))
-        {
-            return Context.User.Identity.Name;
-        }
+    private string ShoppingCartTitle => CartItems.Count == 0 ? "Shopping Cart is Empty" : "Shopping Cart";
 
-        var cartId = Context?.Session.GetString("CartId");
-        if (!string.IsNullOrWhiteSpace(cartId))
-        {
-            return cartId;
-        }
-
-        cartId = Guid.NewGuid().ToString("N");
-        Context?.Session.SetString("CartId", cartId);
-        return cartId;
-    }
+    private string TotalText => String.Format("{0:c}", string.IsNullOrWhiteSpace(CartKey) ? 0 : CartStore.GetTotal(CartKey));
 }

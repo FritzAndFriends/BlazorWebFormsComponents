@@ -1,95 +1,94 @@
-@using Microsoft.AspNetCore.Http
-@using WingtipToys.Services
-@inject CatalogService CatalogService
-@inject CartService CartService
+@inject CatalogService Catalog
+@inject CartSessionStore CartStore
+@inject IHttpContextAccessor HttpContextAccessor
 
-<div class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="/">Wingtip Toys</a>
-        </div>
-        <div class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="/">Home</a></li>
-                <li><a href="/About">About</a></li>
-                <li><a href="/Contact">Contact</a></li>
-                <li><a href="/ProductList">Products</a></li>
-                <li><a href="/ShoppingCart">@CartLabel</a></li>
-            </ul>
-            <AuthorizeView>
-                <NotAuthorized>
+<MasterPage>
+<Head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wingtip Toys</title>
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+</Head>
+<ChildContent>
+    @ChildComponents
+
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Wingtip Toys</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/About">About</a></li>
+                    <li><a href="/Contact">Contact</a></li>
+                    <li><a href="/ProductList">Products</a></li>
+                    <li><a href="/ShoppingCart" id="cartCount">@CartText</a></li>
+                </ul>
+                @if (string.IsNullOrWhiteSpace(CurrentUserEmail))
+                {
                     <ul class="nav navbar-nav navbar-right">
                         <li><a href="/Account/Register">Register</a></li>
                         <li><a href="/Account/Login">Log in</a></li>
                     </ul>
-                </NotAuthorized>
-                <Authorized>
+                }
+                else
+                {
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="/Manage">Hello, @Context.User.Identity?.Name!</a></li>
+                        <li class="navbar-text">Hello, @CurrentUserEmail !</li>
                         <li><a href="/Account/Logout">Log out</a></li>
                     </ul>
-                </Authorized>
-            </AuthorizeView>
+                }
+            </div>
         </div>
     </div>
-</div>
-<div id="TitleContent" style="text-align: center">
-    <a href="/">
-        <img src="/Images/logo.jpg" alt="Wingtip Toys" class="img-responsive center-block" />
-    </a>
-    <br />
-</div>
-<div id="CategoryMenu" style="text-align: center">
-    <ListView Items="@Categories" ItemType="Category" Context="Item">
-        <ItemTemplate>
-            <b style="font-size: large; font-style: normal">
-                <a href="/ProductList?categoryId=@Item.CategoryID">@Item.CategoryName</a>
-            </b>
-        </ItemTemplate>
-        <ItemSeparatorTemplate> | </ItemSeparatorTemplate>
-    </ListView>
-</div>
-<div class="container body-content">
-    @ChildContent
-    <hr />
-    <footer>
-        <p>&copy; 2013 - Wingtip Toys</p>
-    </footer>
-</div>
+    <div id="TitleContent" style="text-align: center">
+        <a href="/">
+            <img src="/Images/logo.jpg" alt="Wingtip Toys" style="border:0" />
+        </a>
+        <br />
+    </div>
+    <div id="CategoryMenu" style="text-align: center">
+        <ListView id="categoryList" ItemType="Category" Items="Categories">
+            <ItemTemplate Context="Item">
+                <b style="font-size: large; font-style: normal">
+                    <a href="/ProductList?categoryName=@Uri.EscapeDataString(Item.CategoryName)">@Item.CategoryName</a>
+                </b>
+            </ItemTemplate>
+            <ItemSeparatorTemplate> | </ItemSeparatorTemplate>
+        </ListView>
+    </div>
+    <div class="container body-content">
+        <ContentPlaceHolder ID="MainContent" />
+        <hr />
+        <footer>
+            <p>&copy; 2013 - Wingtip Toys</p>
+        </footer>
+    </div>
+</ChildContent>
+</MasterPage>
 
 @code {
     [Parameter]
-    public RenderFragment? ChildContent { get; set; }
+    public RenderFragment? ChildComponents { get; set; }
 
-    private IReadOnlyList<Category> Categories { get; set; } = Array.Empty<Category>();
+    private IReadOnlyList<Category> Categories => Catalog.GetCategories();
 
-    private string CartLabel => $"Cart ({CartService.GetCount(GetCartId())})";
+    private string CurrentUserEmail => HttpContextAccessor.HttpContext?.Session.GetString("current-user-email") ?? string.Empty;
 
-    protected override void OnInitialized()
+    private string CartText
     {
-        Categories = CatalogService.GetCategories();
-    }
-
-    private string GetCartId()
-    {
-        if (!string.IsNullOrWhiteSpace(Context?.User?.Identity?.Name))
+        get
         {
-            return Context.User.Identity.Name;
+            var cartKey = HttpContextAccessor.HttpContext?.Session.GetString("cart-key");
+            return string.IsNullOrWhiteSpace(cartKey)
+                ? "Cart (0)"
+                : $"Cart ({CartStore.GetCount(cartKey)})";
         }
-
-        var cartId = Context?.Session.GetString("CartId");
-        if (!string.IsNullOrWhiteSpace(cartId))
-        {
-            return cartId;
-        }
-
-        cartId = Guid.NewGuid().ToString("N");
-        Context?.Session.SetString("CartId", cartId);
-        return cartId;
     }
 }

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace WingtipToys.Account
 {
-    public partial class RegisterExternalLogin
+    public partial class RegisterExternalLogin 
     {
     }
 }

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace WingtipToys.Account
 {
-    public partial class Confirm
+    public partial class Confirm 
     {
     }
 }

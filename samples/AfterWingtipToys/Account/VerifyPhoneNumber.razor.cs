@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace WingtipToys.Account
 {
-    public partial class VerifyPhoneNumber
+    public partial class VerifyPhoneNumber 
     {
     }
 }

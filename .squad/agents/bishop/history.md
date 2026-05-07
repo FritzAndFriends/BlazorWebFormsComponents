@@ -163,3 +163,10 @@
 - Login.aspx and Register.aspx remain explicitly exempt from compile-surface stubbing so the existing account semantic pattern and acceptance-path auth scaffolding continue to run.
 - Updated CLI docs (`docs\cli\index.md`, `docs\cli\transforms.md`) and added focused regression coverage in `DisplayExpressionTransformTests`, `ScriptManagerStripTransformTests`, `CompileSurfaceStubTransformTests`, and `PipelineIntegrationTests`.
 - Validation sequence: baseline `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --no-restore --nologo` (573 passing), after G1 (577 passing), after G2 (582 passing), after G4/final docs/tests (588 passing).
+
+### 2026-05-07T13:05:50-04:00: WingtipToys Migration Run 40 — fresh wrapper benchmark with runtime scaffold validation (Bishop)
+- Executed fresh Run 40 benchmark from a cleared `samples\AfterWingtipToys` folder using `migration-toolkit\scripts\bwfc-migrate.ps1`; final result was **25/25 Wingtip acceptance tests passing** with screenshots under `dev-docs\migration-tests\wingtiptoys\run40\images\`.
+- The generated `RuntimeDetector` / `ProgramCsEmitter` scaffold was a credible starting point (modern `Program.cs`, Razor Components shell, session wiring, launch settings), but it was still not benchmark-ready without manual catalog/cart/auth runtime simplification.
+- Fresh output still arrived with heavy compile-surface debt: malformed `ListView` / `FormView` markup, many `.razor.cs` files explicitly inheriting `ComponentBase`, and a long tail of `Account/*`, `Checkout/*`, mobile, and payment surfaces that were faster to stub than fully migrate.
+- The acceptance path stayed within BWFC controls: `ProductList` kept `ListView`, `ProductDetails` kept `FormView`, and `ShoppingCart` kept `GridView`; the last failing test was fixed by using an explicit session-backed `cart-key` instead of relying directly on `Session.Id`.
+- Final saved artifacts: `dev-docs\migration-tests\wingtiptoys\run40\report.md`, `build-final.log`, `acceptance-final.log`, and the six screenshot captures.

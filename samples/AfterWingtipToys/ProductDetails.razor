@@ -1,51 +1,53 @@
 @page "/ProductDetails"
-@using WingtipToys.Services
-@inject CatalogService CatalogService
+@inject CatalogService Catalog
 
 <PageTitle>Product Details</PageTitle>
-
 <Site>
-    <FormView Items="@ProductItems" ItemType="Product" Context="Item" RenderOuterTable="false" EmptyDataText="Product not found.">
-        <ItemTemplate>
-            <div>
-                <h1>@Item.ProductName</h1>
-            </div>
-            <br />
-            <table>
-                <tr>
-                    <td>
-                        <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName" />
-                    </td>
-                    <td>&nbsp;</td>
-                    <td style="vertical-align: top; text-align:left;">
-                        <b>Description:</b><br />@Item.Description
-                        <br />
-                        <span><b>Price:</b>&nbsp;@(String.Format("{0:c}", Item.UnitPrice))</span>
-                        <br />
-                        <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
-                        <br /><br />
-                        <a data-enhance-nav="false" class="btn btn-primary" href="/AddToCart?productID=@Item.ProductID">Add To Cart</a>
-                    </td>
-                </tr>
-            </table>
-        </ItemTemplate>
-    </FormView>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <FormView id="productDetail" ItemType="Product" SelectItems="GetProduct" RenderOuterTable="false">
+                <EmptyDataTemplate>
+                    <div class="alert alert-warning">Product not found.</div>
+                </EmptyDataTemplate>
+                <ItemTemplate Context="Item">
+                    <div>
+                        <h1>@Item.ProductName</h1>
+                    </div>
+                    <br />
+                    <table>
+                        <tr>
+                            <td>
+                                <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName" />
+                            </td>
+                            <td>&nbsp;</td>
+                            <td style="vertical-align: top; text-align:left;">
+                                <b>Description:</b><br />@Item.Description
+                                <br />
+                                <span><b>Price:</b>&nbsp;@(String.Format("{0:c}", Item.UnitPrice))</span>
+                                <br />
+                                <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
+                                <br /><br />
+                                <a class="btn btn-primary" href="/AddToCart?productID=@Item.ProductID">Add To Cart</a>
+                                <a class="btn btn-default" href="/ProductList">Back to Products</a>
+                            </td>
+                        </tr>
+                    </table>
+                </ItemTemplate>
+            </FormView>
+        </Content>
+    </ChildComponents>
 </Site>
 
 @code {
-    [Parameter, SupplyParameterFromQuery(Name = "productID")]
+    [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
     public int? ProductId { get; set; }
 
-    private IReadOnlyList<Product> ProductItems { get; set; } = Array.Empty<Product>();
+    [Parameter, SupplyParameterFromQuery(Name = "productName")]
+    public string? ProductName { get; set; }
 
-    protected override void OnParametersSet()
+    private IEnumerable<Product> GetProduct(int maxRows, int startRowIndex, string sortByExpression)
     {
-        if (!ProductId.HasValue && int.TryParse(Request.QueryString["productID"], out var requestedProductId))
-        {
-            ProductId = requestedProductId;
-        }
-
-        var product = CatalogService.GetProduct(ProductId);
-        ProductItems = product is null ? Array.Empty<Product>() : new[] { product };
+        var product = Catalog.GetProduct(ProductId, ProductName);
+        return product is null ? Array.Empty<Product>() : new[] { product };
     }
 }
