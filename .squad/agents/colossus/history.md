@@ -130,3 +130,6 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
  Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz
 
 📌 Team update (2026-05-07T12:43): Run 40 complete — 25/25 acceptance tests, 21:55 runtime (-43% vs Run 39). RuntimeDetector/ProgramCsEmitter scaffold validated. BWFC controls preserved on acceptance path. Next focus: runtime scaffold automation, compile-surface debt reduction — decided by Bishop
+
+
+📌 Team update (2026-05-07T13:17): Bishop completed GridView/ListView template emission fixes — ItemType propagation and explicit placeholder contexts now reduce acceptance-test repair surface on data-bound pages. CLI: 603/603 tests. Next: Run 41 validation — decided by Bishop

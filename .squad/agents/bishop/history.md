@@ -39,3 +39,7 @@
 ## Learnings
 - **2026-05-07T13:17:32-04:00:** ListView `GroupTemplate` and `LayoutTemplate` emission is more reliable when the CLI emits explicit `Context` names (`items`, `groups`) instead of leaving raw `@context` placeholders. That keeps generated placeholder markup readable and removes one common manual repair step on Wingtip fixtures.
 - **2026-05-07T13:17:32-04:00:** Typed `GridView` columns must inherit the parent grid `ItemType`; leaving `TemplateField` at `ItemType="object"` breaks migrated template expressions like `@Item.Quantity`. A dedicated post-attribute-strip pass that rewrites child BWFC column generics to the grid row type fixes this deterministically.
+
+
+### Team Update (2026-05-07T13:17): GridView ItemType transform and ListView context normalization
+GridViewColumnItemTypeTransform (Order 705) now propagates parent grid ItemType to child columns. TemplateContextTransform extends to emit explicit Context names for ListViewGroupTemplate/LayoutTemplate. CLI suite 598→603 passing (+5). Commit 1bdbb1f6. Impact: reduces Layer 1 repair surface on typed data-bound pages.
