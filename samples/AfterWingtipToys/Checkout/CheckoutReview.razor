@@ -1,11 +1,46 @@
-@page "/Checkout/CheckoutReview"
 @page "/CheckoutReview"
-<PageTitle>Order Review</PageTitle>
+<PageTitle></PageTitle>
 <Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-            <h1>Order Review</h1>
-            <p>Order review is under migration.</p>
-        </Content>
-    </ChildComponents>
+<Content ContentPlaceHolderID="MainContent">
+    <h1>Order Review</h1>
+    <p></p>
+    <h3 style="padding-left: 33px">Products:</h3>
+    <GridView ItemType="object" id="OrderItemList" @ref="OrderItemList" AutoGenerateColumns="false" GridLines="@GridLines.Both" CellPadding="10" Width="500" BorderColor="#efeeef" BorderWidth="33">              
+        <Columns>
+            <BoundField ItemType="object" DataField="ProductId" HeaderText=" Product ID" />        
+            <BoundField ItemType="object" DataField="Product.ProductName" HeaderText=" Product Name" />        
+            <BoundField ItemType="object" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+            <BoundField ItemType="object" DataField="Quantity" HeaderText="Quantity" />        
+        </Columns>    
+    </GridView>
+    <DetailsView ItemType="object" id="ShipInfo" @ref="ShipInfo" AutoGenerateRows="false" GridLines="@GridLines.None" CellPadding="10" BorderStyle="@BorderStyle.None" CommandRowStyle-BorderStyle="@BorderStyle.None">
+        <Fields>
+        <TemplateField ItemType="object">
+            <ItemTemplate Context="Item">
+                <h3>Shipping Address:</h3>
+                <br />
+                <Label id="FirstName" @ref="FirstName" Text='@Item.FirstName'></Label>  
+                <Label id="LastName" @ref="LastName" Text='@Item.LastName'></Label>
+                <br />
+                <Label id="Address" @ref="Address" Text='@Item.Address'></Label>
+                <br />
+                <Label id="City" @ref="City" Text='@Item.City'></Label>
+                <Label id="State" @ref="State" Text='@Item.State'></Label>
+                <Label id="PostalCode" @ref="PostalCode" Text='@Item.PostalCode'></Label>
+                <p></p>
+                <h3>Order Total:</h3>
+                <br />
+                <Label id="Total" @ref="Total" Text='@Item.Total.ToString("C")'></Label>
+            </ItemTemplate>
+        
+            <ChildComponents>
+                <ItemStyle HorizontalAlign="@HorizontalAlign.Left" />
+            </ChildComponents>
+</TemplateField>
+          </Fields>
+    </DetailsView>
+    <p></p>
+    <hr />
+    <Button id="CheckoutConfirm" @ref="CheckoutConfirm" Text="Complete Order" OnClick="@CheckoutConfirm_Click" />
+</Content>
 </Site>

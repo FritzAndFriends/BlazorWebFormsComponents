@@ -1,5 +1,5 @@
 @page "/ProductList"
-@inject CatalogService Catalog
+@page "/Category/{CategoryName}"
 
 <PageTitle>Products</PageTitle>
 <Site>
@@ -8,14 +8,10 @@
             <section>
                 <div>
                     <hgroup>
-                        <h2>Products</h2>
+                        <h2>@Title</h2>
                     </hgroup>
 
-                    <ListView id="productList"
-                              DataKeyNames="ProductID"
-                              GroupItemCount="4"
-                              ItemType="Product"
-                              SelectItems="GetProducts">
+                    <ListView ItemType="Product" Items="@Products" GroupItemCount="4" Context="Item">
                         <EmptyDataTemplate>
                             <table>
                                 <tr>
@@ -27,33 +23,25 @@
                             <td></td>
                         </EmptyItemTemplate>
                         <GroupTemplate Context="items">
-                            <tr id="itemPlaceholderContainer">
+                            <tr>
                                 @items
                             </tr>
                         </GroupTemplate>
-                        <ItemTemplate Context="Item">
+                        <ItemTemplate>
                             <td>
                                 <table>
                                     <tr>
                                         <td>
-                                            <a href="/ProductDetails?productName=@Uri.EscapeDataString(Item.ProductName)">
-                                                <img src="/Catalog/Images/Thumbs/@Item.ImagePath"
-                                                     width="100"
-                                                     height="75"
-                                                     border="1"
-                                                     alt="@Item.ProductName" />
+                                            <a href="/ProductDetails?ProductID=@Item.ProductID">
+                                                <img src="/Catalog/Images/Thumbs/@Item.ImagePath" width="100" height="75" border="1" alt="@Item.ProductName" />
                                             </a>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <a href="/ProductDetails?productName=@Uri.EscapeDataString(Item.ProductName)">
-                                                @Item.ProductName
-                                            </a>
+                                            <a href="/ProductDetails?ProductID=@Item.ProductID">@Item.ProductName</a>
                                             <br />
-                                            <span>
-                                                <b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))
-                                            </span>
+                                            <span><b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))</span>
                                             <br />
                                             <a href="/AddToCart?productID=@Item.ProductID">
                                                 <span class="ProductListItem"><b>Add To Cart</b></span>
@@ -71,8 +59,10 @@
                                 <tbody>
                                     <tr>
                                         <td>
-                                            <table id="groupPlaceholderContainer" style="width:100%">
-                                                @groups
+                                            <table style="width:100%">
+                                                <tbody>
+                                                    @groups
+                                                </tbody>
                                             </table>
                                         </td>
                                     </tr>
@@ -85,14 +75,3 @@
         </Content>
     </ChildComponents>
 </Site>
-
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "id")]
-    public int? CategoryId { get; set; }
-
-    [Parameter, SupplyParameterFromQuery(Name = "categoryName")]
-    public string? CategoryName { get; set; }
-
-    private IEnumerable<Product> GetProducts(int maxRows, int startRowIndex, string sortByExpression)
-        => Catalog.GetProducts(CategoryId, CategoryName);
-}

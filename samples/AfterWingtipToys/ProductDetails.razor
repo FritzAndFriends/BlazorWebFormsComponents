@@ -1,15 +1,14 @@
 @page "/ProductDetails"
-@inject CatalogService Catalog
+@page "/Product/{ProductName}"
+@using WingtipToys.Services
+@inject ProductCatalogService Catalog
 
 <PageTitle>Product Details</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            <FormView id="productDetail" ItemType="Product" SelectItems="GetProduct" RenderOuterTable="false">
-                <EmptyDataTemplate>
-                    <div class="alert alert-warning">Product not found.</div>
-                </EmptyDataTemplate>
-                <ItemTemplate Context="Item">
+            <FormView ItemType="Product" Items="@ProductItems" RenderOuterTable="false" Context="Item">
+                <ItemTemplate>
                     <div>
                         <h1>@Item.ProductName</h1>
                     </div>
@@ -26,14 +25,19 @@
                                 <span><b>Price:</b>&nbsp;@(String.Format("{0:c}", Item.UnitPrice))</span>
                                 <br />
                                 <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
-                                <br /><br />
-                                <a class="btn btn-primary" href="/AddToCart?productID=@Item.ProductID">Add To Cart</a>
-                                <a class="btn btn-default" href="/ProductList">Back to Products</a>
+                                <br />
+                                <br />
+                                <a href="/AddToCart?productID=@Item.ProductID" class="btn btn-primary">Add To Cart</a>
                             </td>
                         </tr>
                     </table>
                 </ItemTemplate>
             </FormView>
+
+            @if (ProductItems.Count == 0)
+            {
+                <p>Product not found.</p>
+            }
         </Content>
     </ChildComponents>
 </Site>
@@ -42,12 +46,16 @@
     [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
     public int? ProductId { get; set; }
 
-    [Parameter, SupplyParameterFromQuery(Name = "productName")]
+    [Parameter]
     public string? ProductName { get; set; }
 
-    private IEnumerable<Product> GetProduct(int maxRows, int startRowIndex, string sortByExpression)
+    private IReadOnlyList<Product> ProductItems { get; set; } = [];
+
+    protected override void OnParametersSet()
     {
         var product = Catalog.GetProduct(ProductId, ProductName);
-        return product is null ? Array.Empty<Product>() : new[] { product };
+        ProductItems = product is null ? [] : [product];
+        Title = product?.ProductName ?? "Product Details";
+        base.OnParametersSet();
     }
 }

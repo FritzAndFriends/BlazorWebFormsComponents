@@ -1,1 +1,9 @@
-@* Route handled in Program.cs so the migrated app preserves the Web Forms AddToCart flow without a separate routable page. *@
+@page "/AddToCart"
+@inherits BlazorWebFormsComponents.WebFormsPageBase
+
+<div class="migration-pending">
+    <h3>Page Not Yet Migrated</h3>
+    <p>This page (<code>AddToCart.aspx</code>) requires manual migration.</p>
+    <p>Original Web Forms features used: Unresolved compile-surface blockers</p>
+    <p>Suggested migration approach: Port the remaining server-control or lifecycle logic into BWFC-compatible components, services, or semantic patterns before re-enabling the page.</p>
+</div>

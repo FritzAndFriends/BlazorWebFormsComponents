@@ -1,4 +1,71 @@
 @page "/AdminPage"
-
-<h3>This page is under migration</h3>
-<p>The original Web Forms page has been preserved in migration-artifacts/.</p>
+<PageTitle></PageTitle>
+<Site>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>Administration</h1>
+            <hr />
+            <h3>Add Product:</h3>
+            <table>
+                <tr>
+                    <td><Label id="LabelAddCategory" @ref="LabelAddCategory">Category:</Label></td>
+                    <td>
+                        <DropDownList id="DropDownAddCategory" @ref="DropDownAddCategory"
+                            ItemType="Category"
+                            SelectMethod="GetCategories" DataTextField="CategoryName"
+                            DataValueField="CategoryID" >
+                        </DropDownList>
+                    </td>
+                </tr>
+                <tr>
+                    <td><Label id="LabelAddName" @ref="LabelAddName">Name:</Label></td>
+                    <td>
+                        <TextBox id="AddProductName" @ref="AddProductName"></TextBox>
+                        <RequiredFieldValidator Type="string" id="RequiredFieldValidator1" @ref="RequiredFieldValidator1" Text="* Product name required." ControlToValidate="AddProductName" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+                    </td>
+                </tr>
+                <tr>
+                    <td><Label id="LabelAddDescription" @ref="LabelAddDescription">Description:</Label></td>
+                    <td>
+                        <TextBox id="AddProductDescription" @ref="AddProductDescription"></TextBox>
+                        <RequiredFieldValidator Type="string" id="RequiredFieldValidator2" @ref="RequiredFieldValidator2" Text="* Description required." ControlToValidate="AddProductDescription" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+                    </td>
+                </tr>
+                <tr>
+                    <td><Label id="LabelAddPrice" @ref="LabelAddPrice">Price:</Label></td>
+                    <td>
+                        <TextBox id="AddProductPrice" @ref="AddProductPrice"></TextBox>
+                        <RequiredFieldValidator Type="string" id="RequiredFieldValidator3" @ref="RequiredFieldValidator3" Text="* Price required." ControlToValidate="AddProductPrice" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+                        <RegularExpressionValidator id="RegularExpressionValidator1" @ref="RegularExpressionValidator1" Text="* Must be a valid price without $." ControlToValidate="AddProductPrice" SetFocusOnError="true" Display="Dynamic" ValidationExpression="^[0-9]*(\.)?[0-9]?[0-9]?$"></RegularExpressionValidator>
+                    </td>
+                </tr>
+                <tr>
+                    <td><Label id="LabelAddImageFile" @ref="LabelAddImageFile">Image File:</Label></td>
+                    <td>
+                        <FileUpload id="ProductImage" @ref="ProductImage" />
+                        <RequiredFieldValidator Type="string" id="RequiredFieldValidator4" @ref="RequiredFieldValidator4" Text="* Image path required." ControlToValidate="ProductImage" SetFocusOnError="true" Display="Dynamic"></RequiredFieldValidator>
+                    </td>
+                </tr>
+            </table>
+            <p></p>
+            <p></p>
+            <Button id="AddProductButton" @ref="AddProductButton" Text="Add Product" OnClick="@AddProductButton_Click"  CausesValidation="true"/>
+            <Label id="LabelAddStatus" @ref="LabelAddStatus" Text=""></Label>
+            <p></p>
+            <h3>Remove Product:</h3>
+            <table>
+                <tr>
+                    <td><Label id="LabelRemoveProduct" @ref="LabelRemoveProduct">Product:</Label></td>
+                    <td><DropDownList id="DropDownRemoveProduct" @ref="DropDownRemoveProduct" ItemType="Product"
+                            SelectMethod="GetProducts" AppendDataBoundItems="true"
+                            DataTextField="ProductName" DataValueField="ProductID" >
+                        </DropDownList>
+                    </td>
+                </tr>
+            </table>
+            <p></p>
+            <Button id="RemoveProductButton" @ref="RemoveProductButton" Text="Remove Product" OnClick="@RemoveProductButton_Click" CausesValidation="false"/>
+            <Label id="LabelRemoveStatus" @ref="LabelRemoveStatus" Text=""></Label>
+        </Content>
+    </ChildComponents>
+</Site>

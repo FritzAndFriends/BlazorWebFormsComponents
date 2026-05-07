@@ -1,10 +1,9 @@
 using BlazorWebFormsComponents;
-using WingtipToys.Logic;
+using WingtipToys.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -13,126 +12,45 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddBlazorWebFormsComponents();
-builder.Services.AddSingleton<CatalogService>();
-builder.Services.AddSingleton<CartSessionStore>();
-builder.Services.AddSingleton<RegisteredUserStore>();
+builder.Services.AddSingleton<ProductCatalogService>();
+builder.Services.AddSingleton<CartStore>();
+builder.Services.AddSingleton<SimpleUserStore>();
 
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error");
+    app.UseExceptionHandler("/");
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.MapStaticAssets();
+app.UseStaticFiles();
 app.UseSession();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-static string GetOrCreateCartKey(HttpContext context)
+app.MapGet("/AddToCart", (HttpContext context, CartStore cartStore, ProductCatalogService catalog, int? productId) =>
 {
+    if (productId is null || catalog.GetProduct(productId, null) is null)
+    {
+        return Results.Redirect("/ProductList");
+    }
+
     var cartKey = context.Session.GetString("cart-key");
     if (string.IsNullOrWhiteSpace(cartKey))
     {
-        cartKey = Guid.NewGuid().ToString("N");
+        cartKey = Guid.NewGuid().ToString();
         context.Session.SetString("cart-key", cartKey);
     }
 
-    return cartKey;
-}
-
-static string? GetCartKey(HttpContext context) => context.Session.GetString("cart-key");
-
-app.MapGet("/AddToCart", (int? productID, HttpContext context, CatalogService catalog, CartSessionStore carts) =>
-{
-    if (!productID.HasValue)
-    {
-        return Results.Redirect("/ProductList");
-    }
-
-    var product = catalog.GetProduct(productID.Value, null);
-    if (product is null)
-    {
-        return Results.Redirect("/ProductList");
-    }
-
-    carts.AddToCart(GetOrCreateCartKey(context), product);
-    return Results.Redirect("/ShoppingCart");
-});
-app.MapGet("/AddToCart.aspx", (int? productID, HttpContext context, CatalogService catalog, CartSessionStore carts) =>
-{
-    if (!productID.HasValue)
-    {
-        return Results.Redirect("/ProductList");
-    }
-
-    var product = catalog.GetProduct(productID.Value, null);
-    if (product is null)
-    {
-        return Results.Redirect("/ProductList");
-    }
-
-    carts.AddToCart(GetOrCreateCartKey(context), product);
+    cartStore.AddToCart(cartKey, productId.Value, catalog);
     return Results.Redirect("/ShoppingCart");
 });
 
-app.MapGet("/ShoppingCart/Update", (HttpContext context, CartSessionStore carts) =>
-{
-    var cartKey = GetCartKey(context);
-    if (string.IsNullOrWhiteSpace(cartKey))
-    {
-        return Results.Redirect("/ShoppingCart");
-    }
-
-    foreach (var pair in context.Request.Query)
-    {
-        if (!pair.Key.StartsWith("qty-", StringComparison.OrdinalIgnoreCase))
-        {
-            continue;
-        }
-
-        if (int.TryParse(pair.Key[4..], out var productId) && int.TryParse(pair.Value, out var quantity))
-        {
-            carts.UpdateQuantity(cartKey, productId, quantity);
-        }
-    }
-
-    return Results.Redirect("/ShoppingCart");
-});
-
-app.MapGet("/ShoppingCart/Remove", (int productId, HttpContext context, CartSessionStore carts) =>
-{
-    var cartKey = GetCartKey(context);
-    if (!string.IsNullOrWhiteSpace(cartKey))
-    {
-        carts.RemoveItem(cartKey, productId);
-    }
-
-    return Results.Redirect("/ShoppingCart");
-});
-
-app.MapGet("/Account/PerformLogin", (string? email, string? password, string? returnUrl, HttpContext context, RegisteredUserStore users) =>
-{
-    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-    {
-        return Results.Redirect("/Account/Login?error=Email%20and%20password%20are%20required");
-    }
-
-    if (!users.Validate(email, password))
-    {
-        return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl)
-            ? "/Account/Login?error=Invalid%20email%20or%20password"
-            : $"/Account/Login?error=Invalid%20email%20or%20password&returnUrl={Uri.EscapeDataString(returnUrl)}");
-    }
-
-    context.Session.SetString("current-user-email", email);
-    return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
-});
-
-app.MapGet("/Account/PerformRegister", (string? email, string? password, string? confirmPassword, RegisteredUserStore users) =>
+app.MapGet("/Account/PerformRegister", (HttpContext context, SimpleUserStore users, string? email, string? password, string? confirmPassword) =>
 {
     if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
     {
@@ -144,21 +62,36 @@ app.MapGet("/Account/PerformRegister", (string? email, string? password, string?
         return Results.Redirect("/Account/Register?error=Passwords%20do%20not%20match");
     }
 
-    if (!users.Register(email, password, out var error))
+    if (!users.TryRegister(email, password))
     {
-        return Results.Redirect($"/Account/Register?error={Uri.EscapeDataString(error)}");
+        return Results.Redirect("/Account/Register?error=An%20account%20with%20that%20email%20already%20exists");
     }
 
     return Results.Redirect("/Account/Login?registered=1");
 });
 
+app.MapGet("/Account/PerformLogin", (HttpContext context, SimpleUserStore users, string? email, string? password, string? returnUrl) =>
+{
+    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+    {
+        return Results.Redirect("/Account/Login?error=Email%20and%20password%20are%20required");
+    }
+
+    if (!users.Validate(email, password))
+    {
+        return Results.Redirect("/Account/Login?error=Invalid%20login%20attempt");
+    }
+
+    context.Session.SetString("auth-email", email);
+    return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
+});
+
 app.MapGet("/Account/Logout", (HttpContext context) =>
 {
-    context.Session.Remove("current-user-email");
+    context.Session.Remove("auth-email");
     return Results.Redirect("/");
 });
 
-app.MapRazorComponents<WingtipToys.Components.App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<WingtipToys.Components.App>();
 
 app.Run();

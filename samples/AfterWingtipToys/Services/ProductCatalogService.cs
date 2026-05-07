@@ -1,25 +1,24 @@
 using WingtipToys.Models;
 
-namespace WingtipToys.Logic;
+namespace WingtipToys.Services;
 
-public sealed class CatalogService
+public class ProductCatalogService
 {
-    private readonly IReadOnlyList<Category> _categories;
+    private readonly IReadOnlyList<Category> _categories =
+    [
+        new() { CategoryID = 1, CategoryName = "Cars", Description = "Toy cars" },
+        new() { CategoryID = 2, CategoryName = "Planes", Description = "Toy planes" },
+        new() { CategoryID = 3, CategoryName = "Trucks", Description = "Toy trucks" },
+        new() { CategoryID = 4, CategoryName = "Boats", Description = "Toy boats" },
+        new() { CategoryID = 5, CategoryName = "Rockets", Description = "Toy rockets" }
+    ];
+
     private readonly IReadOnlyList<Product> _products;
 
-    public CatalogService()
+    public ProductCatalogService()
     {
-        var categories = new List<Category>
-        {
-            new() { CategoryID = 1, CategoryName = "Cars", Description = "Classic and modern toy cars." },
-            new() { CategoryID = 2, CategoryName = "Planes", Description = "Planes and gliders." },
-            new() { CategoryID = 3, CategoryName = "Trucks", Description = "Working toy trucks." },
-            new() { CategoryID = 4, CategoryName = "Boats", Description = "Ships and boats." },
-            new() { CategoryID = 5, CategoryName = "Rockets", Description = "Rockets ready for launch." }
-        };
-
-        var products = new List<Product>
-        {
+        _products =
+        [
             new() { ProductID = 1, ProductName = "Convertible Car", Description = "This convertible car is fast! The engine is powered by a neutrino based battery (not included). Power it up and let it go!", ImagePath = "carconvert.png", UnitPrice = 22.50, CategoryID = 1 },
             new() { ProductID = 2, ProductName = "Old-time Car", Description = "There's nothing old about this toy car, except its looks. Compatible with other old toy cars.", ImagePath = "carearly.png", UnitPrice = 15.95, CategoryID = 1 },
             new() { ProductID = 3, ProductName = "Fast Car", Description = "Yes this car is fast, but it also floats in water.", ImagePath = "carfast.png", UnitPrice = 32.99, CategoryID = 1 },
@@ -36,27 +35,24 @@ public sealed class CatalogService
             new() { ProductID = 14, ProductName = "Paper Boat", Description = "Floating fun for all! This toy boat can be assembled in seconds. Floats for minutes! Some folding required.", ImagePath = "boatpaper.png", UnitPrice = 4.95, CategoryID = 4 },
             new() { ProductID = 15, ProductName = "Sail Boat", Description = "Put this fun toy sail boat in the water and let it go!", ImagePath = "boatsail.png", UnitPrice = 42.95, CategoryID = 4 },
             new() { ProductID = 16, ProductName = "Rocket", Description = "This fun rocket will travel up to a height of 200 feet.", ImagePath = "rocket.png", UnitPrice = 122.95, CategoryID = 5 }
-        };
+        ];
 
-        foreach (var category in categories)
+        foreach (var product in _products)
         {
-            category.Products = products.Where(p => p.CategoryID == category.CategoryID).ToList();
+            product.Category = _categories.First(c => c.CategoryID == product.CategoryID);
         }
 
-        foreach (var product in products)
+        foreach (var category in _categories)
         {
-            product.Category = categories.First(c => c.CategoryID == product.CategoryID);
+            category.Products = _products.Where(p => p.CategoryID == category.CategoryID).ToList();
         }
-
-        _categories = categories;
-        _products = products;
     }
 
     public IReadOnlyList<Category> GetCategories() => _categories;
 
     public IReadOnlyList<Product> GetProducts(int? categoryId, string? categoryName)
     {
-        var query = _products.AsEnumerable();
+        IEnumerable<Product> query = _products;
 
         if (categoryId.HasValue && categoryId.Value > 0)
         {

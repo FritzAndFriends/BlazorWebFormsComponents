@@ -45,3 +45,11 @@
 
 ### Team Update (2026-05-07T13:17): GridView ItemType transform and ListView context normalization
 GridViewColumnItemTypeTransform (Order 705) now propagates parent grid ItemType to child columns. TemplateContextTransform extends to emit explicit Context names for ListViewGroupTemplate/LayoutTemplate. CLI suite 598→603 passing (+5). Commit 1bdbb1f6. Impact: reduces Layer 1 repair surface on typed data-bound pages.
+
+### Team Update (2026-05-07T15:15): Run 41 benchmark results
+Run 41 finished green at 25/25 acceptance tests in 47:54 from a fresh output folder, while preserving BWFC `ListView`, `FormView`, and `GridView` on the benchmark path. Key fresh-output findings: quarantine still overreaches into benchmark pages, `MapStaticAssets()` served zero-length migrated images until replaced by `UseStaticFiles()`, and SSR cart POSTs required the full `UseAntiforgery()` + `<AntiforgeryToken />` + `@formname` contract to make quantity updates pass.
+
+## Learnings (Run 41)
+- **2026-05-07T15:15:19-04:00:** Fresh Wingtip scaffolds that copy legacy `wwwroot` assets are safer with classic `app.UseStaticFiles()` than `app.MapStaticAssets()`. On Run 41 the latter returned 200 responses with `Content-Length: 0` for logo/catalog images until the middleware was swapped.
+- **2026-05-07T15:15:19-04:00:** SSR forms that rely on `Request.Form` need the whole Blazor postback contract: `app.UseAntiforgery()`, an `<AntiforgeryToken />` inside the `<form>`, and an explicit `@formname`. Missing any one of these left `ShoppingCart` quantity updates failing or timing out under Playwright.
+- **2026-05-07T15:15:19-04:00:** Compile-surface quarantine should keep a benchmark-path allowlist. Stub-safe handling of Account/Admin/Checkout pages is useful, but quarantining `ProductList`, `AddToCart`, or `ShoppingCart` adds avoidable manual repair work on Wingtip fixtures.

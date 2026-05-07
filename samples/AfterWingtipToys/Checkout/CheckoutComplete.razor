@@ -1,4 +1,9 @@
 @page "/CheckoutComplete"
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 
-<h3>This page is under migration</h3>
-<p>The original Web Forms page has been preserved in migration-artifacts/.</p>
+<div class="migration-pending">
+    <h3>Page Not Yet Migrated</h3>
+    <p>This page (<code>Checkout/CheckoutComplete.aspx</code>) requires manual migration.</p>
+    <p>Original Web Forms features used: Payment or checkout integration</p>
+    <p>Suggested migration approach: Move payment orchestration into a dedicated server-side service or API boundary, then reconnect the page once the provider SDK is re-integrated.</p>
+</div>
