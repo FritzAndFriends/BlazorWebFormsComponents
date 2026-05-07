@@ -1,0 +1,55 @@
+@code {
+	[Fact]
+	public void FormView_WithDataSource_RendersItemOnFirstRender()
+	{
+		var dataSource = new[]
+		{
+			new Widget { Id = 39, Name = "SSR Widget", Price = 12.34m }
+		};
+
+		var cut = Render(@<FormView DataSource="dataSource" ItemType="Widget" Context="item">
+			<ItemTemplate>
+				<div id="ssr-item">@item.Name</div>
+			</ItemTemplate>
+		</FormView>);
+
+		cut.Find("#ssr-item").TextContent.ShouldBe("SSR Widget");
+		cut.Markup.ShouldNotContain("Loading...");
+	}
+
+	[Fact]
+	public void FormView_WithEmptyDataSource_ShowsEmptyTemplate()
+	{
+		var dataSource = Array.Empty<Widget>();
+
+		var cut = Render(@<FormView DataSource="dataSource" ItemType="Widget" Context="item">
+			<EmptyDataTemplate>
+				<div id="empty-state">No inventory</div>
+			</EmptyDataTemplate>
+			<ItemTemplate>
+				<div>@item.Name</div>
+			</ItemTemplate>
+		</FormView>);
+
+		cut.Find("#empty-state").TextContent.ShouldBe("No inventory");
+	}
+
+	[Fact]
+	public void FormView_CurrentItemSetDuringParameterProcessing()
+	{
+		var dataSource = new[]
+		{
+			new Widget { Id = 40, Name = "Current SSR Item", Price = 98.76m }
+		};
+
+		var cut = Render(@<FormView DataSource="dataSource" ItemType="Widget" Context="item">
+			<ItemTemplate>
+				<div>@item.Name</div>
+			</ItemTemplate>
+		</FormView>);
+		var formView = cut.FindComponent<FormView<Widget>>().Instance;
+
+		formView.CurrentItem.ShouldNotBeNull();
+		formView.CurrentItem.Name.ShouldBe("Current SSR Item");
+	}
+}
