@@ -10,6 +10,7 @@ public class FileMetadata
     public required FileType FileType { get; init; }
     public required string OriginalContent { get; init; }
     public string? OutputRootPath { get; init; }
+    public string? SourceRootPath { get; init; }
     public string? ProjectNamespace { get; init; }
     public string? CodeBehindContent { get; set; }
     public Dictionary<string, string> DataBindMap { get; set; } = new();
@@ -27,6 +28,7 @@ public class FileMetadata
     public string? MarkupContent { get; set; }
     public string? CompileSurfaceStubReason { get; set; }
     public string? CompileSurfaceOriginalCodeBehind { get; set; }
+    internal PageQuarantineDecision? QuarantineDecision { get; set; }
 
     public string FileName => Path.GetFileNameWithoutExtension(SourceFilePath);
 }

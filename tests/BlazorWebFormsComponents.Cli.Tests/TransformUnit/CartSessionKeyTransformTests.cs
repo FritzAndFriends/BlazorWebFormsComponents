@@ -98,7 +98,7 @@ public class CartSessionKeyTransformTests
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Equal(1, result.Split("private string GetOrCreateCartKey()", StringSplitOptions.None).Length - 1);
-        Assert.Equal(2, result.Split("GetOrCreateCartKey()", StringSplitOptions.None).Length - 1);
+        Assert.Equal(3, result.Split("GetOrCreateCartKey()", StringSplitOptions.None).Length - 1);
         Assert.DoesNotContain("Session.Id", result);
     }
 

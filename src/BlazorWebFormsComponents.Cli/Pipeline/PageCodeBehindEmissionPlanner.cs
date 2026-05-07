@@ -67,4 +67,4 @@ internal static partial class PageCodeBehindEmissionPlanner
     private static CodeBehindEmissionPlan Artifact(string reason) => new(false, reason, null);
 }
 
-internal sealed record CodeBehindEmissionPlan(bool EmitToCompileSurface, string? ArtifactReason, string? ArtifactContent);
+public sealed record CodeBehindEmissionPlan(bool EmitToCompileSurface, string? ArtifactReason, string? ArtifactContent);

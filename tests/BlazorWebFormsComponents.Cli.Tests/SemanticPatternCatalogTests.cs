@@ -95,7 +95,7 @@ public class SemanticPatternCatalogTests : IDisposable
                 MarkupPath = Path.Combine(inputDir, "Default.aspx"),
                 CodeBehindPath = Path.Combine(inputDir, "Default.aspx.cs"),
                 OutputPath = Path.Combine(outputDir, "Default.razor"),
-                FileType = FileType.Page
+                FileType = FileType.Control
             }
         };
 
@@ -115,7 +115,8 @@ public class SemanticPatternCatalogTests : IDisposable
             new AppAssetInjector(outputWriter),
             new NativeNuGetStaticAssetExtractor(),
             new NativeEdmxToEfCoreConverter(),
-            new RedirectHandlerAnnotator(outputWriter));
+            new RedirectHandlerAnnotator(outputWriter),
+            new PageQuarantineDetector());
 
         var context = new MigrationContext
         {

@@ -50,7 +50,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 50 | UrlCleanupTransform | Code-Behind | Code-Behind | Clean URL literals in code |
 | 104 | HttpUtilityRewriteTransform | Code-Behind | Code-Behind | Rewrite `HttpUtility.*` calls to `WebUtility.*` and add `using System.Net;` |
 | 106 | EfContextConstructorTransform | Code-Behind | Code-Behind | Rewrite EF6 `base("name")` DbContext constructors to EF Core `DbContextOptions<TContext>` constructors |
-| 850 | CompileSurfaceStubTransform | Code-Behind | Code-Behind | Replace Account/Admin and infrastructure-heavy pages with build-safe stubs while preserving transformed originals in `migration-artifacts\codebehind\` |
+| 850 | CompileSurfaceStubTransform | Code-Behind | Code-Behind | Quarantine identity/payment/mobile/admin/compile-blocked pages with build-safe stubs while preserving transformed originals in `migration-artifacts\codebehind\` and tracking them in `migration-artifacts\quarantine-manifest.json` |
 | 900 | MarkupReferencedMemberStubTransform | Code-Behind | Code-Behind | Add fallback fields, render-method stubs, and event handlers for markup references still missing from emitted partial classes |
 
 ---
@@ -1021,13 +1021,13 @@ string imageUrl = "/images/logo.png";
 
 ### 32. CompileSurfaceStubTransform (Order: 850)
 
-**Emits build-safe stubs for Account/Admin and infrastructure-heavy pages.**
+**Quarantines non-migratable pages behind build-safe placeholders.**
 
 **Details:**
-- Detects pages that still depend on ASP.NET Identity, OWIN, OpenAuth provider base types, or external payment-service namespaces such as PayPal and Stripe
-- Replaces the generated markup with a visible migration placeholder page
-- Emits a minimal `ComponentBase` partial class so the generated app still builds
-- Preserves the transformed original code-behind under `migration-artifacts\codebehind\` and records a `bwfc-compile-surface` manual item
+- Detects pages that still depend on ASP.NET Identity or membership APIs, payment providers, mobile-only shells, complex admin CRUD with 3+ data-source bindings, or unresolved compile-surface blockers after transforms run
+- Replaces the generated markup with a visible "Page Not Yet Migrated" placeholder that still routes and compiles
+- Emits a minimal `WebFormsPageBase` partial class stub so the generated app still builds
+- Preserves the transformed original code-behind under `migration-artifacts\codebehind\`, records a `bwfc-compile-surface` manual item, and adds the page to `migration-artifacts\quarantine-manifest.json`
 
 ---
 

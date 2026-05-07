@@ -17,7 +17,7 @@ This tool **reduces manual migration effort** by:
 - Rewriting legacy `HttpUtility.*` calls inline to `WebUtility.*`
 - Upgrading EF6-style `DbContext` string constructors to EF Core `DbContextOptions<TContext>` constructors
 - Generating compile-safe stubs for markup-referenced members that are still missing after code-behind conversion
-- Emitting build-safe compile-surface page stubs for Account/Admin or infrastructure-heavy pages while preserving the transformed originals under `migration-artifacts\codebehind\`
+- Quarantining non-migratable pages (identity, payment, complex admin CRUD, mobile shells, unresolved compile blockers) behind build-safe placeholders while preserving transformed originals under `migration-artifacts\codebehind\` and recording entries in `migration-artifacts\quarantine-manifest.json`
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
 - Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
 - Scaffolding a new .NET 10 Blazor SSR project structure with shims, services, and relaxed code-style build enforcement for copied legacy files
@@ -92,7 +92,7 @@ webforms-to-blazor migrate \
 
 **Output:**
 - Converted `.razor` files
-- Quarantined manual code-behind and risky legacy source artifacts under `migration-artifacts\`
+- Quarantined manual code-behind and risky legacy source artifacts under `migration-artifacts\`, including a `quarantine-manifest.json` inventory for deferred page migration work
 - Generated `Program.cs` with shim registration for static SSR on .NET 10 plus detected runtime wiring for EF Core, session state, identity, and legacy `Application_Start` review notes
 - Migration report (`migration-report.json`)
 

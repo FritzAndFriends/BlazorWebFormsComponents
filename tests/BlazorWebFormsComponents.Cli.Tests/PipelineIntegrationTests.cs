@@ -65,7 +65,8 @@ public class PipelineIntegrationTests : IDisposable
             new AppAssetInjector(outputWriter),
             new NativeNuGetStaticAssetExtractor(),
             new NativeEdmxToEfCoreConverter(),
-            new RedirectHandlerAnnotator(outputWriter));
+            new RedirectHandlerAnnotator(outputWriter),
+            new PageQuarantineDetector());
     }
 
     private (string inputDir, string outputDir) CreateTempProjectDir(
@@ -315,9 +316,22 @@ public class PipelineIntegrationTests : IDisposable
 
         var report = await pipeline.ExecuteAsync(context);
 
+        var markupPath = Path.Combine(outputDir, "Default.razor");
+        var codeBehindPath = Path.Combine(outputDir, "Default.razor.cs");
+        var artifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "Default.razor.cs.txt");
+        var manifestPath = Path.Combine(outputDir, "migration-artifacts", "quarantine-manifest.json");
+
         Assert.Empty(report.Errors);
-        Assert.False(File.Exists(Path.Combine(outputDir, "Default.razor.cs")));
-        Assert.True(File.Exists(Path.Combine(outputDir, "migration-artifacts", "codebehind", "Default.razor.cs.txt")));
+        Assert.True(File.Exists(markupPath));
+        Assert.True(File.Exists(codeBehindPath));
+        Assert.True(File.Exists(artifactPath));
+        Assert.True(File.Exists(manifestPath));
+        Assert.Contains("Page Not Yet Migrated", File.ReadAllText(markupPath));
+        Assert.Contains("public partial class Default : BlazorWebFormsComponents.WebFormsPageBase", File.ReadAllText(codeBehindPath));
+
+        using var manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(manifestPath));
+        var quarantinedPages = manifest.RootElement.GetProperty("pages");
+        Assert.Contains(quarantinedPages.EnumerateArray(), page => page.GetProperty("originalFilePath").GetString() == "Default.aspx");
     }
 
     [Fact]
@@ -359,13 +373,21 @@ public class PipelineIntegrationTests : IDisposable
         var codeBehindPath = Path.Combine(outputDir, "Account", "Manage.razor.cs");
         var artifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "Account", "Manage.razor.cs.txt");
 
+        var manifestPath = Path.Combine(outputDir, "migration-artifacts", "quarantine-manifest.json");
+
         Assert.Empty(report.Errors);
         Assert.True(File.Exists(markupPath));
         Assert.True(File.Exists(codeBehindPath));
         Assert.True(File.Exists(artifactPath));
-        Assert.Contains("This page is under migration", File.ReadAllText(markupPath));
-        Assert.Contains("public partial class Manage : ComponentBase", File.ReadAllText(codeBehindPath));
-        Assert.Contains(report.ManualItems, item => item.Category == "bwfc-compile-surface" && item.File == Path.Combine("Account", "Manage.aspx"));
+        Assert.True(File.Exists(manifestPath));
+        Assert.Contains("Page Not Yet Migrated", File.ReadAllText(markupPath));
+        Assert.Contains("Original Web Forms features used: ASP.NET Identity or membership APIs", File.ReadAllText(markupPath));
+        Assert.Contains("public partial class Manage : BlazorWebFormsComponents.WebFormsPageBase", File.ReadAllText(codeBehindPath));
+        Assert.Contains(report.ManualItems, item => item.Category == "bwfc-compile-surface" && item.File == "Account/Manage.aspx");
+
+        using var manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(manifestPath));
+        var quarantinedPages = manifest.RootElement.GetProperty("pages");
+        Assert.Contains(quarantinedPages.EnumerateArray(), page => page.GetProperty("originalFilePath").GetString() == "Account/Manage.aspx");
     }
 
     [Fact]

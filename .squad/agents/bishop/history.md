@@ -39,6 +39,8 @@
 ## Learnings
 - **2026-05-07T13:17:32-04:00:** ListView `GroupTemplate` and `LayoutTemplate` emission is more reliable when the CLI emits explicit `Context` names (`items`, `groups`) instead of leaving raw `@context` placeholders. That keeps generated placeholder markup readable and removes one common manual repair step on Wingtip fixtures.
 - **2026-05-07T13:17:32-04:00:** Typed `GridView` columns must inherit the parent grid `ItemType`; leaving `TemplateField` at `ItemType="object"` breaks migrated template expressions like `@Item.Quantity`. A dedicated post-attribute-strip pass that rewrites child BWFC column generics to the grid row type fixes this deterministically.
+- **2026-05-07T13:58:11-04:00:** Compile-surface quarantine works best as a post-semantic pipeline decision, not just a code-behind transform. Letting semantic patterns normalize login/action pages first avoids quarantining pages the CLI can already turn into SSR-safe stubs.
+- **2026-05-07T13:58:11-04:00:** A quarantine manifest is most useful when it inventories source-relative paths plus detected feature buckets and suggested manual approaches. That turns build-safe placeholders into an actionable backlog for L2/L3 follow-up instead of a silent compile-surface drop.
 
 
 ### Team Update (2026-05-07T13:17): GridView ItemType transform and ListView context normalization
