@@ -60,6 +60,7 @@ class Program
         services.AddSingleton<IMarkupTransform, ValidatorGenericTypeTransform>();
         services.AddSingleton<IMarkupTransform, TemplateFieldChildComponentsTransform>();
         services.AddSingleton<IMarkupTransform, AttributeStripTransform>();
+        services.AddSingleton<IMarkupTransform, GridViewColumnItemTypeTransform>();
         services.AddSingleton<IMarkupTransform, EventWiringTransform>();
         services.AddSingleton<IMarkupTransform, ComponentRefMarkupTransform>();
         services.AddSingleton<IMarkupTransform, UrlReferenceTransform>();

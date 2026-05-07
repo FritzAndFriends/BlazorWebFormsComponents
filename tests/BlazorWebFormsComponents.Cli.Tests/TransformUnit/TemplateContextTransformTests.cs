@@ -52,4 +52,28 @@ public class TemplateContextTransformTests
         Assert.Contains("<TemplateField ItemType=\"object\">", result);
         Assert.Contains("<ItemTemplate Context=\"Item\">@Item.Name</ItemTemplate>", result);
     }
+
+    [Fact]
+    public void PipelineAddsNamedContextForGroupTemplatePlaceholder()
+    {
+        var pipeline = TestHelpers.CreateDefaultPipeline();
+        var metadata = TestMetadata;
+
+        var result = pipeline.TransformMarkup("<asp:ListView ItemType=\"Widget\"><GroupTemplate><tr id=\"itemPlaceholder\" runat=\"server\"></tr></GroupTemplate></asp:ListView>", metadata);
+
+        Assert.Contains("<GroupTemplate Context=\"items\">", result);
+        Assert.Contains("@items", result);
+    }
+
+    [Fact]
+    public void PipelineAddsNamedContextForLayoutTemplatePlaceholder()
+    {
+        var pipeline = TestHelpers.CreateDefaultPipeline();
+        var metadata = TestMetadata;
+
+        var result = pipeline.TransformMarkup("<asp:ListView ItemType=\"Widget\"><LayoutTemplate><div id=\"groupPlaceholder\" runat=\"server\"></div></LayoutTemplate></asp:ListView>", metadata);
+
+        Assert.Contains("<LayoutTemplate Context=\"groups\">", result);
+        Assert.Contains("@groups", result);
+    }
 }

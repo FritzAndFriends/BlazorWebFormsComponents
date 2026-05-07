@@ -35,3 +35,7 @@
 - Deprecate PowerShell scripts — CLI is canonical (2026-05-06T09:16)
 - Audit ALL BWFC Width/Height attributes for string support (2026-05-06T15:12)
 - NEVER replace ListView/FormView/GridView — must use BWFC components (2026-05-07T09:24)
+
+## Learnings
+- **2026-05-07T13:17:32-04:00:** ListView `GroupTemplate` and `LayoutTemplate` emission is more reliable when the CLI emits explicit `Context` names (`items`, `groups`) instead of leaving raw `@context` placeholders. That keeps generated placeholder markup readable and removes one common manual repair step on Wingtip fixtures.
+- **2026-05-07T13:17:32-04:00:** Typed `GridView` columns must inherit the parent grid `ItemType`; leaving `TemplateField` at `ItemType="object"` breaks migrated template expressions like `@Item.Quantity`. A dedicated post-attribute-strip pass that rewrites child BWFC column generics to the grid row type fixes this deterministically.

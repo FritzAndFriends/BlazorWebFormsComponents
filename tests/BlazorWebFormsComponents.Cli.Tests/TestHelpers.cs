@@ -209,6 +209,7 @@ public static class TestHelpers
             new TemplateFieldChildComponentsTransform(),
             // Order 700-750: Attributes & refs
             new AttributeStripTransform(),
+            new GridViewColumnItemTypeTransform(),
             new EventWiringTransform(),
             new ComponentRefMarkupTransform(),
             new UrlReferenceTransform(),

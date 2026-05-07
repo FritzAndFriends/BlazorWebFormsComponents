@@ -27,11 +27,12 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 615 | ValidatorGenericTypeTransform | Markup | Markup | Add explicit `Type="string"` / `InputType="string"` defaults for generic BWFC validators |
 | 620 | TemplateFieldChildComponentsTransform | Markup | Markup | Wrap TemplateField style children in `<ChildComponents>` |
 | 700 | AttributeStripTransform | Markup | Markup | Remove `runat="server"`, preserve BWFC `ItemType`, add generic fallbacks |
+| 705 | GridViewColumnItemTypeTransform | Markup | Markup | Propagate typed `GridView ItemType` values to `BoundField` / `TemplateField` child columns |
 | 710 | EventWiringTransform | Markup | Markup | Convert `OnClick="X"` → `OnClick="@X"` |
 | 720 | UrlReferenceTransform | Markup | Markup | Convert `~/` paths to `/` |
 | 750 | ComponentRefMarkupTransform | Markup | Markup | Convert control IDs to `@ref`-compatible component references |
 | 800 | TemplatePlaceholderTransform | Markup | Markup | Replace template placeholder elements with the layout/group render fragment context |
-| 805 | TemplateContextTransform | Markup | Markup | Add `Context="Item"` to typed item templates and rewrite `@context` → `@Item` |
+| 805 | TemplateContextTransform | Markup | Markup | Add explicit item/group/layout template contexts for typed data-control fragments |
 | 810 | AttributeNormalizeTransform | Markup | Markup | Normalize attribute values (booleans, enums, units) |
 | 820 | DataSourceIdTransform | Markup | Markup | Replace DataSourceID with Items binding |
 | 30 | GetRouteUrlTransform | Code-Behind | Code-Behind | Flag `Page.GetRouteUrl()` calls |
@@ -462,6 +463,41 @@ Also:
 
 ---
 
+### 15a. GridViewColumnItemTypeTransform (Order: 705)
+
+**Propagates a typed `GridView` item type down into child BWFC column components.**
+
+When a migrated `GridView` is strongly typed, `TemplateField`, `BoundField`, `HyperLinkField`, and `ButtonField` children must compile against that same row type. This transform rewrites `ItemType="object"` fallbacks on those column tags to the parent grid's concrete `ItemType`, while leaving object-typed grids alone.
+
+**Example:**
+```html
+<!-- Before -->
+<GridView ItemType="CartItem" AutoGenerateColumns="false">
+  <Columns>
+    <BoundField ItemType="object" DataField="ProductID" />
+    <TemplateField ItemType="object" HeaderText="Quantity">
+      <ItemTemplate Context="Item">
+        <TextBox Text="@Item.Quantity" />
+      </ItemTemplate>
+    </TemplateField>
+  </Columns>
+</GridView>
+
+<!-- After -->
+<GridView ItemType="CartItem" AutoGenerateColumns="false">
+  <Columns>
+    <BoundField ItemType="CartItem" DataField="ProductID" />
+    <TemplateField ItemType="CartItem" HeaderText="Quantity">
+      <ItemTemplate Context="Item">
+        <TextBox Text="@Item.Quantity" />
+      </ItemTemplate>
+    </TemplateField>
+  </Columns>
+</GridView>
+```
+
+---
+
 ### 16. EventWiringTransform (Order: 710)
 
 **Converts Web Forms event handler syntax to Blazor.**
@@ -539,9 +575,9 @@ This transform targets placeholder tags such as `itemPlaceholder`, `groupPlaceho
 
 ### 19. TemplateContextTransform (Order: 805)
 
-**Adds `Context="Item"` to typed item templates and rewrites generated `@context` references to `@Item`.**
+**Adds explicit contexts for typed item templates plus named placeholder contexts for `ListView` group/layout fragments.**
 
-This keeps BWFC data controls aligned with Web Forms naming so generated `<ListView>`, `<FormView>`, `<GridView>`, `<DataList>`, and `<Repeater>` templates stay on the component model instead of being flattened into manual HTML.
+This keeps BWFC data controls aligned with Web Forms naming so generated `<ListView>`, `<FormView>`, `<GridView>`, `<DataList>`, and `<Repeater>` templates stay on the component model instead of being flattened into manual HTML. It also upgrades placeholder-only `GroupTemplate` / `LayoutTemplate` blocks to named contexts such as `items` and `groups`, which makes emitted `ListView` markup structurally valid and easier to read.
 
 **Example:**
 ```html
@@ -549,11 +585,17 @@ This keeps BWFC data controls aligned with Web Forms naming so generated `<ListV
 <ItemTemplate>
   <TextBox Text="@context.Name" />
 </ItemTemplate>
+<GroupTemplate>
+  <tr>@context</tr>
+</GroupTemplate>
 
 <!-- After -->
 <ItemTemplate Context="Item">
   <TextBox Text="@Item.Name" />
 </ItemTemplate>
+<GroupTemplate Context="items">
+  <tr>@items</tr>
+</GroupTemplate>
 ```
 
 ---
