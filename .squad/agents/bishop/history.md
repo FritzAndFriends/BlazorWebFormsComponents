@@ -132,3 +132,9 @@
 - Extended `ServerShim` with `Transfer`, `GetLastError`, and `ClearError`, and updated `ServerShimTransform` guidance to treat those APIs as supported compatibility shims instead of dead-end TODOs.
 - Added focused regression tests for the new transforms, source-file copying, and ServerShim behavior; updated CLI docs plus migration docs so HttpUtility guidance now points to inline `WebUtility` rewrites rather than relying on the legacy shim package.
 - Validation: `dotnet build src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj --nologo`, `dotnet test src\BlazorWebFormsComponents.Test --nologo`, and `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`.
+
+### 2026-05-06T21:33:09-04:00: DisplayExpressionTransform emits idiomatic Razor for simple expressions (Bishop)
+- DisplayExpressionTransform now classifies dotted identifier chains with a dedicated regex helper and emits @expr for simple display expressions while preserving @(expr) for method calls, operators, and other complex expressions.
+- Updated focused coverage in tests\\BlazorWebFormsComponents.Cli.Tests\\TransformUnit\\DisplayExpressionTransformTests.cs for simple and complex cases, plus pipeline assertions for both shapes.
+- Updated L1 expected fixtures TC06-Expressions.razor and TC30-DataDrivenPage.razor to reflect idiomatic Razor output in generated markup.
+- Validation: dotnet test tests\\BlazorWebFormsComponents.Cli.Tests --nologo --filter DisplayExpression (9 passing) and dotnet test tests\\BlazorWebFormsComponents.Cli.Tests --nologo (573 passing).

@@ -23,27 +23,43 @@ public class DisplayExpressionTransformTests
     }
 
     [Fact]
-    public void ConvertsEncodedDisplayExpression()
+    public void ConvertsEncodedDisplayExpressionToIdiomaticRazorForSimpleExpression()
     {
         var result = _transform.Apply("<span><%#: Item.Name %></span>", TestMetadata);
 
-        Assert.Equal("<span>@(Item.Name)</span>", result);
+        Assert.Equal("<span>@Item.Name</span>", result);
     }
 
     [Fact]
-    public void ConvertsColonEqualsDisplayExpression()
+    public void ConvertsColonEqualsDisplayExpressionToIdiomaticRazorForSimpleExpression()
     {
         var result = _transform.Apply("<span><%=: someVar %></span>", TestMetadata);
 
-        Assert.Equal("<span>@(someVar)</span>", result);
+        Assert.Equal("<span>@someVar</span>", result);
     }
 
     [Fact]
-    public void FixesBrokenGeneratedRazorDisplayExpression()
+    public void KeepsParenthesesForMethodCallExpression()
+    {
+        var result = _transform.Apply("<span><%#: item.GetPrice() %></span>", TestMetadata);
+
+        Assert.Equal("<span>@(item.GetPrice())</span>", result);
+    }
+
+    [Fact]
+    public void KeepsParenthesesForOperatorExpression()
+    {
+        var result = _transform.Apply("<span><%#: Item.UnitPrice + tax %></span>", TestMetadata);
+
+        Assert.Equal("<span>@(Item.UnitPrice + tax)</span>", result);
+    }
+
+    [Fact]
+    public void FixesBrokenGeneratedRazorDisplayExpressionToIdiomaticRazorForSimpleExpression()
     {
         var result = _transform.Apply("<span>@(: expr)</span>", TestMetadata);
 
-        Assert.Equal("<span>@(expr)</span>", result);
+        Assert.Equal("<span>@expr</span>", result);
     }
 
     [Fact]
@@ -68,6 +84,23 @@ public class DisplayExpressionTransformTests
 
         var result = pipeline.TransformMarkup("<ItemTemplate><%#: Item.Name %></ItemTemplate>", metadata);
 
-        Assert.Contains("@(Item.Name)", result);
+        Assert.Contains("@Item.Name", result);
+    }
+
+    [Fact]
+    public void PipelinePreservesParenthesesForComplexDisplayExpression()
+    {
+        var pipeline = TestHelpers.CreateDefaultPipeline();
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Product.aspx",
+            OutputFilePath = "Product.razor",
+            FileType = FileType.Page,
+            OriginalContent = string.Empty
+        };
+
+        var result = pipeline.TransformMarkup("<ItemTemplate><%#: item.GetPrice() %></ItemTemplate>", metadata);
+
+        Assert.Contains("@(item.GetPrice())", result);
     }
 }
