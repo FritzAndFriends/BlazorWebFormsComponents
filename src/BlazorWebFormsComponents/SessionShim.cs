@@ -60,9 +60,10 @@ public class SessionShim
 			// Secondary: hydrate from ISession (cross-request persistence)
 			if (TryGetSession(out var session))
 			{
+				string? json = null;
 				try
 				{
-					var json = session.GetString(key);
+					json = session.GetString(key);
 					if (json is null) return null;
 					var value = JsonSerializer.Deserialize<object>(json);
 					_fallbackStore[key] = value;
@@ -70,6 +71,12 @@ public class SessionShim
 				}
 				catch (Exception ex)
 				{
+					if (ex is JsonException)
+					{
+						_fallbackStore[key] = json;
+						return json;
+					}
+
 					_logger.LogDebug(ex, "SessionShim: ISession read failed for key '{Key}'.", key);
 				}
 			}
@@ -126,9 +133,10 @@ public class SessionShim
 		// Secondary: hydrate from ISession
 		if (TryGetSession(out var session))
 		{
+			string? json = null;
 			try
 			{
-				var json = session.GetString(key);
+				json = session.GetString(key);
 				if (json is null) return default;
 				var result = JsonSerializer.Deserialize<T>(json);
 				_fallbackStore[key] = result;
@@ -136,6 +144,12 @@ public class SessionShim
 			}
 			catch (Exception ex)
 			{
+				if (typeof(T) == typeof(string) && ex is JsonException)
+				{
+					_fallbackStore[key] = json;
+					return (T?)(object?)json;
+				}
+
 				_logger.LogDebug(ex, "SessionShim: ISession typed read failed for key '{Key}'.", key);
 			}
 		}

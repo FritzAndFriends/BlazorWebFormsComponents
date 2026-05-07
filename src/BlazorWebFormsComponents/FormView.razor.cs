@@ -204,12 +204,35 @@ namespace BlazorWebFormsComponents
 			};
 		}
 
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+
+			if (Items is null || !Items.Any())
+			{
+				CurrentItem = null;
+				_Position = 1;
+				return;
+			}
+
+			var totalItems = Items.Count();
+			if (_Position < 1)
+			{
+				_Position = 1;
+			}
+			else if (_Position > totalItems)
+			{
+				_Position = totalItems;
+			}
+
+			CurrentItem = Items.Skip(_Position - 1).FirstOrDefault();
+		}
+
 		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{
 
 			if (firstRender)
 			{
-				if ((CurrentItem is null) && Items != null && Items.Any()) Position = 1;
 				var itemCreatedHandler = ItemCreated.HasDelegate ? ItemCreated : OnItemCreated;
 				await itemCreatedHandler.InvokeAsync();
 			}
