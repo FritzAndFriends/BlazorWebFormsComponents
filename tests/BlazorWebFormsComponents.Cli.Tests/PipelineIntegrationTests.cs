@@ -286,12 +286,18 @@ public class PipelineIntegrationTests : IDisposable
     public async Task Pipeline_QuarantinesPageCodeBehind_WhenUnsupportedWebFormsPatternsRemain()
     {
         var (inputDir, outputDir) = CreateTempProjectDir(includeCodeBehind: true);
-        File.WriteAllText(Path.Combine(inputDir, "Default.aspx.cs"), """
+        File.Delete(Path.Combine(inputDir, "Default.aspx"));
+        File.Delete(Path.Combine(inputDir, "Default.aspx.cs"));
+        File.WriteAllText(Path.Combine(inputDir, "LegacyShell.aspx"), """
+            <%@ Page Title="Legacy Shell" Language="C#" AutoEventWireup="true" CodeBehind="LegacyShell.aspx.cs" Inherits="TestApp.LegacyShell" %>
+            <asp:Label ID="Message" runat="server" Text="Legacy shell" />
+            """);
+        File.WriteAllText(Path.Combine(inputDir, "LegacyShell.aspx.cs"), """
             using System;
 
             namespace TestApp
             {
-                public partial class _Default
+                public partial class LegacyShell
                 {
                     protected void Page_Load(object sender, EventArgs e)
                     {
@@ -316,9 +322,9 @@ public class PipelineIntegrationTests : IDisposable
 
         var report = await pipeline.ExecuteAsync(context);
 
-        var markupPath = Path.Combine(outputDir, "Default.razor");
-        var codeBehindPath = Path.Combine(outputDir, "Default.razor.cs");
-        var artifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "Default.razor.cs.txt");
+        var markupPath = Path.Combine(outputDir, "LegacyShell.razor");
+        var codeBehindPath = Path.Combine(outputDir, "LegacyShell.razor.cs");
+        var artifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "LegacyShell.razor.cs.txt");
         var manifestPath = Path.Combine(outputDir, "migration-artifacts", "quarantine-manifest.json");
 
         Assert.Empty(report.Errors);
@@ -327,11 +333,11 @@ public class PipelineIntegrationTests : IDisposable
         Assert.True(File.Exists(artifactPath));
         Assert.True(File.Exists(manifestPath));
         Assert.Contains("Page Not Yet Migrated", File.ReadAllText(markupPath));
-        Assert.Contains("public partial class Default : BlazorWebFormsComponents.WebFormsPageBase", File.ReadAllText(codeBehindPath));
+        Assert.Contains("public partial class LegacyShell : BlazorWebFormsComponents.WebFormsPageBase", File.ReadAllText(codeBehindPath));
 
         using var manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(manifestPath));
         var quarantinedPages = manifest.RootElement.GetProperty("pages");
-        Assert.Contains(quarantinedPages.EnumerateArray(), page => page.GetProperty("originalFilePath").GetString() == "Default.aspx");
+        Assert.Contains(quarantinedPages.EnumerateArray(), page => page.GetProperty("originalFilePath").GetString() == "LegacyShell.aspx");
     }
 
     [Fact]
@@ -563,7 +569,10 @@ public class PipelineIntegrationTests : IDisposable
         var loginMarkup = File.ReadAllText(Path.Combine(outputDir, "Account", "Login.razor"));
 
         Assert.Contains("TODO(bwfc-identity)", loginMarkup);
-        Assert.Contains("<form method=\"get\" action=\"/Account/PerformLogin\" class=\"form-horizontal\">", loginMarkup);
+        Assert.Contains("action=\"/Account/PerformLogin\"", loginMarkup);
+        Assert.Contains("class=\"form-horizontal\"", loginMarkup);
+        Assert.Contains("@formname=\"bwfc-form-1\"", loginMarkup);
+        Assert.Contains("<AntiforgeryToken />", loginMarkup);
         Assert.Contains("type=\"email\"", loginMarkup);
         Assert.Contains("type=\"password\"", loginMarkup);
         Assert.Contains("Register as a new user", loginMarkup);

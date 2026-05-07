@@ -81,7 +81,7 @@ public class ProgramCsEmitter
         builder.AppendLine("}");
         builder.AppendLine();
         builder.AppendLine("app.UseHttpsRedirection();");
-        builder.AppendLine("app.MapStaticAssets();");
+        builder.AppendLine("app.UseStaticFiles();");
 
         if (profile.NeedsSession)
             builder.AppendLine("app.UseSession();");

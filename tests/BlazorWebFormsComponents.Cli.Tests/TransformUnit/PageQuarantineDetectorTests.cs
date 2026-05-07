@@ -28,17 +28,74 @@ public class PageQuarantineDetectorTests
     public void AnalyzeLate_DetectsMobileSpecificPagesWithoutCodeBehind()
     {
         var metadata = CreateMetadata(
-            @"D:\input\Mobile\Catalog.aspx",
-            @"D:\output\Mobile\Catalog.razor",
-            "<asp:Label ID=\"CatalogTitle\" runat=\"server\" Text=\"Catalog\" />",
+            @"D:\input\Mobile\Offers.aspx",
+            @"D:\output\Mobile\Offers.razor",
+            "<asp:Label ID=\"OffersTitle\" runat=\"server\" Text=\"Offers\" />",
             null);
 
-        var decision = _detector.AnalyzeLate(metadata, "@page \"/Mobile/Catalog\"", transformedCodeBehind: null, emissionPlan: null);
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/Mobile/Offers\"", transformedCodeBehind: null, emissionPlan: null);
 
         Assert.True(decision.ShouldQuarantine);
         Assert.Contains("Mobile-specific page or shell", decision.DetectedFeatures);
-        Assert.Equal("Mobile/Catalog.aspx", decision.RelativeSourcePath);
+        Assert.Equal("Mobile/Offers.aspx", decision.RelativeSourcePath);
         Assert.Null(decision.ArtifactContent);
+    }
+
+    [Fact]
+    public void AnalyzeLate_DoesNotQuarantineEssentialProductPagesForMinorIdentitySignals()
+    {
+        var metadata = CreateMetadata(
+            @"D:\input\ProductList.aspx",
+            @"D:\output\ProductList.razor",
+            "<asp:Label ID=\"Title\" runat=\"server\" Text=\"Products\" />",
+            "using Microsoft.AspNet.Identity; namespace TestApp; public partial class ProductList { }");
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/ProductList\"", metadata.CodeBehindContent, emissionPlan: null);
+
+        Assert.False(decision.ShouldQuarantine);
+    }
+
+    [Fact]
+    public void AnalyzeLate_DoesNotQuarantineEssentialShoppingCartPages()
+    {
+        var metadata = CreateMetadata(
+            @"D:\input\ShoppingCart.aspx",
+            @"D:\output\ShoppingCart.razor",
+            "<asp:GridView ID=\"Cart\" runat=\"server\" />",
+            "using Microsoft.AspNet.Identity; namespace TestApp; public partial class ShoppingCart { }");
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/ShoppingCart\"", metadata.CodeBehindContent, emissionPlan: null);
+
+        Assert.False(decision.ShouldQuarantine);
+    }
+
+    [Fact]
+    public void AnalyzeLate_DoesNotQuarantineDefaultPage()
+    {
+        var metadata = CreateMetadata(
+            @"D:\input\Default.aspx",
+            @"D:\output\Default.razor",
+            "<asp:Label ID=\"HomeTitle\" runat=\"server\" Text=\"Home\" />",
+            "using Microsoft.AspNet.Identity; namespace TestApp; public partial class _Default { }");
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/Default\"", metadata.CodeBehindContent, emissionPlan: null);
+
+        Assert.False(decision.ShouldQuarantine);
+    }
+
+    [Fact]
+    public void AnalyzeLate_StillQuarantinesAccountManagePagesForIdentitySignals()
+    {
+        var metadata = CreateMetadata(
+            @"D:\input\Account\Manage.aspx",
+            @"D:\output\Account\Manage.razor",
+            "<asp:Login ID=\"ManageLogin\" runat=\"server\" />",
+            "using Microsoft.AspNet.Identity; namespace TestApp.Account; public partial class Manage { }");
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/Account/Manage\"", metadata.CodeBehindContent, emissionPlan: null);
+
+        Assert.True(decision.ShouldQuarantine);
+        Assert.Contains("ASP.NET Identity or membership APIs", decision.DetectedFeatures);
     }
 
     [Fact]

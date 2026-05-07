@@ -91,6 +91,22 @@ public class ScaffoldingTests : IDisposable
     }
 
     [Fact]
+    public void ProjectScaffolder_ProgramCs_UsesStaticFilesMiddleware()
+    {
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+
+        Assert.Contains("app.UseStaticFiles();", result.Files["program"].Content);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_ProgramCs_UsesAntiforgeryMiddleware()
+    {
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+
+        Assert.Contains("app.UseAntiforgery();", result.Files["program"].Content);
+    }
+
+    [Fact]
     public void ProjectScaffolder_ProgramCs_MapsComponents()
     {
         var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");

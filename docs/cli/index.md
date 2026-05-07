@@ -17,11 +17,11 @@ This tool **reduces manual migration effort** by:
 - Rewriting legacy `HttpUtility.*` calls inline to `WebUtility.*`
 - Upgrading EF6-style `DbContext` string constructors to EF Core `DbContextOptions<TContext>` constructors
 - Generating compile-safe stubs for markup-referenced members that are still missing after code-behind conversion
-- Quarantining non-migratable pages (identity, payment, complex admin CRUD, mobile shells, unresolved compile blockers) behind build-safe placeholders while preserving transformed originals under `migration-artifacts\codebehind\` and recording entries in `migration-artifacts\quarantine-manifest.json`
+- Quarantining non-migratable pages (identity, payment, complex admin CRUD, mobile shells, unresolved compile blockers) behind build-safe placeholders while preserving transformed originals under `migration-artifacts\codebehind\` and recording entries in `migration-artifacts\quarantine-manifest.json`, while keeping essential benchmark paths such as product, cart, home, contact, and about pages out of quarantine
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
 - Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
 - Scaffolding a new .NET 10 Blazor SSR project structure with shims, services, and relaxed code-style build enforcement for copied legacy files
-- Detecting common runtime needs from the source app (DbContext classes, session usage, Account pages, and Global.asax startup hooks) and wiring matching `Program.cs` services/middleware automatically
+- Detecting common runtime needs from the source app (DbContext classes, session usage, Account pages, and Global.asax startup hooks) and wiring matching `Program.cs` services/middleware automatically, including static-file serving and antiforgery middleware for SSR form posts
 
 The tool processes `.aspx`, `.ascx`, and `.master` files in a fixed sequence, then applies a bounded semantic pattern catalog so each higher-level rewrite builds on a normalized page shape.
 

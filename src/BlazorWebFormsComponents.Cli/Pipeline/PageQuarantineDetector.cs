@@ -82,6 +82,11 @@ public sealed partial class PageQuarantineDetector
             return PageQuarantineDecision.None;
         }
 
+        if (IsEssentialPage(relativeSourcePath))
+        {
+            return PageQuarantineDecision.None;
+        }
+
         var features = new List<string>();
         var reasons = new List<string>();
         var suggestions = new List<string>();
@@ -146,6 +151,11 @@ public sealed partial class PageQuarantineDetector
         }
 
         if (features.Count == 0)
+        {
+            return PageQuarantineDecision.None;
+        }
+
+        if (features.Count < 2 && !IsClearlyQuarantinablePath(relativeSourcePath) && !HasStrongSingleSignal(features))
         {
             return PageQuarantineDecision.None;
         }
@@ -321,6 +331,30 @@ public sealed partial class PageQuarantineDetector
             || relativeSourcePath.EndsWith("Register.aspx", StringComparison.OrdinalIgnoreCase);
     }
 
+    private static bool IsEssentialPage(string relativeSourcePath)
+    {
+        var normalizedPath = relativeSourcePath.Replace('\\', '/');
+        var fileName = Path.GetFileName(normalizedPath);
+
+        if (fileName.Equals("Default.aspx", StringComparison.OrdinalIgnoreCase)
+            || fileName.Equals("Index.aspx", StringComparison.OrdinalIgnoreCase)
+            || fileName.Equals("Home.aspx", StringComparison.OrdinalIgnoreCase)
+            || fileName.Equals("About.aspx", StringComparison.OrdinalIgnoreCase)
+            || fileName.Equals("Contact.aspx", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        return normalizedPath.Contains("Product", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Catalog", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Item", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Detail", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Cart", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Shopping", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Basket", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("AddTo", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static bool IsMobileSpecificPage(string relativeSourcePath)
     {
         return relativeSourcePath.Contains("/Mobile/", StringComparison.OrdinalIgnoreCase)
@@ -332,6 +366,33 @@ public sealed partial class PageQuarantineDetector
     {
         return relativeSourcePath.Contains("/Admin/", StringComparison.OrdinalIgnoreCase)
             || relativeSourcePath.StartsWith("Admin/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsAccountPath(string relativeSourcePath)
+    {
+        return relativeSourcePath.Contains("/Account/", StringComparison.OrdinalIgnoreCase)
+            || relativeSourcePath.StartsWith("Account/", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsCheckoutPath(string relativeSourcePath)
+    {
+        return relativeSourcePath.Contains("/Checkout/", StringComparison.OrdinalIgnoreCase)
+            || relativeSourcePath.StartsWith("Checkout/", StringComparison.OrdinalIgnoreCase)
+            || relativeSourcePath.EndsWith("Checkout.aspx", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsClearlyQuarantinablePath(string relativeSourcePath)
+    {
+        return IsAccountPath(relativeSourcePath)
+            || IsAdminPath(relativeSourcePath)
+            || IsCheckoutPath(relativeSourcePath)
+            || IsMobileSpecificPage(relativeSourcePath);
+    }
+
+    private static bool HasStrongSingleSignal(IReadOnlyList<string> features)
+    {
+        return features.Contains("Payment or checkout integration", StringComparer.Ordinal)
+            || features.Contains("Unresolved compile-surface blockers", StringComparer.Ordinal);
     }
 
     private static int CountDataSourceSignals(string content)

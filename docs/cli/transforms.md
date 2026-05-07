@@ -1025,6 +1025,8 @@ string imageUrl = "/images/logo.png";
 
 **Details:**
 - Detects pages that still depend on ASP.NET Identity or membership APIs, payment providers, mobile-only shells, complex admin CRUD with 3+ data-source bindings, or unresolved compile-surface blockers after transforms run
+- Keeps essential product, catalog, cart, home, contact, and about page paths out of quarantine even when they pick up minor incidental signals
+- Requires either multiple signals, a clearly non-essential path (such as `Account/`, `Admin/`, or `Checkout/`), or a strong blocker before quarantine is applied
 - Replaces the generated markup with a visible "Page Not Yet Migrated" placeholder that still routes and compiles
 - Emits a minimal `WebFormsPageBase` partial class stub so the generated app still builds
 - Preserves the transformed original code-behind under `migration-artifacts\codebehind\`, records a `bwfc-compile-surface` manual item, and adds the page to `migration-artifacts\quarantine-manifest.json`

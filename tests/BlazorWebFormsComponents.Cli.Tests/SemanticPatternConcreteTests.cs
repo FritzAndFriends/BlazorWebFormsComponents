@@ -178,6 +178,8 @@ public class SemanticPatternConcreteTests
         Assert.Contains("TODO(bwfc-identity)", result.Markup);
         Assert.Contains("method=\"get\"", result.Markup);
         Assert.Contains("action=\"/Account/PerformRegister\"", result.Markup);
+        Assert.Contains("@formname=\"bwfc-form-1\"", result.Markup);
+        Assert.Contains("<AntiforgeryToken />", result.Markup);
         Assert.DoesNotContain("<ValidationSummary", result.Markup);
         Assert.Equal(2, report.SemanticPatternsApplied);
     }
