@@ -51,18 +51,18 @@ Both should render:
 
 ```
 /docs                                 -- User documentation (MkDocs)
-/samples                              -- Usage samples and migration outputs
+/samples                              -- Usage samples and migration benchmarks (ordered by complexity ↓)
   BeforeWebForms/                     -- Original Web Forms sample (.NET Framework)
-  AfterBlazorServerSide/              -- Blazor Server-Side samples
+  AfterBlazorServerSide/              -- Blazor Server-Side component samples
   AfterBlazorServerSide.Tests/        -- Playwright tests for the sample app
-  AfterBlazorClientSide/              -- Blazor WebAssembly samples
-  AfterContosoUniversity/             -- Migrated Contoso University sample
-  AfterDepartmentPortal/              -- Migrated department portal
-  AfterWingtipToys/                   -- Migrated WingtipToys sample
+  AfterBlazorClientSide/              -- Blazor WebAssembly component samples
   SharedSampleObjects/                -- Shared models/data for samples
-  WingtipToys/                        -- Original WingtipToys Web Forms sample
-  ContosoUniversity/                  -- Original Contoso University Web Forms sample
-  DepartmentPortal/                   -- Original department portal
+  WingtipToys/                        -- ★ Current benchmark focus — e-commerce app (products, cart, checkout, identity)
+  AfterWingtipToys/                   -- Migrated WingtipToys output (cleared + regenerated each benchmark run)
+  ContosoUniversity/                  -- Next benchmark — university CRUD app (EF, master-detail, search)
+  AfterContosoUniversity/             -- Migrated Contoso University output
+  DepartmentPortal/                   -- Most complex benchmark — multi-page portal (advanced data binding, nested controls)
+  AfterDepartmentPortal/              -- Migrated DepartmentPortal output
 /src
   BlazorWebFormsComponents/           -- Main component library
   BlazorWebFormsComponents.Test/      -- Unit tests with bUnit
@@ -316,6 +316,18 @@ These are hard rules for migration work in this repository:
 4. **Preserve BWFC data controls**: Never replace `ListView`, `FormView`, `GridView`, `DataList`, or `Repeater` with manual HTML tables or divs. Fix the generated BWFC markup, templates, item types, or child components instead.
 5. **Register transforms twice**: Every new CLI transform must be registered in both `src/BlazorWebFormsComponents.Cli/Program.cs` DI and `tests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs` so the runtime pipeline and isolated test pipeline stay aligned.
 6. **Respect quarantine boundaries**: `PageQuarantineDetector` should quarantine non-essential `Account/`, `Admin/`, `Checkout/`, mobile, payment, or compile-surface blocker pages, but benchmark-critical home, about, contact, product, catalog, and cart flows stay on the runnable path whenever possible.
+
+### Migration Benchmark Progression
+
+The `samples/` folder contains benchmark apps ordered by increasing complexity. Each app exercises more of the CLI and BWFC component surface:
+
+| Sample | Complexity | Key Challenges | Status |
+|--------|-----------|----------------|--------|
+| **WingtipToys** | ★★☆ | E-commerce: products, cart, checkout, identity, EF data binding | **Current focus** — active benchmark runs |
+| **ContosoUniversity** | ★★☆ | University CRUD: master-detail, search, EF migrations | Acceptance tests exist |
+| **DepartmentPortal** | ★★★ | Multi-page portal: advanced data binding, nested controls, complex layouts | Future target — most sophisticated |
+
+Always complete the current benchmark focus before moving to the next. Improvements to the CLI and toolkit should be validated against the current focus app first, then regression-tested against simpler samples.
 
 ## Migration Shims
 
