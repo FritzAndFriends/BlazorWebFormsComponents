@@ -37,6 +37,7 @@
 - NEVER replace ListView/FormView/GridView — must use BWFC components (2026-05-07T09:24)
 
 ## Learnings
+- **2026-05-08T10:00:31-04:00:** `copilot-instructions.md` now needs explicit migration-tooling guidance: start from the CLI wrapper, preserve BWFC data controls, trust `WebFormsPageBase` shims, and keep transform registration instructions paired across `Program.cs` and `TestHelpers.CreateDefaultPipeline()` so future agents can repair WingtipToys-class migrations without outside help.
 - **2026-05-07T13:17:32-04:00:** ListView `GroupTemplate` and `LayoutTemplate` emission is more reliable when the CLI emits explicit `Context` names (`items`, `groups`) instead of leaving raw `@context` placeholders. That keeps generated placeholder markup readable and removes one common manual repair step on Wingtip fixtures.
 - **2026-05-07T13:17:32-04:00:** Typed `GridView` columns must inherit the parent grid `ItemType`; leaving `TemplateField` at `ItemType="object"` breaks migrated template expressions like `@Item.Quantity`. A dedicated post-attribute-strip pass that rewrites child BWFC column generics to the grid row type fixes this deterministically.
 - **2026-05-07T13:58:11-04:00:** Compile-surface quarantine works best as a post-semantic pipeline decision, not just a code-behind transform. Letting semantic patterns normalize login/action pages first avoids quarantining pages the CLI can already turn into SSR-safe stubs.
