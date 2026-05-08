@@ -99,6 +99,53 @@ public class PageQuarantineDetectorTests
     }
 
     [Fact]
+    public void AnalyzeLate_DoesNotQuarantineRedirectOnlyActionPageWithCompileSurfaceBlocker()
+    {
+        var metadata = CreateMetadata(
+            @"D:\input\Handlers\ApplyCoupon.aspx",
+            @"D:\output\Handlers\ApplyCoupon.razor",
+            "<%@ Page Language=\"C#\" %>",
+            "namespace TestApp.Handlers; public partial class ApplyCoupon { protected void Page_Load(object sender, EventArgs e) { Response.Redirect(\"~/Cart.aspx\"); } }");
+        var emissionPlan = new CodeBehindEmissionPlan(EmitToCompileSurface: false, ArtifactReason: "Compile surface blocker", ArtifactContent: metadata.CodeBehindContent);
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/ApplyCoupon\"\n<PageTitle>ApplyCoupon</PageTitle>\n<div>   </div>", metadata.CodeBehindContent, emissionPlan);
+
+        Assert.False(decision.ShouldQuarantine);
+    }
+
+    [Fact]
+    public void AnalyzeLate_StillQuarantinesRedirectOnlyIdentityPage()
+    {
+        var metadata = CreateMetadata(
+            @"D:\input\Account\PasswordResetBridge.aspx",
+            @"D:\output\Account\PasswordResetBridge.razor",
+            "<%@ Page Language=\"C#\" %>",
+            "using Microsoft.AspNet.Identity; namespace TestApp.Account; public partial class PasswordResetBridge { protected void Page_Load(object sender, EventArgs e) { Response.Redirect(\"~/Account/Login.aspx\"); } }");
+        var emissionPlan = new CodeBehindEmissionPlan(EmitToCompileSurface: false, ArtifactReason: "Compile surface blocker", ArtifactContent: metadata.CodeBehindContent);
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/PasswordResetBridge\"\n<div> </div>", metadata.CodeBehindContent, emissionPlan);
+
+        Assert.True(decision.ShouldQuarantine);
+        Assert.Contains("ASP.NET Identity or membership APIs", decision.DetectedFeatures);
+    }
+
+    [Fact]
+    public void AnalyzeLate_DoesNotChangeNormalPageBehaviorWhenRedirectIsPresent()
+    {
+        var metadata = CreateMetadata(
+            @"D:\input\Admin\Orders.aspx",
+            @"D:\output\Admin\Orders.razor",
+            "<asp:Label ID=\"Title\" runat=\"server\" Text=\"Orders\" />",
+            "namespace TestApp.Admin; public partial class Orders { protected void Page_Load(object sender, EventArgs e) { Response.Redirect(\"~/Admin/Orders.aspx\"); } }");
+        var emissionPlan = new CodeBehindEmissionPlan(EmitToCompileSurface: false, ArtifactReason: "Compile surface blocker", ArtifactContent: metadata.CodeBehindContent);
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/Admin/Orders\"\n<asp:Label ID=\"Title\" runat=\"server\" Text=\"Orders\" />", metadata.CodeBehindContent, emissionPlan);
+
+        Assert.True(decision.ShouldQuarantine);
+        Assert.Contains("Unresolved compile-surface blockers", decision.DetectedFeatures);
+    }
+
+    [Fact]
     public void AnalyzeLate_DetectsComplexAdminCrudPages()
     {
         var metadata = CreateMetadata(

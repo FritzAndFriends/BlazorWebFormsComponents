@@ -44,6 +44,8 @@
 - **2026-05-07T13:17:32-04:00:** Typed `GridView` columns must inherit the parent grid `ItemType`; leaving `TemplateField` at `ItemType="object"` breaks migrated template expressions like `@Item.Quantity`. A dedicated post-attribute-strip pass that rewrites child BWFC column generics to the grid row type fixes this deterministically.
 - **2026-05-07T13:58:11-04:00:** Compile-surface quarantine works best as a post-semantic pipeline decision, not just a code-behind transform. Letting semantic patterns normalize login/action pages first avoids quarantining pages the CLI can already turn into SSR-safe stubs.
 - **2026-05-07T13:58:11-04:00:** A quarantine manifest is most useful when it inventories source-relative paths plus detected feature buckets and suggested manual approaches. That turns build-safe placeholders into an actionable backlog for L2/L3 follow-up instead of a silent compile-surface drop.
+- **2026-05-08T11:37:18.862-04:00:** Nested `.aspx` pages migrate more safely when the CLI emits the source-relative route first and keeps the filename-only route as an alias. That preserves original URLs like `/Account/Login` for tests, bookmarks, and links without breaking the simpler `/Login` Blazor convention.
+- **2026-05-08T11:37:18.862-04:00:** Redirect-only action pages with inert markup should stay on the runnable path unless identity or payment signals are present. `Response.Redirect` plus `WebFormsPageBase` shims is enough for coupon/cart-style handlers, so compile-surface blockers alone are an over-quarantine signal.
 
 
 ### Team Update (2026-05-07T13:17): GridView ItemType transform and ListView context normalization

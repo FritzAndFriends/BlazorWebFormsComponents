@@ -39,6 +39,14 @@ public sealed partial class PageQuarantineDetector
         @"<\s*(SqlDataSource|ObjectDataSource|EntityDataSource|LinqDataSource|AccessDataSource)\b|\bDataSourceID\s*=\s*""[^""]+""",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
+    private static readonly Regex PageAndTitleRegex = new(
+        @"(?is)^\s*@page\s+""[^""]+""\s*|<PageTitle>.*?</PageTitle>",
+        RegexOptions.Compiled);
+
+    private static readonly Regex WrapperTagRegex = new(
+        @"(?is)</?(html|head|body|form|div|span|section|main|title)(?:\s[^>]*)?>",
+        RegexOptions.Compiled);
+
     public PageQuarantineDecision AnalyzeEarly(FileMetadata metadata, string transformedCodeBehind)
     {
         return Analyze(
@@ -87,14 +95,21 @@ public sealed partial class PageQuarantineDetector
             return PageQuarantineDecision.None;
         }
 
+        var originalCodeBehind = metadata.CodeBehindContent ?? string.Empty;
+        var sourceSignals = string.Join("\n", metadata.OriginalContent ?? string.Empty, originalCodeBehind);
+        var hasIdentitySignals = IdentityRegex.IsMatch(sourceSignals);
+        var hasPaymentSignals = PaymentRegex.IsMatch(sourceSignals);
+
+        if (IsRedirectOnlyPage(markup, originalCodeBehind) && !hasIdentitySignals && !hasPaymentSignals)
+        {
+            return PageQuarantineDecision.None;
+        }
+
         var features = new List<string>();
         var reasons = new List<string>();
         var suggestions = new List<string>();
 
-        var originalCodeBehind = metadata.CodeBehindContent ?? string.Empty;
-        var sourceSignals = string.Join("\n", metadata.OriginalContent ?? string.Empty, originalCodeBehind);
-
-        if (IdentityRegex.IsMatch(sourceSignals))
+        if (hasIdentitySignals)
         {
             AddSignal(
                 features,
@@ -105,7 +120,7 @@ public sealed partial class PageQuarantineDetector
                 "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic.");
         }
 
-        if (PaymentRegex.IsMatch(sourceSignals))
+        if (hasPaymentSignals)
         {
             AddSignal(
                 features,
@@ -353,6 +368,20 @@ public sealed partial class PageQuarantineDetector
             || normalizedPath.Contains("Shopping", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.Contains("Basket", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.Contains("AddTo", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsRedirectOnlyPage(string markup, string? codeBehind)
+    {
+        if (string.IsNullOrWhiteSpace(codeBehind)
+            || !codeBehind.Contains("Response.Redirect", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var stripped = PageAndTitleRegex.Replace(markup, string.Empty);
+        stripped = WrapperTagRegex.Replace(stripped, string.Empty);
+        stripped = Regex.Replace(stripped, @"\s+|&nbsp;", string.Empty, RegexOptions.IgnoreCase);
+        return string.IsNullOrEmpty(stripped);
     }
 
     private static bool IsMobileSpecificPage(string relativeSourcePath)

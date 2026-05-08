@@ -77,7 +77,9 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 **What It Does:**
 - Extracts `Inherits` attribute → `@inherits`
-- Infers route from filename or `Url` attribute
+- Infers the primary route from the source-relative `.aspx` path when the page lives under a subdirectory (for example `Account/Login.aspx` → `@page "/Account/Login"`)
+- Adds a secondary filename-only alias route when that alias differs from the source-relative route (for example `@page "/Login"`)
+- Preserves the existing `/` home-page handling for `Default.aspx` and `Index.aspx`
 - Removes boilerplate attributes (Language, AutoEventWireup, CodeBehind)
 - Adds TODO if custom routing logic is detected
 

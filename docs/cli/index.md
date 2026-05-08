@@ -17,7 +17,7 @@ This tool **reduces manual migration effort** by:
 - Rewriting legacy `HttpUtility.*` calls inline to `WebUtility.*`
 - Upgrading EF6-style `DbContext` string constructors to EF Core `DbContextOptions<TContext>` constructors
 - Generating compile-safe stubs for markup-referenced members that are still missing after code-behind conversion
-- Quarantining non-migratable pages (identity, payment, complex admin CRUD, mobile shells, unresolved compile blockers) behind build-safe placeholders while preserving transformed originals under `migration-artifacts\codebehind\` and recording entries in `migration-artifacts\quarantine-manifest.json`, while keeping essential benchmark paths such as product, cart, home, contact, and about pages out of quarantine
+- Quarantining non-migratable pages (identity, payment, complex admin CRUD, mobile shells, unresolved compile blockers) behind build-safe placeholders while preserving transformed originals under `migration-artifacts\codebehind\` and recording entries in `migration-artifacts\quarantine-manifest.json`, while keeping essential benchmark paths such as product, cart, home, contact, about, and redirect-only shim-friendly action pages out of quarantine
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
 - Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
 - Scaffolding a new .NET 10 Blazor SSR project structure with shims, services, and relaxed code-style build enforcement for copied legacy files
