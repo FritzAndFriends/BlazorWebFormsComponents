@@ -267,11 +267,30 @@ Run 34 exposed four deterministic migration gaps:
 
 ---
 
+### 2026-05-08: Update Copilot migration instructions with CLI and toolkit guidance
+**By:** Bishop (Migration Tooling Dev)
+**Status:** Proposed
+**Date:** 2026-05-08T10:00:31-04:00
+
+Expand `.github/copilot-instructions.md` so migration-focused agents are steered toward the BWFC CLI pipeline, migration-toolkit wrapper, static SSR scaffold, quarantine boundaries, acceptance suites, and BWFC component preservation rules.
+
+**Why:** The previous instructions were strong for component development but left migration agents without the repo's actual migration operating model. That gap encouraged ad hoc conversions, missed transform registration in tests, and made it easier to rewrite shim-backed code or replace BWFC data controls with manual HTML during benchmark repairs.
+
+**Required Guidance Added:**
+- Project structure now includes the CLI project, analyzer projects, migration-toolkit, CLI tests, and benchmark acceptance suites.
+- Migration rules now require static SSR, trust in `WebFormsPageBase` shims, BWFC data-control preservation, toolkit-first entry points, and dual transform registration in `Program.cs` plus `TestHelpers.CreateDefaultPipeline()`.
+- A new migration CLI and toolkit section documents `MigrationPipeline`, `ProjectScaffolder`, `RuntimeDetector`, `ProgramCsEmitter`, `PageQuarantineDetector`, the five migration-toolkit skills, and the benchmark acceptance-test commands.
+- The maintenance matrix now covers CLI transforms, scaffolding/runtime changes, and migration-toolkit workflow changes.
+
+**Expected Outcome:** Future agents should start migrations from the supported toolkit path, preserve benchmark-critical BWFC controls and pages, and keep the CLI runtime, test pipeline, and documentation synchronized while pursuing a fast WingtipToys migration loop.
+
+---
+
 ## Summary
 
 **Active Contributors:** Bishop, Colossus, Scribe  
-**Last Update:** 2026-05-07T12:43:55-04:00  
-**Next Review:** Post-Run 41
+**Last Update:** 2026-05-08T14:42:43Z  
+**Next Review:** Post-Bishop-spawn (G3/G4 fixes)
 
 ---
 
