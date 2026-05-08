@@ -3,8 +3,7 @@ namespace WingtipToys.Models
 {
   public class ProductContext : DbContext
   {
-    public ProductContext()
-      : base("WingtipToys")
+    public ProductContext(DbContextOptions<ProductContext> options) : base(options)
     {
     }
     public DbSet<Category> Categories { get; set; }

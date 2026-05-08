@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BwfcMigrationMode>true</BwfcMigrationMode>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,18 +15,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="**\*.razor.cs" />
-    <Compile Remove="BundleConfig.cs" />
-    <Compile Remove="IdentityConfig.cs" />
-    <Compile Remove="RouteConfig.cs" />
-    <Compile Remove="Startup.Auth.cs" />
-    <Compile Remove="Logic\**\*.cs" />
-    <Compile Remove="Models\IdentityModels.cs" />
-    <Compile Remove="Models\ProductContext.cs" />
-    <Compile Remove="Models\ProductDatabaseInitializer.cs" />
   </ItemGroup>
 
 </Project>

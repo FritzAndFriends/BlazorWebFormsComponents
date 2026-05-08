@@ -19,11 +19,11 @@
     </GridView>
     @* TODO(bwfc-datasource): Implement IdsProductsDataService to replace SqlDataSource *@
     <h2>Featured Products</h2>
-    <Repeater id="rptFeatured" TItem="Product" SelectMethod="GetFeaturedProducts">
-        <ItemTemplate>
+    <Repeater id="rptFeatured" ItemType="Product" SelectMethod="GetFeaturedProducts">
+        <ItemTemplate Context="Item">
             <div class="product-card">
-                <h4>@context.ProductName</h4>
-                <span class="price">@context.UnitPrice</span>
+                <h4>@Item.ProductName</h4>
+                <span class="price">@Item.UnitPrice</span>
             </div>
         </ItemTemplate>
     </Repeater>

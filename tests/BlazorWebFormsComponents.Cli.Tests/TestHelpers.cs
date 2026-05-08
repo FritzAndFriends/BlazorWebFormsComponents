@@ -1,6 +1,8 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.Scaffolding;
 using BlazorWebFormsComponents.Cli.SemanticPatterns;
 using BlazorWebFormsComponents.Cli.Transforms;
 using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
@@ -159,12 +161,25 @@ public static class TestHelpers
         new AccountPagesSemanticPattern()
     ];
 
+    public static RuntimeDetector CreateDefaultRuntimeDetector() =>
+        new([
+            new EntityFrameworkRuntimeSignalDetector(),
+            new SessionRuntimeSignalDetector(),
+            new IdentityRuntimeSignalDetector(),
+            new GlobalAsaxRuntimeSignalDetector()
+        ]);
+
+    public static ProjectScaffolder CreateDefaultScaffolder() =>
+        new(new DatabaseProviderDetector(), CreateDefaultRuntimeDetector(), new ProgramCsEmitter());
+
     /// <summary>
     /// Creates a fully configured MigrationPipeline with all markup and code-behind
     /// transforms registered in the canonical order.
     /// </summary>
     public static MigrationPipeline CreateDefaultPipeline()
     {
+        var quarantineDetector = new PageQuarantineDetector();
+
         var markupTransforms = new List<IMarkupTransform>
         {
             // Order 100-120: Directives
@@ -174,26 +189,35 @@ public static class TestHelpers
             // Order 200-210: Imports & Registers
             new ImportDirectiveTransform(),
             new RegisterDirectiveTransform(),
-            // Order 250: Master page layout conversion
+            // Order 250-255: Master page shell cleanup
             new MasterPageTransform(),
+            new ScriptManagerStripTransform(),
             // Order 300-310: Content/Form wrappers
             new ContentWrapperTransform(),
             new FormWrapperTransform(),
-            // Order 500: Expressions
+            // Order 490-500: Expressions
+            new DisplayExpressionTransform(),
             new ExpressionTransform(),
+            // Order 510: Statement block conversion (before LoginViewTransform)
+            new ServerCodeBlockTransform(),
             // Order 510-520: Semantic controls
             new LoginViewTransform(),
             new SelectMethodTransform(),
-            // Order 600-610: Prefix stripping (Ajax before Asp)
+            // Order 600-620: Prefix stripping, validator typing, TemplateField wrapping
             new AjaxToolkitPrefixTransform(),
             new AspPrefixTransform(),
+            new DataBindingAttributeTransform(),
+            new ValidatorGenericTypeTransform(),
+            new TemplateFieldChildComponentsTransform(),
             // Order 700-750: Attributes & refs
             new AttributeStripTransform(),
+            new GridViewColumnItemTypeTransform(),
             new EventWiringTransform(),
             new ComponentRefMarkupTransform(),
             new UrlReferenceTransform(),
             // Order 800-820: Normalize & templates
             new TemplatePlaceholderTransform(),
+            new TemplateContextTransform(),
             new AttributeNormalizeTransform(),
             new DataSourceIdTransform(),
         };
@@ -203,7 +227,9 @@ public static class TestHelpers
             new TodoHeaderTransform(),
             new UsingStripTransform(),
             new IdentityUsingTransform(),
+            new HttpUtilityRewriteTransform(),
             new EntityFrameworkTransform(),
+            new EfContextConstructorTransform(),
             new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),
             new ClassNameAlignTransform(),
@@ -214,6 +240,7 @@ public static class TestHelpers
             new RequestFormTransform(),
             new ServerShimTransform(),
             new GetRouteUrlTransform(),
+            new CartSessionKeyTransform(),
             new SessionDetectTransform(),
             new ViewStateDetectTransform(),
             new IsPostBackTransform(),
@@ -222,6 +249,8 @@ public static class TestHelpers
             new DataBindTransform(),
             new ClientScriptTransform(),
             new UrlCleanupTransform(),
+            new CompileSurfaceStubTransform(quarantineDetector),
+            new MarkupReferencedMemberStubTransform(),
         };
 
         return new MigrationPipeline(markupTransforms, codeBehindTransforms, CreateDefaultSemanticPatterns());

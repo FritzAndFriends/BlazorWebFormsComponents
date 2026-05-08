@@ -142,3 +142,7 @@ Team updates (2026-03-04-05): PRs upstream, reports in docs/migration-tests/, be
 
  Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
  Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz
+
+
+≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
+

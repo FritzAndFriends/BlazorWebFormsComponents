@@ -111,6 +111,46 @@
 	}
 
 	[Fact]
+	public void Label_WithNumericStringWidth_RendersPixelWidthInStyle()
+	{
+		var cut = Render<Label>(parameters => parameters
+			.Add(p => p.Text, "Wide Label")
+			.Add(p => p.Width, "500"));
+
+		cut.Find("span").GetAttribute("style").ShouldContain("width:500px");
+	}
+
+	[Fact]
+	public void Label_WithPixelStringWidth_RendersPixelWidthInStyle()
+	{
+		var cut = Render<Label>(parameters => parameters
+			.Add(p => p.Text, "Wide Label")
+			.Add(p => p.Width, "500px"));
+
+		cut.Find("span").GetAttribute("style").ShouldContain("width:500px");
+	}
+
+	[Fact]
+	public void Label_WithPercentageStringWidth_RendersPercentageWidthInStyle()
+	{
+		var cut = Render<Label>(parameters => parameters
+			.Add(p => p.Text, "Wide Label")
+			.Add(p => p.Width, "50%"));
+
+		cut.Find("span").GetAttribute("style").ShouldContain("width:50%");
+	}
+
+	[Fact]
+	public void Label_WithNumericStringHeight_RendersPixelHeightInStyle()
+	{
+		var cut = Render<Label>(parameters => parameters
+			.Add(p => p.Text, "Tall Label")
+			.Add(p => p.Height, "75"));
+
+		cut.Find("span").GetAttribute("style").ShouldContain("height:75px");
+	}
+
+	[Fact]
 	public void Label_WithBorder_RendersAllBorderPropertiesInStyle()
 	{
 		// Border requires all three: BorderWidth > 0, BorderStyle != None/NotSet, BorderColor != default

@@ -1,4 +1,5 @@
 using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.Transforms.Markup;
 
 namespace BlazorWebFormsComponents.Cli.SemanticPatterns;
 
@@ -55,6 +56,9 @@ public sealed class SemanticPatternCatalog
             migrationContext.Log.Add(sourceFile.MarkupPath, pattern.Id, detail);
             report.SemanticPatternsApplied++;
         }
+
+        markup = FormAntiforgeryPostProcessor.Apply(markup);
+        metadata.MarkupContent = markup;
 
         return new SemanticPatternExecutionResult(markup, codeBehind, appliedPatterns);
     }

@@ -7,6 +7,7 @@ namespace BlazorWebFormsComponents
 {
 
 	[Serializable]
+	[TypeConverter(typeof(UnitTypeConverter))]
 	public struct Unit
 	{
 

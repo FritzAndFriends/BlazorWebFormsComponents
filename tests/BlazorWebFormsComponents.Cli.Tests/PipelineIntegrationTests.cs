@@ -7,6 +7,8 @@ using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Pipeline;
 using BlazorWebFormsComponents.Cli.Scaffolding;
 using BlazorWebFormsComponents.Cli.SemanticPatterns;
+using NativeEdmxToEfCoreConverter = BlazorWebFormsComponents.Cli.Services.EdmxToEfCoreConverter;
+using NativeNuGetStaticAssetExtractor = BlazorWebFormsComponents.Cli.Services.NuGetStaticAssetExtractor;
 
 namespace BlazorWebFormsComponents.Cli.Tests;
 
@@ -52,7 +54,7 @@ public class PipelineIntegrationTests : IDisposable
             markupTransforms,
             codeBehindTransforms,
             new SemanticPatternCatalog(TestHelpers.CreateDefaultSemanticPatterns()),
-            new ProjectScaffolder(new DatabaseProviderDetector()),
+            TestHelpers.CreateDefaultScaffolder(),
             new GlobalUsingsGenerator(),
             new ShimGenerator(),
             new WebConfigTransformer(),
@@ -61,9 +63,10 @@ public class PipelineIntegrationTests : IDisposable
             new SourceFileCopier(outputWriter, codeBehindTransforms),
             new AppStartCopier(outputWriter),
             new AppAssetInjector(outputWriter),
-            new NuGetStaticAssetExtractor(new PowerShellScriptRunner()),
-            new EdmxConverterBridge(new PowerShellScriptRunner()),
-            new RedirectHandlerAnnotator(outputWriter));
+            new NativeNuGetStaticAssetExtractor(),
+            new NativeEdmxToEfCoreConverter(),
+            new RedirectHandlerAnnotator(outputWriter),
+            new PageQuarantineDetector());
     }
 
     private (string inputDir, string outputDir) CreateTempProjectDir(
@@ -255,7 +258,7 @@ public class PipelineIntegrationTests : IDisposable
     }
 
     [Fact]
-    public async Task Pipeline_QuarantinesCodeBehindFilesAsManualArtifacts()
+    public async Task Pipeline_EmitsShimCompatiblePageCodeBehindIntoCompileSurface()
     {
         var (inputDir, outputDir) = CreateTempProjectDir(includeCodeBehind: true);
         var pipeline = CreateFullPipeline();
@@ -273,11 +276,178 @@ public class PipelineIntegrationTests : IDisposable
         var report = await pipeline.ExecuteAsync(context);
 
         Assert.Empty(report.Errors);
-        // Default.aspx has a code-behind → should produce a quarantined manual artifact, not a compile-included .razor.cs file
-        Assert.False(File.Exists(Path.Combine(outputDir, "Default.razor.cs")),
-            "Default.razor.cs should not be written directly into the compile surface");
-        Assert.True(File.Exists(Path.Combine(outputDir, "migration-artifacts", "codebehind", "Default.razor.cs.txt")),
-            "Default.razor.cs.txt should be created as a manual migration artifact");
+        Assert.True(File.Exists(Path.Combine(outputDir, "Default.razor.cs")),
+            "Default.razor.cs should be written into the compile surface for shim-compatible pages");
+        Assert.False(File.Exists(Path.Combine(outputDir, "migration-artifacts", "codebehind", "Default.razor.cs.txt")),
+            "Default.razor.cs.txt should not be created when the page code-behind is compile-safe");
+    }
+
+    [Fact]
+    public async Task Pipeline_PreservesGridViewTemplateFieldsAcrossFullFileMigration()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir(includeWebConfig: false, includeCodeBehind: false);
+        File.WriteAllText(Path.Combine(inputDir, "Default.aspx"), """
+            <%@ Page Title="Shopping Cart" Language="C#" AutoEventWireup="true" Inherits="TestApp.ShoppingCart" %>
+            <asp:GridView ID="CartList" runat="server" AutoGenerateColumns="False" ItemType="TestApp.Models.CartItem">
+                <Columns>
+                    <asp:BoundField DataField="ProductID" HeaderText="ID" />
+                    <asp:TemplateField HeaderText="Quantity">
+                        <ItemTemplate>
+                            <asp:TextBox ID="PurchaseQuantity" Width="40" runat="server" Text="<%#: Item.Quantity %>"></asp:TextBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Item Total">
+                        <ItemTemplate>
+                            <%#: String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))) %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Remove Item">
+                        <ItemTemplate>
+                            <asp:CheckBox ID="Remove" runat="server"></asp:CheckBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+            </asp:GridView>
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false, SkipScaffold = true },
+            SourceFiles = sourceFiles
+        };
+
+        var report = await pipeline.ExecuteAsync(context);
+        var defaultRazor = File.ReadAllText(Path.Combine(outputDir, "Default.razor"));
+
+        Assert.Empty(report.Errors);
+        Assert.Contains("<BoundField ItemType=\"CartItem\" DataField=\"ProductID\" HeaderText=\"ID\" />", defaultRazor);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", defaultRazor);
+        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", defaultRazor);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Item Total\">", defaultRazor);
+        Assert.Contains("@(String.Format(\"{0:c}\", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))", defaultRazor);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Remove Item\">", defaultRazor);
+        Assert.Contains("<CheckBox id=\"Remove\"></CheckBox>", defaultRazor);
+        Assert.Equal(3, defaultRazor.Split("<TemplateField", StringSplitOptions.None).Length - 1);
+    }
+
+    [Fact]
+    public async Task Pipeline_QuarantinesPageCodeBehind_WhenUnsupportedWebFormsPatternsRemain()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir(includeCodeBehind: true);
+        File.Delete(Path.Combine(inputDir, "Default.aspx"));
+        File.Delete(Path.Combine(inputDir, "Default.aspx.cs"));
+        File.WriteAllText(Path.Combine(inputDir, "LegacyShell.aspx"), """
+            <%@ Page Title="Legacy Shell" Language="C#" AutoEventWireup="true" CodeBehind="LegacyShell.aspx.cs" Inherits="TestApp.LegacyShell" %>
+            <asp:Label ID="Message" runat="server" Text="Legacy shell" />
+            """);
+        File.WriteAllText(Path.Combine(inputDir, "LegacyShell.aspx.cs"), """
+            using System;
+
+            namespace TestApp
+            {
+                public partial class LegacyShell
+                {
+                    protected void Page_Load(object sender, EventArgs e)
+                    {
+                        var row = CartList.Rows[0];
+                        var remove = row.FindControl("Remove");
+                    }
+                }
+            }
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false, SkipScaffold = true },
+            SourceFiles = sourceFiles
+        };
+
+        var report = await pipeline.ExecuteAsync(context);
+
+        var markupPath = Path.Combine(outputDir, "LegacyShell.razor");
+        var codeBehindPath = Path.Combine(outputDir, "LegacyShell.razor.cs");
+        var artifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "LegacyShell.razor.cs.txt");
+        var manifestPath = Path.Combine(outputDir, "migration-artifacts", "quarantine-manifest.json");
+
+        Assert.Empty(report.Errors);
+        Assert.True(File.Exists(markupPath));
+        Assert.True(File.Exists(codeBehindPath));
+        Assert.True(File.Exists(artifactPath));
+        Assert.True(File.Exists(manifestPath));
+        Assert.Contains("Page Not Yet Migrated", File.ReadAllText(markupPath));
+        Assert.Contains("public partial class LegacyShell : BlazorWebFormsComponents.WebFormsPageBase", File.ReadAllText(codeBehindPath));
+
+        using var manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(manifestPath));
+        var quarantinedPages = manifest.RootElement.GetProperty("pages");
+        Assert.Contains(quarantinedPages.EnumerateArray(), page => page.GetProperty("originalFilePath").GetString() == "LegacyShell.aspx");
+    }
+
+    [Fact]
+    public async Task Pipeline_EmitsCompileSurfaceStubAndArtifactsOriginalCodeBehind_ForInfrastructurePages()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir(includeWebConfig: false, includeCodeBehind: false);
+        Directory.CreateDirectory(Path.Combine(inputDir, "Account"));
+
+        File.WriteAllText(Path.Combine(inputDir, "Account", "Manage.aspx"), """
+            <%@ Page Title="Manage" Language="C#" AutoEventWireup="true" CodeBehind="Manage.aspx.cs" Inherits="TestApp.Account.Manage" %>
+            <asp:Label ID="StatusLabel" runat="server" Text="Manage" />
+            """);
+        File.WriteAllText(Path.Combine(inputDir, "Account", "Manage.aspx.cs"), """
+            using Microsoft.AspNet.Identity;
+
+            namespace TestApp.Account
+            {
+                public partial class Manage
+                {
+                }
+            }
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false, SkipScaffold = true },
+            SourceFiles = sourceFiles
+        };
+
+        var report = await pipeline.ExecuteAsync(context);
+
+        var markupPath = Path.Combine(outputDir, "Account", "Manage.razor");
+        var codeBehindPath = Path.Combine(outputDir, "Account", "Manage.razor.cs");
+        var artifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "Account", "Manage.razor.cs.txt");
+
+        var manifestPath = Path.Combine(outputDir, "migration-artifacts", "quarantine-manifest.json");
+
+        Assert.Empty(report.Errors);
+        Assert.True(File.Exists(markupPath));
+        Assert.True(File.Exists(codeBehindPath));
+        Assert.True(File.Exists(artifactPath));
+        Assert.True(File.Exists(manifestPath));
+        Assert.Contains("Page Not Yet Migrated", File.ReadAllText(markupPath));
+        Assert.Contains("Original Web Forms features used: ASP.NET Identity or membership APIs", File.ReadAllText(markupPath));
+        Assert.Contains("public partial class Manage : BlazorWebFormsComponents.WebFormsPageBase", File.ReadAllText(codeBehindPath));
+        Assert.Contains(report.ManualItems, item => item.Category == "bwfc-compile-surface" && item.File == "Account/Manage.aspx");
+
+        using var manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(manifestPath));
+        var quarantinedPages = manifest.RootElement.GetProperty("pages");
+        Assert.Contains(quarantinedPages.EnumerateArray(), page => page.GetProperty("originalFilePath").GetString() == "Account/Manage.aspx");
     }
 
     [Fact]
@@ -319,7 +489,8 @@ public class PipelineIntegrationTests : IDisposable
         var report = await pipeline.ExecuteAsync(context);
 
         var markup = File.ReadAllText(Path.Combine(outputDir, "ProductDetails.razor"));
-        Assert.Contains("SelectItems=\"GetProductQueryDetails_SelectItems\"", markup);
+        Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", markup);
+        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", markup);
         Assert.Contains("SupplyParameterFromQuery(Name = \"ProductID\")", markup);
         Assert.True(report.SemanticPatternsApplied >= 1, $"Expected at least one semantic rewrite, got {report.SemanticPatternsApplied}");
         Assert.Contains(report.ManualItems, item => item.Category == "bwfc-query-details");
@@ -452,7 +623,12 @@ public class PipelineIntegrationTests : IDisposable
         var loginMarkup = File.ReadAllText(Path.Combine(outputDir, "Account", "Login.razor"));
 
         Assert.Contains("TODO(bwfc-identity)", loginMarkup);
-        Assert.Contains("<form method=\"get\" action=\"/Account/PerformLogin\" class=\"form-horizontal\">", loginMarkup);
+        Assert.Contains("method=\"post\"", loginMarkup);
+        Assert.Contains("action=\"/Account/LoginHandler\"", loginMarkup);
+        Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", loginMarkup);
+        Assert.Contains("class=\"form-horizontal\"", loginMarkup);
+        Assert.Contains("@formname=\"bwfc-form-1\"", loginMarkup);
+        Assert.Contains("<AntiforgeryToken />", loginMarkup);
         Assert.Contains("type=\"email\"", loginMarkup);
         Assert.Contains("type=\"password\"", loginMarkup);
         Assert.Contains("Register as a new user", loginMarkup);
@@ -500,7 +676,7 @@ public class PipelineIntegrationTests : IDisposable
     public void Scaffold_GeneratesProjectFiles()
     {
         var (inputDir, outputDir) = CreateTempProjectDir();
-        var scaffolder = new ProjectScaffolder(new DatabaseProviderDetector());
+        var scaffolder = TestHelpers.CreateDefaultScaffolder();
 
         var result = scaffolder.Scaffold(inputDir, outputDir, "TestApp");
 
@@ -519,7 +695,7 @@ public class PipelineIntegrationTests : IDisposable
     public async Task Scaffold_WritesFilesToDisk()
     {
         var (inputDir, outputDir) = CreateTempProjectDir();
-        var scaffolder = new ProjectScaffolder(new DatabaseProviderDetector());
+        var scaffolder = TestHelpers.CreateDefaultScaffolder();
         var writer = new OutputWriter { DryRun = false };
 
         var result = scaffolder.Scaffold(inputDir, outputDir, "TestApp");
@@ -687,9 +863,9 @@ public class PipelineIntegrationTests : IDisposable
         Assert.True(File.Exists(Path.Combine(outputDir, "Default.razor")), "Default.razor missing");
         Assert.True(File.Exists(Path.Combine(outputDir, "About.razor")), "About.razor missing");
 
-        // Assert — transformed code-behind is quarantined as a manual artifact
-        Assert.False(File.Exists(Path.Combine(outputDir, "Default.razor.cs")), "Default.razor.cs should not be emitted into the compile surface");
-        Assert.True(File.Exists(Path.Combine(outputDir, "migration-artifacts", "codebehind", "Default.razor.cs.txt")), "Default.razor.cs.txt missing");
+        // Assert — shim-compatible page code-behind is emitted into the compile surface
+        Assert.True(File.Exists(Path.Combine(outputDir, "Default.razor.cs")), "Default.razor.cs should be emitted into the compile surface");
+        Assert.False(File.Exists(Path.Combine(outputDir, "migration-artifacts", "codebehind", "Default.razor.cs.txt")), "Default.razor.cs.txt should not be emitted for compile-safe pages");
 
         // Assert — no identity shims (no Account folder)
         Assert.False(File.Exists(Path.Combine(outputDir, "IdentityShims.cs")),
@@ -1160,15 +1336,22 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Contains("@ChildComponents", siteMarkup);
         Assert.Contains("ContentPlaceHolder", siteMarkup);
         Assert.Contains("MainContent", siteMarkup);
-        Assert.Contains("method=\"get\"", loginMarkup);
-        Assert.Contains("action=\"/Account/PerformLogin\"", loginMarkup);
+        Assert.Contains("method=\"post\"", loginMarkup);
+        Assert.Contains("action=\"/Account/LoginHandler\"", loginMarkup);
+        Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", loginMarkup);
         Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", loginMarkup);
-        Assert.Contains("method=\"get\"", registerMarkup);
-        Assert.Contains("action=\"/Account/PerformRegister\"", registerMarkup);
+        Assert.Contains("method=\"post\"", registerMarkup);
+        Assert.Contains("action=\"/Account/RegisterHandler\"", registerMarkup);
+        Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", registerMarkup);
         Assert.Contains("action=\"/__bwfc/actions/AddToCart\"", actionMarkup);
         Assert.Contains("document.getElementById('bwfc-action-pages-form')?.submit();", actionMarkup);
-        Assert.Contains("app.MapGet(\"/Account/PerformLogin\"", program);
-        Assert.Contains("app.MapGet(\"/Account/PerformRegister\"", program);
+        Assert.Contains("ConfigureApplicationCookie", program);
+        Assert.Contains("options.LoginPath = \"/Account/Login\";", program);
+        Assert.Contains("options.LogoutPath = \"/Account/Logout\";", program);
+        Assert.Contains("app.MapPost(\"/Account/LoginHandler\"", program);
+        Assert.Contains("PasswordSignInAsync", program);
+        Assert.Contains("app.MapPost(\"/Account/RegisterHandler\"", program);
+        Assert.Contains("CreateAsync(user, password)", program);
         Assert.Contains("app.MapPost(\"/__bwfc/actions/AddToCart\"", program);
         Assert.Contains("DisableAntiforgery()", program);
         Assert.False(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));

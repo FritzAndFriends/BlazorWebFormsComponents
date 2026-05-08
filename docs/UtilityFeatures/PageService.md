@@ -32,9 +32,9 @@ The Page system uses three complementary pieces:
 
 ```mermaid
 flowchart LR
-    A["<b>WebFormsPageBase</b>\n<i>(code-behind API)</i>\n\n• Title\n• MetaDescription\n• MetaKeywords\n• IsPostBack\n• Page (self-ref)"]
+    A["<b>WebFormsPageBase</b>\n<i>(shared page shim)</i>\n\n• Title / Meta*\n• IsPostBack\n• Request / Response\n• Session / Cache\n• ClientScript / ViewState"]
     B["<b>IPageService</b>\n<i>(scoped bridge)</i>\n\n• Title\n• MetaDescription\n• MetaKeywords\n• Change events"]
-    C["<b>WebFormsPage</b>\n<i>(layout wrapper)</i>\n\n• &lt;PageTitle&gt;\n• &lt;meta&gt; tags\n• NamingContainer\n• ThemeProvider"]
+    C["<b>Page + WebFormsPage</b>\n<i>(renderers)</i>\n\n• &lt;PageTitle&gt;\n• &lt;meta&gt; tags\n• NamingContainer\n• ThemeProvider"]
 
     A -->|writes| B -->|reads| C
 
@@ -46,14 +46,15 @@ flowchart LR
 
 | Piece | Role | Where it lives |
 |---|---|---|
-| **`WebFormsPageBase`** | Abstract base class for converted pages. Provides `Title`, `MetaDescription`, `MetaKeywords`, `IsPostBack`, and `Page` (self-reference). This is the **code-behind API** your pages inherit. | `@inherits` in `_Imports.razor` |
+| **`WebFormsPageBase`** | Abstract base class for converted pages and the shared runtime shim behind `<Page />`. Provides `Title`, `MetaDescription`, `MetaKeywords`, `IsPostBack`, `Page`, `Request`, `Response`, `Session`, `Server`, `Cache`, `ClientScript`, and `ViewState`. | `@inherits` in `_Imports.razor`, inherited by `<Page />` |
 | **`IPageService` / `PageService`** | Scoped service that bridges the base class and the renderer. Property setters fire change events. | Registered by `AddBlazorWebFormsComponents()` |
-| **`WebFormsPage`** | Unified layout wrapper that provides NamingContainer (ID mangling), ThemeProvider (skin cascading), AND page head rendering (`<PageTitle>` + `<meta>` tags). Subscribes to `IPageService` events. | `<WebFormsPage>` wrapping `@Body` in layout |
+| **`Page`** | Head renderer that inherits `WebFormsPageBase`, reads the current title/meta values, and disables postback interop because it only renders `<PageTitle>` and `<meta>` tags. | `<Page />` |
+| **`WebFormsPage`** | Unified layout wrapper that provides NamingContainer (ID mangling), ThemeProvider (skin cascading), and optionally composes `<Page />` for head rendering. | `<WebFormsPage>` wrapping `@Body` in layout |
 
-**Key point:** `WebFormsPageBase` and `WebFormsPage` are complementary, not redundant. `WebFormsPageBase` *writes* data to `IPageService`; `WebFormsPage` *reads* from `IPageService` and renders HTML. Both are needed.
+**Key point:** `WebFormsPageBase` is now the shared page shim. Converted pages inherit it directly, `<Page />` reuses it for head rendering, and `<WebFormsPage>` composes `<Page />` instead of duplicating page-service subscription logic.
 
-!!! tip "All-in-one layout component"
-    `<WebFormsPage>` combines naming, theming, and head rendering into a single component. You no longer need a separate `<Page />` component — `<WebFormsPage>` handles everything.
+!!! tip "Default layout pattern"
+    `<WebFormsPage>` is still the simplest layout wrapper. It now renders `<Page />` internally by default, so you get naming, theming, and page-head rendering from one component.
 
 ## One-Time Setup
 
@@ -86,10 +87,7 @@ This registers `IPageService` as a scoped service.
 - **Page head rendering** — Subscribes to `IPageService` and renders `<PageTitle>` + `<meta>` tags
 
 !!! note "RenderPageHead parameter"
-    If you need to handle head rendering separately (e.g., with a standalone `<Page />` component), set `RenderPageHead="false"` on `<WebFormsPage>` to disable head rendering.
-
-!!! note "Standalone Page.razor"
-    The `<BlazorWebFormsComponents.Page />` component is still available as a standalone head renderer for apps that don't use `<WebFormsPage>`. However, when using `<WebFormsPage>`, the standalone `<Page />` is unnecessary — don't use both, or you'll get duplicate head content.
+    If you need to handle head rendering separately, set `RenderPageHead="false"` on `<WebFormsPage>` and place `<Page />` yourself. Otherwise, let `<WebFormsPage>` own that composition to avoid duplicate head tags.
 
 ## Primary Approach: WebFormsPageBase
 
@@ -131,7 +129,7 @@ With `WebFormsPageBase` as your base class, Web Forms code-behind patterns work 
 This works because:
 
 - **`Page`** returns `this` (a self-reference), so `Page.Title` resolves to `this.Title`
-- **`Title`**, **`MetaDescription`**, and **`MetaKeywords`** delegate to the injected `IPageService`
+- **`Title`**, **`MetaDescription`**, and **`MetaKeywords`** delegate to the scoped `IPageService` when available
 - **`IsPostBack`** always returns `false` — so `if (!IsPostBack)` blocks always execute, matching first-load behavior
 
 ### Properties Available
@@ -143,16 +141,13 @@ This works because:
 | `MetaKeywords` | `string` | Gets/sets the meta keywords. Delegates to `IPageService.MetaKeywords`. |
 | `IsPostBack` | `bool` | Always returns `false`. Blazor has no postback model. |
 | `Page` | `WebFormsPageBase` | Returns `this`. Enables `Page.Title` syntax. |
-
-### Properties NOT Available
-
-The following `System.Web.UI.Page` members are **deliberately omitted** to encourage proper Blazor migration:
-
-- **`Page.Request`** — Use `NavigationManager` or `HttpContext` instead
-- **`Page.Response`** — Use `NavigationManager.NavigateTo()` for redirects
-- **`Page.Session`** — Use `ProtectedSessionStorage`, `ProtectedLocalStorage`, or a scoped service
-- **`Page.Server`** — Use standard .NET APIs (`Path`, `HttpUtility`, etc.)
-- **`Page.Cache`** — Use `IMemoryCache` or `IDistributedCache`
+| `Request` | `RequestShim` | Compatibility wrapper for query string, cookies, URL, and form data. |
+| `Response` | `ResponseShim` | Compatibility wrapper for redirects and cookies. |
+| `Session` | `SessionShim` | Dictionary-style session storage with SSR and in-memory fallback behavior. |
+| `Server` | `ServerShim` | Compatibility wrapper for `MapPath`, HTML encoding, and URL encoding. |
+| `Cache` | `CacheShim` | Compatibility wrapper over `IMemoryCache`. |
+| `ClientScript` | `ClientScriptShim` | Registers startup scripts, client script blocks, and postback helpers. |
+| `ViewState` | `ViewStateDictionary` | Per-page ViewState-style dictionary. |
 
 !!! warning "Dead Code: `if (IsPostBack)`"
     Code guarded by `if (IsPostBack)` (without `!`) will **never execute** because `IsPostBack` is always `false`. During migration, search for `if (IsPostBack)` (without the negation) and flag those blocks for review — they likely contain logic that needs to be reimplemented as Blazor event handlers.

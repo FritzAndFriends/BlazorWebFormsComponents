@@ -14,6 +14,29 @@ namespace BlazorWebFormsComponents
 	{
 
 		/// <summary>
+		/// Gets or sets a single data item for the FormView.
+		/// When set, the item is wrapped into a single-element collection
+		/// and used as the <see cref="DataBoundComponent{ItemType}.Items"/> source.
+		/// This enables the Web Forms pattern: <c>&lt;FormView DataItem="product" /&gt;</c>.
+		/// </summary>
+		[Parameter]
+		public ItemType DataItem
+		{
+			get => Items?.FirstOrDefault();
+			set
+			{
+				if (value != null)
+				{
+					Items = new[] { value };
+				}
+				else
+				{
+					Items = null;
+				}
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets whether the pager UI is displayed. When false, the pager row is hidden
 		/// even when multiple items exist.
 		/// </summary>
@@ -204,12 +227,35 @@ namespace BlazorWebFormsComponents
 			};
 		}
 
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+
+			if (Items is null || !Items.Any())
+			{
+				CurrentItem = null;
+				_Position = 1;
+				return;
+			}
+
+			var totalItems = Items.Count();
+			if (_Position < 1)
+			{
+				_Position = 1;
+			}
+			else if (_Position > totalItems)
+			{
+				_Position = totalItems;
+			}
+
+			CurrentItem = Items.Skip(_Position - 1).FirstOrDefault();
+		}
+
 		protected override async Task OnAfterRenderAsync(bool firstRender)
 		{
 
 			if (firstRender)
 			{
-				if ((CurrentItem is null) && Items != null && Items.Any()) Position = 1;
 				var itemCreatedHandler = ItemCreated.HasDelegate ? ItemCreated : OnItemCreated;
 				await itemCreatedHandler.InvokeAsync();
 			}

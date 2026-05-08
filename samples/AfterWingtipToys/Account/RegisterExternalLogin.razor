@@ -1,9 +1,12 @@
 @page "/Account/RegisterExternalLogin"
-
-<PageTitle>Register external login</PageTitle>
+@page "/RegisterExternalLogin"
+<PageTitle>Register External Login</PageTitle>
 <Site>
-    <Content ContentPlaceHolderID="MainContent">
-        <h1>Register external login</h1>
-        <p>External login providers are not configured in the migrated benchmark sample.</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h3>External logins are not configured.</h3>
+            <p>Please use the standard registration page instead.</p>
+            <p><a href="/Account/Register">Go to Register</a></p>
+        </Content>
+    </ChildComponents>
 </Site>

@@ -7,19 +7,7 @@ name: Squad Heartbeat (Ralph)
 # Run 'squad upgrade' to sync installed copies from source templates.
 
 on:
-  # React to completed work or new squad work
-  issues:
-    types: [closed, labeled]
-  pull_request:
-    types: [closed]
-
-  # Manual trigger
   workflow_dispatch:
-
-permissions:
-  issues: write
-  contents: read
-  pull-requests: read
 
 jobs:
   heartbeat:

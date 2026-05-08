@@ -1,12 +1,7 @@
 name: Squad Issue Assign
 
 on:
-  issues:
-    types: [labeled]
-
-permissions:
-  issues: write
-  contents: read
+  workflow_dispatch:
 
 jobs:
   assign-work:

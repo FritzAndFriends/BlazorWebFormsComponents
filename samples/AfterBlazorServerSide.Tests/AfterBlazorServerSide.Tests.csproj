@@ -19,11 +19,10 @@
 
   <ItemGroup>
     <ProjectReference Include="../AfterBlazorServerSide/AfterBlazorServerSide.csproj" />
-    <ProjectReference Include="../AfterWingtipToys/WingtipToys.csproj" />
   </ItemGroup>
 
   <Target Name="BuildPlaywrightHostsInRelease" BeforeTargets="VSTest">
-    <MSBuild Projects="../AfterBlazorServerSide/AfterBlazorServerSide.csproj;../AfterWingtipToys/WingtipToys.csproj"
+    <MSBuild Projects="../AfterBlazorServerSide/AfterBlazorServerSide.csproj"
              Targets="Build"
              Properties="Configuration=Release" />
   </Target>

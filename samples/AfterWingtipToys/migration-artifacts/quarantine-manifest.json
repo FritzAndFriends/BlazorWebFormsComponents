@@ -1,0 +1,92 @@
+{
+  "pages": [
+    {
+      "originalFilePath": "Account/AddPhoneNumber.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/Confirm.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/Forgot.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/Manage.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/ManageLogins.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/ManagePassword.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/ResetPassword.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/TwoFactorAuthenticationSignIn.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/VerifyPhoneNumber.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Checkout/CheckoutComplete.aspx",
+      "detectedUnsupportedFeatures": [
+        "Payment or checkout integration"
+      ],
+      "reasonForQuarantine": "Detected payment-provider integration code that requires manual migration and secrets-safe server orchestration.",
+      "suggestedMigrationApproach": "Move payment orchestration into a dedicated server-side service or API boundary, then reconnect the page once the provider SDK is re-integrated."
+    },
+    {
+      "originalFilePath": "Checkout/CheckoutError.aspx",
+      "detectedUnsupportedFeatures": [
+        "Unresolved compile-surface blockers"
+      ],
+      "reasonForQuarantine": "Lowercase HTML elements with server IDs still require explicit server-element shims.",
+      "suggestedMigrationApproach": "Port the remaining server-control or lifecycle logic into BWFC-compatible components, services, or semantic patterns before re-enabling the page."
+    }
+  ]
+}

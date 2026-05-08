@@ -8,6 +8,13 @@ source: "earned"
 
 ## ⛔ MANDATORY RULES — Read Before Any Migration Work
 
+### Data control migration is non-negotiable
+
+- **NEVER replace `<asp:ListView>`, `<asp:FormView>`, `<asp:GridView>`, `<asp:DataList>`, or `<asp:Repeater>` with manual HTML, `<table>` markup, or `@foreach` loops.**
+- **ALWAYS migrate them to the BWFC component of the same name:** `<ListView>`, `<FormView>`, `<GridView>`, `<DataList>`, and `<Repeater>`.
+- These components already exist in the **BlazorWebFormsComponents** library and are the **correct migration target**.
+- If generated BWFC markup does not compile, **fix the markup so the BWFC component works** — **do not replace the component** with hand-written HTML.
+
 1. **ALL migrated pages inherit WebFormsPageBase** via `@inherits BlazorWebFormsComponents.WebFormsPageBase` in `_Imports.razor`. This gives every page: Session, Response, Request, Server, Cache, ClientScript, ViewState, IsPostBack.
 
 2. **PRESERVE the original Web Forms API calls.** If the Web Forms code says `Session["CartId"]`, the Blazor code says `Session["CartId"]`. If it says `Response.Redirect("ShoppingCart.aspx")`, the Blazor code says `Response.Redirect("ShoppingCart")`. The shims handle the translation.

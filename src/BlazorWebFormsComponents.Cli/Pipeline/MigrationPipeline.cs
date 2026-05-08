@@ -4,6 +4,8 @@ using BlazorWebFormsComponents.Cli.Scaffolding;
 using BlazorWebFormsComponents.Cli.SemanticPatterns;
 using BlazorWebFormsComponents.Cli.Transforms;
 using Microsoft.Extensions.DependencyInjection;
+using NativeEdmxToEfCoreConverter = BlazorWebFormsComponents.Cli.Services.EdmxToEfCoreConverter;
+using NativeNuGetStaticAssetExtractor = BlazorWebFormsComponents.Cli.Services.NuGetStaticAssetExtractor;
 
 namespace BlazorWebFormsComponents.Cli.Pipeline;
 
@@ -23,10 +25,11 @@ public class MigrationPipeline
     private readonly SourceFileCopier? _sourceFileCopier;
     private readonly AppStartCopier? _appStartCopier;
     private readonly AppAssetInjector? _appAssetInjector;
-    private readonly NuGetStaticAssetExtractor? _nuGetStaticAssetExtractor;
-    private readonly EdmxConverterBridge? _edmxConverterBridge;
+    private readonly NativeNuGetStaticAssetExtractor? _nuGetStaticAssetExtractor;
+    private readonly NativeEdmxToEfCoreConverter? _edmxConverterBridge;
     private readonly RedirectHandlerAnnotator? _redirectHandlerAnnotator;
     private readonly SemanticPatternCatalog _semanticPatternCatalog;
+    private readonly PageQuarantineDetector _pageQuarantineDetector;
 
     /// <summary>
     /// Full constructor for DI — used by the CLI commands.
@@ -45,9 +48,10 @@ public class MigrationPipeline
         SourceFileCopier sourceFileCopier,
         AppStartCopier appStartCopier,
         AppAssetInjector appAssetInjector,
-        NuGetStaticAssetExtractor nuGetStaticAssetExtractor,
-        EdmxConverterBridge edmxConverterBridge,
-        RedirectHandlerAnnotator redirectHandlerAnnotator)
+        NativeNuGetStaticAssetExtractor nuGetStaticAssetExtractor,
+        NativeEdmxToEfCoreConverter edmxConverterBridge,
+        RedirectHandlerAnnotator redirectHandlerAnnotator,
+        PageQuarantineDetector pageQuarantineDetector)
     {
         _markupTransforms = markupTransforms.OrderBy(t => t.Order).ToList();
         _codeBehindTransforms = codeBehindTransforms.OrderBy(t => t.Order).ToList();
@@ -64,6 +68,7 @@ public class MigrationPipeline
         _nuGetStaticAssetExtractor = nuGetStaticAssetExtractor;
         _edmxConverterBridge = edmxConverterBridge;
         _redirectHandlerAnnotator = redirectHandlerAnnotator;
+        _pageQuarantineDetector = pageQuarantineDetector;
     }
 
     /// <summary>
@@ -87,6 +92,7 @@ public class MigrationPipeline
         _nuGetStaticAssetExtractor = null;
         _edmxConverterBridge = null;
         _redirectHandlerAnnotator = null;
+        _pageQuarantineDetector = new PageQuarantineDetector();
     }
 
     /// <summary>
@@ -110,17 +116,24 @@ public class MigrationPipeline
         await TransformConfigAsync(context, report);
 
         // Step 3: For each source file — markup pipeline → code-behind pipeline → write output
+        var quarantineEntries = new List<PageQuarantineManifestEntry>();
         foreach (var sourceFile in context.SourceFiles)
         {
             try
             {
-                await ProcessSourceFileAsync(sourceFile, context, report);
+                var quarantineEntry = await ProcessSourceFileAsync(sourceFile, context, report);
+                if (quarantineEntry != null)
+                {
+                    quarantineEntries.Add(quarantineEntry);
+                }
             }
             catch (Exception ex)
             {
                 report.Errors.Add($"{sourceFile.MarkupPath}: {ex.Message}");
             }
         }
+
+        await WriteQuarantineManifestAsync(context, quarantineEntries);
 
         // Step 4: Copy static files (CSS, JS, images, fonts) to wwwroot/
         if (_staticFileCopier != null)
@@ -248,7 +261,7 @@ public class MigrationPipeline
         }
     }
 
-    private async Task ProcessSourceFileAsync(SourceFile sourceFile, MigrationContext context, MigrationReport report)
+    private async Task<PageQuarantineManifestEntry?> ProcessSourceFileAsync(SourceFile sourceFile, MigrationContext context, MigrationReport report)
     {
         var markupContent = await File.ReadAllTextAsync(sourceFile.MarkupPath);
         var projectName = GetProjectName(context.SourcePath);
@@ -260,6 +273,7 @@ public class MigrationPipeline
             FileType = sourceFile.FileType,
             OriginalContent = markupContent,
             OutputRootPath = context.OutputPath,
+            SourceRootPath = context.SourcePath,
             ProjectNamespace = projectName
         };
 
@@ -301,25 +315,100 @@ public class MigrationPipeline
 
         var finalMarkup = semanticResult.Markup;
         codeBehind = semanticResult.CodeBehind;
+        var quarantineDecision = metadata.QuarantineDecision;
+
+        if (quarantineDecision?.ShouldQuarantine != true)
+        {
+            var emissionPlan = codeBehind == null
+                ? null
+                : PageCodeBehindEmissionPlanner.Create(metadata, finalMarkup, codeBehind);
+            var lateDecision = _pageQuarantineDetector.AnalyzeLate(metadata, finalMarkup, codeBehind, emissionPlan);
+            if (lateDecision.ShouldQuarantine)
+            {
+                quarantineDecision = lateDecision;
+                metadata.QuarantineDecision = lateDecision;
+                metadata.CompileSurfaceStubReason = lateDecision.Reason;
+                metadata.CompileSurfaceOriginalCodeBehind = lateDecision.ArtifactContent;
+            }
+        }
+
+        if (quarantineDecision?.ShouldQuarantine == true)
+        {
+            finalMarkup = quarantineDecision.StubMarkup;
+            codeBehind = quarantineDecision.StubCodeBehind;
+        }
 
         // Write markup output
         await _outputWriter.WriteFileAsync(sourceFile.OutputPath, finalMarkup,
             $"Converted {Path.GetFileName(sourceFile.MarkupPath)}");
 
+        PageQuarantineManifestEntry? manifestEntry = null;
+
         // Write code-behind output
-        if (codeBehind != null)
+        if (quarantineDecision?.ShouldQuarantine == true && codeBehind != null)
         {
+            await _outputWriter.WriteFileAsync(sourceFile.OutputPath + ".cs", codeBehind,
+                $"Quarantine stub for {Path.GetFileName(sourceFile.MarkupPath)}");
+
             var relativeMarkupPath = Path.GetRelativePath(context.OutputPath, sourceFile.OutputPath);
             var codeOutputPath = Path.Combine(
                 context.OutputPath,
                 "migration-artifacts",
                 "codebehind",
                 relativeMarkupPath + ".cs.txt");
-            await _outputWriter.WriteFileAsync(codeOutputPath, codeBehind,
-                $"Manual code-behind artifact for {Path.GetFileName(sourceFile.MarkupPath)}");
+
+            if (!string.IsNullOrWhiteSpace(quarantineDecision.ArtifactContent))
+            {
+                await _outputWriter.WriteFileAsync(codeOutputPath, quarantineDecision.ArtifactContent,
+                    $"Original quarantined code-behind for {Path.GetFileName(sourceFile.MarkupPath)}");
+            }
+
+            report.AddManualItem(quarantineDecision.RelativeSourcePath, 0, "bwfc-compile-surface", quarantineDecision.Reason, "high");
+            manifestEntry = quarantineDecision.ManifestEntry;
+        }
+        else if (codeBehind != null)
+        {
+            var emissionPlan = PageCodeBehindEmissionPlanner.Create(metadata, finalMarkup, codeBehind);
+            var relativeMarkupPath = Path.GetRelativePath(context.OutputPath, sourceFile.OutputPath);
+            var codeOutputPath = Path.Combine(
+                context.OutputPath,
+                "migration-artifacts",
+                "codebehind",
+                relativeMarkupPath + ".cs.txt");
+
+            if (emissionPlan.EmitToCompileSurface)
+            {
+                await _outputWriter.WriteFileAsync(sourceFile.OutputPath + ".cs", codeBehind,
+                    $"Converted code-behind for {Path.GetFileName(sourceFile.MarkupPath)}");
+
+                if (!string.IsNullOrWhiteSpace(emissionPlan.ArtifactContent) && !string.IsNullOrWhiteSpace(emissionPlan.ArtifactReason))
+                {
+                    await _outputWriter.WriteFileAsync(codeOutputPath, emissionPlan.ArtifactContent,
+                        $"Manual code-behind artifact for {Path.GetFileName(sourceFile.MarkupPath)}");
+                    report.AddManualItem(Path.GetRelativePath(context.SourcePath, sourceFile.MarkupPath), 0, "bwfc-compile-surface", emissionPlan.ArtifactReason);
+                }
+            }
+            else
+            {
+                await _outputWriter.WriteFileAsync(codeOutputPath, codeBehind,
+                    $"Manual code-behind artifact for {Path.GetFileName(sourceFile.MarkupPath)}");
+            }
         }
 
         report.FilesProcessed++;
+        return manifestEntry;
+    }
+
+    private async Task WriteQuarantineManifestAsync(MigrationContext context, IReadOnlyList<PageQuarantineManifestEntry> quarantineEntries)
+    {
+        if (quarantineEntries.Count == 0)
+        {
+            return;
+        }
+
+        var manifestPath = Path.Combine(context.OutputPath, "migration-artifacts", "quarantine-manifest.json");
+        var manifestContent = _pageQuarantineDetector.BuildManifest(quarantineEntries);
+        await _outputWriter.WriteFileAsync(manifestPath, manifestContent, "Compile-surface quarantine manifest");
     }
 
     /// <summary>
@@ -331,6 +420,8 @@ public class MigrationPipeline
         {
             content = transform.Apply(content, metadata);
         }
+
+        metadata.MarkupContent = content;
         return content;
     }
 

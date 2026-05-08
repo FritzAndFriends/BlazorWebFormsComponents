@@ -70,15 +70,15 @@ public class ComponentRefMarkupTransform : IMarkupTransform
 
     /// <summary>
     /// Determines the Blazor field type for a component reference.
-    /// For generic BWFC components, extracts the type parameter from TItem or ItemType attributes.
+    /// For generic BWFC components, extracts the type parameter from ItemType attributes.
     /// </summary>
     public static string ResolveFieldType(string tagName, string tagAttributes)
     {
         if (!GenericComponents.Contains(tagName))
             return tagName;
 
-        // Look for TItem="Type" (already converted from ItemType by AttributeStripTransform)
-        // or ItemType="object" (fallback added by AttributeStripTransform for generic components)
+        // Look for ItemType="Type" (normalized by AttributeStripTransform)
+        // or the ItemType="object" fallback added for generic components.
         var typeMatch = Regex.Match(tagAttributes, @"(?:TItem|ItemType)=""([^""]+)""");
         var typeParam = typeMatch.Success ? typeMatch.Groups[1].Value : "object";
         return $"{tagName}<{typeParam}>";

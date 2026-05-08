@@ -1,52 +1,37 @@
 @page "/ProductDetails"
-@inject CatalogService Catalog
-@inject NavigationManager Navigation
-
 <PageTitle>Product Details</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            @if (Product is null)
-            {
-                <h1>Product not found</h1>
-                <p>The requested product could not be located.</p>
-            }
-            else
-            {
-                <div class="row">
-                    <div class="col-md-5">
-                        <img src="/Catalog/Images/@Product.ImagePath" alt="@Product.ProductName" class="img-responsive img-thumbnail" style="max-height: 360px; width: 100%; object-fit: contain;" />
+            <FormView ItemType="Product" DataItem="@Product" RenderOuterTable="false">
+                <ItemTemplate Context="Item">
+                    <div>
+                        <h1>@Item.ProductName</h1>
                     </div>
-                    <div class="col-md-7">
-                        <h1>@Product.ProductName</h1>
-                        <p>@Product.Description</p>
-                        <p><strong>Price:</strong> @($"{Product.UnitPrice:c}")</p>
-                        <p><strong>Product Number:</strong> @Product.ProductID</p>
-                        <div>
-                            <form method="get" action="/ShoppingCart" style="display: inline;">
-                                <input type="hidden" name="addProductId" value="@Product.ProductID" />
-                                <button type="submit" class="btn btn-primary">Add To Cart</button>
-                            </form>
-                            <a class="btn btn-default" href="/ProductList">Back to Products</a>
-                        </div>
-                    </div>
-                </div>
-            }
+                    <br />
+                    <table>
+                        <tr>
+                            <td>
+                                <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName" />
+                            </td>
+                            <td>&nbsp;</td>
+                            <td style="vertical-align: top; text-align:left;">
+                                <b>Description:</b><br />@Item.Description
+                                <br />
+                                <span><b>Price:</b>&nbsp;@Item.UnitPrice?.ToString("C")</span>
+                                <br />
+                                <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
+                                <br />
+                                <br />
+                                <a href="/AddToCart?productId=@Item.ProductID" class="btn btn-primary">Add To Cart</a>
+                            </td>
+                        </tr>
+                    </table>
+                </ItemTemplate>
+                <EmptyDataTemplate>
+                    <p>We couldn't find that product.</p>
+                </EmptyDataTemplate>
+            </FormView>
         </Content>
     </ChildComponents>
 </Site>
-
-@code {
-    private int? ProductId => TryGetIntQueryValue("id");
-
-    private Product? Product => ProductId.HasValue ? Catalog.GetProduct(ProductId.Value) : null;
-
-    private int? TryGetIntQueryValue(string key)
-    {
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-        return query.TryGetValue(key, out var value) && int.TryParse(value, out var parsed)
-            ? parsed
-            : null;
-    }
-}

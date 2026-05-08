@@ -1,20 +1,34 @@
 @page "/"
-
-<PageTitle>Welcome</PageTitle>
+<PageTitle>Wingtip Toys</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
             <div class="jumbotron">
                 <h1>Wingtip Toys</h1>
-                <h2>Find the perfect transportation toy.</h2>
-                <p class="lead">
-                    Browse boats, cars, planes, and trucks from the classic Wingtip catalog.
-                    Each product page includes images, descriptions, and a quick path into the shopping cart.
-                </p>
-                <p>
-                    <a class="btn btn-primary btn-lg" href="/ProductList">Browse Products</a>
-                </p>
+                <p class="lead">Wingtip Toys can help you find the perfect gift.</p>
+                <p>We're all about transportation toys. Explore the catalog, view product details, and add items to your cart.</p>
+                <p><a class="btn btn-primary btn-lg" href="/ProductList">Shop Now</a></p>
             </div>
+
+            <h2>Featured Products</h2>
+            <ListView ItemType="Product" Items="@FeaturedProducts">
+                <LayoutTemplate Context="items">
+                    <div class="row">@items</div>
+                </LayoutTemplate>
+                <ItemTemplate Context="Item">
+                    <div class="col-sm-3">
+                        <div class="thumbnail">
+                            <a href="/ProductDetails?productId=@Item.ProductID">
+                                <img src="/Catalog/Images/Thumbs/@Item.ImagePath" alt="@Item.ProductName" style="width:100%;height:160px;object-fit:contain" />
+                            </a>
+                            <div class="caption">
+                                <h4><a href="/ProductDetails?productId=@Item.ProductID">@Item.ProductName</a></h4>
+                                <p>@Item.Description</p>
+                            </div>
+                        </div>
+                    </div>
+                </ItemTemplate>
+            </ListView>
         </Content>
     </ChildComponents>
 </Site>

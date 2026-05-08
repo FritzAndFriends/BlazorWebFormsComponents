@@ -4,6 +4,8 @@ using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Pipeline;
 using BlazorWebFormsComponents.Cli.Scaffolding;
 using BlazorWebFormsComponents.Cli.SemanticPatterns;
+using NativeEdmxToEfCoreConverter = BlazorWebFormsComponents.Cli.Services.EdmxToEfCoreConverter;
+using NativeNuGetStaticAssetExtractor = BlazorWebFormsComponents.Cli.Services.NuGetStaticAssetExtractor;
 using BlazorWebFormsComponents.Cli.Transforms;
 
 namespace BlazorWebFormsComponents.Cli.Tests;
@@ -93,7 +95,7 @@ public class SemanticPatternCatalogTests : IDisposable
                 MarkupPath = Path.Combine(inputDir, "Default.aspx"),
                 CodeBehindPath = Path.Combine(inputDir, "Default.aspx.cs"),
                 OutputPath = Path.Combine(outputDir, "Default.razor"),
-                FileType = FileType.Page
+                FileType = FileType.Control
             }
         };
 
@@ -102,7 +104,7 @@ public class SemanticPatternCatalogTests : IDisposable
             [new AppendMarkupTransform()],
             [new AppendCodeBehindTransform()],
             new SemanticPatternCatalog([new VerifyAndAppendSemanticPattern()]),
-            new ProjectScaffolder(new DatabaseProviderDetector()),
+            TestHelpers.CreateDefaultScaffolder(),
             new GlobalUsingsGenerator(),
             new ShimGenerator(),
             new WebConfigTransformer(),
@@ -111,9 +113,10 @@ public class SemanticPatternCatalogTests : IDisposable
             new SourceFileCopier(outputWriter, []),
             new AppStartCopier(outputWriter),
             new AppAssetInjector(outputWriter),
-            new NuGetStaticAssetExtractor(new PowerShellScriptRunner()),
-            new EdmxConverterBridge(new PowerShellScriptRunner()),
-            new RedirectHandlerAnnotator(outputWriter));
+            new NativeNuGetStaticAssetExtractor(),
+            new NativeEdmxToEfCoreConverter(),
+            new RedirectHandlerAnnotator(outputWriter),
+            new PageQuarantineDetector());
 
         var context = new MigrationContext
         {
@@ -168,7 +171,7 @@ public class SemanticPatternCatalogTests : IDisposable
             """
             @page "/ProductDetails"
 
-            <FormView TItem="Product" SelectMethod="GetProduct" />
+            <FormView ItemType="Product" SelectMethod="GetProduct" />
             """,
             """
             using WingtipToys.Models;
@@ -185,7 +188,8 @@ public class SemanticPatternCatalogTests : IDisposable
             """,
             report);
 
-        Assert.Contains("SelectItems=\"GetProductQueryDetails_SelectItems\"", result.Markup);
+        Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", result.Markup);
+        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", result.Markup);
         Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public int? ProductId { get; set; }", result.Markup);
         Assert.Contains("public string? ProductName { get; set; }", result.Markup);
         Assert.Contains("TODO(bwfc-query-details)", result.Markup);
@@ -245,6 +249,8 @@ public class SemanticPatternCatalogTests : IDisposable
         Assert.Contains("<PageTitle>AddToCart</PageTitle>", result.Markup);
         Assert.Contains("TODO(bwfc-action-pages)", result.Markup);
         Assert.Contains("action=\"/__bwfc/actions/AddToCart\"", result.Markup);
+        Assert.Contains("@formname=\"bwfc-form-1\"", result.Markup);
+        Assert.Contains("<AntiforgeryToken />", result.Markup);
         Assert.Contains("document.getElementById('bwfc-action-pages-form')?.submit();", result.Markup);
         Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public string? ProductID { get; set; }", result.Markup);
         Assert.Contains("private const string HandlerRoute = \"/__bwfc/actions/AddToCart\";", result.Markup);

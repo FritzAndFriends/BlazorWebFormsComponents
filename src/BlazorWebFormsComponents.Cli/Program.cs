@@ -10,6 +10,9 @@ using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 using BlazorWebFormsComponents.Cli.Transforms.Directives;
 using BlazorWebFormsComponents.Cli.Transforms.Markup;
 using Microsoft.Extensions.DependencyInjection;
+using NativeEdmxToEfCoreConverter = BlazorWebFormsComponents.Cli.Services.EdmxToEfCoreConverter;
+using NativeNuGetStaticAssetExtractor = BlazorWebFormsComponents.Cli.Services.NuGetStaticAssetExtractor;
+using BlazorWebFormsComponents.Cli.Services;
 
 namespace BlazorWebFormsComponents.Cli;
 
@@ -25,6 +28,9 @@ class Program
         rootCommand.AddCommand(BuildMigrateCommand());
         rootCommand.AddCommand(BuildConvertCommand());
         rootCommand.AddCommand(BuildPrescanCommand());
+        rootCommand.AddCommand(BuildScanCommand());
+        rootCommand.AddCommand(BuildAssetsCommand());
+        rootCommand.AddCommand(BuildEdmxCommand());
 
         return await rootCommand.InvokeAsync(args);
     }
@@ -40,18 +46,26 @@ class Program
         services.AddSingleton<IMarkupTransform, ImportDirectiveTransform>();
         services.AddSingleton<IMarkupTransform, RegisterDirectiveTransform>();
         services.AddSingleton<IMarkupTransform, MasterPageTransform>();
+        services.AddSingleton<IMarkupTransform, ScriptManagerStripTransform>();
         services.AddSingleton<IMarkupTransform, ContentWrapperTransform>();
         services.AddSingleton<IMarkupTransform, FormWrapperTransform>();
+        services.AddSingleton<IMarkupTransform, DisplayExpressionTransform>();
         services.AddSingleton<IMarkupTransform, ExpressionTransform>();
+        services.AddSingleton<IMarkupTransform, ServerCodeBlockTransform>();
         services.AddSingleton<IMarkupTransform, LoginViewTransform>();
         services.AddSingleton<IMarkupTransform, SelectMethodTransform>();
         services.AddSingleton<IMarkupTransform, AjaxToolkitPrefixTransform>();
         services.AddSingleton<IMarkupTransform, AspPrefixTransform>();
+        services.AddSingleton<IMarkupTransform, DataBindingAttributeTransform>();
+        services.AddSingleton<IMarkupTransform, ValidatorGenericTypeTransform>();
+        services.AddSingleton<IMarkupTransform, TemplateFieldChildComponentsTransform>();
         services.AddSingleton<IMarkupTransform, AttributeStripTransform>();
+        services.AddSingleton<IMarkupTransform, GridViewColumnItemTypeTransform>();
         services.AddSingleton<IMarkupTransform, EventWiringTransform>();
         services.AddSingleton<IMarkupTransform, ComponentRefMarkupTransform>();
         services.AddSingleton<IMarkupTransform, UrlReferenceTransform>();
         services.AddSingleton<IMarkupTransform, TemplatePlaceholderTransform>();
+        services.AddSingleton<IMarkupTransform, TemplateContextTransform>();
         services.AddSingleton<IMarkupTransform, AttributeNormalizeTransform>();
         services.AddSingleton<IMarkupTransform, DataSourceIdTransform>();
 
@@ -59,7 +73,9 @@ class Program
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
         services.AddSingleton<ICodeBehindTransform, UsingStripTransform>();
         services.AddSingleton<ICodeBehindTransform, IdentityUsingTransform>();
+        services.AddSingleton<ICodeBehindTransform, HttpUtilityRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
+        services.AddSingleton<ICodeBehindTransform, EfContextConstructorTransform>();
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();
         services.AddSingleton<ICodeBehindTransform, ClassNameAlignTransform>();
@@ -70,6 +86,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, RequestFormTransform>();
         services.AddSingleton<ICodeBehindTransform, ServerShimTransform>();
         services.AddSingleton<ICodeBehindTransform, GetRouteUrlTransform>();
+        services.AddSingleton<ICodeBehindTransform, CartSessionKeyTransform>();
         services.AddSingleton<ICodeBehindTransform, SessionDetectTransform>();
         services.AddSingleton<ICodeBehindTransform, ViewStateDetectTransform>();
         services.AddSingleton<ICodeBehindTransform, IsPostBackTransform>();
@@ -78,8 +95,17 @@ class Program
         services.AddSingleton<ICodeBehindTransform, DataBindTransform>();
         services.AddSingleton<ICodeBehindTransform, ClientScriptTransform>();
         services.AddSingleton<ICodeBehindTransform, UrlCleanupTransform>();
+        services.AddSingleton<PageQuarantineDetector>();
+        services.AddSingleton<ICodeBehindTransform>(sp => new CompileSurfaceStubTransform(sp.GetRequiredService<PageQuarantineDetector>()));
+        services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
 
         // Scaffolding
+        services.AddSingleton<IRuntimeSignalDetector, EntityFrameworkRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, SessionRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, IdentityRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, GlobalAsaxRuntimeSignalDetector>();
+        services.AddSingleton<RuntimeDetector>();
+        services.AddSingleton<ProgramCsEmitter>();
         services.AddSingleton<ProjectScaffolder>();
         services.AddSingleton<GlobalUsingsGenerator>();
         services.AddSingleton<ShimGenerator>();
@@ -89,9 +115,8 @@ class Program
         services.AddSingleton<DatabaseProviderDetector>();
         services.AddSingleton<WebConfigTransformer>();
         services.AddSingleton<PrescanAnalyzer>();
-        services.AddSingleton<NuGetStaticAssetExtractor>();
-        services.AddSingleton<EdmxConverterBridge>();
-        services.AddSingleton<PowerShellScriptRunner>();
+        services.AddSingleton<NativeNuGetStaticAssetExtractor>();
+        services.AddSingleton<NativeEdmxToEfCoreConverter>();
 
         // I/O
         services.AddSingleton<OutputWriter>();
@@ -122,9 +147,10 @@ class Program
             sp.GetRequiredService<SourceFileCopier>(),
             sp.GetRequiredService<AppStartCopier>(),
             sp.GetRequiredService<AppAssetInjector>(),
-            sp.GetRequiredService<NuGetStaticAssetExtractor>(),
-            sp.GetRequiredService<EdmxConverterBridge>(),
-            sp.GetRequiredService<RedirectHandlerAnnotator>()));
+            sp.GetRequiredService<NativeNuGetStaticAssetExtractor>(),
+            sp.GetRequiredService<NativeEdmxToEfCoreConverter>(),
+            sp.GetRequiredService<RedirectHandlerAnnotator>(),
+            sp.GetRequiredService<PageQuarantineDetector>()));
 
         return services.BuildServiceProvider();
     }
@@ -369,6 +395,180 @@ class Program
         }, inputOption, reportOption);
 
         return prescanCommand;
+    }
+
+    private static Command BuildScanCommand()
+    {
+        var scanCommand = new Command("scan", "Scan source files for migration patterns and emit a JSON summary");
+
+        var inputOption = new Option<string>(
+            aliases: ["--input", "-i"],
+            description: "Source Web Forms project root (required)")
+        { IsRequired = true };
+
+        var reportOption = new Option<string?>(
+            aliases: ["--output", "-o"],
+            description: "Write scan JSON output to file");
+
+        scanCommand.AddOption(inputOption);
+        scanCommand.AddOption(reportOption);
+
+        scanCommand.SetHandler(async (input, output) =>
+        {
+            try
+            {
+                using var sp = BuildServiceProvider();
+                var analyzer = sp.GetRequiredService<PrescanAnalyzer>();
+                var result = analyzer.Analyze(input);
+                var json = PrescanAnalyzer.ToJson(result);
+
+                if (!string.IsNullOrEmpty(output))
+                {
+                    var directory = Path.GetDirectoryName(output);
+                    if (!string.IsNullOrEmpty(directory))
+                        Directory.CreateDirectory(directory);
+
+                    await File.WriteAllTextAsync(output, json);
+                }
+
+                Console.WriteLine(json);
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Error.WriteLine($"Error: {ex.Message}");
+                Console.ResetColor();
+                Environment.Exit(1);
+            }
+        }, inputOption, reportOption);
+
+        return scanCommand;
+    }
+
+    private static Command BuildAssetsCommand()
+    {
+        var assetsCommand = new Command("assets", "Work with NuGet-backed static assets");
+        var extractCommand = new Command("extract", "Extract CSS, JS, font, and image assets from NuGet packages");
+
+        var inputOption = new Option<string>(
+            aliases: ["--input", "-i"],
+            description: "Source Web Forms project root (required)")
+        { IsRequired = true };
+
+        var outputOption = new Option<string>(
+            aliases: ["--output", "-o"],
+            description: "Output project root for manifest and extracted assets (required)")
+        { IsRequired = true };
+
+        var packagesPathOption = new Option<string?>(
+            name: "--packages-path",
+            description: "Optional explicit packages directory to search before the global cache");
+
+        var manifestOnlyOption = new Option<bool>(
+            name: "--manifest-only",
+            description: "Generate asset-manifest.json and AssetReferences.html without copying files",
+            getDefaultValue: () => false);
+
+        extractCommand.AddOption(inputOption);
+        extractCommand.AddOption(outputOption);
+        extractCommand.AddOption(packagesPathOption);
+        extractCommand.AddOption(manifestOnlyOption);
+
+        extractCommand.SetHandler(async (input, output, packagesPath, manifestOnly) =>
+        {
+            try
+            {
+                using var sp = BuildServiceProvider();
+                var extractor = sp.GetRequiredService<NativeNuGetStaticAssetExtractor>();
+                var result = await extractor.ExtractAsync(new NuGetAssetExtractionOptions(input, output, packagesPath, manifestOnly));
+
+                if (!result.Success)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Error.WriteLine($"Error: {result.ErrorMessage}");
+                    Console.ResetColor();
+                    Environment.Exit(1);
+                }
+
+                if (result.Skipped)
+                {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine(result.ErrorMessage);
+                    Console.ResetColor();
+                    return;
+                }
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"NuGet asset {(manifestOnly ? "analysis" : "extraction")} complete: {result.PackagesWithAssets} package(s), {result.TotalFilesExtracted} file(s).");
+                Console.ResetColor();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Error.WriteLine($"Error: {ex.Message}");
+                Console.ResetColor();
+                Environment.Exit(1);
+            }
+        }, inputOption, outputOption, packagesPathOption, manifestOnlyOption);
+
+        assetsCommand.AddCommand(extractCommand);
+        return assetsCommand;
+    }
+
+    private static Command BuildEdmxCommand()
+    {
+        var edmxCommand = new Command("edmx", "Work with EDMX models");
+        var convertCommand = new Command("convert", "Convert an EDMX file into EF Core entities and a DbContext");
+
+        var inputOption = new Option<string>(
+            aliases: ["--input", "-i"],
+            description: "Path to the EDMX file (required)")
+        { IsRequired = true };
+
+        var outputOption = new Option<string>(
+            aliases: ["--output", "-o"],
+            description: "Output directory for generated .cs files (required)")
+        { IsRequired = true };
+
+        var namespaceOption = new Option<string?>(
+            name: "--namespace",
+            description: "Namespace for generated EF Core types");
+
+        convertCommand.AddOption(inputOption);
+        convertCommand.AddOption(outputOption);
+        convertCommand.AddOption(namespaceOption);
+
+        convertCommand.SetHandler(async (input, output, @namespace) =>
+        {
+            try
+            {
+                using var sp = BuildServiceProvider();
+                var converter = sp.GetRequiredService<NativeEdmxToEfCoreConverter>();
+                var result = await converter.ConvertAsync(new EdmxConversionOptions(input, output, @namespace));
+
+                if (!result.Success)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Error.WriteLine($"Error: {result.ErrorMessage}");
+                    Console.ResetColor();
+                    Environment.Exit(1);
+                }
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"EDMX conversion complete: {result.EntitiesGenerated} entity file(s) and DbContext generated.");
+                Console.ResetColor();
+            }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.Error.WriteLine($"Error: {ex.Message}");
+                Console.ResetColor();
+                Environment.Exit(1);
+            }
+        }, inputOption, outputOption, namespaceOption);
+
+        edmxCommand.AddCommand(convertCommand);
+        return edmxCommand;
     }
 }
 

@@ -135,7 +135,7 @@ public class ServerShimTransformTests
     }
 
     [Fact]
-    public void DetectsServerTransfer_AddsNoShimTodo()
+    public void DetectsServerTransfer_AddsShimGuidance()
     {
         var input = @"namespace MyApp
 {
@@ -149,12 +149,13 @@ public class ServerShimTransformTests
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        Assert.Contains("TODO(bwfc-server): Server.Transfer has NO SHIM", result);
-        Assert.Contains("NavigationManager.NavigateTo()", result);
+        Assert.Contains("Methods found: Transfer", result);
+        Assert.Contains("NavigationManager.NavigateTo(path)", result);
+        Assert.DoesNotContain("has NO SHIM", result);
     }
 
     [Fact]
-    public void DetectsServerGetLastError_AddsNoShimTodo()
+    public void DetectsServerGetLastError_AddsShimGuidance()
     {
         var input = @"namespace MyApp
 {
@@ -168,12 +169,13 @@ public class ServerShimTransformTests
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        Assert.Contains("TODO(bwfc-server): Server.GetLastError has NO SHIM", result);
-        Assert.Contains("ILogger", result);
+        Assert.Contains("Methods found: GetLastError", result);
+        Assert.Contains("returns null", result);
+        Assert.DoesNotContain("has NO SHIM", result);
     }
 
     [Fact]
-    public void DetectsServerClearError_AddsNoShimTodo()
+    public void DetectsServerClearError_AddsShimGuidance()
     {
         var input = @"namespace MyApp
 {
@@ -187,8 +189,9 @@ public class ServerShimTransformTests
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        Assert.Contains("TODO(bwfc-server): Server.ClearError has NO SHIM", result);
-        Assert.Contains("middleware", result);
+        Assert.Contains("Methods found: ClearError", result);
+        Assert.Contains("no-op compatibility stub", result);
+        Assert.DoesNotContain("has NO SHIM", result);
     }
 
     [Fact]
@@ -208,8 +211,9 @@ public class ServerShimTransformTests
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Contains("MapPath", result);
-        Assert.Contains("TODO(bwfc-server): Server.Transfer has NO SHIM", result);
+        Assert.Contains("Transfer", result);
         Assert.Contains("TODO(bwfc-server): Server.* calls work automatically via ServerShim on WebFormsPageBase", result);
+        Assert.DoesNotContain("has NO SHIM", result);
     }
 
     [Fact]
@@ -228,7 +232,7 @@ public class ServerShimTransformTests
         var result = _transform.Apply(input, TestMetadata(input));
         result = _transform.Apply(result, TestMetadata(result));
 
-        var count = result.Split("Server.Transfer has NO SHIM").Length - 1;
+        var count = result.Split("Methods found: Transfer").Length - 1;
         Assert.Equal(1, count);
     }
 

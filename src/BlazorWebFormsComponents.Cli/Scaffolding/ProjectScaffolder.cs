@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Io;
 
@@ -9,11 +10,22 @@ namespace BlazorWebFormsComponents.Cli.Scaffolding;
 /// </summary>
 public class ProjectScaffolder
 {
-    private readonly DatabaseProviderDetector _dbDetector;
+    private static readonly Regex SystemWebHttpUtilityPackageRegex = new(
+        @"^\s*<PackageReference Include=""System\.Web\.HttpUtility"".*?/?>\s*$\r?\n?",
+        RegexOptions.Compiled | RegexOptions.Multiline);
 
-    public ProjectScaffolder(DatabaseProviderDetector dbDetector)
+    private readonly DatabaseProviderDetector _dbDetector;
+    private readonly RuntimeDetector _runtimeDetector;
+    private readonly ProgramCsEmitter _programCsEmitter;
+
+    public ProjectScaffolder(
+        DatabaseProviderDetector dbDetector,
+        RuntimeDetector runtimeDetector,
+        ProgramCsEmitter programCsEmitter)
     {
         _dbDetector = dbDetector;
+        _runtimeDetector = runtimeDetector;
+        _programCsEmitter = programCsEmitter;
     }
 
     public ScaffoldResult Scaffold(string sourcePath, string outputRoot, string projectName)
@@ -23,24 +35,25 @@ public class ProjectScaffolder
         // Detect features
         var hasModels = !string.IsNullOrEmpty(sourcePath) &&
                         Directory.Exists(Path.Combine(sourcePath, "Models"));
-        var hasIdentity = DetectIdentity(sourcePath);
+        var runtimeProfile = _runtimeDetector.Detect(sourcePath);
         var dbProvider = _dbDetector.Detect(sourcePath);
 
         result.HasModels = hasModels;
-        result.HasIdentity = hasIdentity;
+        result.HasIdentity = runtimeProfile.NeedsIdentity;
         result.DbProvider = dbProvider;
+        result.RuntimeProfile = runtimeProfile;
 
         // Generate all scaffold files
         result.Files["csproj"] = new ScaffoldFile
         {
             RelativePath = $"{projectName}.csproj",
-            Content = GenerateCsproj(projectName, outputRoot, hasModels, hasIdentity, dbProvider)
+            Content = GenerateCsproj(projectName, outputRoot, runtimeProfile, dbProvider)
         };
 
         result.Files["program"] = new ScaffoldFile
         {
             RelativePath = "Program.cs",
-            Content = GenerateProgramCs(projectName, hasModels, hasIdentity, dbProvider)
+            Content = _programCsEmitter.Generate(projectName, runtimeProfile, dbProvider)
         };
 
         result.Files["imports"] = new ScaffoldFile
@@ -85,25 +98,15 @@ public class ProjectScaffolder
         }
     }
 
-    private static bool DetectIdentity(string sourcePath)
-    {
-        if (string.IsNullOrEmpty(sourcePath))
-            return false;
-
-        return Directory.Exists(Path.Combine(sourcePath, "Account")) ||
-               File.Exists(Path.Combine(sourcePath, "Login.aspx")) ||
-               File.Exists(Path.Combine(sourcePath, "Register.aspx"));
-    }
-
-    private static string GenerateCsproj(string projectName, string outputRoot, bool hasModels, bool hasIdentity, DatabaseProviderInfo dbProvider)
+    private static string GenerateCsproj(string projectName, string outputRoot, RuntimeProfile runtimeProfile, DatabaseProviderInfo dbProvider)
     {
         var additionalPackages = "";
-        if (hasModels)
+        if (runtimeProfile.NeedsEntityFramework)
         {
             additionalPackages += $"\n    <PackageReference Include=\"{dbProvider.PackageName}\" Version=\"10.0.0\" />";
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Tools\" Version=\"10.0.0\" />";
         }
-        if (hasIdentity)
+        if (runtimeProfile.NeedsIdentity)
         {
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Identity.EntityFrameworkCore\" Version=\"10.0.0\" />";
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Identity.UI\" Version=\"10.0.0\" />";
@@ -112,13 +115,14 @@ public class ProjectScaffolder
 
         var bwfcReference = ResolveBwfcReference(outputRoot);
 
-        return $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        var csproj = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BwfcMigrationMode>true</BwfcMigrationMode>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -127,7 +131,12 @@ public class ProjectScaffolder
 
 </Project>
 ";
+
+        return StripUnsupportedPackages(csproj);
     }
+
+    private static string StripUnsupportedPackages(string csproj)
+        => SystemWebHttpUtilityPackageRegex.Replace(csproj, string.Empty);
 
     private static string ResolveBwfcReference(string outputRoot)
     {
@@ -150,77 +159,6 @@ public class ProjectScaffolder
         return @"    <PackageReference Include=""Fritz.BlazorWebFormsComponents"" Version=""*"" />";
     }
 
-    private static string GenerateProgramCs(string projectName, bool hasModels, bool hasIdentity, DatabaseProviderInfo dbProvider)
-    {
-        var dbContextLine = !string.IsNullOrEmpty(dbProvider.ConnectionString)
-            ? $"// builder.Services.AddDbContextFactory<YourDbContext>(options => options.{dbProvider.ProviderMethod}(\"{dbProvider.ConnectionString.Replace("\\", "\\\\")}\"));"
-            : $"// builder.Services.AddDbContextFactory<YourDbContext>(options => options.{dbProvider.ProviderMethod}(\"your-connection-string\"));";
-
-        var identityServiceBlock = "";
-        var identityMiddlewareBlock = "";
-
-        if (hasIdentity)
-        {
-            identityServiceBlock = $@"
-
-// TODO(bwfc-datasource): Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
-{dbContextLine}
-
-// TODO(bwfc-identity): Configure Identity
-// builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
-//     .AddEntityFrameworkStores<ProductContext>();
-
-// TODO(bwfc-session-state): Configure session for cart/state management
-// builder.Services.AddDistributedMemoryCache();
-// builder.Services.AddSession();
-// builder.Services.AddHttpContextAccessor();
-// builder.Services.AddCascadingAuthenticationState();
-";
-
-            identityMiddlewareBlock = @"
-
-// TODO(bwfc-general): Add middleware in the pipeline
-// app.UseSession();
-// app.UseAuthentication();
-// app.UseAuthorization();
-";
-        }
-        else if (hasModels)
-        {
-            identityServiceBlock = $@"
-
-// TODO(bwfc-datasource): Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
-{dbContextLine}
-";
-        }
-
-        return $@"// TODO(bwfc-general): Review and adjust this generated Program.cs for your application needs.
-// Generated for .NET 10 Blazor static SSR. Keep interactive render modes opt-in and page-specific.
-using BlazorWebFormsComponents;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddRazorComponents();
-
-builder.Services.AddBlazorWebFormsComponents();
-{identityServiceBlock}
-var app = builder.Build();
-
-if (!app.Environment.IsDevelopment())
-{{
-    app.UseExceptionHandler(""/Error"");
-    app.UseHsts();
-}}
-
-app.UseHttpsRedirection();
-app.MapStaticAssets();
-app.UseAntiforgery();
-{identityMiddlewareBlock}
-app.MapRazorComponents<{projectName}.Components.App>();
-
-app.Run();
-";
-    }
 
     private static string GenerateImportsRazor(string projectName, bool hasModels)
     {
@@ -314,6 +252,7 @@ public class ScaffoldResult
     public bool HasModels { get; set; }
     public bool HasIdentity { get; set; }
     public DatabaseProviderInfo? DbProvider { get; set; }
+    public RuntimeProfile RuntimeProfile { get; set; } = new();
     public Dictionary<string, ScaffoldFile> Files { get; } = [];
 }
 

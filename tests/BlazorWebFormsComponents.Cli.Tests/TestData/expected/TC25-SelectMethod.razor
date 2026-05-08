@@ -1,16 +1,16 @@
 @page "/TC25-SelectMethod"
 <PageTitle>Products</PageTitle>
 <ListView id="ProductList"
-    TItem="Product"
+    ItemType="Product"
     SelectMethod="GetProducts">
-    <ItemTemplate>
+    <ItemTemplate Context="Item">
         <tr>
             <td><%# Item.Name %></td>
         </tr>
     </ItemTemplate>
 </ListView>
 <FormView id="DetailView"
-    TItem="Product"
+    ItemType="Product"
     SelectMethod="GetProduct"
     InsertMethod="InsertProduct"
 @* TODO(bwfc-select-method): Review InsertMethod="InsertProduct" migration for BWFC event/CRUD handling *@
@@ -18,7 +18,7 @@
 @* TODO(bwfc-select-method): Review UpdateMethod="UpdateProduct" migration for BWFC event/CRUD handling *@
     DeleteMethod="DeleteProduct">
 @* TODO(bwfc-select-method): Review DeleteMethod="DeleteProduct" migration for BWFC event/CRUD handling *@
-    <ItemTemplate>
+    <ItemTemplate Context="Item">
         <span><%# Item.Description %></span>
     </ItemTemplate>
 </FormView>

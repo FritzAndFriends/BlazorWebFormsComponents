@@ -99,6 +99,26 @@
 	}
 
 	[Fact]
+	public void QueryString_Get_ReturnsValueForExistingKey()
+	{
+		var cut = RenderWithMockNav("http://localhost/products?id=5&name=widget");
+
+		var value = cut.Instance.ExposedRequest.QueryString.Get("name");
+
+		value.ShouldBe("widget");
+	}
+
+	[Fact]
+	public void QueryString_Get_ReturnsNullForMissingKey()
+	{
+		var cut = RenderWithMockNav("http://localhost/products?id=5");
+
+		var value = cut.Instance.ExposedRequest.QueryString.Get("missing");
+
+		value.ShouldBeNull();
+	}
+
+	[Fact]
 	public void Url_WithoutHttpContext_FallsBackToNavigationManager()
 	{
 		var cut = RenderWithMockNav("http://localhost/products?id=5");

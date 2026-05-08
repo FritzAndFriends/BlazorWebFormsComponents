@@ -13,22 +13,32 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 50 | RegisterDirective | Markup | Directive | Handle `<%@ Register %>` for custom controls |
 | 60 | ImportDirective | Markup | Directive | Convert `<%@ Import %>` → `@using` |
 | 250 | MasterPageTransform | Markup | Markup | Convert master markup to runnable `<MasterPage>` shell syntax |
+| 255 | ScriptManagerStripTransform | Markup | Markup | Remove `ScriptManager`, bundle references, and `Scripts.Render(...)` placeholders from master pages |
 | 300 | ContentWrapperTransform | Markup | Markup | Wrap loose content in `<div>` if needed |
 | 310 | FormWrapperTransform | Markup | Markup | Convert `<form runat="server">` to Blazor form |
-| 400 | ExpressionTransform | Markup | Markup | Convert `<%: %>`, `<%= %>` to `@()` |
+| 490 | DisplayExpressionTransform | Markup | Markup | Normalize `<%#:` / `<%=:` display expressions and broken `@(: expr)` output to valid Razor |
+| 500 | ExpressionTransform | Markup | Markup | Convert `<%: %>`, `<%= %>`, and inline data expressions to Razor |
+| 510 | ServerCodeBlockTransform | Markup | Markup | Convert `<% ... %>` statement blocks to Razor control flow |
 | 510 | LoginViewTransform | Markup | Markup | Convert `<asp:LoginView>` → `<AuthorizeView>` |
 | 520 | SelectMethodTransform | Markup | Markup | Flag SelectMethod/InsertMethod/etc. |
-| 610 | AjaxToolkitPrefixTransform | Markup | Markup | Remove `ajaxToolkit:` prefixes |
-| 620 | AspPrefixTransform | Markup | Markup | Remove `asp:` prefixes from controls |
-| 700 | AttributeStripTransform | Markup | Markup | Remove `runat="server"`, `AutoEventWireup` |
-| 750 | EventWiringTransform | Markup | Markup | Convert `OnClick="X"` → `OnClick="@X"` |
-| 780 | UrlReferenceTransform | Markup | Markup | Convert `~/` paths to `/` |
-| 800 | TemplatePlaceholderTransform | Markup | Markup | Convert `Item` → `context` in templates |
-| 810 | AttributeNormalizeTransform | Markup | Markup | Normalize attribute values (booleans, enums) |
+| 600 | AjaxToolkitPrefixTransform | Markup | Markup | Remove `ajaxToolkit:` prefixes |
+| 610 | AspPrefixTransform | Markup | Markup | Remove `asp:` prefixes from controls |
+| 615 | DataBindingAttributeTransform | Markup | Markup | Convert `<%# ... %>` and `<%= ... %>` attribute values to `@(...)` |
+| 615 | ValidatorGenericTypeTransform | Markup | Markup | Add explicit `Type="string"` / `InputType="string"` defaults for generic BWFC validators |
+| 620 | TemplateFieldChildComponentsTransform | Markup | Markup | Wrap TemplateField style children in `<ChildComponents>` |
+| 700 | AttributeStripTransform | Markup | Markup | Remove `runat="server"`, preserve BWFC `ItemType`, add generic fallbacks |
+| 705 | GridViewColumnItemTypeTransform | Markup | Markup | Propagate typed `GridView ItemType` values to `BoundField` / `TemplateField` child columns |
+| 710 | EventWiringTransform | Markup | Markup | Convert `OnClick="X"` → `OnClick="@X"` |
+| 720 | UrlReferenceTransform | Markup | Markup | Convert `~/` paths to `/` |
+| 750 | ComponentRefMarkupTransform | Markup | Markup | Convert control IDs to `@ref`-compatible component references |
+| 800 | TemplatePlaceholderTransform | Markup | Markup | Replace template placeholder elements with the layout/group render fragment context |
+| 805 | TemplateContextTransform | Markup | Markup | Add explicit item/group/layout template contexts for typed data-control fragments |
+| 810 | AttributeNormalizeTransform | Markup | Markup | Normalize attribute values (booleans, enums, units) |
 | 820 | DataSourceIdTransform | Markup | Markup | Replace DataSourceID with Items binding |
 | 30 | GetRouteUrlTransform | Code-Behind | Code-Behind | Flag `Page.GetRouteUrl()` calls |
 | 50 | GetRouteUrlTransform | Markup | Markup | Flag `<%: Page.GetRouteUrl() %>` expressions |
-| 400 | SessionDetectTransform | Code-Behind | Code-Behind | Detect Session/Cache, inject shim references |
+| 390 | CartSessionKeyTransform | Code-Behind | Code-Behind | Replace cart/basket `Session.Id` usage with a stable session-backed `cart-key` helper |
+| 400 | SessionDetectTransform | Code-Behind | Code-Behind | Detect Session/Cache usage and emit shim guidance |
 | 410 | ViewStateDetectTransform | Code-Behind | Code-Behind | Detect ViewState usage, flag migration |
 | 500 | IsPostBackTransform | Code-Behind | Code-Behind | Unwrap `if (!IsPostBack)` guards |
 | 510 | PageLifecycleTransform | Code-Behind | Code-Behind | Convert Page_Load, Page_Init → Blazor lifecycle |
@@ -38,6 +48,10 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 25 | ResponseRedirectTransform | Code-Behind | Code-Behind | Convert `Response.Redirect()` → `NavigationManager.NavigateTo()` |
 | 40 | DataBindTransform | Code-Behind | Code-Behind | Flag `DataBind()` calls |
 | 50 | UrlCleanupTransform | Code-Behind | Code-Behind | Clean URL literals in code |
+| 104 | HttpUtilityRewriteTransform | Code-Behind | Code-Behind | Rewrite `HttpUtility.*` calls to `WebUtility.*` and add `using System.Net;` |
+| 106 | EfContextConstructorTransform | Code-Behind | Code-Behind | Rewrite EF6 `base("name")` DbContext constructors to EF Core `DbContextOptions<TContext>` constructors |
+| 850 | CompileSurfaceStubTransform | Code-Behind | Code-Behind | Quarantine identity/payment/mobile/admin/compile-blocked pages with build-safe stubs while preserving transformed originals in `migration-artifacts\codebehind\` and tracking them in `migration-artifacts\quarantine-manifest.json` |
+| 900 | MarkupReferencedMemberStubTransform | Code-Behind | Code-Behind | Add fallback fields, render-method stubs, and event handlers for markup references still missing from emitted partial classes |
 
 ---
 
@@ -63,7 +77,9 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 **What It Does:**
 - Extracts `Inherits` attribute → `@inherits`
-- Infers route from filename or `Url` attribute
+- Infers the primary route from the source-relative `.aspx` path when the page lives under a subdirectory (for example `Account/Login.aspx` → `@page "/Account/Login"`)
+- Adds a secondary filename-only alias route when that alias differs from the source-relative route (for example `@page "/Login"`)
+- Preserves the existing `/` home-page handling for `Default.aspx` and `Index.aspx`
 - Removes boilerplate attributes (Language, AutoEventWireup, CodeBehind)
 - Adds TODO if custom routing logic is detected
 
@@ -210,7 +226,19 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 7. ContentWrapperTransform (Order: 300)
+### 7. ScriptManagerStripTransform (Order: 255)
+
+**Removes Web Forms-only script infrastructure from master pages.**
+
+**Details:**
+- Replaces `<asp:ScriptManager>...</asp:ScriptManager>` blocks with `@* Framework scripts are managed by Blazor — no ScriptManager needed. *@`
+- Removes `<webopt:bundlereference ... />` tags
+- Removes `<asp:PlaceHolder runat="server">` wrappers that only contain `Scripts.Render(...)`
+- Collapses excess blank lines left behind by the cleanup
+
+---
+
+### 8. ContentWrapperTransform (Order: 300)
 
 **Wraps loose content in a div if necessary.**
 
@@ -218,7 +246,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 8. FormWrapperTransform (Order: 310)
+### 9. FormWrapperTransform (Order: 310)
 
 **Converts Web Forms form tags to Blazor EditForm or plain HTML form.**
 
@@ -241,7 +269,19 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 9. ExpressionTransform (Order: 400)
+### 10. DisplayExpressionTransform (Order: 490)
+
+**Normalizes Web Forms display-expression syntax before broader expression handling.**
+
+**Details:**
+- Converts `<%#: expr %>` to idiomatic Razor output
+- Leaves `Bind(...)` and `Eval(...)` for later specialized handling
+- Converts complex expressions such as `String.Format(...)` to parenthesized Razor `@( ... )`
+- Repairs broken generated `@(: expr)` output
+
+---
+
+### 11. ExpressionTransform (Order: 500)
 
 **Converts Web Forms expression syntax to Blazor.**
 
@@ -267,7 +307,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 10. LoginViewTransform (Order: 510)
+### 12. LoginViewTransform (Order: 510)
 
 **Converts LoginView to Blazor AuthorizeView.**
 
@@ -312,7 +352,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 11. SelectMethodTransform (Order: 520)
+### 13. SelectMethodTransform (Order: 520)
 
 **Flags data source method attributes for conversion.**
 
@@ -354,7 +394,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 13. AspPrefixTransform (Order: 620)
+### 13. AspPrefixTransform (Order: 610)
 
 **Removes `asp:` prefix from all ASP.NET server controls.**
 
@@ -378,28 +418,90 @@ This page documents the flat markup and code-behind transforms applied by the `w
 
 ---
 
-### 14. AttributeStripTransform (Order: 700)
+### 14. DataBindingAttributeTransform (Order: 615)
 
-**Removes Web Forms-specific attributes.**
+**Converts Web Forms data-binding expressions that appear inside attribute values.**
+
+**Web Forms:**
+```html
+<asp:HyperLink NavigateUrl='<%# Item.GetUrl() %>' Text='<%# Item.Name %>' />
+```
+
+**Output:**
+```razor
+<HyperLink NavigateUrl='@(Item.GetUrl())' Text='@(Item.Name)' />
+```
+
+**What It Does:**
+- Targets attribute values that still contain `<%# ... %>` or `<%= ... %>` after the core expression pass
+- Preserves surrounding attributes while replacing the value with a Razor `@(...)` expression
+- Switches quote style when necessary so embedded C# string literals remain valid Razor
+
+---
+
+### 15. AttributeStripTransform (Order: 700)
+
+**Removes Web Forms-specific attributes and preserves BWFC generic typing.**
 
 Removes:
 - `runat="server"`
 - `AutoEventWireup="true|false"`
-- `EnableEventValidation="true|false"`
+- `EnableViewState="true|false"`
 - `ViewStateMode="Enabled|Disabled|Inherit"`
+- `ClientIDMode="..."`
+
+Also:
+- normalizes `ItemType="Namespace.Product"` → `ItemType="Product"`
+- adds `ItemType="object"` to generic BWFC controls when no type was present
+- converts `ID="..."` → `id="..."`
 
 **Example:**
 ```html
 <!-- Before -->
-<asp:TextBox ID="txt1" runat="server" AutoEventWireup="true" ViewStateMode="Disabled" />
+<asp:GridView ID="ProductsGrid" ItemType="Contoso.Models.Product" runat="server" />
 
 <!-- After -->
-<TextBox ID="txt1" />
+<GridView id="ProductsGrid" ItemType="Product" />
 ```
 
 ---
 
-### 15. EventWiringTransform (Order: 750)
+### 15a. GridViewColumnItemTypeTransform (Order: 705)
+
+**Propagates a typed `GridView` item type down into child BWFC column components.**
+
+When a migrated `GridView` is strongly typed, `TemplateField`, `BoundField`, `HyperLinkField`, and `ButtonField` children must compile against that same row type. This transform rewrites `ItemType="object"` fallbacks on those column tags to the parent grid's concrete `ItemType`, while leaving object-typed grids alone.
+
+**Example:**
+```html
+<!-- Before -->
+<GridView ItemType="CartItem" AutoGenerateColumns="false">
+  <Columns>
+    <BoundField ItemType="object" DataField="ProductID" />
+    <TemplateField ItemType="object" HeaderText="Quantity">
+      <ItemTemplate Context="Item">
+        <TextBox Text="@Item.Quantity" />
+      </ItemTemplate>
+    </TemplateField>
+  </Columns>
+</GridView>
+
+<!-- After -->
+<GridView ItemType="CartItem" AutoGenerateColumns="false">
+  <Columns>
+    <BoundField ItemType="CartItem" DataField="ProductID" />
+    <TemplateField ItemType="CartItem" HeaderText="Quantity">
+      <ItemTemplate Context="Item">
+        <TextBox Text="@Item.Quantity" />
+      </ItemTemplate>
+    </TemplateField>
+  </Columns>
+</GridView>
+```
+
+---
+
+### 16. EventWiringTransform (Order: 710)
 
 **Converts Web Forms event handler syntax to Blazor.**
 
@@ -417,7 +519,7 @@ Removes:
 
 ---
 
-### 16. UrlReferenceTransform (Order: 780)
+### 17. UrlReferenceTransform (Order: 720)
 
 **Converts ASP.NET virtual paths to absolute URLs.**
 
@@ -449,30 +551,59 @@ Handles 8 URL attributes:
 
 ---
 
-### 17. TemplatePlaceholderTransform (Order: 800)
+### 18. TemplatePlaceholderTransform (Order: 800)
 
-**Converts `Item` placeholder to `context` in Blazor templates.**
+**Replaces Web Forms placeholder elements with the Blazor render-fragment placeholder.**
 
-Blazor uses `context` to reference the template context variable. Web Forms uses `Item`.
+This transform targets placeholder tags such as `itemPlaceholder`, `groupPlaceholder`, and similar generated template markers so BWFC `LayoutTemplate` and `GroupTemplate` blocks render the nested fragment correctly.
 
 **Example:**
 ```html
-<!-- Before (GridView template) -->
-<ItemTemplate>
-  <td><%# Item.Name %></td>
-  <td><%# Item.Price %></td>
-</ItemTemplate>
+<!-- Before -->
+<LayoutTemplate>
+  <table>
+    <tr id="itemPlaceholder" runat="server"></tr>
+  </table>
+</LayoutTemplate>
 
 <!-- After -->
-<ItemTemplate>
-  <td>@context.Name</td>
-  <td>@context.Price</td>
-</ItemTemplate>
+<LayoutTemplate>
+  <table>
+    @context
+  </table>
+</LayoutTemplate>
 ```
 
 ---
 
-### 18. AttributeNormalizeTransform (Order: 810)
+### 19. TemplateContextTransform (Order: 805)
+
+**Adds explicit contexts for typed item templates plus named placeholder contexts for `ListView` group/layout fragments.**
+
+This keeps BWFC data controls aligned with Web Forms naming so generated `<ListView>`, `<FormView>`, `<GridView>`, `<DataList>`, and `<Repeater>` templates stay on the component model instead of being flattened into manual HTML. It also upgrades placeholder-only `GroupTemplate` / `LayoutTemplate` blocks to named contexts such as `items` and `groups`, which makes emitted `ListView` markup structurally valid and easier to read.
+
+**Example:**
+```html
+<!-- Before -->
+<ItemTemplate>
+  <TextBox Text="@context.Name" />
+</ItemTemplate>
+<GroupTemplate>
+  <tr>@context</tr>
+</GroupTemplate>
+
+<!-- After -->
+<ItemTemplate Context="Item">
+  <TextBox Text="@Item.Name" />
+</ItemTemplate>
+<GroupTemplate Context="items">
+  <tr>@items</tr>
+</GroupTemplate>
+```
+
+---
+
+### 20. AttributeNormalizeTransform (Order: 810)
 
 **Normalizes attribute values to Blazor syntax.**
 
@@ -493,7 +624,7 @@ Converts:
 
 ---
 
-### 19. DataSourceIdTransform (Order: 820)
+### 21. DataSourceIdTransform (Order: 820)
 
 **Replaces DataSourceID with Items binding and scaffolds data properties.**
 
@@ -633,9 +764,43 @@ string url = Page.GetRouteUrl("ProductRoute", new { id = 123 });
 
 ---
 
+### CartSessionKeyTransform (Order: 390)
+
+**Rewrites cart and basket flows so they use a stable session-backed `cart-key` instead of the raw session identifier.**
+
+**Before:**
+```csharp
+var cart = _cartService.GetCart(Session.Id);
+```
+
+**After:**
+```csharp
+private string GetOrCreateCartKey()
+{
+    var cartKey = Session["cart-key"]?.ToString();
+    if (string.IsNullOrEmpty(cartKey))
+    {
+        cartKey = Guid.NewGuid().ToString();
+        Session["cart-key"] = cartKey;
+    }
+
+    return cartKey;
+}
+
+var cart = _cartService.GetCart(GetOrCreateCartKey());
+```
+
+**What It Does:**
+- Matches cart/basket-focused statements that still use `Session.Id` or `HttpContext.Session.Id`
+- Injects a single `GetOrCreateCartKey()` helper into the generated partial class
+- Keeps the migration on top of BWFC's existing `SessionShim` surface (`Session["cart-key"]`)
+- Leaves unrelated `Session.Id` usage alone to avoid over-matching
+
+---
+
 ### 25. SessionDetectTransform (Order: 400)
 
-**Detects Session/Cache usage and auto-wires SessionShim/CacheShim.**
+**Detects Session/Cache usage and emits shim guidance for `WebFormsPageBase`.**
 
 **Web Forms:**
 ```csharp
@@ -652,7 +817,7 @@ public class CheckoutPage : Page
 **Output:**
 ```csharp
 // --- Session State Migration ---
-// TODO(bwfc-session-state): SessionShim auto-wired via [Inject] — Session["CartId"] calls compile against the shim's indexer.
+// TODO(bwfc-session-state): Session["CartId"] calls work automatically via SessionShim on WebFormsPageBase.
 // Session keys found: CartId
 // Options for long-term replacement:
 //   (1) ProtectedSessionStorage (Blazor Server) — persists across circuits
@@ -661,16 +826,13 @@ public class CheckoutPage : Page
 // See: https://learn.microsoft.com/aspnet/core/blazor/state-management
 
 // --- Cache Migration ---
-// TODO(bwfc-session-state): CacheShim auto-wired via [Inject] — Cache["ProductList"] calls compile against the shim's indexer.
+// TODO(bwfc-session-state): Cache["ProductList"] calls work automatically via CacheShim on WebFormsPageBase.
 // Cache keys found: ProductList
 // CacheShim wraps IMemoryCache — items are per-server, not distributed.
 // For distributed caching, consider IDistributedCache.
 
-public class CheckoutPage : ComponentBase
+public class CheckoutPage : WebFormsPageBase
 {
-    [Inject] private SessionShim Session { get; set; }
-    [Inject] private CacheShim Cache { get; set; }
-
     private void LoadCart()
     {
         string cartId = (string)Session["CartId"];
@@ -856,6 +1018,31 @@ string imageUrl = "~/images/logo.png";
 string redirectUrl = "/products/list";
 string imageUrl = "/images/logo.png";
 ```
+
+---
+
+### 32. CompileSurfaceStubTransform (Order: 850)
+
+**Quarantines non-migratable pages behind build-safe placeholders.**
+
+**Details:**
+- Detects pages that still depend on ASP.NET Identity or membership APIs, payment providers, mobile-only shells, complex admin CRUD with 3+ data-source bindings, or unresolved compile-surface blockers after transforms run
+- Keeps essential product, catalog, cart, home, contact, and about page paths out of quarantine even when they pick up minor incidental signals
+- Requires either multiple signals, a clearly non-essential path (such as `Account/`, `Admin/`, or `Checkout/`), or a strong blocker before quarantine is applied
+- Replaces the generated markup with a visible "Page Not Yet Migrated" placeholder that still routes and compiles
+- Emits a minimal `WebFormsPageBase` partial class stub so the generated app still builds
+- Preserves the transformed original code-behind under `migration-artifacts\codebehind\`, records a `bwfc-compile-surface` manual item, and adds the page to `migration-artifacts\quarantine-manifest.json`
+
+---
+
+### 33. MarkupReferencedMemberStubTransform (Order: 900)
+
+**Adds compile-safe fallback members for identifiers that remain referenced from markup.**
+
+**Details:**
+- Scans the transformed markup for missing `@Method()`, `@_field`, and event-handler references
+- Appends minimal stubs only when the emitted partial class does not already declare the member
+- Keeps the compile surface moving while leaving explicit TODO comments for the real migration work
 
 ---
 

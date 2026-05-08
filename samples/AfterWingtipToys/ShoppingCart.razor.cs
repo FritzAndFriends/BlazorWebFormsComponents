@@ -1,151 +1,88 @@
-// =============================================================================
-// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
-//
-// Common transforms needed (use the BWFC Copilot skill for assistance):
-//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
-//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
-//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
-//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
-//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
-//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
-//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
-//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
-//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
-//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
-//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
-//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
-//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
-//   TODO(bwfc-general): User controls → Blazor component references
-// =============================================================================
-
-// --- Session State Migration ---
-// TODO(bwfc-session-state): Session["key"] calls work automatically via SessionShim on WebFormsPageBase.
-// Session keys found: payment_amt
-// Options for long-term replacement:
-//   (1) ProtectedSessionStorage (Blazor Server) — persists across circuits
-//   (2) Scoped service via DI — lifetime matches user circuit
-//   (3) Cascading parameter from a root-level state provider
-// See: https://learn.microsoft.com/aspnet/core/blazor/state-management
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using WingtipToys.Models;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
 using WingtipToys.Logic;
-using System.Collections.Specialized;
-using System.Collections;
-namespace WingtipToys
+using WingtipToys.Models;
+
+namespace WingtipToys;
+
+public partial class ShoppingCart
 {
-  public partial class ShoppingCart
-  {
-    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
+    [Inject] private CartStore CartStore { get; set; } = default!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
 
-    // --- Request.Form Migration ---
-    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
-    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
-    // Form keys found: key
-    // For non-page classes, inject RequestShim via DI.
+    private List<CartItem> CartItems { get; set; } = [];
+    private string ShoppingCartTitle { get; set; } = "Shopping Cart";
+    private string TotalText { get; set; } = "$0.00";
 
-    // --- Response.Redirect Migration ---
-    // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
-    // For non-page classes, inject ResponseShim via DI.
-
-    private GridView<CartItem> CartList = default!;
-    private ImageButton CheckoutImageBtn = default!;
-    private Label LabelTotalText = default!;
-    private Label lblTotal = default!;
-    private TextBox PurchaseQuantity = default!;
-    private CheckBox Remove = default!;
-    private Button UpdateBtn = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
-    protected override async Task OnInitializedAsync()
+    protected override Task OnParametersSetAsync()
     {
-        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
-        await base.OnInitializedAsync();
+        var cartId = GetOrCreateCartId();
+        var workingItems = CartStore.GetCart(cartId)
+            .Select(item => new CartItem
+            {
+                ItemId = item.ItemId,
+                CartId = item.CartId,
+                ProductId = item.ProductId,
+                Product = item.Product,
+                Quantity = item.Quantity,
+                DateCreated = item.DateCreated
+            })
+            .ToList();
 
-      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-      {
-        decimal cartTotal = 0;
-        cartTotal = usersShoppingCart.GetTotal();
-        if (cartTotal > 0)
+        if (HttpContextAccessor.HttpContext?.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase) == true)
         {
-          // Display Total.
-          lblTotal.Text = String.Format("{0:c}", cartTotal);
+            foreach (var item in workingItems.ToList())
+            {
+                var qtyValue = Request.Form[$"qty_{item.ProductId}"];
+                var removeValue = Request.Form[$"remove_{item.ProductId}"];
+                var removeItem = string.Equals(removeValue, "on", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(removeValue, "true", StringComparison.OrdinalIgnoreCase);
+
+                if (removeItem)
+                {
+                    workingItems.Remove(item);
+                    continue;
+                }
+
+                if (int.TryParse(qtyValue, out var quantity) && quantity > 0)
+                {
+                    item.Quantity = quantity;
+                }
+            }
+
+            CartStore.UpdateCart(cartId, workingItems);
         }
-        else
+
+        CartItems = workingItems;
+        var total = CartItems.Sum(item => Convert.ToDecimal(item.Product?.UnitPrice ?? 0) * item.Quantity);
+        TotalText = total.ToString("C");
+        ShoppingCartTitle = CartItems.Count == 0 ? "Shopping Cart is Empty" : "Shopping Cart";
+        Title = ShoppingCartTitle;
+        return Task.CompletedTask;
+    }
+
+    private string GetOrCreateCartId()
+    {
+        var context = HttpContextAccessor.HttpContext;
+        if (context is null)
         {
-          LabelTotalText.Text = "";
-          lblTotal.Text = "";
-          ShoppingCartTitle.InnerText = "Shopping Cart is Empty";
-          UpdateBtn.Visible = false;
-          CheckoutImageBtn.Visible = false;
+            return "anonymous-cart";
         }
-      }
-    }
 
-    public List<CartItem> GetShoppingCartItems()
-    {
-      ShoppingCartActions actions = new ShoppingCartActions();
-      return actions.GetCartItems();
-    }
-
-    public List<CartItem> UpdateCartItems()
-    {
-      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-      {
-        String cartId = usersShoppingCart.GetCartId();
-
-        ShoppingCartActions.ShoppingCartUpdates[] cartUpdates = new ShoppingCartActions.ShoppingCartUpdates[CartList.Rows.Count];
-        for (int i = 0; i < CartList.Rows.Count; i++)
+        if (context.Request.Cookies.TryGetValue("CartSessionId", out var existing) && !string.IsNullOrWhiteSpace(existing))
         {
-          IOrderedDictionary rowValues = new OrderedDictionary();
-          rowValues = GetValues(CartList.Rows[i]);
-          cartUpdates[i].ProductId = Convert.ToInt32(rowValues["ProductID"]);
-
-          CheckBox cbRemove = new CheckBox();
-          cbRemove = (CheckBox)CartList.Rows[i].FindControl("Remove");
-          cartUpdates[i].RemoveItem = cbRemove.Checked;
-
-          TextBox quantityTextBox = new TextBox();
-          quantityTextBox = (TextBox)CartList.Rows[i].FindControl("PurchaseQuantity");
-          cartUpdates[i].PurchaseQuantity = Convert.ToInt16(quantityTextBox.Text.ToString());
+            return existing;
         }
-        usersShoppingCart.UpdateShoppingCartDatabase(cartId, cartUpdates);
-                lblTotal.Text = String.Format("{0:c}", usersShoppingCart.GetTotal());
-        return usersShoppingCart.GetCartItems();
-      }
-    }
 
-    public static IOrderedDictionary GetValues(GridViewRow row)
-    {
-      IOrderedDictionary values = new OrderedDictionary();
-      foreach (DataControlFieldCell cell in row.Cells)
-      {
-        if (cell.Visible)
+        var cartId = Guid.NewGuid().ToString("N");
+        context.Response.Cookies.Append("CartSessionId", cartId, new CookieOptions
         {
-          // Extract values from the cell.
-          cell.ContainingField.ExtractValuesFromCell(values, cell, row.RowState, true);
-        }
-      }
-      return values;
-    }
+            HttpOnly = true,
+            IsEssential = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = context.Request.IsHttps
+        });
 
-    protected void UpdateBtn_Click()
-    {
-      UpdateCartItems();
+        return cartId;
     }
-
-    protected void CheckoutBtn_Click(ImageClickEventArgs e)
-    {
-      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-      {
-        Session["payment_amt"] = usersShoppingCart.GetTotal();
-      }
-      Response.Redirect("Checkout/CheckoutStart.aspx");
-    }
-  }
 }

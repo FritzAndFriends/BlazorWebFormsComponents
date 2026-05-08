@@ -299,11 +299,12 @@ BWFC provides a comprehensive shim layer that enables Web Forms API calls to com
 |---|---|---|
 | **WebFormsPageBase** | `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack` | Base class for all pages via `@inherits` in `_Imports.razor` |
 | **ResponseShim** | `Response.Redirect("~/path")` | Auto-strips `~/` prefix and `.aspx` extension; uses `NavigationManager` internally |
-| **RequestShim** | `Request.Url`, `Request.QueryString["key"]`, `Request.Cookies` | Reads current URL and query parameters from `NavigationManager` |
+| **RequestShim** | `Request.Url`, `Request.QueryString["key"]`, `Request.QueryString.Get("key")`, `Request.Cookies` | Reads current URL and query parameters from `NavigationManager` |
 | **FormShim** | `Request.Form["key"]`, `Request.Form.AllKeys`, `Request.Form.Count` | Dual-mode SSR+Interactive; requires `<WebFormsForm>` wrapper |
 | **SessionShim** | `Session["key"]`, `Session.Clear()`, `Session.Remove()` | Scoped in-memory dictionary — per-circuit lifetime |
 | **CacheShim** | `Cache["key"]`, `Cache.Insert()`, `Cache.Remove()` | Singleton in-memory cache |
-| **ServerShim** | `Server.MapPath("~/path")`, `Server.HtmlEncode()`, `Server.UrlEncode()` | Maps virtual paths; delegates encoding to `WebUtility` |
+| **ServerShim** | `Server.MapPath("~/path")`, `Server.HtmlEncode()`, `Server.UrlEncode()`, `Server.Transfer()`, `Server.GetLastError()`, `Server.ClearError()` | Maps virtual paths; delegates encoding to `WebUtility`; routes `Transfer()` through `NavigationManager`; provides compatibility stubs for error methods |
+| **HttpUtility rewrite** | `HttpUtility.UrlEncode()`, `HttpUtility.UrlDecode()`, `HttpUtility.HtmlEncode()`, `HttpUtility.HtmlDecode()` | CLI rewrites calls inline to `WebUtility` during Layer 1 migration to avoid legacy package collisions |
 | **ClientScriptShim** | `Page.ClientScript.RegisterStartupScript()`, `RegisterClientScriptBlock()` | Registers scripts via JS interop |
 | **ScriptManagerShim** | `ScriptManager.GetCurrent(Page)`, `RegisterStartupScript()` | Compatibility shim for ScriptManager API |
 | **ViewStateDictionary** | `ViewState["key"]` dictionary access | In-memory dictionary (not serialized to page) |
@@ -313,20 +314,21 @@ BWFC provides a comprehensive shim layer that enables Web Forms API calls to com
 | **RouteConfig** | `RouteTable.Routes.MapPageRoute()`, `Routes.Ignore()` | No-op compile shim — compiles but does nothing |
 | **WebFormsForm** | `<form>` POST data capture | Blazor component — wraps forms to feed `FormShim` |
 
-> **Key insight:** With `AddBlazorWebFormsComponents()` + `@inherits WebFormsPageBase`, code-behind files using `Response.Redirect`, `Session`, `Request`, `IsPostBack`, `Page.Title`, `Cache`, `Server.MapPath`, or `ClientScript` **compile and run without modification**. This shifts ~20% of previously-manual Layer 2 work into automatic Layer 1 coverage.
+> **Key insight:** With `AddBlazorWebFormsComponents()` + `@inherits WebFormsPageBase`, code-behind files using `Response.Redirect`, `Session`, `Request`, `Request.QueryString.Get()`, `IsPostBack`, `Page.Title`, `Cache`, `Server.*`, or `ClientScript` **compile and run without modification**. For `HttpUtility`, the CLI now rewrites calls inline to `WebUtility` during Layer 1 so the migrated app avoids legacy package collisions. This shifts ~20% of previously-manual Layer 2 work into automatic Layer 1 coverage.
 
-### Migration Shims (14)
+### Migration Shims (15)
 
 These drop-in shims allow Web Forms API calls to compile and function in Blazor. On `WebFormsPageBase`, most are auto-wired — no code changes needed.
 
 | Shim | Web Forms API | Usage on WebFormsPageBase |
 |---|---|---|
-| **RequestShim** | `Request.Cookies`, `Request.Form`, `Request.QueryString`, `Request.Url` | `Request.*` — auto-wired |
+| **RequestShim** | `Request.Cookies`, `Request.Form`, `Request.QueryString`, `Request.QueryString.Get()`, `Request.Url` | `Request.*` — auto-wired |
 | **FormShim** | `Request.Form["key"]`, `Request.Form.AllKeys`, `Request.Form.Count` | `Request.Form["key"]` — auto-wired via RequestShim |
 | **ResponseShim** | `Response.Redirect()`, `Response.Cookies` | `Response.Redirect()` — auto-wired |
 | **SessionShim** | `Session["key"]`, `Session.Clear()`, `Session.Remove()` | `Session["key"]` — auto-wired |
 | **CacheShim** | `Cache["key"]`, `Cache.Insert()`, `Cache.Remove()` | `Cache["key"]` — auto-wired |
-| **ServerShim** | `Server.MapPath()`, `Server.HtmlEncode()`, `Server.UrlEncode()` | `Server.MapPath()` — auto-wired |
+| **ServerShim** | `Server.MapPath()`, `Server.HtmlEncode()`, `Server.UrlEncode()`, `Server.Transfer()`, `Server.GetLastError()`, `Server.ClearError()` | `Server.*` — auto-wired |
+| **HttpUtility rewrite** | `HttpUtility.UrlEncode()`, `HttpUtility.UrlDecode()`, `HttpUtility.HtmlEncode()`, `HttpUtility.HtmlDecode()` | Let the CLI rewrite calls to `WebUtility` during migration |
 | **ClientScriptShim** | `Page.ClientScript.RegisterStartupScript()`, `RegisterClientScriptBlock()`, `RegisterClientScriptInclude()`, `GetPostBackEventReference()` | `ClientScript.*` — auto-wired |
 | **ScriptManagerShim** | `ScriptManager.GetCurrent(Page)`, `ScriptManager.RegisterStartupScript()` | Via `ScriptManager.GetCurrent(this)` |
 | **ConfigurationManager** | `ConfigurationManager.AppSettings["key"]`, `ConfigurationManager.ConnectionStrings["name"]` | Call `app.UseConfigurationManagerShim()` in Program.cs |

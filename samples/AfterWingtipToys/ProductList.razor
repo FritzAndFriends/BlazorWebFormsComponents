@@ -1,63 +1,35 @@
 @page "/ProductList"
-@inject CatalogService Catalog
-@inject NavigationManager Navigation
-
 <PageTitle>Products</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            <h1>@Heading</h1>
-            <div class="row">
-                @foreach (var product in Products)
-                {
-                    <div class="col-sm-6 col-md-4">
-                        <div class="thumbnail">
-                            <a href="/ProductDetails?id=@product.ProductID">
-                                <img src="/Catalog/Images/@product.ImagePath" alt="@product.ProductName" style="height: 220px; width: 100%; object-fit: contain;" />
-                            </a>
-                            <div class="caption">
-                                <h3>
-                                    <a href="/ProductDetails?id=@product.ProductID">@product.ProductName</a>
-                                </h3>
-                                <p>@product.Description</p>
-                                <p><strong>@($"{product.UnitPrice:c}")</strong></p>
-                                <p>
-                                    <a class="btn btn-primary" href="/ProductDetails?id=@product.ProductID">View Details</a>
-                                </p>
+            <section>
+                <div>
+                    <h2>Products</h2>
+                    <ListView ItemType="Product" Items="@Products">
+                        <EmptyDataTemplate>
+                            <p>No products were found.</p>
+                        </EmptyDataTemplate>
+                        <LayoutTemplate Context="items">
+                            <div class="row">@items</div>
+                        </LayoutTemplate>
+                        <ItemTemplate Context="Item">
+                            <div class="col-sm-3">
+                                <div class="thumbnail">
+                                    <a href="/ProductDetails?productId=@Item.ProductID">
+                                        <img src="/Catalog/Images/Thumbs/@Item.ImagePath" alt="@Item.ProductName" style="width:100%;height:160px;object-fit:contain" />
+                                    </a>
+                                    <div class="caption">
+                                        <h4><a href="/ProductDetails?productId=@Item.ProductID">@Item.ProductName</a></h4>
+                                        <p><strong>Price:</strong> @Item.UnitPrice?.ToString("C")</p>
+                                        <p><a href="/AddToCart?productId=@Item.ProductID" class="btn btn-primary">Add To Cart</a></p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                }
-            </div>
+                        </ItemTemplate>
+                    </ListView>
+                </div>
+            </section>
         </Content>
     </ChildComponents>
 </Site>
-
-@code {
-    private int? CategoryId => TryGetIntQueryValue("id");
-
-    private IReadOnlyList<Product> Products => Catalog.GetProducts(CategoryId);
-
-    private string Heading
-    {
-        get
-        {
-            if (!CategoryId.HasValue)
-            {
-                return "All Products";
-            }
-
-            var category = Catalog.GetCategories().FirstOrDefault(c => c.CategoryID == CategoryId.Value);
-            return category is null ? "Products" : category.CategoryName;
-        }
-    }
-
-    private int? TryGetIntQueryValue(string key)
-    {
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-        var query = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
-        return query.TryGetValue(key, out var value) && int.TryParse(value, out var parsed)
-            ? parsed
-            : null;
-    }
-}

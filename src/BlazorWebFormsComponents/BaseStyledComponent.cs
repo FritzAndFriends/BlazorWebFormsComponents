@@ -1,3 +1,6 @@
+using System;
+using System.Globalization;
+using System.Text.RegularExpressions;
 using BlazorComponentUtilities;
 using BlazorWebFormsComponents.Enums;
 using BlazorWebFormsComponents.Theming;
@@ -7,6 +10,10 @@ namespace BlazorWebFormsComponents
 {
 	public abstract class BaseStyledComponent : BaseWebFormsComponent, IStyle
 	{
+		private static readonly Regex UnitFactoryRegex = new(@"^Unit\.(?<factory>Pixel|Point|Percentage)\((?<value>-?[0-9]+(?:\.[0-9]+)?)\)$", RegexOptions.Compiled);
+		private Unit _height;
+		private Unit _width;
+
 		[Parameter]
 		public WebColor BackColor { get; set; }
 
@@ -26,15 +33,65 @@ namespace BlazorWebFormsComponents
 		public WebColor ForeColor { get; set; }
 
 		[Parameter]
-		public Unit Height { get; set; }
+		public string Height
+		{
+			get => _height.ToString();
+			set => _height = ParseUnitString(value, nameof(Height));
+		}
 
 		[Parameter]
-		public Unit Width { get; set; }
+		public string Width
+		{
+			get => _width.ToString();
+			set => _width = ParseUnitString(value, nameof(Width));
+		}
+
+		Unit IHasLayoutStyle.Height
+		{
+			get => _height;
+			set => _height = value;
+		}
+
+		Unit IHasLayoutStyle.Width
+		{
+			get => _width;
+			set => _width = value;
+		}
 
 		[Parameter]
 		public FontInfo Font { get; set; } = new FontInfo();
 
 		protected string Style => this.ToStyle().Build().NullIfEmpty();
+
+		private static Unit ParseUnitString(string value, string parameterName)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+				return Unit.Empty;
+
+			var trimmed = value.Trim();
+			var factoryMatch = UnitFactoryRegex.Match(trimmed);
+			if (factoryMatch.Success)
+			{
+				var numericText = factoryMatch.Groups["value"].Value;
+				var factory = factoryMatch.Groups["factory"].Value;
+				return factory switch
+				{
+					nameof(Unit.Pixel) => Unit.Pixel(int.Parse(numericText, CultureInfo.InvariantCulture)),
+					nameof(Unit.Point) => Unit.Point(int.Parse(numericText, CultureInfo.InvariantCulture)),
+					nameof(Unit.Percentage) => Unit.Percentage(double.Parse(numericText, CultureInfo.InvariantCulture)),
+					_ => throw new InvalidOperationException($"Unsupported unit factory syntax for {parameterName}: {value}")
+				};
+			}
+
+			try
+			{
+				return Unit.Parse(trimmed, CultureInfo.InvariantCulture);
+			}
+			catch (Exception ex) when (ex is FormatException or ArgumentOutOfRangeException)
+			{
+				throw new InvalidOperationException($"Could not parse {parameterName} value '{value}'.", ex);
+			}
+		}
 
 		/// <summary>
 		/// Applies skin properties respecting the specified ThemeMode.
@@ -65,10 +122,10 @@ namespace BlazorWebFormsComponents
 					CssClass = skin.CssClass;
 
 				if (skin.Height.HasValue)
-					Height = skin.Height.Value;
+					_height = skin.Height.Value;
 
 				if (skin.Width.HasValue)
-					Width = skin.Width.Value;
+					_width = skin.Width.Value;
 
 				if (!string.IsNullOrEmpty(skin.ToolTip))
 					ToolTip = skin.ToolTip;
@@ -115,11 +172,11 @@ namespace BlazorWebFormsComponents
 				if (string.IsNullOrEmpty(CssClass) && !string.IsNullOrEmpty(skin.CssClass))
 					CssClass = skin.CssClass;
 
-				if (Height == default && skin.Height.HasValue)
-					Height = skin.Height.Value;
+				if (_height == default && skin.Height.HasValue)
+					_height = skin.Height.Value;
 
-				if (Width == default && skin.Width.HasValue)
-					Width = skin.Width.Value;
+				if (_width == default && skin.Width.HasValue)
+					_width = skin.Width.Value;
 
 				if (string.IsNullOrEmpty(ToolTip) && !string.IsNullOrEmpty(skin.ToolTip))
 					ToolTip = skin.ToolTip;

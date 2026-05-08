@@ -1,22 +1,9 @@
 @page "/Account/Manage"
-@inject UserStoreService UserStore
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 
-<PageTitle>Manage your account</PageTitle>
-<Site>
-    <Content ContentPlaceHolderID="MainContent">
-        <h1>Manage your account</h1>
-        @if (string.IsNullOrWhiteSpace(CurrentUser))
-        {
-            <p>Please <a href="/Account/Login">log in</a> to manage your account.</p>
-        }
-        else
-        {
-            <p>You are signed in as <strong>@CurrentUser</strong>.</p>
-            <p><a href="/Account/Logout">Log out</a></p>
-        }
-    </Content>
-</Site>
-
-@code {
-    private string? CurrentUser => UserStore.GetCurrentUserEmail();
-}
+<div class="migration-pending">
+    <h3>Page Not Yet Migrated</h3>
+    <p>This page (<code>Account/Manage.aspx</code>) requires manual migration.</p>
+    <p>Original Web Forms features used: ASP.NET Identity or membership APIs</p>
+    <p>Suggested migration approach: Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic.</p>
+</div>

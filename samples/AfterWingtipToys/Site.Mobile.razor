@@ -1,6 +1,12 @@
-<Site>
-    <Content ContentPlaceHolderID="MainContent">
-        <h1>Mobile View</h1>
-        <p>The mobile-specific master page is not implemented in this migrated benchmark sample.</p>
-    </Content>
-</Site>
+<div class="container">
+    @ChildComponents
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildComponents { get; set; }
+}
