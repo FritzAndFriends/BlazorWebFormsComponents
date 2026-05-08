@@ -850,3 +850,34 @@ Add a dedicated CLI code-behind transform named `CartSessionKeyTransform` that:
 - `docs/cli/index.md`
 - `docs/cli/transforms.md`
 
+
+
+# Bishop decision inbox — G3/G4 fixes
+
+- **Date:** 2026-05-08T10:42:43-04:00
+- **Owner:** Bishop
+
+## Decision
+For benchmark-facing identity scaffolds, the CLI should emit one consistent auth contract end to end:
+- account semantic rewrites post to `/Account/LoginHandler` and `/Account/RegisterHandler`
+- generated `Program.cs` configures application cookie `LoginPath` and `LogoutPath`
+- redirect handler stubs use ASP.NET Core Identity (`SignInManager<IdentityUser>` / `UserManager<IdentityUser>`) and preserve `ReturnUrl` when it is local
+
+For validator typing, `RequiredFieldValidator` should infer its generic `Type` from the validated control when possible (notably `TextBox` -> `string`) and only fall back to `object` when no control hint exists.
+
+## Why
+Run 42 showed that mismatched auth contracts caused the only first-pass failure, while blanket validator defaults created avoidable generic warnings. Encoding both decisions in the CLI keeps Layer 1 output runnable without forcing manual post-processing.
+
+
+# Bishop G6/G7 Fixes
+
+Date: 2026-05-08T11:37:18.862-04:00
+Branch: feature/wingtip-next-features-review
+PR: #545
+
+## Decisions
+
+1. `PageDirectiveTransform` now emits a source-relative primary `@page` route for nested `.aspx` pages and keeps the filename-only alias as a secondary route when the two differ. Root-level pages still emit a single route, and `Default.aspx`/`Index.aspx` continue to resolve to `/`.
+2. `PageQuarantineDetector` now bypasses quarantine for redirect-only action pages when their markup is inert and their code-behind uses `Response.Redirect`, unless identity or payment signals are also present.
+3. CLI docs were updated to describe nested route aliasing and the redirect-only quarantine exemption because both behaviors change generated migration output in operator-visible ways.
+
