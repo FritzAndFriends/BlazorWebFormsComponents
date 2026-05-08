@@ -1,5 +1,5 @@
 @page "/ProductList"
-@page "/Category/{CategoryName}"
+@inject CatalogService CatalogService
 
 <PageTitle>Products</PageTitle>
 <Site>
@@ -8,14 +8,14 @@
             <section>
                 <div>
                     <hgroup>
-                        <h2>@Title</h2>
+                        <h2>Products</h2>
                     </hgroup>
 
-                    <ListView ItemType="Product" Items="@Products" GroupItemCount="4" Context="Item">
+                    <ListView Items="@Products" GroupItemCount="4">
                         <EmptyDataTemplate>
                             <table>
                                 <tr>
-                                    <td>No data was returned.</td>
+                                    <td>No products were found.</td>
                                 </tr>
                             </table>
                         </EmptyDataTemplate>
@@ -27,21 +27,21 @@
                                 @items
                             </tr>
                         </GroupTemplate>
-                        <ItemTemplate>
+                        <ItemTemplate Context="Item">
                             <td>
                                 <table>
                                     <tr>
                                         <td>
-                                            <a href="/ProductDetails?ProductID=@Item.ProductID">
+                                            <a href="/ProductDetails?productID=@Item.ProductID">
                                                 <img src="/Catalog/Images/Thumbs/@Item.ImagePath" width="100" height="75" border="1" alt="@Item.ProductName" />
                                             </a>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <a href="/ProductDetails?ProductID=@Item.ProductID">@Item.ProductName</a>
+                                            <a href="/ProductDetails?productID=@Item.ProductID">@Item.ProductName</a>
                                             <br />
-                                            <span><b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))</span>
+                                            <span><b>Price:</b> @(String.Format("{0:c}", Item.UnitPrice))</span>
                                             <br />
                                             <a href="/AddToCart?productID=@Item.ProductID">
                                                 <span class="ProductListItem"><b>Add To Cart</b></span>
@@ -54,15 +54,13 @@
                                 </table>
                             </td>
                         </ItemTemplate>
-                        <LayoutTemplate Context="groups">
+                        <LayoutTemplate Context="content">
                             <table style="width:100%;">
                                 <tbody>
                                     <tr>
                                         <td>
                                             <table style="width:100%">
-                                                <tbody>
-                                                    @groups
-                                                </tbody>
+                                                @content
                                             </table>
                                         </td>
                                     </tr>
@@ -75,3 +73,13 @@
         </Content>
     </ChildComponents>
 </Site>
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "categoryId")]
+    public int? CategoryId { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "categoryName")]
+    public string? CategoryName { get; set; }
+
+    private IReadOnlyList<Product> Products => CatalogService.GetProducts(CategoryId, CategoryName);
+}

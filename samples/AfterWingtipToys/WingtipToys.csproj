@@ -17,9 +17,4 @@
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="AddToCart.razor.cs;Default.razor.cs;ErrorPage.razor.cs;Logic\AddProducts.cs;Logic\PayPalFunctions.cs;Logic\RoleActions.cs;ProductDetails.razor.cs;Admin\**\*.cs;Checkout\**\*.cs" />
-    <Content Remove="AddToCart.razor;ErrorPage.razor;Site.Mobile.razor;ViewSwitcher.razor;Account\OpenAuthProviders.razor;Account\RegisterExternalLogin.razor;Admin\**\*.razor;Checkout\**\*.razor" />
-  </ItemGroup>
-
 </Project>

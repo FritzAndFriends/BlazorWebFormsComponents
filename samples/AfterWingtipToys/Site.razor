@@ -1,68 +1,103 @@
+@inject CatalogService CatalogService
+@inject CartStore CartStore
+
 <MasterPage>
-    <Head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>@(Page.Title) - Wingtip Toys</title>
-        <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-    </Head>
-    <ChildContent>
-        @ChildComponents
-        <div class="navbar navbar-inverse navbar-fixed-top">
-            <div class="container">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                    <a class="navbar-brand" href="/">Wingtip Toys</a>
-                </div>
-                <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav">
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/About">About</a></li>
-                        <li><a href="/Contact">Contact</a></li>
-                        <li><a href="/ProductList">Products</a></li>
-                        <li><a href="/ShoppingCart">@CartText</a></li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                        @if (string.IsNullOrWhiteSpace(CurrentUserEmail))
-                        {
+<Head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@(string.IsNullOrWhiteSpace(Page.Title) ? "Wingtip Toys" : $"{Page.Title} - Wingtip Toys")</title>
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+</Head>
+<ChildContent>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Wingtip Toys</a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/About">About</a></li>
+                    <li><a href="/Contact">Contact</a></li>
+                    <li><a href="/ProductList">Products</a></li>
+                    <li><a href="/ShoppingCart">Cart (@CartStore.GetCount(GetOrCreateCartId()))</a></li>
+                </ul>
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <ul class="nav navbar-nav navbar-right">
                             <li><a href="/Account/Register">Register</a></li>
                             <li><a href="/Account/Login">Log in</a></li>
-                        }
-                        else
-                        {
-                            <li><a href="/">Hello, @CurrentUserEmail!</a></li>
-                            <li><a href="/Account/Logout">Log out</a></li>
-                        }
-                    </ul>
-                </div>
+                        </ul>
+                    </NotAuthorized>
+                    <Authorized>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li><a href="/">Hello, @context.User.Identity?.Name!</a></li>
+                            <li>
+                                <form method="post" action="/Account/LogoutHandler" style="display:inline-block; margin:0;" @formname="logout-form">
+                                    <AntiforgeryToken />
+                                    <button type="submit" class="btn btn-link navbar-btn navbar-link">Log out</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </Authorized>
+                </AuthorizeView>
             </div>
         </div>
-        <div id="TitleContent" style="text-align: center">
-            <a href="/">
-                <Image ImageUrl="/Images/logo.jpg" BorderStyle="@BorderStyle.None" />
-            </a>
-            <br />
-        </div>
-        <div id="CategoryMenu" style="text-align: center">
-            <ListView ItemType="Category" Items="@Categories" Context="Item">
-                <ItemTemplate>
-                    <b style="font-size: large; font-style: normal">
-                        <a href="/Category/@Uri.EscapeDataString(Item.CategoryName)">@Item.CategoryName</a>
-                    </b>
-                </ItemTemplate>
-                <ItemSeparatorTemplate> | </ItemSeparatorTemplate>
-            </ListView>
-        </div>
-        <div class="container body-content">
-            <ContentPlaceHolder ID="MainContent"></ContentPlaceHolder>
-            <hr />
-            <footer>
-                <p>&copy; 2013 - Wingtip Toys</p>
-            </footer>
-        </div>
+    </div>
+
+    <div id="TitleContent" style="text-align: center">
+        <a href="/">
+            <img id="Image1" src="/Images/logo.jpg" alt="Wingtip Toys" />
+        </a>
+        <br />
+    </div>
+
+    <div id="CategoryMenu" style="text-align: center">
+        <ListView Items="@CatalogService.GetCategories()">
+            <ItemTemplate Context="Item">
+                <b style="font-size: large; font-style: normal">
+                    <a href="/ProductList?categoryId=@Item.CategoryID">@Item.CategoryName</a>
+                </b>
+            </ItemTemplate>
+            <ItemSeparatorTemplate> | </ItemSeparatorTemplate>
+        </ListView>
+    </div>
+
+    <div class="container body-content">
+        @ChildComponents
+        <ContentPlaceHolder id="MainContent" />
         @ChildContent
-    </ChildContent>
+        <hr />
+        <footer>
+            <p>&copy; 2013 - Wingtip Toys</p>
+        </footer>
+    </div>
+</ChildContent>
 </MasterPage>
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildComponents { get; set; }
+
+    private string GetOrCreateCartId()
+    {
+        var cartId = Session[CartSessionKey]?.ToString();
+        if (string.IsNullOrWhiteSpace(cartId))
+        {
+            cartId = Guid.NewGuid().ToString("N");
+            Session[CartSessionKey] = cartId;
+        }
+
+        return cartId;
+    }
+
+    private const string CartSessionKey = "CartId";
+}

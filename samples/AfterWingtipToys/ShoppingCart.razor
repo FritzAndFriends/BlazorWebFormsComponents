@@ -1,49 +1,113 @@
 @page "/ShoppingCart"
+@inject CartStore CartStore
 
 <PageTitle>Shopping Cart</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            <div class="ContentHead"><h1>@ShoppingCartTitle</h1></div>
+            <div id="ShoppingCartTitle" class="ContentHead"><h1>@Heading</h1></div>
+            <form method="post" @formname="shopping-cart-form">
+                <AntiforgeryToken />
+                <GridView ItemType="CartItem" AutoGenerateColumns="false" GridLines="@GridLines.Vertical" CellPadding="4"
+                          Items="@CartItems" CssClass="table table-striped table-bordered">
+                    <EmptyDataTemplate>
+                        <div>Your shopping cart is empty.</div>
+                    </EmptyDataTemplate>
+                    <Columns>
+                        <TemplateField ItemType="CartItem" HeaderText="ID">
+                            <ItemTemplate Context="Item">@Item.ProductId</ItemTemplate>
+                        </TemplateField>
+                        <TemplateField ItemType="CartItem" HeaderText="Name">
+                            <ItemTemplate Context="Item">@Item.Product.ProductName</ItemTemplate>
+                        </TemplateField>
+                        <TemplateField ItemType="CartItem" HeaderText="Price (each)">
+                            <ItemTemplate Context="Item">@(String.Format("{0:c}", Item.Product.UnitPrice))</ItemTemplate>
+                        </TemplateField>
+                        <TemplateField ItemType="CartItem" HeaderText="Quantity">
+                            <ItemTemplate Context="Item">
+                                <input type="number" min="1" name="qty_@Item.ProductId" value="@Item.Quantity" class="form-control" style="width:80px" />
+                            </ItemTemplate>
+                        </TemplateField>
+                        <TemplateField ItemType="CartItem" HeaderText="Item Total">
+                            <ItemTemplate Context="Item">@(String.Format("{0:c}", ((Item.Product.UnitPrice ?? 0) * Item.Quantity)))</ItemTemplate>
+                        </TemplateField>
+                        <TemplateField ItemType="CartItem" HeaderText="Remove Item">
+                            <ItemTemplate Context="Item">
+                                <button type="submit" name="removeItem" value="@Item.ProductId" class="btn btn-link">Remove</button>
+                            </ItemTemplate>
+                        </TemplateField>
+                    </Columns>
+                </GridView>
 
-            @if (HasItems)
-            {
-                <form method="post" @formname="shoppingCart">
-                    <AntiforgeryToken />
-                    <GridView ItemType="CartItem" Items="@CartItems" AutoGenerateColumns="false" CssClass="table table-striped table-bordered">
-                        <Columns>
-                            <BoundField DataField="ProductId" HeaderText="ID" />
-                            <BoundField DataField="Product.ProductName" HeaderText="Name" />
-                            <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
-                            <TemplateField HeaderText="Quantity">
-                                <ItemTemplate Context="Item">
-                                    <input type="number" min="0" class="form-control" style="width: 80px" name="quantity-@Item.ProductId" value="@Item.Quantity" />
-                                </ItemTemplate>
-                            </TemplateField>
-                            <TemplateField HeaderText="Item Total">
-                                <ItemTemplate Context="Item">
-                                    @(((decimal)(Item.Product?.UnitPrice ?? 0) * Item.Quantity).ToString("c"))
-                                </ItemTemplate>
-                            </TemplateField>
-                            <TemplateField HeaderText="Remove Item">
-                                <ItemTemplate Context="Item">
-                                    <button type="submit" class="btn btn-default" name="removeProductId" value="@Item.ProductId">Remove</button>
-                                </ItemTemplate>
-                            </TemplateField>
-                        </Columns>
-                    </GridView>
+                @if (CartItems.Count > 0)
+                {
                     <div>
                         <p></p>
-                        <strong>Order Total: @CartTotal.ToString("c")</strong>
+                        <strong>Order Total: @String.Format("{0:c}", OrderTotal)</strong>
                     </div>
                     <br />
-                    <button type="submit" class="btn btn-default" name="action" value="Update">Update</button>
-                </form>
-            }
-            else
-            {
-                <p>Your shopping cart is empty.</p>
-            }
+                    <table>
+                        <tr>
+                            <td>
+                                <button type="submit" name="updateCart" value="true" class="btn btn-default">Update</button>
+                            </td>
+                            <td style="padding-left:12px;">
+                                <a class="btn btn-primary" href="/Checkout/CheckoutStart">Checkout</a>
+                            </td>
+                        </tr>
+                    </table>
+                }
+                else
+                {
+                    <p>Your shopping cart is empty.</p>
+                }
+            </form>
         </Content>
     </ChildComponents>
 </Site>
+
+@code {
+    private List<CartItem> CartItems { get; set; } = [];
+    private decimal OrderTotal { get; set; }
+    private string Heading { get; set; } = "Shopping Cart";
+
+    protected override void OnInitialized()
+    {
+        var cartId = GetOrCreateCartId();
+        if (IsPostBack)
+        {
+            if (int.TryParse(Request.Form["removeItem"], out var removeProductId))
+            {
+                CartStore.RemoveItem(cartId, removeProductId);
+            }
+            else
+            {
+                foreach (var item in CartStore.GetCartItems(cartId))
+                {
+                    if (int.TryParse(Request.Form[$"qty_{item.ProductId}"], out var quantity))
+                    {
+                        CartStore.UpdateQuantity(cartId, item.ProductId, quantity);
+                    }
+                }
+            }
+        }
+
+        CartItems = CartStore.GetCartItems(cartId).ToList();
+        OrderTotal = CartStore.GetTotal(cartId);
+        Heading = CartItems.Count == 0 ? "Shopping Cart is Empty" : "Shopping Cart";
+    }
+
+    private string GetOrCreateCartId()
+    {
+        var cartId = Session[CartSessionKey]?.ToString();
+        if (string.IsNullOrWhiteSpace(cartId))
+        {
+            cartId = Guid.NewGuid().ToString("N");
+            Session[CartSessionKey] = cartId;
+        }
+
+        return cartId;
+    }
+
+    private const string CartSessionKey = "CartId";
+}

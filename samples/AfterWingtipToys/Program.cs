@@ -1,5 +1,8 @@
+using System.Security.Claims;
 using BlazorWebFormsComponents;
-using WingtipToys.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using WingtipToys.Logic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,84 +14,83 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+    });
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAntiforgery();
 builder.Services.AddBlazorWebFormsComponents();
-builder.Services.AddSingleton<ProductCatalogService>();
+builder.Services.AddSingleton<CatalogService>();
 builder.Services.AddSingleton<CartStore>();
-builder.Services.AddSingleton<SimpleUserStore>();
+builder.Services.AddSingleton<DemoUserStore>();
 
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/");
+    app.UseExceptionHandler("/ErrorPage");
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSession();
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-app.MapGet("/AddToCart", (HttpContext context, CartStore cartStore, ProductCatalogService catalog, int? productId) =>
+app.MapPost("/Account/RegisterHandler", async (HttpContext context, DemoUserStore users) =>
 {
-    if (productId is null || catalog.GetProduct(productId, null) is null)
-    {
-        return Results.Redirect("/ProductList");
-    }
-
-    var cartKey = context.Session.GetString("cart-key");
-    if (string.IsNullOrWhiteSpace(cartKey))
-    {
-        cartKey = Guid.NewGuid().ToString();
-        context.Session.SetString("cart-key", cartKey);
-    }
-
-    cartStore.AddToCart(cartKey, productId.Value, catalog);
-    return Results.Redirect("/ShoppingCart");
-});
-
-app.MapGet("/Account/PerformRegister", (HttpContext context, SimpleUserStore users, string? email, string? password, string? confirmPassword) =>
-{
-    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-    {
-        return Results.Redirect("/Account/Register?error=Email%20and%20password%20are%20required");
-    }
+    var form = await context.Request.ReadFormAsync();
+    var email = form["Email"].ToString().Trim();
+    var password = form["Password"].ToString();
+    var confirmPassword = form["ConfirmPassword"].ToString();
 
     if (!string.Equals(password, confirmPassword, StringComparison.Ordinal))
     {
         return Results.Redirect("/Account/Register?error=Passwords%20do%20not%20match");
     }
 
-    if (!users.TryRegister(email, password))
+    if (!users.TryRegister(email, password, out var error))
     {
-        return Results.Redirect("/Account/Register?error=An%20account%20with%20that%20email%20already%20exists");
+        return Results.Redirect($"/Account/Register?error={Uri.EscapeDataString(error)}");
     }
 
     return Results.Redirect("/Account/Login?registered=1");
 });
 
-app.MapGet("/Account/PerformLogin", (HttpContext context, SimpleUserStore users, string? email, string? password, string? returnUrl) =>
+app.MapPost("/Account/LoginHandler", async (HttpContext context, DemoUserStore users) =>
 {
-    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+    var form = await context.Request.ReadFormAsync();
+    var email = form["Email"].ToString().Trim();
+    var password = form["Password"].ToString();
+    var returnUrl = form["ReturnUrl"].ToString();
+
+    if (!users.ValidateCredentials(email, password))
     {
-        return Results.Redirect("/Account/Login?error=Email%20and%20password%20are%20required");
+        var errorUrl = string.IsNullOrWhiteSpace(returnUrl)
+            ? "/Account/Login?error=Invalid%20login%20attempt"
+            : $"/Account/Login?error=Invalid%20login%20attempt&returnUrl={Uri.EscapeDataString(returnUrl)}";
+        return Results.Redirect(errorUrl);
     }
 
-    if (!users.Validate(email, password))
-    {
-        return Results.Redirect("/Account/Login?error=Invalid%20login%20attempt");
-    }
+    var principal = new ClaimsPrincipal(new ClaimsIdentity(
+    [
+        new Claim(ClaimTypes.Name, email),
+        new Claim(ClaimTypes.Email, email)
+    ], CookieAuthenticationDefaults.AuthenticationScheme));
 
-    context.Session.SetString("auth-email", email);
+    await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
     return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl) ? "/" : returnUrl);
 });
 
-app.MapGet("/Account/Logout", (HttpContext context) =>
+app.MapPost("/Account/LogoutHandler", async (HttpContext context) =>
 {
-    context.Session.Remove("auth-email");
+    await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     return Results.Redirect("/");
 });
 

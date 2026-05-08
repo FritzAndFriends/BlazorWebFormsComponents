@@ -1,9 +1,29 @@
 @page "/AddToCart"
-@inherits BlazorWebFormsComponents.WebFormsPageBase
+@inject CartStore CartStore
 
-<div class="migration-pending">
-    <h3>Page Not Yet Migrated</h3>
-    <p>This page (<code>AddToCart.aspx</code>) requires manual migration.</p>
-    <p>Original Web Forms features used: Unresolved compile-surface blockers</p>
-    <p>Suggested migration approach: Port the remaining server-control or lifecycle logic into BWFC-compatible components, services, or semantic patterns before re-enabling the page.</p>
-</div>
+<PageTitle>Add To Cart</PageTitle>
+<p>Adding item to cart...</p>
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "productID")]
+    public int? ProductId { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var cartId = Session[CartSessionKey]?.ToString();
+        if (string.IsNullOrWhiteSpace(cartId))
+        {
+            cartId = Guid.NewGuid().ToString("N");
+            Session[CartSessionKey] = cartId;
+        }
+
+        if (ProductId.HasValue)
+        {
+            CartStore.AddItem(cartId!, ProductId.Value);
+        }
+
+        Response.Redirect("~/ShoppingCart.aspx");
+    }
+
+    private const string CartSessionKey = "CartId";
+}
