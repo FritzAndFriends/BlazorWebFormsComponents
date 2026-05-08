@@ -56,32 +56,138 @@ public class GridViewColumnItemTypeTransformTests
     }
 
     [Fact]
-    public void PipelineRewritesWingtipShoppingCartColumnsToTypedFields()
+    public void PipelinePreservesTemplateFieldWithInnerTextBoxControl()
     {
-        var pipeline = TestHelpers.CreateDefaultPipeline();
-        var metadata = TestMetadata;
-
-        var result = pipeline.TransformMarkup("""
+        var result = TransformMarkup("""
             <asp:GridView ID="CartList" runat="server" AutoGenerateColumns="False" ItemType="WingtipToys.Models.CartItem">
                 <Columns>
-                    <asp:BoundField DataField="ProductID" HeaderText="ID" />
                     <asp:TemplateField HeaderText="Quantity">
                         <ItemTemplate>
-                            <asp:TextBox ID="PurchaseQuantity" runat="server" Text="<%#: Item.Quantity %>"></asp:TextBox>
+                            <asp:TextBox ID="PurchaseQuantity" Width="40" runat="server" Text="<%#: Item.Quantity %>"></asp:TextBox>
                         </ItemTemplate>
                     </asp:TemplateField>
                 </Columns>
             </asp:GridView>
-            """, metadata);
+            """);
 
         Assert.Contains("<GridView id=\"CartList\" AutoGenerateColumns=\"false\" ItemType=\"CartItem\">", result);
-        Assert.Contains("<BoundField ItemType=\"CartItem\" DataField=\"ProductID\" HeaderText=\"ID\" />", result);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", result);
         Assert.Contains("<ItemTemplate Context=\"Item\">", result);
-        Assert.Contains("Text=\"@Item.Quantity\"", result);
-        Assert.DoesNotContain("ItemType=\"object\"", result);
-        Assert.Equal(1, CountOccurrences(result, "<Columns>"));
-        Assert.Contains("</GridView>", result);
+        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", result);
+        Assert.Equal(1, CountOccurrences(result, "<TemplateField"));
+        Assert.DoesNotContain("<BoundField", result);
+    }
+
+    [Fact]
+    public void PipelinePreservesTemplateFieldWithInnerCheckBoxControl()
+    {
+        var result = TransformMarkup("""
+            <asp:GridView ID="CartList" runat="server" AutoGenerateColumns="False" ItemType="WingtipToys.Models.CartItem">
+                <Columns>
+                    <asp:TemplateField HeaderText="Remove Item">
+                        <ItemTemplate>
+                            <asp:CheckBox ID="Remove" runat="server"></asp:CheckBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+            </asp:GridView>
+            """);
+
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Remove Item\">", result);
+        Assert.Contains("<ItemTemplate Context=\"Item\">", result);
+        Assert.Contains("<CheckBox id=\"Remove\"></CheckBox>", result);
+        Assert.Equal(1, CountOccurrences(result, "<TemplateField"));
+        Assert.DoesNotContain("<BoundField", result);
+    }
+
+    [Fact]
+    public void PipelinePreservesTemplateFieldWithDisplayExpressionOnly()
+    {
+        var result = TransformMarkup("""
+            <asp:GridView ID="CartList" runat="server" AutoGenerateColumns="False" ItemType="WingtipToys.Models.CartItem">
+                <Columns>
+                    <asp:TemplateField HeaderText="Item Total">
+                        <ItemTemplate>
+                            <%#: String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))) %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+            </asp:GridView>
+            """);
+
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Item Total\">", result);
+        Assert.Contains("<ItemTemplate Context=\"Item\">", result);
+        Assert.Contains("@(String.Format(\"{0:c}\", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))", result);
+        Assert.Equal(1, CountOccurrences(result, "<TemplateField"));
+        Assert.DoesNotContain("<BoundField", result);
+    }
+
+    [Fact]
+    public void PipelinePreservesTemplateFieldsMixedWithBoundFieldSiblings()
+    {
+        var result = TransformMarkup("""
+            <asp:GridView ID="CartList" runat="server" AutoGenerateColumns="False" ItemType="WingtipToys.Models.CartItem">
+                <Columns>
+                    <asp:BoundField DataField="ProductID" HeaderText="ID" />
+                    <asp:BoundField DataField="Product.ProductName" HeaderText="Name" />
+                    <asp:TemplateField HeaderText="Quantity">
+                        <ItemTemplate>
+                            <asp:TextBox ID="PurchaseQuantity" Width="40" runat="server" Text="<%#: Item.Quantity %>"></asp:TextBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Item Total">
+                        <ItemTemplate>
+                            <%#: String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))) %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Remove Item">
+                        <ItemTemplate>
+                            <asp:CheckBox ID="Remove" runat="server"></asp:CheckBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+            </asp:GridView>
+            """);
+
+        Assert.Contains("<BoundField ItemType=\"CartItem\" DataField=\"ProductID\" HeaderText=\"ID\" />", result);
+        Assert.Contains("<BoundField ItemType=\"CartItem\" DataField=\"Product.ProductName\" HeaderText=\"Name\" />", result);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", result);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Item Total\">", result);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Remove Item\">", result);
+        Assert.Equal(2, CountOccurrences(result, "<BoundField"));
+        Assert.Equal(3, CountOccurrences(result, "<TemplateField"));
+    }
+
+    [Fact]
+    public void PipelinePreservesGridViewWithOnlyTemplateFieldColumns()
+    {
+        var result = TransformMarkup("""
+            <asp:GridView ID="CartList" runat="server" AutoGenerateColumns="False" ItemType="WingtipToys.Models.CartItem">
+                <Columns>
+                    <asp:TemplateField HeaderText="Quantity">
+                        <ItemTemplate>
+                            <asp:TextBox ID="PurchaseQuantity" Width="40" runat="server" Text="<%#: Item.Quantity %>"></asp:TextBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Remove Item">
+                        <ItemTemplate>
+                            <asp:CheckBox ID="Remove" runat="server"></asp:CheckBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+            </asp:GridView>
+            """);
+
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", result);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Remove Item\">", result);
+        Assert.Equal(2, CountOccurrences(result, "<TemplateField"));
+        Assert.DoesNotContain("<BoundField", result);
+    }
+
+    private static string TransformMarkup(string input)
+    {
+        var pipeline = TestHelpers.CreateDefaultPipeline();
+        return pipeline.TransformMarkup(input, TestMetadata);
     }
 
     private static int CountOccurrences(string source, string target)

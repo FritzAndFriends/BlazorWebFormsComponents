@@ -283,6 +283,60 @@ public class PipelineIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task Pipeline_PreservesGridViewTemplateFieldsAcrossFullFileMigration()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir(includeWebConfig: false, includeCodeBehind: false);
+        File.WriteAllText(Path.Combine(inputDir, "Default.aspx"), """
+            <%@ Page Title="Shopping Cart" Language="C#" AutoEventWireup="true" Inherits="TestApp.ShoppingCart" %>
+            <asp:GridView ID="CartList" runat="server" AutoGenerateColumns="False" ItemType="TestApp.Models.CartItem">
+                <Columns>
+                    <asp:BoundField DataField="ProductID" HeaderText="ID" />
+                    <asp:TemplateField HeaderText="Quantity">
+                        <ItemTemplate>
+                            <asp:TextBox ID="PurchaseQuantity" Width="40" runat="server" Text="<%#: Item.Quantity %>"></asp:TextBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Item Total">
+                        <ItemTemplate>
+                            <%#: String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))) %>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                    <asp:TemplateField HeaderText="Remove Item">
+                        <ItemTemplate>
+                            <asp:CheckBox ID="Remove" runat="server"></asp:CheckBox>
+                        </ItemTemplate>
+                    </asp:TemplateField>
+                </Columns>
+            </asp:GridView>
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false, SkipScaffold = true },
+            SourceFiles = sourceFiles
+        };
+
+        var report = await pipeline.ExecuteAsync(context);
+        var defaultRazor = File.ReadAllText(Path.Combine(outputDir, "Default.razor"));
+
+        Assert.Empty(report.Errors);
+        Assert.Contains("<BoundField ItemType=\"CartItem\" DataField=\"ProductID\" HeaderText=\"ID\" />", defaultRazor);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", defaultRazor);
+        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", defaultRazor);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Item Total\">", defaultRazor);
+        Assert.Contains("@(String.Format(\"{0:c}\", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))", defaultRazor);
+        Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Remove Item\">", defaultRazor);
+        Assert.Contains("<CheckBox id=\"Remove\"></CheckBox>", defaultRazor);
+        Assert.Equal(3, defaultRazor.Split("<TemplateField", StringSplitOptions.None).Length - 1);
+    }
+
+    [Fact]
     public async Task Pipeline_QuarantinesPageCodeBehind_WhenUnsupportedWebFormsPatternsRemain()
     {
         var (inputDir, outputDir) = CreateTempProjectDir(includeCodeBehind: true);

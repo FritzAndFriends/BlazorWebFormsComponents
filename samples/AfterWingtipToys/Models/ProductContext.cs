@@ -1,20 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-
 namespace WingtipToys.Models
 {
   public class ProductContext : DbContext
   {
-    public ProductContext()
-      : this(new DbContextOptionsBuilder<ProductContext>()
-          .UseSqlite("Data Source=wingtiptoys.db")
-          .Options)
-    {
-    }
-
     public ProductContext(DbContextOptions<ProductContext> options) : base(options)
     {
     }
-
     public DbSet<Category> Categories { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<CartItem> ShoppingCartItems { get; set; }

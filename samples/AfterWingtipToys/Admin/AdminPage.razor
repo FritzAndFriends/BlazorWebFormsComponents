@@ -5,60 +5,7 @@
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
             <h1>Administration</h1>
-            <p>Use this simplified admin page to manage catalog data in the migrated benchmark.</p>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <h3>Add Product</h3>
-                    <div class="form-group">
-                        <label>Name</label>
-                        <input class="form-control" @bind="AddProductName" />
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <textarea class="form-control" @bind="AddProductDescription"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Price</label>
-                        <input class="form-control" @bind="AddProductPrice" />
-                    </div>
-                    <div class="form-group">
-                        <label>Image File</label>
-                        <input class="form-control" @bind="AddProductImagePath" />
-                    </div>
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select class="form-control" @bind="SelectedCategoryId">
-                            @foreach (var category in Categories)
-                            {
-                                <option value="@category.CategoryID">@category.CategoryName</option>
-                            }
-                        </select>
-                    </div>
-                    <Button Text="Add Product" OnClick="@AddProductButton_Click" />
-                    @if (!string.IsNullOrWhiteSpace(AddStatus))
-                    {
-                        <p>@AddStatus</p>
-                    }
-                </div>
-                <div class="col-md-6">
-                    <h3>Remove Product</h3>
-                    <div class="form-group">
-                        <label>Product</label>
-                        <select class="form-control" @bind="SelectedProductId">
-                            @foreach (var product in Products)
-                            {
-                                <option value="@product.ProductID">@product.ProductName</option>
-                            }
-                        </select>
-                    </div>
-                    <Button Text="Remove Product" OnClick="@RemoveProductButton_Click" />
-                    @if (!string.IsNullOrWhiteSpace(RemoveStatus))
-                    {
-                        <p>@RemoveStatus</p>
-                    }
-                </div>
-            </div>
+            <p>This administrative workflow was quarantined during migration and is not part of the benchmark path.</p>
         </Content>
     </ChildComponents>
 </Site>

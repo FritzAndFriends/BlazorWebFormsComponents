@@ -1,6 +1,7 @@
 using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using WingtipToys.Logic;
 using WingtipToys.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,22 +16,19 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-var productConnectionString = builder.Configuration.GetConnectionString("WingtipToys")
-    ?? throw new InvalidOperationException("Connection string 'WingtipToys' was not found.");
-var identityConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
+var catalogConnection = builder.Configuration.GetConnectionString("WingtipToys")
+    ?? throw new InvalidOperationException("Connection string 'WingtipToys' was not found.");
 
-builder.Services.AddDbContext<ProductContext>(options =>
-    options.UseSqlite(productConnectionString));
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(identityConnectionString));
-
-var identityBuilder = builder.Services.AddDefaultIdentity<IdentityUser>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(defaultConnection));
+builder.Services.AddDbContextFactory<ProductContext>(options => options.UseSqlServer(catalogConnection));
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
-});
-identityBuilder.AddEntityFrameworkStores<ApplicationDbContext>();
-
+})
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
@@ -39,19 +37,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddBlazorWebFormsComponents();
+builder.Services.AddSingleton<CartStore>();
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var productDb = services.GetRequiredService<ProductContext>();
-    productDb.Database.EnsureCreated();
-    ProductSeedData.EnsureSeeded(productDb);
-
-    var identityDb = services.GetRequiredService<ApplicationDbContext>();
-    identityDb.Database.EnsureCreated();
-}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -60,13 +48,57 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.MapStaticAssets();
+app.UseStaticFiles();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
+using (var scope = app.Services.CreateScope())
+{
+    var identityDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    identityDb.Database.EnsureCreated();
+
+    var catalogFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
+    using var catalogDb = catalogFactory.CreateDbContext();
+    catalogDb.Database.EnsureCreated();
+    ProductDatabaseInitializer.SeedIfNeeded(catalogDb);
+}
+
+app.MapGet("/AddToCart", async (int? productId, int? productID, IDbContextFactory<ProductContext> dbFactory, CartStore cartStore, HttpContext context) =>
+{
+    var requestedId = productId ?? productID;
+    if (requestedId is null)
+    {
+        return Results.Redirect("/ProductList");
+    }
+
+    await using var db = await dbFactory.CreateDbContextAsync();
+    var product = await db.Products.Include(item => item.Category)
+        .FirstOrDefaultAsync(item => item.ProductID == requestedId.Value);
+    if (product is null)
+    {
+        return Results.Redirect("/ProductList");
+    }
+
+    var cartId = context.Request.Cookies["CartSessionId"];
+    if (string.IsNullOrWhiteSpace(cartId))
+    {
+        cartId = Guid.NewGuid().ToString("N");
+        context.Response.Cookies.Append("CartSessionId", cartId, new CookieOptions
+        {
+            HttpOnly = true,
+            IsEssential = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = context.Request.IsHttps
+        });
+    }
+
+    cartStore.AddItem(cartId, product);
+    return Results.Redirect("/ShoppingCart");
+});
+
+app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
 {
     var form = await context.Request.ReadFormAsync();
     var email = form["Email"].ToString().Trim();
@@ -96,9 +128,9 @@ app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<I
     }
 
     return Results.LocalRedirect(hasLocalReturnUrl ? returnUrl : "/");
-});
+}).DisableAntiforgery();
 
-app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<IdentityUser> userManager) =>
+app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<ApplicationUser> userManager) =>
 {
     var form = await context.Request.ReadFormAsync();
     var email = form["Email"].ToString().Trim();
@@ -125,7 +157,7 @@ app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<
         return Results.LocalRedirect(mismatchedPasswordUrl);
     }
 
-    var user = new IdentityUser
+    var user = new ApplicationUser
     {
         UserName = email,
         Email = email
@@ -141,17 +173,16 @@ app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<
         return Results.LocalRedirect(registrationErrorUrl);
     }
 
-    var registeredUrl = hasLocalReturnUrl
+    return Results.LocalRedirect(hasLocalReturnUrl
         ? $"/Account/Login?registered=1&returnUrl={Uri.EscapeDataString(returnUrl)}"
-        : "/Account/Login?registered=1";
-    return Results.LocalRedirect(registeredUrl);
-});
+        : "/Account/Login?registered=1");
+}).DisableAntiforgery();
 
-app.MapPost("/Account/LogoutHandler", async (SignInManager<IdentityUser> signInManager) =>
+app.MapPost("/Account/PerformLogout", async (SignInManager<ApplicationUser> signInManager) =>
 {
     await signInManager.SignOutAsync();
-    return Results.LocalRedirect("/");
-});
+    return Results.Redirect("/");
+}).DisableAntiforgery();
 
 app.MapRazorComponents<WingtipToys.Components.App>();
 

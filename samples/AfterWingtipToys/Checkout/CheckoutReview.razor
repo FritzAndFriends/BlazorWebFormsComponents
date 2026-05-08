@@ -5,30 +5,8 @@
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
             <h1>Order Review</h1>
-            @if (OrderItems.Count == 0)
-            {
-                <p>Your cart is empty.</p>
-            }
-            else
-            {
-                <GridView ItemType="CartItem" Items="OrderItems" AutoGenerateColumns="false" GridLines="@GridLines.Both" CellPadding="10" Width="500">
-                    <Columns>
-                        <BoundField ItemType="CartItem" DataField="ProductId" HeaderText="Product ID" />
-                        <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Product Name" />
-                        <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
-                        <BoundField ItemType="CartItem" DataField="Quantity" HeaderText="Quantity" />
-                    </Columns>
-                </GridView>
-
-                <h3>Shipping Address:</h3>
-                <p>@ShippingSummary</p>
-
-                <h3>Order Total:</h3>
-                <p>@TotalText</p>
-
-                <hr />
-                <Button Text="Complete Order" OnClick="@CheckoutConfirm_Click" />
-            }
+            <p>PayPal checkout is not configured for this migrated benchmark app.</p>
+            <p><a href="/ShoppingCart">Return to your cart</a></p>
         </Content>
     </ChildComponents>
 </Site>

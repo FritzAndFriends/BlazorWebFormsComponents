@@ -4,23 +4,7 @@
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
             <h2>Error</h2>
-            <p>@FriendlyMessage</p>
-            @if (!string.IsNullOrWhiteSpace(Handler))
-            {
-                <p><strong>Handler:</strong> @Handler</p>
-            }
+            <p>Something went wrong while processing your request.</p>
         </Content>
     </ChildComponents>
 </Site>
-
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "msg")]
-    public string? MessageCode { get; set; }
-
-    [Parameter, SupplyParameterFromQuery(Name = "handler")]
-    public string? Handler { get; set; }
-
-    private string FriendlyMessage => MessageCode == "404"
-        ? "The page you requested could not be found."
-        : "A problem has occurred on this web site. Please try again.";
-}

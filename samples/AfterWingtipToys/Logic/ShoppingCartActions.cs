@@ -1,127 +1,113 @@
-using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
 using WingtipToys.Models;
 
 namespace WingtipToys.Logic;
 
 public class ShoppingCartActions : IDisposable
 {
-    private readonly ProductContext _db = new();
+    private static readonly ConcurrentDictionary<string, List<CartItem>> Carts = new();
 
-    public string ShoppingCartId { get; private set; } = "guest";
+    public string ShoppingCartId { get; set; } = "legacy-cart";
 
     public const string CartSessionKey = "CartId";
 
     public void AddToCart(int id)
     {
-        var product = _db.Products.SingleOrDefault(p => p.ProductID == id);
-        if (product is null)
+        var cart = GetCartItems();
+        var existing = cart.FirstOrDefault(item => item.ProductId == id);
+        if (existing is null)
         {
-            return;
-        }
-
-        var cartItem = _db.ShoppingCartItems
-            .Include(c => c.Product)
-            .SingleOrDefault(c => c.CartId == ShoppingCartId && c.ProductId == id);
-
-        if (cartItem is null)
-        {
-            cartItem = new CartItem
+            cart.Add(new CartItem
             {
-                ItemId = Guid.NewGuid().ToString(),
-                ProductId = id,
+                ItemId = Guid.NewGuid().ToString("N"),
                 CartId = ShoppingCartId,
-                Product = product,
+                ProductId = id,
                 Quantity = 1,
                 DateCreated = DateTime.UtcNow
-            };
-            _db.ShoppingCartItems.Add(cartItem);
+            });
         }
         else
         {
-            cartItem.Quantity++;
+            existing.Quantity++;
         }
 
-        _db.SaveChanges();
+        Carts[ShoppingCartId] = cart;
     }
 
     public string GetCartId() => ShoppingCartId;
 
-    public List<CartItem> GetCartItems() => _db.ShoppingCartItems
-        .Include(c => c.Product)
-        .Where(c => c.CartId == ShoppingCartId)
-        .OrderBy(c => c.ProductId)
-        .ToList();
+    public List<CartItem> GetCartItems()
+    {
+        return Carts.GetOrAdd(ShoppingCartId, _ => []);
+    }
 
-    public decimal GetTotal() => GetCartItems().Sum(item => (decimal)((item.Product?.UnitPrice ?? 0) * item.Quantity));
+    public decimal GetTotal() => GetCartItems().Sum(item => Convert.ToDecimal(item.Product?.UnitPrice ?? 0) * item.Quantity);
+
+    public ShoppingCartActions GetCart(object? _) => this;
 
     public void UpdateShoppingCartDatabase(string cartId, ShoppingCartUpdates[] cartItemUpdates)
     {
+        var items = GetCartItems();
         foreach (var update in cartItemUpdates)
         {
+            var item = items.FirstOrDefault(existing => existing.ProductId == update.ProductId);
+            if (item is null)
+            {
+                continue;
+            }
+
             if (update.RemoveItem || update.PurchaseQuantity < 1)
             {
-                RemoveItem(cartId, update.ProductId);
+                items.Remove(item);
             }
             else
             {
-                UpdateItem(cartId, update.ProductId, update.PurchaseQuantity);
+                item.Quantity = update.PurchaseQuantity;
             }
         }
+
+        Carts[cartId] = items;
     }
 
     public void RemoveItem(string removeCartId, int removeProductId)
     {
-        var item = _db.ShoppingCartItems.SingleOrDefault(c => c.CartId == removeCartId && c.ProductId == removeProductId);
-        if (item is null)
-        {
-            return;
-        }
-
-        _db.ShoppingCartItems.Remove(item);
-        _db.SaveChanges();
+        var items = Carts.GetOrAdd(removeCartId, _ => []);
+        items.RemoveAll(item => item.ProductId == removeProductId);
     }
 
     public void UpdateItem(string updateCartId, int updateProductId, int quantity)
     {
-        var item = _db.ShoppingCartItems.SingleOrDefault(c => c.CartId == updateCartId && c.ProductId == updateProductId);
-        if (item is null)
+        var item = Carts.GetOrAdd(updateCartId, _ => []).FirstOrDefault(existing => existing.ProductId == updateProductId);
+        if (item is not null)
         {
-            return;
+            item.Quantity = quantity;
         }
-
-        item.Quantity = quantity;
-        _db.SaveChanges();
     }
 
     public void EmptyCart()
     {
-        var items = _db.ShoppingCartItems.Where(c => c.CartId == ShoppingCartId).ToList();
-        if (items.Count == 0)
-        {
-            return;
-        }
-
-        _db.ShoppingCartItems.RemoveRange(items);
-        _db.SaveChanges();
+        Carts[ShoppingCartId] = [];
     }
 
-    public int GetCount() => _db.ShoppingCartItems
-        .Where(c => c.CartId == ShoppingCartId)
-        .Sum(c => (int?)c.Quantity) ?? 0;
+    public int GetCount() => GetCartItems().Sum(item => item.Quantity);
 
     public void MigrateCart(string cartId, string userName)
     {
-        var shoppingCart = _db.ShoppingCartItems.Where(c => c.CartId == cartId).ToList();
-        foreach (var item in shoppingCart)
+        if (Carts.TryRemove(cartId, out var items))
         {
-            item.CartId = userName;
-        }
+            foreach (var item in items)
+            {
+                item.CartId = userName;
+            }
 
-        ShoppingCartId = userName;
-        _db.SaveChanges();
+            Carts[userName] = items;
+            ShoppingCartId = userName;
+        }
     }
 
-    public void Dispose() => _db.Dispose();
+    public void Dispose()
+    {
+    }
 
     public struct ShoppingCartUpdates
     {

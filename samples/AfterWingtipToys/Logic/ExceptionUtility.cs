@@ -2,35 +2,25 @@ using System.Text;
 
 namespace WingtipToys.Logic;
 
-public sealed class ExceptionUtility
+public static class ExceptionUtility
 {
-    private ExceptionUtility()
-    {
-    }
-
     public static void LogException(Exception exc, string source)
     {
-        var appDataPath = Path.Combine(AppContext.BaseDirectory, "App_Data");
-        Directory.CreateDirectory(appDataPath);
-        var logFile = Path.Combine(appDataPath, "ErrorLog.txt");
-
-        var builder = new StringBuilder();
-        builder.AppendLine($"********** {DateTime.Now} **********");
-        builder.AppendLine($"Exception Type: {exc.GetType()}");
-        builder.AppendLine($"Exception: {exc.Message}");
-        builder.AppendLine($"Source: {source}");
-        if (!string.IsNullOrWhiteSpace(exc.StackTrace))
+        try
         {
-            builder.AppendLine("Stack Trace:");
-            builder.AppendLine(exc.StackTrace);
+            var directory = Path.Combine(AppContext.BaseDirectory, "App_Data");
+            Directory.CreateDirectory(directory);
+            var logPath = Path.Combine(directory, "ErrorLog.txt");
+            var builder = new StringBuilder()
+                .AppendLine($"********** {DateTime.UtcNow:u} **********")
+                .AppendLine($"Source: {source}")
+                .AppendLine($"Exception: {exc.Message}")
+                .AppendLine(exc.ToString())
+                .AppendLine();
+            File.AppendAllText(logPath, builder.ToString());
         }
-        if (exc.InnerException is not null)
+        catch
         {
-            builder.AppendLine($"Inner Exception Type: {exc.InnerException.GetType()}");
-            builder.AppendLine($"Inner Exception: {exc.InnerException.Message}");
         }
-        builder.AppendLine();
-
-        File.AppendAllText(logFile, builder.ToString());
     }
 }

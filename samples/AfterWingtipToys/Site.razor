@@ -10,31 +10,43 @@
         </div>
         <div class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="/Admin/AdminPage">Admin</a></li>
                 <li><a href="/">Home</a></li>
                 <li><a href="/About">About</a></li>
                 <li><a href="/Contact">Contact</a></li>
                 <li><a href="/ProductList">Products</a></li>
-                <li><a href="/ShoppingCart">@CartCountText</a></li>
+                <li><a href="/ShoppingCart">@CartLabel</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="/Account/Register">Register</a></li>
-                <li><a href="/Account/Login">Log in</a></li>
+                @if (IsAuthenticated)
+                {
+                    <li><a href="/Account/Manage">Hello, @CurrentUserName!</a></li>
+                    <li>
+                        <form method="post" action="/Account/PerformLogout" style="display:inline">
+                            <button type="submit" class="btn btn-link navbar-btn navbar-link">Log out</button>
+                        </form>
+                    </li>
+                }
+                else
+                {
+                    <li><a href="/Account/Register">Register</a></li>
+                    <li><a href="/Account/Login">Log in</a></li>
+                }
             </ul>
         </div>
     </div>
 </div>
+
 <div id="TitleContent" style="text-align: center; margin-top: 70px;">
     <a href="/">
         <img src="/Images/logo.jpg" alt="Wingtip Toys" />
     </a>
     <br />
 </div>
-<div id="CategoryMenu" style="text-align: center">
-    <ListView Items="Categories" ItemType="Category">
+<div id="CategoryMenu" style="text-align: center; margin-bottom: 20px;">
+    <ListView ItemType="Category" Items="@Categories">
         <ItemTemplate Context="Item">
             <b style="font-size: large; font-style: normal">
-                <a href="/Category/@Item.CategoryName">@Item.CategoryName</a>
+                <a href="/ProductList?categoryName=@Uri.EscapeDataString(Item.CategoryName)">@Item.CategoryName</a>
             </b>
         </ItemTemplate>
         <ItemSeparatorTemplate> | </ItemSeparatorTemplate>
@@ -42,41 +54,17 @@
 </div>
 <div class="container body-content">
     @ChildComponents
+    @ChildContent
     <hr />
     <footer>
         <p>&copy; 2013 - Wingtip Toys</p>
     </footer>
 </div>
 
-@using WingtipToys.Logic
-
 @code {
-    [Inject]
-    private ProductContext ProductContext { get; set; } = default!;
-
     [Parameter]
     public RenderFragment? ChildContent { get; set; }
 
     [Parameter]
     public RenderFragment? ChildComponents { get; set; }
-
-    private List<Category> Categories { get; set; } = [];
-
-    private string CartCountText { get; set; } = "Cart (0)";
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        Categories = await Task.FromResult(ProductContext.Categories.OrderBy(c => c.CategoryID).ToList());
-
-        try
-        {
-            using var cart = new ShoppingCartActions();
-            CartCountText = $"Cart ({cart.GetCount()})";
-        }
-        catch
-        {
-            CartCountText = "Cart (0)";
-        }
-    }
 }

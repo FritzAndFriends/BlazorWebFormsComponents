@@ -1,115 +1,35 @@
 @page "/ProductList"
-@page "/Category/{CategoryName}"
-@inject ProductContext ProductContext
-
 <PageTitle>Products</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
             <section>
                 <div>
-                    <hgroup>
-                        <h2>@CurrentTitle</h2>
-                    </hgroup>
-
-                    <ListView Items="Products" ItemType="Product" GroupItemCount="4">
+                    <h2>Products</h2>
+                    <ListView ItemType="Product" Items="@Products">
                         <EmptyDataTemplate>
-                            <table>
-                                <tr>
-                                    <td>No data was returned.</td>
-                                </tr>
-                            </table>
+                            <p>No products were found.</p>
                         </EmptyDataTemplate>
-                        <EmptyItemTemplate>
-                            <td />
-                        </EmptyItemTemplate>
-                        <GroupTemplate Context="items">
-                            <tr id="itemPlaceholderContainer">
-                                @items
-                            </tr>
-                        </GroupTemplate>
-                        <ItemTemplate Context="Item">
-                            <td>
-                                <table>
-                                    <tr>
-                                        <td>
-                                            <a href="/ProductDetails/@Item.ProductID">
-                                                <img src="/Catalog/Images/Thumbs/@Item.ImagePath" width="100" height="75" border="1" alt="@Item.ProductName" />
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <a href="/ProductDetails/@Item.ProductID">@Item.ProductName</a>
-                                            <br />
-                                            <span>
-                                                <b>Price: </b>@string.Format("{0:c}", Item.UnitPrice)
-                                            </span>
-                                            <br />
-                                            <a href="/AddToCart?ProductID=@Item.ProductID">
-                                                <span class="ProductListItem">
-                                                    <b>Add To Cart</b>
-                                                </span>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>&nbsp;</td>
-                                    </tr>
-                                </table>
-                            </td>
-                        </ItemTemplate>
-                        <LayoutTemplate Context="groups">
-                            <table style="width:100%;">
-                                <tbody>
-                                    <tr>
-                                        <td>
-                                            <table id="groupPlaceholderContainer" style="width:100%">
-                                                @groups
-                                            </table>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <LayoutTemplate Context="items">
+                            <div class="row">@items</div>
                         </LayoutTemplate>
+                        <ItemTemplate Context="Item">
+                            <div class="col-sm-3">
+                                <div class="thumbnail">
+                                    <a href="/ProductDetails?productId=@Item.ProductID">
+                                        <img src="/Catalog/Images/Thumbs/@Item.ImagePath" alt="@Item.ProductName" style="width:100%;height:160px;object-fit:contain" />
+                                    </a>
+                                    <div class="caption">
+                                        <h4><a href="/ProductDetails?productId=@Item.ProductID">@Item.ProductName</a></h4>
+                                        <p><strong>Price:</strong> @Item.UnitPrice?.ToString("C")</p>
+                                        <p><a href="/AddToCart?productId=@Item.ProductID" class="btn btn-primary">Add To Cart</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </ItemTemplate>
                     </ListView>
                 </div>
             </section>
         </Content>
     </ChildComponents>
 </Site>
-
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "id")]
-    public int? CategoryId { get; set; }
-
-    [Parameter]
-    public string? CategoryName { get; set; }
-
-    private List<Product> Products { get; set; } = [];
-
-    private string CurrentTitle { get; set; } = "Products";
-
-    protected override async Task OnParametersSetAsync()
-    {
-        await base.OnParametersSetAsync();
-
-        var query = ProductContext.Products.AsQueryable();
-        if (CategoryId.HasValue && CategoryId > 0)
-        {
-            query = query.Where(p => p.CategoryID == CategoryId);
-        }
-
-        if (!string.IsNullOrWhiteSpace(CategoryName))
-        {
-            query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
-            CurrentTitle = CategoryName;
-        }
-        else
-        {
-            CurrentTitle = "Products";
-        }
-
-        Products = await Task.FromResult(query.OrderBy(p => p.ProductName).ToList());
-    }
-}
