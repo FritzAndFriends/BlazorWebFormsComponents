@@ -36,9 +36,7 @@ jobs:
 
           # Strip forbidden paths from merge commit
           git rm -rf --cached --ignore-unmatch \
-            .ai-team/ \
             .squad/ \
-            .ai-team-templates/ \
             team-docs/ \
             "docs/proposals/" || true
 
