@@ -1,113 +1,55 @@
 @page "/ShoppingCart"
-@inject CartStore CartStore
-
-<PageTitle>Shopping Cart</PageTitle>
+<PageTitle></PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            <div id="ShoppingCartTitle" class="ContentHead"><h1>@Heading</h1></div>
-            <form method="post" @formname="shopping-cart-form">
-                <AntiforgeryToken />
-                <GridView ItemType="CartItem" AutoGenerateColumns="false" GridLines="@GridLines.Vertical" CellPadding="4"
-                          Items="@CartItems" CssClass="table table-striped table-bordered">
-                    <EmptyDataTemplate>
-                        <div>Your shopping cart is empty.</div>
-                    </EmptyDataTemplate>
-                    <Columns>
-                        <TemplateField ItemType="CartItem" HeaderText="ID">
-                            <ItemTemplate Context="Item">@Item.ProductId</ItemTemplate>
-                        </TemplateField>
-                        <TemplateField ItemType="CartItem" HeaderText="Name">
-                            <ItemTemplate Context="Item">@Item.Product.ProductName</ItemTemplate>
-                        </TemplateField>
-                        <TemplateField ItemType="CartItem" HeaderText="Price (each)">
-                            <ItemTemplate Context="Item">@(String.Format("{0:c}", Item.Product.UnitPrice))</ItemTemplate>
-                        </TemplateField>
-                        <TemplateField ItemType="CartItem" HeaderText="Quantity">
-                            <ItemTemplate Context="Item">
-                                <input type="number" min="1" name="qty_@Item.ProductId" value="@Item.Quantity" class="form-control" style="width:80px" />
-                            </ItemTemplate>
-                        </TemplateField>
-                        <TemplateField ItemType="CartItem" HeaderText="Item Total">
-                            <ItemTemplate Context="Item">@(String.Format("{0:c}", ((Item.Product.UnitPrice ?? 0) * Item.Quantity)))</ItemTemplate>
-                        </TemplateField>
-                        <TemplateField ItemType="CartItem" HeaderText="Remove Item">
-                            <ItemTemplate Context="Item">
-                                <button type="submit" name="removeItem" value="@Item.ProductId" class="btn btn-link">Remove</button>
-                            </ItemTemplate>
-                        </TemplateField>
-                    </Columns>
-                </GridView>
-
-                @if (CartItems.Count > 0)
-                {
-                    <div>
-                        <p></p>
-                        <strong>Order Total: @String.Format("{0:c}", OrderTotal)</strong>
-                    </div>
-                    <br />
-                    <table>
-                        <tr>
-                            <td>
-                                <button type="submit" name="updateCart" value="true" class="btn btn-default">Update</button>
-                            </td>
-                            <td style="padding-left:12px;">
-                                <a class="btn btn-primary" href="/Checkout/CheckoutStart">Checkout</a>
-                            </td>
-                        </tr>
-                    </table>
-                }
-                else
-                {
-                    <p>Your shopping cart is empty.</p>
-                }
-            </form>
+            <div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
+            <GridView id="CartList" @ref="CartList" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
+                ItemType="CartItem" SelectMethod="GetShoppingCartItems"
+                CssClass="table table-striped table-bordered" >
+                <Columns>
+                <BoundField ItemType="CartItem" DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />
+                <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Name" />
+                <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>
+                <TemplateField ItemType="CartItem"   HeaderText="Quantity">
+                        <ItemTemplate Context="Item">
+                            <TextBox id="PurchaseQuantity" @ref="PurchaseQuantity" Width="40" Text="@Item.Quantity.ToString()"></TextBox>
+                        </ItemTemplate>
+                </TemplateField>
+                <TemplateField ItemType="CartItem" HeaderText="Item Total">
+                        <ItemTemplate Context="Item">
+                            @(String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) *  Convert.ToDouble(Item.Product.UnitPrice))))
+                        </ItemTemplate>
+                </TemplateField>
+                <TemplateField ItemType="CartItem" HeaderText="Remove Item">
+                        <ItemTemplate Context="Item">
+                            <CheckBox id="Remove" @ref="Remove"></CheckBox>
+                        </ItemTemplate>
+                </TemplateField>
+                </Columns>
+            </GridView>
+            <div>
+                <p></p>
+                <strong>
+                    <Label id="LabelTotalText" @ref="LabelTotalText" Text="Order Total: "></Label>
+                    <Label id="lblTotal" @ref="lblTotal"></Label>
+                </strong>
+            </div>
+            <br />
+            <table>
+            <tr>
+              <td>
+                <Button id="UpdateBtn" @ref="UpdateBtn" Text="Update" OnClick="@UpdateBtn_Click" />
+              </td>
+              <td>
+                <ImageButton id="CheckoutImageBtn" @ref="CheckoutImageBtn"
+                              ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+                              Width="145" AlternateText="Check out with PayPal"
+                              OnClick="@CheckoutBtn_Click"
+                              BackColor="@WebColor.Transparent" BorderWidth="0" />
+              </td>
+            </tr>
+            </table>
         </Content>
     </ChildComponents>
 </Site>
-
-@code {
-    private List<CartItem> CartItems { get; set; } = [];
-    private decimal OrderTotal { get; set; }
-    private string Heading { get; set; } = "Shopping Cart";
-
-    protected override void OnInitialized()
-    {
-        var cartId = GetOrCreateCartId();
-        if (IsPostBack)
-        {
-            if (int.TryParse(Request.Form["removeItem"], out var removeProductId))
-            {
-                CartStore.RemoveItem(cartId, removeProductId);
-            }
-            else
-            {
-                foreach (var item in CartStore.GetCartItems(cartId))
-                {
-                    if (int.TryParse(Request.Form[$"qty_{item.ProductId}"], out var quantity))
-                    {
-                        CartStore.UpdateQuantity(cartId, item.ProductId, quantity);
-                    }
-                }
-            }
-        }
-
-        CartItems = CartStore.GetCartItems(cartId).ToList();
-        OrderTotal = CartStore.GetTotal(cartId);
-        Heading = CartItems.Count == 0 ? "Shopping Cart is Empty" : "Shopping Cart";
-    }
-
-    private string GetOrCreateCartId()
-    {
-        var cartId = Session[CartSessionKey]?.ToString();
-        if (string.IsNullOrWhiteSpace(cartId))
-        {
-            cartId = Guid.NewGuid().ToString("N");
-            Session[CartSessionKey] = cartId;
-        }
-
-        return cartId;
-    }
-
-    private const string CartSessionKey = "CartId";
-}

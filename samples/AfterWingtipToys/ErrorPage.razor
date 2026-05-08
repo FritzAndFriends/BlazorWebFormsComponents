@@ -1,10 +1,32 @@
 @page "/ErrorPage"
-<PageTitle>Error</PageTitle>
+<PageTitle></PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            <h2>Error</h2>
-            <p>An unexpected error occurred.</p>
+            <h2>Error:</h2>
+            <p></p>
+            <Label id="FriendlyErrorMsg" @ref="FriendlyErrorMsg" Text="Label" Font-Size="Large" style="color: red"></Label>
+
+            <Panel id="DetailedErrorPanel" @ref="DetailedErrorPanel" Visible="false">
+                <p>&nbsp;</p>
+                <h4>Detailed Error:</h4>
+                <p>
+                    <Label id="ErrorDetailedMsg" @ref="ErrorDetailedMsg" Font-Size="Small" /><br />
+                </p>
+
+                <h4>Error Handler:</h4>
+                <p>
+                    <Label id="ErrorHandler" @ref="ErrorHandler" Font-Size="Small" /><br />
+                </p>
+
+                <h4>Detailed Error Message:</h4>
+                <p>
+                    <Label id="InnerMessage" @ref="InnerMessage" Font-Size="Small" /><br />
+                </p>
+                <p>
+                    <Label id="InnerTrace" @ref="InnerTrace"  />
+                </p>
+            </Panel>
         </Content>
     </ChildComponents>
 </Site>

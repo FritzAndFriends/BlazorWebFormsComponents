@@ -1,29 +1,17 @@
 @page "/AddToCart"
-@inject CartStore CartStore
-
-<PageTitle>Add To Cart</PageTitle>
-<p>Adding item to cart...</p>
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 
 @code {
-    [Parameter, SupplyParameterFromQuery(Name = "productID")]
-    public int? ProductId { get; set; }
-
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        var cartId = Session[CartSessionKey]?.ToString();
-        if (string.IsNullOrWhiteSpace(cartId))
-        {
-            cartId = Guid.NewGuid().ToString("N");
-            Session[CartSessionKey] = cartId;
-        }
+        await base.OnInitializedAsync();
 
-        if (ProductId.HasValue)
+        string rawId = Request.QueryString["productID"];
+        if (!string.IsNullOrEmpty(rawId) && int.TryParse(rawId, out var productId))
         {
-            CartStore.AddItem(cartId!, ProductId.Value);
+            using var cart = new WingtipToys.Logic.ShoppingCartActions();
+            cart.AddToCart(productId);
         }
-
-        Response.Redirect("~/ShoppingCart.aspx");
+        Response.Redirect("ShoppingCart");
     }
-
-    private const string CartSessionKey = "CartId";
 }

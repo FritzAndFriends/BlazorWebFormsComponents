@@ -1,11 +1,10 @@
 @page "/ProductDetails"
-@inject CatalogService CatalogService
-
+@page "/ProductDetails/{ProductId:int}"
 <PageTitle>Product Details</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            <FormView ItemType="Product" Items="@ProductItems" RenderOuterTable="false">
+            <FormView id="productDetail" @ref="productDetail" ItemType="Product" SelectMethod ="GetProduct" RenderOuterTable="false">
                 <ItemTemplate Context="Item">
                     <div>
                         <h1>@Item.ProductName</h1>
@@ -14,7 +13,7 @@
                     <table>
                         <tr>
                             <td>
-                                <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName" />
+                                <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName"/>
                             </td>
                             <td>&nbsp;</td>
                             <td style="vertical-align: top; text-align:left;">
@@ -23,8 +22,11 @@
                                 <span><b>Price:</b>&nbsp;@(String.Format("{0:c}", Item.UnitPrice))</span>
                                 <br />
                                 <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
-                                <br /><br />
-                                <a class="btn btn-primary" href="/AddToCart?productID=@Item.ProductID">Add To Cart</a>
+                                <br />
+                                <br />
+                                <a href="/AddToCart?productID=@Item.ProductID">
+                                    <b>Add To Cart</b>
+                                </a>
                             </td>
                         </tr>
                     </table>
@@ -33,15 +35,3 @@
         </Content>
     </ChildComponents>
 </Site>
-
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "productID")]
-    public int? ProductId { get; set; }
-
-    [Parameter, SupplyParameterFromQuery(Name = "productName")]
-    public string? ProductName { get; set; }
-
-    private IReadOnlyList<Product> ProductItems => CatalogService.GetProduct(ProductId, ProductName) is { } product
-        ? [product]
-        : Array.Empty<Product>();
-}

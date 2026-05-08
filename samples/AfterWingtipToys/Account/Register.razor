@@ -1,45 +1,53 @@
 @page "/Account/Register"
+@page "/Register"
 <PageTitle>Register</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            <h1>Register</h1>
-            @if (!string.IsNullOrWhiteSpace(Error))
-            {
-                <p class="text-danger">@Error</p>
-            }
-            <form method="post" action="/Account/RegisterHandler" class="form-horizontal" @formname="register-form">
-                <AntiforgeryToken />
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="email">Email</label>
-                    <div class="col-md-10">
-                        <input id="email" name="Email" type="email" class="form-control" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="password">Password</label>
-                    <div class="col-md-10">
-                        <input id="password" name="Password" type="password" class="form-control" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2 control-label" for="confirm-password">Confirm password</label>
-                    <div class="col-md-10">
-                        <input id="confirm-password" name="ConfirmPassword" type="password" class="form-control" />
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <button type="submit" class="btn btn-default">Register</button>
-                    </div>
-                </div>
-            </form>
-            <p><a href="/Account/Login">Already have an account? Sign in</a></p>
-        </Content>
+    <h1>Register</h1>
+    @* TODO(bwfc-identity): Wire this account page to ASP.NET Core Identity or your app's authentication service. *@
+    @* TODO(bwfc-identity): Recreate validation and submit handling with EditForm, minimal APIs, or an equivalent SSR-safe endpoint. *@
+    @if (!string.IsNullOrWhiteSpace(Error))
+    {
+        <p class="text-danger">@Error</p>
+    }
+    <form method="post" action="/Account/RegisterHandler" class="form-horizontal" @formname="bwfc-form-1">
+    <AntiforgeryToken />
+        @if (!string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+        }
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="email">Email</label>
+            <div class="col-md-10">
+                <input id="email" name="Email" type="email" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="password">Password</label>
+            <div class="col-md-10">
+                <input id="password" name="Password" type="password" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="confirm-password">Confirm password</label>
+            <div class="col-md-10">
+                <input id="confirm-password" name="ConfirmPassword" type="password" class="form-control" />
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-default">Register</button>
+            </div>
+        </div>
+    </form>
+    <p><a href="/Account/Login">Already have an account? Sign in</a></p>
+</Content>
     </ChildComponents>
 </Site>
 
 @code {
-    [Parameter, SupplyParameterFromQuery(Name = "error")]
-    public string? Error { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name = "error")] public string? Error { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "returnUrl")] public string? ReturnUrl { get; set; }
 }
