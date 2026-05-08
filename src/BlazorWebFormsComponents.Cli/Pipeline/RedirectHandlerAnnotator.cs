@@ -53,13 +53,13 @@ public class RedirectHandlerAnnotator
         if (context.SourceFiles.Any(IsLoginPage))
         {
             handlerBlocks.Add(BuildLoginHandlerBlock());
-            report.AddManualItem("Account/Login.aspx", 0, "bwfc-identity", "Login.razor submits to /Account/PerformLogin — replace the generated stub with your real authentication endpoint.", "high");
+            report.AddManualItem("Account/Login.aspx", 0, "bwfc-identity", "Login.razor now posts to /Account/LoginHandler — verify the generated Identity sign-in flow matches your app's redirect and claims requirements.", "medium");
         }
 
         if (context.SourceFiles.Any(IsRegisterPage))
         {
             handlerBlocks.Add(BuildRegisterHandlerBlock());
-            report.AddManualItem("Account/Register.aspx", 0, "bwfc-identity", "Register.razor submits to /Account/PerformRegister — replace the generated stub with your real registration endpoint.", "high");
+            report.AddManualItem("Account/Register.aspx", 0, "bwfc-identity", "Register.razor now posts to /Account/RegisterHandler — verify the generated Identity registration flow matches your app's user profile and confirmation requirements.", "medium");
         }
 
         if (handlerBlocks.Count == 0)
@@ -139,30 +139,88 @@ public class RedirectHandlerAnnotator
 
     private static string BuildLoginHandlerBlock() =>
         """
-app.MapGet("/Account/PerformLogin", (string? email, string? password, string? returnUrl) =>
+app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
 {
-    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-        return Results.Redirect("/Account/Login?error=Email%20and%20password%20are%20required");
+    var form = await context.Request.ReadFormAsync();
+    var email = form["Email"].ToString().Trim();
+    var password = form["Password"].ToString();
+    var returnUrl = form["ReturnUrl"].ToString();
+    var rememberMe = string.Equals(form["RememberMe"], "on", StringComparison.OrdinalIgnoreCase)
+        || string.Equals(form["RememberMe"], "true", StringComparison.OrdinalIgnoreCase);
+    var hasLocalReturnUrl = !string.IsNullOrWhiteSpace(returnUrl)
+        && Uri.IsWellFormedUriString(returnUrl, UriKind.Relative)
+        && returnUrl.StartsWith("/", StringComparison.Ordinal);
 
-    // TODO(bwfc-identity): Replace this stub with a real authentication endpoint that issues cookies.
-    return Results.Redirect(string.IsNullOrWhiteSpace(returnUrl)
-        ? "/Account/Login?error=Authentication%20is%20not%20wired%20yet"
-        : $"/Account/Login?error=Authentication%20is%20not%20wired%20yet&returnUrl={Uri.EscapeDataString(returnUrl)}");
+    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+    {
+        var missingCredentialsUrl = hasLocalReturnUrl
+            ? $"/Account/Login?error=Email%20and%20password%20are%20required&returnUrl={Uri.EscapeDataString(returnUrl)}"
+            : "/Account/Login?error=Email%20and%20password%20are%20required";
+        return Results.LocalRedirect(missingCredentialsUrl);
+    }
+
+    var result = await signInManager.PasswordSignInAsync(email, password, rememberMe, lockoutOnFailure: false);
+    if (!result.Succeeded)
+    {
+        var invalidLoginUrl = hasLocalReturnUrl
+            ? $"/Account/Login?error=Invalid%20login%20attempt&returnUrl={Uri.EscapeDataString(returnUrl)}"
+            : "/Account/Login?error=Invalid%20login%20attempt";
+        return Results.LocalRedirect(invalidLoginUrl);
+    }
+
+    return Results.LocalRedirect(hasLocalReturnUrl ? returnUrl : "/");
 });
 """;
 
     private static string BuildRegisterHandlerBlock() =>
         """
-app.MapGet("/Account/PerformRegister", (string? email, string? password, string? confirmPassword) =>
+app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<IdentityUser> userManager) =>
 {
+    var form = await context.Request.ReadFormAsync();
+    var email = form["Email"].ToString().Trim();
+    var password = form["Password"].ToString();
+    var confirmPassword = form["ConfirmPassword"].ToString();
+    var returnUrl = form["ReturnUrl"].ToString();
+    var hasLocalReturnUrl = !string.IsNullOrWhiteSpace(returnUrl)
+        && Uri.IsWellFormedUriString(returnUrl, UriKind.Relative)
+        && returnUrl.StartsWith("/", StringComparison.Ordinal);
+
     if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-        return Results.Redirect("/Account/Register?error=Email%20and%20password%20are%20required");
+    {
+        var missingCredentialsUrl = hasLocalReturnUrl
+            ? $"/Account/Register?error=Email%20and%20password%20are%20required&returnUrl={Uri.EscapeDataString(returnUrl)}"
+            : "/Account/Register?error=Email%20and%20password%20are%20required";
+        return Results.LocalRedirect(missingCredentialsUrl);
+    }
 
     if (!string.Equals(password, confirmPassword, StringComparison.Ordinal))
-        return Results.Redirect("/Account/Register?error=Passwords%20do%20not%20match");
+    {
+        var mismatchedPasswordUrl = hasLocalReturnUrl
+            ? $"/Account/Register?error=Passwords%20do%20not%20match&returnUrl={Uri.EscapeDataString(returnUrl)}"
+            : "/Account/Register?error=Passwords%20do%20not%20match";
+        return Results.LocalRedirect(mismatchedPasswordUrl);
+    }
 
-    // TODO(bwfc-identity): Replace this stub with a real registration endpoint that creates a user record.
-    return Results.Redirect("/Account/Login?registered=1");
+    var user = new IdentityUser
+    {
+        UserName = email,
+        Email = email
+    };
+
+    var result = await userManager.CreateAsync(user, password);
+    if (!result.Succeeded)
+    {
+        var error = result.Errors.FirstOrDefault()?.Description ?? "Registration failed";
+        var registrationErrorUrl = hasLocalReturnUrl
+            ? $"/Account/Register?error={Uri.EscapeDataString(error)}&returnUrl={Uri.EscapeDataString(returnUrl)}"
+            : $"/Account/Register?error={Uri.EscapeDataString(error)}";
+        return Results.LocalRedirect(registrationErrorUrl);
+    }
+
+    var registeredUrl = hasLocalReturnUrl
+        ? $"/Account/Login?registered=1&returnUrl={Uri.EscapeDataString(returnUrl)}"
+        : "/Account/Login?registered=1";
+    return Results.LocalRedirect(registeredUrl);
 });
 """;
 }

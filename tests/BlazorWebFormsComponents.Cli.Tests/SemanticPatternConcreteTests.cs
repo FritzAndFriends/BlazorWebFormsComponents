@@ -50,7 +50,8 @@ public class SemanticPatternConcreteTests
             FileType.Page);
 
         Assert.Contains("TODO(bwfc-identity)", result.Markup);
-        Assert.Contains("<form method=\"get\" action=\"/Account/PerformLogin\" class=\"form-horizontal\">", result.Markup);
+        Assert.Contains("<form method=\"post\" action=\"/Account/LoginHandler\" class=\"form-horizontal\">", result.Markup);
+        Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", result.Markup);
         Assert.Contains("type=\"email\"", result.Markup);
         Assert.Contains("type=\"password\"", result.Markup);
         Assert.Contains("type=\"checkbox\"", result.Markup);
@@ -176,8 +177,9 @@ public class SemanticPatternConcreteTests
             result.AppliedPatterns.Select(p => p.PatternId).ToArray());
         Assert.Contains("<ChildComponents>", result.Markup);
         Assert.Contains("TODO(bwfc-identity)", result.Markup);
-        Assert.Contains("method=\"get\"", result.Markup);
-        Assert.Contains("action=\"/Account/PerformRegister\"", result.Markup);
+        Assert.Contains("method=\"post\"", result.Markup);
+        Assert.Contains("action=\"/Account/RegisterHandler\"", result.Markup);
+        Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", result.Markup);
         Assert.Contains("@formname=\"bwfc-form-1\"", result.Markup);
         Assert.Contains("<AntiforgeryToken />", result.Markup);
         Assert.DoesNotContain("<ValidationSummary", result.Markup);

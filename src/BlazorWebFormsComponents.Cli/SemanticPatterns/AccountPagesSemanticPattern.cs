@@ -122,11 +122,12 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         builder.AppendLine("}");
         builder.AppendLine($"<form method=\"{GetFormMethod(fileName)}\" action=\"{formAction}\" class=\"form-horizontal\">");
 
-        if (fileName.Equals("Login", StringComparison.OrdinalIgnoreCase))
+        if (fileName.Equals("Login", StringComparison.OrdinalIgnoreCase)
+            || fileName.Equals("Register", StringComparison.OrdinalIgnoreCase))
         {
             builder.AppendLine("    @if (!string.IsNullOrWhiteSpace(ReturnUrl))");
             builder.AppendLine("    {");
-            builder.AppendLine("        <input type=\"hidden\" name=\"returnUrl\" value=\"@ReturnUrl\" />");
+            builder.AppendLine("        <input type=\"hidden\" name=\"ReturnUrl\" value=\"@ReturnUrl\" />");
             builder.AppendLine("    }");
         }
 
@@ -327,15 +328,11 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         : "Submit";
 
     private static string GetFormAction(string fileName) =>
-        fileName.Equals("Login", StringComparison.OrdinalIgnoreCase) ? "/Account/PerformLogin"
-        : fileName.Equals("Register", StringComparison.OrdinalIgnoreCase) ? "/Account/PerformRegister"
+        fileName.Equals("Login", StringComparison.OrdinalIgnoreCase) ? "/Account/LoginHandler"
+        : fileName.Equals("Register", StringComparison.OrdinalIgnoreCase) ? "/Account/RegisterHandler"
         : $"/Account/{fileName}Handler";
 
-    private static string GetFormMethod(string fileName) =>
-        fileName.Equals("Login", StringComparison.OrdinalIgnoreCase)
-        || fileName.Equals("Register", StringComparison.OrdinalIgnoreCase)
-            ? "get"
-            : "post";
+    private static string GetFormMethod(string fileName) => "post";
 
     private static string ToTitle(string value)
     {
@@ -369,6 +366,10 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         if (fileName.Equals("Login", StringComparison.OrdinalIgnoreCase))
         {
             AddParameterIfMissing(markup, parameterLines, "Registered", "registered", "int?");
+            AddParameterIfMissing(markup, parameterLines, "ReturnUrl", "returnUrl", "string?");
+        }
+        else if (fileName.Equals("Register", StringComparison.OrdinalIgnoreCase))
+        {
             AddParameterIfMissing(markup, parameterLines, "ReturnUrl", "returnUrl", "string?");
         }
 

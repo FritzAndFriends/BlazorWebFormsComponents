@@ -23,6 +23,7 @@ public class ProgramCsEmitter
         builder.AppendLine("var builder = WebApplication.CreateBuilder(args);");
         builder.AppendLine();
         builder.AppendLine("builder.Services.AddRazorComponents();");
+        builder.AppendLine("builder.Services.AddAntiforgery();");
 
         if (profile.NeedsSession)
         {
@@ -65,6 +66,11 @@ public class ProgramCsEmitter
                 builder.AppendLine("// Add identityBuilder.AddEntityFrameworkStores<YourDbContext>() after migrating your auth store.");
             }
 
+            builder.AppendLine("builder.Services.ConfigureApplicationCookie(options =>");
+            builder.AppendLine("{");
+            builder.AppendLine("    options.LoginPath = \"/Account/Login\";");
+            builder.AppendLine("    options.LogoutPath = \"/Account/Logout\";");
+            builder.AppendLine("});");
             builder.AppendLine("builder.Services.AddAuthorization();");
             builder.AppendLine("builder.Services.AddCascadingAuthenticationState();");
         }

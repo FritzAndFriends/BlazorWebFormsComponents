@@ -16,9 +16,19 @@ public class ValidatorGenericTypeTransformTests
     };
 
     [Fact]
-    public void AddsType_ToRequiredFieldValidator_WhenMissing()
+    public void AddsObjectType_ToRequiredFieldValidator_WhenNoControlTypeHintExists()
     {
         var input = "<RequiredFieldValidator ControlToValidate=\"Email\" />";
+
+        var result = _transform.Apply(input, TestMetadata);
+
+        Assert.Contains("<RequiredFieldValidator Type=\"object\" ControlToValidate=\"Email\" />", result);
+    }
+
+    [Fact]
+    public void AddsStringType_ToRequiredFieldValidator_WhenTextBoxIsValidated()
+    {
+        var input = "<TextBox ID=\"Email\" /><RequiredFieldValidator ControlToValidate=\"Email\" />";
 
         var result = _transform.Apply(input, TestMetadata);
 

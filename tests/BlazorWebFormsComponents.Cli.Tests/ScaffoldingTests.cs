@@ -103,6 +103,7 @@ public class ScaffoldingTests : IDisposable
     {
         var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
 
+        Assert.Contains("builder.Services.AddAntiforgery();", result.Files["program"].Content);
         Assert.Contains("app.UseAntiforgery();", result.Files["program"].Content);
     }
 
@@ -314,6 +315,9 @@ public class ScaffoldingTests : IDisposable
 
         Assert.True(result.RuntimeProfile.NeedsIdentity);
         Assert.Contains("AddDefaultIdentity<IdentityUser>", program);
+        Assert.Contains("ConfigureApplicationCookie", program);
+        Assert.Contains("options.LoginPath = \"/Account/Login\";", program);
+        Assert.Contains("options.LogoutPath = \"/Account/Logout\";", program);
         Assert.Contains("app.UseAuthentication();", program);
         Assert.Contains("app.UseAuthorization();", program);
     }
