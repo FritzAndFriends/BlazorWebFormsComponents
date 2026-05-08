@@ -14,6 +14,29 @@ namespace BlazorWebFormsComponents
 	{
 
 		/// <summary>
+		/// Gets or sets a single data item for the FormView.
+		/// When set, the item is wrapped into a single-element collection
+		/// and used as the <see cref="DataBoundComponent{ItemType}.Items"/> source.
+		/// This enables the Web Forms pattern: <c>&lt;FormView DataItem="product" /&gt;</c>.
+		/// </summary>
+		[Parameter]
+		public ItemType DataItem
+		{
+			get => Items?.FirstOrDefault();
+			set
+			{
+				if (value != null)
+				{
+					Items = new[] { value };
+				}
+				else
+				{
+					Items = null;
+				}
+			}
+		}
+
+		/// <summary>
 		/// Gets or sets whether the pager UI is displayed. When false, the pager row is hidden
 		/// even when multiple items exist.
 		/// </summary>

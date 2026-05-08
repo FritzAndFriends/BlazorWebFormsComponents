@@ -1,71 +1,64 @@
+@page "/Admin/AdminPage"
 @page "/AdminPage"
-<PageTitle></PageTitle>
+<PageTitle>Administration</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
             <h1>Administration</h1>
-            <hr />
-            <h3>Add Product:</h3>
-            <table>
-                <tr>
-                    <td><Label id="LabelAddCategory" @ref="LabelAddCategory">Category:</Label></td>
-                    <td>
-                        <DropDownList id="DropDownAddCategory" @ref="DropDownAddCategory"
-                            ItemType="Category"
-                            SelectMethod="GetCategories" DataTextField="CategoryName"
-                            DataValueField="CategoryID" >
-                        </DropDownList>
-                    </td>
-                </tr>
-                <tr>
-                    <td><Label id="LabelAddName" @ref="LabelAddName">Name:</Label></td>
-                    <td>
-                        <TextBox id="AddProductName" @ref="AddProductName"></TextBox>
-                        <RequiredFieldValidator Type="string" id="RequiredFieldValidator1" @ref="RequiredFieldValidator1" Text="* Product name required." ControlToValidate="AddProductName" SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic"></RequiredFieldValidator>
-                    </td>
-                </tr>
-                <tr>
-                    <td><Label id="LabelAddDescription" @ref="LabelAddDescription">Description:</Label></td>
-                    <td>
-                        <TextBox id="AddProductDescription" @ref="AddProductDescription"></TextBox>
-                        <RequiredFieldValidator Type="string" id="RequiredFieldValidator2" @ref="RequiredFieldValidator2" Text="* Description required." ControlToValidate="AddProductDescription" SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic"></RequiredFieldValidator>
-                    </td>
-                </tr>
-                <tr>
-                    <td><Label id="LabelAddPrice" @ref="LabelAddPrice">Price:</Label></td>
-                    <td>
-                        <TextBox id="AddProductPrice" @ref="AddProductPrice"></TextBox>
-                        <RequiredFieldValidator Type="string" id="RequiredFieldValidator3" @ref="RequiredFieldValidator3" Text="* Price required." ControlToValidate="AddProductPrice" SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic"></RequiredFieldValidator>
-                        <RegularExpressionValidator id="RegularExpressionValidator1" @ref="RegularExpressionValidator1" Text="* Must be a valid price without $." ControlToValidate="AddProductPrice" SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic" ValidationExpression="^[0-9]*(\.)?[0-9]?[0-9]?$"></RegularExpressionValidator>
-                    </td>
-                </tr>
-                <tr>
-                    <td><Label id="LabelAddImageFile" @ref="LabelAddImageFile">Image File:</Label></td>
-                    <td>
-                        <FileUpload id="ProductImage" @ref="ProductImage" />
-                        <RequiredFieldValidator Type="object" id="RequiredFieldValidator4" @ref="RequiredFieldValidator4" Text="* Image path required." ControlToValidate="ProductImage" SetFocusOnError="true" Display="@ValidatorDisplay.Dynamic"></RequiredFieldValidator>
-                    </td>
-                </tr>
-            </table>
-            <p></p>
-            <p></p>
-            <Button id="AddProductButton" @ref="AddProductButton" Text="Add Product" OnClick="@AddProductButton_Click"  CausesValidation="true"/>
-            <Label id="LabelAddStatus" @ref="LabelAddStatus" Text=""></Label>
-            <p></p>
-            <h3>Remove Product:</h3>
-            <table>
-                <tr>
-                    <td><Label id="LabelRemoveProduct" @ref="LabelRemoveProduct">Product:</Label></td>
-                    <td><DropDownList id="DropDownRemoveProduct" @ref="DropDownRemoveProduct" ItemType="Product"
-                            SelectMethod="GetProducts" AppendDataBoundItems="true"
-                            DataTextField="ProductName" DataValueField="ProductID" >
-                        </DropDownList>
-                    </td>
-                </tr>
-            </table>
-            <p></p>
-            <Button id="RemoveProductButton" @ref="RemoveProductButton" Text="Remove Product" OnClick="@RemoveProductButton_Click" CausesValidation="false"/>
-            <Label id="LabelRemoveStatus" @ref="LabelRemoveStatus" Text=""></Label>
+            <p>Use this simplified admin page to manage catalog data in the migrated benchmark.</p>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h3>Add Product</h3>
+                    <div class="form-group">
+                        <label>Name</label>
+                        <input class="form-control" @bind="AddProductName" />
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" @bind="AddProductDescription"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input class="form-control" @bind="AddProductPrice" />
+                    </div>
+                    <div class="form-group">
+                        <label>Image File</label>
+                        <input class="form-control" @bind="AddProductImagePath" />
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select class="form-control" @bind="SelectedCategoryId">
+                            @foreach (var category in Categories)
+                            {
+                                <option value="@category.CategoryID">@category.CategoryName</option>
+                            }
+                        </select>
+                    </div>
+                    <Button Text="Add Product" OnClick="@AddProductButton_Click" />
+                    @if (!string.IsNullOrWhiteSpace(AddStatus))
+                    {
+                        <p>@AddStatus</p>
+                    }
+                </div>
+                <div class="col-md-6">
+                    <h3>Remove Product</h3>
+                    <div class="form-group">
+                        <label>Product</label>
+                        <select class="form-control" @bind="SelectedProductId">
+                            @foreach (var product in Products)
+                            {
+                                <option value="@product.ProductID">@product.ProductName</option>
+                            }
+                        </select>
+                    </div>
+                    <Button Text="Remove Product" OnClick="@RemoveProductButton_Click" />
+                    @if (!string.IsNullOrWhiteSpace(RemoveStatus))
+                    {
+                        <p>@RemoveStatus</p>
+                    }
+                </div>
+            </div>
         </Content>
     </ChildComponents>
 </Site>

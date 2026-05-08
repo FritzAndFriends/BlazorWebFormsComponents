@@ -1,37 +1,12 @@
+@page "/Account/RegisterExternalLogin"
 @page "/RegisterExternalLogin"
 <PageTitle>Register an external login</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-        <h3>Register with your @(ProviderName) account</h3>
-
-            <PlaceHolder>
-                <div class="form-horizontal">
-                    <h4>Association Form</h4>
-                    <hr />
-                    <ValidationSummary ShowModelStateErrors="true" CssClass="text-danger" />
-                    <p class="text-info">
-                        You've authenticated with <strong>@(ProviderName)</strong>. Please enter an email below for the current site
-                        and click the Log in button.
-                    </p>
-
-                    <div class="form-group">
-                        <Label AssociatedControlID="email" CssClass="col-md-2 control-label">Email</Label>
-                        <div class="col-md-10">
-                            <TextBox id="email" @ref="email" CssClass="form-control" TextMode="@TextBoxMode.Email" />
-                            <RequiredFieldValidator Type="string" ControlToValidate="email"
-                                Display="@ValidatorDisplay.Dynamic" CssClass="text-danger" ErrorMessage="Email is required" />
-                            <ModelErrorMessage ModelStateKey="email" CssClass="text-error" />
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <Button Text="Log in" CssClass="btn btn-default" OnClick="@LogIn_Click" />
-                        </div>
-                    </div>
-                </div>
-            </PlaceHolder>
+            <h3>External login setup is not available in this benchmark run.</h3>
+            <p>Please register with an email address and password instead.</p>
+            <p><a href="/Account/Register">Return to registration</a></p>
         </Content>
     </ChildComponents>
 </Site>

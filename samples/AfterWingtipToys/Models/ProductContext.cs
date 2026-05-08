@@ -4,22 +4,15 @@ namespace WingtipToys.Models
 {
   public class ProductContext : DbContext
   {
-    private const string DefaultConnectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=|DataDirectory|\\wingtiptoys.mdf;Integrated Security=True";
-
     public ProductContext()
+      : this(new DbContextOptionsBuilder<ProductContext>()
+          .UseSqlite("Data Source=wingtiptoys.db")
+          .Options)
     {
     }
 
     public ProductContext(DbContextOptions<ProductContext> options) : base(options)
     {
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-      if (!optionsBuilder.IsConfigured)
-      {
-        optionsBuilder.UseSqlite("Data Source=wingtiptoys.db");
-      }
     }
 
     public DbSet<Category> Categories { get; set; }

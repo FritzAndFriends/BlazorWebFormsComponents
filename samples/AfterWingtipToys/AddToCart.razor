@@ -1,17 +1,3 @@
 @page "/AddToCart"
-@inherits BlazorWebFormsComponents.WebFormsPageBase
-
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-
-        string rawId = Request.QueryString["productID"];
-        if (!string.IsNullOrEmpty(rawId) && int.TryParse(rawId, out var productId))
-        {
-            using var cart = new WingtipToys.Logic.ShoppingCartActions();
-            cart.AddToCart(productId);
-        }
-        Response.Redirect("ShoppingCart");
-    }
-}
+<PageTitle>Add To Cart</PageTitle>
+<p>Adding item to cart...</p>

@@ -1,32 +1,26 @@
 @page "/ErrorPage"
-<PageTitle></PageTitle>
+<PageTitle>Error</PageTitle>
 <Site>
     <ChildComponents>
         <Content ContentPlaceHolderID="MainContent">
-            <h2>Error:</h2>
-            <p></p>
-            <Label id="FriendlyErrorMsg" @ref="FriendlyErrorMsg" Text="Label" Font-Size="Large" style="color: red"></Label>
-
-            <Panel id="DetailedErrorPanel" @ref="DetailedErrorPanel" Visible="false">
-                <p>&nbsp;</p>
-                <h4>Detailed Error:</h4>
-                <p>
-                    <Label id="ErrorDetailedMsg" @ref="ErrorDetailedMsg" Font-Size="Small" /><br />
-                </p>
-
-                <h4>Error Handler:</h4>
-                <p>
-                    <Label id="ErrorHandler" @ref="ErrorHandler" Font-Size="Small" /><br />
-                </p>
-
-                <h4>Detailed Error Message:</h4>
-                <p>
-                    <Label id="InnerMessage" @ref="InnerMessage" Font-Size="Small" /><br />
-                </p>
-                <p>
-                    <Label id="InnerTrace" @ref="InnerTrace"  />
-                </p>
-            </Panel>
+            <h2>Error</h2>
+            <p>@FriendlyMessage</p>
+            @if (!string.IsNullOrWhiteSpace(Handler))
+            {
+                <p><strong>Handler:</strong> @Handler</p>
+            }
         </Content>
     </ChildComponents>
 </Site>
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "msg")]
+    public string? MessageCode { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "handler")]
+    public string? Handler { get; set; }
+
+    private string FriendlyMessage => MessageCode == "404"
+        ? "The page you requested could not be found."
+        : "A problem has occurred on this web site. Please try again.";
+}

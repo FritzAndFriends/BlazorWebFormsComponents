@@ -1,181 +1,93 @@
-// =============================================================================
-// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
-//
-// Common transforms needed (use the BWFC Copilot skill for assistance):
-//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
-//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
-//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
-//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
-//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
-//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
-//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
-//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
-//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
-//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
-//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
-//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
-//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
-//   TODO(bwfc-general): User controls → Blazor component references
-// =============================================================================
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
-using WingtipToys.Logic;
 
-namespace WingtipToys.Admin
+namespace WingtipToys.Admin;
+
+public partial class AdminPage
 {
-  public partial class AdminPage
-  {
-    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
+    [Inject]
+    private ProductContext ProductContext { get; set; } = default!;
 
-    // --- Server Utility Migration ---
-    // TODO(bwfc-server): Server.* calls work automatically via ServerShim on WebFormsPageBase.
-    // Methods found: MapPath
-    // For non-page classes, inject ServerShim via DI.
-    // MapPath("~/path") maps to IWebHostEnvironment.WebRootPath.
+    private List<Category> Categories { get; set; } = [];
 
-    // --- Request.Form Migration ---
-    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
-    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
-    // Form keys found: key
-    // For non-page classes, inject RequestShim via DI.
+    private List<Product> Products { get; set; } = [];
 
-    // --- Response.Redirect Migration ---
-    // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
-    // For non-page classes, inject ResponseShim via DI.
+    private string AddProductName { get; set; } = string.Empty;
 
-    private Button AddProductButton = default!;
-    private TextBox AddProductDescription = default!;
-    private TextBox AddProductName = default!;
-    private TextBox AddProductPrice = default!;
-    private DropDownList<Category> DropDownAddCategory = default!;
-    private DropDownList<Product> DropDownRemoveProduct = default!;
-    private Label LabelAddCategory = default!;
-    private Label LabelAddDescription = default!;
-    private Label LabelAddImageFile = default!;
-    private Label LabelAddName = default!;
-    private Label LabelAddPrice = default!;
-    private Label LabelAddStatus = default!;
-    private Label LabelRemoveProduct = default!;
-    private Label LabelRemoveStatus = default!;
-    private FileUpload ProductImage = default!;
-    private RegularExpressionValidator RegularExpressionValidator1 = default!;
-    private Button RemoveProductButton = default!;
-    private RequiredFieldValidator<string> RequiredFieldValidator1 = default!;
-    private RequiredFieldValidator<string> RequiredFieldValidator2 = default!;
-    private RequiredFieldValidator<string> RequiredFieldValidator3 = default!;
-    private RequiredFieldValidator<object> RequiredFieldValidator4 = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+    private string AddProductDescription { get; set; } = string.Empty;
+
+    private string AddProductPrice { get; set; } = string.Empty;
+
+    private string AddProductImagePath { get; set; } = string.Empty;
+
+    private int SelectedCategoryId { get; set; } = 1;
+
+    private int SelectedProductId { get; set; }
+
+    private string AddStatus { get; set; } = string.Empty;
+
+    private string RemoveStatus { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
         await base.OnInitializedAsync();
-
-      string productAction = Request.QueryString["ProductAction"];
-      if (productAction == "add")
-      {
-        LabelAddStatus.Text = "Product added!";
-      }
-
-      if (productAction == "remove")
-      {
-        LabelRemoveStatus.Text = "Product removed!";
-      }
+        await LoadDataAsync();
     }
 
-    protected void AddProductButton_Click()
+    private async Task LoadDataAsync()
     {
-      Boolean fileOK = false;
-      String path = Server.MapPath("~/Catalog/Images/");
-      if (ProductImage.HasFile)
-      {
-        String fileExtension = System.IO.Path.GetExtension(ProductImage.FileName).ToLower();
-        String[] allowedExtensions = { ".gif", ".png", ".jpeg", ".jpg" };
-        for (int i = 0; i < allowedExtensions.Length; i++)
+        Categories = await ProductContext.Categories.OrderBy(c => c.CategoryName).ToListAsync();
+        Products = await ProductContext.Products.OrderBy(p => p.ProductName).ToListAsync();
+        if (Products.Count > 0 && SelectedProductId == 0)
         {
-          if (fileExtension == allowedExtensions[i])
-          {
-            fileOK = true;
-          }
+            SelectedProductId = Products[0].ProductID;
         }
-      }
-
-      if (fileOK)
-      {
-        try
+        if (Categories.Count > 0 && SelectedCategoryId == 0)
         {
-          // Save to Images folder.
-          ProductImage.PostedFile.SaveAs(path + ProductImage.FileName);
-          // Save to Images/Thumbs folder.
-          ProductImage.PostedFile.SaveAs(path + "Thumbs/" + ProductImage.FileName);
+            SelectedCategoryId = Categories[0].CategoryID;
         }
-        catch (Exception ex)
-        {
-          LabelAddStatus.Text = ex.Message;
-        }
-
-        // Add product data to DB.
-        AddProducts products = new AddProducts();
-        bool addSuccess = products.AddProduct(AddProductName.Text, AddProductDescription.Text,
-            AddProductPrice.Text, DropDownAddCategory.SelectedValue, ProductImage.FileName);
-        if (addSuccess)
-        {
-          // Reload the page.
-          string pageUrl = Request.Url.AbsoluteUri.Substring(0, Request.Url.AbsoluteUri.Count() - Request.Url.Query.Count());
-          Response.Redirect(pageUrl + "?ProductAction=add");
-        }
-        else
-        {
-          LabelAddStatus.Text = "Unable to add new product to database.";
-        }
-      }
-      else
-      {
-        LabelAddStatus.Text = "Unable to accept file type.";
-      }
     }
 
-    public IQueryable<Category> GetCategories(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    private async Task AddProductButton_Click()
     {
-      using var _db = new WingtipToys.Models.ProductContext();
-      var items = _db.Categories.ToList();
-      totalRowCount = items.Count;
-      return items.AsQueryable();
-    }
-
-    public IQueryable<Product> GetProducts(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-    {
-      using var _db = new WingtipToys.Models.ProductContext();
-      var items = _db.Products.ToList();
-      totalRowCount = items.Count;
-      return items.AsQueryable();
-    }
-
-    protected void RemoveProductButton_Click()
-    {
-      using (var _db = new WingtipToys.Models.ProductContext())
-      {
-        int productId = Convert.ToInt16(DropDownRemoveProduct.SelectedValue);
-        var myItem = (from c in _db.Products where c.ProductID == productId select c).FirstOrDefault();
-        if (myItem != null)
+        if (string.IsNullOrWhiteSpace(AddProductName) || !double.TryParse(AddProductPrice, out var price))
         {
-          _db.Products.Remove(myItem);
-          _db.SaveChanges();
+            AddStatus = "Enter a name and numeric price before adding a product.";
+            return;
+        }
 
-          // Reload the page.
-          string pageUrl = Request.Url.AbsoluteUri.Substring(0, Request.Url.AbsoluteUri.Count() - Request.Url.Query.Count());
-          Response.Redirect(pageUrl + "?ProductAction=remove");
-        }
-        else
+        var nextId = Products.Count == 0 ? 1 : Products.Max(p => p.ProductID) + 1;
+        ProductContext.Products.Add(new Product
         {
-          LabelRemoveStatus.Text = "Unable to locate product.";
-        }
-      }
+            ProductID = nextId,
+            ProductName = AddProductName,
+            Description = string.IsNullOrWhiteSpace(AddProductDescription) ? AddProductName : AddProductDescription,
+            ImagePath = string.IsNullOrWhiteSpace(AddProductImagePath) ? "placeholder.png" : AddProductImagePath,
+            UnitPrice = price,
+            CategoryID = SelectedCategoryId
+        });
+        await ProductContext.SaveChangesAsync();
+
+        AddStatus = "Product added.";
+        AddProductName = string.Empty;
+        AddProductDescription = string.Empty;
+        AddProductPrice = string.Empty;
+        AddProductImagePath = string.Empty;
+        await LoadDataAsync();
     }
-  }
+
+    private async Task RemoveProductButton_Click()
+    {
+        var product = await ProductContext.Products.FirstOrDefaultAsync(p => p.ProductID == SelectedProductId);
+        if (product is null)
+        {
+            RemoveStatus = "Unable to locate product.";
+            return;
+        }
+
+        ProductContext.Products.Remove(product);
+        await ProductContext.SaveChangesAsync();
+        RemoveStatus = "Product removed.";
+        await LoadDataAsync();
+    }
 }

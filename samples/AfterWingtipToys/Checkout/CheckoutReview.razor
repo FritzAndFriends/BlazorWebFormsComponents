@@ -1,46 +1,34 @@
+@page "/Checkout/CheckoutReview"
 @page "/CheckoutReview"
-<PageTitle></PageTitle>
+<PageTitle>Order Review</PageTitle>
 <Site>
-<Content ContentPlaceHolderID="MainContent">
-    <h1>Order Review</h1>
-    <p></p>
-    <h3 style="padding-left: 33px">Products:</h3>
-    <GridView ItemType="CartItem" id="OrderItemList" @ref="OrderItemList" AutoGenerateColumns="false" GridLines="@GridLines.Both" CellPadding="10" Width="500" BorderColor='@("#efeeef")' BorderWidth="33">              
-        <Columns>
-            <BoundField ItemType="CartItem" DataField="ProductId" HeaderText=" Product ID" />        
-            <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText=" Product Name" />        
-            <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
-            <BoundField ItemType="CartItem" DataField="Quantity" HeaderText="Quantity" />        
-        </Columns>    
-    </GridView>
-    <DetailsView ItemType="Order" id="ShipInfo" @ref="ShipInfo" AutoGenerateRows="false" GridLines="@GridLines.None" CellPadding="10" BorderStyle="@BorderStyle.None" CommandRowStyle-BorderStyle="@BorderStyle.None">
-        <Fields>
-        <TemplateField ItemType="Order">
-            <ItemTemplate Context="Item">
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>Order Review</h1>
+            @if (OrderItems.Count == 0)
+            {
+                <p>Your cart is empty.</p>
+            }
+            else
+            {
+                <GridView ItemType="CartItem" Items="OrderItems" AutoGenerateColumns="false" GridLines="@GridLines.Both" CellPadding="10" Width="500">
+                    <Columns>
+                        <BoundField ItemType="CartItem" DataField="ProductId" HeaderText="Product ID" />
+                        <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Product Name" />
+                        <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
+                        <BoundField ItemType="CartItem" DataField="Quantity" HeaderText="Quantity" />
+                    </Columns>
+                </GridView>
+
                 <h3>Shipping Address:</h3>
-                <br />
-                <Label id="FirstName" @ref="FirstName" Text='@Item.FirstName'></Label>  
-                <Label id="LastName" @ref="LastName" Text='@Item.LastName'></Label>
-                <br />
-                <Label id="Address" @ref="Address" Text='@Item.Address'></Label>
-                <br />
-                <Label id="City" @ref="City" Text='@Item.City'></Label>
-                <Label id="State" @ref="State" Text='@Item.State'></Label>
-                <Label id="PostalCode" @ref="PostalCode" Text='@Item.PostalCode'></Label>
-                <p></p>
+                <p>@ShippingSummary</p>
+
                 <h3>Order Total:</h3>
-                <br />
-                <Label id="Total" @ref="Total" Text='@Item.Total.ToString("C")'></Label>
-            </ItemTemplate>
-        
-            <ChildComponents>
-                <ItemStyle HorizontalAlign="@HorizontalAlign.Left" />
-            </ChildComponents>
-</TemplateField>
-          </Fields>
-    </DetailsView>
-    <p></p>
-    <hr />
-    <Button id="CheckoutConfirm" @ref="CheckoutConfirm" Text="Complete Order" OnClick="@CheckoutConfirm_Click" />
-</Content>
+                <p>@TotalText</p>
+
+                <hr />
+                <Button Text="Complete Order" OnClick="@CheckoutConfirm_Click" />
+            }
+        </Content>
+    </ChildComponents>
 </Site>

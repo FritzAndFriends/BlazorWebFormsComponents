@@ -8,23 +8,17 @@ public class ApplicationUser : IdentityUser
 {
 }
 
-public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {
-	private const string DefaultConnectionString = "Data Source=(LocalDb)\\MSSQLLocalDB;Initial Catalog=aspnet-WingtipToys;Integrated Security=True";
+    public ApplicationDbContext()
+        : this(new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlite("Data Source=wingtiptoys-auth.db")
+            .Options)
+    {
+    }
 
-	public ApplicationDbContext()
-	{
-	}
-
-	public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
-	{
-	}
-
-	protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-	{
-		if (!optionsBuilder.IsConfigured)
-		{
-			optionsBuilder.UseSqlite("Data Source=wingtiptoys.db");
-		}
-	}
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        : base(options)
+    {
+    }
 }

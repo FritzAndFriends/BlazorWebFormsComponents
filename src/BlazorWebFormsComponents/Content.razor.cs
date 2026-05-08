@@ -49,6 +49,14 @@ namespace BlazorWebFormsComponents
 		[CascadingParameter]
 		private MasterPage ParentMasterPage { get; set; }
 
+		/// <summary>
+		/// Returns <c>true</c> when no <see cref="MasterPageContext"/> or
+		/// <see cref="MasterPage"/> parent is available, meaning the content should
+		/// render inline as a fallback (e.g. in SSR or non-master-page scenarios).
+		/// </summary>
+		private bool ShouldRenderInline =>
+			MasterContext == null && ParentMasterPage == null;
+
 		/// <inheritdoc />
 		protected override void OnParametersSet()
 		{
@@ -58,6 +66,12 @@ namespace BlazorWebFormsComponents
 			}
 
 			var context = MasterContext ?? ParentMasterPage?.Context;
+			if (context == null)
+			{
+				// No master-page context — will render inline via the .razor fallback.
+				return;
+			}
+
 			if (string.Equals(_registeredContentPlaceHolderId, ContentPlaceHolderID, StringComparison.OrdinalIgnoreCase))
 			{
 				return;
@@ -65,10 +79,10 @@ namespace BlazorWebFormsComponents
 
 			if (!string.IsNullOrWhiteSpace(_registeredContentPlaceHolderId))
 			{
-				context?.SetContent(_registeredContentPlaceHolderId, null);
+				context.SetContent(_registeredContentPlaceHolderId, null);
 			}
 
-			context?.SetContent(ContentPlaceHolderID, ChildContent);
+			context.SetContent(ContentPlaceHolderID, ChildContent);
 			_registeredContentPlaceHolderId = ContentPlaceHolderID;
 		}
 

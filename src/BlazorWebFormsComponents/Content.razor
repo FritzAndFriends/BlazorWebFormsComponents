@@ -1,3 +1,6 @@
 @inherits ContentBase
 
-@* Content controls don't render directly - they provide content to ContentPlaceHolders *@
+@if (ShouldRenderInline)
+{
+	@ChildContent
+}

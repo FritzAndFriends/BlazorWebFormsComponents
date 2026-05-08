@@ -1,3 +1,11 @@
 <div id="viewSwitcher">
-    @(CurrentView) view | <a href="@(SwitchUrl)" data-ajax="false">Switch to @(AlternateView)</a>
+    @CurrentView view | <a href="@SwitchUrl" data-ajax="false">Switch to @AlternateView</a>
 </div>
+
+@code {
+    private string CurrentView { get; set; } = "Desktop";
+
+    private string AlternateView { get; set; } = "Mobile";
+
+    private string SwitchUrl { get; set; } = "#";
+}
