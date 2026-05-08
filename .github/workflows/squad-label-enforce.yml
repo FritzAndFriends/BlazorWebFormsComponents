@@ -1,12 +1,7 @@
 name: Squad Label Enforce
 
 on:
-  issues:
-    types: [labeled]
-
-permissions:
-  issues: write
-  contents: read
+  workflow_dispatch:
 
 jobs:
   enforce:
