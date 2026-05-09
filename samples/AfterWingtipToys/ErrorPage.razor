@@ -1,52 +1,22 @@
 @page "/ErrorPage"
-@page "/Error"
-@inject IHttpContextAccessor HttpContextAccessor
-
 <PageTitle>Error</PageTitle>
 
-<h2>Error</h2>
-<p class="text-danger">@FriendlyErrorMessage</p>
+<h2>Error:</h2>
+<p></p>
+<p style="color: red; font-size: large;">@FriendlyErrorMessage</p>
 
-@if (ShowDetails)
+@if (ShowDetailedError)
 {
-    <div class="alert alert-warning">
-        <h4>Detailed Error</h4>
-        <p><strong>Handler:</strong> @ErrorHandler</p>
-        <p><strong>Message:</strong> @_exception?.Message</p>
-        @if (!string.IsNullOrWhiteSpace(_exception?.StackTrace))
-        {
-            <pre>@_exception.StackTrace</pre>
-        }
+    <div>
+        <p>&nbsp;</p>
+        <h4>Detailed Error:</h4>
+        <p>@DetailedErrorMessage</p>
+
+        <h4>Error Handler:</h4>
+        <p>@ErrorHandlerText</p>
+
+        <h4>Detailed Error Message:</h4>
+        <p>@InnerMessageText</p>
+        <pre>@InnerTraceText</pre>
     </div>
-}
-
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "handler")]
-    public string? Handler { get; set; }
-
-    [Parameter, SupplyParameterFromQuery(Name = "msg")]
-    public string? MessageCode { get; set; }
-
-    private Exception? _exception;
-
-    private string ErrorHandler => string.IsNullOrWhiteSpace(Handler) ? "Error Page" : Handler;
-
-    private bool ShowDetails
-    {
-        get
-        {
-            var connection = HttpContextAccessor.HttpContext?.Connection;
-            return connection?.LocalIpAddress is not null && Equals(connection.RemoteIpAddress, connection.LocalIpAddress);
-        }
-    }
-
-    private string FriendlyErrorMessage => MessageCode == "404"
-        ? "An HTTP error occurred. Page not found. Please try again."
-        : "A problem has occurred on this web site. Please try again. If this error continues, please contact support.";
-
-    protected override void OnInitialized()
-    {
-        _exception = Server.GetLastError();
-        Server.ClearError();
-    }
 }

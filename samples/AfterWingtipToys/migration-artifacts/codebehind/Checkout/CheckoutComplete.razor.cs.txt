@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
 
+using Microsoft.AspNetCore.Components;
 namespace WingtipToys.Checkout
 {
   public partial class CheckoutComplete
@@ -54,6 +55,9 @@ namespace WingtipToys.Checkout
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+
+    [Inject]
+    protected ProductContext _productContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,7 +92,7 @@ namespace WingtipToys.Checkout
             TransactionId.Text = PaymentConfirmation;
 
 
-            ProductContext _db = new ProductContext();
+
             // Get the current order id.
             int currentOrderId = -1;
             if (Session["currentOrderId"] != string.Empty)

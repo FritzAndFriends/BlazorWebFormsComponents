@@ -1,13 +1,13 @@
 @page "/ProductDetails"
 <PageTitle>Product Details</PageTitle>
 
-@if (Products.Count == 0)
+@if (Product is null)
 {
     <p>Product not found.</p>
 }
 else
 {
-    <FormView ItemType="Product" Items="@Products" RenderOuterTable="false">
+    <FormView id="productDetail" ItemType="Product" DataItem="@Product" RenderOuterTable="false">
         <ItemTemplate Context="Item">
             <div>
                 <h1>@Item.ProductName</h1>
@@ -22,11 +22,11 @@ else
                     <td style="vertical-align: top; text-align:left;">
                         <b>Description:</b><br />@Item.Description
                         <br />
-                        <span><b>Price:</b>&nbsp;@String.Format("{0:c}", Item.UnitPrice)</span>
+                        <span><b>Price:</b>&nbsp;@(string.Format("{0:c}", Item.UnitPrice))</span>
                         <br />
                         <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
                         <br /><br />
-                        <a class="btn btn-primary" href="/AddToCart?productId=@Item.ProductID" data-enhance-nav="false">Add To Cart</a>
+                        <a class="btn btn-primary" href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">Add To Cart</a>
                     </td>
                 </tr>
             </table>

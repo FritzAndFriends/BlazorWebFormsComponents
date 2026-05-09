@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
 
+using Microsoft.AspNetCore.Components;
 namespace WingtipToys.Checkout
 {
   public partial class CheckoutReview
@@ -62,6 +63,9 @@ namespace WingtipToys.Checkout
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+
+    [Inject]
+    protected ProductContext _productContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -111,7 +115,7 @@ namespace WingtipToys.Checkout
             }
 
             // Get DB context.
-            ProductContext _db = new ProductContext();
+
 
             // Add order to DB.
             _db.Orders.Add(myOrder);

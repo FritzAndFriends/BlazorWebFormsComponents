@@ -1,135 +1,89 @@
 @page "/ShoppingCart"
-@rendermode @(new InteractiveServerRenderMode())
-@using Microsoft.AspNetCore.Components.Web
+@rendermode InteractiveServer
 @using Microsoft.EntityFrameworkCore
 @inject IHttpContextAccessor HttpContextAccessor
 @inject IDbContextFactory<ProductContext> DbFactory
-@inject NavigationManager Navigation
+@inject WingtipToys.Logic.ShoppingCartService ShoppingCartService
 
 <PageTitle>Shopping Cart</PageTitle>
 
-<div id="ShoppingCartTitle" class="ContentHead"><h1>@PageHeading</h1></div>
-
-@if (_cartItems.Count == 0)
+<div id="ShoppingCartTitle" class="ContentHead"><h1>@ShoppingCartTitle</h1></div>
+@if (CartItems.Count == 0)
 {
     <p>Your shopping cart is empty.</p>
 }
 else
 {
-    <GridView ItemType="CartItem" Items="@_cartItems" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
-              CssClass="table table-striped table-bordered">
-        <Columns>
-            <BoundField ItemType="CartItem" DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
-            <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Name" />
-            <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
-            <TemplateField ItemType="CartItem" HeaderText="Quantity">
-                <ItemTemplate Context="Item">
-                    <InputNumber @bind-Value="Item.Quantity" class="form-control" style="width: 80px;" />
-                </ItemTemplate>
-            </TemplateField>
-            <TemplateField ItemType="CartItem" HeaderText="Item Total">
-                <ItemTemplate Context="Item">
-                    @((Item.Quantity * Convert.ToDecimal(Item.Product?.UnitPrice ?? 0)).ToString("c"))
-                </ItemTemplate>
-            </TemplateField>
-            <TemplateField ItemType="CartItem" HeaderText="Remove Item">
-                <ItemTemplate Context="Item">
-                    <a class="btn btn-link" href="/RemoveFromCart?productId=@Item.ProductId" data-enhance-nav="false">Remove</a>
-                </ItemTemplate>
-            </TemplateField>
-        </Columns>
-    </GridView>
-
-    <div>
-        <strong>Order Total: @OrderTotal.ToString("c")</strong>
-    </div>
-    <br />
-    <div class="btn-toolbar">
-        <button type="button" class="btn btn-primary" @onclick="UpdateCartAsync">Update</button>
-        <button type="button" class="btn btn-default" @onclick="CheckoutAsync">Checkout</button>
-    </div>
+    <form method="post" action="/UpdateCart" data-enhance-nav="false">
+        <GridView AutoGenerateColumns="false"
+                  ShowFooter="true"
+                  GridLines="@GridLines.Vertical"
+                  CellPadding="4"
+                  ItemType="CartItem"
+                  Items="@CartItems"
+                  CssClass="table table-striped table-bordered">
+            <Columns>
+                <BoundField ItemType="CartItem" DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
+                <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Name" />
+                <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
+                <TemplateField ItemType="CartItem" HeaderText="Quantity">
+                    <ItemTemplate Context="Item">
+                        <input type="text" name="quantity-@Item.ProductId" value="@Item.Quantity" class="form-control" style="width:70px" />
+                    </ItemTemplate>
+                </TemplateField>
+                <TemplateField ItemType="CartItem" HeaderText="Item Total">
+                    <ItemTemplate Context="Item">
+                        @FormatCurrency(Item.Quantity * Convert.ToDecimal(Item.Product?.UnitPrice ?? 0D))
+                    </ItemTemplate>
+                </TemplateField>
+                <TemplateField ItemType="CartItem" HeaderText="Remove Item">
+                    <ItemTemplate Context="Item">
+                        <a href="/RemoveFromCart?productID=@Item.ProductId" data-enhance-nav="false">Remove</a>
+                    </ItemTemplate>
+                </TemplateField>
+            </Columns>
+        </GridView>
+        <div>
+            <p></p>
+            <strong>
+                <span>Order Total: </span>
+                <span>@FormatCurrency(Total)</span>
+            </strong>
+        </div>
+        <br />
+        <table>
+            <tr>
+                <td>
+                    <button type="submit" class="btn btn-default">Update</button>
+                </td>
+                <td>
+                    <a href="/Checkout/CheckoutStart" class="btn btn-link">
+                        <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" width="145" alt="Check out with PayPal" />
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </form>
 }
 
 @code {
-    private List<CartItem> _cartItems = new();
+    private List<CartItem> CartItems { get; set; } = [];
 
-    private string PageHeading => _cartItems.Count == 0 ? "Shopping Cart is Empty" : "Shopping Cart";
-    private decimal OrderTotal => _cartItems.Sum(item => Convert.ToDecimal(item.Product?.UnitPrice ?? 0) * item.Quantity);
+    private string ShoppingCartTitle { get; set; } = "Shopping Cart";
+
+    private decimal Total { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         await LoadCartAsync();
     }
 
-    private string GetCartId()
-    {
-        var session = HttpContextAccessor.HttpContext?.Session;
-        var cartId = session?.GetString("CartId");
-        if (string.IsNullOrWhiteSpace(cartId))
-        {
-            cartId = Guid.NewGuid().ToString();
-            session?.SetString("CartId", cartId);
-        }
-
-        return cartId;
-    }
-
     private async Task LoadCartAsync()
     {
-        var cartId = GetCartId();
-        await using var db = await DbFactory.CreateDbContextAsync();
-        _cartItems = await db.ShoppingCartItems
-            .AsNoTracking()
-            .Include(item => item.Product)
-            .Where(item => item.CartId == cartId)
-            .OrderBy(item => item.ProductId)
-            .ToListAsync();
+        CartItems = await ShoppingCartService.GetCartItemsAsync();
+        Total = await ShoppingCartService.GetTotalAsync();
+        ShoppingCartTitle = CartItems.Count > 0 ? "Shopping Cart" : "Shopping Cart is Empty";
     }
 
-    private async Task UpdateCartAsync()
-    {
-        var cartId = GetCartId();
-        await using var db = await DbFactory.CreateDbContextAsync();
-        var dbItems = await db.ShoppingCartItems.Where(item => item.CartId == cartId).ToListAsync();
-
-        foreach (var cartItem in _cartItems)
-        {
-            var dbItem = dbItems.FirstOrDefault(item => item.ItemId == cartItem.ItemId);
-            if (dbItem is null)
-            {
-                continue;
-            }
-
-            if (cartItem.Quantity < 1)
-            {
-                db.ShoppingCartItems.Remove(dbItem);
-            }
-            else
-            {
-                dbItem.Quantity = cartItem.Quantity;
-            }
-        }
-
-        await db.SaveChangesAsync();
-        await LoadCartAsync();
-    }
-
-    private async Task RemoveItemAsync(int productId)
-    {
-        var cartId = GetCartId();
-        await using var db = await DbFactory.CreateDbContextAsync();
-        var item = await db.ShoppingCartItems.FirstOrDefaultAsync(cartItem => cartItem.CartId == cartId && cartItem.ProductId == productId);
-        if (item is not null)
-        {
-            db.ShoppingCartItems.Remove(item);
-            await db.SaveChangesAsync();
-        }
-
-        await LoadCartAsync();
-    }
-
-    private void CheckoutAsync()
-    {
-        Navigation.NavigateTo("/Checkout/CheckoutStart");
-    }
+    private static string FormatCurrency(decimal amount) => string.Format("{0:c}", amount);
 }

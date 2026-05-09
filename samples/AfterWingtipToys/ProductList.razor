@@ -1,16 +1,19 @@
 @page "/ProductList"
-@using Microsoft.EntityFrameworkCore
-@inject ProductContext Db
+@inject WingtipToys.Logic.CatalogService CatalogService
 
 <PageTitle>Products</PageTitle>
 
 <section>
     <div>
         <hgroup>
-            <h2>@Heading</h2>
+            <h2>Products</h2>
         </hgroup>
 
-        <ListView DataKeyNames="ProductID" GroupItemCount="4" ItemType="Product" Items="@_products">
+        <ListView id="productList"
+                  DataKeyNames="ProductID"
+                  GroupItemCount="4"
+                  ItemType="Product"
+                  Items="@Products">
             <EmptyDataTemplate>
                 <table>
                     <tr>
@@ -32,7 +35,11 @@
                         <tr>
                             <td>
                                 <a href="/ProductDetails?productId=@Item.ProductID">
-                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath" width="100" height="75" border="1" alt="@Item.ProductName" />
+                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath"
+                                         width="100"
+                                         height="75"
+                                         border="1"
+                                         alt="@Item.ProductName" />
                                 </a>
                             </td>
                         </tr>
@@ -43,10 +50,10 @@
                                 </a>
                                 <br />
                                 <span>
-                                    <b>Price:</b> @String.Format("{0:c}", Item.UnitPrice)
+                                    <b>Price:</b> @(string.Format("{0:c}", Item.UnitPrice))
                                 </span>
                                 <br />
-                                <a href="/AddToCart?productId=@Item.ProductID" data-enhance-nav="false">
+                                <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">
                                     <span class="ProductListItem">
                                         <b>Add To Cart</b>
                                     </span>
@@ -69,6 +76,10 @@
                                 </table>
                             </td>
                         </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr></tr>
                     </tbody>
                 </table>
             </LayoutTemplate>
@@ -80,27 +91,16 @@
     [Parameter, SupplyParameterFromQuery(Name = "id")]
     public int? CategoryId { get; set; }
 
+    [Parameter, SupplyParameterFromQuery(Name = "categoryId")]
+    public int? AlternateCategoryId { get; set; }
+
     [Parameter, SupplyParameterFromQuery(Name = "categoryName")]
     public string? CategoryName { get; set; }
 
-    private List<Product> _products = new();
-    private string Heading => string.IsNullOrWhiteSpace(CategoryName) ? "Products" : CategoryName!;
+    private IReadOnlyList<Product> Products { get; set; } = Array.Empty<Product>();
 
     protected override async Task OnParametersSetAsync()
     {
-        IQueryable<Product> query = Db.Products.AsNoTracking().Include(p => p.Category).OrderBy(p => p.ProductName);
-
-        if (CategoryId.HasValue && CategoryId > 0)
-        {
-            query = query.Where(p => p.CategoryID == CategoryId);
-        }
-
-        if (!string.IsNullOrWhiteSpace(CategoryName))
-        {
-            query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
-        }
-
-        _products = await query.ToListAsync();
-        Title = Heading;
+        Products = await CatalogService.GetProductsAsync(CategoryId ?? AlternateCategoryId, CategoryName);
     }
 }

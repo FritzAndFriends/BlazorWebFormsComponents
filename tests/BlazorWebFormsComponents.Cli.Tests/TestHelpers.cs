@@ -221,6 +221,7 @@ public static class TestHelpers
             new TemplateContextTransform(),
             new AttributeNormalizeTransform(),
             new DataSourceIdTransform(),
+            new EnhancedNavAnnotationTransform(),
         };
 
         var codeBehindTransforms = new List<ICodeBehindTransform>
@@ -232,6 +233,7 @@ public static class TestHelpers
             new EntityFrameworkTransform(),
             new EfContextConstructorTransform(),
             new DbContextInstantiationTransform(),
+            new HttpExceptionTransform(),
             new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),
             new ClassNameAlignTransform(),

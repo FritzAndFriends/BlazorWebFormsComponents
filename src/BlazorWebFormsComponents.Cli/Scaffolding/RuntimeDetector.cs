@@ -46,6 +46,17 @@ public class RuntimeProfile
     public List<string> ApplicationStartPatterns { get; set; } = [];
     public List<string> AdditionalDbContextNames { get; set; } = [];
 
+    /// <summary>
+    /// Identity role names detected from RoleManager/RoleStore patterns (e.g., "canEdit").
+    /// </summary>
+    public List<string> DetectedRoleNames { get; set; } = [];
+
+    /// <summary>
+    /// Seed user credentials detected from UserManager.Create patterns.
+    /// Each entry: (email, password, roleName).
+    /// </summary>
+    public List<(string Email, string Password, string RoleName)> DetectedSeedUsers { get; set; } = [];
+
     public string? ResolvedDbContextTypeName =>
         string.IsNullOrWhiteSpace(DbContextClassName)
             ? null

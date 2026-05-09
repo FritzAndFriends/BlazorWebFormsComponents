@@ -69,6 +69,7 @@ class Program
         services.AddSingleton<IMarkupTransform, TemplateContextTransform>();
         services.AddSingleton<IMarkupTransform, AttributeNormalizeTransform>();
         services.AddSingleton<IMarkupTransform, DataSourceIdTransform>();
+        services.AddSingleton<IMarkupTransform, EnhancedNavAnnotationTransform>();
 
         // Register code-behind transforms in order
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
@@ -78,6 +79,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
         services.AddSingleton<ICodeBehindTransform, EfContextConstructorTransform>();
         services.AddSingleton<ICodeBehindTransform, DbContextInstantiationTransform>();
+        services.AddSingleton<ICodeBehindTransform, HttpExceptionTransform>();
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();
         services.AddSingleton<ICodeBehindTransform, ClassNameAlignTransform>();

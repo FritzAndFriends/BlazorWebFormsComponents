@@ -1,57 +1,70 @@
 @inherits LayoutComponentBase
-@using Microsoft.EntityFrameworkCore
-@inject IDbContextFactory<ProductContext> DbFactory
-@inject IHttpContextAccessor HttpContextAccessor
+@inject WingtipToys.Logic.CatalogService CatalogService
+@inject WingtipToys.Logic.ShoppingCartService ShoppingCartService
 
-<nav class="navbar navbar-inverse navbar-static-top">
-    <div class="navbar-header">
-        <a class="navbar-brand" href="/">Wingtip Toys</a>
+<div class="navbar navbar-inverse navbar-static-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Wingtip Toys</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="/About">About</a></li>
+                <li><a href="/Contact">Contact</a></li>
+                <li><a href="/ProductList">Products</a></li>
+                <li><a href="/ShoppingCart">Cart (@CartCount)</a></li>
+            </ul>
+            <AuthorizeView>
+                <Authorized>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/Account/Manage">Hello, @context.User.Identity?.Name</a></li>
+                        <li><a href="/Account/Logout" data-enhance-nav="false">Log out</a></li>
+                    </ul>
+                </Authorized>
+                <NotAuthorized>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="/Account/Register">Register</a></li>
+                        <li><a href="/Account/Login">Log in</a></li>
+                    </ul>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
     </div>
-    <ul class="nav navbar-nav">
-        <li><a href="/">Home</a></li>
-        <li><a href="/About">About</a></li>
-        <li><a href="/Contact">Contact</a></li>
-        <li><a href="/ProductList">Products</a></li>
-        <li><a href="/ShoppingCart">@CartLinkText</a></li>
-    </ul>
-    <AuthorizeView>
-        <Authorized>
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="/Account/Manage">Hello, @context.User.Identity?.Name!</a></li>
-                <li><a href="/Account/Logout" data-enhance-nav="false">Log out</a></li>
-            </ul>
-        </Authorized>
-        <NotAuthorized>
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="/Account/Register">Register</a></li>
-                <li><a href="/Account/Login">Log in</a></li>
-            </ul>
-        </NotAuthorized>
-    </AuthorizeView>
-</nav>
+</div>
 
 <div id="TitleContent" class="text-center">
     <a href="/">
-        <img src="/Images/logo.jpg" alt="Wingtip Toys" style="border:none;" />
+        <img src="/Images/logo.jpg" alt="Wingtip Toys" />
     </a>
+    <br />
 </div>
 
-<div class="container body-content">
+<div class="container-fluid body-content">
     <div class="row">
         <aside class="col-md-3">
-            <h3>Categories</h3>
-            <ul class="nav nav-pills nav-stacked">
-                @foreach (var category in _categories)
-                {
-                    <li>
-                        <a href="/ProductList?categoryName=@Uri.EscapeDataString(category.CategoryName)">@category.CategoryName</a>
-                    </li>
-                }
-            </ul>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <strong>Categories</strong>
+                </div>
+                <div class="list-group">
+                    @foreach (var category in Categories)
+                    {
+                        <a class="list-group-item" href="/ProductList?id=@category.CategoryID">@category.CategoryName</a>
+                    }
+                </div>
+            </div>
         </aside>
-        <main class="col-md-9">
-            @Body
-        </main>
+        <div class="col-md-9">
+            <main role="main">
+                @Body
+            </main>
+        </div>
     </div>
     <hr />
     <footer>
@@ -60,24 +73,13 @@
 </div>
 
 @code {
-    private List<Category> _categories = new();
-    private int _cartCount;
+    private IReadOnlyList<Category> Categories { get; set; } = Array.Empty<Category>();
 
-    private string CartLinkText => _cartCount > 0 ? $"Cart ({_cartCount})" : "Cart";
+    private int CartCount { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        await using var db = await DbFactory.CreateDbContextAsync();
-        _categories = await db.Categories.AsNoTracking()
-            .OrderBy(c => c.CategoryName)
-            .ToListAsync();
-
-        var cartId = HttpContextAccessor.HttpContext?.Session.GetString("CartId");
-        if (!string.IsNullOrWhiteSpace(cartId))
-        {
-            _cartCount = await db.ShoppingCartItems.AsNoTracking()
-                .Where(c => c.CartId == cartId)
-                .SumAsync(c => (int?)c.Quantity) ?? 0;
-        }
+        Categories = await CatalogService.GetCategoriesAsync();
+        CartCount = await ShoppingCartService.GetCountAsync();
     }
 }

@@ -1,44 +1,27 @@
 using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
+using WingtipToys.Logic;
 using WingtipToys.Models;
 
 namespace WingtipToys;
 
 public partial class ProductDetails
 {
-    [Inject] public ProductContext Db { get; set; } = default!;
-
-    [Parameter, SupplyParameterFromQuery(Name = "productId")]
-    public int? ProductId { get; set; }
+    [Inject]
+    public CatalogService CatalogService { get; set; } = default!;
 
     [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
-    public int? LegacyProductId { get; set; }
+    public int? ProductId { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "productId")]
+    public int? AlternateProductId { get; set; }
 
     [Parameter, SupplyParameterFromQuery(Name = "productName")]
     public string? ProductName { get; set; }
 
-    protected List<Product> Products { get; private set; } = new();
+    protected Product? Product { get; set; }
 
     protected override async Task OnParametersSetAsync()
     {
-        IQueryable<Product> query = Db.Products.AsNoTracking();
-        var selectedProductId = ProductId ?? LegacyProductId;
-
-        if (selectedProductId.HasValue && selectedProductId > 0)
-        {
-            query = query.Where(product => product.ProductID == selectedProductId.Value);
-        }
-        else if (!string.IsNullOrWhiteSpace(ProductName))
-        {
-            query = query.Where(product => product.ProductName == ProductName);
-        }
-        else
-        {
-            Products = new();
-            return;
-        }
-
-        Products = await query.ToListAsync();
-        Title = "Product Details";
+        Product = await CatalogService.GetProductAsync(ProductId ?? AlternateProductId, ProductName);
     }
 }

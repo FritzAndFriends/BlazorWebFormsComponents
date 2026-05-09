@@ -76,7 +76,8 @@ public class ProgramCsEmitter
             builder.AppendLine("var identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>");
             builder.AppendLine("{");
             builder.AppendLine("    options.SignIn.RequireConfirmedAccount = false;");
-            builder.AppendLine("});");
+            builder.AppendLine("})");
+            builder.AppendLine("    .AddRoles<IdentityRole>();");
 
             if (profile.NeedsEntityFramework)
             {
@@ -135,6 +136,44 @@ public class ProgramCsEmitter
         builder.AppendLine();
         builder.AppendLine($"app.MapRazorComponents<{projectName}.Components.App>()");
         builder.AppendLine("    .AddInteractiveServerRenderMode();");
+
+        // Generate seed data initialization if identity roles/users were detected
+        if (profile.NeedsIdentity && (profile.DetectedRoleNames.Count > 0 || profile.DetectedSeedUsers.Count > 0))
+        {
+            builder.AppendLine();
+            builder.AppendLine("// Seed identity roles and users (detected from Web Forms source)");
+            builder.AppendLine("using (var scope = app.Services.CreateScope())");
+            builder.AppendLine("{");
+            builder.AppendLine("    var services = scope.ServiceProvider;");
+
+            if (profile.DetectedRoleNames.Count > 0)
+            {
+                builder.AppendLine("    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();");
+                foreach (var role in profile.DetectedRoleNames)
+                {
+                    builder.AppendLine($"    if (!await roleManager.RoleExistsAsync(\"{role}\"))");
+                    builder.AppendLine($"        await roleManager.CreateAsync(new IdentityRole(\"{role}\"));");
+                }
+            }
+
+            if (profile.DetectedSeedUsers.Count > 0)
+            {
+                builder.AppendLine("    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();");
+                foreach (var (email, password, roleName) in profile.DetectedSeedUsers)
+                {
+                    builder.AppendLine($"    if (await userManager.FindByEmailAsync(\"{email}\") == null)");
+                    builder.AppendLine("    {");
+                    builder.AppendLine($"        var seedUser = new ApplicationUser {{ UserName = \"{email}\", Email = \"{email}\" }};");
+                    builder.AppendLine($"        await userManager.CreateAsync(seedUser, \"{password}\");");
+                    if (!string.IsNullOrEmpty(roleName))
+                        builder.AppendLine($"        await userManager.AddToRoleAsync(seedUser, \"{roleName}\");");
+                    builder.AppendLine("    }");
+                }
+            }
+
+            builder.AppendLine("}");
+        }
+
         builder.AppendLine();
         builder.AppendLine("app.Run();");
 
