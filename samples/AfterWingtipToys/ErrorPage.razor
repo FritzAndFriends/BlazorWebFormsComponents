@@ -1,10 +1,52 @@
 @page "/ErrorPage"
+@page "/Error"
+@inject IHttpContextAccessor HttpContextAccessor
+
 <PageTitle>Error</PageTitle>
 
-<h1>Error</h1>
-<p class="text-danger">@FriendlyMessage</p>
+<h2>Error</h2>
+<p class="text-danger">@FriendlyErrorMessage</p>
 
-@if (!string.IsNullOrWhiteSpace(Handler))
+@if (ShowDetails)
 {
-    <p><strong>Handler:</strong> @Handler</p>
+    <div class="alert alert-warning">
+        <h4>Detailed Error</h4>
+        <p><strong>Handler:</strong> @ErrorHandler</p>
+        <p><strong>Message:</strong> @_exception?.Message</p>
+        @if (!string.IsNullOrWhiteSpace(_exception?.StackTrace))
+        {
+            <pre>@_exception.StackTrace</pre>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "handler")]
+    public string? Handler { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "msg")]
+    public string? MessageCode { get; set; }
+
+    private Exception? _exception;
+
+    private string ErrorHandler => string.IsNullOrWhiteSpace(Handler) ? "Error Page" : Handler;
+
+    private bool ShowDetails
+    {
+        get
+        {
+            var connection = HttpContextAccessor.HttpContext?.Connection;
+            return connection?.LocalIpAddress is not null && Equals(connection.RemoteIpAddress, connection.LocalIpAddress);
+        }
+    }
+
+    private string FriendlyErrorMessage => MessageCode == "404"
+        ? "An HTTP error occurred. Page not found. Please try again."
+        : "A problem has occurred on this web site. Please try again. If this error continues, please contact support.";
+
+    protected override void OnInitialized()
+    {
+        _exception = Server.GetLastError();
+        Server.ClearError();
+    }
 }

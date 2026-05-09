@@ -1,18 +1,14 @@
-using Microsoft.AspNetCore.Components;
-
-namespace WingtipToys;
-
-public partial class Default
+namespace WingtipToys
 {
-    [Inject]
-    public NavigationManager NavigationManager { get; set; } = default!;
-
-    private void Page_Error()
+    public partial class Default
     {
-        var exc = Server.GetLastError();
-        if (exc is InvalidOperationException)
+        private void Page_Error()
         {
-            NavigationManager.NavigateTo("/ErrorPage?handler=Page_Error%20-%20Default.aspx");
+            var exc = Server.GetLastError();
+            if (exc is InvalidOperationException)
+            {
+                Server.Transfer("ErrorPage?handler=Page_Error%20-%20Default");
+            }
         }
     }
 }

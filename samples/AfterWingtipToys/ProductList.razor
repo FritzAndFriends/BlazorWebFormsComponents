@@ -1,5 +1,4 @@
 @page "/ProductList"
-@page "/Category/{CategoryName}"
 @using Microsoft.EntityFrameworkCore
 @inject ProductContext Db
 
@@ -7,9 +6,11 @@
 
 <section>
     <div>
-        <h2>@Heading</h2>
+        <hgroup>
+            <h2>@Heading</h2>
+        </hgroup>
 
-        <ListView Items="products" DataKeyNames="ProductID" GroupItemCount="4" ItemType="Product">
+        <ListView DataKeyNames="ProductID" GroupItemCount="4" ItemType="Product" Items="@_products">
             <EmptyDataTemplate>
                 <table>
                     <tr>
@@ -30,21 +31,25 @@
                     <table>
                         <tr>
                             <td>
-                                <a href="@($"/ProductDetails?ProductID={Item.ProductID}")">
+                                <a href="/ProductDetails?productId=@Item.ProductID">
                                     <img src="/Catalog/Images/Thumbs/@Item.ImagePath" width="100" height="75" border="1" alt="@Item.ProductName" />
                                 </a>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <a href="@($"/ProductDetails?ProductID={Item.ProductID}")">@Item.ProductName</a>
+                                <a href="/ProductDetails?productId=@Item.ProductID">
+                                    @Item.ProductName
+                                </a>
                                 <br />
                                 <span>
-                                    <b>Price:</b> @(string.Format("{0:c}", Item.UnitPrice))
+                                    <b>Price:</b> @String.Format("{0:c}", Item.UnitPrice)
                                 </span>
                                 <br />
-                                <a href="@($"/AddToCart?productId={Item.ProductID}")" data-enhance-nav="false">
-                                    <span class="ProductListItem"><b>Add To Cart</b></span>
+                                <a href="/AddToCart?productId=@Item.ProductID" data-enhance-nav="false">
+                                    <span class="ProductListItem">
+                                        <b>Add To Cart</b>
+                                    </span>
                                 </a>
                             </td>
                         </tr>
@@ -75,29 +80,27 @@
     [Parameter, SupplyParameterFromQuery(Name = "id")]
     public int? CategoryId { get; set; }
 
-    [Parameter]
+    [Parameter, SupplyParameterFromQuery(Name = "categoryName")]
     public string? CategoryName { get; set; }
 
-    private List<Product> products = [];
-
-    private string Heading => string.IsNullOrWhiteSpace(CategoryName) ? "Products" : CategoryName;
+    private List<Product> _products = new();
+    private string Heading => string.IsNullOrWhiteSpace(CategoryName) ? "Products" : CategoryName!;
 
     protected override async Task OnParametersSetAsync()
     {
-        IQueryable<Product> query = Db.Products
-            .Include(product => product.Category)
-            .AsNoTracking();
+        IQueryable<Product> query = Db.Products.AsNoTracking().Include(p => p.Category).OrderBy(p => p.ProductName);
 
-        if (CategoryId is > 0)
+        if (CategoryId.HasValue && CategoryId > 0)
         {
-            query = query.Where(product => product.CategoryID == CategoryId);
+            query = query.Where(p => p.CategoryID == CategoryId);
         }
 
         if (!string.IsNullOrWhiteSpace(CategoryName))
         {
-            query = query.Where(product => product.Category != null && product.Category.CategoryName == CategoryName);
+            query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
         }
 
-        products = await query.ToListAsync();
+        _products = await query.ToListAsync();
+        Title = Heading;
     }
 }

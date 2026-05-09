@@ -231,6 +231,7 @@ public static class TestHelpers
             new HttpUtilityRewriteTransform(),
             new EntityFrameworkTransform(),
             new EfContextConstructorTransform(),
+            new DbContextInstantiationTransform(),
             new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),
             new ClassNameAlignTransform(),

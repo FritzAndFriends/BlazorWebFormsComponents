@@ -6,24 +6,27 @@ namespace WingtipToys;
 
 public partial class ProductDetails
 {
-    [Inject]
-    public ProductContext Db { get; set; } = default!;
+    [Inject] public ProductContext Db { get; set; } = default!;
 
-    [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
+    [Parameter, SupplyParameterFromQuery(Name = "productId")]
     public int? ProductId { get; set; }
 
-    [Parameter]
+    [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
+    public int? LegacyProductId { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "productName")]
     public string? ProductName { get; set; }
 
-    protected IReadOnlyList<Product> Products { get; set; } = Array.Empty<Product>();
+    protected List<Product> Products { get; private set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
         IQueryable<Product> query = Db.Products.AsNoTracking();
+        var selectedProductId = ProductId ?? LegacyProductId;
 
-        if (ProductId is > 0)
+        if (selectedProductId.HasValue && selectedProductId > 0)
         {
-            query = query.Where(product => product.ProductID == ProductId.Value);
+            query = query.Where(product => product.ProductID == selectedProductId.Value);
         }
         else if (!string.IsNullOrWhiteSpace(ProductName))
         {
@@ -31,10 +34,11 @@ public partial class ProductDetails
         }
         else
         {
-            Products = Array.Empty<Product>();
+            Products = new();
             return;
         }
 
         Products = await query.ToListAsync();
+        Title = "Product Details";
     }
 }

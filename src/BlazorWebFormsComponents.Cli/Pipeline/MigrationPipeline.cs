@@ -367,6 +367,35 @@ public class MigrationPipeline
             return null;
         }
 
+        // Mobile-specific user controls (e.g., ViewSwitcher.ascx) are not useful in Blazor —
+        // responsive design replaces dedicated mobile views. Write as artifacts only.
+        if (sourceFile.FileType == FileType.Control && IsMobileRelatedControl(sourceFile))
+        {
+            var relativeMarkupPath = Path.GetRelativePath(context.OutputPath, sourceFile.OutputPath);
+            var artifactPath = Path.Combine(
+                context.OutputPath,
+                "migration-artifacts",
+                "codebehind",
+                relativeMarkupPath + ".txt");
+            await _outputWriter.WriteFileAsync(artifactPath, finalMarkup,
+                $"Mobile-specific control {Path.GetFileName(sourceFile.MarkupPath)} — preserved as artifact");
+
+            if (codeBehind != null)
+            {
+                var cbArtifactPath = Path.Combine(
+                    context.OutputPath,
+                    "migration-artifacts",
+                    "codebehind",
+                    relativeMarkupPath + ".cs.txt");
+                await _outputWriter.WriteFileAsync(cbArtifactPath, codeBehind,
+                    $"Mobile-specific control code-behind for {Path.GetFileName(sourceFile.MarkupPath)}");
+            }
+
+            report.AddManualItem(relativeMarkupPath, 0, "bwfc-mobile-control",
+                "Mobile-specific control excluded — use responsive design instead.", "info");
+            return null;
+        }
+
         // Write markup output
         await _outputWriter.WriteFileAsync(sourceFile.OutputPath, finalMarkup,
             $"Converted {Path.GetFileName(sourceFile.MarkupPath)}");
@@ -470,5 +499,19 @@ public class MigrationPipeline
     {
         var projectName = Path.GetFileName(sourcePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
         return string.IsNullOrEmpty(projectName) ? "MigratedApp" : projectName;
+    }
+
+    private static bool IsMobileRelatedControl(SourceFile sourceFile)
+    {
+        var fileName = Path.GetFileNameWithoutExtension(sourceFile.MarkupPath);
+        // ViewSwitcher and similar mobile-only controls
+        if (fileName.Equals("ViewSwitcher", StringComparison.OrdinalIgnoreCase))
+            return true;
+        // Controls in Mobile directories or with .Mobile. in name
+        var relativePath = sourceFile.MarkupPath;
+        return relativePath.Contains("Mobile", StringComparison.OrdinalIgnoreCase)
+            && (relativePath.Contains("/Mobile/", StringComparison.OrdinalIgnoreCase)
+                || relativePath.Contains("\\Mobile\\", StringComparison.OrdinalIgnoreCase)
+                || relativePath.Contains(".Mobile.", StringComparison.OrdinalIgnoreCase));
     }
 }

@@ -77,6 +77,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, HttpUtilityRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
         services.AddSingleton<ICodeBehindTransform, EfContextConstructorTransform>();
+        services.AddSingleton<ICodeBehindTransform, DbContextInstantiationTransform>();
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();
         services.AddSingleton<ICodeBehindTransform, ClassNameAlignTransform>();
