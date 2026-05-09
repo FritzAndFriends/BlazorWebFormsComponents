@@ -2,9 +2,11 @@
 @inherits BaseRow<ItemType>
 @using Interfaces
 
+<CascadingValue Value="_formNamingContext" Name="FormNamingContext">
 <tr @key="DataItem" style="@(IsEditing && EditRowStyle != null ? EditRowStyle.ToString() : RowStyle?.ToString())">
 	@foreach (IColumn<ItemType> column in Columns)
 	{
+		SetColumnNamingContext(column);
 		<td @key="column">
 
 			@if (DataItem is ButtonField<ItemType>) (DataItem as ButtonField<ItemType>).DataItemIndex = DataItemIndex;
@@ -44,3 +46,4 @@
 		</td>
 	}
 </tr>
+</CascadingValue>

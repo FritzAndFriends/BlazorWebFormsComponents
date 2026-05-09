@@ -67,12 +67,19 @@ namespace BlazorWebFormsComponents
 				obj = DataBinder.GetPropertyValue(obj, property);
 			}
 			var value = obj?.ToString() ?? string.Empty;
+
+			// Use the naming context from the current row to generate a row-scoped name.
+			// In Web Forms, this would be e.g., "GridView1$ctl02$Quantity"
+			var fieldName = CurrentFormNamingContext != null
+				? CurrentFormNamingContext.GetChildUniqueID(DataField)
+				: DataField;
+
 			return builder =>
 			{
 				builder.OpenElement(0, "input");
 				builder.AddAttribute(1, "type", "text");
 				builder.AddAttribute(2, "value", value);
-				builder.AddAttribute(3, "name", DataField);
+				builder.AddAttribute(3, "name", fieldName);
 				builder.CloseElement();
 			};
 		}

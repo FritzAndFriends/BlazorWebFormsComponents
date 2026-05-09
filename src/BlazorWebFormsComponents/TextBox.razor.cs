@@ -19,6 +19,14 @@ namespace BlazorWebFormsComponents
 		[CascadingParameter(Name = "ValidationGroupCoordinator")]
 		protected ValidationGroupCoordinator Coordinator { get; set; }
 
+		/// <summary>
+		/// The form naming context cascaded from a parent data row (e.g., GridViewRow).
+		/// When present, the control's HTML name attribute uses the Web Forms-compatible
+		/// UniqueID format (e.g., "GridView1$ctl02$PurchaseQuantity").
+		/// </summary>
+		[CascadingParameter(Name = "FormNamingContext")]
+		protected FormNamingContext FormNamingContext { get; set; }
+
 		[Parameter]
 		public string Text { get; set; } = string.Empty;
 
@@ -97,6 +105,21 @@ namespace BlazorWebFormsComponents
 			await OnTextChanged.InvokeAsync(e);
 		}
 
+		/// <summary>
+		/// Gets the form field name for this TextBox, following Web Forms UniqueID conventions.
+		/// When inside a naming container (e.g., GridViewRow), the name includes the container prefix.
+		/// Otherwise falls back to the component's UniqueID or ID.
+		/// </summary>
+		internal string FormName
+		{
+			get
+			{
+				if (FormNamingContext != null && !string.IsNullOrEmpty(ID))
+					return FormNamingContext.GetChildUniqueID(ID);
+				return UniqueID;
+			}
+		}
+
 		internal Dictionary<string, object> CalculatedAttributes
 		{
 			get
@@ -105,6 +128,10 @@ namespace BlazorWebFormsComponents
 
 				if (!string.IsNullOrEmpty(ClientID))
 					attributes["id"] = ClientID;
+
+				var formName = FormName;
+				if (!string.IsNullOrEmpty(formName))
+					attributes["name"] = formName;
 
 				if (!string.IsNullOrEmpty(CssClass))
 					attributes["class"] = CssClass;
