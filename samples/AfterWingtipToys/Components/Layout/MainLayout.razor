@@ -1,5 +1,44 @@
 @inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
 
-<main>
+<div class="navbar navbar-inverse navbar-static-top">
+    <div class="navbar-inner">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/">Wingtip Toys</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a href="/">Home</a></li>
+                <li><a href="/About">About</a></li>
+                <li><a href="/Contact">Contact</a></li>
+                <li><a href="/ProductList">Products</a></li>
+                <li><a href="/ShoppingCart">Cart</a></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <AuthorizeView>
+                    <Authorized>
+                        <li><a href="/Account/Manage">Hello, @context.User.Identity?.Name!</a></li>
+                        <li>
+                            <form method="post" action="/Account/PerformLogout" data-enhance="false">
+                                <AntiforgeryToken />
+                                <button type="submit" class="btn btn-link navbar-btn">Log off</button>
+                            </form>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
+                        <li><a href="/Account/Register">Register</a></li>
+                        <li><a href="/Account/Login">Log in</a></li>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<main class="container body-content">
     @Body
+    <hr />
+    <footer>
+        <p>&copy; @DateTime.Now.Year - Wingtip Toys</p>
+    </footer>
 </main>

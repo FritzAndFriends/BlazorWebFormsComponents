@@ -6,42 +6,35 @@ namespace WingtipToys;
 
 public partial class ProductDetails
 {
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
-
-    [Parameter, SupplyParameterFromQuery(Name = "productId")]
-    public int? ProductId { get; set; }
+    [Inject]
+    public ProductContext Db { get; set; } = default!;
 
     [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
-    public int? ProductIdLegacy { get; set; }
+    public int? ProductId { get; set; }
 
     [Parameter, SupplyParameterFromQuery(Name = "productName")]
     public string? ProductName { get; set; }
 
-    private Product? Product { get; set; }
+    private Product? product;
 
     protected override async Task OnParametersSetAsync()
     {
-        await base.OnParametersSetAsync();
-        Title = "Product Details";
+        var query = Db.Products.AsQueryable();
 
-        var requestedId = ProductId ?? ProductIdLegacy;
-
-        await using var db = await DbFactory.CreateDbContextAsync();
-        if (requestedId is > 0)
+        if (ProductId.HasValue && ProductId.Value > 0)
         {
-            Product = await db.Products.Include(product => product.Category)
-                .FirstOrDefaultAsync(product => product.ProductID == requestedId.Value);
+            query = query.Where(item => item.ProductID == ProductId.Value);
         }
         else if (!string.IsNullOrWhiteSpace(ProductName))
         {
-            Product = await db.Products.Include(product => product.Category)
-                .FirstOrDefaultAsync(product => product.ProductName == ProductName);
+            query = query.Where(item => item.ProductName == ProductName);
         }
         else
         {
-            Product = await db.Products.Include(product => product.Category)
-                .OrderBy(product => product.ProductID)
-                .FirstOrDefaultAsync();
+            product = null;
+            return;
         }
+
+        product = await query.FirstOrDefaultAsync();
     }
 }

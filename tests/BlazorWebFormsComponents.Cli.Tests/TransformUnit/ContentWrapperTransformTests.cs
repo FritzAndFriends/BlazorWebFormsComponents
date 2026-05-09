@@ -4,8 +4,8 @@ using BlazorWebFormsComponents.Cli.Transforms.Markup;
 namespace BlazorWebFormsComponents.Cli.Tests.TransformUnit;
 
 /// <summary>
-/// Unit tests for ContentWrapperTransform — converts &lt;asp:Content&gt; wrappers to BWFC
-/// &lt;Content ContentPlaceHolderID="X"&gt; and wraps in the master page component.
+/// Unit tests for ContentWrapperTransform — strips &lt;asp:Content&gt; wrappers and keeps
+/// only the inner content.
 /// Corresponds to TC09-ContentWrappers test case.
 /// </summary>
 public class ContentWrapperTransformTests
@@ -37,7 +37,7 @@ public class ContentWrapperTransformTests
     };
 
     [Fact]
-    public void ConvertsOpenTagToNamedContent()
+    public void StripsOpenTagKeepingInnerContent()
     {
         var input = "<asp:Content ID=\"BodyContent\" ContentPlaceHolderID=\"MainContent\" runat=\"server\">\n" +
                     "    <h1>Hello</h1>\n" +
@@ -45,12 +45,13 @@ public class ContentWrapperTransformTests
 
         var result = _transform.Apply(input, PageMeta());
 
-        Assert.Contains("<Content ContentPlaceHolderID=\"MainContent\">", result);
+        Assert.Contains("<h1>Hello</h1>", result);
         Assert.DoesNotContain("<asp:Content", result);
+        Assert.DoesNotContain("ContentPlaceHolderID", result);
     }
 
     [Fact]
-    public void ConvertsCloseTagToContentClose()
+    public void StripsCloseTagKeepingInnerContent()
     {
         var input = "<asp:Content ContentPlaceHolderID=\"Main\" runat=\"server\">\n" +
                     "    <p>Body</p>\n" +
@@ -58,8 +59,9 @@ public class ContentWrapperTransformTests
 
         var result = _transform.Apply(input, PageMeta());
 
-        Assert.Contains("</Content>", result);
+        Assert.Contains("<p>Body</p>", result);
         Assert.DoesNotContain("</asp:Content>", result);
+        Assert.DoesNotContain("</Content>", result);
     }
 
     [Fact]
@@ -77,17 +79,18 @@ public class ContentWrapperTransformTests
     }
 
     [Fact]
-    public void PreservesContentPlaceHolderID_Value()
+    public void RemovesContentPlaceHolderID_Attribute()
     {
         var input = "<asp:Content ContentPlaceHolderID=\"FeaturedContent\" runat=\"server\"><p>test</p></asp:Content>";
 
         var result = _transform.Apply(input, PageMeta());
 
-        Assert.Contains("ContentPlaceHolderID=\"FeaturedContent\"", result);
+        Assert.DoesNotContain("ContentPlaceHolderID=\"FeaturedContent\"", result);
+        Assert.Equal("<p>test</p>", result.Trim());
     }
 
     [Fact]
-    public void WrapsInMasterComponent_WhenMasterPageFilePresent()
+    public void DoesNotWrapInMasterComponent_WhenMasterPageFilePresent()
     {
         var input = "<asp:Content ContentPlaceHolderID=\"MainContent\" runat=\"server\">\n" +
                     "    <h1>Body</h1>\n" +
@@ -95,19 +98,21 @@ public class ContentWrapperTransformTests
 
         var result = _transform.Apply(input, PageMetaWithMaster("~/Site.Master"));
 
-        Assert.Contains("<Site>", result);
-        Assert.Contains("</Site>", result);
+        Assert.Contains("<h1>Body</h1>", result);
+        Assert.DoesNotContain("<Site>", result);
+        Assert.DoesNotContain("</Site>", result);
     }
 
     [Fact]
-    public void ComponentNameDerivedFromMasterPageFile()
+    public void IgnoresMasterPageComponentName_WhenStrippingContent()
     {
         var input = "<asp:Content ContentPlaceHolderID=\"Main\" runat=\"server\"><p>x</p></asp:Content>";
 
         var result = _transform.Apply(input, PageMetaWithMaster("~/Layouts/AdminLayout.master"));
 
-        Assert.Contains("<AdminLayout>", result);
-        Assert.Contains("</AdminLayout>", result);
+        Assert.Equal("<p>x</p>", result.Trim());
+        Assert.DoesNotContain("<AdminLayout>", result);
+        Assert.DoesNotContain("</AdminLayout>", result);
     }
 
     [Fact]
@@ -117,13 +122,13 @@ public class ContentWrapperTransformTests
 
         var result = _transform.Apply(input, PageMeta(originalContent: ""));
 
-        // Content converted but no master component wrapper
-        Assert.Contains("<Content ContentPlaceHolderID=\"Main\">", result);
+        Assert.Equal("<p>x</p>", result.Trim());
         Assert.DoesNotContain("<Site>", result);
+        Assert.DoesNotContain("ContentPlaceHolderID", result);
     }
 
     [Fact]
-    public void MultipleContentBlocks_AllWrapped()
+    public void MultipleContentBlocks_AllStripped()
     {
         var input = "<asp:Content ID=\"Head\" ContentPlaceHolderID=\"HeadContent\" runat=\"server\">\n" +
                     "    <title>My Page</title>\n" +
@@ -136,13 +141,10 @@ public class ContentWrapperTransformTests
 
         Assert.DoesNotContain("<asp:Content", result);
         Assert.DoesNotContain("</asp:Content>", result);
-        Assert.Contains("<Content ContentPlaceHolderID=\"HeadContent\">", result);
-        Assert.Contains("<Content ContentPlaceHolderID=\"MainContent\">", result);
+        Assert.DoesNotContain("ContentPlaceHolderID", result);
+        Assert.DoesNotContain("<Site>", result);
         Assert.Contains("<title>My Page</title>", result);
         Assert.Contains("<h1>Page body</h1>", result);
-        // Both Content blocks wrapped in a single Site component
-        Assert.Equal(1, result.Split("<Site>").Length - 1);
-        Assert.Equal(1, result.Split("</Site>").Length - 1);
     }
 
     [Fact]

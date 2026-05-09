@@ -29,7 +29,8 @@ public class ProgramCsEmitter
         builder.AppendLine();
         builder.AppendLine("var builder = WebApplication.CreateBuilder(args);");
         builder.AppendLine();
-        builder.AppendLine("builder.Services.AddRazorComponents();");
+        builder.AppendLine("builder.Services.AddRazorComponents()");
+        builder.AppendLine("    .AddInteractiveServerComponents();");
         builder.AppendLine("builder.Services.AddAntiforgery();");
 
         if (profile.NeedsSession)
@@ -108,7 +109,7 @@ public class ProgramCsEmitter
         builder.AppendLine("}");
         builder.AppendLine();
         builder.AppendLine("app.UseHttpsRedirection();");
-        builder.AppendLine("app.UseStaticFiles();");
+        builder.AppendLine("app.MapStaticAssets();");
 
         if (profile.NeedsSession)
             builder.AppendLine("app.UseSession();");
@@ -132,7 +133,8 @@ public class ProgramCsEmitter
         }
 
         builder.AppendLine();
-        builder.AppendLine($"app.MapRazorComponents<{projectName}.Components.App>();");
+        builder.AppendLine($"app.MapRazorComponents<{projectName}.Components.App>()");
+        builder.AppendLine("    .AddInteractiveServerRenderMode();");
         builder.AppendLine();
         builder.AppendLine("app.Run();");
 

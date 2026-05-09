@@ -1,47 +1,45 @@
 @page "/ShoppingCart"
+@rendermode Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveServer
 <PageTitle>Shopping Cart</PageTitle>
-<Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-            <div id="ShoppingCartTitle" class="ContentHead"><h1>@ShoppingCartTitle</h1></div>
 
-            <form method="post" @formname="shopping-cart-form">
-                <AntiforgeryToken />
-                <GridView AutoGenerateColumns="false" ShowFooter="false" GridLines="@GridLines.Vertical" CellPadding="4"
-                          ItemType="CartItem" Items="@CartItems"
-                          CssClass="table table-striped table-bordered">
-                    <Columns>
-                        <BoundField ItemType="CartItem" DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
-                        <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Name" />
-                        <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
-                        <TemplateField ItemType="CartItem" HeaderText="Quantity">
-                            <ItemTemplate Context="Item">
-                                <input type="number" min="1" name="qty_@Item.ProductId" value="@Item.Quantity" style="width:80px" />
-                            </ItemTemplate>
-                        </TemplateField>
-                        <TemplateField ItemType="CartItem" HeaderText="Item Total">
-                            <ItemTemplate Context="Item">
-                                @((Convert.ToDecimal(Item.Product?.UnitPrice ?? 0) * Item.Quantity).ToString("C"))
-                            </ItemTemplate>
-                        </TemplateField>
-                        <TemplateField ItemType="CartItem" HeaderText="Remove Item">
-                            <ItemTemplate Context="Item">
-                                <input type="checkbox" name="remove_@Item.ProductId" />
-                            </ItemTemplate>
-                        </TemplateField>
-                    </Columns>
-                </GridView>
+<div id="ShoppingCartTitle" class="ContentHead">
+    <h1>@shoppingCartTitle</h1>
+</div>
 
-                <div>
-                    <p></p>
-                    <strong>Order Total: @TotalText</strong>
-                </div>
-                <br />
-                <div class="btn-toolbar">
-                    <button type="submit" class="btn btn-primary">Update</button>
-                    <a href="/Checkout/CheckoutStart" class="btn btn-default">Checkout</a>
-                </div>
-            </form>
-        </Content>
-    </ChildComponents>
-</Site>
+@if (cartItems.Count > 0)
+{
+    <GridView AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
+              ItemType="CartItem" DataSource="@cartItems" CssClass="table table-striped table-bordered">
+        <Columns>
+            <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
+            <BoundField DataField="Product.ProductName" HeaderText="Name" />
+            <TemplateField HeaderText="Price (each)">
+                <ItemTemplate Context="Item">@((Item.Product?.UnitPrice ?? 0).ToString("c"))</ItemTemplate>
+            </TemplateField>
+            <TemplateField HeaderText="Quantity">
+                <ItemTemplate Context="Item">
+                    <input type="number" value="@Item.Quantity" min="1" @onchange="@(async (ChangeEventArgs e) => { Item.Quantity = int.TryParse(e.Value?.ToString(), out var q) ? q : Item.Quantity; })" style="width:60px" />
+                </ItemTemplate>
+            </TemplateField>
+            <TemplateField HeaderText="Item Total">
+                <ItemTemplate Context="Item">@(((decimal)(Item.Product?.UnitPrice ?? 0) * Item.Quantity).ToString("c"))</ItemTemplate>
+            </TemplateField>
+        </Columns>
+    </GridView>
+
+    <div>
+        <p></p>
+        <strong>Order Total: @cartTotal.ToString("c")</strong>
+    </div>
+    <br />
+    <table>
+        <tr>
+            <td><Button Text="Refresh" OnClick="UpdateBtn_Click" /></td>
+            <td><Button Text="Checkout" OnClick="CheckoutBtn_Click" /></td>
+        </tr>
+    </table>
+}
+else
+{
+    <p>Your shopping cart is empty.</p>
+}

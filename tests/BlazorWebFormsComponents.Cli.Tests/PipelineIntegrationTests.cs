@@ -580,9 +580,11 @@ public class PipelineIntegrationTests : IDisposable
 
         Assert.Contains("@ChildComponents", masterMarkup);
         Assert.Contains("public RenderFragment? ChildComponents { get; set; }", masterMarkup);
-        Assert.Contains("<ChildComponents>", defaultMarkup);
+        Assert.DoesNotContain("<ChildComponents>", defaultMarkup);
         Assert.DoesNotContain("<ChildContent>", defaultMarkup);
-        Assert.True(report.SemanticPatternsApplied >= 3, $"Expected master/content semantic rewrites to run, got {report.SemanticPatternsApplied}");
+        Assert.DoesNotContain("<Site>", defaultMarkup);
+        Assert.DoesNotContain("<Content ", defaultMarkup);
+        Assert.True(report.SemanticPatternsApplied >= 1, $"Expected master/content semantic rewrites to run, got {report.SemanticPatternsApplied}");
     }
 
     [Fact]

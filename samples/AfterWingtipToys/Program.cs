@@ -1,12 +1,12 @@
 using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using WingtipToys.Logic;
 using WingtipToys.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents();
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 builder.Services.AddAntiforgery();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
@@ -16,30 +16,43 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection")
+var authConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' was not found.");
-var catalogConnection = builder.Configuration.GetConnectionString("WingtipToys")
+var catalogConnectionString = builder.Configuration.GetConnectionString("WingtipToys")
     ?? throw new InvalidOperationException("Connection string 'WingtipToys' was not found.");
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(defaultConnection));
-builder.Services.AddDbContextFactory<ProductContext>(options => options.UseSqlServer(catalogConnection));
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(authConnectionString));
+builder.Services.AddDbContext<ProductContext>(options =>
+    options.UseSqlite(catalogConnectionString));
+
+var identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
-})
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
+});
+identityBuilder.AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
-    options.LogoutPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
 });
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
+
 builder.Services.AddBlazorWebFormsComponents();
-builder.Services.AddSingleton<CartStore>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var identityDb = services.GetRequiredService<ApplicationDbContext>();
+    var productDb = services.GetRequiredService<ProductContext>();
+
+    await identityDb.Database.EnsureCreatedAsync();
+    await productDb.Database.EnsureCreatedAsync();
+    await SeedData.InitializeAsync(productDb);
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -48,55 +61,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.MapStaticAssets();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
-
-using (var scope = app.Services.CreateScope())
-{
-    var identityDb = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    identityDb.Database.EnsureCreated();
-
-    var catalogFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
-    using var catalogDb = catalogFactory.CreateDbContext();
-    catalogDb.Database.EnsureCreated();
-    ProductDatabaseInitializer.SeedIfNeeded(catalogDb);
-}
-
-app.MapGet("/AddToCart", async (int? productId, int? productID, IDbContextFactory<ProductContext> dbFactory, CartStore cartStore, HttpContext context) =>
-{
-    var requestedId = productId ?? productID;
-    if (requestedId is null)
-    {
-        return Results.Redirect("/ProductList");
-    }
-
-    await using var db = await dbFactory.CreateDbContextAsync();
-    var product = await db.Products.Include(item => item.Category)
-        .FirstOrDefaultAsync(item => item.ProductID == requestedId.Value);
-    if (product is null)
-    {
-        return Results.Redirect("/ProductList");
-    }
-
-    var cartId = context.Request.Cookies["CartSessionId"];
-    if (string.IsNullOrWhiteSpace(cartId))
-    {
-        cartId = Guid.NewGuid().ToString("N");
-        context.Response.Cookies.Append("CartSessionId", cartId, new CookieOptions
-        {
-            HttpOnly = true,
-            IsEssential = true,
-            SameSite = SameSiteMode.Lax,
-            Secure = context.Request.IsHttps
-        });
-    }
-
-    cartStore.AddItem(cartId, product);
-    return Results.Redirect("/ShoppingCart");
-});
 
 app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
 {
@@ -128,7 +97,7 @@ app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<A
     }
 
     return Results.LocalRedirect(hasLocalReturnUrl ? returnUrl : "/");
-}).DisableAntiforgery();
+});
 
 app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<ApplicationUser> userManager) =>
 {
@@ -173,17 +142,58 @@ app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<
         return Results.LocalRedirect(registrationErrorUrl);
     }
 
-    return Results.LocalRedirect(hasLocalReturnUrl
+    var registeredUrl = hasLocalReturnUrl
         ? $"/Account/Login?registered=1&returnUrl={Uri.EscapeDataString(returnUrl)}"
-        : "/Account/Login?registered=1");
-}).DisableAntiforgery();
+        : "/Account/Login?registered=1";
+    return Results.LocalRedirect(registeredUrl);
+});
 
 app.MapPost("/Account/PerformLogout", async (SignInManager<ApplicationUser> signInManager) =>
 {
     await signInManager.SignOutAsync();
-    return Results.Redirect("/");
-}).DisableAntiforgery();
+    return Results.LocalRedirect("/");
+});
 
-app.MapRazorComponents<WingtipToys.Components.App>();
+app.MapGet("/AddToCart", async (int? productID, HttpContext context, ProductContext db) =>
+{
+    if (productID.HasValue)
+    {
+        var cartId = context.Session.GetString("CartId");
+        if (string.IsNullOrEmpty(cartId))
+        {
+            cartId = Guid.NewGuid().ToString();
+            context.Session.SetString("CartId", cartId);
+        }
+
+        var cartItem = await db.ShoppingCartItems
+            .FirstOrDefaultAsync(i => i.CartId == cartId && i.ProductId == productID.Value);
+
+        if (cartItem is null)
+        {
+            var product = await db.Products.FirstOrDefaultAsync(p => p.ProductID == productID.Value);
+            if (product is not null)
+            {
+                db.ShoppingCartItems.Add(new CartItem
+                {
+                    ItemId = Guid.NewGuid().ToString(),
+                    CartId = cartId,
+                    ProductId = product.ProductID,
+                    Product = product,
+                    Quantity = 1,
+                    DateCreated = DateTime.UtcNow
+                });
+            }
+        }
+        else
+        {
+            cartItem.Quantity++;
+        }
+        await db.SaveChangesAsync();
+    }
+    return Results.LocalRedirect("/ShoppingCart");
+});
+
+app.MapRazorComponents<WingtipToys.Components.App>()
+    .AddInteractiveServerRenderMode();
 
 app.Run();

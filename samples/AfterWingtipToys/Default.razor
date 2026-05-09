@@ -1,34 +1,52 @@
 @page "/"
-<PageTitle>Wingtip Toys</PageTitle>
-<Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-            <div class="jumbotron">
-                <h1>Wingtip Toys</h1>
-                <p class="lead">Wingtip Toys can help you find the perfect gift.</p>
-                <p>We're all about transportation toys. Explore the catalog, view product details, and add items to your cart.</p>
-                <p><a class="btn btn-primary btn-lg" href="/ProductList">Shop Now</a></p>
-            </div>
+@using Microsoft.EntityFrameworkCore
+@inject ProductContext Db
 
-            <h2>Featured Products</h2>
-            <ListView ItemType="Product" Items="@FeaturedProducts">
-                <LayoutTemplate Context="items">
-                    <div class="row">@items</div>
-                </LayoutTemplate>
-                <ItemTemplate Context="Item">
-                    <div class="col-sm-3">
-                        <div class="thumbnail">
-                            <a href="/ProductDetails?productId=@Item.ProductID">
-                                <img src="/Catalog/Images/Thumbs/@Item.ImagePath" alt="@Item.ProductName" style="width:100%;height:160px;object-fit:contain" />
-                            </a>
-                            <div class="caption">
-                                <h4><a href="/ProductDetails?productId=@Item.ProductID">@Item.ProductName</a></h4>
-                                <p>@Item.Description</p>
-                            </div>
-                        </div>
-                    </div>
-                </ItemTemplate>
-            </ListView>
-        </Content>
-    </ChildComponents>
-</Site>
+<PageTitle>Welcome to Wingtip Toys</PageTitle>
+
+<div id="TitleContent" style="text-align: center">
+    <h1>Welcome to Wingtip Toys</h1>
+    <br />
+    <h2>Wingtip Toys can help you find the perfect gift.</h2>
+    <p class="lead">We're all about transportation toys. You can order any of our toys today. Each toy listing has detailed information to help you choose the right toy.</p>
+</div>
+
+<div style="text-align: center; padding: 20px;">
+    <ListView Items="products" DataKeyNames="ProductID" GroupItemCount="4" ItemType="Product">
+        <EmptyDataTemplate>
+            <p>No products available.</p>
+        </EmptyDataTemplate>
+        <EmptyItemTemplate>
+            <td></td>
+        </EmptyItemTemplate>
+        <GroupTemplate Context="items">
+            <tr>@items</tr>
+        </GroupTemplate>
+        <ItemTemplate Context="Item">
+            <td style="padding: 10px;">
+                <a href="@($"/ProductDetails?ProductID={Item.ProductID}")">
+                    <img src="@($"/Catalog/Images/Thumbs/{Item.ImagePath}")" width="100" height="75" alt="@Item.ProductName" style="border:1px solid #ccc" />
+                </a>
+                <br />
+                <a href="@($"/ProductDetails?ProductID={Item.ProductID}")">@Item.ProductName</a>
+            </td>
+        </ItemTemplate>
+        <LayoutTemplate Context="groups">
+            <table style="width:100%;">
+                <tbody>@groups</tbody>
+            </table>
+        </LayoutTemplate>
+    </ListView>
+</div>
+
+@code {
+    private List<Product> products = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await Db.Products
+            .OrderBy(p => p.ProductName)
+            .Take(8)
+            .ToListAsync();
+    }
+}
