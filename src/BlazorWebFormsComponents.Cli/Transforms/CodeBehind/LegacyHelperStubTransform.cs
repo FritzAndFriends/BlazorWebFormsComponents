@@ -11,7 +11,7 @@ namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 public class LegacyHelperStubTransform : ICodeBehindTransform
 {
     private static readonly Regex LegacyNamespaceRegex = new(
-        @"\busing\s+(System\.Web\.Security|Microsoft\.AspNet\.Identity|System\.Web\.Providers|System\.Web\.Configuration|System\.Web\.Profile|WebMatrix\.WebData)\b",
+        @"\busing\s+(Microsoft\.AspNet\.Identity|Microsoft\.AspNet\.Identity\.EntityFramework|Microsoft\.AspNet\.Identity\.Owin|System\.Web\.Security|System\.Web\.Providers|System\.Web\.Configuration|System\.Web\.Profile|WebMatrix\.WebData|System\.Configuration)\b",
         RegexOptions.Compiled);
 
     private static readonly Regex NamespaceRegex = new(
@@ -23,12 +23,16 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
         RegexOptions.Compiled);
 
     public string Name => "LegacyHelperStub";
-    public int Order => 860;
+    public int Order => 50; // Run before UsingStripTransform (100) so legacy using directives are still present
 
     public string Apply(string content, FileMetadata metadata)
     {
-        // Only process non-page code files
-        if (metadata.FileType == FileType.Page || metadata.FileType == FileType.Master || metadata.FileType == FileType.Control)
+        // Only process standalone .cs files (not page/master/control code-behinds)
+        // Code-behind files have a SourceFilePath ending in .aspx.cs, .ascx.cs, or .master.cs
+        var sourcePath = metadata.SourceFilePath ?? metadata.OutputFilePath;
+        if (sourcePath.EndsWith(".aspx.cs", StringComparison.OrdinalIgnoreCase)
+            || sourcePath.EndsWith(".ascx.cs", StringComparison.OrdinalIgnoreCase)
+            || sourcePath.EndsWith(".master.cs", StringComparison.OrdinalIgnoreCase))
             return content;
 
         if (!LegacyNamespaceRegex.IsMatch(content))

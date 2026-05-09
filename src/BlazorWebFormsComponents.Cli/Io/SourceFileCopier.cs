@@ -40,7 +40,7 @@ public class SourceFileCopier
         _outputWriter = outputWriter;
         // Only apply a subset of transforms relevant to non-page .cs files
         _transforms = transforms
-            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor")
+            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "LegacyHelperStub")
             .OrderBy(t => t.Order)
             .ToList();
     }
