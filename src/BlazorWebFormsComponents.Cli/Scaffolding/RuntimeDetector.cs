@@ -44,6 +44,7 @@ public class RuntimeProfile
     public string? DbContextNamespace { get; set; }
     public List<string> ConnectionStringNames { get; set; } = [];
     public List<string> ApplicationStartPatterns { get; set; } = [];
+    public List<string> AdditionalDbContextNames { get; set; } = [];
 
     public string? ResolvedDbContextTypeName =>
         string.IsNullOrWhiteSpace(DbContextClassName)

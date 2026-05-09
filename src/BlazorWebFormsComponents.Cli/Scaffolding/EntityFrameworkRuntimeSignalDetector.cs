@@ -15,11 +15,20 @@ public partial class EntityFrameworkRuntimeSignalDetector : IRuntimeSignalDetect
                 continue;
 
             profile.NeedsEntityFramework = true;
-            profile.DbContextClassName ??= classMatch.Groups["name"].Value;
+            var contextName = classMatch.Groups["name"].Value;
 
-            var namespaceMatch = NamespaceRegex().Match(content);
-            if (namespaceMatch.Success)
-                profile.DbContextNamespace ??= namespaceMatch.Groups["name"].Value;
+            if (profile.DbContextClassName is null)
+            {
+                profile.DbContextClassName = contextName;
+                var namespaceMatch = NamespaceRegex().Match(content);
+                if (namespaceMatch.Success)
+                    profile.DbContextNamespace = namespaceMatch.Groups["name"].Value;
+            }
+            else if (!string.Equals(contextName, profile.DbContextClassName, StringComparison.Ordinal)
+                     && !profile.AdditionalDbContextNames.Contains(contextName, StringComparer.Ordinal))
+            {
+                profile.AdditionalDbContextNames.Add(contextName);
+            }
 
             if (classMatch.Groups["baseType"].Value.Contains("IdentityDbContext", StringComparison.Ordinal))
                 profile.NeedsIdentity = true;

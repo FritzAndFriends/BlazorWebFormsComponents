@@ -21,6 +21,10 @@ public class ProgramCsEmitter
             builder.AppendLine("using Microsoft.AspNetCore.Identity;");
             builder.AppendLine($"using {projectName}.Models;");
         }
+        else if (profile.NeedsEntityFramework && profile.AdditionalDbContextNames.Count > 0)
+        {
+            builder.AppendLine($"using {projectName}.Models;");
+        }
 
         builder.AppendLine();
         builder.AppendLine("var builder = WebApplication.CreateBuilder(args);");
@@ -52,6 +56,17 @@ public class ProgramCsEmitter
             builder.AppendLine($"    ?? throw new InvalidOperationException(\"Connection string '{connectionStringName}' was not found.\");");
             builder.AppendLine($"builder.Services.AddDbContext<{dbContextTypeName}>(options =>");
             builder.AppendLine($"    options.{dbProvider.ProviderMethod}(connectionString));");
+
+            // Register additional DbContext types (e.g. ProductContext alongside ApplicationDbContext)
+            foreach (var additionalContext in profile.AdditionalDbContextNames)
+            {
+                // Skip the identity context if it was already registered above
+                if (profile.NeedsIdentity && string.Equals(additionalContext, "ApplicationDbContext", StringComparison.Ordinal))
+                    continue;
+
+                builder.AppendLine($"builder.Services.AddDbContext<{additionalContext}>(options =>");
+                builder.AppendLine($"    options.{dbProvider.ProviderMethod}(connectionString));");
+            }
         }
 
         if (profile.NeedsIdentity)
