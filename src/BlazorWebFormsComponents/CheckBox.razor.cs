@@ -40,6 +40,14 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+			// Register this control's type with the naming context so FindControl
+			// can create a correctly-typed proxy from form POST data.
+			FormNamingContext?.RegisterControl(ID, typeof(CheckBox));
+		}
+
 		[Parameter]
 		public bool Checked { get; set; }
 

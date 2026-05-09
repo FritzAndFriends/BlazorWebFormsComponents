@@ -54,7 +54,7 @@
 					var rowIndex = index;
 					var rowStyle = GetRowStyle(rowIndex);
 					<CascadingValue Value="this" Name="RowCollection">
-						<GridViewRow DataItem="item" Columns="ColumnList" DataItemIndex="rowIndex" IsEditing="(rowIndex == EditIndex)" IsSelected="(rowIndex == SelectedIndex)" EditRowStyle="EditRowStyle" RowStyle="rowStyle" GridView="this" />
+						<GridViewRow DataItem="item" Columns="ColumnList" DataItemIndex="rowIndex" IsEditing="(rowIndex == EditIndex)" IsSelected="(rowIndex == SelectedIndex)" EditRowStyle="EditRowStyle" RowStyle="rowStyle" GridView="this" FormRowData="GetFormRowData(rowIndex)" />
 					</CascadingValue>
 
 					index++;

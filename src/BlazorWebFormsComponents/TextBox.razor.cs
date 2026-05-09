@@ -30,6 +30,14 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public string Text { get; set; } = string.Empty;
 
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+			// Register this control's type with the naming context so FindControl
+			// can create a correctly-typed proxy from form POST data.
+			FormNamingContext?.RegisterControl(ID, typeof(TextBox));
+		}
+
 		[Parameter]
 		public EnumParameter<TextBoxMode> TextMode { get; set; } = TextBoxMode.SingleLine;
 

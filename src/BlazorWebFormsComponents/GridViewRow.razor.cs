@@ -1,5 +1,7 @@
 ﻿using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Primitives;
+using System;
 using System.Collections.Generic;
 
 namespace BlazorWebFormsComponents
@@ -50,6 +52,12 @@ namespace BlazorWebFormsComponents
 		[Parameter] public GridView<ItemType> GridView { get; set; }
 
 		/// <summary>
+		/// The form data dictionary for this row, passed down from GridView.
+		/// Contains only the form values relevant to this row (keyed by control ID).
+		/// </summary>
+		[Parameter] public IDictionary<string, string> FormRowData { get; set; }
+
+		/// <summary>
 		/// The form naming context for this row, cascaded to child controls.
 		/// Provides the naming prefix (e.g., "CartList$ctl04") so child controls
 		/// can generate Web Forms-compatible form field names.
@@ -81,6 +89,55 @@ namespace BlazorWebFormsComponents
 			{
 				baseCol.CurrentFormNamingContext = _formNamingContext;
 			}
+		}
+
+		/// <summary>
+		/// Finds a control by ID. When form data is available, returns a proxy control
+		/// populated from form POST data (enabling the Web Forms FindControl pattern).
+		/// Falls back to the live component tree when no form data is present.
+		/// This enables Web Forms code-behind like:
+		///   TextBox qty = (TextBox)CartList.Rows[i].FindControl("PurchaseQuantity");
+		///   int quantity = Convert.ToInt16(qty.Text);
+		/// to compile and work unchanged after migration.
+		/// </summary>
+		public override BaseWebFormsComponent FindControl(string controlId)
+		{
+			if (string.IsNullOrEmpty(controlId)) return null;
+
+			// Get the registered control type from the naming context
+			var controlType = _formNamingContext?.GetControlType(controlId);
+
+			// When form data is available, create a proxy with form values
+			// This takes priority over live components because the caller wants
+			// the submitted form values, not the rendered component state
+			if (FormRowData != null && controlType != null)
+			{
+				FormRowData.TryGetValue(controlId, out var formValue);
+
+				if (controlType == typeof(TextBox))
+				{
+					return new TextBox { ID = controlId, Text = formValue ?? string.Empty };
+				}
+
+				if (controlType == typeof(CheckBox))
+				{
+					// Checkbox form values: present means checked, absent means unchecked.
+					// Value is "on" or "true" when checked.
+					var isChecked = formValue != null &&
+						(formValue.Equals("on", StringComparison.OrdinalIgnoreCase) ||
+						 formValue.Equals("true", StringComparison.OrdinalIgnoreCase));
+					return new CheckBox { ID = controlId, Checked = isChecked };
+				}
+			}
+
+			// If we have form data but no registered type, check for a value
+			if (FormRowData != null && FormRowData.TryGetValue(controlId, out var fallbackValue))
+			{
+				return new TextBox { ID = controlId, Text = fallbackValue };
+			}
+
+			// Fall back to the live component tree
+			return base.FindControl(controlId);
 		}
 	}
 }

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace BlazorWebFormsComponents
 {
 	/// <summary>
@@ -11,6 +14,9 @@ namespace BlazorWebFormsComponents
 	///
 	/// The Prefix property carries the parent portion (e.g., "CartList$ctl04") so child
 	/// controls only need to append "$" + their own ID.
+	///
+	/// Controls self-register their type during rendering so that FindControl can create
+	/// correctly-typed proxy instances populated from form POST data.
 	/// </summary>
 	public class FormNamingContext
 	{
@@ -25,10 +31,40 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		public int RowIndex { get; }
 
+		/// <summary>
+		/// Registry of control IDs to their concrete types, populated during render
+		/// as each control registers itself. Used by FindControl to create properly-typed
+		/// proxy instances from form data.
+		/// </summary>
+		private readonly Dictionary<string, Type> _controlTypes = new(StringComparer.OrdinalIgnoreCase);
+
 		public FormNamingContext(string prefix, int rowIndex)
 		{
 			Prefix = prefix;
 			RowIndex = rowIndex;
+		}
+
+		/// <summary>
+		/// Registers a control's type so FindControl can create the correct proxy type.
+		/// Called by controls (TextBox, CheckBox, etc.) during their parameter set phase.
+		/// </summary>
+		/// <param name="controlId">The control's ID (e.g., "PurchaseQuantity")</param>
+		/// <param name="controlType">The concrete control type (e.g., typeof(TextBox))</param>
+		public void RegisterControl(string controlId, Type controlType)
+		{
+			if (!string.IsNullOrEmpty(controlId) && controlType != null)
+			{
+				_controlTypes[controlId] = controlType;
+			}
+		}
+
+		/// <summary>
+		/// Gets the registered type for a control ID, or null if not registered.
+		/// </summary>
+		public Type GetControlType(string controlId)
+		{
+			if (string.IsNullOrEmpty(controlId)) return null;
+			return _controlTypes.TryGetValue(controlId, out var type) ? type : null;
 		}
 
 		/// <summary>
