@@ -98,6 +98,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, UrlCleanupTransform>();
         services.AddSingleton<PageQuarantineDetector>();
         services.AddSingleton<ICodeBehindTransform>(sp => new CompileSurfaceStubTransform(sp.GetRequiredService<PageQuarantineDetector>()));
+        services.AddSingleton<ICodeBehindTransform, LegacyHelperStubTransform>();
         services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
 
         // Scaffolding

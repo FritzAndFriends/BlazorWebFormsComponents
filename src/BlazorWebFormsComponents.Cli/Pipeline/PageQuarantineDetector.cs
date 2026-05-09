@@ -165,6 +165,20 @@ public sealed partial class PageQuarantineDetector
                 "Port the remaining server-control or lifecycle logic into BWFC-compatible components, services, or semantic patterns before re-enabling the page.");
         }
 
+        // Pages on clearly quarantinable paths (Account/*, Admin/*, Checkout/*, Mobile)
+        // are always quarantined even without explicit signals — these paths consistently
+        // produce compile errors from legacy APIs that the CLI cannot safely transform.
+        if (features.Count == 0 && IsClearlyQuarantinablePath(relativeSourcePath))
+        {
+            AddSignal(
+                features,
+                reasons,
+                suggestions,
+                "Non-essential path (auto-quarantined)",
+                $"Page is located in a non-essential path ({relativeSourcePath}) that typically requires manual migration of legacy Web Forms APIs.",
+                "Migrate the page manually once core pages are stable, using injected services and Blazor patterns.");
+        }
+
         if (features.Count == 0)
         {
             return PageQuarantineDecision.None;
