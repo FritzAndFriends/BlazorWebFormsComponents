@@ -1,22 +1,27 @@
 @page "/ErrorPage"
-<PageTitle>Error</PageTitle>
+<PageTitle></PageTitle>
 
-<h2>Error:</h2>
-<p></p>
-<p style="color: red; font-size: large;">@FriendlyErrorMessage</p>
+    <h2>Error:</h2>
+    <p></p>
+    <Label id="FriendlyErrorMsg" @ref="FriendlyErrorMsg" Text="Label" Font-Size="Large" style="color: red"></Label>
 
-@if (ShowDetailedError)
-{
-    <div>
+    <Panel id="DetailedErrorPanel" @ref="DetailedErrorPanel" Visible="false">
         <p>&nbsp;</p>
         <h4>Detailed Error:</h4>
-        <p>@DetailedErrorMessage</p>
+        <p>
+            <Label id="ErrorDetailedMsg" @ref="ErrorDetailedMsg" Font-Size="Small" /><br />
+        </p>
 
         <h4>Error Handler:</h4>
-        <p>@ErrorHandlerText</p>
+        <p>
+            <Label id="ErrorHandler" @ref="ErrorHandler" Font-Size="Small" /><br />
+        </p>
 
         <h4>Detailed Error Message:</h4>
-        <p>@InnerMessageText</p>
-        <pre>@InnerTraceText</pre>
-    </div>
-}
+        <p>
+            <Label id="InnerMessage" @ref="InnerMessage" Font-Size="Small" /><br />
+        </p>
+        <p>
+            <Label id="InnerTrace" @ref="InnerTrace"  />
+        </p>
+    </Panel>

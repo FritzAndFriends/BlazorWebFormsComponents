@@ -1,13 +1,10 @@
 @page "/ProductDetails"
+@inject WingtipToys.Models.ProductContext _db
 <PageTitle>Product Details</PageTitle>
 
-@if (Product is null)
+@if (_product != null)
 {
-    <p>Product not found.</p>
-}
-else
-{
-    <FormView id="productDetail" ItemType="Product" DataItem="@Product" RenderOuterTable="false">
+    <FormView DataItem="_product" RenderOuterTable="false">
         <ItemTemplate Context="Item">
             <div>
                 <h1>@Item.ProductName</h1>
@@ -16,20 +13,41 @@ else
             <table>
                 <tr>
                     <td>
-                        <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName" />
+                        <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName"/>
                     </td>
-                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>  
                     <td style="vertical-align: top; text-align:left;">
                         <b>Description:</b><br />@Item.Description
                         <br />
-                        <span><b>Price:</b>&nbsp;@(string.Format("{0:c}", Item.UnitPrice))</span>
+                        <span><b>Price:</b>&nbsp;@(String.Format("{0:c}", Item.UnitPrice))</span>
                         <br />
                         <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
-                        <br /><br />
-                        <a class="btn btn-primary" href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">Add To Cart</a>
+                        <br />
+                        <br />
+                        <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false" class="btn btn-success">
+                            Add To Cart
+                        </a>
                     </td>
                 </tr>
             </table>
         </ItemTemplate>
     </FormView>
+}
+else
+{
+    <p>Product not found.</p>
+}
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "ProductID")] public int? ProductId { get; set; }
+
+    private Product? _product;
+
+    protected override void OnInitialized()
+    {
+        if (ProductId.HasValue && ProductId > 0)
+        {
+            _product = _db.Products.FirstOrDefault(p => p.ProductID == ProductId);
+        }
+    }
 }

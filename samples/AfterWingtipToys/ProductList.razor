@@ -1,106 +1,98 @@
 @page "/ProductList"
-@inject WingtipToys.Logic.CatalogService CatalogService
-
+@inject WingtipToys.Models.ProductContext _db
 <PageTitle>Products</PageTitle>
+	
+    <section>
+        <div>
+            <hgroup>
+                <h2>Products</h2>
+            </hgroup>
 
-<section>
-    <div>
-        <hgroup>
-            <h2>Products</h2>
-        </hgroup>
-
-        <ListView id="productList"
-                  DataKeyNames="ProductID"
-                  GroupItemCount="4"
-                  ItemType="Product"
-                  Items="@Products">
-            <EmptyDataTemplate>
-                <table>
-                    <tr>
-                        <td>No data was returned.</td>
-                    </tr>
-                </table>
-            </EmptyDataTemplate>
-            <EmptyItemTemplate>
-                <td></td>
-            </EmptyItemTemplate>
-            <GroupTemplate Context="items">
-                <tr id="itemPlaceholderContainer">
-                    @items
-                </tr>
-            </GroupTemplate>
-            <ItemTemplate Context="Item">
-                <td>
-                    <table>
+            <ListView 
+                DataKeyNames="ProductID" GroupItemCount="4"
+                ItemType="Product" DataSource="@_products">
+                <EmptyDataTemplate>
+                    <table >
                         <tr>
-                            <td>
-                                <a href="/ProductDetails?productId=@Item.ProductID">
-                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath"
-                                         width="100"
-                                         height="75"
-                                         border="1"
-                                         alt="@Item.ProductName" />
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="/ProductDetails?productId=@Item.ProductID">
-                                    @Item.ProductName
-                                </a>
-                                <br />
-                                <span>
-                                    <b>Price:</b> @(string.Format("{0:c}", Item.UnitPrice))
-                                </span>
-                                <br />
-                                <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">
-                                    <span class="ProductListItem">
-                                        <b>Add To Cart</b>
-                                    </span>
-                                </a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;</td>
+                            <td>No data was returned.</td>
                         </tr>
                     </table>
-                </td>
-            </ItemTemplate>
-            <LayoutTemplate Context="groups">
-                <table style="width:100%;">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <table id="groupPlaceholderContainer" style="width:100%">
-                                    @groups
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                        </tr>
-                        <tr></tr>
-                    </tbody>
-                </table>
-            </LayoutTemplate>
-        </ListView>
-    </div>
-</section>
+                </EmptyDataTemplate>
+                <EmptyItemTemplate>
+                    <td/>
+                </EmptyItemTemplate>
+                <GroupTemplate Context="items">
+                    <tr id="itemPlaceholderContainer">
+                        @items
+                    </tr>
+                </GroupTemplate>
+                <ItemTemplate Context="Item">
+                    <td>
+                        <table>
+                            <tr>
+                                <td>
+                                  <a href="/ProductDetails?ProductID=@Item.ProductID">
+                                    <img src='/Catalog/Images/Thumbs/@Item.ImagePath'
+                                      width="100" height="75" style="border:1px solid #ccc" />
+                                  </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <a href="/ProductDetails?ProductID=@Item.ProductID">
+                                      @Item.ProductName
+                                    </a>
+                                    <br />
+                                    <span>
+                                        <b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))
+                                    </span>
+                                    <br />
+                                    <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">               
+                                        <span class="ProductListItem">
+                                            <b>Add To Cart</b>
+                                        </span>           
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                </ItemTemplate>
+                <LayoutTemplate Context="groups">
+                    <table style="width:100%;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table id="groupPlaceholderContainer" style="width:100%">
+                                        @groups
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </LayoutTemplate>
+            </ListView>
+        </div>
+    </section>
 
 @code {
-    [Parameter, SupplyParameterFromQuery(Name = "id")]
-    public int? CategoryId { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
 
-    [Parameter, SupplyParameterFromQuery(Name = "categoryId")]
-    public int? AlternateCategoryId { get; set; }
+    private IEnumerable<Product> _products = Enumerable.Empty<Product>();
 
-    [Parameter, SupplyParameterFromQuery(Name = "categoryName")]
-    public string? CategoryName { get; set; }
-
-    private IReadOnlyList<Product> Products { get; set; } = Array.Empty<Product>();
-
-    protected override async Task OnParametersSetAsync()
+    protected override void OnInitialized()
     {
-        Products = await CatalogService.GetProductsAsync(CategoryId ?? AlternateCategoryId, CategoryName);
+        IQueryable<Product> query = _db.Products.Include(p => p.Category);
+        if (CategoryId.HasValue && CategoryId > 0)
+        {
+            query = query.Where(p => p.CategoryID == CategoryId);
+        }
+        _products = query.ToList();
     }
 }

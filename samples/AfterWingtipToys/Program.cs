@@ -1,15 +1,11 @@
+// TODO(bwfc-general): Review and adjust this generated Program.cs for your application needs.
+// Generated for .NET 10 Blazor static SSR. Keep interactive render modes opt-in and page-specific.
 using BlazorWebFormsComponents;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using WingtipToys.Logic;
+using Microsoft.AspNetCore.Identity;
 using WingtipToys.Models;
 
 var builder = WebApplication.CreateBuilder(args);
-
-var authConnectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Data Source=wingtiptoys-auth.db";
-var catalogConnectionString = builder.Configuration.GetConnectionString("WingtipToys")
-    ?? "Data Source=wingtiptoys.db";
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
@@ -22,51 +18,50 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+var connectionString = builder.Configuration.GetConnectionString("WingtipToys")
+    ?? "Data Source=wingtiptoys.db";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(authConnectionString));
-builder.Services.AddDbContextFactory<ProductContext>(options =>
-    options.UseSqlite(catalogConnectionString));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=wingtiptoys-auth.db"));
+builder.Services.AddDbContext<ProductContext>(options =>
+    options.UseSqlite(connectionString));
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+var identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 8;
 })
-.AddEntityFrameworkStores<ApplicationDbContext>();
-
+    .AddRoles<IdentityRole>();
+identityBuilder.AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.LogoutPath = "/Account/Logout";
 });
-
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddScoped<CatalogService>();
-builder.Services.AddScoped<ShoppingCartService>();
+
 builder.Services.AddBlazorWebFormsComponents();
+builder.Services.AddScoped<WingtipToys.Logic.ShoppingCartActions>();
 
 var app = builder.Build();
-await SeedData.InitializeAsync(app.Services);
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/ErrorPage");
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 app.MapStaticAssets();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
+// TODO(bwfc-general): Review legacy Application_Start registrations during runtime cutover:
+// - RouteConfig.RegisterRoutes
+// - BundleConfig.RegisterBundles
+
+// --- BWFC generated handler stubs ---
 app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
 {
     var form = await context.Request.ReadFormAsync();
@@ -148,42 +143,48 @@ app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<
     return Results.LocalRedirect(registeredUrl);
 });
 
-app.MapGet("/Account/Logout", async (SignInManager<ApplicationUser> signInManager) =>
+app.MapGet("/AddToCart", async (HttpContext context, int productID, WingtipToys.Logic.ShoppingCartActions cartActions) =>
+{
+    cartActions.AddToCart(productID);
+    return Results.LocalRedirect("/ShoppingCart");
+});
+
+app.MapGet("/Account/Logout", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
 {
     await signInManager.SignOutAsync();
     return Results.LocalRedirect("/");
 });
 
-app.MapGet("/AddToCart", async (int productID, ShoppingCartService shoppingCartService) =>
-{
-    await shoppingCartService.AddToCartAsync(productID);
-    return Results.LocalRedirect("/ShoppingCart");
-});
-
-app.MapGet("/RemoveFromCart", async (int productID, ShoppingCartService shoppingCartService) =>
-{
-    await shoppingCartService.RemoveFromCartAsync(productID);
-    return Results.LocalRedirect("/ShoppingCart");
-});
-
-app.MapPost("/UpdateCart", async (HttpContext context, ShoppingCartService shoppingCartService) =>
-{
-    var form = await context.Request.ReadFormAsync();
-    var updates = form
-        .Where(entry => entry.Key.StartsWith("quantity-", StringComparison.OrdinalIgnoreCase))
-        .Select(entry =>
-        {
-            var productIdText = entry.Key["quantity-".Length..];
-            _ = int.TryParse(productIdText, out var productId);
-            _ = int.TryParse(entry.Value.ToString(), out var quantity);
-            return (productId, quantity);
-        });
-
-    await shoppingCartService.UpdateQuantitiesByProductAsync(updates);
-    return Results.LocalRedirect("/ShoppingCart");
-});
-
 app.MapRazorComponents<WingtipToys.Components.App>()
     .AddInteractiveServerRenderMode();
+
+// Seed identity roles and users (detected from Web Forms source)
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    // Ensure databases are created
+    var productDb = services.GetRequiredService<ProductContext>();
+    productDb.Database.EnsureCreated();
+    var authDb = services.GetRequiredService<ApplicationDbContext>();
+    authDb.Database.EnsureCreated();
+
+    // Seed product data if empty
+    if (!productDb.Categories.Any())
+    {
+        WingtipToys.Logic.SeedData.Initialize(productDb);
+    }
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    if (!await roleManager.RoleExistsAsync("canEdit"))
+        await roleManager.CreateAsync(new IdentityRole("canEdit"));
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+    if (await userManager.FindByEmailAsync("canEditUser@wingtiptoys.com") == null)
+    {
+        var seedUser = new ApplicationUser { UserName = "canEditUser@wingtiptoys.com", Email = "canEditUser@wingtiptoys.com" };
+        await userManager.CreateAsync(seedUser, "Pa$$word1");
+        await userManager.AddToRoleAsync(seedUser, "canEdit");
+    }
+}
 
 app.Run();

@@ -61,7 +61,8 @@ namespace WingtipToys
       if (exc is InvalidOperationException)
       {
         // Pass the error on to the error page.
-        Server.Transfer("/ErrorPage?handler=Page_Error%20-%20Default");
+        Server.Transfer("ErrorPage.aspx?handler=Page_Error%20-%20Default.aspx",
+            true);
       }
     }
   }
