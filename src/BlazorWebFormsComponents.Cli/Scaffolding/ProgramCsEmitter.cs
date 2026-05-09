@@ -17,7 +17,10 @@ public class ProgramCsEmitter
             builder.AppendLine("using Microsoft.EntityFrameworkCore;");
 
         if (profile.NeedsIdentity)
+        {
             builder.AppendLine("using Microsoft.AspNetCore.Identity;");
+            builder.AppendLine($"using {projectName}.Models;");
+        }
 
         builder.AppendLine();
         builder.AppendLine("var builder = WebApplication.CreateBuilder(args);");
@@ -39,7 +42,10 @@ public class ProgramCsEmitter
         if (profile.NeedsEntityFramework)
         {
             var connectionStringName = profile.ConnectionStringNames.FirstOrDefault() ?? "DefaultConnection";
-            var dbContextTypeName = profile.ResolvedDbContextTypeName ?? "YourDbContext";
+            // When identity is present, use ApplicationDbContext (generated stub) instead of the detected name
+            var dbContextTypeName = profile.NeedsIdentity
+                ? "ApplicationDbContext"
+                : (profile.ResolvedDbContextTypeName ?? "YourDbContext");
 
             builder.AppendLine();
             builder.AppendLine($"var connectionString = builder.Configuration.GetConnectionString(\"{connectionStringName}\")");
@@ -51,19 +57,19 @@ public class ProgramCsEmitter
         if (profile.NeedsIdentity)
         {
             builder.AppendLine();
-            builder.AppendLine("var identityBuilder = builder.Services.AddDefaultIdentity<IdentityUser>(options =>");
+            builder.AppendLine("var identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>");
             builder.AppendLine("{");
             builder.AppendLine("    options.SignIn.RequireConfirmedAccount = false;");
             builder.AppendLine("});");
 
-            if (profile.NeedsEntityFramework && !string.IsNullOrWhiteSpace(profile.ResolvedDbContextTypeName))
+            if (profile.NeedsEntityFramework)
             {
-                builder.AppendLine($"identityBuilder.AddEntityFrameworkStores<{profile.ResolvedDbContextTypeName}>();");
+                builder.AppendLine("identityBuilder.AddEntityFrameworkStores<ApplicationDbContext>();");
             }
             else
             {
-                builder.AppendLine("// TODO(bwfc-identity): Identity pages were detected but no DbContext class was found.");
-                builder.AppendLine("// Add identityBuilder.AddEntityFrameworkStores<YourDbContext>() after migrating your auth store.");
+                builder.AppendLine("// TODO(bwfc-identity): No EF DbContext was detected. Add a DbContext and wire identity stores.");
+                builder.AppendLine("// identityBuilder.AddEntityFrameworkStores<ApplicationDbContext>();");
             }
 
             builder.AppendLine("builder.Services.ConfigureApplicationCookie(options =>");

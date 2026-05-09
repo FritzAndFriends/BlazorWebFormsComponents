@@ -87,6 +87,26 @@ public class BaseClassStripTransformTests
     }
 
     [Fact]
+    public void Strips_ComponentBase()
+    {
+        var input = "public partial class Default : ComponentBase { }";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("public partial class Default { }", result);
+        Assert.DoesNotContain(": ComponentBase", result);
+    }
+
+    [Fact]
+    public void Strips_FullyQualifiedComponentBase()
+    {
+        var input = "public partial class Default : Microsoft.AspNetCore.Components.ComponentBase { }";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("public partial class Default { }", result);
+        Assert.DoesNotContain("ComponentBase", result);
+    }
+
+    [Fact]
     public void PreservesNonWebFormsBaseClass()
     {
         var input = "public partial class MyPage : SomeCustomBase { }";

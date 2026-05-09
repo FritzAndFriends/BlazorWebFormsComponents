@@ -59,6 +59,7 @@ class Program
         services.AddSingleton<IMarkupTransform, DataBindingAttributeTransform>();
         services.AddSingleton<IMarkupTransform, ValidatorGenericTypeTransform>();
         services.AddSingleton<IMarkupTransform, TemplateFieldChildComponentsTransform>();
+        services.AddSingleton<IMarkupTransform, DataControlChildComponentsTransform>();
         services.AddSingleton<IMarkupTransform, AttributeStripTransform>();
         services.AddSingleton<IMarkupTransform, GridViewColumnItemTypeTransform>();
         services.AddSingleton<IMarkupTransform, EventWiringTransform>();

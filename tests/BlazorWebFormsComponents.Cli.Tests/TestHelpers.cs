@@ -209,6 +209,7 @@ public static class TestHelpers
             new DataBindingAttributeTransform(),
             new ValidatorGenericTypeTransform(),
             new TemplateFieldChildComponentsTransform(),
+            new DataControlChildComponentsTransform(),
             // Order 700-750: Attributes & refs
             new AttributeStripTransform(),
             new GridViewColumnItemTypeTransform(),

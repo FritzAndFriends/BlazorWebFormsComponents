@@ -5,15 +5,23 @@ using BlazorWebFormsComponents.Cli.Pipeline;
 namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 
 /// <summary>
-/// Wraps TemplateField child style elements (ItemStyle, HeaderStyle, FooterStyle, etc.)
-/// inside a &lt;ChildComponents&gt; element as required by BWFC's TemplateField API.
-/// Template fragments (ItemTemplate, HeaderTemplate, etc.) are left in place.
-/// Must run after AspPrefixTransform (610) so asp: prefixes have been stripped.
+/// Wraps style child elements of data controls (GridView, FormView, ListView, DataList,
+/// DetailsView, Repeater, DataGrid) inside a &lt;ChildComponents&gt; element.
+/// The existing TemplateFieldChildComponentsTransform (620) handles style elements inside
+/// TemplateField blocks; this transform handles style elements that are direct children
+/// of the data controls themselves.
+/// Must run after AspPrefixTransform (610) and TemplateFieldChildComponentsTransform (620).
 /// </summary>
-public class TemplateFieldChildComponentsTransform : IMarkupTransform
+public sealed class DataControlChildComponentsTransform : IMarkupTransform
 {
-    public string Name => "TemplateFieldChildComponents";
-    public int Order => 620;
+    public string Name => "DataControlChildComponents";
+    public int Order => 625;
+
+    private static readonly string[] DataControlNames =
+    [
+        "GridView", "FormView", "ListView", "DataList",
+        "DetailsView", "Repeater", "DataGrid"
+    ];
 
     private static readonly string[] StyleElementNames =
     [
@@ -21,32 +29,33 @@ public class TemplateFieldChildComponentsTransform : IMarkupTransform
         "ControlStyle", "EditItemStyle", "AlternatingItemStyle",
         "RowStyle", "AlternatingRowStyle", "SelectedRowStyle",
         "PagerStyle", "EmptyDataRowStyle",
-        "EditRowStyle", "InsertRowStyle"
+        "EditRowStyle", "InsertRowStyle",
+        "SortedAscendingCellStyle", "SortedAscendingHeaderStyle",
+        "SortedDescendingCellStyle", "SortedDescendingHeaderStyle"
     ];
-
-    // Matches a TemplateField block — non-greedy so adjacent siblings are handled correctly.
-    // Applied iteratively so that any edge-case nesting is also processed.
-    private static readonly Regex TemplateFieldRegex = new(
-        @"(?s)(<TemplateField\b[^>]*>)(.*?)(</TemplateField>)",
-        RegexOptions.Compiled);
 
     public string Apply(string content, FileMetadata metadata)
     {
-        // Iterate until stable so that any nested TemplateField structures are fully processed.
-        var previous = string.Empty;
-        do
+        foreach (var controlName in DataControlNames)
         {
-            previous = content;
-            content = TemplateFieldRegex.Replace(content, m =>
-                m.Groups[1].Value + ProcessInner(m.Groups[2].Value) + m.Groups[3].Value);
-        } while (content != previous);
+            var regex = new Regex(
+                $@"(?s)(<{controlName}\b[^>]*>)(.*?)(</{controlName}>)",
+                RegexOptions.Compiled);
+
+            var previous = string.Empty;
+            do
+            {
+                previous = content;
+                content = regex.Replace(content, m =>
+                    m.Groups[1].Value + ProcessInner(m.Groups[2].Value) + m.Groups[3].Value);
+            } while (!string.Equals(previous, content, StringComparison.Ordinal));
+        }
 
         return content;
     }
 
     private static string ProcessInner(string inner)
     {
-        // Already wrapped — don't add a second ChildComponents.
         if (inner.Contains("<ChildComponents"))
             return inner;
 
@@ -67,13 +76,11 @@ public class TemplateFieldChildComponentsTransform : IMarkupTransform
             {
                 if (IsSingleLineElement(trimmed, matchedName!))
                 {
-                    // Self-closing or complete open/close on one line
                     collectedStyles.Add((leadingIndent, trimmed));
                     i++;
                     continue;
                 }
 
-                // Multi-line open/close: accumulate until we see the closing tag
                 var elementParts = new List<string> { trimmed };
                 i++;
                 while (i < rawLines.Length)
@@ -97,7 +104,6 @@ public class TemplateFieldChildComponentsTransform : IMarkupTransform
         if (collectedStyles.Count == 0)
             return inner;
 
-        // Inherit the indentation level of the first collected style element.
         var indent = collectedStyles[0].LeadingIndent;
         var extraIndent = indent + "    ";
 
@@ -110,19 +116,13 @@ public class TemplateFieldChildComponentsTransform : IMarkupTransform
                 sb.AppendLine($"{extraIndent}{part.TrimStart()}");
         }
 
-        // Strip the trailing newline that AppendLine added, then close the wrapper.
         var block = sb.ToString().TrimEnd('\n', '\r');
         block += $"\n{indent}</ChildComponents>";
 
-        // Reassemble: remaining lines first, then the ChildComponents block.
         var remainingContent = string.Join("\n", remainingLines).TrimEnd('\n', '\r');
         return remainingContent + block + "\n";
     }
 
-    /// <summary>
-    /// Returns true if <paramref name="trimmed"/> starts a known style element tag.
-    /// Sets <paramref name="matchedName"/> to the element name on a match.
-    /// </summary>
     private static bool TryMatchStyleElementName(string trimmed, out string? matchedName)
     {
         foreach (var name in StyleElementNames)
@@ -130,9 +130,7 @@ public class TemplateFieldChildComponentsTransform : IMarkupTransform
             if (!trimmed.StartsWith($"<{name}", StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            // Ensure the character after the tag name is a valid tag delimiter,
-            // not part of a longer identifier (e.g. <ItemStyleExtra>).
-            var afterNamePos = name.Length + 1; // length of "<name"
+            var afterNamePos = name.Length + 1;
             if (afterNamePos < trimmed.Length)
             {
                 var c = trimmed[afterNamePos];
