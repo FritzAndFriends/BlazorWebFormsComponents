@@ -175,21 +175,19 @@ Tests are organized by component in folders matching component names:
     ...
 ```
 
-### bUnit Test Pattern (v2.x)
+### bUnit Test Quick Reference
 
-Tests inherit from `BunitContext` and use the `Render()` method with Razor syntax:
+Tests use bUnit v2 with `.razor` test files that inherit from `BlazorWebFormsTestContext` (which extends `BunitContext` with pre-registered BWFC services). Use `Render(@<Component />)` with inline Razor syntax and Shouldly assertions.
 
 ```razor
-@inherits BunitContext
+@inherits BlazorWebFormsTestContext
 
 @code {
     [Fact]
     public void ComponentName_Scenario_ExpectedBehavior()
     {
         var cut = Render(@<Button OnClick="HandleClick">Submit</Button>);
-
-        cut.Find("button").Click();
-
+        cut.Find("input").Click();
         ClickCount.ShouldBe(1);
     }
 
@@ -198,104 +196,11 @@ Tests inherit from `BunitContext` and use the `Render()` method with Razor synta
 }
 ```
 
-### Using the xUnit Logger (Optional)
+**Test naming:** `ComponentName_Scenario_ExpectedBehavior` (e.g., `Button_Click_InvokesHandler`)
 
-The test infrastructure supports optional logging via xUnit's `ITestOutputHelper` for debugging test execution. This is useful when you need to capture diagnostic output during test runs.
+**Assertions:** Use Shouldly (`ShouldBe`, `ShouldBeTrue`, `ShouldContain`) and bUnit's `MarkupMatches()` for HTML comparison.
 
-To enable logging in a test, inject `ITestOutputHelper` into the test constructor and pass it to the base constructor:
-
-```razor
-@using Microsoft.Extensions.Logging
-
-@code {
-    private ILogger<MyTest> _logger;
-
-    public MyTest(ITestOutputHelper output) : base(output)
-    {
-    }
-
-    [Fact]
-    public void MyComponent_WithDiagnostics_LogsExpectedMessages()
-    {
-        _logger = Services.GetService<ILogger<MyTest>>();
-        _logger?.LogInformation("Setting up test");
-
-        var cut = Render(@<MyComponent />);
-
-        _logger?.LogDebug("Component rendered successfully");
-
-        // Your test assertions...
-    }
-}
-```
-
-**When to use logging:**
-- Only add logging to tests where diagnostic output is helpful for debugging
-- Use for complex tests that need visibility into execution flow
-- Leave most simple tests without logging to keep them clean and focused
-- Logging is completely optional and does not affect test execution
-
-**Note:** The `BlazorWebFormsTestContext` base class automatically configures the xUnit logger when `ITestOutputHelper` is provided. Log messages appear in test output when tests fail.
-
-### Test Method Naming
-
-Use the pattern: `ComponentName_Scenario_ExpectedBehavior`
-
-Examples:
-- `Button_Click_InvokesHandler`
-- `DataList_EmptySource_ShowsEmptyTemplate`
-- `RequiredFieldValidator_BlankInput_DisplaysError`
-
-### Service Registration
-
-```razor
-@code {
-    [Fact]
-    public void Component_WithService_BehavesCorrectly()
-    {
-        Services.AddSingleton<IMyService>(new FakeService());
-
-        var cut = Render(@<MyComponent />);
-    }
-}
-```
-
-### Authentication Testing
-
-```razor
-@code {
-    [Fact]
-    public void SecureComponent_AuthenticatedUser_ShowsContent()
-    {
-        var auth = this.AddTestAuthorization();
-        auth.SetAuthorized("testuser");
-        auth.SetRoles("Admin", "User");
-
-        var cut = Render(@<SecureComponent />);
-    }
-}
-```
-
-### Accessing Component Instance
-
-When testing component properties or state, use `FindComponent<T>()`:
-
-```razor
-@code {
-    [Fact]
-    public void TreeView_StaticNodes_HasCorrectNodeCount()
-    {
-        var cut = Render(@<TreeView>...</TreeView>);
-
-        cut.FindComponent<TreeView>().Instance.Nodes.Count.ShouldBe(4);
-    }
-}
-```
-
-### Assertions
-- Use Shouldly for assertions (`value.ShouldBe(expected)`)
-- Use `MarkupMatches()` for HTML comparison
-- Follow Arrange-Act-Assert pattern in test methods
+> **For comprehensive test authoring guidance** — data-bound components, validation, event callbacks, JS interop mocking, service registration, authentication, xUnit logger integration — see the **bunit-testing** skill (`.github/skills/bunit-testing/SKILL.md`).
 
 ## Design Principles
 
