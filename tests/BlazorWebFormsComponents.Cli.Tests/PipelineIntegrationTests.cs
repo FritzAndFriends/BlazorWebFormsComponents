@@ -575,16 +575,17 @@ public class PipelineIntegrationTests : IDisposable
 
         var report = await pipeline.ExecuteAsync(context);
 
-        var masterMarkup = File.ReadAllText(Path.Combine(outputDir, "Site.razor"));
+        // Master page files are now written as artifacts only
+        var masterArtifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "Site.razor.txt");
+        Assert.True(File.Exists(masterArtifactPath), "Master page should be preserved as artifact");
+        Assert.False(File.Exists(Path.Combine(outputDir, "Site.razor")), "Master page should NOT be written to compile surface");
         var defaultMarkup = File.ReadAllText(Path.Combine(outputDir, "Default.razor"));
 
-        Assert.Contains("@ChildComponents", masterMarkup);
-        Assert.Contains("public RenderFragment? ChildComponents { get; set; }", masterMarkup);
         Assert.DoesNotContain("<ChildComponents>", defaultMarkup);
         Assert.DoesNotContain("<ChildContent>", defaultMarkup);
         Assert.DoesNotContain("<Site>", defaultMarkup);
         Assert.DoesNotContain("<Content ", defaultMarkup);
-        Assert.True(report.SemanticPatternsApplied >= 1, $"Expected master/content semantic rewrites to run, got {report.SemanticPatternsApplied}");
+        Assert.True(report.ManualItems.Any(m => m.Category == "bwfc-master-page"), "Master page should appear in manual items as artifact");
     }
 
     [Fact]
@@ -1329,15 +1330,15 @@ public class PipelineIntegrationTests : IDisposable
 
         await pipeline.ExecuteAsync(context);
 
-        var siteMarkup = File.ReadAllText(Path.Combine(outputDir, "Site.razor"));
+        // Master pages are now written as artifacts, not to compile surface
+        var siteArtifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "Site.razor.txt");
+        Assert.True(File.Exists(siteArtifactPath), "Master page should be preserved as artifact");
         var loginMarkup = File.ReadAllText(Path.Combine(outputDir, "Account", "Login.razor"));
         var registerMarkup = File.ReadAllText(Path.Combine(outputDir, "Account", "Register.razor"));
         var actionMarkup = File.ReadAllText(Path.Combine(outputDir, "AddToCart.razor"));
         var program = File.ReadAllText(Path.Combine(outputDir, "Program.cs"));
 
-        Assert.Contains("@ChildComponents", siteMarkup);
-        Assert.Contains("ContentPlaceHolder", siteMarkup);
-        Assert.Contains("MainContent", siteMarkup);
+        Assert.DoesNotContain("Site.razor", Directory.GetFiles(outputDir, "*.razor").Select(Path.GetFileName));
         Assert.Contains("method=\"post\"", loginMarkup);
         Assert.Contains("action=\"/Account/LoginHandler\"", loginMarkup);
         Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", loginMarkup);

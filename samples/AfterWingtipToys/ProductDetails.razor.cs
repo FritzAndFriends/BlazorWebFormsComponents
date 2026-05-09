@@ -12,29 +12,29 @@ public partial class ProductDetails
     [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
     public int? ProductId { get; set; }
 
-    [Parameter, SupplyParameterFromQuery(Name = "productName")]
+    [Parameter]
     public string? ProductName { get; set; }
 
-    private Product? product;
+    protected IReadOnlyList<Product> Products { get; set; } = Array.Empty<Product>();
 
     protected override async Task OnParametersSetAsync()
     {
-        var query = Db.Products.AsQueryable();
+        IQueryable<Product> query = Db.Products.AsNoTracking();
 
-        if (ProductId.HasValue && ProductId.Value > 0)
+        if (ProductId is > 0)
         {
-            query = query.Where(item => item.ProductID == ProductId.Value);
+            query = query.Where(product => product.ProductID == ProductId.Value);
         }
         else if (!string.IsNullOrWhiteSpace(ProductName))
         {
-            query = query.Where(item => item.ProductName == ProductName);
+            query = query.Where(product => product.ProductName == ProductName);
         }
         else
         {
-            product = null;
+            Products = Array.Empty<Product>();
             return;
         }
 
-        product = await query.FirstOrDefaultAsync();
+        Products = await query.ToListAsync();
     }
 }

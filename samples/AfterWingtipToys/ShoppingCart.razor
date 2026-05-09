@@ -1,45 +1,152 @@
 @page "/ShoppingCart"
-@rendermode Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveServer
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Http
+@using Microsoft.EntityFrameworkCore
+@inject IHttpContextAccessor HttpContextAccessor
+@inject IDbContextFactory<ProductContext> DbFactory
+
 <PageTitle>Shopping Cart</PageTitle>
 
-<div id="ShoppingCartTitle" class="ContentHead">
-    <h1>@shoppingCartTitle</h1>
-</div>
+<section>
+    <h1>@(CartItems.Count == 0 ? "Shopping Cart is Empty" : "Shopping Cart")</h1>
 
-@if (cartItems.Count > 0)
-{
-    <GridView AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
-              ItemType="CartItem" DataSource="@cartItems" CssClass="table table-striped table-bordered">
-        <Columns>
-            <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
-            <BoundField DataField="Product.ProductName" HeaderText="Name" />
-            <TemplateField HeaderText="Price (each)">
-                <ItemTemplate Context="Item">@((Item.Product?.UnitPrice ?? 0).ToString("c"))</ItemTemplate>
-            </TemplateField>
-            <TemplateField HeaderText="Quantity">
-                <ItemTemplate Context="Item">
-                    <input type="number" value="@Item.Quantity" min="1" @onchange="@(async (ChangeEventArgs e) => { Item.Quantity = int.TryParse(e.Value?.ToString(), out var q) ? q : Item.Quantity; })" style="width:60px" />
-                </ItemTemplate>
-            </TemplateField>
-            <TemplateField HeaderText="Item Total">
-                <ItemTemplate Context="Item">@(((decimal)(Item.Product?.UnitPrice ?? 0) * Item.Quantity).ToString("c"))</ItemTemplate>
-            </TemplateField>
-        </Columns>
-    </GridView>
+    @if (CartItems.Count == 0)
+    {
+        <p>Your shopping cart is empty.</p>
+        <a href="/Default">Continue Shopping</a>
+    }
+    else
+    {
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Price (each)</th>
+                    <th>Quantity</th>
+                    <th>Item Total</th>
+                    <th>Remove Item</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in CartItems)
+                {
+                    <tr>
+                        <td>@item.ProductId</td>
+                        <td>@item.Product?.ProductName</td>
+                        <td>@((item.Product?.UnitPrice ?? 0).ToString("C"))</td>
+                        <td>
+                            <input class="form-control" type="number" min="0" @bind="item.Quantity" />
+                        </td>
+                        <td>@((item.Quantity * (item.Product?.UnitPrice ?? 0)).ToString("C"))</td>
+                        <td>
+                            <a class="btn btn-link" href="@($"/RemoveFromCart?itemId={Uri.EscapeDataString(item.ItemId)}")" data-enhance-nav="false">Remove</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
-    <div>
-        <p></p>
-        <strong>Order Total: @cartTotal.ToString("c")</strong>
-    </div>
-    <br />
-    <table>
-        <tr>
-            <td><Button Text="Refresh" OnClick="UpdateBtn_Click" /></td>
-            <td><Button Text="Checkout" OnClick="CheckoutBtn_Click" /></td>
-        </tr>
-    </table>
-}
-else
-{
-    <p>Your shopping cart is empty.</p>
+        <p><strong>Order Total:</strong> @Total.ToString("C")</p>
+
+        <div class="btn-toolbar">
+            <button type="button" class="btn btn-primary" @onclick="UpdateCartAsync">Update</button>
+            <a class="btn btn-default" href="/Default">Continue Shopping</a>
+        </div>
+    }
+</section>
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "removeItemId")]
+    public string? RemoveItemId { get; set; }
+
+    private string cartId = string.Empty;
+    private List<CartItem> CartItems { get; set; } = [];
+    private double Total => CartItems.Sum(item => item.Quantity * (item.Product?.UnitPrice ?? 0));
+
+    protected override async Task OnParametersSetAsync()
+    {
+        EnsureCartId();
+
+        if (!string.IsNullOrWhiteSpace(RemoveItemId))
+        {
+            await DeleteItemAsync(RemoveItemId);
+            RemoveItemId = null;
+        }
+
+        await LoadCartAsync();
+    }
+
+    private void EnsureCartId()
+    {
+        var httpContext = HttpContextAccessor.HttpContext;
+        if (httpContext is null)
+        {
+            return;
+        }
+
+        cartId = httpContext.Session.GetString("CartId") ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(cartId))
+        {
+            cartId = Guid.NewGuid().ToString();
+            httpContext.Session.SetString("CartId", cartId);
+        }
+    }
+
+    private async Task LoadCartAsync()
+    {
+        if (string.IsNullOrWhiteSpace(cartId))
+        {
+            CartItems = [];
+            return;
+        }
+
+        await using var db = await DbFactory.CreateDbContextAsync();
+        CartItems = await db.ShoppingCartItems
+            .Include(item => item.Product)
+            .Where(item => item.CartId == cartId)
+            .OrderBy(item => item.DateCreated)
+            .ToListAsync();
+    }
+
+    private async Task UpdateCartAsync()
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        var dbItems = await db.ShoppingCartItems
+            .Where(item => item.CartId == cartId)
+            .ToListAsync();
+
+        foreach (var item in CartItems)
+        {
+            var dbItem = dbItems.FirstOrDefault(candidate => candidate.ItemId == item.ItemId);
+            if (dbItem is null)
+            {
+                continue;
+            }
+
+            if (item.Quantity <= 0)
+            {
+                db.ShoppingCartItems.Remove(dbItem);
+            }
+            else
+            {
+                dbItem.Quantity = item.Quantity;
+            }
+        }
+
+        await db.SaveChangesAsync();
+        await LoadCartAsync();
+    }
+
+    private async Task DeleteItemAsync(string itemId)
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        var item = await db.ShoppingCartItems.FirstOrDefaultAsync(candidate => candidate.ItemId == itemId && candidate.CartId == cartId);
+        if (item is not null)
+        {
+            db.ShoppingCartItems.Remove(item);
+            await db.SaveChangesAsync();
+        }
+    }
 }

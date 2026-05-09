@@ -338,6 +338,35 @@ public class MigrationPipeline
             codeBehind = quarantineDecision.StubCodeBehind;
         }
 
+        // Master page files are replaced by the scaffolded MainLayout.razor —
+        // write them as artifacts only, not to the compile surface.
+        if (sourceFile.FileType == FileType.Master)
+        {
+            var relativeMarkupPath = Path.GetRelativePath(context.OutputPath, sourceFile.OutputPath);
+            var artifactPath = Path.Combine(
+                context.OutputPath,
+                "migration-artifacts",
+                "codebehind",
+                relativeMarkupPath + ".txt");
+            await _outputWriter.WriteFileAsync(artifactPath, finalMarkup,
+                $"Original master page markup for {Path.GetFileName(sourceFile.MarkupPath)}");
+
+            if (codeBehind != null)
+            {
+                var cbArtifactPath = Path.Combine(
+                    context.OutputPath,
+                    "migration-artifacts",
+                    "codebehind",
+                    relativeMarkupPath + ".cs.txt");
+                await _outputWriter.WriteFileAsync(cbArtifactPath, codeBehind,
+                    $"Original master page code-behind for {Path.GetFileName(sourceFile.MarkupPath)}");
+            }
+
+            report.AddManualItem(relativeMarkupPath, 0, "bwfc-master-page",
+                "Master page replaced by scaffolded MainLayout.razor — original preserved as artifact.", "info");
+            return null;
+        }
+
         // Write markup output
         await _outputWriter.WriteFileAsync(sourceFile.OutputPath, finalMarkup,
             $"Converted {Path.GetFileName(sourceFile.MarkupPath)}");

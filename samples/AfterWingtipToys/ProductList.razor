@@ -1,4 +1,5 @@
 @page "/ProductList"
+@page "/Category/{CategoryName}"
 @using Microsoft.EntityFrameworkCore
 @inject ProductContext Db
 
@@ -6,9 +7,7 @@
 
 <section>
     <div>
-        <hgroup>
-            <h2>Products</h2>
-        </hgroup>
+        <h2>@Heading</h2>
 
         <ListView Items="products" DataKeyNames="ProductID" GroupItemCount="4" ItemType="Product">
             <EmptyDataTemplate>
@@ -32,7 +31,7 @@
                         <tr>
                             <td>
                                 <a href="@($"/ProductDetails?ProductID={Item.ProductID}")">
-                                    <img src="@($"/Catalog/Images/Thumbs/{Item.ImagePath}")" width="100" height="75" border="1" alt="@Item.ProductName" />
+                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath" width="100" height="75" border="1" alt="@Item.ProductName" />
                                 </a>
                             </td>
                         </tr>
@@ -40,9 +39,11 @@
                             <td>
                                 <a href="@($"/ProductDetails?ProductID={Item.ProductID}")">@Item.ProductName</a>
                                 <br />
-                                <span><b>Price:</b> @((Item.UnitPrice ?? 0).ToString("c"))</span>
+                                <span>
+                                    <b>Price:</b> @(string.Format("{0:c}", Item.UnitPrice))
+                                </span>
                                 <br />
-                                <a href="@($"/AddToCart?productID={Item.ProductID}")">
+                                <a href="@($"/AddToCart?productId={Item.ProductID}")" data-enhance-nav="false">
                                     <span class="ProductListItem"><b>Add To Cart</b></span>
                                 </a>
                             </td>
@@ -74,18 +75,22 @@
     [Parameter, SupplyParameterFromQuery(Name = "id")]
     public int? CategoryId { get; set; }
 
-    [Parameter, SupplyParameterFromQuery(Name = "categoryName")]
+    [Parameter]
     public string? CategoryName { get; set; }
 
-    private List<Product> products = new();
+    private List<Product> products = [];
+
+    private string Heading => string.IsNullOrWhiteSpace(CategoryName) ? "Products" : CategoryName;
 
     protected override async Task OnParametersSetAsync()
     {
-        var query = Db.Products.Include(product => product.Category).AsQueryable();
+        IQueryable<Product> query = Db.Products
+            .Include(product => product.Category)
+            .AsNoTracking();
 
-        if (CategoryId.HasValue && CategoryId.Value > 0)
+        if (CategoryId is > 0)
         {
-            query = query.Where(product => product.CategoryID == CategoryId.Value);
+            query = query.Where(product => product.CategoryID == CategoryId);
         }
 
         if (!string.IsNullOrWhiteSpace(CategoryName))
@@ -93,8 +98,6 @@
             query = query.Where(product => product.Category != null && product.Category.CategoryName == CategoryName);
         }
 
-        products = await query
-            .OrderBy(product => product.ProductName)
-            .ToListAsync();
+        products = await query.ToListAsync();
     }
 }

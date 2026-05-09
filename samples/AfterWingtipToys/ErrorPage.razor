@@ -1,5 +1,10 @@
 @page "/ErrorPage"
 <PageTitle>Error</PageTitle>
 
-<h2>Error:</h2>
-<p>An error has occurred. Please try again later.</p>
+<h1>Error</h1>
+<p class="text-danger">@FriendlyMessage</p>
+
+@if (!string.IsNullOrWhiteSpace(Handler))
+{
+    <p><strong>Handler:</strong> @Handler</p>
+}
