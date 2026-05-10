@@ -106,9 +106,9 @@ Record:
 - Whether the toolkit resolved the nested `samples\WingtipToys\WingtipToys\` app root automatically
 - Whether `.razor` output, scaffold files, and static assets were produced in the expected places
 
-### Phase 2: Layer 2/3 - Skill-Guided Repair
+### Phase 2: Build Repair (Compile Errors Only)
 
-Load and apply the migration toolkit skills from `migration-toolkit\skills\`:
+Load the migration toolkit skills from `migration-toolkit\skills\` for reference during repair:
 
 | Skill | Responsibility |
 |-------|---------------|
@@ -117,65 +117,117 @@ Load and apply the migration toolkit skills from `migration-toolkit\skills\`:
 | `bwfc-data-migration` | EF/data-layer modernization, service registration, data access fixes |
 | `bwfc-identity-migration` | Authentication and account-page migration |
 
-Repair the generated app **in place**. Do not replace it with a simplified rewrite or a fresh unrelated sample.
+Repair the generated app **in place**. Do not replace it with a simplified rewrite.
 
-Important benchmark constraint:
-
+**Benchmark constraints:**
 - Every repair must be derived from the **current run's freshly generated output**, the raw Web Forms source, BWFC/toolkit rules, and normal debugging/build feedback.
 - Do **not** import repaired files from previous runs, from git history, or from other saved artifacts.
+- **NEVER replace generated BWFC data controls (`ListView`, `FormView`, `GridView`, `DataList`, `Repeater`) with manual HTML.**
 
-Focus on:
-
-- Keeping the generated project shape in `samples\AfterWingtipToys\`
-- Preserving Web Forms semantics through BWFC shims where available
-- **NEVER replace generated BWFC data controls (`ListView`, `FormView`, `GridView`, `DataList`, `Repeater`) with manual HTML. Fix the generated markup to work with the BWFC component instead.**
-- Fixing build errors iteratively until the app runs cleanly enough for acceptance validation
-- Treating the migration toolkit as the thing under test; manual fixes should be documented as toolkit gaps
-
-### Phase 3: Build Validation
-
-Run:
+Fix **only compile errors** in this phase. Do not rewrite page logic, add features, or restructure files — only make the project build.
 
 ```powershell
 dotnet build samples\AfterWingtipToys\WingtipToys.csproj
 ```
 
+**Repair rules:**
+- Fix one error category at a time (missing usings, missing types, syntax errors)
+- Add minimal stubs for missing types (empty class body, not full implementations)
+- Do NOT rewrite code-behind files that already exist — the CLI generated them for a reason
+- Do NOT replace BWFC data controls with manual HTML
+- Rebuild after each batch of fixes to verify progress
+
 Record:
-
+- Initial error count
+- Error categories
+- Number of rebuild iterations
 - Final build status
-- Error and warning counts
-- Major error categories encountered before the final green build
 
-### Phase 4: Run the Migrated App
+### Phase 3: Startup Triage (Root Cause Before Symptoms)
 
-Start the migrated app and wait until it is responsive.
+> **CRITICAL: This phase prevents wasted L2 repair work.**
+> Most page-level failures are caused by 1-2 startup issues (missing DB tables, bad connection string, missing DI registration). Fixing the root cause often makes 10+ "broken" pages work instantly. **Never skip this phase.**
 
-Recommended default:
+#### Step 1: Start the app
 
 ```powershell
 dotnet run --project samples\AfterWingtipToys\WingtipToys.csproj
 ```
 
-Use the app's configured launch settings when possible. If you must override the base URL, keep it consistent with the acceptance tests and report it explicitly.
+Watch the console output. If the app crashes at startup, the error message tells you what to fix.
 
-### Phase 5: Acceptance Tests
+#### Step 2: Smoke test the home page
 
-Run the existing Playwright suite against the migrated app:
+```powershell
+curl -k -s -o NUL -w "%{http_code}" https://localhost:5001/
+```
+
+| Result | Action |
+|--------|--------|
+| **200** | App is running. Proceed to Phase 4. |
+| **500** | Read console logs. Fix the root cause (DB init, config, DI). Do NOT touch page files yet. |
+| **Connection refused** | App crashed at startup. Read console output. Fix and restart. |
+
+#### Step 3: If 500 — diagnose before rewriting
+
+Common root causes and their fixes:
+
+| Console Error Pattern | Root Cause | Fix |
+|----------------------|------------|-----|
+| `Invalid object name 'TableName'` | Tables don't exist | Add `Database.EnsureCreated()` in Program.cs |
+| `Cannot attach the file` / `AttachDbFilename` | Bad connection string | Change to `Initial Catalog=DbName` |
+| `Unable to resolve service for type` | Missing DI registration | Add `builder.Services.AddDbContext<T>()` or similar |
+| `No such table` (SQLite) | Tables don't exist | Add `Database.EnsureCreated()` |
+| `Authentication scheme not registered` | Missing auth config | Add `AddAuthentication()` / `AddDefaultIdentity()` |
+
+**After each root-cause fix:**
+1. Restart the app
+2. Re-run the smoke test
+3. Only proceed to page-level fixes once the home page returns 200
+
+#### Step 4: Verify multiple routes before page repair
+
+Once `/` returns 200, spot-check 3-4 other key routes:
+
+```powershell
+curl -k -s -o NUL -w "%{http_code}" https://localhost:5001/ProductList
+curl -k -s -o NUL -w "%{http_code}" https://localhost:5001/About
+curl -k -s -o NUL -w "%{http_code}" https://localhost:5001/Account/Login
+```
+
+If these all return 200, most pages are working. Skip to acceptance tests (Phase 4). If specific pages return 500, check their console errors — these are genuine page-level issues to fix.
+
+### Phase 4: Acceptance Tests and Targeted Repair
+
+Run the Playwright suite against the running app:
 
 ```powershell
 $env:WINGTIPTOYS_BASE_URL = "https://localhost:5001"
 dotnet test src\WingtipToys.AcceptanceTests\WingtipToys.AcceptanceTests.csproj --verbosity normal
 ```
 
+**For each failing test:**
+
+1. **Read the failure message** — what did the test expect vs what it got?
+2. **Inspect the specific page** — `curl` or browser check. Is it a 500? Missing content? Wrong layout?
+3. **Check if the CLI already generated the file correctly** — `cat` the .razor and .razor.cs. If the code looks reasonable, the problem may be data/config, not the file itself.
+4. **Make the minimum fix** — don't rewrite the whole file. Fix the specific issue.
+
+**NEVER do this:**
+- See 18 test failures and rewrite 18 files
+- Replace a CLI-generated code-behind with a from-scratch rewrite
+- Add features that weren't in the original Web Forms app
+
 Record:
 
 - Total / passed / failed / skipped counts
-- Any test retries or targeted fixes needed
+- Per-failure root cause (startup issue? missing content? broken template? missing route?)
+- Which fixes were root-cause (config/startup) vs page-specific
 - Final pass condition
 
-If the suite does not pass, the run is **not** successful. Continue repair work or write a failed run report that clearly explains the blocker.
+If the suite does not pass after targeted repairs, the run is **not** successful. Write a failed run report that explains the blocker. Do not keep rewriting files hoping something sticks.
 
-### Phase 6: Screenshot Capture
+### Phase 5: Screenshot Capture
 
 Capture proof screenshots from the working migrated app and save them under `runNN\images\`.
 
@@ -190,7 +242,7 @@ Recommended minimum set:
 
 Use additional screenshots when they clarify a major success or known defect.
 
-### Phase 7: Report Generation
+### Phase 6: Report Generation
 
 Create `dev-docs\migration-tests\wingtiptoys\runNN\report.md` from `REPORT-TEMPLATE.md`.
 
@@ -222,6 +274,9 @@ Optional supporting artifacts:
 | **Work from scratch** | Every run must begin from the raw source plus fresh toolkit output only; no prior migrated content may be reused |
 | **No git/history restores** | Never use `git restore`, `git checkout`, `git show`, or copied historical file contents to repair the benchmark run |
 | **Repair in place** | Do not swap in a smaller clean app or rewrite the site from scratch |
+| **Triage before rewriting** | Always diagnose startup crashes and root causes BEFORE touching page files. A single missing `EnsureCreated()` can cause 18 test failures — fix the root cause, not the symptoms |
+| **Inspect CLI output first** | Before rewriting any file, READ what the CLI generated. If the code looks correct, the problem is likely config/startup, not the file |
+| **Never replace BWFC controls** | Do not replace generated `ListView`, `FormView`, `GridView`, `DataList`, or `Repeater` with manual HTML |
 | **Acceptance tests are the gate** | The run is only successful when `src/WingtipToys.AcceptanceTests/` passes |
 | **Report every run** | Successful or failed runs both get a numbered report folder |
 | **Embed screenshots** | The main report must show images inline with Markdown links |
