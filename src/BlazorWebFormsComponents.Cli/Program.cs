@@ -109,6 +109,7 @@ class Program
         services.AddSingleton<IRuntimeSignalDetector, SessionRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, IdentityRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, GlobalAsaxRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, WebConfigRuntimeSignalDetector>();
         services.AddSingleton<RuntimeDetector>();
         services.AddSingleton<ProgramCsEmitter>();
         services.AddSingleton<ProjectScaffolder>();

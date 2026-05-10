@@ -57,6 +57,21 @@ public class RuntimeProfile
     /// </summary>
     public List<(string Email, string Password, string RoleName)> DetectedSeedUsers { get; set; } = [];
 
+    /// <summary>
+    /// Login path detected from Web.config &lt;forms loginUrl="..."&gt; or defaults to /Account/Login.
+    /// </summary>
+    public string? AuthLoginPath { get; set; }
+
+    /// <summary>
+    /// Custom error redirect from Web.config &lt;customErrors defaultRedirect="..."&gt;.
+    /// </summary>
+    public string? CustomErrorRedirect { get; set; }
+
+    /// <summary>
+    /// Authentication mode from Web.config &lt;authentication mode="..."&gt; (Forms, Windows, None).
+    /// </summary>
+    public string? AuthenticationMode { get; set; }
+
     public string? ResolvedDbContextTypeName =>
         string.IsNullOrWhiteSpace(DbContextClassName)
             ? null

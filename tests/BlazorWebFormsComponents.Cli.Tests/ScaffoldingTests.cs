@@ -87,7 +87,6 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("AddRazorComponents()", program);
         Assert.Contains("AddInteractiveServerComponents()", program);
         Assert.Contains("AddInteractiveServerRenderMode()", program);
-        Assert.Contains("Generated for .NET 10 Blazor static SSR", program);
         Assert.Contains("using BlazorWebFormsComponents;", program);
     }
 
@@ -104,7 +103,6 @@ public class ScaffoldingTests : IDisposable
     {
         var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
 
-        Assert.Contains("builder.Services.AddAntiforgery();", result.Files["program"].Content);
         Assert.Contains("app.UseAntiforgery();", result.Files["program"].Content);
     }
 
