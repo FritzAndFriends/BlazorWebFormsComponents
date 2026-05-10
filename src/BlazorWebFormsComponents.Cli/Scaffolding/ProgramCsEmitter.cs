@@ -102,6 +102,36 @@ public class ProgramCsEmitter
         builder.AppendLine("builder.Services.AddBlazorWebFormsComponents();");
         builder.AppendLine();
         builder.AppendLine("var app = builder.Build();");
+
+        // Generate EnsureCreated calls for all registered DbContexts
+        if (profile.NeedsEntityFramework)
+        {
+            var allContextNames = new List<string>();
+
+            // Primary context
+            var primaryContext = profile.NeedsIdentity
+                ? "ApplicationDbContext"
+                : (profile.ResolvedDbContextTypeName ?? "YourDbContext");
+            allContextNames.Add(primaryContext);
+
+            // Additional contexts (skip if already covered by primary)
+            foreach (var ctx in profile.AdditionalDbContextNames)
+            {
+                if (!string.Equals(ctx, primaryContext, StringComparison.Ordinal))
+                    allContextNames.Add(ctx);
+            }
+
+            builder.AppendLine();
+            builder.AppendLine("// Ensure database tables exist for all registered DbContexts");
+            builder.AppendLine("using (var scope = app.Services.CreateScope())");
+            builder.AppendLine("{");
+            foreach (var ctx in allContextNames)
+            {
+                builder.AppendLine($"    scope.ServiceProvider.GetRequiredService<{ctx}>().Database.EnsureCreated();");
+            }
+            builder.AppendLine("}");
+        }
+
         builder.AppendLine();
         builder.AppendLine("if (!app.Environment.IsDevelopment())");
         builder.AppendLine("{");

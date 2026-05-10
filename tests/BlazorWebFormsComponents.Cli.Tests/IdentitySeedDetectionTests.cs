@@ -96,4 +96,69 @@ public class IdentitySeedDetectionTests
         Assert.Contains("AddToRoleAsync(seedUser, \"canEdit\")", result);
         Assert.Contains(".AddRoles<IdentityRole>()", result);
     }
+
+    [Fact]
+    public void ProgramCsEmitter_GeneratesEnsureCreated_ForSingleDbContext()
+    {
+        var emitter = new ProgramCsEmitter();
+        var profile = new RuntimeProfile
+        {
+            NeedsEntityFramework = true,
+            DbContextClassName = "ProductContext"
+        };
+        var dbProvider = new DatabaseProviderInfo
+        {
+            ProviderMethod = "UseSqlServer",
+            PackageName = "Microsoft.EntityFrameworkCore.SqlServer",
+            DetectedFrom = "test",
+            ConnectionString = "Server=.;Database=Test"
+        };
+
+        var result = emitter.Generate("TestApp", profile, dbProvider);
+
+        Assert.Contains("Database.EnsureCreated()", result);
+        Assert.Contains("GetRequiredService<ProductContext>()", result);
+    }
+
+    [Fact]
+    public void ProgramCsEmitter_GeneratesEnsureCreated_ForIdentityPlusAdditionalContext()
+    {
+        var emitter = new ProgramCsEmitter();
+        var profile = new RuntimeProfile
+        {
+            NeedsIdentity = true,
+            NeedsEntityFramework = true,
+            AdditionalDbContextNames = ["ProductContext"]
+        };
+        var dbProvider = new DatabaseProviderInfo
+        {
+            ProviderMethod = "UseSqlServer",
+            PackageName = "Microsoft.EntityFrameworkCore.SqlServer",
+            DetectedFrom = "test",
+            ConnectionString = "Server=.;Database=Test"
+        };
+
+        var result = emitter.Generate("TestApp", profile, dbProvider);
+
+        Assert.Contains("GetRequiredService<ApplicationDbContext>().Database.EnsureCreated()", result);
+        Assert.Contains("GetRequiredService<ProductContext>().Database.EnsureCreated()", result);
+    }
+
+    [Fact]
+    public void ProgramCsEmitter_NoEnsureCreated_WhenNoEntityFramework()
+    {
+        var emitter = new ProgramCsEmitter();
+        var profile = new RuntimeProfile();
+        var dbProvider = new DatabaseProviderInfo
+        {
+            ProviderMethod = "UseSqlServer",
+            PackageName = "Microsoft.EntityFrameworkCore.SqlServer",
+            DetectedFrom = "test",
+            ConnectionString = "Server=.;Database=Test"
+        };
+
+        var result = emitter.Generate("TestApp", profile, dbProvider);
+
+        Assert.DoesNotContain("EnsureCreated", result);
+    }
 }
