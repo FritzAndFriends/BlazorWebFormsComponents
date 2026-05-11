@@ -63,7 +63,7 @@
                 SelectMethod="GetCategories" >
                 <ItemTemplate Context="Item">
                     <b style="font-size: large; font-style: normal">
-                    <a href="@(GetRouteUrl("ProductsByCategoryRoute", new {categoryName = Item.CategoryName}))">
+                    <a href="@($"/Category/{Item.CategoryName}")">
                         @Item.CategoryName
                     </a>
                     </b>

@@ -18,3 +18,14 @@
         </EmptyDataTemplate>
     </ListView>
 </div>
+
+@code {
+    private ListView<string> providerDetails = default!;
+
+    public IQueryable<string> GetProviderNames(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        var providers = new List<string>();
+        totalRowCount = providers.Count;
+        return providers.AsQueryable();
+    }
+}

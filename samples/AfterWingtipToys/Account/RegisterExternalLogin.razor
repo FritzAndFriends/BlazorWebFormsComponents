@@ -19,7 +19,7 @@
                 <div class="col-md-10">
                     <TextBox id="email" @ref="email" CssClass="form-control" TextMode="@TextBoxMode.Email" />
                     <RequiredFieldValidator Type="string" ControlToValidate="email"
-                        Display="Dynamic" CssClass="text-danger" ErrorMessage="Email is required" />
+                        Display="@ValidatorDisplay.Dynamic" CssClass="text-danger" ErrorMessage="Email is required" />
                     <ModelErrorMessage ModelStateKey="email" CssClass="text-error" />
                 </div>
             </div>
@@ -32,3 +32,12 @@
         </div>
     </PlaceHolder>
 
+@code {
+    private string ProviderName = "External";
+    private TextBox email = default!;
+
+    private void LogIn_Click()
+    {
+        // External login not yet implemented in migration
+    }
+}

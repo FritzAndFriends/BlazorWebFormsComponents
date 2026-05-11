@@ -1,13 +1,13 @@
 using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Components;
-using WingtipToys.Logic;
+using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 namespace WingtipToys;
 
-public partial class ShoppingCart
+public partial class ShoppingCart : WebFormsPageBase
 {
-    [Inject] private ShoppingCartActions ShoppingCartActions { get; set; } = default!;
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
 
     private GridView<CartItem> CartList = default!;
     private TextBox PurchaseQuantity = default!;
@@ -17,54 +17,61 @@ public partial class ShoppingCart
     private Button UpdateBtn = default!;
     private ImageButton CheckoutImageBtn = default!;
 
-    private string ShoppingCartTitleText { get; set; } = "Shopping Cart";
-    private string OrderTotalLabelText { get; set; } = "Order Total: ";
-    private string OrderTotalValueText { get; set; } = string.Empty;
-    private bool UpdateBtnVisible { get; set; } = true;
-    private bool CheckoutImageBtnVisible { get; set; } = true;
-    protected WebColor Transparent { get; } = WebColor.Transparent;
+    private List<CartItem> cartItems = new();
+
+    private List<CartItem> LoadShoppingCartItems()
+    {
+        using var db = DbFactory.CreateDbContext();
+        var cartId = GetCartId();
+        return db.ShoppingCartItems
+            .Include(c => c.Product)
+            .Where(c => c.CartId == cartId)
+            .ToList();
+    }
+
+    public IQueryable<CartItem> GetShoppingCartItems(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        totalRowCount = cartItems.Count;
+        return cartItems.AsQueryable();
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        RefreshCartState();
-    }
-
-    private IQueryable<CartItem> GetShoppingCartItems(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-    {
-        var items = ShoppingCartActions.GetCartItems();
-        totalRowCount = items.Count;
-        return items.AsQueryable();
-    }
-
-    private void UpdateBtn_Click(EventArgs args)
-    {
-        RefreshCartState();
-    }
-
-    private void CheckoutBtn_Click(EventArgs args)
-    {
-        Session["payment_amt"] = ShoppingCartActions.GetTotal();
-        Response.Redirect("Checkout/CheckoutStart.aspx");
-    }
-
-    private void RefreshCartState()
-    {
-        var cartTotal = ShoppingCartActions.GetTotal();
+        cartItems = LoadShoppingCartItems();
+        decimal cartTotal = cartItems.Sum(c => (decimal)(c.Quantity * c.Product.UnitPrice));
         if (cartTotal > 0)
         {
-            ShoppingCartTitleText = "Shopping Cart";
-            OrderTotalLabelText = "Order Total: ";
-            OrderTotalValueText = $"{cartTotal:c}";
-            UpdateBtnVisible = true;
-            CheckoutImageBtnVisible = true;
-            return;
+            lblTotal.Text = string.Format("{0:c}", cartTotal);
         }
+        else
+        {
+            LabelTotalText.Text = "";
+            lblTotal.Text = "";
+            UpdateBtn.Visible = false;
+            CheckoutImageBtn.Visible = false;
+        }
+    }
 
-        ShoppingCartTitleText = "Shopping Cart is Empty";
-        OrderTotalLabelText = string.Empty;
-        OrderTotalValueText = string.Empty;
-        UpdateBtnVisible = false;
-        CheckoutImageBtnVisible = false;
+    protected void UpdateBtn_Click()
+    {
+        cartItems = LoadShoppingCartItems();
+        decimal cartTotal = cartItems.Sum(c => (decimal)(c.Quantity * c.Product.UnitPrice));
+        lblTotal.Text = string.Format("{0:c}", cartTotal);
+    }
+
+    protected void CheckoutBtn_Click()
+    {
+        Session["payment_amt"] = cartItems.Sum(c => (decimal)(c.Quantity * c.Product.UnitPrice));
+        Response.Redirect("Checkout/CheckoutStart");
+    }
+
+    private string GetCartId()
+    {
+        if (Session["CartId"] == null)
+        {
+            Session["CartId"] = Guid.NewGuid().ToString();
+        }
+        return Session["CartId"]!.ToString()!;
     }
 }

@@ -1,9 +1,12 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using WingtipToys.Logic;
 
-namespace WingtipToys;
-
-public partial class ErrorPage
+namespace WingtipToys
 {
+  public partial class ErrorPage
+  {
     private Panel DetailedErrorPanel = default!;
     private Label ErrorDetailedMsg = default!;
     private Label ErrorHandler = default!;
@@ -13,45 +16,56 @@ public partial class ErrorPage
 
     protected override async Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync();
+      await base.OnInitializedAsync();
 
-        const string generalErrorMsg = "A problem has occurred on this web site. Please try again. If this error continues, please contact support.";
-        const string httpErrorMsg = "An HTTP error occurred. Page Not found. Please try again.";
-        const string unhandledErrorMsg = "The error was unhandled by application code.";
+      string generalErrorMsg = "A problem has occurred on this web site. Please try again. If this error continues, please contact support.";
+      string httpErrorMsg = "An HTTP error occurred. Page Not found. Please try again.";
+      string unhandledErrorMsg = "The error was unhandled by application code.";
 
-        FriendlyErrorMsg.Text = generalErrorMsg;
+      FriendlyErrorMsg.Text = generalErrorMsg;
 
-        var errorHandler = Request.QueryString["handler"].ToString();
-        if (string.IsNullOrWhiteSpace(errorHandler))
-        {
-            errorHandler = "Error Page";
-        }
+      string errorHandler = Request.QueryString["handler"];
+      if (errorHandler == null)
+      {
+        errorHandler = "Error Page";
+      }
 
-        var ex = Server.GetLastError() ?? new Exception(unhandledErrorMsg);
-        var errorMsg = Request.QueryString["msg"].ToString();
+      Exception ex = Server.GetLastError();
+      string errorMsg = Request.QueryString["msg"];
+      if (errorMsg == "404")
+      {
+        ex = new InvalidOperationException(httpErrorMsg, ex);
+        FriendlyErrorMsg.Text = ex.Message;
+      }
 
-        if (errorMsg == "404")
-        {
-            ex = new InvalidOperationException(httpErrorMsg, ex);
-            FriendlyErrorMsg.Text = ex.Message;
-        }
+      if (ex == null)
+      {
+        ex = new Exception(unhandledErrorMsg);
+      }
 
+      if (true)
+      {
         ErrorDetailedMsg.Text = ex.Message;
         ErrorHandler.Text = errorHandler;
         DetailedErrorPanel.Visible = true;
 
         if (ex.InnerException != null)
         {
-            InnerMessage.Text = ex.GetType() + "<br/>" + ex.InnerException.Message;
-            InnerTrace.Text = ex.InnerException.StackTrace ?? string.Empty;
+          InnerMessage.Text = ex.GetType().ToString() + "<br/>" + ex.InnerException.Message;
+          InnerTrace.Text = ex.InnerException.StackTrace;
         }
         else
         {
-            InnerMessage.Text = ex.GetType().ToString();
-            InnerTrace.Text = ex.StackTrace?.TrimStart() ?? string.Empty;
+          InnerMessage.Text = ex.GetType().ToString();
+          if (ex.StackTrace != null)
+          {
+            InnerTrace.Text = ex.StackTrace.TrimStart();
+          }
         }
+      }
 
-        ExceptionUtility.LogException(ex, errorHandler);
-        Server.ClearError();
+      // ExceptionUtility not available in Blazor migration
+      Server.ClearError();
     }
+  }
 }

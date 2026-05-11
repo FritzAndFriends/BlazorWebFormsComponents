@@ -21,7 +21,7 @@ public class ShoppingCartTests
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // The product list should contain at least one product link
-        var productLinks = page.Locator("a[href*='ProductDetails']");
+        var productLinks = page.Locator("a[href*='/Product/']");
         var count = await productLinks.CountAsync();
         Assert.True(count > 0, "Product list should display at least one product");
     }
@@ -36,11 +36,11 @@ public class ShoppingCartTests
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // Click the first product to view details
-        var firstProduct = page.Locator("a[href*='ProductDetails']").First;
+        var firstProduct = page.Locator("a[href*='/Product/']").First;
         await firstProduct.ClickAsync();
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        Assert.Contains("ProductDetails", page.Url, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("/Product/", page.Url, StringComparison.OrdinalIgnoreCase);
 
         // Look for an "Add to Cart" link or button and click it
         // The AddToCart route is typically a link like /AddToCart?productID=N
@@ -160,7 +160,7 @@ public class ShoppingCartTests
         await page.GotoAsync($"{TestConfiguration.BaseUrl}/ProductList");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        var firstProduct = page.Locator("a[href*='ProductDetails']").First;
+        var firstProduct = page.Locator("a[href*='/Product/']").First;
         await firstProduct.ClickAsync();
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 

@@ -1,18 +1,58 @@
 @page "/AddToCart"
-@using WingtipToys.Logic
-@inject ShoppingCartActions ShoppingCartActions
-@inject NavigationManager Navigation
+@using Microsoft.EntityFrameworkCore
+@using WingtipToys.Models
+@inherits BlazorWebFormsComponents.WebFormsPageBase
+@attribute [StreamRendering(false)]
+@inject IDbContextFactory<ProductContext> DbFactory
 
 @code {
-    [SupplyParameterFromQuery(Name = "productID")]
-    public int ProductID { get; set; }
+    [SupplyParameterFromQuery(Name = "productID")] public int? ProductID { get; set; }
 
     protected override void OnInitialized()
     {
-        if (ProductID > 0)
+        base.OnInitialized();
+
+        if (ProductID.HasValue && ProductID > 0)
         {
-            ShoppingCartActions.AddToCart(ProductID);
+            using var db = DbFactory.CreateDbContext();
+            var cartId = GetCartId();
+
+            var existingItem = db.ShoppingCartItems
+                .SingleOrDefault(c => c.CartId == cartId && c.ProductId == ProductID.Value);
+
+            if (existingItem == null)
+            {
+                var product = db.Products.SingleOrDefault(p => p.ProductID == ProductID.Value);
+                if (product != null)
+                {
+                    db.ShoppingCartItems.Add(new CartItem
+                    {
+                        ItemId = Guid.NewGuid().ToString(),
+                        ProductId = ProductID.Value,
+                        CartId = cartId,
+                        Product = product,
+                        Quantity = 1,
+                        DateCreated = DateTime.Now
+                    });
+                    db.SaveChanges();
+                }
+            }
+            else
+            {
+                existingItem.Quantity++;
+                db.SaveChanges();
+            }
         }
-        Navigation.NavigateTo("/ShoppingCart", replace: true);
+
+        Response.Redirect("/ShoppingCart");
+    }
+
+    private string GetCartId()
+    {
+        if (Session["CartId"] == null)
+        {
+            Session["CartId"] = Guid.NewGuid().ToString();
+        }
+        return Session["CartId"]!.ToString()!;
     }
 }

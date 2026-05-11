@@ -4,6 +4,10 @@ body {
     padding-bottom: 20px;
 }
 
+.navbar-fixed-top .container {
+    min-height: 51px;
+}
+
 /* Wrapping element */
 /* Set some basic padding to keep content from hitting the edges */
 .body-content {

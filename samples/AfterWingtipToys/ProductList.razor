@@ -1,4 +1,7 @@
 @page "/ProductList"
+@page "/Category/{categoryName}"
+@using Microsoft.EntityFrameworkCore
+@using WingtipToys.Models
 <PageTitle>Products</PageTitle>
 	
     <section>
@@ -30,15 +33,15 @@
                         <table>
                             <tr>
                                 <td>
-                                  <a href="/ProductDetails?productName=@(Uri.EscapeDataString(Item.ProductName))" data-enhance-nav="false">
-                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath"
-                                         width="100" height="75" border="1" />
+                                  <a href="@($"/Product/{Item.ProductName}")">
+                                    <image src='/Catalog/Images/Thumbs/@Item.ImagePath'
+                                      width="100" height="75" border="1" />
                                   </a>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <a href="/ProductDetails?productName=@(Uri.EscapeDataString(Item.ProductName))" data-enhance-nav="false">
+                                    <a href="@($"/Product/{Item.ProductName}")">
                                       @Item.ProductName
                                     </a>
                                     <br />
@@ -46,10 +49,10 @@
                                         <b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))
                                     </span>
                                     <br />
-                                    <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">
+                                    <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">               
                                         <span class="ProductListItem">
                                             <b>Add To Cart</b>
-                                        </span>
+                                        </span>           
                                     </a>
                                 </td>
                             </tr>
@@ -80,3 +83,36 @@
         </div>
     </section>
 
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
+    [Parameter] public string? CategoryName { get; set; }
+
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+
+    private ListView<Product> productList = default!;
+    private List<Product> products = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var db = DbFactory.CreateDbContext();
+        IQueryable<Product> query = db.Products.Include(p => p.Category);
+
+        if (CategoryId.HasValue && CategoryId > 0)
+        {
+            query = query.Where(p => p.CategoryID == CategoryId);
+        }
+
+        if (!string.IsNullOrEmpty(CategoryName))
+        {
+            query = query.Where(p => p.Category.CategoryName == CategoryName);
+        }
+
+        products = await query.ToListAsync();
+    }
+
+    public IQueryable<Product> GetProductsQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        totalRowCount = products.Count;
+        return products.AsQueryable();
+    }
+}

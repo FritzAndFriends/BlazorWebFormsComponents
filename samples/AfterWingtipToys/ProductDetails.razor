@@ -1,4 +1,5 @@
 @page "/ProductDetails"
+@page "/Product/{productName}"
 <PageTitle>Product Details</PageTitle>
 
     <FormView id="productDetail" @ref="productDetail" ItemType="Product" SelectMethod ="GetProduct" RenderOuterTable="false">
@@ -21,7 +22,7 @@
                         <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
                         <br />
                         <br />
-                        <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">
+                        <a data-enhance-nav="false" href="/AddToCart?productID=@Item.ProductID">
                             <b>Add To Cart</b>
                         </a>
                     </td>
