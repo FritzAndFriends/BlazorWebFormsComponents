@@ -68,7 +68,7 @@ public class WebConfigTransformer
             {
                 if (!BuiltInConnectionNames.Contains(name))
                 {
-                    connectionStrings[name] = connStr;
+                    connectionStrings[name] = NormalizeConnectionString(connStr);
                 }
             }
         }
@@ -120,6 +120,74 @@ public class WebConfigTransformer
             ConnectionStringsCount = connectionStrings.Count,
             AppSettingsKeys = [.. appSettings.Keys],
             ConnectionStringNames = [.. connectionStrings.Keys]
+        };
+    }
+
+    private static string NormalizeConnectionString(string connStr)
+    {
+        if (!connStr.Contains("AttachDbFilename=|DataDirectory|", StringComparison.OrdinalIgnoreCase))
+            return connStr;
+
+        var segments = connStr.Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .Select(segment => segment.Trim())
+            .ToList();
+
+        string? databaseName = null;
+        var normalizedSegments = new List<string>();
+
+        foreach (var segment in segments)
+        {
+            var separatorIndex = segment.IndexOf('=');
+            if (separatorIndex < 0)
+            {
+                normalizedSegments.Add(segment);
+                continue;
+            }
+
+            var key = segment[..separatorIndex].Trim();
+            var value = segment[(separatorIndex + 1)..].Trim();
+
+            if (key.Equals("AttachDbFilename", StringComparison.OrdinalIgnoreCase) &&
+                value.StartsWith("|DataDirectory|", StringComparison.OrdinalIgnoreCase))
+            {
+                var fileName = Path.GetFileNameWithoutExtension(value.Replace("|DataDirectory|\\", string.Empty, StringComparison.OrdinalIgnoreCase)
+                    .Replace("|DataDirectory|/", string.Empty, StringComparison.OrdinalIgnoreCase));
+
+                if (!string.IsNullOrWhiteSpace(fileName))
+                    databaseName ??= NormalizeDatabaseName(fileName);
+
+                continue;
+            }
+
+            normalizedSegments.Add(segment);
+        }
+
+        if (string.IsNullOrWhiteSpace(databaseName))
+            return connStr;
+
+        if (!normalizedSegments.Any(segment => segment.StartsWith("Initial Catalog=", StringComparison.OrdinalIgnoreCase)))
+        {
+            var insertIndex = normalizedSegments.FindIndex(segment => segment.StartsWith("Data Source=", StringComparison.OrdinalIgnoreCase));
+            var catalogSegment = $"Initial Catalog={databaseName}";
+            if (insertIndex >= 0)
+                normalizedSegments.Insert(insertIndex + 1, catalogSegment);
+            else
+                normalizedSegments.Add(catalogSegment);
+        }
+
+        return string.Join(';', normalizedSegments);
+    }
+
+    private static string NormalizeDatabaseName(string fileName)
+    {
+        return fileName.ToLowerInvariant() switch
+        {
+            "wingtiptoys" => "WingtipToys",
+            "contosouniversity" => "ContosoUniversity",
+            "departmentportal" => "DepartmentPortal",
+            _ => string.Concat(fileName
+                .Split(['-', '_', ' '], StringSplitOptions.RemoveEmptyEntries)
+                .Select(segment => char.ToUpperInvariant(segment[0]) + segment[1..].ToLowerInvariant()))
         };
     }
 

@@ -50,6 +50,8 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 50 | UrlCleanupTransform | Code-Behind | Code-Behind | Clean URL literals in code |
 | 104 | HttpUtilityRewriteTransform | Code-Behind | Code-Behind | Rewrite `HttpUtility.*` calls to `WebUtility.*` and add `using System.Net;` |
 | 106 | EfContextConstructorTransform | Code-Behind | Code-Behind | Rewrite EF6 `base("name")` DbContext constructors to EF Core `DbContextOptions<TContext>` constructors |
+| 107 | DbContextInstantiationTransform | Code-Behind | Code-Behind | Replace inline `new XxxContext()` usage with injected DbContext references |
+| 108 | SelectMethodMaterializeTransform | Code-Behind | Code-Behind | Materialize IQueryable SelectMethod results before methods exit after `CreateDbContext()` usage |
 | 850 | CompileSurfaceStubTransform | Code-Behind | Code-Behind | Quarantine identity/payment/mobile/admin/compile-blocked pages with build-safe stubs while preserving transformed originals in `migration-artifacts\codebehind\` and tracking them in `migration-artifacts\quarantine-manifest.json` |
 | 900 | MarkupReferencedMemberStubTransform | Code-Behind | Code-Behind | Add fallback fields, render-method stubs, and event handlers for markup references still missing from emitted partial classes |
 
@@ -1021,7 +1023,41 @@ string imageUrl = "/images/logo.png";
 
 ---
 
-### 32. CompileSurfaceStubTransform (Order: 850)
+### 32. SelectMethodMaterializeTransform (Order: 108)
+
+**Materializes `IQueryable` SelectMethod results before the scoped DbContext goes out of scope.**
+
+**Before:**
+```csharp
+public IQueryable<Product> GetProducts(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+{
+    using var db = DbFactory.CreateDbContext();
+    var query = db.Products.OrderBy(p => p.ProductName);
+    totalRowCount = query.Count();
+    return query;
+}
+```
+
+**After:**
+```csharp
+public IQueryable<Product> GetProducts(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+{
+    var db = DbFactory.CreateDbContext();
+    var query = db.Products.OrderBy(p => p.ProductName);
+    totalRowCount = query.Count();
+    return query.ToList().AsQueryable();
+}
+```
+
+**Details:**
+- Only applies to methods whose signature returns `IQueryable<...>`
+- Removes `using` from `using var db = ...CreateDbContext()` so the query can be materialized before the method exits
+- Rewrites simple `return query;` patterns to `return query.ToList().AsQueryable();`
+- Leaves non-`IQueryable` methods untouched
+
+---
+
+### 33. CompileSurfaceStubTransform (Order: 850)
 
 **Quarantines non-migratable pages behind build-safe placeholders.**
 
@@ -1035,7 +1071,7 @@ string imageUrl = "/images/logo.png";
 
 ---
 
-### 33. MarkupReferencedMemberStubTransform (Order: 900)
+### 34. MarkupReferencedMemberStubTransform (Order: 900)
 
 **Adds compile-safe fallback members for identifiers that remain referenced from markup.**
 

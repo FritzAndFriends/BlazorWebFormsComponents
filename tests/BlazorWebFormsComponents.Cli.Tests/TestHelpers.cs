@@ -235,6 +235,7 @@ public static class TestHelpers
             new EntityFrameworkTransform(),
             new EfContextConstructorTransform(),
             new DbContextInstantiationTransform(),
+            new SelectMethodMaterializeTransform(),
             new HttpExceptionTransform(),
             new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),

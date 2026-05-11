@@ -196,6 +196,11 @@ public class ProgramCsEmitter
 
         sb.AppendLine("app.UseAntiforgery();");
 
+        if (profile.NeedsIdentity)
+        {
+            EmitAuthEndpoints(sb, profile);
+        }
+
         // 4d. Application_Start patterns as TODO comments
         if (profile.ApplicationStartPatterns.Count > 0)
         {
@@ -228,6 +233,45 @@ public class ProgramCsEmitter
 
         sb.AppendLine();
         sb.AppendLine("app.Run();");
+    }
+
+    private static void EmitAuthEndpoints(StringBuilder sb, RuntimeProfile profile)
+    {
+        sb.AppendLine();
+        sb.AppendLine("// Account endpoints detected from Web Forms authentication flows");
+        sb.AppendLine("app.MapGet(\"/Account/PerformLogin\", async (string email, string password, SignInManager<ApplicationUser> signInManager) =>");
+        sb.AppendLine("{");
+        sb.AppendLine("    var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);");
+        sb.AppendLine("    if (result.Succeeded)");
+        sb.AppendLine("        return Results.Redirect(\"/\");");
+        sb.AppendLine("    return Results.Redirect(\"/Account/Login?error=\" + Uri.EscapeDataString(\"Invalid login attempt.\"));");
+        sb.AppendLine("});");
+        sb.AppendLine();
+        sb.AppendLine("app.MapPost(\"/Account/RegisterHandler\", async (HttpContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager) =>");
+        sb.AppendLine("{");
+        sb.AppendLine("    var form = await context.Request.ReadFormAsync();");
+        sb.AppendLine("    var email = form[\"Email\"].ToString();");
+        sb.AppendLine("    var password = form[\"Password\"].ToString();");
+        sb.AppendLine();
+        sb.AppendLine("    if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))");
+        sb.AppendLine("        return Results.Redirect(\"/Account/Register?error=\" + Uri.EscapeDataString(\"Email and password are required.\"));");
+        sb.AppendLine();
+        sb.AppendLine("    var user = new ApplicationUser { UserName = email, Email = email };");
+        sb.AppendLine("    var result = await userManager.CreateAsync(user, password);");
+        sb.AppendLine("    if (result.Succeeded)");
+        sb.AppendLine("    {");
+        sb.AppendLine("        await signInManager.SignInAsync(user, isPersistent: false);");
+        sb.AppendLine("        return Results.Redirect(\"/\");");
+        sb.AppendLine("    }");
+        sb.AppendLine("    var errors = string.Join(\"; \", result.Errors.Select(e => e.Description));");
+        sb.AppendLine("    return Results.Redirect(\"/Account/Register?error=\" + Uri.EscapeDataString(errors));");
+        sb.AppendLine("});");
+        sb.AppendLine();
+        sb.AppendLine("app.MapPost(\"/Account/PerformLogout\", async (SignInManager<ApplicationUser> signInManager) =>");
+        sb.AppendLine("{");
+        sb.AppendLine("    await signInManager.SignOutAsync();");
+        sb.AppendLine("    return Results.Redirect(\"/\");");
+        sb.AppendLine("}).DisableAntiforgery();");
     }
 
     private static void EmitEnsureCreated(StringBuilder sb, RuntimeProfile profile)

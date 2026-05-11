@@ -80,6 +80,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
         services.AddSingleton<ICodeBehindTransform, EfContextConstructorTransform>();
         services.AddSingleton<ICodeBehindTransform, DbContextInstantiationTransform>();
+        services.AddSingleton<ICodeBehindTransform, SelectMethodMaterializeTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpExceptionTransform>();
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();
