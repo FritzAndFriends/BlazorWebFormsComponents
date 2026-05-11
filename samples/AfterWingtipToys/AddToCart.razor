@@ -1,54 +1,16 @@
 @page "/AddToCart"
 @page "/AddToCart.aspx"
-@using Microsoft.EntityFrameworkCore
-@using WingtipToys.Models
-@inject IDbContextFactory<ProductContext> DbFactory
-@inject IHttpContextAccessor HttpContextAccessor
+<!DOCTYPE html>
 
-@code {
-    [SupplyParameterFromQuery(Name = "productID")]
-    public int ProductId { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (ProductId <= 0) return;
-
-        var httpContext = HttpContextAccessor.HttpContext;
-        if (httpContext == null) return;
-
-        var cartId = GetCartId(httpContext);
-
-        using var db = DbFactory.CreateDbContext();
-        var existingItem = await db.ShoppingCartItems
-            .FirstOrDefaultAsync(c => c.CartId == cartId && c.ProductId == ProductId);
-
-        if (existingItem != null)
-        {
-            existingItem.Quantity++;
-        }
-        else
-        {
-            db.ShoppingCartItems.Add(new CartItem
-            {
-                ItemId = Guid.NewGuid().ToString(),
-                CartId = cartId,
-                ProductId = ProductId,
-                Quantity = 1,
-                DateCreated = DateTime.Now
-            });
-        }
-
-        await db.SaveChangesAsync();
-        httpContext.Response.Redirect("/ShoppingCart");
-    }
-
-    private string GetCartId(HttpContext httpContext)
-    {
-        var cartIdCookie = httpContext.Request.Cookies["CartId"];
-        if (!string.IsNullOrEmpty(cartIdCookie)) return cartIdCookie;
-
-        var newCartId = httpContext.User?.Identity?.Name ?? Guid.NewGuid().ToString();
-        httpContext.Response.Cookies.Append("CartId", newCartId, new CookieOptions { Expires = DateTimeOffset.Now.AddDays(30) });
-        return newCartId;
-    }
-}
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title></title>
+</head>
+<body>
+    <WebFormsForm id="form1">
+    <div>
+    
+    </div>
+    </WebFormsForm>
+</body>
+</html>

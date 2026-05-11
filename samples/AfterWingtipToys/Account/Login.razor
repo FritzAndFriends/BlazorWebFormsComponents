@@ -10,7 +10,8 @@
 {
     <p class="text-danger">@Error</p>
 }
-<form method="post" action="/Account/LoginHandler" class="form-horizontal" data-enhance="false">
+<form method="post" action="/Account/LoginHandler" class="form-horizontal" @formname="bwfc-form-1">
+    <AntiforgeryToken />
     @if (!string.IsNullOrWhiteSpace(ReturnUrl))
     {
         <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />

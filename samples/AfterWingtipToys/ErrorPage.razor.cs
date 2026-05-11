@@ -89,22 +89,16 @@ namespace WingtipToys
         ex = new Exception(unhandledErrorMsg);
       }
 
-      // Show error details in the migrated app during development validation.
-      if (true)
+      // Show error details only in development scenarios.
+      if (false)
       {
-        // Detailed Error Message.
         ErrorDetailedMsg.Text = ex.Message;
-
-        // Show where the error was handled.
         ErrorHandler.Text = errorHandler;
-
-        // Show local access details.
         DetailedErrorPanel.Visible = true;
 
         if (ex.InnerException != null)
         {
-          InnerMessage.Text = ex.GetType().ToString() + "<br/>" +
-              ex.InnerException.Message;
+          InnerMessage.Text = ex.GetType().ToString() + "<br/>" + ex.InnerException.Message;
           InnerTrace.Text = ex.InnerException.StackTrace;
         }
         else
@@ -117,9 +111,7 @@ namespace WingtipToys
         }
       }
 
-      // TODO(bwfc-error): Reconnect legacy exception logging to ASP.NET Core logging.
-
-      // Clear the error from the server.
+      // Clear the error from the server shim.
       Server.ClearError();
     }
   }

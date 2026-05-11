@@ -1,33 +1,31 @@
 @page "/ProductDetails"
-@page "/Product/{ProductName}"
-
+@page "/Product/{productName}"
 <PageTitle>Product Details</PageTitle>
 
-<FormView DataItem="product" ItemType="Product" RenderOuterTable="false">
-    <ItemTemplate Context="Item">
-        <div>
-            <h1>@Item.ProductName</h1>
-        </div>
-        <br />
-        <table>
-            <tr>
-                <td>
-                    <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName" />
-                </td>
-                <td>&nbsp;</td>
-                <td style="vertical-align: top; text-align:left;">
-                    <b>Description:</b><br />@Item.Description
-                    <br />
-                    <span><b>Price:</b>&nbsp;@((Item.UnitPrice ?? 0).ToString("C"))</span>
-                    <br />
-                    <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
-                    <br />
-                    <br />
-                    <a href="/AddToCart.aspx?productID=@Item.ProductID" data-enhance-nav="false">
-                        <b>Add To Cart</b>
-                    </a>
-                </td>
-            </tr>
-        </table>
-    </ItemTemplate>
-</FormView>
+    <FormView id="productDetail" ItemType="Product" SelectMethod ="GetProduct" RenderOuterTable="false">
+        <ItemTemplate Context="Item">
+            <div>
+                <h1>@Item.ProductName</h1>
+            </div>
+            <br />
+            <table>
+                <tr>
+                    <td>
+                        <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName"/>
+                    </td>
+                    <td>&nbsp;</td>  
+                    <td style="vertical-align: top; text-align:left;">
+                        <b>Description:</b><br />@Item.Description
+                        <br />
+                        <span><b>Price:</b>&nbsp;@(String.Format("{0:c}", Item.UnitPrice))</span>
+                        <br />
+                        <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
+                        <br />
+                        <a href="/AddToCart.aspx?productID=@Item.ProductID" data-enhance-nav="false">
+                            <span class="ProductListItem"><b>Add To Cart</b></span>
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        </ItemTemplate>
+    </FormView>

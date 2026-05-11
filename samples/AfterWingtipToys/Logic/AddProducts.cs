@@ -1,16 +1,15 @@
 using System;
-using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 namespace WingtipToys.Logic
 {
   public class AddProducts
   {
-    private readonly IDbContextFactory<ProductContext> _dbFactory;
+    private readonly ProductContext _db;
 
-    public AddProducts(IDbContextFactory<ProductContext> dbFactory)
+    public AddProducts(ProductContext db)
     {
-      _dbFactory = dbFactory;
+      _db = db;
     }
 
     public bool AddProduct(string ProductName, string ProductDesc, string ProductPrice, string ProductCategory, string ProductImagePath)
@@ -24,9 +23,8 @@ namespace WingtipToys.Logic
         CategoryID = Convert.ToInt32(ProductCategory)
       };
 
-      using var db = _dbFactory.CreateDbContext();
-      db.Products.Add(myProduct);
-      db.SaveChanges();
+      _db.Products.Add(myProduct);
+      _db.SaveChanges();
       return true;
     }
   }
