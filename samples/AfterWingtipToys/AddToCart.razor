@@ -1,58 +1,54 @@
 @page "/AddToCart"
+@page "/AddToCart.aspx"
 @using Microsoft.EntityFrameworkCore
 @using WingtipToys.Models
-@inherits BlazorWebFormsComponents.WebFormsPageBase
-@attribute [StreamRendering(false)]
 @inject IDbContextFactory<ProductContext> DbFactory
+@inject IHttpContextAccessor HttpContextAccessor
 
 @code {
-    [SupplyParameterFromQuery(Name = "productID")] public int? ProductID { get; set; }
+    [SupplyParameterFromQuery(Name = "productID")]
+    public int ProductId { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        if (ProductId <= 0) return;
 
-        if (ProductID.HasValue && ProductID > 0)
+        var httpContext = HttpContextAccessor.HttpContext;
+        if (httpContext == null) return;
+
+        var cartId = GetCartId(httpContext);
+
+        using var db = DbFactory.CreateDbContext();
+        var existingItem = await db.ShoppingCartItems
+            .FirstOrDefaultAsync(c => c.CartId == cartId && c.ProductId == ProductId);
+
+        if (existingItem != null)
         {
-            using var db = DbFactory.CreateDbContext();
-            var cartId = GetCartId();
-
-            var existingItem = db.ShoppingCartItems
-                .SingleOrDefault(c => c.CartId == cartId && c.ProductId == ProductID.Value);
-
-            if (existingItem == null)
+            existingItem.Quantity++;
+        }
+        else
+        {
+            db.ShoppingCartItems.Add(new CartItem
             {
-                var product = db.Products.SingleOrDefault(p => p.ProductID == ProductID.Value);
-                if (product != null)
-                {
-                    db.ShoppingCartItems.Add(new CartItem
-                    {
-                        ItemId = Guid.NewGuid().ToString(),
-                        ProductId = ProductID.Value,
-                        CartId = cartId,
-                        Product = product,
-                        Quantity = 1,
-                        DateCreated = DateTime.Now
-                    });
-                    db.SaveChanges();
-                }
-            }
-            else
-            {
-                existingItem.Quantity++;
-                db.SaveChanges();
-            }
+                ItemId = Guid.NewGuid().ToString(),
+                CartId = cartId,
+                ProductId = ProductId,
+                Quantity = 1,
+                DateCreated = DateTime.Now
+            });
         }
 
-        Response.Redirect("/ShoppingCart");
+        await db.SaveChangesAsync();
+        httpContext.Response.Redirect("/ShoppingCart");
     }
 
-    private string GetCartId()
+    private string GetCartId(HttpContext httpContext)
     {
-        if (Session["CartId"] == null)
-        {
-            Session["CartId"] = Guid.NewGuid().ToString();
-        }
-        return Session["CartId"]!.ToString()!;
+        var cartIdCookie = httpContext.Request.Cookies["CartId"];
+        if (!string.IsNullOrEmpty(cartIdCookie)) return cartIdCookie;
+
+        var newCartId = httpContext.User?.Identity?.Name ?? Guid.NewGuid().ToString();
+        httpContext.Response.Cookies.Append("CartId", newCartId, new CookieOptions { Expires = DateTimeOffset.Now.AddDays(30) });
+        return newCartId;
     }
 }

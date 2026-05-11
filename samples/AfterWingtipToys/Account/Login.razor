@@ -11,7 +11,6 @@
     <p class="text-danger">@Error</p>
 }
 <form method="post" action="/Account/LoginHandler" class="form-horizontal" data-enhance="false">
-    <AntiforgeryToken />
     @if (!string.IsNullOrWhiteSpace(ReturnUrl))
     {
         <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />

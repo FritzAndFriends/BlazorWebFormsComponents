@@ -1,31 +1,32 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 namespace WingtipToys.Logic
 {
   public class AddProducts
   {
-    private readonly ProductContext _db;
+    private readonly IDbContextFactory<ProductContext> _dbFactory;
 
-    public AddProducts(ProductContext db)
+    public AddProducts(IDbContextFactory<ProductContext> dbFactory)
     {
-      _db = db;
+      _dbFactory = dbFactory;
     }
 
     public bool AddProduct(string ProductName, string ProductDesc, string ProductPrice, string ProductCategory, string ProductImagePath)
     {
-      var myProduct = new Product();
-      myProduct.ProductName = ProductName;
-      myProduct.Description = ProductDesc;
-      myProduct.UnitPrice = Convert.ToDouble(ProductPrice);
-      myProduct.ImagePath = ProductImagePath;
-      myProduct.CategoryID = Convert.ToInt32(ProductCategory);
+      var myProduct = new Product
+      {
+        ProductName = ProductName,
+        Description = ProductDesc,
+        UnitPrice = Convert.ToDouble(ProductPrice),
+        ImagePath = ProductImagePath,
+        CategoryID = Convert.ToInt32(ProductCategory)
+      };
 
-      _db.Products.Add(myProduct);
-      _db.SaveChanges();
-
+      using var db = _dbFactory.CreateDbContext();
+      db.Products.Add(myProduct);
+      db.SaveChanges();
       return true;
     }
   }

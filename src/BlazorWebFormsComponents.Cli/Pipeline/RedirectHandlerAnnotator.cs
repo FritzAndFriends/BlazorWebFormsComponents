@@ -62,6 +62,11 @@ public class RedirectHandlerAnnotator
             report.AddManualItem("Account/Register.aspx", 0, "bwfc-identity", "Register.razor now posts to /Account/RegisterHandler — verify the generated Identity registration flow matches your app's user profile and confirmation requirements.", "medium");
         }
 
+        if (context.SourceFiles.Any(IsLoginPage) || context.SourceFiles.Any(IsRegisterPage))
+        {
+            handlerBlocks.Add(BuildLogoutHandlerBlock());
+        }
+
         if (handlerBlocks.Count == 0)
             return 0;
 
@@ -139,7 +144,7 @@ public class RedirectHandlerAnnotator
 
     private static string BuildLoginHandlerBlock() =>
         """
-app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
+app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
 {
     var form = await context.Request.ReadFormAsync();
     var email = form["Email"].ToString().Trim();
@@ -174,7 +179,7 @@ app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<I
 
     private static string BuildRegisterHandlerBlock() =>
         """
-app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<IdentityUser> userManager) =>
+app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager) =>
 {
     var form = await context.Request.ReadFormAsync();
     var email = form["Email"].ToString().Trim();
@@ -201,7 +206,7 @@ app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<
         return Results.LocalRedirect(mismatchedPasswordUrl);
     }
 
-    var user = new IdentityUser
+    var user = new ApplicationUser
     {
         UserName = email,
         Email = email
@@ -217,10 +222,17 @@ app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<
         return Results.LocalRedirect(registrationErrorUrl);
     }
 
-    var registeredUrl = hasLocalReturnUrl
-        ? $"/Account/Login?registered=1&returnUrl={Uri.EscapeDataString(returnUrl)}"
-        : "/Account/Login?registered=1";
-    return Results.LocalRedirect(registeredUrl);
+    await signInManager.SignInAsync(user, isPersistent: false);
+    return Results.LocalRedirect(hasLocalReturnUrl ? returnUrl : "/");
 });
+""";
+
+    private static string BuildLogoutHandlerBlock() =>
+        """
+app.MapPost("/Account/PerformLogout", async (SignInManager<ApplicationUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Redirect("/");
+}).DisableAntiforgery();
 """;
 }

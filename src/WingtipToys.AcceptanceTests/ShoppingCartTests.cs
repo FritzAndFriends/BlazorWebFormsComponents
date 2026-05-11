@@ -60,9 +60,9 @@ public class ShoppingCartTests
         // Should end up on the shopping cart page
         Assert.Contains("ShoppingCart", page.Url, StringComparison.OrdinalIgnoreCase);
 
-        // Cart should contain at least one item row
-        // The GridView renders a <table> with data rows
+        // ShoppingCart is InteractiveServer — wait for SignalR to render content
         var cartTable = page.Locator("table");
+        await cartTable.First.WaitForAsync(new() { Timeout = 15000 });
         var tableCount = await cartTable.CountAsync();
         Assert.True(tableCount > 0, "Shopping cart should display a table with the added item");
     }
@@ -174,6 +174,9 @@ public class ShoppingCartTests
             var addButton = page.GetByRole(AriaRole.Button, new() { Name = "Add To Cart" });
             await addButton.ClickAsync();
         }
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // ShoppingCart is an InteractiveServer page — wait for it to render via SignalR
+        await page.WaitForURLAsync("**/ShoppingCart**", new() { Timeout = 15000 });
+        await page.Locator("h1").WaitForAsync(new() { Timeout = 15000 });
     }
 }

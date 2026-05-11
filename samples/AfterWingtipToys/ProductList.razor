@@ -1,118 +1,114 @@
 @page "/ProductList"
-@page "/Category/{categoryName}"
+@page "/Category/{CategoryName}"
 @using Microsoft.EntityFrameworkCore
-@using WingtipToys.Models
-<PageTitle>Products</PageTitle>
-	
-    <section>
-        <div>
-            <hgroup>
-                <h2>@(Page.Title)</h2>
-            </hgroup>
 
-            <ListView id="productList" @ref="productList" 
-                DataKeyNames="ProductID" GroupItemCount="4"
-                ItemType="Product" SelectMethod="GetProductsQueryDetails_SelectMethod">
-                <EmptyDataTemplate>
-                    <table >
+<PageTitle>Products</PageTitle>
+
+<section>
+    <div>
+        <hgroup>
+            <h2>@Heading</h2>
+        </hgroup>
+
+        <ListView DataKeyNames="ProductID" GroupItemCount="4" ItemType="Product" Items="products">
+            <EmptyDataTemplate>
+                <table>
+                    <tr>
+                        <td>No data was returned.</td>
+                    </tr>
+                </table>
+            </EmptyDataTemplate>
+            <EmptyItemTemplate>
+                <td />
+            </EmptyItemTemplate>
+            <GroupTemplate Context="items">
+                <tr id="itemPlaceholderContainer">
+                    @items
+                </tr>
+            </GroupTemplate>
+            <ItemTemplate Context="Item">
+                <td>
+                    <table>
                         <tr>
-                            <td>No data was returned.</td>
+                            <td>
+                                <a href="@($"/Product/{Item.ProductName}")">
+                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath" width="100" height="75" border="1" alt="@Item.ProductName" />
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="@($"/Product/{Item.ProductName}")">
+                                    @Item.ProductName
+                                </a>
+                                <br />
+                                <span>
+                                    <b>Price: </b>@((Item.UnitPrice ?? 0).ToString("C"))
+                                </span>
+                                <br />
+                                <a href="/AddToCart.aspx?productID=@Item.ProductID" data-enhance-nav="false">
+                                    <span class="ProductListItem">
+                                        <b>Add To Cart</b>
+                                    </span>
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
                         </tr>
                     </table>
-                </EmptyDataTemplate>
-                <EmptyItemTemplate>
-                    <td/>
-                </EmptyItemTemplate>
-                <GroupTemplate Context="items">
-                    <tr id="itemPlaceholderContainer">
-                        @items
-                    </tr>
-                </GroupTemplate>
-                <ItemTemplate Context="Item">
-                    <td>
-                        <table>
-                            <tr>
-                                <td>
-                                  <a href="@($"/Product/{Item.ProductName}")">
-                                    <image src='/Catalog/Images/Thumbs/@Item.ImagePath'
-                                      width="100" height="75" border="1" />
-                                  </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <a href="@($"/Product/{Item.ProductName}")">
-                                      @Item.ProductName
-                                    </a>
-                                    <br />
-                                    <span>
-                                        <b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))
-                                    </span>
-                                    <br />
-                                    <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">               
-                                        <span class="ProductListItem">
-                                            <b>Add To Cart</b>
-                                        </span>           
-                                    </a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>&nbsp;</td>
-                            </tr>
-                        </table>
-                    </td>
-                </ItemTemplate>
-                <LayoutTemplate Context="groups">
-                    <table style="width:100%;">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table id="groupPlaceholderContainer" style="width:100%">
-                                        @groups
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                            </tr>
-                            <tr></tr>
-                        </tbody>
-                    </table>
-                </LayoutTemplate>
-            </ListView>
-        </div>
-    </section>
+                </td>
+            </ItemTemplate>
+            <LayoutTemplate Context="groups">
+                <table style="width:100%;">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <table id="groupPlaceholderContainer" style="width:100%">
+                                    @groups
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr></tr>
+                    </tbody>
+                </table>
+            </LayoutTemplate>
+        </ListView>
+    </div>
+</section>
 
 @code {
-    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
-    [Parameter] public string? CategoryName { get; set; }
+    [Inject] public IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
 
-    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
+    [Parameter, SupplyParameterFromQuery(Name = "id")]
+    public int? CategoryId { get; set; }
 
-    private ListView<Product> productList = default!;
+    [Parameter]
+    public string? CategoryName { get; set; }
+
     private List<Product> products = new();
+    private string Heading => string.IsNullOrWhiteSpace(CategoryName) ? "Products" : CategoryName;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
+        await base.OnParametersSetAsync();
+
         using var db = DbFactory.CreateDbContext();
         IQueryable<Product> query = db.Products.Include(p => p.Category);
 
-        if (CategoryId.HasValue && CategoryId > 0)
+        if (CategoryId.GetValueOrDefault() > 0)
         {
-            query = query.Where(p => p.CategoryID == CategoryId);
+            query = query.Where(p => p.CategoryID == CategoryId.Value);
         }
 
-        if (!string.IsNullOrEmpty(CategoryName))
+        if (!string.IsNullOrWhiteSpace(CategoryName))
         {
-            query = query.Where(p => p.Category.CategoryName == CategoryName);
+            query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
         }
 
         products = await query.ToListAsync();
-    }
-
-    public IQueryable<Product> GetProductsQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-    {
-        totalRowCount = products.Count;
-        return products.AsQueryable();
     }
 }
