@@ -24,7 +24,7 @@ public sealed class ActionPagesSemanticPattern : ISemanticPattern
         @"(?is)^\s*@page\s+""[^""]+""\s*|<PageTitle>.*?</PageTitle>",
         RegexOptions.Compiled);
     private static readonly Regex WrapperTagRegex = new(
-        @"(?is)</?(html|head|body|form|div|span|section|main|title)(?:\s[^>]*)?>",
+        @"(?is)</?(html|head|body|form|WebFormsForm|div|span|section|main|title)(?:\s[^>]*)?>",
         RegexOptions.Compiled);
 
     public string Id => "pattern-action-pages";

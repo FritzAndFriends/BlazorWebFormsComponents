@@ -797,7 +797,10 @@ namespace BlazorWebFormsComponents
 			if (_formDataParsed) return;
 			_formDataParsed = true;
 
-			var formCollection = HttpContextAccessor?.HttpContext?.Request?.Form;
+			var request = HttpContextAccessor?.HttpContext?.Request;
+			if (request == null || !request.HasFormContentType) return;
+
+			var formCollection = request.Form;
 			if (formCollection == null) return;
 
 			var gridId = UniqueID ?? ID;

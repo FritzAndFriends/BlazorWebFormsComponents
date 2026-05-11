@@ -1,43 +1,75 @@
+using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.Transforms.Markup;
+
 namespace BlazorWebFormsComponents.Cli.Tests.TransformUnit;
 
 /// <summary>
-/// Unit tests for FormWrapperTransform — converts server form elements to div.
-/// Corresponds to TC05-FormWrapper test case.
+/// Unit tests for FormWrapperTransform — converts server form elements to WebFormsForm.
 /// </summary>
 public class FormWrapperTransformTests
 {
-    // TODO: Instantiate the real transform when Bishop builds it:
-    // private readonly FormWrapperTransform _transform = new();
+    private readonly FormWrapperTransform _transform = new();
+
+    private static FileMetadata TestMetadata() => new()
+    {
+        SourceFilePath = "Default.aspx",
+        OutputFilePath = "Default.razor",
+        FileType = FileType.Page,
+        OriginalContent = ""
+    };
 
     [Fact]
-    public void ConvertsFormToDiv()
+    public void ConvertsFormToWebFormsForm()
     {
-        // Input:  <form id="form1" runat="server">...</form>
-        // Expect: <div id="form1">...</div>
-        var input = @"<form id=""form1"" runat=""server"">";
-        var expected = @"<div id=""form1"">";
+        var input = @"<form id=""form1"" runat=""server"">content</form>";
+        var result = _transform.Apply(input, TestMetadata());
 
-        Assert.Contains("form", input);
-        Assert.Contains("div", expected);
+        Assert.Contains("<WebFormsForm", result);
+        Assert.Contains("</WebFormsForm>", result);
+        Assert.DoesNotContain("<div", result);
+        Assert.DoesNotContain("<form", result);
     }
 
     [Fact]
     public void PreservesFormId()
     {
-        // The id attribute is preserved for CSS compatibility
-        var input = @"<form id=""form1"" runat=""server"">";
-        var expected = @"<div id=""form1"">";
+        var input = @"<form id=""form1"" runat=""server"">content</form>";
+        var result = _transform.Apply(input, TestMetadata());
 
-        Assert.Contains(@"id=""form1""", expected);
+        Assert.Contains(@"id=""form1""", result);
     }
 
     [Fact]
-    public void ConvertsClosingFormTag()
+    public void HandlesFormWithoutId()
     {
-        // Closing </form> becomes </div>
-        var input = "</form>";
-        var expected = "</div>";
+        var input = @"<form runat=""server"">content</form>";
+        var result = _transform.Apply(input, TestMetadata());
 
-        Assert.NotEqual(input, expected);
+        Assert.Equal("<WebFormsForm>content</WebFormsForm>", result);
+    }
+
+    [Fact]
+    public void IgnoresNonServerForms()
+    {
+        var input = @"<form action=""/search"">content</form>";
+        var result = _transform.Apply(input, TestMetadata());
+
+        Assert.Equal(input, result);
+    }
+
+    [Fact]
+    public void HandlesMultilineForm()
+    {
+        var input = "<form id=\"form1\"\n    runat=\"server\">\n  <div>content</div>\n</form>";
+        var result = _transform.Apply(input, TestMetadata());
+
+        Assert.Contains("<WebFormsForm id=\"form1\">", result);
+        Assert.Contains("</WebFormsForm>", result);
+    }
+
+    [Fact]
+    public void OrderIs310()
+    {
+        Assert.Equal(310, _transform.Order);
     }
 }
