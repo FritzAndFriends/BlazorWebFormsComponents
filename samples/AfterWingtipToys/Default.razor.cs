@@ -25,6 +25,8 @@ namespace WingtipToys
 {
   public partial class Default
   {
+	protected string Title { get; set; } = "Welcome";
+
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
     // --- Server Utility Migration ---

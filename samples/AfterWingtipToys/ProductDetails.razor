@@ -1,7 +1,7 @@
 @page "/ProductDetails"
 <PageTitle>Product Details</PageTitle>
 
-    <FormView id="productDetail" @ref="productDetail" TItem="Product" DataItem="product" RenderOuterTable="false">
+    <FormView id="productDetail" @ref="productDetail" ItemType="Product" SelectMethod ="GetProduct" RenderOuterTable="false">
         <ItemTemplate Context="Item">
             <div>
                 <h1>@Item.ProductName</h1>

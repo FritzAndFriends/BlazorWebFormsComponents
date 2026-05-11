@@ -1,6 +1,7 @@
 using BlazorWebFormsComponents;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using WingtipToys.Logic;
 using WingtipToys.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlServer(connectionString));
+builder.Services.AddScoped<ShoppingCartActions>();
 
 var identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
@@ -45,9 +47,11 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.EnsureCreated();
-    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
-    using var productDb = factory.CreateDbContext();
-    productDb.Database.EnsureCreated();
+    var productContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
+    using (var productContext = productContextFactory.CreateDbContext())
+    {
+        productContext.Database.EnsureCreated();
+    }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -153,12 +157,6 @@ app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<
         : "/Account/Login?registered=1";
     return Results.LocalRedirect(registeredUrl);
 });
-
-app.MapPost("/Account/PerformLogout", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
-{
-    await signInManager.SignOutAsync();
-    return Results.LocalRedirect("/");
-}).DisableAntiforgery();
 
 app.MapRazorComponents<WingtipToys.Components.App>()
     .AddInteractiveServerRenderMode();

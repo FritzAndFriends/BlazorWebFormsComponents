@@ -3,5 +3,7 @@
 namespace WingtipToys.Account;
 public class Login
 {
+	protected string Title { get; set; } = "Log in";
+
     // Stubbed — original file referenced legacy namespaces not available in .NET 10.
 }

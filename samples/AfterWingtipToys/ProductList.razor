@@ -4,11 +4,12 @@
     <section>
         <div>
             <hgroup>
-                <h2>Products</h2>
+                <h2>@(Page.Title)</h2>
             </hgroup>
 
-            <ListView TItem="Product" Items="products"
-                DataKeyNames="ProductID" GroupItemCount="4">
+            <ListView id="productList" @ref="productList" 
+                DataKeyNames="ProductID" GroupItemCount="4"
+                ItemType="Product" SelectMethod="GetProductsQueryDetails_SelectMethod">
                 <EmptyDataTemplate>
                     <table >
                         <tr>
@@ -29,15 +30,15 @@
                         <table>
                             <tr>
                                 <td>
-                                  <a href="/ProductDetails?ProductID=@Item.ProductID">
-                                    <image src='/Catalog/Images/Thumbs/@Item.ImagePath'
-                                      width="100" height="75" border="1" />
+                                  <a href="/ProductDetails?productName=@(Uri.EscapeDataString(Item.ProductName))" data-enhance-nav="false">
+                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath"
+                                         width="100" height="75" border="1" />
                                   </a>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <a href="/ProductDetails?ProductID=@Item.ProductID">
+                                    <a href="/ProductDetails?productName=@(Uri.EscapeDataString(Item.ProductName))" data-enhance-nav="false">
                                       @Item.ProductName
                                     </a>
                                     <br />
@@ -45,10 +46,10 @@
                                         <b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))
                                     </span>
                                     <br />
-                                    <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">               
+                                    <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">
                                         <span class="ProductListItem">
                                             <b>Add To Cart</b>
-                                        </span>           
+                                        </span>
                                     </a>
                                 </td>
                             </tr>
@@ -79,20 +80,3 @@
         </div>
     </section>
 
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
-
-    [Inject] private ProductContext Db { get; set; } = default!;
-
-    private List<Product> products = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        IQueryable<Product> query = Db.Products;
-        if (CategoryId.HasValue && CategoryId > 0)
-        {
-            query = query.Where(p => p.CategoryID == CategoryId);
-        }
-        products = await query.ToListAsync();
-    }
-}

@@ -1,19 +1,18 @@
 @page "/AddToCart"
-@inject ProductContext Db
-@inject IHttpContextAccessor HttpContextAccessor
-@inject NavigationManager NavigationManager
+@using WingtipToys.Logic
+@inject ShoppingCartActions ShoppingCartActions
+@inject NavigationManager Navigation
 
 @code {
     [SupplyParameterFromQuery(Name = "productID")]
-    public int? ProductID { get; set; }
+    public int ProductID { get; set; }
 
     protected override void OnInitialized()
     {
-        if (ProductID.HasValue && ProductID > 0)
+        if (ProductID > 0)
         {
-            using var cart = new WingtipToys.Logic.ShoppingCartActions(Db, HttpContextAccessor);
-            cart.AddToCart(ProductID.Value);
+            ShoppingCartActions.AddToCart(ProductID);
         }
-        NavigationManager.NavigateTo("/ShoppingCart", forceLoad: true);
+        Navigation.NavigateTo("/ShoppingCart", replace: true);
     }
 }

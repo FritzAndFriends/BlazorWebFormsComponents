@@ -1,26 +1,27 @@
 @page "/ShoppingCart"
-<PageTitle>Shopping Cart</PageTitle>
+<PageTitle></PageTitle>
 
-    <div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
-    <GridView TItem="CartItem" Items="cartItems" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
+    <div id="ShoppingCartTitle" class="ContentHead"><h1>@ShoppingCartTitleText</h1></div>
+    <GridView id="CartList" @ref="CartList" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
+        ItemType="CartItem" SelectMethod="GetShoppingCartItems" 
         CssClass="table table-striped table-bordered" >   
         <Columns>
-        <BoundField TItem="CartItem" DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />        
-        <BoundField TItem="CartItem" DataField="Product.ProductName" HeaderText="Name" />        
-        <BoundField TItem="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
-        <TemplateField TItem="CartItem" HeaderText="Quantity">            
+        <BoundField ItemType="CartItem" DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />        
+        <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Name" />        
+        <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+        <TemplateField ItemType="CartItem"   HeaderText="Quantity">            
                 <ItemTemplate Context="Item">
-                    <input type="number" style="width:40px" value="@Item.Quantity" /> 
+                    <TextBox id="PurchaseQuantity" @ref="PurchaseQuantity" Width="40" Text="@Item.Quantity.ToString()"></TextBox> 
                 </ItemTemplate>        
         </TemplateField>    
-        <TemplateField TItem="CartItem" HeaderText="Item Total">            
+        <TemplateField ItemType="CartItem" HeaderText="Item Total">            
                 <ItemTemplate Context="Item">
                     @(String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) *  Convert.ToDouble(Item.Product.UnitPrice))))
                 </ItemTemplate>        
         </TemplateField> 
-        <TemplateField TItem="CartItem" HeaderText="Remove Item">            
+        <TemplateField ItemType="CartItem" HeaderText="Remove Item">            
                 <ItemTemplate Context="Item">
-                    <input type="checkbox" />
+                    <CheckBox id="Remove" @ref="Remove"></CheckBox>
                 </ItemTemplate>        
         </TemplateField>    
         </Columns>    
@@ -28,22 +29,23 @@
     <div>
         <p></p>
         <strong>
-            <span>Order Total: </span>
-            <span>@orderTotal.ToString("c")</span>
+            <Label id="LabelTotalText" @ref="LabelTotalText" Text="@OrderTotalLabelText"></Label>
+            <Label id="lblTotal" @ref="lblTotal" Text="@OrderTotalValueText"></Label>
         </strong> 
     </div>
     <br />
     <table> 
     <tr>
       <td>
-        <Button Text="Update" OnClick="UpdateBtn_Click" />
+        <Button id="UpdateBtn" @ref="UpdateBtn" Text="Update" Visible="@UpdateBtnVisible" OnClick="@UpdateBtn_Click" />
       </td>
       <td>
-        <ImageButton
+        <ImageButton id="CheckoutImageBtn" @ref="CheckoutImageBtn" 
                       ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
                       Width="145" AlternateText="Check out with PayPal" 
-                      OnClick="CheckoutBtn_Click" 
-                      BorderWidth="0" />
+                      Visible="@CheckoutImageBtnVisible"
+                      OnClick="@CheckoutBtn_Click" 
+                      BackColor="@Transparent" BorderWidth="0" />
       </td>
     </tr>
     </table>

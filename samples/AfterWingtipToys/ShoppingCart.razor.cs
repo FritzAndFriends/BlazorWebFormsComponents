@@ -1,36 +1,70 @@
+using BlazorWebFormsComponents;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Http;
-using WingtipToys.Models;
 using WingtipToys.Logic;
+using WingtipToys.Models;
 
 namespace WingtipToys;
 
 public partial class ShoppingCart
 {
-	[Inject] private ProductContext Db { get; set; } = default!;
-	[Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
-	[Inject] private NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] private ShoppingCartActions ShoppingCartActions { get; set; } = default!;
 
-	private List<CartItem> cartItems = new();
-	private decimal orderTotal;
+    private GridView<CartItem> CartList = default!;
+    private TextBox PurchaseQuantity = default!;
+    private CheckBox Remove = default!;
+    private Label LabelTotalText = default!;
+    private Label lblTotal = default!;
+    private Button UpdateBtn = default!;
+    private ImageButton CheckoutImageBtn = default!;
 
-	protected override void OnInitialized()
-	{
-		using var cart = new ShoppingCartActions(Db, HttpContextAccessor);
-		cartItems = cart.GetCartItems();
-		orderTotal = cart.GetTotal();
-	}
+    private string ShoppingCartTitleText { get; set; } = "Shopping Cart";
+    private string OrderTotalLabelText { get; set; } = "Order Total: ";
+    private string OrderTotalValueText { get; set; } = string.Empty;
+    private bool UpdateBtnVisible { get; set; } = true;
+    private bool CheckoutImageBtnVisible { get; set; } = true;
+    protected WebColor Transparent { get; } = WebColor.Transparent;
 
-	private void UpdateBtn_Click()
-	{
-		// Reload cart items (full update would require form data)
-		using var cart = new ShoppingCartActions(Db, HttpContextAccessor);
-		cartItems = cart.GetCartItems();
-		orderTotal = cart.GetTotal();
-	}
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        RefreshCartState();
+    }
 
-	private void CheckoutBtn_Click()
-	{
-		NavigationManager.NavigateTo("/Checkout/CheckoutStart");
-	}
+    private IQueryable<CartItem> GetShoppingCartItems(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        var items = ShoppingCartActions.GetCartItems();
+        totalRowCount = items.Count;
+        return items.AsQueryable();
+    }
+
+    private void UpdateBtn_Click(EventArgs args)
+    {
+        RefreshCartState();
+    }
+
+    private void CheckoutBtn_Click(EventArgs args)
+    {
+        Session["payment_amt"] = ShoppingCartActions.GetTotal();
+        Response.Redirect("Checkout/CheckoutStart.aspx");
+    }
+
+    private void RefreshCartState()
+    {
+        var cartTotal = ShoppingCartActions.GetTotal();
+        if (cartTotal > 0)
+        {
+            ShoppingCartTitleText = "Shopping Cart";
+            OrderTotalLabelText = "Order Total: ";
+            OrderTotalValueText = $"{cartTotal:c}";
+            UpdateBtnVisible = true;
+            CheckoutImageBtnVisible = true;
+            return;
+        }
+
+        ShoppingCartTitleText = "Shopping Cart is Empty";
+        OrderTotalLabelText = string.Empty;
+        OrderTotalValueText = string.Empty;
+        UpdateBtnVisible = false;
+        CheckoutImageBtnVisible = false;
+    }
 }

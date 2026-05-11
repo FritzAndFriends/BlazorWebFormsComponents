@@ -1,32 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using WingtipToys.Models;
 
-namespace WingtipToys.Logic
+namespace WingtipToys.Logic;
+
+public static class AddProducts
 {
-  public class AddProducts
-  {
-    private readonly ProductContext _db;
-
-    public AddProducts(ProductContext db)
+    public static bool AddProduct(ProductContext db, string productName, string productDesc, string productPrice, string productCategory, string productImagePath)
     {
-      _db = db;
+        var myProduct = new Product
+        {
+            ProductName = productName,
+            Description = productDesc,
+            UnitPrice = Convert.ToDouble(productPrice),
+            ImagePath = productImagePath,
+            CategoryID = Convert.ToInt32(productCategory)
+        };
+
+        db.Products.Add(myProduct);
+        db.SaveChanges();
+        return true;
     }
-
-    public bool AddProduct(string ProductName, string ProductDesc, string ProductPrice, string ProductCategory, string ProductImagePath)
-    {
-      var myProduct = new Product();
-      myProduct.ProductName = ProductName;
-      myProduct.Description = ProductDesc;
-      myProduct.UnitPrice = Convert.ToDouble(ProductPrice);
-      myProduct.ImagePath = ProductImagePath;
-      myProduct.CategoryID = Convert.ToInt32(ProductCategory);
-
-      _db.Products.Add(myProduct);
-      _db.SaveChanges();
-
-      return true;
-    }
-  }
 }

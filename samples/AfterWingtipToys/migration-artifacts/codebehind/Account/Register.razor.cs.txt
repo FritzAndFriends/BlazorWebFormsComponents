@@ -3,5 +3,7 @@
 namespace WingtipToys.Account;
 public class Register
 {
+	protected string Title { get; set; } = "Register";
+
     // Stubbed — original file referenced legacy namespaces not available in .NET 10.
 }

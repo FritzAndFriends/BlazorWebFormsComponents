@@ -44,30 +44,17 @@
         </div>
         <div id="TitleContent" style="text-align: center">
             <a href="/">
-                <img src="/Images/logo.jpg" style="border-style: none;" />
+                <img src="/Images/logo.jpg" />
             </a>
             <br />
         </div>
         <div id="CategoryMenu" style="text-align: center">
-            @if (categories != null)
-            {
-                @for (int i = 0; i < categories.Count; i++)
-                {
-                    var cat = categories[i];
-                    <b style="font-size: large; font-style: normal">
-                        <a href="/ProductList?id=@cat.CategoryID">@cat.CategoryName</a>
-                    </b>
-                    @if (i < categories.Count - 1)
-                    {
-                        <text>  |  </text>
-                    }
-                }
-            }
         </div>
-        <main class="container body-content" style="padding-top: 70px;">
+        <main role="main" class="container body-content">
         @Body
             <hr />
             <footer>
                 <p>&copy; 2013 - Wingtip Toys</p>
             </footer>
         </main>
+
