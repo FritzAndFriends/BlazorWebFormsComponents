@@ -28,6 +28,13 @@ public class FileMetadata
     public string? MarkupContent { get; set; }
     public string? CompileSurfaceStubReason { get; set; }
     public string? CompileSurfaceOriginalCodeBehind { get; set; }
+
+    /// <summary>
+    /// Page title extracted from <%@ Page Title="..." %>.
+    /// Populated by PageDirectiveTransform, consumed by TitlePropertyCodeBehindTransform.
+    /// </summary>
+    public string? PageTitle { get; set; }
+
     internal PageQuarantineDecision? QuarantineDecision { get; set; }
 
     public string FileName => Path.GetFileNameWithoutExtension(SourceFilePath);

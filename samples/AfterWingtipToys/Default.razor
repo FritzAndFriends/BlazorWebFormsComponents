@@ -1,14 +1,12 @@
 @page "/"
 <PageTitle>Welcome</PageTitle>
 
-<div class="container">
-    <div class="jumbotron" style="padding:30px; margin-top:20px; background-color:#f5f5f5; border-radius:6px;">
         <h1>@(Title).</h1>
         <h2>Wingtip Toys can help you find the perfect gift.</h2>
         <p class="lead">We're all about transportation toys. You can order 
                 any of our toys today. Each toy listing has detailed 
                 information to help you choose the right toy.</p>
-        <p><a class="btn btn-primary btn-lg" href="/ProductList">Shop Now &raquo;</a></p>
-    </div>
-</div>
 
+@code {
+    private string Title = "Welcome to Wingtip Toys";
+}

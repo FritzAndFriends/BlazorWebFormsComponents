@@ -1,110 +1,49 @@
 @page "/ShoppingCart"
-@rendermode Microsoft.AspNetCore.Components.Web.RenderMode.InteractiveServer
-@inject WingtipToys.Logic.ShoppingCartActions CartActions
 <PageTitle>Shopping Cart</PageTitle>
 
-    <div id="ShoppingCartTitle" class="ContentHead"><h1>@_title</h1></div>
-
-@if (_cartItems.Any())
-{
-    <table class="table table-striped table-bordered" cellpadding="4">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Price (each)</th>
-                <th>Quantity</th>
-                <th>Item Total</th>
-                <th>Remove Item</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var item in _cartItems)
-        {
-            <tr>
-                <td>@item.ProductId</td>
-                <td>@item.Product?.ProductName</td>
-                <td>@(String.Format("{0:c}", item.Product?.UnitPrice))</td>
-                <td><input type="number" style="width:60px" value="@item.Quantity" @onchange="(e) => UpdateQuantity(item.ProductId, e)" /></td>
-                <td>@(String.Format("{0:c}", item.Quantity * (item.Product?.UnitPrice ?? 0)))</td>
-                <td><input type="checkbox" @onchange="(e) => ToggleRemove(item.ProductId, (bool)(e.Value ?? false))" /></td>
-            </tr>
-        }
-        </tbody>
-    </table>
+    <div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
+    <GridView TItem="CartItem" Items="cartItems" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
+        CssClass="table table-striped table-bordered" >   
+        <Columns>
+        <BoundField TItem="CartItem" DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />        
+        <BoundField TItem="CartItem" DataField="Product.ProductName" HeaderText="Name" />        
+        <BoundField TItem="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}"/>     
+        <TemplateField TItem="CartItem" HeaderText="Quantity">            
+                <ItemTemplate Context="Item">
+                    <input type="number" style="width:40px" value="@Item.Quantity" /> 
+                </ItemTemplate>        
+        </TemplateField>    
+        <TemplateField TItem="CartItem" HeaderText="Item Total">            
+                <ItemTemplate Context="Item">
+                    @(String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) *  Convert.ToDouble(Item.Product.UnitPrice))))
+                </ItemTemplate>        
+        </TemplateField> 
+        <TemplateField TItem="CartItem" HeaderText="Remove Item">            
+                <ItemTemplate Context="Item">
+                    <input type="checkbox" />
+                </ItemTemplate>        
+        </TemplateField>    
+        </Columns>    
+    </GridView>
     <div>
         <p></p>
         <strong>
-            Order Total: @(String.Format("{0:c}", _total))
-        </strong>
+            <span>Order Total: </span>
+            <span>@orderTotal.ToString("c")</span>
+        </strong> 
     </div>
     <br />
-    <table>
+    <table> 
     <tr>
       <td>
-        <button class="btn btn-default" @onclick="UpdateBtn_Click">Update</button>
+        <Button Text="Update" OnClick="UpdateBtn_Click" />
       </td>
       <td>
-        <a href="/Checkout/CheckoutStart" data-enhance-nav="false">
-          <img src="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
-               width="145" alt="Check out with PayPal" style="border:0" />
-        </a>
+        <ImageButton
+                      ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif" 
+                      Width="145" AlternateText="Check out with PayPal" 
+                      OnClick="CheckoutBtn_Click" 
+                      BorderWidth="0" />
       </td>
     </tr>
     </table>
-}
-
-@code {
-    private List<WingtipToys.Models.CartItem> _cartItems = new();
-    private decimal _total;
-    private string _title = "Shopping Cart";
-    private Dictionary<int, int> _updatedQuantities = new();
-    private HashSet<int> _removeItems = new();
-
-    protected override void OnInitialized()
-    {
-        LoadCart();
-    }
-
-    private void LoadCart()
-    {
-        _cartItems = CartActions.GetCartItems();
-        _total = CartActions.GetTotal();
-        if (!_cartItems.Any())
-        {
-            _title = "Shopping Cart is Empty";
-        }
-    }
-
-    private void UpdateQuantity(int productId, ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var qty))
-        {
-            _updatedQuantities[productId] = qty;
-        }
-    }
-
-    private void ToggleRemove(int productId, bool remove)
-    {
-        if (remove) _removeItems.Add(productId);
-        else _removeItems.Remove(productId);
-    }
-
-    private void UpdateBtn_Click()
-    {
-        foreach (var productId in _removeItems)
-        {
-            CartActions.RemoveItem(productId);
-        }
-        foreach (var (productId, qty) in _updatedQuantities)
-        {
-            if (!_removeItems.Contains(productId) && qty > 0)
-            {
-                CartActions.UpdateItem(productId, qty);
-            }
-        }
-        _removeItems.Clear();
-        _updatedQuantities.Clear();
-        LoadCart();
-    }
-}

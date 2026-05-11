@@ -26,6 +26,7 @@ public class PageDirectiveTransform : IMarkupTransform
         if (titleMatch.Success)
         {
             pageTitle = titleMatch.Groups[1].Value;
+            metadata.PageTitle = pageTitle;
         }
 
         content = PageDirectiveRegex.Replace(content, "");

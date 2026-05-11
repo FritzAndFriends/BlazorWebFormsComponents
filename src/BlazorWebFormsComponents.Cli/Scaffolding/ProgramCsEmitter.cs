@@ -121,7 +121,7 @@ public class ProgramCsEmitter
             if (profile.NeedsIdentity && string.Equals(additionalContext, "ApplicationDbContext", StringComparison.Ordinal))
                 continue;
 
-            sb.AppendLine($"builder.Services.AddDbContext<{additionalContext}>(options =>");
+            sb.AppendLine($"builder.Services.AddDbContextFactory<{additionalContext}>(options =>");
             sb.AppendLine($"    options.{dbProvider.ProviderMethod}(connectionString));");
         }
     }
@@ -232,27 +232,29 @@ public class ProgramCsEmitter
 
     private static void EmitEnsureCreated(StringBuilder sb, RuntimeProfile profile)
     {
-        var allContextNames = new List<string>();
-
         var primaryContext = profile.NeedsIdentity
             ? "ApplicationDbContext"
             : (profile.ResolvedDbContextTypeName ?? "YourDbContext");
-        allContextNames.Add(primaryContext);
 
-        foreach (var ctx in profile.AdditionalDbContextNames)
-        {
-            if (!string.Equals(ctx, primaryContext, StringComparison.Ordinal))
-                allContextNames.Add(ctx);
-        }
+        var additionalContexts = profile.AdditionalDbContextNames
+            .Where(ctx => !string.Equals(ctx, primaryContext, StringComparison.Ordinal))
+            .ToList();
 
         sb.AppendLine();
         sb.AppendLine("// Ensure database tables exist for all registered DbContexts");
         sb.AppendLine("using (var scope = app.Services.CreateScope())");
         sb.AppendLine("{");
-        foreach (var ctx in allContextNames)
+        sb.AppendLine($"    scope.ServiceProvider.GetRequiredService<{primaryContext}>().Database.EnsureCreated();");
+
+        foreach (var ctx in additionalContexts)
         {
-            sb.AppendLine($"    scope.ServiceProvider.GetRequiredService<{ctx}>().Database.EnsureCreated();");
+            sb.AppendLine($"    var {char.ToLowerInvariant(ctx[0])}{ctx[1..]}Factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<{ctx}>>();");
+            sb.AppendLine($"    using (var {char.ToLowerInvariant(ctx[0])}{ctx[1..]} = {char.ToLowerInvariant(ctx[0])}{ctx[1..]}Factory.CreateDbContext())");
+            sb.AppendLine("    {");
+            sb.AppendLine($"        {char.ToLowerInvariant(ctx[0])}{ctx[1..]}.Database.EnsureCreated();");
+            sb.AppendLine("    }");
         }
+
         sb.AppendLine("}");
     }
 

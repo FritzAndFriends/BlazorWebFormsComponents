@@ -89,8 +89,8 @@ namespace WingtipToys
         ex = new Exception(unhandledErrorMsg);
       }
 
-      // Show error details in development only.
-      // (Request.IsLocal not available in Blazor — showing details for all in dev)
+      // Show error details to only you (developer). LOCAL ACCESS ONLY.
+      if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
       {
         // Detailed Error Message.
         ErrorDetailedMsg.Text = ex.Message;
@@ -118,8 +118,7 @@ namespace WingtipToys
       }
 
       // Log the exception.
-      // ExceptionUtility was a Web Forms helper — use ILogger in Blazor instead.
-      System.Diagnostics.Debug.WriteLine($"[{errorHandler}] {ex.Message}");
+      ExceptionUtility.LogException(ex, errorHandler);
 
       // Clear the error from the server.
       Server.ClearError();

@@ -2,9 +2,29 @@
 @page "/RegisterExternalLogin"
 <PageTitle>Register an external login</PageTitle>
 
-@* TODO(bwfc-identity): External login registration requires external auth provider configuration.
-   This page is a stub until external providers (Google, Facebook, etc.) are configured in Program.cs. *@
-<h3>External Login Registration</h3>
-<p class="text-info">External authentication is not currently configured for this application.</p>
-<p><a href="/Account/Login">Return to login</a></p>
+<h3>Register with your external account</h3>
+
+    <PlaceHolder>
+        <div class="form-horizontal">
+            <h4>Association Form</h4>
+            <hr />
+            <p class="text-info">
+                You've authenticated with an external provider. Please enter an email below
+                and click the Log in button.
+            </p>
+
+            <div class="form-group">
+                <Label CssClass="col-md-2 control-label">Email</Label>
+                <div class="col-md-10">
+                    <TextBox CssClass="form-control" TextMode="@TextBoxMode.Email" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <Button Text="Log in" CssClass="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    </PlaceHolder>
 

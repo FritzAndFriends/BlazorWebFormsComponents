@@ -256,6 +256,7 @@ public static class TestHelpers
             new UrlCleanupTransform(),
             new CompileSurfaceStubTransform(quarantineDetector),
             new LegacyHelperStubTransform(),
+            new TitlePropertyCodeBehindTransform(),
             new MarkupReferencedMemberStubTransform(),
         };
 

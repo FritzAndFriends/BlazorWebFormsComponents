@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace WingtipToys.Logic
 {

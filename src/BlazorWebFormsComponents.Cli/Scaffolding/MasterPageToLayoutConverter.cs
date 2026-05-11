@@ -119,6 +119,36 @@ public class MasterPageToLayoutConverter
 		@"<%--[\s\S]*?--%>",
 		RegexOptions.Compiled);
 
+	// ── asp: control conversions ──
+
+	private static readonly Regex AspImageRegex = new(
+		@"<asp:Image\b(?=[^>]*\bImageUrl\s*=\s*""([^""]*)"")(?=[^>]*?)(?:\s+\w+\s*=\s*""[^""]*"")*\s*/?\s*>(?:</asp:Image>)?",
+		RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+	private static readonly Regex AspHyperLinkRegex = new(
+		@"<asp:HyperLink\b(?=[^>]*\bNavigateUrl\s*=\s*""([^""]*)"")(?=[^>]*?\bText\s*=\s*""([^""]*)"")[^>]*/?\s*>(?:</asp:HyperLink>)?",
+		RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+	private static readonly Regex AspHyperLinkContentRegex = new(
+		@"<asp:HyperLink\b(?=[^>]*\bNavigateUrl\s*=\s*""([^""]*)"")[^>]*>([\s\S]*?)</asp:HyperLink>",
+		RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+	private static readonly Regex AspSiteMapDataSourceRegex = new(
+		@"[ \t]*<asp:SiteMapDataSource\b[^>]*/?\s*>(?:</asp:SiteMapDataSource>)?[ \t]*\r?\n?",
+		RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+	private static readonly Regex AspMenuRegex = new(
+		@"[ \t]*<asp:Menu\b[^>]*>[\s\S]*?</asp:Menu>[ \t]*\r?\n?",
+		RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+	private static readonly Regex AspMenuSelfClosingRegex = new(
+		@"[ \t]*<asp:Menu\b[^>]*/?\s*>[ \t]*\r?\n?",
+		RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+	private static readonly Regex AspListViewRegex = new(
+		@"[ \t]*<asp:ListView\b[^>]*>[\s\S]*?</asp:ListView>[ \t]*\r?\n?",
+		RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
 	// ── Attribute cleanup ──
 
 	private static readonly Regex RunatServerRegex = new(
@@ -171,6 +201,9 @@ public class MasterPageToLayoutConverter
 
 		// Step 3: Strip server comments
 		content = ServerCommentRegex.Replace(content, "");
+
+		// Step 3b: Convert asp: controls to HTML equivalents
+		content = ConvertAspControls(content);
 
 		// Step 4: Replace main ContentPlaceHolder with @Body
 		content = ContentPlaceHolderMainBlockRegex.Replace(content, "        @Body\n");
@@ -246,6 +279,49 @@ public class MasterPageToLayoutConverter
 			.ToArray();
 
 		return masterFiles.Length > 0 ? masterFiles[0] : null;
+	}
+
+	/// <summary>
+	/// Converts asp: controls found in master page body to HTML equivalents.
+	/// Handles asp:Image, asp:HyperLink, and removes asp:SiteMapDataSource,
+	/// asp:Menu, and asp:ListView (which need dynamic data binding not available at layout level).
+	/// </summary>
+	private static string ConvertAspControls(string content)
+	{
+		// asp:Image → <img>
+		content = AspImageRegex.Replace(content, m =>
+		{
+			var imageUrl = m.Groups[1].Value;
+			return $@"<img src=""{imageUrl}"" />";
+		});
+
+		// asp:HyperLink with Text attribute → <a>
+		content = AspHyperLinkRegex.Replace(content, m =>
+		{
+			var navigateUrl = m.Groups[1].Value;
+			var text = m.Groups[2].Value;
+			return $@"<a href=""{navigateUrl}"">{text}</a>";
+		});
+
+		// asp:HyperLink with inner content → <a>
+		content = AspHyperLinkContentRegex.Replace(content, m =>
+		{
+			var navigateUrl = m.Groups[1].Value;
+			var innerContent = m.Groups[2].Value;
+			return $@"<a href=""{navigateUrl}"">{innerContent}</a>";
+		});
+
+		// Remove asp:SiteMapDataSource (no equivalent in Blazor)
+		content = AspSiteMapDataSourceRegex.Replace(content, "");
+
+		// Remove asp:Menu (needs manual navigation implementation)
+		content = AspMenuRegex.Replace(content, "");
+		content = AspMenuSelfClosingRegex.Replace(content, "");
+
+		// Remove asp:ListView (data-bound controls need page-level implementation)
+		content = AspListViewRegex.Replace(content, "");
+
+		return content;
 	}
 
 	private static string ConvertLoginView(string content)

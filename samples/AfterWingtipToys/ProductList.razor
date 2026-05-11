@@ -1,5 +1,4 @@
 @page "/ProductList"
-@inject WingtipToys.Models.ProductContext _db
 <PageTitle>Products</PageTitle>
 	
     <section>
@@ -8,9 +7,8 @@
                 <h2>Products</h2>
             </hgroup>
 
-            <ListView 
-                DataKeyNames="ProductID" GroupItemCount="4"
-                ItemType="Product" DataSource="@_products">
+            <ListView TItem="Product" Items="products"
+                DataKeyNames="ProductID" GroupItemCount="4">
                 <EmptyDataTemplate>
                     <table >
                         <tr>
@@ -32,8 +30,8 @@
                             <tr>
                                 <td>
                                   <a href="/ProductDetails?ProductID=@Item.ProductID">
-                                    <img src='/Catalog/Images/Thumbs/@Item.ImagePath'
-                                      width="100" height="75" style="border:1px solid #ccc" />
+                                    <image src='/Catalog/Images/Thumbs/@Item.ImagePath'
+                                      width="100" height="75" border="1" />
                                   </a>
                                 </td>
                             </tr>
@@ -84,15 +82,17 @@
 @code {
     [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
 
-    private IEnumerable<Product> _products = Enumerable.Empty<Product>();
+    [Inject] private ProductContext Db { get; set; } = default!;
 
-    protected override void OnInitialized()
+    private List<Product> products = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        IQueryable<Product> query = _db.Products.Include(p => p.Category);
+        IQueryable<Product> query = Db.Products;
         if (CategoryId.HasValue && CategoryId > 0)
         {
             query = query.Where(p => p.CategoryID == CategoryId);
         }
-        _products = query.ToList();
+        products = await query.ToListAsync();
     }
 }

@@ -256,7 +256,7 @@ public class ProgramCsEmitterTemplateTests
         Assert.Contains("using Microsoft.AspNetCore.Identity;", result);
         Assert.Contains("var builder = WebApplication.CreateBuilder(args);", result);
         Assert.Contains("AddDbContext<ApplicationDbContext>", result);
-        Assert.Contains("AddDbContext<ProductContext>", result);
+        Assert.Contains("AddDbContextFactory<ProductContext>", result);
         Assert.Contains("AddDefaultIdentity<ApplicationUser>", result);
         Assert.Contains("AddBlazorWebFormsComponents()", result);
         Assert.Contains("var app = builder.Build();", result);

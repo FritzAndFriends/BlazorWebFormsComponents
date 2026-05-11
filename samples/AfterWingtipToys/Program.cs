@@ -1,5 +1,3 @@
-// TODO(bwfc-general): Review and adjust this generated Program.cs for your application needs.
-// Generated for .NET 10 Blazor static SSR. Keep interactive render modes opt-in and page-specific.
 using BlazorWebFormsComponents;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
@@ -7,9 +5,9 @@ using WingtipToys.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-builder.Services.AddAntiforgery();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -19,11 +17,11 @@ builder.Services.AddSession(options =>
 });
 
 var connectionString = builder.Configuration.GetConnectionString("WingtipToys")
-    ?? "Data Source=wingtiptoys.db";
+    ?? throw new InvalidOperationException("Connection string 'WingtipToys' was not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=wingtiptoys-auth.db"));
-builder.Services.AddDbContext<ProductContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlServer(connectionString));
+builder.Services.AddDbContextFactory<ProductContext>(options =>
+    options.UseSqlServer(connectionString));
 
 var identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
@@ -40,9 +38,17 @@ builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddBlazorWebFormsComponents();
-builder.Services.AddScoped<WingtipToys.Logic.ShoppingCartActions>();
 
 var app = builder.Build();
+
+// Ensure database tables exist for all registered DbContexts
+using (var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.EnsureCreated();
+    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
+    using var productDb = factory.CreateDbContext();
+    productDb.Database.EnsureCreated();
+}
 
 if (!app.Environment.IsDevelopment())
 {
@@ -57,9 +63,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-// TODO(bwfc-general): Review legacy Application_Start registrations during runtime cutover:
+// TODO(bwfc-general): Review legacy Application_Start registrations:
 // - RouteConfig.RegisterRoutes
 // - BundleConfig.RegisterBundles
+// - Database.SetInitializer
+// - Application_Error
+
+// Custom error page detected from Web.config <customErrors defaultRedirect="ErrorPage.aspx?handler=customErrors%20section%20-%20Web.config">
+// The UseExceptionHandler("/Error") above handles this. Create an /Error page if needed.
 
 // --- BWFC generated handler stubs ---
 app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
@@ -143,17 +154,11 @@ app.MapPost("/Account/RegisterHandler", async (HttpContext context, UserManager<
     return Results.LocalRedirect(registeredUrl);
 });
 
-app.MapGet("/AddToCart", async (HttpContext context, int productID, WingtipToys.Logic.ShoppingCartActions cartActions) =>
-{
-    cartActions.AddToCart(productID);
-    return Results.LocalRedirect("/ShoppingCart");
-});
-
-app.MapGet("/Account/Logout", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
+app.MapPost("/Account/PerformLogout", async (HttpContext context, SignInManager<ApplicationUser> signInManager) =>
 {
     await signInManager.SignOutAsync();
     return Results.LocalRedirect("/");
-});
+}).DisableAntiforgery();
 
 app.MapRazorComponents<WingtipToys.Components.App>()
     .AddInteractiveServerRenderMode();
@@ -162,19 +167,6 @@ app.MapRazorComponents<WingtipToys.Components.App>()
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-
-    // Ensure databases are created
-    var productDb = services.GetRequiredService<ProductContext>();
-    productDb.Database.EnsureCreated();
-    var authDb = services.GetRequiredService<ApplicationDbContext>();
-    authDb.Database.EnsureCreated();
-
-    // Seed product data if empty
-    if (!productDb.Categories.Any())
-    {
-        WingtipToys.Logic.SeedData.Initialize(productDb);
-    }
-
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     if (!await roleManager.RoleExistsAsync("canEdit"))
         await roleManager.CreateAsync(new IdentityRole("canEdit"));

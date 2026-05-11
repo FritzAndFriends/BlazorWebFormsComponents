@@ -80,6 +80,7 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         var pageTitle = ToTitle(fileName);
         var formMarkup = BuildNormalizedAccountMarkup(context.Markup, fileName, pageTitle);
         var rewritten = ReplacePrimaryContent(context.Markup, formMarkup);
+        rewritten = EnsurePageDirective(rewritten, context.Metadata);
         rewritten = EnsureAccountQueryParameters(rewritten, fileName);
 
         return new SemanticPatternResult(
@@ -357,6 +358,37 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
                 m => m.Groups["name"].Value,
                 m => m.Groups["value"].Value,
                 StringComparer.OrdinalIgnoreCase);
+
+    /// <summary>
+    /// Ensures the output markup has an @page directive and PageTitle.
+    /// If the semantic pattern replaced the Content block (which drops @page),
+    /// we re-derive the route from the file metadata.
+    /// </summary>
+    private static string EnsurePageDirective(string markup, FileMetadata metadata)
+    {
+        if (Regex.IsMatch(markup, @"^@page\s", RegexOptions.Multiline))
+            return markup;
+
+        var fileName = Path.GetFileNameWithoutExtension(metadata.SourceFilePath);
+        var relativePath = string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(metadata.SourceRootPath))
+        {
+            relativePath = Path.GetRelativePath(metadata.SourceRootPath, metadata.SourceFilePath)
+                .Replace(Path.DirectorySeparatorChar, '/')
+                .Replace(Path.AltDirectorySeparatorChar, '/');
+            if (relativePath.EndsWith(".aspx", StringComparison.OrdinalIgnoreCase))
+                relativePath = relativePath[..^".aspx".Length];
+            if (relativePath.StartsWith("./"))
+                relativePath = relativePath[2..];
+        }
+
+        var route = string.IsNullOrEmpty(relativePath) || !relativePath.Contains('/')
+            ? $"/{fileName}"
+            : $"/{relativePath}";
+
+        return $"@page \"{route}\"\n{markup}";
+    }
 
     private static string EnsureAccountQueryParameters(string markup, string fileName)
     {

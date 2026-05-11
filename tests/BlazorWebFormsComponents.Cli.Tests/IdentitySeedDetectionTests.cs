@@ -141,7 +141,8 @@ public class IdentitySeedDetectionTests
         var result = emitter.Generate("TestApp", profile, dbProvider);
 
         Assert.Contains("GetRequiredService<ApplicationDbContext>().Database.EnsureCreated()", result);
-        Assert.Contains("GetRequiredService<ProductContext>().Database.EnsureCreated()", result);
+        Assert.Contains("IDbContextFactory<ProductContext>", result);
+        Assert.Contains("Database.EnsureCreated()", result);
     }
 
     [Fact]

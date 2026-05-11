@@ -1,10 +1,7 @@
 @page "/ProductDetails"
-@inject WingtipToys.Models.ProductContext _db
 <PageTitle>Product Details</PageTitle>
 
-@if (_product != null)
-{
-    <FormView DataItem="_product" RenderOuterTable="false">
+    <FormView id="productDetail" @ref="productDetail" TItem="Product" DataItem="product" RenderOuterTable="false">
         <ItemTemplate Context="Item">
             <div>
                 <h1>@Item.ProductName</h1>
@@ -24,30 +21,11 @@
                         <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
                         <br />
                         <br />
-                        <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false" class="btn btn-success">
-                            Add To Cart
+                        <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">
+                            <b>Add To Cart</b>
                         </a>
                     </td>
                 </tr>
             </table>
         </ItemTemplate>
     </FormView>
-}
-else
-{
-    <p>Product not found.</p>
-}
-
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "ProductID")] public int? ProductId { get; set; }
-
-    private Product? _product;
-
-    protected override void OnInitialized()
-    {
-        if (ProductId.HasValue && ProductId > 0)
-        {
-            _product = _db.Products.FirstOrDefault(p => p.ProductID == ProductId);
-        }
-    }
-}
