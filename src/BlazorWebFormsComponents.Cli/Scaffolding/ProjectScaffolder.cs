@@ -17,15 +17,18 @@ public class ProjectScaffolder
     private readonly DatabaseProviderDetector _dbDetector;
     private readonly RuntimeDetector _runtimeDetector;
     private readonly ProgramCsEmitter _programCsEmitter;
+    private readonly MasterPageToLayoutConverter _masterPageConverter;
 
     public ProjectScaffolder(
         DatabaseProviderDetector dbDetector,
         RuntimeDetector runtimeDetector,
-        ProgramCsEmitter programCsEmitter)
+        ProgramCsEmitter programCsEmitter,
+        MasterPageToLayoutConverter masterPageConverter)
     {
         _dbDetector = dbDetector;
         _runtimeDetector = runtimeDetector;
         _programCsEmitter = programCsEmitter;
+        _masterPageConverter = masterPageConverter;
     }
 
     public ScaffoldResult Scaffold(string sourcePath, string outputRoot, string projectName)
@@ -77,7 +80,7 @@ public class ProjectScaffolder
         result.Files["layout"] = new ScaffoldFile
         {
             RelativePath = Path.Combine("Components", "Layout", "MainLayout.razor"),
-            Content = GenerateMainLayoutRazor()
+            Content = GenerateMainLayoutRazor(sourcePath)
         };
 
         result.Files["launchSettings"] = new ScaffoldFile
@@ -233,8 +236,19 @@ public class ProjectScaffolder
 ";
     }
 
-    private static string GenerateMainLayoutRazor()
+    private string GenerateMainLayoutRazor(string sourcePath)
     {
+        // Try to convert the original Site.Master into a proper layout
+        var masterPath = MasterPageToLayoutConverter.FindMasterPage(sourcePath);
+        if (masterPath != null)
+        {
+            var masterContent = File.ReadAllText(masterPath);
+            var converted = _masterPageConverter.Convert(masterContent);
+            if (converted != null)
+                return converted;
+        }
+
+        // Fallback: minimal layout
         return @"@inherits LayoutComponentBase
 
 <main>

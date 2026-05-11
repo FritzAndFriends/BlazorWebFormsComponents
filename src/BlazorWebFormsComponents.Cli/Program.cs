@@ -112,6 +112,7 @@ class Program
         services.AddSingleton<IRuntimeSignalDetector, WebConfigRuntimeSignalDetector>();
         services.AddSingleton<RuntimeDetector>();
         services.AddSingleton<ProgramCsEmitter>();
+        services.AddSingleton<MasterPageToLayoutConverter>();
         services.AddSingleton<ProjectScaffolder>();
         services.AddSingleton<GlobalUsingsGenerator>();
         services.AddSingleton<ShimGenerator>();

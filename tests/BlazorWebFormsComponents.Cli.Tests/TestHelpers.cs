@@ -171,7 +171,7 @@ public static class TestHelpers
         ]);
 
     public static ProjectScaffolder CreateDefaultScaffolder() =>
-        new(new DatabaseProviderDetector(), CreateDefaultRuntimeDetector(), new ProgramCsEmitter());
+        new(new DatabaseProviderDetector(), CreateDefaultRuntimeDetector(), new ProgramCsEmitter(), new MasterPageToLayoutConverter());
 
     /// <summary>
     /// Creates a fully configured MigrationPipeline with all markup and code-behind
