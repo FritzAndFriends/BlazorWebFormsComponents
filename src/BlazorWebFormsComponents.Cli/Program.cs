@@ -70,6 +70,7 @@ class Program
         services.AddSingleton<IMarkupTransform, AttributeNormalizeTransform>();
         services.AddSingleton<IMarkupTransform, DataSourceIdTransform>();
         services.AddSingleton<IMarkupTransform, EnhancedNavAnnotationTransform>();
+        services.AddSingleton<IMarkupTransform, GetRouteUrlMarkupTransform>();
 
         // Register code-behind transforms in order
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
@@ -88,6 +89,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, ComponentRefCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();
         services.AddSingleton<ICodeBehindTransform, RequestFormTransform>();
+        services.AddSingleton<ICodeBehindTransform, QueryStringTypeAnnotationTransform>();
         services.AddSingleton<ICodeBehindTransform, ServerShimTransform>();
         services.AddSingleton<ICodeBehindTransform, GetRouteUrlTransform>();
         services.AddSingleton<ICodeBehindTransform, CartSessionKeyTransform>();

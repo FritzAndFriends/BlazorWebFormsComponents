@@ -223,6 +223,7 @@ public static class TestHelpers
             new AttributeNormalizeTransform(),
             new DataSourceIdTransform(),
             new EnhancedNavAnnotationTransform(),
+            new GetRouteUrlMarkupTransform(),
         };
 
         var codeBehindTransforms = new List<ICodeBehindTransform>
@@ -243,6 +244,7 @@ public static class TestHelpers
             new ComponentRefCodeBehindTransform(),
             new ResponseRedirectTransform(),
             new RequestFormTransform(),
+            new QueryStringTypeAnnotationTransform(),
             new ServerShimTransform(),
             new GetRouteUrlTransform(),
             new CartSessionKeyTransform(),

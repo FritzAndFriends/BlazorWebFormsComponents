@@ -1,5 +1,6 @@
 using System.Text.RegularExpressions;
 using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.Transforms;
 
 namespace BlazorWebFormsComponents.Cli.Transforms.Directives;
 
@@ -55,6 +56,18 @@ public class PageDirectiveTransform : IMarkupTransform
         }
 
         routes.Add(fileNameRoute);
+
+        // Add custom routes from Global.asax MapPageRoute definitions
+        var pageRoutes = PageRouteParser.FindRoutesForPage(metadata.SourceRootPath, metadata.SourceFilePath);
+        foreach (var route in pageRoutes)
+        {
+            var blazorRoute = "/" + route.Template.TrimStart('/');
+            if (!routes.Contains(blazorRoute, StringComparer.OrdinalIgnoreCase))
+            {
+                routes.Add(blazorRoute);
+            }
+        }
+
         return routes;
     }
 
