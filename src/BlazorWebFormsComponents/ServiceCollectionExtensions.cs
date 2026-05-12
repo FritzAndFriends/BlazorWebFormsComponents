@@ -174,6 +174,14 @@ public static class ServiceCollectionExtensions
         var options = app.ApplicationServices.GetService<BlazorWebFormsComponentsOptions>()
                      ?? new BlazorWebFormsComponentsOptions();
 
+        // Initialize ConfigurationManager shim so migrated code can use
+        // ConfigurationManager.AppSettings["key"] and .ConnectionStrings["name"]
+        var config = app.ApplicationServices.GetService<IConfiguration>();
+        if (config is not null)
+        {
+            ConfigurationManager.Initialize(config);
+        }
+
         if (options.EnableAspxUrlRewriting)
         {
             app.UseMiddleware<AspxRewriteMiddleware>();
