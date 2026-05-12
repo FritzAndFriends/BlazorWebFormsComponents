@@ -1,8 +1,9 @@
 @page "/ProductDetails"
 @page "/Product/{productName}"
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 <PageTitle>Product Details</PageTitle>
 
-<FormView id="productDetail" @ref="productDetail" TItem="Product" DataItem="ProductItem" RenderOuterTable="false">
+<FormView Items="products" ItemType="Product" RenderOuterTable="false">
     <ItemTemplate Context="Item">
         <div>
             <h1>@Item.ProductName</h1>
@@ -11,7 +12,7 @@
         <table>
             <tr>
                 <td>
-                    <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName"/>
+                    <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName" />
                 </td>
                 <td>&nbsp;</td>
                 <td style="vertical-align: top; text-align:left;">
@@ -22,7 +23,7 @@
                     <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
                     <br />
                     <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">
-                        <span class="ProductListItem"><b>Add To Cart</b></span>
+                        <b>Add To Cart</b>
                     </a>
                 </td>
             </tr>

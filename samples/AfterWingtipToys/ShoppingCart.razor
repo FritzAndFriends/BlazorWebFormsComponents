@@ -1,50 +1,36 @@
 @page "/ShoppingCart"
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 <PageTitle>Shopping Cart</PageTitle>
 
-<div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
-<GridView id="CartList" @ref="CartList" AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
-          TItem="CartItem" Items="cartItems"
-          CssClass="table table-striped table-bordered">
-    <Columns>
-        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductID" />
-        <BoundField DataField="Product.ProductName" HeaderText="Name" />
-        <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
-        <TemplateField HeaderText="Quantity">
-            <ItemTemplate Context="Item">
-                <TextBox id="PurchaseQuantity" @ref="PurchaseQuantity" Width="40" Text="@Item.Quantity.ToString()"></TextBox>
-            </ItemTemplate>
-        </TemplateField>
-        <TemplateField HeaderText="Item Total">
-            <ItemTemplate Context="Item">
-                @(String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))
-            </ItemTemplate>
-        </TemplateField>
-        <TemplateField HeaderText="Remove Item">
-            <ItemTemplate Context="Item">
-                <CheckBox id="Remove" @ref="Remove"></CheckBox>
-            </ItemTemplate>
-        </TemplateField>
-    </Columns>
-</GridView>
-<div>
-    <p></p>
-    <strong>
-        <Label id="LabelTotalText" @ref="LabelTotalText" Text="Order Total: "></Label>
-        <Label id="lblTotal" @ref="lblTotal" Text="@OrderTotalText"></Label>
-    </strong>
-</div>
-<br />
-<table>
-    <tr>
-        <td>
-            <Button id="UpdateBtn" @ref="UpdateBtn" Text="Update" OnClick="@UpdateBtn_Click" />
-        </td>
-        <td>
-            <ImageButton id="CheckoutImageBtn" @ref="CheckoutImageBtn"
-                          ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
-                          Width="145" AlternateText="Check out with PayPal"
-                          OnClick="@CheckoutBtn_Click"
-                          BorderWidth="0" />
-        </td>
-    </tr>
-</table>
+<section>
+    <h1>Shopping Cart</h1>
+    <WebFormsForm>
+        <GridView ItemType="WingtipToys.Models.CartItem"
+                  Items="cartItems"
+                  AutoGenerateColumns="false"
+                  EmptyDataText="Your shopping cart is empty.">
+            <Columns>
+                <BoundField ItemType="WingtipToys.Models.CartItem" DataField="Product.ProductName" HeaderText="Product" />
+                <BoundField ItemType="WingtipToys.Models.CartItem" DataField="Product.UnitPrice" HeaderText="Price" DataFormatString="{0:c}" />
+                <BoundField ItemType="WingtipToys.Models.CartItem" DataField="Quantity" HeaderText="Quantity" />
+                <TemplateField HeaderText="Total">
+                    <ItemTemplate Context="item">
+                        @(String.Format("{0:c}", (item.Product?.UnitPrice ?? 0d) * item.Quantity))
+                    </ItemTemplate>
+                </TemplateField>
+                <TemplateField HeaderText="">
+                    <ItemTemplate Context="item">
+                        <a href="/RemoveItem?cartItemId=@item.ItemId" data-enhance-nav="false">Remove</a>
+                    </ItemTemplate>
+                </TemplateField>
+            </Columns>
+        </GridView>
+        <div>
+            <p></p>
+            <strong>
+                <span>Total: </span>
+                <span>@(String.Format("{0:c}", cartTotal))</span>
+            </strong>
+        </div>
+    </WebFormsForm>
+</section>

@@ -1,35 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
-namespace WingtipToys.Logic
+namespace WingtipToys.Logic;
+
+public class AddProducts(ProductContext db)
 {
-  public class AddProducts
-  {
-    public bool AddProduct(string ProductName, string ProductDesc, string ProductPrice, string ProductCategory, string ProductImagePath)
+    public bool AddProduct(string productName, string productDesc, string productPrice, string productCategory, string productImagePath)
     {
-      var myProduct = new Product();
-      myProduct.ProductName = ProductName;
-      myProduct.Description = ProductDesc;
-      myProduct.UnitPrice = Convert.ToDouble(ProductPrice);
-      myProduct.ImagePath = ProductImagePath;
-      myProduct.CategoryID = Convert.ToInt32(ProductCategory);
+        var myProduct = new Product
+        {
+            ProductName = productName,
+            Description = productDesc,
+            UnitPrice = Convert.ToDouble(productPrice),
+            ImagePath = productImagePath,
+            CategoryID = Convert.ToInt32(productCategory)
+        };
 
-      var connectionString = BlazorWebFormsComponents.ConfigurationManager.ConnectionStrings["WingtipToys"]?.ConnectionString
-          ?? throw new InvalidOperationException("Connection string 'WingtipToys' was not found.");
-      var options = new DbContextOptionsBuilder<ProductContext>()
-          .UseSqlServer(connectionString)
-          .Options;
-
-      using (ProductContext _db = new ProductContext(options))
-      {
-        _db.Products.Add(myProduct);
-        _db.SaveChanges();
-      }
-
-      return true;
+        db.Products.Add(myProduct);
+        db.SaveChanges();
+        return true;
     }
-  }
 }

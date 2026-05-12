@@ -21,6 +21,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<ProductContext>(options =>
     options.UseSqlServer(connectionString));
+builder.Services.AddScoped<WingtipToys.Logic.AddProducts>();
 
 var identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
@@ -39,7 +40,6 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddBlazorWebFormsComponents();
 
 var app = builder.Build();
-app.UseConfigurationManagerShim();
 
 // Ensure database tables exist for all registered DbContexts
 using (var scope = app.Services.CreateScope())
@@ -56,6 +56,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapStaticAssets();
+app.UseConfigurationManagerShim();
 app.UseBlazorWebFormsComponents();
 app.UseSession();
 app.UseAuthentication();
