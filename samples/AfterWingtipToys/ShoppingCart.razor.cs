@@ -1,70 +1,89 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 namespace WingtipToys
 {
-  public partial class ShoppingCart
-  {
-    [Inject] public ProductContext Db { get; set; } = default!;
-    [Inject] public NavigationManager Navigation { get; set; } = default!;
-
-    private string ShoppingCartTitleText { get; set; } = "Shopping Cart";
-    private string OrderTotalLabelText { get; set; } = "Order Total: ";
-    private string OrderTotalText { get; set; } = string.Empty;
-    private bool HasCartItems { get; set; }
-
-    public IQueryable<CartItem> GetShoppingCartItems(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    public partial class ShoppingCart
     {
-      var cartId = GetCartId();
-      var query = Db.ShoppingCartItems
-        .Include(item => item.Product)
-        .Where(item => item.CartId == cartId);
+        [Inject] public ProductContext Db { get; set; } = default!;
 
-      totalRowCount = query.Count();
-      RefreshCartState(query);
-      return query;
+        private GridView<CartItem> CartList = default!;
+        private TextBox PurchaseQuantity = default!;
+        private CheckBox Remove = default!;
+        private Label LabelTotalText = default!;
+        private Label lblTotal = default!;
+        private Button UpdateBtn = default!;
+        private ImageButton CheckoutImageBtn = default!;
+        private string ShoppingCartTitleText = "Shopping Cart";
+        private string OrderTotalText = 0m.ToString("C");
+        private List<CartItem> cartItems = new();
+
+        protected override async Task OnInitializedAsync()
+        {
+            await base.OnInitializedAsync();
+            await LoadCart();
+        }
+
+        private async Task LoadCart()
+        {
+            var cartId = GetCartId();
+            cartItems = await Db.ShoppingCartItems
+                .Where(c => c.CartId == cartId)
+                .Include(c => c.Product)
+                .ToListAsync();
+
+            var total = cartItems.Sum(c => (double)c.Quantity * (c.Product.UnitPrice ?? 0d));
+            OrderTotalText = total.ToString("C");
+        }
+
+        private async Task UpdateBtn_Click()
+        {
+            var cartId = GetCartId();
+            var items = await Db.ShoppingCartItems
+                .Where(c => c.CartId == cartId)
+                .Include(c => c.Product)
+                .ToListAsync();
+
+            foreach (var item in items)
+            {
+                var qtyField = Request.Form[$"PurchaseQuantity_{item.ItemId}"];
+                if (!string.IsNullOrEmpty(qtyField) && int.TryParse(qtyField, out var newQty) && newQty > 0)
+                {
+                    item.Quantity = newQty;
+                }
+
+                var removeField = Request.Form[$"Remove_{item.ItemId}"];
+                if (!string.IsNullOrEmpty(removeField))
+                {
+                    Db.ShoppingCartItems.Remove(item);
+                }
+            }
+
+            await Db.SaveChangesAsync();
+            await LoadCart();
+        }
+
+        private void CheckoutBtn_Click()
+        {
+            Response.Redirect("Checkout/CheckoutStart.aspx");
+        }
+
+        private string GetCartId()
+        {
+            const string cartSessionKey = "CartId";
+            var existingCartId = Session[cartSessionKey]?.ToString();
+            if (!string.IsNullOrWhiteSpace(existingCartId))
+            {
+                return existingCartId;
+            }
+
+            var newCartId = Guid.NewGuid().ToString();
+            Session[cartSessionKey] = newCartId;
+            return newCartId;
+        }
     }
-
-    private void UpdateBtn_Click(EventArgs _)
-    {
-      RefreshCartState();
-    }
-
-    private void CheckoutBtn_Click(EventArgs _)
-    {
-      Session["payment_amt"] = OrderTotalText;
-      Navigation.NavigateTo("/Checkout/CheckoutStart", forceLoad: true);
-    }
-
-    private void RefreshCartState(IQueryable<CartItem>? query = null)
-    {
-      query ??= Db.ShoppingCartItems
-        .Include(item => item.Product)
-        .Where(item => item.CartId == GetCartId());
-
-      var items = query.ToList();
-      var total = items.Sum(item => item.Quantity * (item.Product?.UnitPrice ?? 0d));
-
-      HasCartItems = items.Count > 0;
-      ShoppingCartTitleText = HasCartItems ? "Shopping Cart" : "Shopping Cart is Empty";
-      OrderTotalLabelText = HasCartItems ? "Order Total: " : string.Empty;
-      OrderTotalText = HasCartItems ? string.Format("{0:c}", total) : string.Empty;
-    }
-
-    private string GetCartId()
-    {
-      const string cartSessionKey = "CartId";
-      var existingCartId = Session[cartSessionKey]?.ToString();
-      if (!string.IsNullOrWhiteSpace(existingCartId))
-      {
-        return existingCartId;
-      }
-
-      var newCartId = Guid.NewGuid().ToString();
-      Session[cartSessionKey] = newCartId;
-      return newCartId;
-    }
-  }
 }

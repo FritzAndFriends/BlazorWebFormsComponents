@@ -6,8 +6,7 @@ using WingtipToys.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -156,8 +155,7 @@ app.MapPost("/Account/PerformLogout", async (SignInManager<ApplicationUser> sign
     return Results.Redirect("/");
 }).DisableAntiforgery();
 
-app.MapRazorComponents<WingtipToys.Components.App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<WingtipToys.Components.App>();
 
 // Seed identity roles and users (detected from Web Forms source)
 using (var scope = app.Services.CreateScope())
