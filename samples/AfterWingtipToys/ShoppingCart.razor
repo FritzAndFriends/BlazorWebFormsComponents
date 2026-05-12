@@ -1,5 +1,4 @@
 @page "/ShoppingCart"
-@page "/ShoppingCart.aspx"
 <PageTitle>Shopping Cart</PageTitle>
 
 <div id="ShoppingCartTitle" class="ContentHead"><h1>Shopping Cart</h1></div>
@@ -7,7 +6,7 @@
           TItem="CartItem" Items="cartItems"
           CssClass="table table-striped table-bordered">
     <Columns>
-        <BoundField DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />
+        <BoundField DataField="ProductId" HeaderText="ID" SortExpression="ProductID" />
         <BoundField DataField="Product.ProductName" HeaderText="Name" />
         <BoundField DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
         <TemplateField HeaderText="Quantity">
@@ -42,10 +41,10 @@
         </td>
         <td>
             <ImageButton id="CheckoutImageBtn" @ref="CheckoutImageBtn"
-                         ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
-                         Width="145" AlternateText="Check out with PayPal"
-                         OnClick="@CheckoutBtn_Click"
-                         BorderWidth="0" />
+                          ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+                          Width="145" AlternateText="Check out with PayPal"
+                          OnClick="@CheckoutBtn_Click"
+                          BorderWidth="0" />
         </td>
     </tr>
 </table>

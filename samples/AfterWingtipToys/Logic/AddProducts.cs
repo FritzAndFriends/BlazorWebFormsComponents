@@ -1,28 +1,35 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 namespace WingtipToys.Logic
 {
-    public class AddProducts
+  public class AddProducts
+  {
+    public bool AddProduct(string ProductName, string ProductDesc, string ProductPrice, string ProductCategory, string ProductImagePath)
     {
-        private readonly ProductContext _db;
+      var myProduct = new Product();
+      myProduct.ProductName = ProductName;
+      myProduct.Description = ProductDesc;
+      myProduct.UnitPrice = Convert.ToDouble(ProductPrice);
+      myProduct.ImagePath = ProductImagePath;
+      myProduct.CategoryID = Convert.ToInt32(ProductCategory);
 
-        public AddProducts(ProductContext db)
-        {
-            _db = db;
-        }
+      var connectionString = BlazorWebFormsComponents.ConfigurationManager.ConnectionStrings["WingtipToys"]?.ConnectionString
+          ?? throw new InvalidOperationException("Connection string 'WingtipToys' was not found.");
+      var options = new DbContextOptionsBuilder<ProductContext>()
+          .UseSqlServer(connectionString)
+          .Options;
 
-        public bool AddProduct(string ProductName, string ProductDesc, string ProductPrice, string ProductCategory, string ProductImagePath)
-        {
-            var myProduct = new Product();
-            myProduct.ProductName = ProductName;
-            myProduct.Description = ProductDesc;
-            myProduct.UnitPrice = Convert.ToDouble(ProductPrice);
-            myProduct.ImagePath = ProductImagePath;
-            myProduct.CategoryID = Convert.ToInt32(ProductCategory);
-            _db.Products.Add(myProduct);
-            _db.SaveChanges();
-            return true;
-        }
+      using (ProductContext _db = new ProductContext(options))
+      {
+        _db.Products.Add(myProduct);
+        _db.SaveChanges();
+      }
+
+      return true;
     }
+  }
 }

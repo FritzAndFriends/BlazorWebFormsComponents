@@ -39,6 +39,7 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddBlazorWebFormsComponents();
 
 var app = builder.Build();
+app.UseConfigurationManagerShim();
 
 // Ensure database tables exist for all registered DbContexts
 using (var scope = app.Services.CreateScope())
@@ -55,6 +56,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapStaticAssets();
+app.UseBlazorWebFormsComponents();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();

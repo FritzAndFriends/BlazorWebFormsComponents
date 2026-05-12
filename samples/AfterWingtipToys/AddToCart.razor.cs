@@ -11,8 +11,6 @@ namespace WingtipToys
     {
         [Inject] public ProductContext Db { get; set; } = default!;
 
-        private WebFormsForm form1 = default!;
-
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
@@ -26,7 +24,8 @@ namespace WingtipToys
             if (!string.IsNullOrEmpty(rawId) && int.TryParse(rawId, out var productId))
             {
                 var cartId = GetCartId();
-                var cartItem = await Db.ShoppingCartItems.SingleOrDefaultAsync(c => c.CartId == cartId && c.ProductId == productId);
+                var cartItem = await Db.ShoppingCartItems
+                    .SingleOrDefaultAsync(c => c.CartId == cartId && c.ProductId == productId);
                 if (cartItem == null)
                 {
                     cartItem = new CartItem
@@ -49,11 +48,11 @@ namespace WingtipToys
             }
             else
             {
-                Debug.Fail("ERROR : We should never get to AddToCart.aspx without a ProductId.");
-                throw new Exception("ERROR : It is illegal to load AddToCart.aspx without setting a ProductId.");
+                Debug.Fail("ERROR : We should never get to AddToCart without a ProductId.");
+                throw new Exception("ERROR : It is illegal to load AddToCart without setting a ProductId.");
             }
 
-            Response.Redirect("ShoppingCart.aspx");
+            Response.Redirect("ShoppingCart");
         }
 
         private string GetCartId()

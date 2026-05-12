@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
@@ -18,8 +19,8 @@ namespace WingtipToys
         private Label lblTotal = default!;
         private Button UpdateBtn = default!;
         private ImageButton CheckoutImageBtn = default!;
-        private string ShoppingCartTitleText = "Shopping Cart";
         private string OrderTotalText = 0m.ToString("C");
+
         private List<CartItem> cartItems = new();
 
         protected override async Task OnInitializedAsync()
@@ -69,7 +70,7 @@ namespace WingtipToys
 
         private void CheckoutBtn_Click()
         {
-            Response.Redirect("Checkout/CheckoutStart.aspx");
+            Response.Redirect("Checkout/CheckoutStart");
         }
 
         private string GetCartId()

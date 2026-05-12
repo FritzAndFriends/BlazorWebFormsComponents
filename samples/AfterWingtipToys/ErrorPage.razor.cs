@@ -1,17 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace WingtipToys
 {
     public partial class ErrorPage
     {
-        [Inject] public IWebHostEnvironment Env { get; set; } = default!;
-        [Inject] public ILogger<ErrorPage> Logger { get; set; } = default!;
-
         private Panel DetailedErrorPanel = default!;
         private Label ErrorDetailedMsg = default!;
         private Label ErrorHandler = default!;
@@ -23,20 +18,22 @@ namespace WingtipToys
         {
             await base.OnInitializedAsync();
 
-            var generalErrorMsg = "A problem has occurred on this web site. Please try again. If this error continues, please contact support.";
-            var httpErrorMsg = "An HTTP error occurred. Page Not found. Please try again.";
-            var unhandledErrorMsg = "The error was unhandled by application code.";
+            string generalErrorMsg = "A problem has occurred on this web site. Please try again. " +
+                "If this error continues, please contact support.";
+            string httpErrorMsg = "An HTTP error occurred. Page Not found. Please try again.";
+            string unhandledErrorMsg = "The error was unhandled by application code.";
 
             FriendlyErrorMsg.Text = generalErrorMsg;
 
-            var errorHandler = Request.QueryString["handler"].ToString();
-            if (string.IsNullOrEmpty(errorHandler))
+            string errorHandler = Request.QueryString["handler"];
+            if (errorHandler == null)
             {
                 errorHandler = "Error Page";
             }
 
-            var ex = Server.GetLastError();
-            var errorMsg = Request.QueryString["msg"].ToString();
+            Exception ex = Server.GetLastError();
+
+            string errorMsg = Request.QueryString["msg"];
             if (errorMsg == "404")
             {
                 ex = new InvalidOperationException(httpErrorMsg, ex);
@@ -48,7 +45,7 @@ namespace WingtipToys
                 ex = new Exception(unhandledErrorMsg);
             }
 
-            if (Env.IsDevelopment())
+            if (Request.Url.IsLoopback)
             {
                 ErrorDetailedMsg.Text = ex.Message;
                 ErrorHandler.Text = errorHandler;
@@ -56,7 +53,8 @@ namespace WingtipToys
 
                 if (ex.InnerException != null)
                 {
-                    InnerMessage.Text = ex.GetType() + "<br/>" + ex.InnerException.Message;
+                    InnerMessage.Text = ex.GetType().ToString() + "<br/>" +
+                        ex.InnerException.Message;
                     InnerTrace.Text = ex.InnerException.StackTrace;
                 }
                 else
@@ -64,12 +62,11 @@ namespace WingtipToys
                     InnerMessage.Text = ex.GetType().ToString();
                     if (ex.StackTrace != null)
                     {
-                        InnerTrace.Text = ex.StackTrace.TrimStart();
+                        InnerTrace.Text = ex.StackTrace.ToString().TrimStart();
                     }
                 }
             }
 
-            Logger.LogError(ex, "Unhandled error on {ErrorHandler}", errorHandler);
             Server.ClearError();
         }
     }
