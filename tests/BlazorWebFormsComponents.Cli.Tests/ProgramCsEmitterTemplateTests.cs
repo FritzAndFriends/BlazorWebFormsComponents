@@ -139,6 +139,7 @@ public class ProgramCsEmitterTemplateTests
         Assert.Contains("var app = builder.Build();", result);
         Assert.Contains("app.UseHttpsRedirection();", result);
         Assert.Contains("app.MapStaticAssets();", result);
+        Assert.Contains("app.UseBlazorWebFormsComponents();", result);
         Assert.Contains("app.UseAntiforgery();", result);
         Assert.Contains("MapRazorComponents<TestApp.Components.App>()", result);
         Assert.Contains("app.Run();", result);
@@ -217,16 +218,18 @@ public class ProgramCsEmitterTemplateTests
 
         var result = emitter.Generate("TestApp", profile, DefaultDbProvider);
 
-        // Verify middleware ordering: HttpsRedirection → StaticAssets → Session → Auth → Antiforgery
+        // Verify middleware ordering: HttpsRedirection → StaticAssets → BWFC → Session → Auth → Antiforgery
         var httpsIdx = result.IndexOf("app.UseHttpsRedirection()");
         var staticIdx = result.IndexOf("app.MapStaticAssets()");
+        var bwfcIdx = result.IndexOf("app.UseBlazorWebFormsComponents()");
         var sessionIdx = result.IndexOf("app.UseSession()");
         var authIdx = result.IndexOf("app.UseAuthentication()");
         var authzIdx = result.IndexOf("app.UseAuthorization()");
         var antiforgeryIdx = result.IndexOf("app.UseAntiforgery()");
 
         Assert.True(httpsIdx < staticIdx, "HttpsRedirection should come before StaticAssets");
-        Assert.True(staticIdx < sessionIdx, "StaticAssets should come before Session");
+        Assert.True(staticIdx < bwfcIdx, "StaticAssets should come before BlazorWebFormsComponents");
+        Assert.True(bwfcIdx < sessionIdx, "BlazorWebFormsComponents should come before Session");
         Assert.True(sessionIdx < authIdx, "Session should come before Authentication");
         Assert.True(authIdx < authzIdx, "Authentication should come before Authorization");
         Assert.True(authzIdx < antiforgeryIdx, "Authorization should come before Antiforgery");

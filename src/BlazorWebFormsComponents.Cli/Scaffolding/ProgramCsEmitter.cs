@@ -185,6 +185,7 @@ public class ProgramCsEmitter
         // 4c. Standard middleware pipeline (order matters — follows ASP.NET Core conventions)
         sb.AppendLine("app.UseHttpsRedirection();");
         sb.AppendLine("app.MapStaticAssets();");
+        sb.AppendLine("app.UseBlazorWebFormsComponents();");
 
         if (profile.NeedsSession)
             sb.AppendLine("app.UseSession();");
