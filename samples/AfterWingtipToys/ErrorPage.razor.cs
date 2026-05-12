@@ -90,7 +90,7 @@ namespace WingtipToys
       }
 
       // Show error details to only you (developer). LOCAL ACCESS ONLY.
-      if (true)
+      if (Request.Url.IsLoopback)
       {
         // Detailed Error Message.
         ErrorDetailedMsg.Text = ex.Message;
@@ -118,7 +118,7 @@ namespace WingtipToys
       }
 
       // Log the exception.
-      // ExceptionUtility.LogException(ex, errorHandler);
+      ExceptionUtility.LogException(ex, errorHandler);
 
       // Clear the error from the server.
       Server.ClearError();

@@ -1,50 +1,71 @@
-using Microsoft.AspNetCore.Components;
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 namespace WingtipToys;
 
-public partial class AddToCart : BlazorWebFormsComponents.WebFormsPageBase
+public partial class AddToCart
 {
-    [Inject] public ProductContext Db { get; set; } = default!;
-    [Parameter, SupplyParameterFromQuery(Name = "productID")] public int ProductId { get; set; }
+    private const string CartSessionKey = "CartId";
+    private WebFormsForm form1 = default!;
+
+    [Inject] private IDbContextFactory<ProductContext> ProductContextFactory { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        var cartId = Session["CartId"]?.ToString();
-        if (string.IsNullOrEmpty(cartId))
+        var rawId = Request.QueryString["ProductID"].ToString();
+        if (string.IsNullOrWhiteSpace(rawId))
         {
-            cartId = Guid.NewGuid().ToString();
-            Session["CartId"] = cartId;
+            rawId = Request.QueryString["productID"].ToString();
         }
-
-        var product = await Db.Products.FindAsync(ProductId);
-        if (product != null)
+        if (!string.IsNullOrWhiteSpace(rawId) && int.TryParse(rawId, out var productId))
         {
-            var existingItem = await Db.ShoppingCartItems
-                .FirstOrDefaultAsync(c => c.CartId == cartId && c.ProductId == ProductId);
-            if (existingItem != null)
+            using var db = ProductContextFactory.CreateDbContext();
+            var cartId = GetCartId();
+            var cartItem = db.ShoppingCartItems.SingleOrDefault(c => c.CartId == cartId && c.ProductId == productId);
+            if (cartItem == null)
             {
-                existingItem.Quantity++;
-            }
-            else
-            {
-                Db.ShoppingCartItems.Add(new CartItem
+                var product = db.Products.SingleOrDefault(p => p.ProductID == productId)
+                    ?? throw new InvalidOperationException($"Unable to locate product {productId}.");
+
+                db.ShoppingCartItems.Add(new CartItem
                 {
                     ItemId = Guid.NewGuid().ToString(),
+                    ProductId = productId,
                     CartId = cartId,
-                    ProductId = ProductId,
                     Product = product,
                     Quantity = 1,
                     DateCreated = DateTime.Now
                 });
             }
+            else
+            {
+                cartItem.Quantity++;
+            }
 
-            await Db.SaveChangesAsync();
+            db.SaveChanges();
+        }
+        else
+        {
+            Debug.Fail("ERROR : We should never get to AddToCart.aspx without a ProductId.");
+            throw new Exception("ERROR : It is illegal to load AddToCart.aspx without setting a ProductId.");
         }
 
-        Response.Redirect("/ShoppingCart");
+        Response.Redirect("ShoppingCart");
+    }
+
+    private string GetCartId()
+    {
+        var cartId = Session[CartSessionKey]?.ToString();
+        if (!string.IsNullOrWhiteSpace(cartId))
+        {
+            return cartId;
+        }
+
+        cartId = Guid.NewGuid().ToString();
+        Session[CartSessionKey] = cartId;
+        return cartId;
     }
 }

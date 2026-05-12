@@ -1,35 +1,39 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 namespace WingtipToys;
 
-public partial class ProductDetails : BlazorWebFormsComponents.WebFormsPageBase
+public partial class ProductDetails
 {
-    [Inject] public ProductContext Db { get; set; } = default!;
-    [Parameter, SupplyParameterFromQuery(Name = "productID")] public int? ProductId { get; set; }
-    [Parameter] public string? productName { get; set; }
+    private FormView<Product> productDetail = default!;
 
-    private List<Product> products = new();
+    [Parameter] public string? productName { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name = "ProductID")] public int? ProductId { get; set; }
+    [Inject] private IDbContextFactory<ProductContext> ProductContextFactory { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+    }
 
-        IQueryable<Product> query = Db.Products.Include(p => p.Category);
+    public IQueryable<Product> GetProduct()
+    {
+        using var db = ProductContextFactory.CreateDbContext();
+
+        var query = db.Products.AsNoTracking().AsQueryable();
         if (ProductId.HasValue && ProductId > 0)
         {
-            query = query.Where(p => p.ProductID == ProductId.Value);
+            query = query.Where(p => p.ProductID == ProductId);
         }
         else if (!string.IsNullOrEmpty(productName))
         {
-            query = query.Where(p => p.ProductName == productName);
+            query = query.Where(p => string.Compare(p.ProductName, productName) == 0);
         }
         else
         {
-            query = query.Where(_ => false);
+            return Array.Empty<Product>().AsQueryable();
         }
 
-        products = await query.ToListAsync();
+        return query.ToList().AsQueryable();
     }
 }

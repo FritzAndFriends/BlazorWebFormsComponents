@@ -1,27 +1,77 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 namespace WingtipToys;
 
-public partial class ShoppingCart : BlazorWebFormsComponents.WebFormsPageBase
+public partial class ShoppingCart
 {
-    [Inject] public ProductContext Db { get; set; } = default!;
+    private const string CartSessionKey = "CartId";
 
-    private List<CartItem> cartItems = new();
-    private double cartTotal;
+    [Inject] private IDbContextFactory<ProductContext> ProductContextFactory { get; set; } = default!;
+
+    protected string ShoppingCartTitleText { get; set; } = "Shopping Cart";
+    protected string OrderTotalLabelText { get; set; } = "Order Total: ";
+    protected string TotalText { get; set; } = string.Empty;
+    protected bool ShowActions { get; set; } = true;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        var cartId = Session["CartId"]?.ToString();
-        if (!string.IsNullOrEmpty(cartId))
+        LoadCartSummary();
+    }
+
+    public List<CartItem> GetShoppingCartItems()
+    {
+        using var db = ProductContextFactory.CreateDbContext();
+        return db.ShoppingCartItems
+            .Include(c => c.Product)
+            .AsNoTracking()
+            .Where(c => c.CartId == GetCartId())
+            .ToList();
+    }
+
+    protected void UpdateBtn_Click()
+    {
+        LoadCartSummary();
+    }
+
+    protected void CheckoutBtn_Click()
+    {
+        Session["payment_amt"] = GetTotal();
+        Response.Redirect("Checkout/CheckoutStart.aspx");
+    }
+
+    private void LoadCartSummary()
+    {
+        var cartTotal = GetTotal();
+        if (cartTotal > 0)
         {
-            cartItems = await Db.ShoppingCartItems
-                .Include(c => c.Product)
-                .Where(c => c.CartId == cartId)
-                .ToListAsync();
-            cartTotal = cartItems.Sum(c => (c.Product?.UnitPrice ?? 0d) * c.Quantity);
+            TotalText = string.Format("{0:c}", cartTotal);
+            return;
         }
+
+        OrderTotalLabelText = string.Empty;
+        TotalText = string.Empty;
+        ShoppingCartTitleText = "Shopping Cart is Empty";
+        ShowActions = false;
+    }
+
+    private decimal GetTotal()
+    {
+        return GetShoppingCartItems()
+            .Sum(item => (decimal)(item.Product?.UnitPrice ?? 0d) * item.Quantity);
+    }
+
+    private string GetCartId()
+    {
+        var existingCartId = Session[CartSessionKey]?.ToString();
+        if (!string.IsNullOrWhiteSpace(existingCartId))
+        {
+            return existingCartId;
+        }
+
+        var cartId = Guid.NewGuid().ToString();
+        Session[CartSessionKey] = cartId;
+        return cartId;
     }
 }

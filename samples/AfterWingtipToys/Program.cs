@@ -19,9 +19,8 @@ var connectionString = builder.Configuration.GetConnectionString("WingtipToys")
     ?? throw new InvalidOperationException("Connection string 'WingtipToys' was not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddDbContext<ProductContext>(options =>
+builder.Services.AddDbContextFactory<ProductContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddScoped<WingtipToys.Logic.AddProducts>();
 
 var identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
@@ -45,7 +44,11 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.EnsureCreated();
-    scope.ServiceProvider.GetRequiredService<ProductContext>().Database.EnsureCreated();
+    var productContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ProductContext>>();
+    using (var productContext = productContextFactory.CreateDbContext())
+    {
+        productContext.Database.EnsureCreated();
+    }
 }
 
 if (!app.Environment.IsDevelopment())
@@ -56,7 +59,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.MapStaticAssets();
-app.UseConfigurationManagerShim();
 app.UseBlazorWebFormsComponents();
 app.UseSession();
 app.UseAuthentication();

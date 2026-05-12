@@ -1,15 +1,19 @@
 @page "/ProductList"
 @page "/Category/{categoryName}"
-@inherits BlazorWebFormsComponents.WebFormsPageBase
+@using Microsoft.EntityFrameworkCore
 <PageTitle>Products</PageTitle>
 
 <section>
     <div>
         <hgroup>
-            <h2>@(categoryName ?? "Products")</h2>
+            <h2>@(Page.Title)</h2>
         </hgroup>
 
-        <ListView Items="products" ItemType="Product" DataKeyNames="ProductID" GroupItemCount="4">
+        <ListView id="productList"
+                  DataKeyNames="ProductID"
+                  GroupItemCount="4"
+                  ItemType="Product"
+                  SelectMethod="GetProductsQueryDetails_SelectMethod">
             <EmptyDataTemplate>
                 <table>
                     <tr>
@@ -30,14 +34,17 @@
                     <table>
                         <tr>
                             <td>
-                                <a href="@($"/Product/{Item.ProductName}")">
-                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath" width="100" height="75" border="1" alt="@Item.ProductName" />
+                                <a href="@($"/Product/{Item.ProductName}")" data-enhance-nav="false">
+                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath"
+                                         width="100"
+                                         height="75"
+                                         border="1" />
                                 </a>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <a href="@($"/Product/{Item.ProductName}")">
+                                <a href="@($"/Product/{Item.ProductName}")" data-enhance-nav="false">
                                     @Item.ProductName
                                 </a>
                                 <br />
@@ -68,9 +75,43 @@
                                 </table>
                             </td>
                         </tr>
+                        <tr>
+                            <td></td>
+                        </tr>
+                        <tr></tr>
                     </tbody>
                 </table>
             </LayoutTemplate>
         </ListView>
     </div>
 </section>
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
+    [Parameter] public string? CategoryName { get; set; }
+    [Inject] private IDbContextFactory<ProductContext> ProductContextFactory { get; set; } = default!;
+
+    private IQueryable<Product> GetProductsQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        using var db = ProductContextFactory.CreateDbContext();
+
+        var query = db.Products
+            .Include(p => p.Category)
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (CategoryId.HasValue && CategoryId > 0)
+        {
+            query = query.Where(p => p.CategoryID == CategoryId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(CategoryName))
+        {
+            query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
+        }
+
+        var results = query.ToList();
+        totalRowCount = results.Count;
+        return results.AsQueryable();
+    }
+}
