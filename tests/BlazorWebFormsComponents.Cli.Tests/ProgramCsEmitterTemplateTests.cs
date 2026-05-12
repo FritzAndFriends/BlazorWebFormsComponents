@@ -135,7 +135,7 @@ public class ProgramCsEmitterTemplateTests
         // Standard Blazor baseline elements
         Assert.Contains("var builder = WebApplication.CreateBuilder(args);", result);
         Assert.Contains("AddRazorComponents()", result);
-        Assert.Contains("AddInteractiveServerComponents()", result);
+        Assert.DoesNotContain("AddInteractiveServerComponents()", result);
         Assert.Contains("var app = builder.Build();", result);
         Assert.Contains("app.UseHttpsRedirection();", result);
         Assert.Contains("app.MapStaticAssets();", result);

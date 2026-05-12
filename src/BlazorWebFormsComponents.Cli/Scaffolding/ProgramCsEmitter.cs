@@ -62,10 +62,11 @@ public class ProgramCsEmitter
     private static void EmitServiceRegistrations(
         StringBuilder sb, string projectName, RuntimeProfile profile, DatabaseProviderInfo dbProvider)
     {
-        // 3a. Razor components (always — Blazor baseline)
+        // 3a. Razor components (always — Blazor static SSR baseline)
+        // NEVER add .AddInteractiveServerComponents() — migrated apps target static SSR only.
+        // Interactive render modes must be opted into deliberately per-page, not globally.
         sb.AppendLine("// Add services to the container.");
-        sb.AppendLine("builder.Services.AddRazorComponents()");
-        sb.AppendLine("    .AddInteractiveServerComponents();");
+        sb.AppendLine("builder.Services.AddRazorComponents();");
 
         // 3b. HttpContext access (needed for Session, Identity, or BWFC shims)
         if (profile.NeedsSession || profile.NeedsIdentity)
@@ -221,10 +222,10 @@ public class ProgramCsEmitter
             sb.AppendLine("// The UseExceptionHandler(\"/Error\") above handles this. Create an /Error page if needed.");
         }
 
-        // 4f. Map Razor components (standard Blazor baseline)
+        // 4f. Map Razor components (static SSR only — no interactive render mode)
+        // NEVER add .AddInteractiveServerRenderMode() — migrated apps target static SSR only.
         sb.AppendLine();
-        sb.AppendLine($"app.MapRazorComponents<{projectName}.Components.App>()");
-        sb.AppendLine("    .AddInteractiveServerRenderMode();");
+        sb.AppendLine($"app.MapRazorComponents<{projectName}.Components.App>();");
 
         // 4g. Identity seed data
         if (profile.NeedsIdentity && (profile.DetectedRoleNames.Count > 0 || profile.DetectedSeedUsers.Count > 0))

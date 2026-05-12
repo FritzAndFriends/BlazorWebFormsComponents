@@ -85,8 +85,8 @@ public class ScaffoldingTests : IDisposable
 
         Assert.Contains("AddBlazorWebFormsComponents()", program);
         Assert.Contains("AddRazorComponents()", program);
-        Assert.Contains("AddInteractiveServerComponents()", program);
-        Assert.Contains("AddInteractiveServerRenderMode()", program);
+        Assert.DoesNotContain("AddInteractiveServerComponents()", program);
+        Assert.DoesNotContain("AddInteractiveServerRenderMode()", program);
         Assert.Contains("using BlazorWebFormsComponents;", program);
     }
 
@@ -114,7 +114,7 @@ public class ScaffoldingTests : IDisposable
         var program = result.Files["program"].Content;
 
         Assert.Contains("MapRazorComponents<TestApp.Components.App>()", program);
-        Assert.Contains("AddInteractiveServerRenderMode()", program);
+        Assert.DoesNotContain("AddInteractiveServerRenderMode()", program);
     }
 
     [Fact]
