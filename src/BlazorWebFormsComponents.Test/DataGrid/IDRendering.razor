@@ -5,7 +5,7 @@
 	{
 		var cut = Render(@<DataGrid ItemType="Widget"
 							AutoGenerateColumns="true"
-							SelectMethod="GetWidgets"
+							Items="@(Widget.SimpleWidgetList)"
 							ID="myDataGrid" />);
 
 		cut.Find("table").GetAttribute("id").ShouldBe("myDataGrid");
@@ -16,7 +16,7 @@
 	{
 		var cut = Render(@<DataGrid ItemType="Widget"
 							AutoGenerateColumns="true"
-							SelectMethod="GetWidgets" />);
+							Items="@(Widget.SimpleWidgetList)" />);
 
 		cut.Find("table").HasAttribute("id").ShouldBeFalse();
 	}
@@ -27,3 +27,4 @@
 		return Widget.SimpleWidgetList.AsQueryable();
 	}
 }
+

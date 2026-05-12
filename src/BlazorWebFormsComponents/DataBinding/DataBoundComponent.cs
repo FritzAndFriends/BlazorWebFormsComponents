@@ -13,9 +13,47 @@ namespace BlazorWebFormsComponents.DataBinding
 		[Parameter]
 		public string DataMember { get; set; }
 
+		/// <summary>
+		/// String-based method name for data retrieval, matching the ASP.NET Web Forms
+		/// <c>SelectMethod="GetProducts"</c> pattern. The named method is resolved via
+		/// reflection on the hosting <see cref="WebFormsPageBase"/> page.
+		/// Supports methods returning IEnumerable&lt;T&gt;, IQueryable&lt;T&gt;, List&lt;T&gt;, etc.
+		/// </summary>
 		[Parameter]
-		public SelectHandler<ItemType> SelectMethod { get; set; }
+		public string SelectMethod { get; set; }
 
+		/// <summary>
+		/// String-based method name for inserting items, matching the ASP.NET Web Forms
+		/// <c>InsertMethod="InsertItem"</c> pattern.
+		/// </summary>
+		[Parameter]
+		public string InsertMethod { get; set; }
+
+		/// <summary>
+		/// String-based method name for updating items, matching the ASP.NET Web Forms
+		/// <c>UpdateMethod="UpdateItem"</c> pattern.
+		/// </summary>
+		[Parameter]
+		public string UpdateMethod { get; set; }
+
+		/// <summary>
+		/// String-based method name for deleting items, matching the ASP.NET Web Forms
+		/// <c>DeleteMethod="DeleteItem"</c> pattern.
+		/// </summary>
+		[Parameter]
+		public string DeleteMethod { get; set; }
+
+		/// <summary>
+		/// Delegate-based select method with pagination support.
+		/// Prefer string-based <see cref="SelectMethod"/> for Web Forms compatibility.
+		/// </summary>
+		[Parameter]
+		public SelectHandler<ItemType> SelectMethodDelegate { get; set; }
+
+		/// <summary>
+		/// Simplified delegate-based select method without the out parameter.
+		/// Prefer string-based <see cref="SelectMethod"/> for Web Forms compatibility.
+		/// </summary>
 		[Parameter]
 		public SimpleSelectHandler<ItemType> SelectItems { get; set; }
 
@@ -30,6 +68,14 @@ namespace BlazorWebFormsComponents.DataBinding
 		}
 
 		protected List<ItemType> ItemsList { get; set; }
+
+		/// <summary>
+		/// The hosting WebFormsPageBase, received via cascading parameter.
+		/// Used to resolve string-based SelectMethod/InsertMethod/UpdateMethod/DeleteMethod
+		/// via reflection, exactly as ASP.NET Web Forms resolves model-binding methods.
+		/// </summary>
+		[CascadingParameter(Name = WebFormsPageBase.CascadingParameterName)]
+		protected WebFormsPageBase HostingPage { get; set; }
 
 		[Parameter]
 		public override object DataSource
@@ -46,13 +92,11 @@ namespace BlazorWebFormsComponents.DataBinding
 		{
 			if (dataSource is IEnumerable<ItemType> enumerableOfItemType)
 			{
-				// If data source is already the right type, return it
 				return enumerableOfItemType;
 			}
 
 			if (dataSource is IListSource listSource)
 			{
-				// Check for DataTable and DataSet
 				return GetListSourceData(listSource);
 			}
 
@@ -74,13 +118,10 @@ namespace BlazorWebFormsComponents.DataBinding
 
 			if (!listSource.ContainsListCollection)
 			{
-				// If this is the actual list, get it, and return it
 				return list.OfType<object>() as IEnumerable<ItemType>;
 			}
 			else
 			{
-				// If not, then this is a list of lists, so find the list within
-
 				if (list is ITypedList typedList)
 				{
 					var propDescs = typedList.GetItemProperties(Array.Empty<PropertyDescriptor>());
@@ -113,20 +154,41 @@ namespace BlazorWebFormsComponents.DataBinding
 			base.OnAfterRender(firstRender);
 		}
 
+		/// <summary>
+		/// Ensures that string-based SelectMethod has a valid hosting page to resolve against.
+		/// </summary>
+		private void RequireHostingPage(string methodAttributeName, string methodName)
+		{
+			if (HostingPage == null)
+			{
+				throw new InvalidOperationException(
+					$"The data-bound component '{GetType().Name}' has {methodAttributeName}=\"{methodName}\" " +
+					$"but no hosting page was found. String-based method resolution requires the page to " +
+					$"inherit from WebFormsPageBase, which cascades itself to child components. " +
+					$"Either make your page inherit from WebFormsPageBase, or use the Items parameter " +
+					$"with direct data binding instead.");
+			}
+		}
+
 		protected override void OnParametersSet()
 		{
 			base.OnParametersSet();
 
-			// Only run sync loading if no async method is provided
+			// Priority: SelectMethodAsync (handled in OnParametersSetAsync) > string SelectMethod > delegate SelectItems > delegate SelectMethodDelegate
 			if (SelectMethodAsync == null)
 			{
-				if (SelectItems != null)
+				if (!string.IsNullOrEmpty(SelectMethod))
+				{
+					RequireHostingPage(nameof(SelectMethod), SelectMethod);
+					Items = SelectMethodResolver.InvokeSelectMethod<ItemType>(HostingPage, SelectMethod);
+				}
+				else if (SelectItems != null)
 				{
 					Items = SelectItems(int.MaxValue, 0, "");
 				}
-				else if (SelectMethod != null)
+				else if (SelectMethodDelegate != null)
 				{
-					Items = SelectMethod(int.MaxValue, 0, "", out var totalRowCount);
+					Items = SelectMethodDelegate(int.MaxValue, 0, "", out var totalRowCount);
 				}
 			}
 		}
@@ -140,10 +202,23 @@ namespace BlazorWebFormsComponents.DataBinding
 				var result = await SelectMethodAsync(int.MaxValue, 0, "");
 				Items = result;
 			}
+			else if (!string.IsNullOrEmpty(SelectMethod) && HostingPage != null)
+			{
+				// Check if the method on the page is async
+				if (SelectMethodResolver.HasMethod(HostingPage, SelectMethod))
+				{
+					var method = HostingPage.GetType().GetMethod(SelectMethod,
+						System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+					if (method != null && typeof(Task).IsAssignableFrom(method.ReturnType))
+					{
+						Items = await SelectMethodResolver.InvokeSelectMethodAsync<ItemType>(HostingPage, SelectMethod);
+					}
+				}
+			}
 		}
 
 		/// <summary>
-		/// Re-invokes the appropriate select delegate to refresh data after CRUD operations (sort, page, edit, delete).
+		/// Re-invokes the appropriate select method to refresh data after CRUD operations.
 		/// </summary>
 		protected void RefreshSelectMethod()
 		{
@@ -151,15 +226,20 @@ namespace BlazorWebFormsComponents.DataBinding
 			{
 				_ = RefreshSelectMethodAsync();
 			}
+			else if (!string.IsNullOrEmpty(SelectMethod) && HostingPage != null)
+			{
+				Items = SelectMethodResolver.InvokeSelectMethod<ItemType>(HostingPage, SelectMethod);
+				StateHasChanged();
+			}
 			else if (SelectItems != null)
 			{
 				var result = SelectItems(int.MaxValue, 0, "");
 				Items = result;
 				StateHasChanged();
 			}
-			else if (SelectMethod != null)
+			else if (SelectMethodDelegate != null)
 			{
-				Items = SelectMethod(int.MaxValue, 0, "", out var totalRowCount);
+				Items = SelectMethodDelegate(int.MaxValue, 0, "", out var totalRowCount);
 				StateHasChanged();
 			}
 		}
@@ -169,6 +249,39 @@ namespace BlazorWebFormsComponents.DataBinding
 			var result = await SelectMethodAsync(int.MaxValue, 0, "");
 			Items = result;
 			StateHasChanged();
+		}
+
+		/// <summary>
+		/// Invokes the InsertMethod on the hosting page, if configured.
+		/// </summary>
+		protected async Task InvokeInsertMethodAsync(params object[] args)
+		{
+			if (string.IsNullOrEmpty(InsertMethod)) return;
+			RequireHostingPage(nameof(InsertMethod), InsertMethod);
+			await SelectMethodResolver.InvokeActionMethodAsync(HostingPage, InsertMethod, args);
+			RefreshSelectMethod();
+		}
+
+		/// <summary>
+		/// Invokes the UpdateMethod on the hosting page, if configured.
+		/// </summary>
+		protected async Task InvokeUpdateMethodAsync(params object[] args)
+		{
+			if (string.IsNullOrEmpty(UpdateMethod)) return;
+			RequireHostingPage(nameof(UpdateMethod), UpdateMethod);
+			await SelectMethodResolver.InvokeActionMethodAsync(HostingPage, UpdateMethod, args);
+			RefreshSelectMethod();
+		}
+
+		/// <summary>
+		/// Invokes the DeleteMethod on the hosting page, if configured.
+		/// </summary>
+		protected async Task InvokeDeleteMethodAsync(params object[] args)
+		{
+			if (string.IsNullOrEmpty(DeleteMethod)) return;
+			RequireHostingPage(nameof(DeleteMethod), DeleteMethod);
+			await SelectMethodResolver.InvokeActionMethodAsync(HostingPage, DeleteMethod, args);
+			RefreshSelectMethod();
 		}
 	}
 }

@@ -41,7 +41,7 @@
 		var cut = Render(
 			@<GridView ItemType="Widget" AutoGenerateColumns="false"
 				SelectMethodAsync="@(async (int maxRows, int startRowIndex, string sortBy) => { _asyncCallCount++; await Task.Yield(); return asyncData.AsEnumerable(); })"
-				SelectMethod="GetWidgetsSync">
+				SelectMethodDelegate="GetWidgetsSync">
 				<Columns>
 					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 				</Columns>

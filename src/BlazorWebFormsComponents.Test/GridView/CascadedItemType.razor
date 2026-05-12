@@ -6,7 +6,7 @@
 		// This uses the CascadingTypeParameter feature
 		var cut = Render(@<GridView ItemType="Widget"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField DataField="Id" HeaderText="ID" />
 				<BoundField DataField="Name" HeaderText="Widget Name" />
@@ -38,7 +38,7 @@
 		// Test backward compatibility - explicit ItemType on columns should still work
 		var cut = Render(@<GridView ItemType="Widget"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
 				<BoundField DataField="Name" HeaderText="Widget Name" />
@@ -57,7 +57,7 @@
 		// Test that TemplateField also benefits from cascaded type
 		var cut = Render(@<GridView ItemType="Widget"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField DataField="Id" HeaderText="ID" />
 				<TemplateField HeaderText="Custom">
@@ -84,3 +84,4 @@
 		return Widget.SimpleWidgetList.AsQueryable();
 	}
 }
+

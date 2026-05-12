@@ -5,7 +5,7 @@
 	[Fact]
 	public void GridView_LinkButtonField_RendersLinksCorrectly()
 	{
-		var cut = Render(@<GridView SelectMethod="GetWidgets"
+		var cut = Render(@<GridView Items="@(Widget.SimpleWidgetList)"
 							AutoGenerateColumns="false"
 							ItemType="SharedSampleObjects.Models.Widget">
 			<Columns>
@@ -45,7 +45,7 @@
 	[Fact]
 	public void GridView_LinkButtonField_HandlesCommandCorrectly()
 	{
-		var cut = Render(@<GridView SelectMethod="GetWidgets"
+		var cut = Render(@<GridView Items="@(Widget.SimpleWidgetList)"
 							AutoGenerateColumns="false"
 							OnRowCommand="RowCommand"
 							ItemType="SharedSampleObjects.Models.Widget">
@@ -84,3 +84,4 @@
 	}
 
 }
+
