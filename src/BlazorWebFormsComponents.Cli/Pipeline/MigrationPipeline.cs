@@ -182,9 +182,15 @@ public class MigrationPipeline
                 }
             }
 
-            var sourceCount = await _sourceFileCopier.CopySourceFilesAsync(
+            var copyResult = await _sourceFileCopier.CopySourceFilesAsync(
                 context.SourcePath, context.OutputPath, context.SourceFiles, context.Options.Verbose, report, excludedSourceFiles, scaffoldedClassNames);
-            report.FilesWritten += sourceCount;
+            report.FilesWritten += copyResult.TotalCount;
+
+            // Post-process Program.cs to register discovered service classes in DI
+            if (copyResult.DiscoveredServiceClasses.Count > 0 && !context.Options.SkipScaffold)
+            {
+                await InjectServiceRegistrationsAsync(context.OutputPath, copyResult.DiscoveredServiceClasses);
+            }
         }
 
         // Step 7: Copy App_Start artifacts to the project root
@@ -283,6 +289,70 @@ public class MigrationPipeline
                     "medium");
             }
         }
+    }
+
+    /// <summary>
+    /// Post-processes Program.cs to add DI registrations for service classes that received
+    /// constructor injection during source file transforms.
+    /// </summary>
+    private async Task InjectServiceRegistrationsAsync(
+        string outputPath,
+        IReadOnlyList<DiscoveredServiceClass> serviceClasses)
+    {
+        var programPath = Path.Combine(outputPath, "Program.cs");
+        if (!File.Exists(programPath))
+            return;
+
+        var content = await File.ReadAllTextAsync(programPath);
+
+        // Build the registration lines
+        var registrations = new System.Text.StringBuilder();
+        registrations.AppendLine();
+        registrations.AppendLine("// Service classes discovered with constructor injection — registered for DI");
+        foreach (var svc in serviceClasses)
+        {
+            registrations.AppendLine($"builder.Services.AddScoped<{svc.ClassName}>();");
+        }
+
+        // Insert before "builder.Services.AddBlazorWebFormsComponents();" (the BWFC anchor)
+        const string anchor = "builder.Services.AddBlazorWebFormsComponents();";
+        var anchorIndex = content.IndexOf(anchor, StringComparison.Ordinal);
+        if (anchorIndex >= 0)
+        {
+            content = content[..anchorIndex] + registrations.ToString() + content[anchorIndex..];
+        }
+        else
+        {
+            // Fallback: insert before "var app = builder.Build();"
+            const string buildAnchor = "var app = builder.Build();";
+            var buildIndex = content.IndexOf(buildAnchor, StringComparison.Ordinal);
+            if (buildIndex >= 0)
+            {
+                content = content[..buildIndex] + registrations.ToString() + "\n" + content[buildIndex..];
+            }
+        }
+
+        // Add using statements for service class namespaces if needed
+        foreach (var svc in serviceClasses)
+        {
+            if (svc.Namespace != null)
+            {
+                var usingLine = $"using {svc.Namespace};";
+                if (!content.Contains(usingLine, StringComparison.Ordinal))
+                {
+                    // Insert after last using statement
+                    var lastUsing = Regex.Match(content, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
+                    if (lastUsing.Success)
+                    {
+                        var insertAt = lastUsing.Index + lastUsing.Length;
+                        content = content[..insertAt] + "\n" + usingLine + content[insertAt..];
+                    }
+                }
+            }
+        }
+
+        await File.WriteAllTextAsync(programPath, content);
+        Console.WriteLine($"  Program.cs updated with {serviceClasses.Count} service class DI registration(s)");
     }
 
     private async Task<PageQuarantineManifestEntry?> ProcessSourceFileAsync(SourceFile sourceFile, MigrationContext context, MigrationReport report)

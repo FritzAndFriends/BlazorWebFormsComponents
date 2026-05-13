@@ -265,6 +265,7 @@ public static class TestHelpers
             new RouteDataParameterPromotionTransform(),
             new TitlePropertyCodeBehindTransform(),
             new MarkupReferencedMemberStubTransform(),
+            new TypeMismatchFixTransform(),
         };
 
         return new MigrationPipeline(markupTransforms, codeBehindTransforms, CreateDefaultSemanticPatterns());

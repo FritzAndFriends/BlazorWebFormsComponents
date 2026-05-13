@@ -32,6 +32,11 @@ public class SourceFileCopier
         (new Regex(@"\b(DropCreateDatabaseAlways|DropCreateDatabaseIfModelChanges|CreateDatabaseIfNotExists|DbMigrationsConfiguration|DbMigration)\b", RegexOptions.Compiled), "Legacy EF initializer or migrations bootstrap should be reviewed manually instead of compiled directly.")
     ];
 
+    // Matches constructors with DI-injected parameters (non-empty parameter lists)
+    private static readonly Regex InjectedConstructorRegex = new(
+        @"public\s+(?<name>[A-Za-z_]\w*)\s*\((?<params>[^)]+)\)",
+        RegexOptions.Compiled);
+
     private static readonly Regex NamespaceRegex = new(
         @"namespace\s+(?<ns>[A-Za-z_][\w.]*)\s*(?:\{|;)",
         RegexOptions.Compiled);
@@ -56,15 +61,16 @@ public class SourceFileCopier
         _outputWriter = outputWriter;
         // Only apply a subset of transforms relevant to non-page .cs files
         _transforms = transforms
-            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "HttpContextAccessor" or "SelectMethodMaterialize" or "LegacyHelperStub")
+            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "HttpContextAccessor" or "SelectMethodMaterialize" or "LegacyHelperStub" or "TypeMismatchFix")
             .OrderBy(t => t.Order)
             .ToList();
     }
 
     /// <summary>
     /// Scan for non-page .cs files and copy them with namespace transforms applied.
+    /// Returns a result containing copy counts and discovered service classes that need DI registration.
     /// </summary>
-    public async Task<int> CopySourceFilesAsync(
+    public async Task<SourceFileCopyResult> CopySourceFilesAsync(
         string sourcePath,
         string outputPath,
         IReadOnlyList<SourceFile> pageFiles,
@@ -74,7 +80,7 @@ public class SourceFileCopier
         ISet<string>? scaffoldedClassNames = null)
     {
         if (!Directory.Exists(sourcePath))
-            return 0;
+            return new SourceFileCopyResult(0, 0, []);
 
         // Build set of code-behind paths to skip (already handled by page pipeline)
         var codeBehindPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -86,6 +92,7 @@ public class SourceFileCopier
 
         var copiedCount = 0;
         var quarantinedCount = 0;
+        var discoveredServiceClasses = new List<DiscoveredServiceClass>();
 
         foreach (var file in Directory.EnumerateFiles(sourcePath, "*.cs", SearchOption.AllDirectories))
         {
@@ -151,14 +158,21 @@ public class SourceFileCopier
             var destPath = Path.Combine(outputPath, relativePath);
             await _outputWriter.WriteFileAsync(destPath, content, $"Source: {relativePath}");
             copiedCount++;
+
+            // Detect service classes that received constructor injection from transforms
+            var serviceClass = DetectServiceClass(content);
+            if (serviceClass != null)
+                discoveredServiceClasses.Add(serviceClass);
         }
 
         if (verbose || copiedCount > 0)
             Console.WriteLine($"  Source files copied:  {copiedCount} (with namespace transforms)");
         if (verbose || quarantinedCount > 0)
             Console.WriteLine($"  Compile-surface artifacts quarantined: {quarantinedCount}");
+        if (verbose && discoveredServiceClasses.Count > 0)
+            Console.WriteLine($"  Service classes discovered for DI: {discoveredServiceClasses.Count}");
 
-        return copiedCount + quarantinedCount;
+        return new SourceFileCopyResult(copiedCount, quarantinedCount, discoveredServiceClasses);
     }
 
     private static CompileSurfaceDecision Classify(string relativePath, string fileName, string topDir, string content)
@@ -286,5 +300,52 @@ public class SourceFileCopier
         return sb.ToString();
     }
 
+    /// <summary>
+    /// Detects whether a transformed source file contains a non-page class with constructor injection,
+    /// indicating it needs DI registration in Program.cs.
+    /// </summary>
+    private static DiscoveredServiceClass? DetectServiceClass(string content)
+    {
+        var classMatch = ClassRegex.Match(content);
+        if (!classMatch.Success)
+            return null;
+
+        var className = classMatch.Groups["name"].Value;
+
+        // Skip DbContext subclasses — they're registered separately by ProgramCsEmitter
+        if (Regex.IsMatch(content, @"class\s+\w+\s*:\s*(?:Db|Identity).*Context\b"))
+            return null;
+
+        // Skip static classes
+        if (Regex.IsMatch(content, @"\bstatic\s+class\b"))
+            return null;
+
+        // Look for constructors with parameters (sign of DI injection from transforms)
+        var ctorMatch = InjectedConstructorRegex.Match(content);
+        if (!ctorMatch.Success || ctorMatch.Groups["name"].Value != className)
+            return null;
+
+        var nsMatch = NamespaceRegex.Match(content);
+        var namespaceName = nsMatch.Success ? nsMatch.Groups["ns"].Value : null;
+
+        return new DiscoveredServiceClass(className, namespaceName);
+    }
+
     private sealed record CompileSurfaceDecision(bool ShouldQuarantine, string? Reason);
 }
+
+/// <summary>
+/// Result of source file copy operation, including discovered service classes that need DI registration.
+/// </summary>
+public sealed record SourceFileCopyResult(
+    int CopiedCount,
+    int QuarantinedCount,
+    IReadOnlyList<DiscoveredServiceClass> DiscoveredServiceClasses)
+{
+    public int TotalCount => CopiedCount + QuarantinedCount;
+}
+
+/// <summary>
+/// A non-page class that was discovered to have constructor injection and needs DI registration.
+/// </summary>
+public sealed record DiscoveredServiceClass(string ClassName, string? Namespace);

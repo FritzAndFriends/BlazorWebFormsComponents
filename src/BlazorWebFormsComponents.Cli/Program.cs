@@ -111,6 +111,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, RouteDataParameterPromotionTransform>();
         services.AddSingleton<ICodeBehindTransform, TitlePropertyCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
+        services.AddSingleton<ICodeBehindTransform, TypeMismatchFixTransform>();
 
         // Scaffolding
         services.AddSingleton<IRuntimeSignalDetector, EntityFrameworkRuntimeSignalDetector>();

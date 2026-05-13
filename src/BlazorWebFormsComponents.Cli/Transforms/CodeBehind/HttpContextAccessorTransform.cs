@@ -99,6 +99,23 @@ public class HttpContextAccessorTransform : ICodeBehindTransform
         // Replace bare HttpContext.Current → _httpContextAccessor.HttpContext
         content = HttpContextCurrentRegex.Replace(content, $"{FieldName}.HttpContext");
 
+        // Remove System.Web.HttpContext method parameters — the class now uses injected _httpContextAccessor
+        // e.g., GetCart(HttpContext context) → GetCart()
+        // Also handles fully-qualified System.Web.HttpContext parameters
+        content = Regex.Replace(content,
+            @",\s*(?:System\.Web\.)?HttpContext\s+\w+",
+            "");
+        content = Regex.Replace(content,
+            @"(?:System\.Web\.)?HttpContext\s+\w+\s*,\s*",
+            "");
+        // Sole parameter case: (HttpContext context) → ()
+        content = Regex.Replace(content,
+            @"\(\s*(?:System\.Web\.)?HttpContext\s+\w+\s*\)",
+            "()");
+
+        // Remove System.Web using if present (before injection adds Microsoft.AspNetCore.Http)
+        content = Regex.Replace(content, @"^\s*using\s+System\.Web\s*;\s*\r?\n", "", RegexOptions.Multiline);
+
         // Inject the IHttpContextAccessor field/constructor
         if (!content.Contains(AccessorType, StringComparison.Ordinal))
         {
@@ -160,9 +177,6 @@ public class HttpContextAccessorTransform : ICodeBehindTransform
                 content = content[..insertAt] + "\nusing Microsoft.AspNetCore.Http;" + content[insertAt..];
             }
         }
-
-        // Remove System.Web using if present
-        content = Regex.Replace(content, @"^\s*using\s+System\.Web\s*;\s*\r?\n", "", RegexOptions.Multiline);
 
         return content;
     }
