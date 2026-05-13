@@ -56,7 +56,7 @@ public class SourceFileCopier
         _outputWriter = outputWriter;
         // Only apply a subset of transforms relevant to non-page .cs files
         _transforms = transforms
-            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "SelectMethodMaterialize" or "LegacyHelperStub")
+            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "HttpContextAccessor" or "SelectMethodMaterialize" or "LegacyHelperStub")
             .OrderBy(t => t.Order)
             .ToList();
     }
@@ -112,6 +112,21 @@ public class SourceFileCopier
 
             var content = await File.ReadAllTextAsync(file);
 
+            // Apply transforms first — transforms like HttpContextAccessor may fix
+            // quarantine-triggering patterns, allowing the file to pass classification
+            var metadata = new FileMetadata
+            {
+                SourceFilePath = file,
+                OutputFilePath = Path.Combine(outputPath, relativePath),
+                FileType = FileType.Page, // Doesn't matter for UsingStrip/EF transforms
+                OriginalContent = content
+            };
+
+            foreach (var transform in _transforms)
+            {
+                content = transform.Apply(content, metadata);
+            }
+
             var decision = Classify(relativePath, fileName, topDir, content);
             if (decision.ShouldQuarantine)
             {
@@ -131,20 +146,6 @@ public class SourceFileCopier
 
                 quarantinedCount++;
                 continue;
-            }
-
-            // Read and apply transforms
-            var metadata = new FileMetadata
-            {
-                SourceFilePath = file,
-                OutputFilePath = Path.Combine(outputPath, relativePath),
-                FileType = FileType.Page, // Doesn't matter for UsingStrip/EF transforms
-                OriginalContent = content
-            };
-
-            foreach (var transform in _transforms)
-            {
-                content = transform.Apply(content, metadata);
             }
 
             var destPath = Path.Combine(outputPath, relativePath);

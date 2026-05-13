@@ -80,6 +80,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
         services.AddSingleton<ICodeBehindTransform, EfContextConstructorTransform>();
         services.AddSingleton<ICodeBehindTransform, DbContextInstantiationTransform>();
+        services.AddSingleton<ICodeBehindTransform, HttpContextAccessorTransform>();
         services.AddSingleton<ICodeBehindTransform, SelectMethodMaterializeTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpExceptionTransform>();
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
@@ -88,6 +89,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, NamespaceAlignTransform>();
         services.AddSingleton<ICodeBehindTransform, MethodNameCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefCodeBehindTransform>();
+        services.AddSingleton<ICodeBehindTransform, ComponentRefNullSafetyTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();
         services.AddSingleton<ICodeBehindTransform, RequestFormTransform>();
         services.AddSingleton<ICodeBehindTransform, QueryStringTypeAnnotationTransform>();

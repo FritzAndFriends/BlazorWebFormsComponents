@@ -12,13 +12,14 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
     // Matches field/variable assignments like: XxxContext _db = new XxxContext();
     // or using blocks like: using (XxxContext _db = new XxxContext())
     private static readonly Regex NewContextRegex = new(
-        @"(?<type>\w+Context)\s+(?<var>\w+)\s*=\s*new\s+\k<type>\s*\(\s*\)",
+        @"(?<type>\w+(?:Context|Actions|Service|Manager|Helper|Repository|Provider))\s+(?<var>\w+)\s*=\s*new\s+\k<type>\s*\(\s*\)",
         RegexOptions.Compiled);
 
-    // Matches just the `new XxxContext()` expression, with optional namespace prefix
-    // e.g., new ProductContext(), new WingtipToys.Models.ProductContext()
+    // Matches just the `new XxxType()` expression for known service/context patterns,
+    // with optional namespace prefix.
+    // e.g., new ProductContext(), new ShoppingCartActions(), new OrderService()
     private static readonly Regex NewContextExprRegex = new(
-        @"new\s+(?:(?<ns>[\w.]+)\.)?(?<type>\w+Context)\s*\(\s*\)",
+        @"new\s+(?:(?<ns>[\w.]+)\.)?(?<type>\w+(?:Context|Actions|Service|Manager|Helper|Repository|Provider))\s*\(\s*\)",
         RegexOptions.Compiled);
 
     // Check if a class already has an [Inject] property for a given type

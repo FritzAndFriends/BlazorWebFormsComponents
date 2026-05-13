@@ -10,9 +10,15 @@ namespace BlazorWebFormsComponents.Cli.Pipeline;
 /// </summary>
 public static class CodeBehindInjector
 {
+	// Matches [Parameter] or [Parameter, ...] property declarations
+	private static readonly Regex ExistingParameterRegex = new(
+		@"\[Parameter[^\]]*\]\s*(?:public|protected|private|internal)\s+\w[\w<>,\s\?\[\]]*\s+(?<name>\w+)\s*\{",
+		RegexOptions.Compiled);
+
 	/// <summary>
 	/// Inserts one or more member declarations (fields, properties, methods) into
 	/// the last class body in the code-behind content, just before the final closing brace.
+	/// Automatically deduplicates [Parameter] properties using case-insensitive comparison.
 	/// </summary>
 	/// <param name="codeBehind">The full code-behind content.</param>
 	/// <param name="members">Lines of C# code to inject (without outer braces).</param>
@@ -27,9 +33,76 @@ public static class CodeBehindInjector
 		if (lastBrace < 0)
 			return codeBehind;
 
+		// Deduplicate: remove [Parameter] lines from members if an equivalent
+		// property (case-insensitive) already exists in the code-behind
+		members = DeduplicateParameters(codeBehind, members);
+		if (string.IsNullOrWhiteSpace(members))
+			return codeBehind;
+
 		// Ensure the injected members have proper spacing
 		var injection = "\n" + members.TrimEnd() + "\n";
 		return codeBehind.Insert(lastBrace, injection);
+	}
+
+	/// <summary>
+	/// Removes [Parameter] property declarations from <paramref name="members"/>
+	/// if a property with the same name (case-insensitive) already exists in <paramref name="existingCode"/>.
+	/// Non-parameter members (fields, methods) are always kept.
+	/// </summary>
+	internal static string DeduplicateParameters(string existingCode, string members)
+	{
+		// Collect existing parameter names (case-insensitive)
+		var existingNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+		foreach (Match m in ExistingParameterRegex.Matches(existingCode))
+		{
+			existingNames.Add(m.Groups["name"].Value);
+		}
+
+		if (existingNames.Count == 0)
+			return members;
+
+		// Process members line-by-line, skipping duplicate [Parameter] declarations
+		var lines = members.Split('\n');
+		var result = new StringBuilder();
+		var skipNext = false;
+
+		for (var i = 0; i < lines.Length; i++)
+		{
+			var trimmed = lines[i].TrimStart();
+
+			// Detect [Parameter...] attribute line — check if the following property is a dupe
+			if (trimmed.StartsWith("[Parameter", StringComparison.Ordinal))
+			{
+				// Look ahead for the property declaration (may be on same or next line)
+				var combined = trimmed;
+				var lookAhead = i + 1;
+				while (lookAhead < lines.Length && !combined.Contains('{'))
+				{
+					combined += " " + lines[lookAhead].TrimStart();
+					lookAhead++;
+				}
+
+				var propMatch = Regex.Match(combined, @"(?:public|protected|private|internal)\s+\w[\w<>,\s\?\[\]]*\s+(?<name>\w+)\s*\{");
+				if (propMatch.Success && existingNames.Contains(propMatch.Groups["name"].Value))
+				{
+					// Skip this parameter attribute + property declaration lines
+					skipNext = true;
+					continue;
+				}
+			}
+
+			if (skipNext)
+			{
+				// Skip the property line that follows the duplicate [Parameter] attribute
+				if (trimmed.Contains('{') || trimmed.Contains(';'))
+					skipNext = false;
+				continue;
+			}
+
+			result.AppendLine(lines[i]);
+		}
+
+		return result.ToString().TrimEnd('\r', '\n');
 	}
 
 	/// <summary>
