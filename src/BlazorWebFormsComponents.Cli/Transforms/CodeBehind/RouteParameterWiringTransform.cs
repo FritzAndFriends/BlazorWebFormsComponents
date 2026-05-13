@@ -21,6 +21,12 @@ public class RouteParameterWiringTransform : ICodeBehindTransform
         @"\[Parameter[^\]]*\]\s*(?:\[SupplyParameterFromQuery[^\]]*\]\s*)?public\s+\S+\s+(?<name>\w+)\s*\{",
         RegexOptions.Compiled);
 
+    // Matches any public/protected/private property or field with the same name
+    // (catches code-behind declarations that would collide with route params)
+    private static readonly Regex AnyMemberRegex = new(
+        @"(?:public|protected|private)\s+(?:static\s+)?(?:readonly\s+)?\S+\s+(?<name>\w+)\s*(?:\{|;|=)",
+        RegexOptions.Compiled);
+
     // Matches the opening brace of the class body
     private static readonly Regex ClassBodyRegex = new(
         @"(partial\s+class\s+\w+[^{]*\{)",
@@ -40,9 +46,21 @@ public class RouteParameterWiringTransform : ICodeBehindTransform
         if (routeParams.Count == 0)
             return content;
 
-        // Find existing [Parameter] property names
+        // Find existing [Parameter] property names in code-behind
         var existingParams = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (Match m in ExistingParameterRegex.Matches(content))
+        {
+            existingParams.Add(m.Groups["name"].Value);
+        }
+
+        // Also check for any member (field/property) with the same name to avoid collisions
+        foreach (Match m in AnyMemberRegex.Matches(content))
+        {
+            existingParams.Add(m.Groups["name"].Value);
+        }
+
+        // Check the markup @code block for existing [Parameter] declarations too
+        foreach (Match m in ExistingParameterRegex.Matches(markup))
         {
             existingParams.Add(m.Groups["name"].Value);
         }

@@ -31,19 +31,12 @@ public class ShoppingCartTests
     {
         var page = await _fixture.NewPageAsync();
 
-        // Navigate to the product list
+        // Navigate to the product list — the "Add to Cart" links are here
+        // (original WingtipToys has AddToCart links on ProductList, not ProductDetails)
         await page.GotoAsync($"{TestConfiguration.BaseUrl}/ProductList");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        // Click the first product to view details
-        var firstProduct = page.Locator("a[href*='/Product/']").First;
-        await firstProduct.ClickAsync();
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-        Assert.Contains("/Product/", page.Url, StringComparison.OrdinalIgnoreCase);
-
-        // Look for an "Add to Cart" link or button and click it
-        // The AddToCart route is typically a link like /AddToCart?productID=N
+        // Look for an "Add to Cart" link and click the first one
         var addToCartLink = page.Locator("a[href*='AddToCart']").First;
         if (await addToCartLink.CountAsync() > 0)
         {
@@ -152,16 +145,12 @@ public class ShoppingCartTests
     }
 
     /// <summary>
-    /// Helper: navigates to the product list, clicks the first product,
-    /// and adds it to the cart.
+    /// Helper: navigates to the product list and clicks the first "Add to Cart" link.
+    /// Original WingtipToys has AddToCart links on the ProductList page, not ProductDetails.
     /// </summary>
     private static async Task AddFirstProductToCart(IPage page)
     {
         await page.GotoAsync($"{TestConfiguration.BaseUrl}/ProductList");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-        var firstProduct = page.Locator("a[href*='/Product/']").First;
-        await firstProduct.ClickAsync();
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var addToCartLink = page.Locator("a[href*='AddToCart']").First;

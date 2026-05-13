@@ -47,7 +47,8 @@ public class AttributeNormalizeTransform : IMarkupTransform
         ["TitleFormat"] = "TitleFormat",
         ["InsertItemPosition"] = "InsertItemPosition",
         ["UpdateMode"] = "UpdatePanelUpdateMode",
-        ["FontSize"] = "FontSize"
+        ["FontSize"] = "FontSize",
+        ["Display"] = "ValidatorDisplay"
     };
 
     // Dimension attributes for px stripping

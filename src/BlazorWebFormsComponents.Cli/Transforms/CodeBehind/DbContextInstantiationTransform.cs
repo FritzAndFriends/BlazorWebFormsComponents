@@ -15,9 +15,10 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
         @"(?<type>\w+Context)\s+(?<var>\w+)\s*=\s*new\s+\k<type>\s*\(\s*\)",
         RegexOptions.Compiled);
 
-    // Matches just the `new XxxContext()` expression
+    // Matches just the `new XxxContext()` expression, with optional namespace prefix
+    // e.g., new ProductContext(), new WingtipToys.Models.ProductContext()
     private static readonly Regex NewContextExprRegex = new(
-        @"new\s+(?<type>\w+Context)\s*\(\s*\)",
+        @"new\s+(?:(?<ns>[\w.]+)\.)?(?<type>\w+Context)\s*\(\s*\)",
         RegexOptions.Compiled);
 
     // Check if a class already has an [Inject] property for a given type
@@ -57,15 +58,17 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
             var fieldName = "_" + char.ToLowerInvariant(contextType[0]) + contextType[1..];
 
             // Replace field declarations like: XxxContext _db = new XxxContext();
+            // or: Namespace.XxxContext _db = new Namespace.XxxContext();
+            var fqnPattern = $@"(?:[\w.]+\.)?{Regex.Escape(contextType)}";
             var fieldDeclRegex = new Regex(
-                $@"(?<indent>[ \t]*)(?:private\s+)?{Regex.Escape(contextType)}\s+\w+\s*=\s*new\s+{Regex.Escape(contextType)}\s*\(\s*\)\s*;",
+                $@"(?<indent>[ \t]*)(?:private\s+)?{fqnPattern}\s+\w+\s*=\s*new\s+{fqnPattern}\s*\(\s*\)\s*;",
                 RegexOptions.Compiled);
             content = fieldDeclRegex.Replace(content, "");
 
             // Replace using declarations: using (XxxContext x = new XxxContext()) { ... }
             // Removes the using wrapper entirely, keeping the body contents
             var usingBlockRegex = new Regex(
-                $@"using\s*\(\s*(?:var|{Regex.Escape(contextType)})\s+(?<var>\w+)\s*=\s*new\s+{Regex.Escape(contextType)}\s*\(\s*\)\s*\)\s*\{{",
+                $@"using\s*\(\s*(?:var|{fqnPattern})\s+(?<var>\w+)\s*=\s*new\s+{fqnPattern}\s*\(\s*\)\s*\)\s*\{{",
                 RegexOptions.Compiled);
             var usingBlockMatch = usingBlockRegex.Match(content);
             while (usingBlockMatch.Success)
@@ -92,7 +95,7 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
 
             // Fallback: using declarations without braces on same match (single-line using statement)
             var usingDeclRegex = new Regex(
-                $@"using\s*\(\s*{Regex.Escape(contextType)}\s+\w+\s*=\s*new\s+{Regex.Escape(contextType)}\s*\(\s*\)\s*\)",
+                $@"using\s*\(\s*{fqnPattern}\s+\w+\s*=\s*new\s+{fqnPattern}\s*\(\s*\)\s*\)",
                 RegexOptions.Compiled);
             content = usingDeclRegex.Replace(content, m =>
             {
@@ -101,7 +104,7 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
 
             // Also handle using var declarations: using var db = new XxxContext();
             var usingVarDeclRegex = new Regex(
-                $@"using\s+(?:var|{Regex.Escape(contextType)})\s+(?<var>\w+)\s*=\s*new\s+{Regex.Escape(contextType)}\s*\(\s*\)\s*;",
+                $@"using\s+(?:var|{fqnPattern})\s+(?<var>\w+)\s*=\s*new\s+{fqnPattern}\s*\(\s*\)\s*;",
                 RegexOptions.Compiled);
             content = usingVarDeclRegex.Replace(content, m =>
             {
@@ -111,7 +114,7 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
 
             // Replace local variable declarations: var db = new XxxContext();
             var localVarRegex = new Regex(
-                $@"(?<indent>[ \t]*)(?:var|{Regex.Escape(contextType)})\s+(?<var>\w+)\s*=\s*new\s+{Regex.Escape(contextType)}\s*\(\s*\)\s*;",
+                $@"(?<indent>[ \t]*)(?:var|{fqnPattern})\s+(?<var>\w+)\s*=\s*new\s+{fqnPattern}\s*\(\s*\)\s*;",
                 RegexOptions.Compiled);
             content = localVarRegex.Replace(content, m =>
             {
@@ -120,9 +123,9 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
                 return $"{indent}var {varName} = {fieldName}; // Injected via DI";
             });
 
-            // Replace any remaining `new XxxContext()` expressions
+            // Replace any remaining `new XxxContext()` expressions (including fully-qualified)
             var remainingNewRegex = new Regex(
-                $@"new\s+{Regex.Escape(contextType)}\s*\(\s*\)",
+                $@"new\s+{fqnPattern}\s*\(\s*\)",
                 RegexOptions.Compiled);
             content = remainingNewRegex.Replace(content, fieldName);
 

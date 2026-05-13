@@ -56,7 +56,7 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
         }
 
         var staticModifier = isStatic ? "static " : "";
-        sb.AppendLine($"public {staticModifier}class {className}");
+        sb.AppendLine($"public {staticModifier}partial class {className}");
         sb.AppendLine("{");
         sb.AppendLine($"    // Stubbed — original file referenced legacy namespaces not available in .NET 10.");
         sb.AppendLine("}");

@@ -44,6 +44,16 @@ internal class AspxRewriteMiddleware
 
             // Preserve query string
             var queryString = context.Request.QueryString.Value;
+
+            // For non-GET requests (POST, PUT, etc.), rewrite the path internally
+            // so the request body and method are preserved. A 301 redirect would
+            // convert POST→GET and lose the form data.
+            if (!HttpMethods.IsGet(context.Request.Method) && !HttpMethods.IsHead(context.Request.Method))
+            {
+                context.Request.Path = newPath;
+                return _next(context);
+            }
+
             context.Response.StatusCode = StatusCodes.Status301MovedPermanently;
             context.Response.Headers.Location = newPath + queryString;
             return Task.CompletedTask;
