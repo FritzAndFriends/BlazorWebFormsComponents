@@ -189,13 +189,13 @@ public class SemanticPatternCatalogTests : IDisposable
             report);
 
         Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", result.Markup);
-        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", result.Markup);
-        Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public int? ProductId { get; set; }", result.Markup);
-        Assert.Contains("public string? ProductName { get; set; }", result.Markup);
-        Assert.Contains("TODO(bwfc-query-details)", result.Markup);
+        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", result.CodeBehind);
+        Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public int? ProductId { get; set; }", result.CodeBehind);
+        Assert.Contains("public string? ProductName { get; set; }", result.CodeBehind);
+        Assert.Contains("TODO(bwfc-query-details)", result.CodeBehind);
         // Swing 3: wrapper auto-wires to the code-behind method instead of returning empty data
-        Assert.Contains("var query = GetProduct(ProductId, ProductName);", result.Markup);
-        Assert.DoesNotContain("Array.Empty", result.Markup);
+        Assert.Contains("var query = GetProduct(ProductId, ProductName);", result.CodeBehind);
+        Assert.DoesNotContain("Array.Empty", result.CodeBehind);
         Assert.Single(result.AppliedPatterns);
         Assert.Equal("pattern-query-details", result.AppliedPatterns[0].PatternId);
         Assert.Single(report.ManualItems);
@@ -255,8 +255,8 @@ public class SemanticPatternCatalogTests : IDisposable
         Assert.Contains("@formname=\"bwfc-form-1\"", result.Markup);
         Assert.Contains("<AntiforgeryToken />", result.Markup);
         Assert.Contains("document.getElementById('bwfc-action-pages-form')?.submit();", result.Markup);
-        Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public string? ProductID { get; set; }", result.Markup);
-        Assert.Contains("private const string HandlerRoute = \"/__bwfc/actions/AddToCart\";", result.Markup);
+        Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public string? ProductID { get; set; }", result.CodeBehind);
+        Assert.Contains("private const string HandlerRoute = \"/__bwfc/actions/AddToCart\";", result.CodeBehind);
         Assert.Single(result.AppliedPatterns);
         Assert.Equal("pattern-action-pages", result.AppliedPatterns[0].PatternId);
         Assert.Single(report.ManualItems);

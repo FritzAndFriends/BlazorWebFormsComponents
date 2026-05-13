@@ -62,6 +62,14 @@ public sealed class ActionPagesSemanticPattern : ISemanticPattern
 
         var markup = BuildMarkup(context.Markup, candidate);
         var codeBehind = context.CodeBehind;
+
+        // Inject query parameters and constants into code-behind
+        var codeMembers = BuildCodeBehindMembers(candidate);
+        if (!string.IsNullOrEmpty(codeBehind))
+        {
+            codeBehind = CodeBehindInjector.InjectMembers(codeBehind, codeMembers);
+        }
+
         if (!string.IsNullOrEmpty(codeBehind) && !codeBehind.Contains(Marker, StringComparison.Ordinal))
         {
             var redirectSummary = candidate.RedirectTarget is null
@@ -161,8 +169,13 @@ public sealed class ActionPagesSemanticPattern : ISemanticPattern
         builder.AppendLine("document.getElementById('bwfc-action-pages-form')?.submit();");
         builder.AppendLine("</script>");
 
-        builder.AppendLine();
-        builder.AppendLine("@code {");
+        return builder.ToString();
+    }
+
+    private static string BuildCodeBehindMembers(ActionPageCandidate candidate)
+    {
+        var endpointRoute = GetEndpointRoute(candidate.PageName);
+        var builder = new StringBuilder();
         foreach (var queryKey in candidate.QueryKeys)
         {
             var propertyName = SemanticPatternUtilities.ToPropertyName(queryKey);
@@ -178,9 +191,8 @@ public sealed class ActionPagesSemanticPattern : ISemanticPattern
         builder.AppendLine($"    private const string HandlerRoute = \"{endpointRoute}\";");
         if (!string.IsNullOrEmpty(candidate.RedirectTarget))
         {
-            builder.AppendLine($"    private const string RedirectTarget = \"{candidate.RedirectTarget}\";");
+            builder.Append($"    private const string RedirectTarget = \"{candidate.RedirectTarget}\";");
         }
-        builder.Append('}');
         return builder.ToString();
     }
 

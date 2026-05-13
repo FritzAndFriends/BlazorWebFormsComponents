@@ -16,7 +16,8 @@ public class MasterPageTransformTests
         SourceFilePath = "Site.master",
         OutputFilePath = "Site.razor",
         FileType = FileType.Master,
-        OriginalContent = ""
+        OriginalContent = "",
+        CodeBehindContent = "using Microsoft.AspNetCore.Components;\n\nnamespace Test;\n\npublic partial class Site\n{\n}"
     };
 
     private static FileMetadata PageMetadata => new()
@@ -201,12 +202,15 @@ public class MasterPageTransformTests
     public void EmitsChildContentParameterAndRendersIt()
     {
         var input = "<html><body><asp:ContentPlaceHolder ID=\"MainContent\" runat=\"server\" /></body></html>";
+        var metadata = MasterMetadata;
 
-        var result = _transform.Apply(input, MasterMetadata);
+        var result = _transform.Apply(input, metadata);
 
         Assert.Contains("@ChildContent", result);
-        Assert.Contains("[Parameter]", result);
-        Assert.Contains("public RenderFragment? ChildContent { get; set; }", result);
+        // ChildContent parameter is now injected into code-behind
+        Assert.NotNull(metadata.CodeBehindContent);
+        Assert.Contains("[Parameter]", metadata.CodeBehindContent);
+        Assert.Contains("public RenderFragment? ChildContent { get; set; }", metadata.CodeBehindContent);
     }
 
     [Fact]

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Pipeline;
 
 namespace BlazorWebFormsComponents.Cli.SemanticPatterns;
 
@@ -59,8 +60,13 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
                 : match.Value,
             1);
 
-        var codeBlock = BuildCodeBlock(candidate, wrapperMethodName);
-        rewrittenMarkup = $"{rewrittenMarkup.TrimEnd()}\n\n{codeBlock}\n";
+        // Inject query parameters and wrapper method into code-behind (not @code block)
+        var codeBehind = context.CodeBehind;
+        var codeMembers = BuildCodeBehindMembers(candidate, wrapperMethodName);
+        if (!string.IsNullOrEmpty(codeBehind))
+        {
+            codeBehind = CodeBehindInjector.InjectMembers(codeBehind, codeMembers);
+        }
 
         var relativePath = SemanticPatternUtilities.RelativeMarkupPath(context);
         context.Report.AddManualItem(
@@ -70,7 +76,6 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
             $"{candidate.Method.Name} was normalized to a query-bound SelectMethod wrapper — port the original query into an injected service or DbContext.",
             "medium");
 
-        var codeBehind = context.CodeBehind;
         if (!string.IsNullOrEmpty(codeBehind) && !codeBehind.Contains(Marker, StringComparison.Ordinal))
         {
             codeBehind = $"// {Marker}: {candidate.Method.Name} now binds through component query properties and a SelectMethod wrapper in the generated .razor file.{Environment.NewLine}{codeBehind}";
@@ -173,10 +178,9 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
             : null;
     }
 
-    private static string BuildCodeBlock(QueryDetailsCandidate candidate, string wrapperMethodName)
+    private static string BuildCodeBehindMembers(QueryDetailsCandidate candidate, string wrapperMethodName)
     {
         var builder = new StringBuilder();
-        builder.AppendLine("@code {");
 
         foreach (var parameter in candidate.BoundParameters)
         {
@@ -208,8 +212,7 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
             $"        if (query != null) totalRowCount = query.Count();");
         builder.AppendLine(
             $"        return query ?? global::System.Linq.Enumerable.Empty<{candidate.ItemType}>().AsQueryable();");
-        builder.AppendLine("    }");
-        builder.Append('}');
+        builder.Append("    }");
         return builder.ToString();
     }
 

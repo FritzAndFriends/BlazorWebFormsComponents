@@ -47,7 +47,8 @@ public class SemanticPatternConcreteTests
             </Site>
             """,
             "D:\\input\\Account\\Login.aspx",
-            FileType.Page);
+            FileType.Page,
+            codeBehind: "namespace Test;\n\npublic partial class Login : WebFormsPageBase\n{\n}");
 
         Assert.Contains("TODO(bwfc-identity)", result.Markup);
         Assert.Contains("<form method=\"post\" action=\"/Account/LoginHandler\" class=\"form-horizontal\">", result.Markup);
@@ -56,7 +57,7 @@ public class SemanticPatternConcreteTests
         Assert.Contains("type=\"password\"", result.Markup);
         Assert.Contains("type=\"checkbox\"", result.Markup);
         Assert.Contains("Register as a new user", result.Markup);
-        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", result.Markup);
+        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", result.CodeBehind);
         Assert.DoesNotContain("<RequiredFieldValidator", result.Markup);
     }
 
@@ -75,18 +76,14 @@ public class SemanticPatternConcreteTests
                 </div>
             </ChildContent>
             </MasterPage>
-
-            @code {
-                [Parameter]
-                public RenderFragment? ChildContent { get; set; }
-            }
             """,
             "D:\\input\\Site.master",
-            FileType.Master);
+            FileType.Master,
+            codeBehind: "namespace Test;\n\npublic partial class Site\n{\n    [Parameter]\n    public RenderFragment? ChildContent { get; set; }\n}");
 
         Assert.Contains("@ChildComponents", result.Markup);
-        Assert.Contains("public RenderFragment? ChildComponents { get; set; }", result.Markup);
-        Assert.Contains("public RenderFragment? ChildContent { get; set; }", result.Markup);
+        Assert.Contains("public RenderFragment? ChildComponents { get; set; }", result.CodeBehind);
+        Assert.Contains("public RenderFragment? ChildContent { get; set; }", result.CodeBehind);
     }
 
     [Fact]
@@ -190,7 +187,15 @@ public class SemanticPatternConcreteTests
         ISemanticPattern pattern,
         string markup,
         string markupPath,
-        FileType fileType)
+        FileType fileType) =>
+        ApplyPattern(pattern, markup, markupPath, fileType, codeBehind: null);
+
+    private static SemanticPatternResult ApplyPattern(
+        ISemanticPattern pattern,
+        string markup,
+        string markupPath,
+        FileType fileType,
+        string? codeBehind)
     {
         var context = new SemanticPatternContext
         {
@@ -215,7 +220,7 @@ public class SemanticPatternConcreteTests
             },
             Report = new MigrationReport(),
             Markup = markup,
-            CodeBehind = null
+            CodeBehind = codeBehind
         };
 
         var match = pattern.Match(context);

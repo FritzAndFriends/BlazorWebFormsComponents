@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Pipeline;
 
 namespace BlazorWebFormsComponents.Cli.SemanticPatterns;
 
@@ -99,11 +100,16 @@ internal static partial class SemanticPatternMarkupHelpers
                + markup[(match.Index + match.Length)..];
     }
 
-    public static string EnsureChildComponentsParameter(string markup)
+    public static string? EnsureChildComponentsParameter(string markup, string? codeBehind)
     {
-        if (markup.Contains("public RenderFragment? ChildComponents { get; set; }", StringComparison.Ordinal))
+        if (string.IsNullOrEmpty(codeBehind))
+            return codeBehind;
+
+        // Check both markup and code-behind for existing parameter
+        if (markup.Contains("public RenderFragment? ChildComponents { get; set; }", StringComparison.Ordinal)
+            || codeBehind.Contains("public RenderFragment? ChildComponents { get; set; }", StringComparison.Ordinal))
         {
-            return markup;
+            return codeBehind;
         }
 
         var parameterBlock = """
@@ -111,27 +117,7 @@ internal static partial class SemanticPatternMarkupHelpers
     public RenderFragment? ChildComponents { get; set; }
 """;
 
-        var codeIndex = markup.LastIndexOf("@code", StringComparison.Ordinal);
-        if (codeIndex < 0)
-        {
-            return $"{markup.TrimEnd()}\n\n@code {{\n{parameterBlock}\n}}";
-        }
-
-        var openBraceIndex = markup.IndexOf('{', codeIndex);
-        var closeBraceIndex = markup.LastIndexOf('}');
-        if (openBraceIndex < 0 || closeBraceIndex <= openBraceIndex)
-        {
-            return $"{markup.TrimEnd()}\n\n@code {{\n{parameterBlock}\n}}";
-        }
-
-        var body = markup.Substring(openBraceIndex + 1, closeBraceIndex - openBraceIndex - 1).Trim('\r', '\n');
-        var rewrittenBody = string.IsNullOrWhiteSpace(body)
-            ? parameterBlock
-            : $"{body}\n\n{parameterBlock}";
-
-        return markup[..codeIndex]
-               + $"@code {{\n{rewrittenBody}\n}}"
-               + markup[(closeBraceIndex + 1)..];
+        return CodeBehindInjector.InjectMembers(codeBehind, parameterBlock);
     }
 
     public static string RebuildWrapper(WrapperMatch wrapper, string rewrittenInner) =>

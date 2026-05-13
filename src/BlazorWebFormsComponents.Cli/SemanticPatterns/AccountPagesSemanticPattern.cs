@@ -81,11 +81,14 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         var formMarkup = BuildNormalizedAccountMarkup(context.Markup, fileName, pageTitle);
         var rewritten = ReplacePrimaryContent(context.Markup, formMarkup);
         rewritten = EnsurePageDirective(rewritten, context.Metadata);
-        rewritten = EnsureAccountQueryParameters(rewritten, fileName);
+
+        // Inject query parameters into code-behind instead of @code block
+        var codeBehind = context.CodeBehind;
+        codeBehind = EnsureAccountQueryParameters(rewritten, codeBehind, fileName);
 
         return new SemanticPatternResult(
             rewritten,
-            context.CodeBehind,
+            codeBehind,
             $"Replaced validator-heavy {pageTitle} markup with an SSR-safe account form stub and auth TODOs.");
     }
 
@@ -390,48 +393,30 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         return $"@page \"{route}\"\n{markup}";
     }
 
-    private static string EnsureAccountQueryParameters(string markup, string fileName)
+    private static string? EnsureAccountQueryParameters(string markup, string? codeBehind, string fileName)
     {
         var parameterLines = new List<string>();
-        AddParameterIfMissing(markup, parameterLines, "Error", "error", "string?");
+        // Check both markup and code-behind for existing parameters
+        var searchContent = $"{markup}\n{codeBehind}";
+        AddParameterIfMissing(searchContent, parameterLines, "Error", "error", "string?");
 
         if (fileName.Equals("Login", StringComparison.OrdinalIgnoreCase))
         {
-            AddParameterIfMissing(markup, parameterLines, "Registered", "registered", "int?");
-            AddParameterIfMissing(markup, parameterLines, "ReturnUrl", "returnUrl", "string?");
+            AddParameterIfMissing(searchContent, parameterLines, "Registered", "registered", "int?");
+            AddParameterIfMissing(searchContent, parameterLines, "ReturnUrl", "returnUrl", "string?");
         }
         else if (fileName.Equals("Register", StringComparison.OrdinalIgnoreCase))
         {
-            AddParameterIfMissing(markup, parameterLines, "ReturnUrl", "returnUrl", "string?");
+            AddParameterIfMissing(searchContent, parameterLines, "ReturnUrl", "returnUrl", "string?");
         }
 
-        if (parameterLines.Count == 0)
+        if (parameterLines.Count == 0 || string.IsNullOrEmpty(codeBehind))
         {
-            return markup;
+            return codeBehind;
         }
 
-        var parameterBlock = string.Join(Environment.NewLine + Environment.NewLine, parameterLines);
-        var codeIndex = markup.LastIndexOf("@code", StringComparison.Ordinal);
-        if (codeIndex < 0)
-        {
-            return $"{markup.TrimEnd()}{Environment.NewLine}{Environment.NewLine}@code {{{Environment.NewLine}{parameterBlock}{Environment.NewLine}}}";
-        }
-
-        var openBraceIndex = markup.IndexOf('{', codeIndex);
-        var closeBraceIndex = markup.LastIndexOf('}');
-        if (openBraceIndex < 0 || closeBraceIndex <= openBraceIndex)
-        {
-            return $"{markup.TrimEnd()}{Environment.NewLine}{Environment.NewLine}@code {{{Environment.NewLine}{parameterBlock}{Environment.NewLine}}}";
-        }
-
-        var body = markup.Substring(openBraceIndex + 1, closeBraceIndex - openBraceIndex - 1).Trim('\r', '\n');
-        var rewrittenBody = string.IsNullOrWhiteSpace(body)
-            ? parameterBlock
-            : $"{body}{Environment.NewLine}{Environment.NewLine}{parameterBlock}";
-
-        return markup[..codeIndex]
-               + $"@code {{{Environment.NewLine}{rewrittenBody}{Environment.NewLine}}}"
-               + markup[(closeBraceIndex + 1)..];
+        var parameterBlock = string.Join("\n", parameterLines);
+        return CodeBehindInjector.InjectMembers(codeBehind, parameterBlock);
     }
 
     private static void AddParameterIfMissing(string markup, ICollection<string> parameterLines, string propertyName, string queryName, string type)

@@ -328,11 +328,11 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Empty(report.Errors);
         Assert.Contains("<BoundField ItemType=\"CartItem\" DataField=\"ProductID\" HeaderText=\"ID\" />", defaultRazor);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", defaultRazor);
-        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", defaultRazor);
+        Assert.Contains("<TextBox id=\"PurchaseQuantity\" @ref=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", defaultRazor);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Item Total\">", defaultRazor);
         Assert.Contains("@(String.Format(\"{0:c}\", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))", defaultRazor);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Remove Item\">", defaultRazor);
-        Assert.Contains("<CheckBox id=\"Remove\"></CheckBox>", defaultRazor);
+        Assert.Contains("<CheckBox id=\"Remove\" @ref=\"Remove\"></CheckBox>", defaultRazor);
         Assert.Equal(3, defaultRazor.Split("<TemplateField", StringSplitOptions.None).Length - 1);
     }
 
@@ -489,9 +489,10 @@ public class PipelineIntegrationTests : IDisposable
         var report = await pipeline.ExecuteAsync(context);
 
         var markup = File.ReadAllText(Path.Combine(outputDir, "ProductDetails.razor"));
+        var codeBehind = File.ReadAllText(Path.Combine(outputDir, "ProductDetails.razor.cs"));
         Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", markup);
-        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", markup);
-        Assert.Contains("SupplyParameterFromQuery(Name = \"ProductID\")", markup);
+        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", codeBehind);
+        Assert.Contains("SupplyParameterFromQuery(Name = \"ProductID\")", codeBehind);
         Assert.True(report.SemanticPatternsApplied >= 1, $"Expected at least one semantic rewrite, got {report.SemanticPatternsApplied}");
         Assert.Contains(report.ManualItems, item => item.Category == "bwfc-query-details");
     }
@@ -635,7 +636,8 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Contains("type=\"email\"", loginMarkup);
         Assert.Contains("type=\"password\"", loginMarkup);
         Assert.Contains("Register as a new user", loginMarkup);
-        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", loginMarkup);
+        var loginCodeBehind = File.ReadAllText(Path.Combine(outputDir, "Account", "Login.razor.cs"));
+        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", loginCodeBehind);
         Assert.DoesNotContain("<RequiredFieldValidator", loginMarkup);
         Assert.True(report.SemanticPatternsApplied >= 1, "Expected the account semantic pattern to run for Account/Login.aspx");
     }
@@ -1355,7 +1357,8 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Contains("method=\"post\"", loginMarkup);
         Assert.Contains("action=\"/Account/LoginHandler\"", loginMarkup);
         Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", loginMarkup);
-        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", loginMarkup);
+        var loginCodeBehind = File.ReadAllText(Path.Combine(outputDir, "Account", "Login.razor.cs"));
+        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", loginCodeBehind);
         Assert.Contains("method=\"post\"", registerMarkup);
         Assert.Contains("action=\"/Account/RegisterHandler\"", registerMarkup);
         Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", registerMarkup);

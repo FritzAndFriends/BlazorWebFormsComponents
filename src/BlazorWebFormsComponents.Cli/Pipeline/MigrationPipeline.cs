@@ -306,6 +306,15 @@ public class MigrationPipeline
         {
             metadata.CodeBehindContent = await File.ReadAllTextAsync(sourceFile.CodeBehindPath!);
         }
+        else
+        {
+            // Generate a scaffold code-behind so transforms always have a target.
+            // This eliminates the need for @code blocks in .razor files.
+            var className = CodeBehindInjector.DeriveClassName(sourceFile.OutputPath);
+            var subNamespace = CodeBehindInjector.DeriveSubNamespace(sourceFile.OutputPath, context.OutputPath);
+            metadata.CodeBehindContent = CodeBehindInjector.GenerateScaffold(projectName, className, subNamespace);
+            metadata.IsGeneratedCodeBehind = true;
+        }
 
         // Markup pipeline
         var markup = markupContent;
@@ -317,11 +326,10 @@ public class MigrationPipeline
         // Set markup content for code-behind transforms to reference/modify
         metadata.MarkupContent = markup;
 
-        // Code-behind pipeline
-        string? codeBehind = null;
-        if (sourceFile.HasCodeBehind && metadata.CodeBehindContent != null)
+        // Code-behind pipeline (always runs — scaffold generated above when no source code-behind)
+        var codeBehind = metadata.CodeBehindContent;
+        if (codeBehind != null)
         {
-            codeBehind = metadata.CodeBehindContent;
             foreach (var transform in _codeBehindTransforms)
             {
                 codeBehind = transform.Apply(codeBehind, metadata);

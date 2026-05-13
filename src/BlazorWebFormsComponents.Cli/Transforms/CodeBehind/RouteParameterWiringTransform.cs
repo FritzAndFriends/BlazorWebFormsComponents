@@ -59,12 +59,6 @@ public class RouteParameterWiringTransform : ICodeBehindTransform
             existingParams.Add(m.Groups["name"].Value);
         }
 
-        // Check the markup @code block for existing [Parameter] declarations too
-        foreach (Match m in ExistingParameterRegex.Matches(markup))
-        {
-            existingParams.Add(m.Groups["name"].Value);
-        }
-
         // Determine which route params are missing
         var missingParams = routeParams
             .Where(p => !existingParams.Contains(p.Name))

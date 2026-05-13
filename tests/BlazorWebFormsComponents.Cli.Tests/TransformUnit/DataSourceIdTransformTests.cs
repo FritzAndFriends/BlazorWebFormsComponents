@@ -84,12 +84,26 @@ public class DataSourceIdTransformTests
     [Fact]
     public void InjectsCodeBlockWhenNoCodeBehind()
     {
+        var metadata = MakeMetadata();
         var input = @"<GridView DataSourceID=""SqlDS1"" />";
-        var result = _transform.Apply(input, MakeMetadata());
+        _transform.Apply(input, metadata);
 
-        Assert.Contains("@code {", result);
-        Assert.Contains("private IEnumerable<object> SqlDS1Data { get; set; } = Array.Empty<object>();", result);
-        Assert.Contains("// TODO(bwfc-datasource): Replace SqlDS1Data with real data from injected service", result);
+        // With no code-behind, no injection happens (pipeline provides scaffold code-behind)
+        // When code-behind IS present, properties are injected there
+        Assert.Null(metadata.CodeBehindContent);
+    }
+
+    [Fact]
+    public void InjectsIntoScaffoldCodeBehind()
+    {
+        var scaffoldCb = "using Microsoft.AspNetCore.Components;\n\nnamespace Test;\n\npublic partial class TestPage\n{\n}";
+        var metadata = MakeMetadata(scaffoldCb);
+        var input = @"<GridView DataSourceID=""SqlDS1"" />";
+        _transform.Apply(input, metadata);
+
+        Assert.NotNull(metadata.CodeBehindContent);
+        Assert.Contains("private IEnumerable<object> SqlDS1Data { get; set; } = Array.Empty<object>();", metadata.CodeBehindContent);
+        Assert.Contains("// TODO(bwfc-datasource): Replace SqlDS1Data with real data from injected service", metadata.CodeBehindContent);
     }
 
     [Fact]
@@ -118,23 +132,29 @@ public class DataSourceIdTransformTests
     [Fact]
     public void HandlesMultipleDataSourceIds()
     {
+        var codeBehind = "public partial class TestPage\n{\n}";
+        var metadata = MakeMetadata(codeBehind);
         var input = @"<GridView DataSourceID=""DS1"" /><DropDownList DataSourceID=""DS2"" />";
-        var result = _transform.Apply(input, MakeMetadata());
+        var result = _transform.Apply(input, metadata);
 
         Assert.Contains(@"Items=""@DS1Data""", result);
         Assert.Contains(@"Items=""@DS2Data""", result);
-        Assert.Contains("private IEnumerable<object> DS1Data", result);
-        Assert.Contains("private IEnumerable<object> DS2Data", result);
+        Assert.NotNull(metadata.CodeBehindContent);
+        Assert.Contains("private IEnumerable<object> DS1Data", metadata.CodeBehindContent);
+        Assert.Contains("private IEnumerable<object> DS2Data", metadata.CodeBehindContent);
     }
 
     [Fact]
     public void HandlesDuplicateDataSourceIdReferences()
     {
+        var codeBehind = "public partial class TestPage\n{\n}";
+        var metadata = MakeMetadata(codeBehind);
         var input = "<GridView DataSourceID=\"SharedDS\" />\n<DropDownList DataSourceID=\"SharedDS\" />";
-        var result = _transform.Apply(input, MakeMetadata());
+        _transform.Apply(input, metadata);
 
         // Should only inject one property for the shared ID
-        var occurrences = result.Split("private IEnumerable<object> SharedDSData").Length - 1;
+        Assert.NotNull(metadata.CodeBehindContent);
+        var occurrences = metadata.CodeBehindContent.Split("private IEnumerable<object> SharedDSData").Length - 1;
         Assert.Equal(1, occurrences);
     }
 

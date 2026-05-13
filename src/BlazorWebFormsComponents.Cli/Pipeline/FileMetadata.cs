@@ -26,6 +26,12 @@ public class FileMetadata
     /// Code-behind transforms may modify this to update markup references (e.g., method renames).
     /// </summary>
     public string? MarkupContent { get; set; }
+    /// <summary>
+    /// True when the pipeline generated a scaffold code-behind because the source
+    /// had no .aspx.cs file. Transforms may use this to decide injection strategy.
+    /// </summary>
+    public bool IsGeneratedCodeBehind { get; set; }
+
     public string? CompileSurfaceStubReason { get; set; }
     public string? CompileSurfaceOriginalCodeBehind { get; set; }
 
