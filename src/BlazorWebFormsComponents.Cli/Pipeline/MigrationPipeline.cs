@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Scaffolding;
@@ -30,6 +31,11 @@ public class MigrationPipeline
     private readonly RedirectHandlerAnnotator? _redirectHandlerAnnotator;
     private readonly SemanticPatternCatalog _semanticPatternCatalog;
     private readonly PageQuarantineDetector _pageQuarantineDetector;
+    private ScaffoldResult? _lastScaffoldResult;
+
+    private static readonly Regex ScaffoldClassNameRegex = new(
+        @"(?:public|internal)\s+(?:(?:partial|static|sealed|abstract)\s+)*class\s+(?<name>[A-Za-z_]\w*)",
+        RegexOptions.Compiled);
 
     /// <summary>
     /// Full constructor for DI — used by the CLI commands.
@@ -159,8 +165,25 @@ public class MigrationPipeline
         // Step 6: Copy non-page source files (Models, Logic, etc.) with namespace transforms
         if (_sourceFileCopier != null)
         {
+            // Extract class names from scaffolded .cs files to avoid duplicate stubs
+            HashSet<string>? scaffoldedClassNames = null;
+            if (_lastScaffoldResult != null)
+            {
+                scaffoldedClassNames = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var file in _lastScaffoldResult.Files.Values)
+                {
+                    if (file.RelativePath.EndsWith(".cs", StringComparison.OrdinalIgnoreCase))
+                    {
+                        foreach (Match m in ScaffoldClassNameRegex.Matches(file.Content))
+                        {
+                            scaffoldedClassNames.Add(m.Groups["name"].Value);
+                        }
+                    }
+                }
+            }
+
             var sourceCount = await _sourceFileCopier.CopySourceFilesAsync(
-                context.SourcePath, context.OutputPath, context.SourceFiles, context.Options.Verbose, report, excludedSourceFiles);
+                context.SourcePath, context.OutputPath, context.SourceFiles, context.Options.Verbose, report, excludedSourceFiles, scaffoldedClassNames);
             report.FilesWritten += sourceCount;
         }
 
@@ -212,6 +235,7 @@ public class MigrationPipeline
         Console.WriteLine($"Scaffolding project: {projectName}");
 
         var scaffoldResult = _scaffolder.Scaffold(context.SourcePath, context.OutputPath, projectName);
+        _lastScaffoldResult = scaffoldResult;
         await _scaffolder.WriteAsync(scaffoldResult, context.OutputPath, _outputWriter);
         report.ScaffoldFilesGenerated += scaffoldResult.Files.Count;
 
@@ -448,8 +472,17 @@ public class MigrationPipeline
             }
             else
             {
+                // Save full transformed code-behind as artifact for manual review
                 await _outputWriter.WriteFileAsync(codeOutputPath, codeBehind,
                     $"Manual code-behind artifact for {Path.GetFileName(sourceFile.MarkupPath)}");
+
+                // Emit the full transformed code-behind to the compile surface anyway.
+                // The "unsafe" patterns are typically runtime issues, not compile errors.
+                // A file that compiles but needs L2 fixes is better than a skeleton missing members.
+                await _outputWriter.WriteFileAsync(sourceFile.OutputPath + ".cs", codeBehind,
+                    $"Code-behind (needs review) for {Path.GetFileName(sourceFile.MarkupPath)}");
+                report.AddManualItem(Path.GetRelativePath(context.SourcePath, sourceFile.MarkupPath), 0, "bwfc-compile-surface",
+                    $"{emissionPlan.ArtifactReason} Full code-behind emitted; review migration-artifacts/codebehind/ for original.");
             }
         }
 
@@ -513,5 +546,94 @@ public class MigrationPipeline
             && (relativePath.Contains("/Mobile/", StringComparison.OrdinalIgnoreCase)
                 || relativePath.Contains("\\Mobile\\", StringComparison.OrdinalIgnoreCase)
                 || relativePath.Contains(".Mobile.", StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>
+    /// Builds a minimal skeleton code-behind (.razor.cs) for a page whose full
+    /// transformed code-behind was deemed unsafe for the compile surface.
+    /// The skeleton contains the class declaration, base class, and [Parameter] properties
+    /// extracted from the @page route template.
+    /// </summary>
+    private static string? BuildSkeletonCodeBehind(FileMetadata metadata, string markup)
+    {
+        // Extract class name from original code-behind
+        var className = ExtractClassName(metadata);
+        if (className == null)
+            return null;
+
+        // Extract namespace
+        var namespaceName = ExtractNamespace(metadata);
+
+        // Extract route parameters from @page directives
+        var routeParams = ExtractRouteParametersFromMarkup(markup);
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine("using BlazorWebFormsComponents;");
+        sb.AppendLine("using Microsoft.AspNetCore.Components;");
+        sb.AppendLine();
+
+        if (namespaceName != null)
+        {
+            sb.AppendLine($"namespace {namespaceName};");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine($"/// <summary>");
+        sb.AppendLine($"/// Skeleton code-behind. Full transformed source is in migration-artifacts/codebehind/.");
+        sb.AppendLine($"/// </summary>");
+        sb.AppendLine($"public partial class {className} : WebFormsPageBase");
+        sb.AppendLine("{");
+
+        foreach (var (name, csharpType) in routeParams)
+        {
+            sb.AppendLine($"    [Parameter] public {csharpType} {name} {{ get; set; }}");
+        }
+
+        sb.AppendLine("}");
+
+        return sb.ToString();
+    }
+
+    private static string? ExtractClassName(FileMetadata metadata)
+    {
+        var content = metadata.CodeBehindContent ?? metadata.OriginalContent ?? "";
+        var match = Regex.Match(content, @"(?:public|internal)\s+(?:partial\s+)?class\s+(?<name>[A-Za-z_]\w*)");
+        if (match.Success) return match.Groups["name"].Value;
+
+        // Fall back to file name
+        var fileName = Path.GetFileNameWithoutExtension(metadata.OutputFilePath ?? metadata.SourceFilePath ?? "");
+        return string.IsNullOrEmpty(fileName) ? null : fileName;
+    }
+
+    private static string? ExtractNamespace(FileMetadata metadata)
+    {
+        var content = metadata.CodeBehindContent ?? "";
+        var match = Regex.Match(content, @"namespace\s+(?<ns>[A-Za-z_][\w.]*)\s*(?:\{|;)");
+        return match.Success ? match.Groups["ns"].Value : metadata.ProjectNamespace;
+    }
+
+    private static List<(string Name, string CsharpType)> ExtractRouteParametersFromMarkup(string markup)
+    {
+        var result = new List<(string, string)>();
+        var pageRouteRegex = new Regex(@"@page\s+""[^""]*\{(?<param>\w+)(?::(?<constraint>\w+))?\}[^""]*""");
+        foreach (Match m in pageRouteRegex.Matches(markup))
+        {
+            var name = m.Groups["param"].Value;
+            var constraint = m.Groups["constraint"].Success ? m.Groups["constraint"].Value : null;
+            var csharpType = constraint switch
+            {
+                "int" => "int?",
+                "long" => "long?",
+                "bool" => "bool?",
+                "double" => "double?",
+                "decimal" => "decimal?",
+                _ => "string?"
+            };
+            if (!result.Any(p => p.Item1.Equals(name, StringComparison.OrdinalIgnoreCase)))
+            {
+                result.Add((name, csharpType));
+            }
+        }
+        return result;
     }
 }

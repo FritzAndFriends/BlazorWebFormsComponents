@@ -26,15 +26,25 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
     public string Name => "DbContextInstantiation";
     public int Order => 107; // Right after EfContextConstructor (106)
 
+    // Detects page/component classes that use [Inject] DI pattern
+    private static readonly Regex PageBaseRegex = new(
+        @":\s*(?:WebFormsPageBase|ComponentBase|LayoutComponentBase|BaseWebFormsComponent)\b",
+        RegexOptions.Compiled);
+
     public string Apply(string content, FileMetadata metadata)
     {
-        // Only apply to page code-behind, not to DbContext class definitions themselves
-        if (metadata.FileType != FileType.Page && metadata.FileType != FileType.Control)
+        // Skip DbContext class definitions themselves
+        if (Regex.IsMatch(content, @"class\s+\w+Context\s*:\s*(?:Db|Identity)", RegexOptions.Compiled))
             return content;
 
         var matches = NewContextExprRegex.Matches(content);
         if (matches.Count == 0)
             return content;
+
+        // Determine if this is a page/component (uses [Inject]) or a standalone class (uses constructor injection)
+        var isPageOrComponent = metadata.FileType == FileType.Page
+            || metadata.FileType == FileType.Control
+            || PageBaseRegex.IsMatch(content);
 
         // Collect unique context type names
         var contextTypes = matches
@@ -52,14 +62,51 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
                 RegexOptions.Compiled);
             content = fieldDeclRegex.Replace(content, "");
 
-            // Replace using declarations: using (XxxContext x = new XxxContext())
+            // Replace using declarations: using (XxxContext x = new XxxContext()) { ... }
+            // Removes the using wrapper entirely, keeping the body contents
+            var usingBlockRegex = new Regex(
+                $@"using\s*\(\s*(?:var|{Regex.Escape(contextType)})\s+(?<var>\w+)\s*=\s*new\s+{Regex.Escape(contextType)}\s*\(\s*\)\s*\)\s*\{{",
+                RegexOptions.Compiled);
+            var usingBlockMatch = usingBlockRegex.Match(content);
+            while (usingBlockMatch.Success)
+            {
+                var varName = usingBlockMatch.Groups["var"].Value;
+                var openBracePos = content.IndexOf('{', usingBlockMatch.Index);
+                var closingBracePos = FindMatchingBrace(content, openBracePos);
+                if (closingBracePos >= 0)
+                {
+                    // Extract body between braces, dedented
+                    var body = content[(openBracePos + 1)..closingBracePos];
+                    // Replace the original variable name with the injected field
+                    body = body.Replace(varName, fieldName);
+                    var replacement = $"// DbContext '{contextType}' is injected via DI\n{body}";
+                    content = content[..usingBlockMatch.Index] + replacement + content[(closingBracePos + 1)..];
+                }
+                else
+                {
+                    // Couldn't find matching brace, just replace the using line
+                    content = usingBlockRegex.Replace(content, $"var {varName} = {fieldName}; // Injected via DI\n{{", 1);
+                }
+                usingBlockMatch = usingBlockRegex.Match(content);
+            }
+
+            // Fallback: using declarations without braces on same match (single-line using statement)
             var usingDeclRegex = new Regex(
                 $@"using\s*\(\s*{Regex.Escape(contextType)}\s+\w+\s*=\s*new\s+{Regex.Escape(contextType)}\s*\(\s*\)\s*\)",
                 RegexOptions.Compiled);
             content = usingDeclRegex.Replace(content, m =>
             {
-                // Convert to a simple block — the injected context is managed by DI
-                return $"// DbContext '{contextType}' is injected via DI — using block removed\n{{";
+                return $"// DbContext '{contextType}' is injected via DI";
+            });
+
+            // Also handle using var declarations: using var db = new XxxContext();
+            var usingVarDeclRegex = new Regex(
+                $@"using\s+(?:var|{Regex.Escape(contextType)})\s+(?<var>\w+)\s*=\s*new\s+{Regex.Escape(contextType)}\s*\(\s*\)\s*;",
+                RegexOptions.Compiled);
+            content = usingVarDeclRegex.Replace(content, m =>
+            {
+                var varName = m.Groups["var"].Value;
+                return $"var {varName} = {fieldName}; // Injected via DI";
             });
 
             // Replace local variable declarations: var db = new XxxContext();
@@ -79,24 +126,77 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
                 RegexOptions.Compiled);
             content = remainingNewRegex.Replace(content, fieldName);
 
-            // Add [Inject] property if not already present
+            // Add injection for the context
             if (!content.Contains($"{contextType} {fieldName}", StringComparison.Ordinal))
             {
-                var classBodyRegex = new Regex(
-                    @"(partial\s+class\s+\w+[^{]*\{)",
-                    RegexOptions.Compiled);
-                var classMatch = classBodyRegex.Match(content);
-                if (classMatch.Success)
+                if (isPageOrComponent)
                 {
-                    var insertPos = classMatch.Index + classMatch.Length;
-                    var injection = $"\n    {InjectAttr}\n    protected {contextType} {fieldName} {{ get; set; }} = default!;\n";
-                    content = content[..insertPos] + injection + content[insertPos..];
+                    // Page/component: use [Inject] property
+                    var classBodyRegex = new Regex(
+                        @"((?:partial\s+)?class\s+\w+[^{]*\{)",
+                        RegexOptions.Compiled);
+                    var classMatch = classBodyRegex.Match(content);
+                    if (classMatch.Success)
+                    {
+                        var insertPos = classMatch.Index + classMatch.Length;
+                        var injection = $"\n    {InjectAttr}\n    protected {contextType} {fieldName} {{ get; set; }} = default!;\n";
+                        content = content[..insertPos] + injection + content[insertPos..];
+                    }
+                }
+                else
+                {
+                    // Standalone class: use constructor injection with private readonly field
+                    var classBodyRegex = new Regex(
+                        @"((?:partial\s+)?class\s+(?<className>\w+)[^{]*\{)",
+                        RegexOptions.Compiled);
+                    var classMatch = classBodyRegex.Match(content);
+                    if (classMatch.Success)
+                    {
+                        var className = classMatch.Groups["className"].Value;
+                        var insertPos = classMatch.Index + classMatch.Length;
+                        var field = $"\n    private readonly {contextType} {fieldName};\n";
+
+                        // Check if a constructor already exists
+                        var existingCtorRegex = new Regex(
+                            $@"public\s+{Regex.Escape(className)}\s*\(([^)]*)\)",
+                            RegexOptions.Compiled);
+                        var ctorMatch = existingCtorRegex.Match(content);
+                        if (ctorMatch.Success)
+                        {
+                            // Add parameter to existing constructor
+                            var existingParams = ctorMatch.Groups[1].Value.Trim();
+                            var newParams = string.IsNullOrEmpty(existingParams)
+                                ? $"{contextType} {fieldName.TrimStart('_')}"
+                                : $"{existingParams}, {contextType} {fieldName.TrimStart('_')}";
+                            content = content[..ctorMatch.Index]
+                                + $"public {className}({newParams})"
+                                + content[(ctorMatch.Index + ctorMatch.Length)..];
+
+                            // Add field assignment in constructor body
+                            var ctorBodyStart = content.IndexOf('{', ctorMatch.Index) + 1;
+                            content = content[..ctorBodyStart]
+                                + $"\n        {fieldName} = {fieldName.TrimStart('_')};"
+                                + content[ctorBodyStart..];
+                        }
+                        else
+                        {
+                            // Create new constructor
+                            var ctor = $"\n    public {className}({contextType} {fieldName.TrimStart('_')})\n    {{\n        {fieldName} = {fieldName.TrimStart('_')};\n    }}\n";
+                            content = content[..insertPos] + field + ctor + content[insertPos..];
+                        }
+
+                        // Add field declaration if constructor path didn't already
+                        if (!content.Contains($"readonly {contextType} {fieldName}", StringComparison.Ordinal))
+                        {
+                            content = content[..insertPos] + field + content[insertPos..];
+                        }
+                    }
                 }
             }
         }
 
-        // Ensure Microsoft.AspNetCore.Components using is present for [Inject]
-        if (content.Contains(InjectAttr) && !content.Contains("using Microsoft.AspNetCore.Components;", StringComparison.Ordinal))
+        // Ensure Microsoft.AspNetCore.Components using is present for [Inject] (only for pages)
+        if (isPageOrComponent && content.Contains(InjectAttr) && !content.Contains("using Microsoft.AspNetCore.Components;", StringComparison.Ordinal))
         {
             var lastUsing = Regex.Match(content, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
             if (lastUsing.Success)
@@ -110,5 +210,59 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
         content = Regex.Replace(content, @"\n{3,}", "\n\n");
 
         return content;
+    }
+
+    /// <summary>
+    /// Finds the closing brace that matches the opening brace at the given position,
+    /// accounting for nested braces, string literals, and comments.
+    /// </summary>
+    private static int FindMatchingBrace(string content, int openBracePos)
+    {
+        var depth = 1;
+        var inString = false;
+        var inVerbatimString = false;
+        var inSingleLineComment = false;
+        var inMultiLineComment = false;
+
+        for (var i = openBracePos + 1; i < content.Length; i++)
+        {
+            var c = content[i];
+            var next = i + 1 < content.Length ? content[i + 1] : '\0';
+
+            if (inSingleLineComment)
+            {
+                if (c == '\n') inSingleLineComment = false;
+                continue;
+            }
+            if (inMultiLineComment)
+            {
+                if (c == '*' && next == '/') { inMultiLineComment = false; i++; }
+                continue;
+            }
+            if (inVerbatimString)
+            {
+                if (c == '"' && next == '"') { i++; continue; }
+                if (c == '"') { inVerbatimString = false; }
+                continue;
+            }
+            if (inString)
+            {
+                if (c == '\\') { i++; continue; }
+                if (c == '"') { inString = false; }
+                continue;
+            }
+            if (c == '/' && next == '/') { inSingleLineComment = true; i++; continue; }
+            if (c == '/' && next == '*') { inMultiLineComment = true; i++; continue; }
+            if (c == '@' && next == '"') { inVerbatimString = true; i++; continue; }
+            if (c == '"') { inString = true; continue; }
+
+            if (c == '{') depth++;
+            if (c == '}')
+            {
+                depth--;
+                if (depth == 0) return i;
+            }
+        }
+        return -1;
     }
 }

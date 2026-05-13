@@ -106,6 +106,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform>(sp => new CompileSurfaceStubTransform(sp.GetRequiredService<PageQuarantineDetector>()));
         services.AddSingleton<ICodeBehindTransform, LegacyHelperStubTransform>();
         services.AddSingleton<ICodeBehindTransform, RouteParameterWiringTransform>();
+        services.AddSingleton<ICodeBehindTransform, RouteDataParameterPromotionTransform>();
         services.AddSingleton<ICodeBehindTransform, TitlePropertyCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
 

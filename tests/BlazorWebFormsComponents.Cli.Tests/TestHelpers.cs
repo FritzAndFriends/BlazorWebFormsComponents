@@ -260,6 +260,7 @@ public static class TestHelpers
             new CompileSurfaceStubTransform(quarantineDetector),
             new LegacyHelperStubTransform(),
             new RouteParameterWiringTransform(),
+            new RouteDataParameterPromotionTransform(),
             new TitlePropertyCodeBehindTransform(),
             new MarkupReferencedMemberStubTransform(),
         };
