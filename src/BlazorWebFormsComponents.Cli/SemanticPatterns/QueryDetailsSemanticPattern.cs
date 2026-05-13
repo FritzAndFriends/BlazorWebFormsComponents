@@ -198,12 +198,16 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
         builder.AppendLine("    {");
         builder.AppendLine("        totalRowCount = 0;");
         builder.AppendLine(
-            $"        // {Marker}: {candidate.ControlType} now binds through component properties instead of Web Forms method-parameter binding.");
+            $"        // {Marker}: Wrapper delegates to the code-behind {candidate.Method.Name} method.");
+
+        // Build argument list mapping component properties to the original method parameters
+        var args = string.Join(", ", candidate.BoundParameters.Select(static p => p.PropertyName));
         builder.AppendLine(
-            $"        // Manual boundary: port {candidate.Method.Name} from the migration-artifacts code-behind file into an injected service or DbContext-backed query.");
+            $"        var query = {candidate.Method.Name}({args});");
         builder.AppendLine(
-            $"        // Bound inputs: {string.Join(", ", candidate.BoundParameters.Select(static p => $"{p.BindingName} → {p.PropertyName} ({p.Kind})"))}.");
-        builder.AppendLine($"        return new global::System.Linq.EnumerableQuery<{candidate.ItemType}>(global::System.Array.Empty<{candidate.ItemType}>());");
+            $"        if (query != null) totalRowCount = query.Count();");
+        builder.AppendLine(
+            $"        return query ?? global::System.Linq.Enumerable.Empty<{candidate.ItemType}>().AsQueryable();");
         builder.AppendLine("    }");
         builder.Append('}');
         return builder.ToString();

@@ -21,10 +21,10 @@ public class RouteParameterWiringTransform : ICodeBehindTransform
         @"\[Parameter[^\]]*\]\s*(?:\[SupplyParameterFromQuery[^\]]*\]\s*)?public\s+\S+\s+(?<name>\w+)\s*\{",
         RegexOptions.Compiled);
 
-    // Matches any public/protected/private property or field with the same name
-    // (catches code-behind declarations that would collide with route params)
+    // Matches any public/protected/private property or field with the same name,
+    // including those prefixed with attributes like [Parameter] or [Inject].
     private static readonly Regex AnyMemberRegex = new(
-        @"(?:public|protected|private)\s+(?:static\s+)?(?:readonly\s+)?\S+\s+(?<name>\w+)\s*(?:\{|;|=)",
+        @"(?:\[[^\]]*\]\s*)*(?:public|protected|private)\s+(?:static\s+)?(?:readonly\s+)?\S+\s+(?<name>\w+)\s*(?:\{|;|=)",
         RegexOptions.Compiled);
 
     // Matches the opening brace of the class body

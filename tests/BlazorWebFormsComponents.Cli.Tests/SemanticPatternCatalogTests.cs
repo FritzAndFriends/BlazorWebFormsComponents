@@ -193,6 +193,9 @@ public class SemanticPatternCatalogTests : IDisposable
         Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public int? ProductId { get; set; }", result.Markup);
         Assert.Contains("public string? ProductName { get; set; }", result.Markup);
         Assert.Contains("TODO(bwfc-query-details)", result.Markup);
+        // Swing 3: wrapper auto-wires to the code-behind method instead of returning empty data
+        Assert.Contains("var query = GetProduct(ProductId, ProductName);", result.Markup);
+        Assert.DoesNotContain("Array.Empty", result.Markup);
         Assert.Single(result.AppliedPatterns);
         Assert.Equal("pattern-query-details", result.AppliedPatterns[0].PatternId);
         Assert.Single(report.ManualItems);
