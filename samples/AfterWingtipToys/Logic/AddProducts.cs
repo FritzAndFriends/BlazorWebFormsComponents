@@ -1,30 +1,32 @@
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
-namespace WingtipToys.Logic;
-
-public class AddProducts
+namespace WingtipToys.Logic
 {
-    private const string WingtipToysConnectionString = "Data Source=(LocalDB)\\MSSQLLocalDB;Initial Catalog=WingtipToys;Integrated Security=True";
+  public class AddProducts
+  {
+    private readonly IDbContextFactory<ProductContext> _dbFactory;
+
+    public AddProducts(IDbContextFactory<ProductContext> dbFactory)
+    {
+      _dbFactory = dbFactory;
+    }
 
     public bool AddProduct(string ProductName, string ProductDesc, string ProductPrice, string ProductCategory, string ProductImagePath)
     {
-        var myProduct = new Product
-        {
-            ProductName = ProductName,
-            Description = ProductDesc,
-            UnitPrice = Convert.ToDouble(ProductPrice),
-            ImagePath = ProductImagePath,
-            CategoryID = Convert.ToInt32(ProductCategory)
-        };
+      var myProduct = new Product
+      {
+        ProductName = ProductName,
+        Description = ProductDesc,
+        UnitPrice = Convert.ToDouble(ProductPrice),
+        ImagePath = ProductImagePath,
+        CategoryID = Convert.ToInt32(ProductCategory)
+      };
 
-        var options = new DbContextOptionsBuilder<ProductContext>()
-            .UseSqlServer(WingtipToysConnectionString)
-            .Options;
-
-        using var db = new ProductContext(options);
-        db.Products.Add(myProduct);
-        db.SaveChanges();
-        return true;
+      using var db = _dbFactory.CreateDbContext();
+      db.Products.Add(myProduct);
+      db.SaveChanges();
+      return true;
     }
+  }
 }

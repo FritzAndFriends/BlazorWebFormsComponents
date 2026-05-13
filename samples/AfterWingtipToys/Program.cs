@@ -1,6 +1,7 @@
 using BlazorWebFormsComponents;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using WingtipToys.Logic;
 using WingtipToys.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +38,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
 builder.Services.AddBlazorWebFormsComponents();
+builder.Services.AddScoped<ShoppingCartActions>();
+builder.Services.AddScoped<AddProducts>();
 
 var app = builder.Build();
 

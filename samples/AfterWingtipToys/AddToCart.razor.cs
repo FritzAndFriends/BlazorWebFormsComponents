@@ -1,71 +1,71 @@
+// =============================================================================
+// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
+//
+// Common transforms needed (use the BWFC Copilot skill for assistance):
+//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
+//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
+//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
+//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
+//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
+//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
+//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
+//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
+//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
+//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
+//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
+//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
+//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
+//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
+//   TODO(bwfc-general): User controls → Blazor component references
+// =============================================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Diagnostics;
-using Microsoft.EntityFrameworkCore;
-using WingtipToys.Models;
+using Microsoft.AspNetCore.Components;
+using WingtipToys.Logic;
 
-namespace WingtipToys;
-
-public partial class AddToCart
+namespace WingtipToys
 {
-    private const string CartSessionKey = "CartId";
+  public partial class AddToCart
+  {
+    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
+
+    // --- Request.Form Migration ---
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
+    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
+    // Form keys found: key
+    // For non-page classes, inject RequestShim via DI.
+
+    // --- Response.Redirect Migration ---
+    // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
+    // For non-page classes, inject ResponseShim via DI.
+
     private WebFormsForm form1 = default!;
 
-    [Inject] private IDbContextFactory<ProductContext> ProductContextFactory { get; set; } = default!;
+    [Inject] public ShoppingCartActions CartActions { get; set; } = default!;
+
+    // --- ConfigurationManager Migration ---
+    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
+    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
     protected override async Task OnInitializedAsync()
     {
+        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
         await base.OnInitializedAsync();
 
-        var rawId = Request.QueryString["ProductID"].ToString();
-        if (string.IsNullOrWhiteSpace(rawId))
-        {
-            rawId = Request.QueryString["productID"].ToString();
-        }
-        if (!string.IsNullOrWhiteSpace(rawId) && int.TryParse(rawId, out var productId))
-        {
-            using var db = ProductContextFactory.CreateDbContext();
-            var cartId = GetCartId();
-            var cartItem = db.ShoppingCartItems.SingleOrDefault(c => c.CartId == cartId && c.ProductId == productId);
-            if (cartItem == null)
-            {
-                var product = db.Products.SingleOrDefault(p => p.ProductID == productId)
-                    ?? throw new InvalidOperationException($"Unable to locate product {productId}.");
-
-                db.ShoppingCartItems.Add(new CartItem
-                {
-                    ItemId = Guid.NewGuid().ToString(),
-                    ProductId = productId,
-                    CartId = cartId,
-                    Product = product,
-                    Quantity = 1,
-                    DateCreated = DateTime.Now
-                });
-            }
-            else
-            {
-                cartItem.Quantity++;
-            }
-
-            db.SaveChanges();
-        }
-        else
-        {
-            Debug.Fail("ERROR : We should never get to AddToCart.aspx without a ProductId.");
-            throw new Exception("ERROR : It is illegal to load AddToCart.aspx without setting a ProductId.");
-        }
-
-        Response.Redirect("ShoppingCart");
+      string rawId = Request.QueryString["ProductID"];
+      int productId;
+      if (!String.IsNullOrEmpty(rawId) && int.TryParse(rawId, out productId))
+      {
+        CartActions.AddToCart(productId);
+      }
+      else
+      {
+        Debug.Fail("ERROR : We should never get to AddToCart.aspx without a ProductId.");
+        throw new Exception("ERROR : It is illegal to load AddToCart.aspx without setting a ProductId.");
+      }
+      Response.Redirect("ShoppingCart.aspx");
     }
-
-    private string GetCartId()
-    {
-        var cartId = Session[CartSessionKey]?.ToString();
-        if (!string.IsNullOrWhiteSpace(cartId))
-        {
-            return cartId;
-        }
-
-        cartId = Guid.NewGuid().ToString();
-        Session[CartSessionKey] = cartId;
-        return cartId;
-    }
+  }
 }

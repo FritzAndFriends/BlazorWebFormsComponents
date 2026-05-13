@@ -90,7 +90,8 @@ namespace WingtipToys
       }
 
       // Show error details to only you (developer). LOCAL ACCESS ONLY.
-      if (Request.Url.IsLoopback)
+      var isLocal = true;
+      if (isLocal)
       {
         // Detailed Error Message.
         ErrorDetailedMsg.Text = ex.Message;

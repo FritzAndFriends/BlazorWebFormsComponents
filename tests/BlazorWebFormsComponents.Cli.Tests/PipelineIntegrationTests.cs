@@ -355,8 +355,8 @@ public class PipelineIntegrationTests : IDisposable
                 {
                     protected void Page_Load(object sender, EventArgs e)
                     {
-                        var row = CartList.Rows[0];
-                        var remove = row.FindControl("Remove");
+                        var ctx = System.Web.HttpContext.Current;
+                        var user = ctx.User.Identity.Name;
                     }
                 }
             }

@@ -1144,184 +1144,25 @@ L1 removes these. Use `@ref` if programmatic access is needed.
 
 ## L2 Break-Fix Playbook
 
-Proven repair recipes extracted from 7+ consecutive successful WingtipToys benchmark runs (Runs 57–63). When you encounter these error patterns during L2 repair, apply the corresponding fix instead of rewriting files from scratch.
+Proven repair recipes extracted from 7+ consecutive successful benchmark runs. When you encounter compile errors during L2 repair, match the error signature to a recipe and apply the fix instead of rewriting files from scratch.
 
-### Recipe 1: ShoppingCart Code-Behind Reconstruction
+**Recipes are in `recipes/` child files** — load only the ones matching your errors to minimize context usage.
 
-**Symptom:** 10–18 compile errors in `ShoppingCart.razor` referencing undefined members like `CartList`, `lblTotal`, `UpdateBtn_Click`, `CheckoutBtn_Click`, `PurchaseQuantity`, `Remove`.
+### Recipe Index
 
-**Root Cause:** The CLI generates ShoppingCart markup but the code-behind references Web Forms control IDs that don't exist as Blazor fields.
+| Error Signature | Recipe File | Pattern |
+|---|---|---|
+| `CS7036: no argument ... 'options' of 'XxxContext'` | `recipes/new-dbcontext-to-di.md` | `new DbContext()` → factory injection |
+| `CS0103` on `@ref` fields, no `.razor.cs` exists | `recipes/missing-code-behind.md` | Code-behind suppressed by emission planner |
+| `CS1061: 'GridView<T>' ... 'Rows'` / `FindControl` | `recipes/gridview-row-findcontrol.md` | GridView row traversal with BWFC shims |
+| `CS1061: ... 'InnerText'` | `recipes/innertext-to-markup.md` | HTML server element → Razor binding |
+| `CS1503: SelectMethod ... 'string' to 'SelectHandler'` | `recipes/selectmethod-string-binding.md` | String-based SelectMethod resolution |
+| CSS/layout visual regression, missing wrapper classes | `recipes/layout-css-body-class.md` | Master page body CSS → MainLayout |
+| `CS1061: 'RequestShim' ... 'IsLocal'` | `recipes/request-shim-gaps.md` | Uncommon Request/Response members |
+| `CS0103` on OAuth fields (`providerDetails`, etc.) | `recipes/oauth-page-stubs.md` | External auth page compile-safe stubs |
+| `CS0246: 'IDatabaseInitializer'` | `recipes/database-seed-initializer.md` | EF6 seed → EF Core EnsureCreated |
 
-**Fix Pattern:**
-1. Add missing properties and event handlers to `ShoppingCart.razor.cs`
-2. Use `SessionShim` for cart state (Web Forms used Session)
-3. Bind data controls with `Items` property, not `SelectMethod` (unless the page inherits WebFormsPageBase)
-
-```csharp
-// ShoppingCart.razor.cs — key members to add
-public partial class ShoppingCart : WebFormsPageBase
-{
-    [Inject] public IDbContextFactory<ProductContext> DbFactory { get; set; }
-
-    private List<CartItem> CartItems { get; set; } = new();
-    private string TotalText { get; set; } = "";
-
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        LoadCart();
-    }
-
-    private void LoadCart()
-    {
-        var cartId = Session["CartId"]?.ToString() ?? "";
-        if (!string.IsNullOrEmpty(cartId))
-        {
-            using var db = DbFactory.CreateDbContext();
-            CartItems = db.ShoppingCartItems
-                .Where(c => c.CartId == cartId)
-                .Include(c => c.Product)
-                .ToList();
-        }
-        TotalText = CartItems.Sum(c => c.Product.UnitPrice * c.Quantity)
-            .ToString("C");
-    }
-
-    private void UpdateBtn_Click() => LoadCart();
-    private void CheckoutBtn_Click() => Response.Redirect("/Checkout");
-
-    private void RemoveItem(int itemId)
-    {
-        using var db = DbFactory.CreateDbContext();
-        var item = db.ShoppingCartItems.Find(itemId);
-        if (item != null) { db.ShoppingCartItems.Remove(item); db.SaveChanges(); }
-        LoadCart();
-    }
-}
-```
-
-**Markup fixes:**
-- Replace `@CartList` control ID refs → bind GridView/ListView with `Items="@CartItems"`
-- Replace `@lblTotal` → use `@TotalText`
-- Replace `@UpdateBtn_Click` / `@CheckoutBtn_Click` → wire to code-behind methods via `OnClick`
-- Remove `@ref` attributes for controls that don't exist as fields
-
-### Recipe 2: ProductList/ProductDetails Route Binding
-
-**Symptom:** `productList` doesn't exist, unclosed HTML tags in ListView ItemTemplate, route parameter not bound.
-
-**Root Cause:** CLI generates Web Forms control ID references in markup and doesn't always fix HTML structure inside templates.
-
-**Fix Pattern:**
-
-```razor
-@* ProductList.razor — fix route and data binding *@
-@page "/ProductList"
-@page "/ProductList/{CategoryName}"
-
-@code {
-    [Parameter] public string CategoryName { get; set; }
-    [SupplyParameterFromQuery] public int? catId { get; set; }
-}
-```
-
-**HTML structure in ItemTemplate — common fixes:**
-- Close all `<b>`, `<p>`, `<div>` tags inside each template
-- Ensure `<a>` tags use `href` not `NavigateUrl` (CLI should have converted these)
-- Use `data-enhance-nav="false"` on product links for SSR navigation stability
-
-```razor
-<ItemTemplate Context="item">
-    <div class="product-item">
-        <a href="/Product/@item.ProductName" data-enhance-nav="false">
-            <b>@item.ProductName</b>
-        </a>
-        <p>@item.Description</p>
-        <b>@item.UnitPrice.ToString("C")</b>
-    </div>
-</ItemTemplate>
-```
-
-### Recipe 3: ErrorPage Compatibility
-
-**Symptom:** `RequestShim` does not contain `IsLocal`, `ExceptionUtility` does not exist.
-
-**Root Cause:** `Request.IsLocal` is not in BWFC's RequestShim. `ExceptionUtility` is an app-specific helper.
-
-**Fix:**
-```csharp
-// ErrorPage.razor.cs — replace Request.IsLocal with safe fallback
-// BEFORE:
-if (Request.IsLocal) { /* show details */ }
-
-// AFTER:
-var isLocal = true; // Safe default for dev; production uses env check
-```
-
-```csharp
-// Logic/ExceptionUtility.cs — minimal stub
-namespace WingtipToys.Logic
-{
-    public static class ExceptionUtility
-    {
-        public static void LogException(Exception exc, string source)
-        {
-            System.Diagnostics.Debug.WriteLine($"[{source}] {exc.Message}");
-        }
-    }
-}
-```
-
-### Recipe 4: MainLayout Body CSS Class
-
-**Symptom:** CSS styles from Site.css don't apply because layout `<main>` is missing the expected wrapper class.
-
-**Fix:** Check original `Site.Master` for the CSS class on the `<asp:ContentPlaceHolder>` wrapper, replicate it:
-```razor
-@* Components/Layout/MainLayout.razor *@
-@inherits LayoutComponentBase
-
-<div class="container body-content">
-    @Body
-</div>
-```
-
-### Recipe 5: `new DbContext()` → Factory Injection
-
-**Symptom:** `There is no argument given that corresponds to the required parameter 'options'` when code does `new ProductContext()`.
-
-**Root Cause:** EF Core requires `DbContextOptions` in the constructor. Web Forms code instantiated DbContext directly.
-
-**Fix — in page code-behind:**
-```csharp
-// BEFORE:
-using (var db = new ProductContext()) { ... }
-
-// AFTER:
-[Inject] public IDbContextFactory<ProductContext> DbFactory { get; set; }
-private void LoadData()
-{
-    using var db = DbFactory.CreateDbContext();
-    // ... use db ...
-}
-```
-
-**Fix — in Logic/service classes:**
-```csharp
-// Accept factory via constructor, register as builder.Services.AddScoped<T>()
-public class AddProducts
-{
-    private readonly IDbContextFactory<ProductContext> _dbFactory;
-    public AddProducts(IDbContextFactory<ProductContext> dbFactory) => _dbFactory = dbFactory;
-
-    public void AddProduct(Product product)
-    {
-        using var db = _dbFactory.CreateDbContext();
-        db.Products.Add(product);
-        db.SaveChanges();
-    }
-}
-```
+**Usage:** When the L2 agent encounters a compile error, scan the Error Signature column. Read the matching recipe file with `view`. Apply the fix pattern from the recipe.
 
 ---
 

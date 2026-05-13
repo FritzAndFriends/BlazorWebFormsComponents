@@ -4,6 +4,6 @@ public static class ExceptionUtility
 {
     public static void LogException(Exception exc, string source)
     {
-        Console.Error.WriteLine($"[{source}] {exc}");
+        System.Diagnostics.Debug.WriteLine($"[{source}] {exc}");
     }
 }

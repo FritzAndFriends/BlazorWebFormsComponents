@@ -1,10 +1,10 @@
+using Microsoft.AspNetCore.Components;
+
 namespace WingtipToys.Account;
 
 public partial class OpenAuthProviders
 {
-    private ListView<string> providerDetails = default!;
+    [Parameter] public string ReturnUrl { get; set; } = "/";
 
-    [Parameter] public string? ReturnUrl { get; set; }
-
-    public IEnumerable<string> GetProviderNames() => Array.Empty<string>();
+    private List<object> providerDetails { get; } = new();
 }

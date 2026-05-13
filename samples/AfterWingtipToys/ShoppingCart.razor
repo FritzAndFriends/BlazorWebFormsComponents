@@ -2,47 +2,49 @@
 <PageTitle>Shopping Cart</PageTitle>
 
 <div id="ShoppingCartTitle" class="ContentHead"><h1>@ShoppingCartTitleText</h1></div>
-<GridView id="CartList"
-          AutoGenerateColumns="false"
-          ShowFooter="true"
-          GridLines="@GridLines.Vertical"
-          CellPadding="4"
-          ItemType="CartItem"
-          SelectMethod="GetShoppingCartItems"
+<GridView AutoGenerateColumns="false" ShowFooter="true" GridLines="@GridLines.Vertical" CellPadding="4"
+          ItemType="CartItem" Items="@CartItems"
           CssClass="table table-striped table-bordered">
     <Columns>
-        <BoundField ItemType="CartItem" DataField="ProductID" HeaderText="ID" SortExpression="ProductID" />
+        <BoundField ItemType="CartItem" DataField="ProductId" HeaderText="ID" SortExpression="ProductId" />
         <BoundField ItemType="CartItem" DataField="Product.ProductName" HeaderText="Name" />
         <BoundField ItemType="CartItem" DataField="Product.UnitPrice" HeaderText="Price (each)" DataFormatString="{0:c}" />
         <TemplateField ItemType="CartItem" HeaderText="Quantity">
-            <ItemTemplate Context="Item">
-                @Item.Quantity
+            <ItemTemplate Context="item">
+                <TextBox ID="PurchaseQuantity" Text="@item.Quantity.ToString()" Width="40" />
             </ItemTemplate>
         </TemplateField>
         <TemplateField ItemType="CartItem" HeaderText="Item Total">
-            <ItemTemplate Context="Item">
-                @(String.Format("{0:c}", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))
+            <ItemTemplate Context="item">
+                @GetItemTotal(item)
             </ItemTemplate>
         </TemplateField>
         <TemplateField ItemType="CartItem" HeaderText="Remove Item">
-            <ItemTemplate Context="Item">
-                <span></span>
+            <ItemTemplate Context="item">
+                <CheckBox ID="Remove" Checked="false" />
             </ItemTemplate>
         </TemplateField>
     </Columns>
 </GridView>
 <div>
     <p></p>
-    <strong>@OrderTotalLabelText@TotalText</strong>
+    <strong>Order Total: @TotalText</strong>
 </div>
 <br />
-<div>
-    <Button id="UpdateBtn" Text="Update" OnClick="@UpdateBtn_Click" Visible="@ShowActions" />
-    <ImageButton id="CheckoutImageBtn"
-                 ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
-                 Width="145"
-                 AlternateText="Check out with PayPal"
-                 OnClick="@CheckoutBtn_Click"
-                 BorderWidth="0"
-                 Visible="@ShowActions" />
-</div>
+@if (HasItems)
+{
+    <table>
+        <tr>
+            <td>
+                <Button Text="Update" OnClick="@UpdateBtn_Click" />
+            </td>
+            <td>
+                <ImageButton ImageUrl="https://www.paypal.com/en_US/i/btn/btn_xpressCheckout.gif"
+                             Width="145"
+                             AlternateText="Check out with PayPal"
+                             OnClick="@CheckoutBtn_Click"
+                             BorderWidth="0" />
+            </td>
+        </tr>
+    </table>
+}

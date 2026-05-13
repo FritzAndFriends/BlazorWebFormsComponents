@@ -1,6 +1,9 @@
 @page "/ProductList"
-@page "/Category/{categoryName}"
+@page "/ProductList/{CategoryName}"
+@page "/Category/{CategoryName}"
 @using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ProductContext> DbFactory
+
 <PageTitle>Products</PageTitle>
 
 <section>
@@ -9,11 +12,8 @@
             <h2>@(Page.Title)</h2>
         </hgroup>
 
-        <ListView id="productList"
-                  DataKeyNames="ProductID"
-                  GroupItemCount="4"
-                  ItemType="Product"
-                  SelectMethod="GetProductsQueryDetails_SelectMethod">
+        <ListView DataKeyNames="ProductID" GroupItemCount="4"
+                  ItemType="Product" SelectMethod="GetProducts">
             <EmptyDataTemplate>
                 <table>
                     <tr>
@@ -22,37 +22,34 @@
                 </table>
             </EmptyDataTemplate>
             <EmptyItemTemplate>
-                <td />
+                <td></td>
             </EmptyItemTemplate>
             <GroupTemplate Context="items">
                 <tr id="itemPlaceholderContainer">
                     @items
                 </tr>
             </GroupTemplate>
-            <ItemTemplate Context="Item">
+            <ItemTemplate Context="item">
                 <td>
                     <table>
                         <tr>
                             <td>
-                                <a href="@($"/Product/{Item.ProductName}")" data-enhance-nav="false">
-                                    <img src="/Catalog/Images/Thumbs/@Item.ImagePath"
-                                         width="100"
-                                         height="75"
-                                         border="1" />
+                                <a href="@($"/Product/{item.ProductName}")" data-enhance-nav="false">
+                                    <img src="@($"/Catalog/Images/Thumbs/{item.ImagePath}")" width="100" height="75" border="1" alt="@item.ProductName" />
                                 </a>
                             </td>
                         </tr>
                         <tr>
                             <td>
-                                <a href="@($"/Product/{Item.ProductName}")" data-enhance-nav="false">
-                                    @Item.ProductName
+                                <a href="@($"/Product/{item.ProductName}")" data-enhance-nav="false">
+                                    @item.ProductName
                                 </a>
                                 <br />
                                 <span>
-                                    <b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))
+                                    <b>Price: </b>@string.Format("{0:c}", item.UnitPrice)
                                 </span>
                                 <br />
-                                <a href="/AddToCart?productID=@Item.ProductID" data-enhance-nav="false">
+                                <a href="@($"/AddToCart.aspx?productID={item.ProductID}")" data-enhance-nav="false">
                                     <span class="ProductListItem">
                                         <b>Add To Cart</b>
                                     </span>
@@ -75,10 +72,6 @@
                                 </table>
                             </td>
                         </tr>
-                        <tr>
-                            <td></td>
-                        </tr>
-                        <tr></tr>
                     </tbody>
                 </table>
             </LayoutTemplate>
@@ -89,29 +82,22 @@
 @code {
     [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
     [Parameter] public string? CategoryName { get; set; }
-    [Inject] private IDbContextFactory<ProductContext> ProductContextFactory { get; set; } = default!;
 
-    private IQueryable<Product> GetProductsQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    public IQueryable<Product> GetProducts()
     {
-        using var db = ProductContextFactory.CreateDbContext();
-
-        var query = db.Products
-            .Include(p => p.Category)
-            .AsNoTracking()
-            .AsQueryable();
+        using var db = DbFactory.CreateDbContext();
+        IQueryable<Product> query = db.Products.Include(p => p.Category);
 
         if (CategoryId.HasValue && CategoryId > 0)
         {
             query = query.Where(p => p.CategoryID == CategoryId);
         }
 
-        if (!string.IsNullOrWhiteSpace(CategoryName))
+        if (!string.IsNullOrEmpty(CategoryName))
         {
-            query = query.Where(p => p.Category != null && p.Category.CategoryName == CategoryName);
+            query = query.Where(p => string.Compare(p.Category.CategoryName, CategoryName) == 0);
         }
 
-        var results = query.ToList();
-        totalRowCount = results.Count;
-        return results.AsQueryable();
+        return query.ToList().AsQueryable();
     }
 }
