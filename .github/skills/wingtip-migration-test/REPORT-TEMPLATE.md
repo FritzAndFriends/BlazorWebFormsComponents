@@ -26,15 +26,18 @@ One short paragraph covering the overall result, total runtime, and whether the 
 
 ## Timing
 
-| Phase | Duration | Notes |
-|-------|----------|-------|
-| Preparation | `TBD` | Run numbering, folder cleanup, report folder creation |
-| Layer 1 toolkit migration | `TBD` | `bwfc-migrate.ps1` invocation |
-| Repair / migration skill work | `TBD` | Layer 2/3 fixes |
-| Build validation | `TBD` | Final green build or last failing state |
-| Acceptance tests | `TBD` | Playwright run |
-| Screenshots + report | `TBD` | Evidence and write-up |
-| **Total** | `TBD` | |
+> Populated from the `run_timing` SQL table. Durations are wall-clock minutes.
+
+| Phase | Started | Finished | Duration | Notes |
+|-------|---------|----------|----------|-------|
+| Preparation | | | | Run numbering, folder cleanup, report folder creation |
+| L1 toolkit migration | | | | `bwfc-migrate.ps1` invocation |
+| Build repair | | | | Layer 2 compile-error fixes |
+| Startup triage | | | | DI/config/DB root-cause fixes |
+| Acceptance tests | | | | Playwright runs + targeted repairs |
+| Screenshots | | | | Evidence capture |
+| Report | | | | Write-up |
+| **Total** | | | | **Start of Phase 0 → end of Phase 6** |
 
 ## Commands
 

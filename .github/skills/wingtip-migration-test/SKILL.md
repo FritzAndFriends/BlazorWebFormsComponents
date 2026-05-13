@@ -79,8 +79,47 @@ pwsh src\WingtipToys.AcceptanceTests\bin\Debug\net10.0\playwright.ps1 install
 1. **Determine the next run number**  
    Scan `dev-docs\migration-tests\wingtiptoys\run*` folders and use the next numeric value after the current maximum. Preserve zero padding: `run26`, `run27`, etc.
 
-2. **Record the start timestamp**  
-   Start total wall-clock timing **before** clearing the output folder.
+2. **Initialize the timing ledger**  
+   Create a SQL table and record the run start time **before** any other work:
+
+   ```sql
+   CREATE TABLE IF NOT EXISTS run_timing (
+     phase TEXT PRIMARY KEY,
+     started_at TEXT,
+     finished_at TEXT,
+     notes TEXT
+   );
+   DELETE FROM run_timing;   -- clean slate for this run
+   INSERT INTO run_timing (phase, started_at) VALUES
+     ('total',        strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
+   ```
+
+   At the **start** of each subsequent phase, insert its row:
+   ```sql
+   INSERT INTO run_timing (phase, started_at) VALUES
+     ('phase_name', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
+   ```
+
+   At the **end** of each phase, update its row:
+   ```sql
+   UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
+     WHERE phase = 'phase_name';
+   ```
+
+   Phase names to track (must match these keys exactly):
+
+   | Phase key | Corresponds to |
+   |-----------|---------------|
+   | `total` | Entire run (Phase 0 start → Phase 6 end) |
+   | `preparation` | Phase 0: folder cleanup, report folder creation |
+   | `l1_migration` | Phase 1: `bwfc-migrate.ps1` execution |
+   | `build_repair` | Phase 2: compile-error fixes |
+   | `startup_triage` | Phase 3: DI/config/DB root-cause fixes |
+   | `acceptance_tests` | Phase 4: Playwright test runs + targeted repairs |
+   | `screenshots` | Phase 5: screenshot capture |
+   | `report` | Phase 6: report generation |
+
+   > **Why SQL?** Timestamps persist across tool calls and can be queried at report time to auto-populate the timing table. No manual bookkeeping required.
 
 3. **Clear the output folder contents**  
    Delete everything under `samples\AfterWingtipToys\` while keeping the folder itself.
@@ -88,7 +127,21 @@ pwsh src\WingtipToys.AcceptanceTests\bin\Debug\net10.0\playwright.ps1 install
 4. **Create the report folder early**  
    Create `dev-docs\migration-tests\wingtiptoys\runNN\` and an `images\` subfolder so logs and screenshots have a known destination from the start.
 
+5. **Mark Phase 0 complete**
+   ```sql
+   INSERT INTO run_timing (phase, started_at, finished_at) VALUES
+     ('preparation',
+      (SELECT started_at FROM run_timing WHERE phase = 'total'),
+      strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
+   ```
+
 ### Phase 1: Layer 1 - Migration Toolkit Run
+
+**Start timing:**
+```sql
+INSERT INTO run_timing (phase, started_at) VALUES
+  ('l1_migration', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
+```
 
 Run the toolkit wrapper, not the CLI directly:
 
@@ -106,7 +159,19 @@ Record:
 - Whether the toolkit resolved the nested `samples\WingtipToys\WingtipToys\` app root automatically
 - Whether `.razor` output, scaffold files, and static assets were produced in the expected places
 
+**End timing:**
+```sql
+UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
+  WHERE phase = 'l1_migration';
+```
+
 ### Phase 2: Build Repair (Compile Errors Only)
+
+**Start timing:**
+```sql
+INSERT INTO run_timing (phase, started_at) VALUES
+  ('build_repair', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
+```
 
 Load the migration toolkit skills from `migration-toolkit\skills\` for reference during repair:
 
@@ -143,7 +208,19 @@ Record:
 - Number of rebuild iterations
 - Final build status
 
+**End timing:**
+```sql
+UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
+  WHERE phase = 'build_repair';
+```
+
 ### Phase 3: Startup Triage (Root Cause Before Symptoms)
+
+**Start timing:**
+```sql
+INSERT INTO run_timing (phase, started_at) VALUES
+  ('startup_triage', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
+```
 
 > **CRITICAL: This phase prevents wasted L2 repair work.**
 > Most page-level failures are caused by 1-2 startup issues (missing DB tables, bad connection string, missing DI registration). Fixing the root cause often makes 10+ "broken" pages work instantly. **Never skip this phase.**
@@ -197,7 +274,19 @@ curl -k -s -o NUL -w "%{http_code}" https://localhost:5001/Account/Login
 
 If these all return 200, most pages are working. Skip to acceptance tests (Phase 4). If specific pages return 500, check their console errors — these are genuine page-level issues to fix.
 
+**End timing:**
+```sql
+UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
+  WHERE phase = 'startup_triage';
+```
+
 ### Phase 4: Acceptance Tests and Targeted Repair
+
+**Start timing:**
+```sql
+INSERT INTO run_timing (phase, started_at) VALUES
+  ('acceptance_tests', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
+```
 
 Run the Playwright suite against the running app:
 
@@ -227,7 +316,19 @@ Record:
 
 If the suite does not pass after targeted repairs, the run is **not** successful. Write a failed run report that explains the blocker. Do not keep rewriting files hoping something sticks.
 
+**End timing:**
+```sql
+UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
+  WHERE phase = 'acceptance_tests';
+```
+
 ### Phase 5: Screenshot Capture
+
+**Start timing:**
+```sql
+INSERT INTO run_timing (phase, started_at) VALUES
+  ('screenshots', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
+```
 
 Capture proof screenshots from the working migrated app and save them under `runNN\images\`.
 
@@ -242,9 +343,41 @@ Recommended minimum set:
 
 Use additional screenshots when they clarify a major success or known defect.
 
+**End timing:**
+```sql
+UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
+  WHERE phase = 'screenshots';
+```
+
 ### Phase 6: Report Generation
 
+**Start timing:**
+```sql
+INSERT INTO run_timing (phase, started_at) VALUES
+  ('report', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
+```
+
 Create `dev-docs\migration-tests\wingtiptoys\runNN\report.md` from `REPORT-TEMPLATE.md`.
+
+#### Populate timing from the ledger
+
+Query the `run_timing` table to fill the report's Timing section:
+
+```sql
+SELECT
+  phase,
+  started_at,
+  finished_at,
+  CASE
+    WHEN finished_at IS NOT NULL AND started_at IS NOT NULL
+    THEN CAST((julianday(finished_at) - julianday(started_at)) * 1440 AS INTEGER) || ' min'
+    ELSE 'not recorded'
+  END AS duration
+FROM run_timing
+ORDER BY rowid;
+```
+
+Copy the query output directly into the Timing table in the report. If a phase was not timed (agent was working across multiple turns without explicit checkpoints), note it as "~estimate" and explain in the Notes column.
 
 The report must include:
 
@@ -264,6 +397,16 @@ Optional supporting artifacts:
 - `summary.md`
 - `raw-data.md`
 - captured command output snippets
+
+**End timing (report + total):**
+```sql
+UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
+  WHERE phase = 'report';
+UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
+  WHERE phase = 'total';
+```
+
+After closing the timing ledger, re-run the duration query above and update the report's Timing table with the final values. The **Total** row in the report must show the actual elapsed time from run start to report completion.
 
 ## Critical Rules
 
