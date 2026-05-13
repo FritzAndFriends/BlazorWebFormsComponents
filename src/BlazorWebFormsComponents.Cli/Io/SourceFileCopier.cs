@@ -32,6 +32,22 @@ public class SourceFileCopier
         (new Regex(@"\b(DropCreateDatabaseAlways|DropCreateDatabaseIfModelChanges|CreateDatabaseIfNotExists|DbMigrationsConfiguration|DbMigration)\b", RegexOptions.Compiled), "Legacy EF initializer or migrations bootstrap should be reviewed manually instead of compiled directly.")
     ];
 
+    private static readonly Regex NamespaceRegex = new(
+        @"namespace\s+(?<ns>[A-Za-z_][\w.]*)\s*(?:\{|;)",
+        RegexOptions.Compiled);
+
+    private static readonly Regex ClassRegex = new(
+        @"(?:public|internal)\s+(?:(?:partial|static|sealed|abstract)\s+)*class\s+(?<name>[A-Za-z_]\w*)(?:\s*<[^>]+>)?(?:\s*:\s*[^{]+)?\s*\{",
+        RegexOptions.Compiled);
+
+    private static readonly Regex ConstructorRegex = new(
+        @"public\s+(?<name>[A-Za-z_]\w*)\s*\((?<params>[^)]*)\)",
+        RegexOptions.Compiled);
+
+    private static readonly Regex PublicMethodRegex = new(
+        @"public\s+(?:(?:static|virtual|override|async)\s+)*(?<return>[A-Za-z_][\w<>,\s\?\[\]]*)\s+(?<name>[A-Za-z_]\w*)\s*\((?<params>[^)]*)\)",
+        RegexOptions.Compiled);
+
     private readonly OutputWriter _outputWriter;
     private readonly IReadOnlyList<ICodeBehindTransform> _transforms;
 
@@ -40,7 +56,7 @@ public class SourceFileCopier
         _outputWriter = outputWriter;
         // Only apply a subset of transforms relevant to non-page .cs files
         _transforms = transforms
-            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "LegacyHelperStub")
+            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "SelectMethodMaterialize" or "LegacyHelperStub")
             .OrderBy(t => t.Order)
             .ToList();
     }
@@ -102,6 +118,15 @@ public class SourceFileCopier
                 var quarantinedContent = BuildQuarantineArtifact(relativePath, decision.Reason!, content);
                 await _outputWriter.WriteFileAsync(artifactPath, quarantinedContent, $"Compile-surface artifact: {relativePath}");
                 report.AddManualItem(relativePath, 0, "bwfc-compile-surface", decision.Reason!);
+
+                // Generate a compile-safe stub at the original location so dependent files still build
+                var stub = BuildCompileStub(content, relativePath, decision.Reason!);
+                if (stub != null)
+                {
+                    var stubPath = Path.Combine(outputPath, relativePath);
+                    await _outputWriter.WriteFileAsync(stubPath, stub, $"Compile stub: {relativePath}");
+                }
+
                 quarantinedCount++;
                 continue;
             }
@@ -163,6 +188,93 @@ public class SourceFileCopier
             $"// TODO: Reason — {reason}{Environment.NewLine}" +
             $"// TODO: Move or rewrite only the relevant pieces into Program.cs, services, middleware, or application code.{Environment.NewLine}{Environment.NewLine}" +
             content;
+    }
+
+    /// <summary>
+    /// Generates a minimal compile-safe stub class so dependent files still build.
+    /// Extracts namespace, class name, constructors, and public method signatures
+    /// from the original source and generates empty bodies.
+    /// </summary>
+    private static string? BuildCompileStub(string originalContent, string relativePath, string reason)
+    {
+        var nsMatch = NamespaceRegex.Match(originalContent);
+        var classMatch = ClassRegex.Match(originalContent);
+
+        if (!classMatch.Success)
+            return null;
+
+        var className = classMatch.Groups["name"].Value;
+        var namespaceName = nsMatch.Success ? nsMatch.Groups["ns"].Value : null;
+
+        var sb = new System.Text.StringBuilder();
+        sb.AppendLine($"// Compile-safe stub for quarantined file '{relativePath}'");
+        sb.AppendLine($"// Reason: {reason}");
+        sb.AppendLine($"// Full original source preserved in migration-artifacts/compile-surface/{relativePath}.txt");
+        sb.AppendLine();
+
+        // Only include safe framework usings — skip legacy usings that caused quarantine
+        var safeUsings = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var line in originalContent.Split('\n'))
+        {
+            var trimmed = line.Trim().TrimEnd('\r');
+            if (trimmed.StartsWith("using ", StringComparison.Ordinal) && trimmed.EndsWith(";"))
+            {
+                // Skip legacy namespaces that don't exist in modern .NET
+                if (trimmed.Contains("Microsoft.Owin") || trimmed.Contains("Owin;") ||
+                    trimmed.Contains("System.Web") || trimmed.Contains("System.Data.Entity") ||
+                    trimmed.Contains("Microsoft.AspNet.Identity") || trimmed.Contains("Microsoft.Owin"))
+                    continue;
+                safeUsings.Add(trimmed);
+            }
+            else if (!string.IsNullOrWhiteSpace(trimmed) && !trimmed.StartsWith("//"))
+                break;
+        }
+        // Always include System
+        safeUsings.Add("using System;");
+        foreach (var u in safeUsings.OrderBy(x => x))
+            sb.AppendLine(u);
+        sb.AppendLine();
+
+        if (namespaceName != null)
+        {
+            sb.AppendLine($"namespace {namespaceName};");
+            sb.AppendLine();
+        }
+
+        sb.AppendLine($"/// <summary>");
+        sb.AppendLine($"/// Stub for quarantined class. Provides compile compatibility for dependent code.");
+        sb.AppendLine($"/// Replace with a proper implementation during Layer 2 migration.");
+        sb.AppendLine($"/// </summary>");
+        sb.AppendLine($"public class {className}");
+        sb.AppendLine("{");
+
+        // Generate parameterless constructor
+        sb.AppendLine($"    public {className}() {{ }}");
+
+        // Generate public method stubs with default return values (skip params to avoid type issues)
+        foreach (Match methodMatch in PublicMethodRegex.Matches(originalContent))
+        {
+            var methodName = methodMatch.Groups["name"].Value;
+            if (methodName == className) continue; // Skip constructors
+            var returnType = methodMatch.Groups["return"].Value.Trim();
+
+            var defaultReturn = returnType switch
+            {
+                "void" => "",
+                "string" => " return string.Empty;",
+                "bool" => " return false;",
+                "int" => " return 0;",
+                "double" or "decimal" or "float" => " return 0;",
+                "Task" => " return Task.CompletedTask;",
+                _ => " throw new NotImplementedException();"
+            };
+
+            sb.AppendLine($"    public {returnType} {methodName}() {{{defaultReturn} }}");
+        }
+
+        sb.AppendLine("}");
+
+        return sb.ToString();
     }
 
     private sealed record CompileSurfaceDecision(bool ShouldQuarantine, string? Reason);

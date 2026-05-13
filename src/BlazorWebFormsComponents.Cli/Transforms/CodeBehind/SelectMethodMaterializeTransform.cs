@@ -9,8 +9,14 @@ namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 /// </summary>
 public class SelectMethodMaterializeTransform : ICodeBehindTransform
 {
+    // Match methods returning IQueryable<T> — uses balanced groups for the method body braces
+    // The parameter portion handles attributes with parentheses like [QueryString("ProductID")]
     private static readonly Regex IQueryableMethodRegex = new(
-        @"(?<method>(?<signature>^[ \t]*(?:public|protected|private|internal)[^{;\r\n]*IQueryable<[^;\r\n{]+\([^)]*\)\s*\{)(?<body>(?>[^{}]+|\{(?<depth>)|\}(?<-depth>))*)(?(depth)(?!))\})",
+        @"(?<method>(?<signature>^[ \t]*(?:public|protected|private|internal)[^{;\r\n]*IQueryable<[^;\r\n{]+?" +
+        @"(?<paramlist>\((?:[^()]*|\((?:[^()]*|\([^()]*\))*\))*\))" +  // Nested parens up to 3 levels
+        @"\s*)\{" +
+        @"(?<body>(?>[^{}]+|\{(?<depth>)|\}(?<-depth>))*)(?(depth)(?!))" +
+        @"\})",
         RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.Singleline);
 
     private static readonly Regex UsingCreateDbContextRegex = new(
@@ -41,7 +47,9 @@ public class SelectMethodMaterializeTransform : ICodeBehindTransform
         if (!UsingCreateDbContextRegex.IsMatch(methodContent))
             return methodContent;
 
+        // Remove 'using' so the DbContext stays alive until the IQueryable is materialized by the caller
         var updatedMethod = UsingCreateDbContextRegex.Replace(methodContent, "var ${var} = ${factory};");
+        // Materialize the IQueryable inline so it doesn't depend on an open DbContext
         updatedMethod = ReturnQueryableRegex.Replace(updatedMethod, match =>
         {
             var expression = match.Groups["expr"].Value;

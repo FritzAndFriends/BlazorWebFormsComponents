@@ -1035,8 +1035,17 @@ public class PipelineIntegrationTests : IDisposable
 
         var report = await pipeline.ExecuteAsync(context);
 
-        Assert.False(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
-        Assert.False(File.Exists(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
+        // Quarantined files now have compile-safe stubs at the original location
+        Assert.True(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
+        var startupStub = File.ReadAllText(Path.Combine(outputDir, "Startup.Auth.cs"));
+        Assert.Contains("Compile-safe stub for quarantined file", startupStub);
+        Assert.Contains("public class Startup", startupStub);
+
+        Assert.True(File.Exists(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
+        var efStub = File.ReadAllText(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs"));
+        Assert.Contains("Compile-safe stub for quarantined file", efStub);
+        Assert.Contains("public class CatalogDatabaseInitializer", efStub);
+
         Assert.True(File.Exists(Path.Combine(outputDir, "Models", "Product.cs")));
 
         var startupArtifact = Path.Combine(outputDir, "migration-artifacts", "compile-surface", "Startup.Auth.cs.txt");
@@ -1181,9 +1190,13 @@ public class PipelineIntegrationTests : IDisposable
         var report = await pipeline.ExecuteAsync(context);
         Assert.Empty(report.Errors);
 
-        Assert.False(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
-        Assert.False(File.Exists(Path.Combine(outputDir, "IdentityConfig.cs")));
-        Assert.False(File.Exists(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
+        // Quarantined files now have compile-safe stubs at the original location
+        Assert.True(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
+        Assert.Contains("Compile-safe stub", File.ReadAllText(Path.Combine(outputDir, "Startup.Auth.cs")));
+        Assert.True(File.Exists(Path.Combine(outputDir, "IdentityConfig.cs")));
+        Assert.Contains("Compile-safe stub", File.ReadAllText(Path.Combine(outputDir, "IdentityConfig.cs")));
+        Assert.True(File.Exists(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
+        Assert.Contains("Compile-safe stub", File.ReadAllText(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
 
         var layoutDir = Path.Combine(outputDir, "Layout");
         Directory.CreateDirectory(layoutDir);
@@ -1357,7 +1370,8 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Contains("CreateAsync(user, password)", program);
         Assert.Contains("app.MapPost(\"/__bwfc/actions/AddToCart\"", program);
         Assert.Contains("DisableAntiforgery()", program);
-        Assert.False(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
+        Assert.True(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
+        Assert.Contains("Compile-safe stub", File.ReadAllText(Path.Combine(outputDir, "Startup.Auth.cs")));
         Assert.True(File.Exists(Path.Combine(outputDir, "migration-artifacts", "compile-surface", "Startup.Auth.cs.txt")));
     }
 

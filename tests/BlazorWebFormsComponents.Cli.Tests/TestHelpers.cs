@@ -259,6 +259,7 @@ public static class TestHelpers
             new UrlCleanupTransform(),
             new CompileSurfaceStubTransform(quarantineDetector),
             new LegacyHelperStubTransform(),
+            new RouteParameterWiringTransform(),
             new TitlePropertyCodeBehindTransform(),
             new MarkupReferencedMemberStubTransform(),
         };
