@@ -451,6 +451,114 @@ private IQueryable<Product> GetProducts(int categoryId)
 }
 ```
 
+---
+
+## L2 Break-Fix Playbook — Data Layer
+
+### Recipe D1: SelectMethod String Binding (New in BWFC)
+
+As of the string-based SelectMethod feature, BWFC data controls accept `SelectMethod="MethodName"` as a plain string — exactly like Web Forms. The control resolves the method via reflection on the hosting `WebFormsPageBase`.
+
+**Prerequisite:** The page must inherit from `WebFormsPageBase` (which cascades itself automatically).
+
+```razor
+@* This works with zero CLI transforms — same as Web Forms *@
+@inherits WebFormsPageBase
+
+<ListView ItemType="Product" SelectMethod="GetProducts">
+    <ItemTemplate Context="item">
+        <span>@item.ProductName</span>
+    </ItemTemplate>
+</ListView>
+
+@code {
+    [Inject] IDbContextFactory<ProductContext> DbFactory { get; set; }
+
+    public IQueryable<Product> GetProducts()
+    {
+        using var db = DbFactory.CreateDbContext();
+        return db.Products.ToList().AsQueryable();
+    }
+}
+```
+
+**Key rules:**
+- `SelectMethod` is now a string (not a delegate) — pass the method name exactly as in Web Forms markup
+- The method must be `public` on the page class (reflection finds it)
+- Zero-param methods are resolved first (most common Web Forms pattern)
+- 4-param pagination signatures `(int maxRows, int startRowIndex, string sortBy, out int totalRowCount)` also work
+- `InsertMethod`, `UpdateMethod`, `DeleteMethod` follow the same string pattern
+- If no `WebFormsPageBase` cascade exists, the control throws a clear error
+
+**When to use string SelectMethod vs Items binding:**
+| Scenario | Use |
+|----------|-----|
+| Page inherits `WebFormsPageBase` and has the method | `SelectMethod="MethodName"` — zero changes needed |
+| Component/partial without page context | `Items="@data"` with explicit data loading |
+| Test code or standalone components | `Items="@list"` or `SelectMethodDelegate` |
+
+### Recipe D2: Detect and Fix `new DbContext()` Anti-Pattern
+
+**Symptom:** `CS7036: There is no argument given that corresponds to the required parameter 'options'`
+
+**Detection:** Search the migrated output for `new ProductContext()` or `new ApplicationDbContext()`:
+```powershell
+Select-String -Path samples\AfterWingtipToys\**\*.cs -Pattern "new \w+Context\(\)" -SimpleMatch
+```
+
+**Fix Pattern — page code-behind:**
+```csharp
+// BEFORE (Web Forms):
+var db = new ProductContext();
+
+// AFTER (inject factory):
+[Inject] public IDbContextFactory<ProductContext> DbFactory { get; set; }
+// Then in methods:
+using var db = DbFactory.CreateDbContext();
+```
+
+**Fix Pattern — Logic/service classes (not components):**
+```csharp
+// Accept IDbContextFactory via constructor injection
+public class ShoppingCartActions
+{
+    private readonly IDbContextFactory<ProductContext> _dbFactory;
+    public ShoppingCartActions(IDbContextFactory<ProductContext> dbFactory)
+        => _dbFactory = dbFactory;
+
+    public void AddToCart(int productId)
+    {
+        using var db = _dbFactory.CreateDbContext();
+        // ... use db ...
+    }
+}
+```
+Register in Program.cs: `builder.Services.AddScoped<ShoppingCartActions>();`
+
+### Recipe D3: Database Seed Data / Initializer Migration
+
+**Symptom:** `ProductDatabaseInitializer` or similar `IDatabaseInitializer` classes fail because EF Core doesn't have `Database.SetInitializer`.
+
+**Fix:** Convert to `EnsureCreated()` + manual seed in Program.cs:
+```csharp
+// Program.cs — after app.Build()
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ProductContext>();
+    db.Database.EnsureCreated();
+    if (!db.Products.Any())
+    {
+        // Seed data from the original initializer
+        db.Products.AddRange(/* ... */);
+        db.SaveChanges();
+    }
+}
+```
+
+The CLI quarantines `DatabaseInitializer` classes as compile-surface artifacts under `migration-artifacts/compile-surface/`. Read them for the seed data, then port to the pattern above.
+
+---
+
 **For SelectHandler delegates**, the delegate is invoked by BWFC infrastructure AFTER your method returns. You MUST materialize:
 ```csharp
 // BWFC SelectHandler delegate — MUST materialize

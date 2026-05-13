@@ -526,3 +526,80 @@ For a complete Identity UI (login, register, manage profile), scaffold it:
 dotnet aspnet-codegenerator identity -dc ApplicationDbContext --files "Account.Login;Account.Register;Account.Logout"
 ```
 This generates Razor Pages (not components) under `/Areas/Identity/`. They coexist with Blazor.
+
+---
+
+## L2 Break-Fix Playbook — Identity & Account Pages
+
+### Recipe I1: OAuth/External Auth Page Quarantine
+
+**Symptom:** 6–7 compile errors in `Account/OpenAuthProviders.razor` and `Account/RegisterExternalLogin.razor` referencing `providerDetails`, `ProviderName`, `email`, `Dynamic`, `LogIn_Click`.
+
+**Root Cause:** These pages depend on OWIN/Microsoft.Owin.Security which doesn't exist in .NET 10. The CLI migrates the markup but code-behind has unresolvable dependencies.
+
+**Detection:** Look for these patterns in Account pages:
+- `Microsoft.Owin.Security`
+- `Microsoft.AspNet.Identity.Owin`
+- `OpenAuthProviders`
+- `ExternalLoginResult`
+- `GetExternalLoginInfo`
+
+**Fix — create stub code-behind files:**
+
+```csharp
+// Account/OpenAuthProviders.razor.cs
+using Microsoft.AspNetCore.Components;
+
+namespace WingtipToys.Account;
+
+public partial class OpenAuthProviders : ComponentBase
+{
+    // Stub: external OAuth not yet migrated to ASP.NET Core Identity
+    [Parameter] public string ReturnUrl { get; set; } = "/";
+    private List<object> providerDetails { get; set; } = new();
+}
+```
+
+```csharp
+// Account/RegisterExternalLogin.razor.cs
+using Microsoft.AspNetCore.Components;
+
+namespace WingtipToys.Account;
+
+public partial class RegisterExternalLogin : ComponentBase
+{
+    private string ProviderName { get; set; } = "";
+    private string email { get; set; } = "";
+
+    private void LogIn_Click() { }
+}
+```
+
+**Markup fix — simplify to compile-safe stub:**
+```razor
+@* Account/OpenAuthProviders.razor *@
+<div class="external-login-providers">
+    @if (providerDetails.Any())
+    {
+        <p>No external login providers configured.</p>
+    }
+</div>
+```
+
+### Recipe I2: Account Page Missing Code-Behind Pattern
+
+**Symptom:** Razor markup references fields, properties, or event handlers that don't exist.
+
+**Root Cause:** CLI generates `.razor` from `.aspx` but doesn't always generate a matching `.razor.cs` when the original `.aspx.cs` had unresolvable dependencies.
+
+**Fix — systematic stub generation:**
+1. Read the `.razor` file and list every `@identifier` reference
+2. Create a `.razor.cs` partial class with stub members for each:
+   - Properties → `private string X { get; set; } = "";`
+   - Event handlers → `private void X_Click() { }`
+   - Collections → `private List<object> X { get; set; } = new();`
+3. Add `// TODO(bwfc-identity-migration): implement actual auth logic` comments
+
+**Key principle:** The goal is **compile-safe stubs**, not functional OAuth. Full external auth migration is an L3 task that requires architectural decisions about which OAuth providers to support in ASP.NET Core Identity.
+
+---
