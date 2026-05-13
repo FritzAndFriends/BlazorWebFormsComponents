@@ -224,6 +224,7 @@ public static class TestHelpers
             new DataSourceIdTransform(),
             new EnhancedNavAnnotationTransform(),
             new GetRouteUrlMarkupTransform(),
+            new HtmlBoilerplateStripTransform(),
         };
 
         var codeBehindTransforms = new List<ICodeBehindTransform>
@@ -237,6 +238,7 @@ public static class TestHelpers
             new DbContextInstantiationTransform(),
             new HttpContextAccessorTransform(),
             new SelectMethodMaterializeTransform(),
+            new EagerLoadNavigationTransform(),
             new HttpExceptionTransform(),
             new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),

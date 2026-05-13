@@ -8,8 +8,10 @@ public class LegacyHelperStubTransformTests
     private readonly LegacyHelperStubTransform _transform = new();
 
     [Fact]
-    public void SystemWeb_WithHttpContextCurrent_GeneratesApiAwareStub()
+    public void SystemWeb_WithOnlyHttpContextCurrent_PassesThrough()
     {
+        // Files with System.Web + HttpContext.Current should NOT be stubbed —
+        // HttpContextAccessorTransform (order 108) handles those patterns
         var content = """
             using System;
             using System.Collections.Generic;
@@ -80,38 +82,41 @@ public class LegacyHelperStubTransformTests
 
         var result = _transform.Apply(content, metadata);
 
-        // Verify it was stubbed (not passed through)
+        // Should NOT be stubbed — HttpContext.Current alone is handled by HttpContextAccessorTransform
+        Assert.DoesNotContain("Auto-generated API-compatible stub", result);
+        Assert.Equal(content, result);
+    }
+
+    [Fact]
+    public void SystemWeb_WithHttpRuntime_IsStubbed()
+    {
+        // Files with truly untransformable APIs (HttpRuntime, HttpServerUtility) SHOULD be stubbed
+        var content = """
+            using System.Web;
+            
+            namespace TestApp.Logic;
+            
+            public class CacheHelper
+            {
+                public string GetAppPath()
+                {
+                    return HttpRuntime.AppDomainAppPath;
+                }
+            }
+            """;
+
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = @"D:\input\Logic\CacheHelper.cs",
+            OutputFilePath = @"D:\output\Logic\CacheHelper.cs",
+            FileType = FileType.Page,
+            OriginalContent = content,
+        };
+
+        var result = _transform.Apply(content, metadata);
+
         Assert.Contains("Auto-generated API-compatible stub", result);
-        Assert.Contains("namespace TestApp.Logic;", result);
-
-        // Verify IDisposable interface preserved
-        Assert.Contains("IDisposable", result);
-
-        // Verify public methods preserved
-        Assert.Contains("public void AddToCart(int id)", result);
-        Assert.Contains("public void Dispose()", result);
-        Assert.Contains("public string GetCartId()", result);
-        Assert.Contains("public List<CartItem> GetCartItems()", result);
-        Assert.Contains("public decimal GetTotal()", result);
-        Assert.Contains("public void UpdateShoppingCartDatabase(string cartId, ShoppingCartUpdates[] updates)", result);
-
-        // Verify property preserved
-        Assert.Contains("public string ShoppingCartId { get; set; }", result);
-
-        // Verify constant preserved
-        Assert.Contains("public const string CartSessionKey = \"CartId\";", result);
-
-        // Verify nested struct preserved
-        Assert.Contains("public struct ShoppingCartUpdates", result);
-        Assert.Contains("public int ProductId;", result);
-        Assert.Contains("public int PurchaseQuantity;", result);
-        Assert.Contains("public bool RemoveItem;", result);
-
-        // Dispose gets empty body (not throw)
-        Assert.Contains("public void Dispose() { }", result);
-
-        // Other methods get throw NotImplementedException
-        Assert.Contains("GetCartId()", result);
+        Assert.Contains("public string GetAppPath()", result);
     }
 
     [Fact]

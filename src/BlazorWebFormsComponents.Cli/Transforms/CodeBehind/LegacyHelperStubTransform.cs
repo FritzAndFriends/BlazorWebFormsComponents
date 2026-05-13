@@ -16,14 +16,19 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
         @"\busing\s+(Microsoft\.AspNet\.Identity|Microsoft\.AspNet\.Identity\.EntityFramework|Microsoft\.AspNet\.Identity\.Owin|System\.Web\.Security|System\.Web\.Providers|System\.Web\.Configuration|System\.Web\.Profile|WebMatrix\.WebData|System\.Configuration)\b",
         RegexOptions.Compiled);
 
-    // Matches System.Web usage for heavy APIs (HttpContext.Current, Session, etc.)
-    // that can't be rewritten with simple using swaps
+    // Matches System.Web usage for heavy APIs that HttpContextAccessorTransform cannot handle
     private static readonly Regex SystemWebHeavyUsageRegex = new(
         @"\busing\s+System\.Web\b.*;\s*$",
         RegexOptions.Compiled | RegexOptions.Multiline);
 
+    // APIs that HttpContextAccessorTransform CAN handle — these should NOT trigger stubbing alone
+    private static readonly Regex HttpContextTransformableRegex = new(
+        @"\bHttpContext\.Current\b",
+        RegexOptions.Compiled);
+
+    // APIs that are truly untransformable and require stubbing
     private static readonly Regex HeavyWebApiRegex = new(
-        @"\bHttpContext\.Current\b|\bHttpRuntime\b|\bHttpServerUtility\b|\bHttpApplication\b",
+        @"\bHttpRuntime\b|\bHttpServerUtility\b|\bHttpApplication\b",
         RegexOptions.Compiled);
 
     private static readonly Regex NamespaceRegex = new(
@@ -71,14 +76,20 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
             || sourcePath.EndsWith(".master.cs", StringComparison.OrdinalIgnoreCase))
             return content;
 
-        if (!LegacyNamespaceRegex.IsMatch(content))
+        // Check for legacy namespace imports that have no automated transform
+        if (LegacyNamespaceRegex.IsMatch(content))
+            return BuildApiAwareStub(content, metadata);
+
+        // Check for System.Web usage — only stub if there are truly untransformable APIs
+        // HttpContext.Current alone is handled by HttpContextAccessorTransform (order 108)
+        if (SystemWebHeavyUsageRegex.IsMatch(content))
         {
-            // Check for System.Web + heavy API usage (HttpContext.Current, etc.)
-            if (!(SystemWebHeavyUsageRegex.IsMatch(content) && HeavyWebApiRegex.IsMatch(content)))
-                return content;
+            if (HeavyWebApiRegex.IsMatch(content))
+                return BuildApiAwareStub(content, metadata);
+            // System.Web + only HttpContext.Current → let HttpContextAccessorTransform handle it
         }
 
-        return BuildApiAwareStub(content, metadata);
+        return content;
     }
 
     internal static string BuildApiAwareStub(string content, FileMetadata metadata)

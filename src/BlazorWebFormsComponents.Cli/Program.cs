@@ -71,6 +71,7 @@ class Program
         services.AddSingleton<IMarkupTransform, DataSourceIdTransform>();
         services.AddSingleton<IMarkupTransform, EnhancedNavAnnotationTransform>();
         services.AddSingleton<IMarkupTransform, GetRouteUrlMarkupTransform>();
+        services.AddSingleton<IMarkupTransform, HtmlBoilerplateStripTransform>();
 
         // Register code-behind transforms in order
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
@@ -82,6 +83,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, DbContextInstantiationTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpContextAccessorTransform>();
         services.AddSingleton<ICodeBehindTransform, SelectMethodMaterializeTransform>();
+        services.AddSingleton<ICodeBehindTransform, EagerLoadNavigationTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpExceptionTransform>();
         services.AddSingleton<ICodeBehindTransform, ConfigurationManagerTransform>();
         services.AddSingleton<ICodeBehindTransform, BaseClassStripTransform>();

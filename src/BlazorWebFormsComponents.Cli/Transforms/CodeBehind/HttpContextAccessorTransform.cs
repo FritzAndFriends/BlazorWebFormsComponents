@@ -54,11 +54,18 @@ public class HttpContextAccessorTransform : ICodeBehindTransform
         if (!HttpContextCurrentRegex.IsMatch(content))
             return content;
 
-        // Don't transform pages — WebFormsPageBase already provides HttpContext shims
-        var isPageOrComponent = metadata.FileType == FileType.Page
-            || metadata.FileType == FileType.Control
+        // Don't transform actual page/control/master code-behinds — WebFormsPageBase provides HttpContext shims.
+        // Check by source file extension (reliable) rather than FileType (which SourceFileCopier sets to Page for all files).
+        // Also check for WebFormsPageBase in content as a fallback.
+        var sourcePath = metadata.SourceFilePath ?? "";
+        var isPageCodeBehind = sourcePath.EndsWith(".aspx", StringComparison.OrdinalIgnoreCase)
+            || sourcePath.EndsWith(".aspx.cs", StringComparison.OrdinalIgnoreCase)
+            || sourcePath.EndsWith(".ascx", StringComparison.OrdinalIgnoreCase)
+            || sourcePath.EndsWith(".ascx.cs", StringComparison.OrdinalIgnoreCase)
+            || sourcePath.EndsWith(".master", StringComparison.OrdinalIgnoreCase)
+            || sourcePath.EndsWith(".master.cs", StringComparison.OrdinalIgnoreCase)
             || PageBaseRegex.IsMatch(content);
-        if (isPageOrComponent)
+        if (isPageCodeBehind)
             return content;
 
         // Replace Session assignments: HttpContext.Current.Session["key"] = value;
