@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
@@ -6,159 +9,181 @@ namespace WingtipToys.Logic;
 
 public class ShoppingCartActions : IDisposable
 {
+    public struct ShoppingCartUpdates
+    {
+        public int ProductId { get; set; }
+        public int PurchaseQuantity { get; set; }
+        public bool RemoveItem { get; set; }
+    }
+
+    public string ShoppingCartId { get; set; } = string.Empty;
     public const string CartSessionKey = "CartId";
 
-    private readonly IDbContextFactory<ProductContext> _dbFactory;
+    private readonly ProductContext _db;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ShoppingCartActions(IDbContextFactory<ProductContext> dbFactory, IHttpContextAccessor httpContextAccessor)
+    public ShoppingCartActions(ProductContext db, IHttpContextAccessor httpContextAccessor)
     {
-        _dbFactory = dbFactory;
+        _db = db;
         _httpContextAccessor = httpContextAccessor;
     }
 
     public void AddToCart(int id)
     {
-        var cartId = GetCartId();
-        using var db = _dbFactory.CreateDbContext();
+        ShoppingCartId = GetCartId();
 
-        var cartItem = db.ShoppingCartItems
-            .Include(c => c.Product)
-            .SingleOrDefault(c => c.CartId == cartId && c.ProductId == id);
+        var cartItem = _db.ShoppingCartItems.SingleOrDefault(
+            c => c.CartId == ShoppingCartId && c.ProductId == id);
 
-        if (cartItem is null)
+        if (cartItem == null)
         {
             cartItem = new CartItem
             {
                 ItemId = Guid.NewGuid().ToString(),
                 ProductId = id,
-                CartId = cartId,
-                Product = db.Products.Single(p => p.ProductID == id),
+                CartId = ShoppingCartId,
+                Product = _db.Products.SingleOrDefault(p => p.ProductID == id),
                 Quantity = 1,
                 DateCreated = DateTime.Now
             };
-
-            db.ShoppingCartItems.Add(cartItem);
+            _db.ShoppingCartItems.Add(cartItem);
         }
         else
         {
             cartItem.Quantity++;
         }
-
-        db.SaveChanges();
+        _db.SaveChanges();
     }
+
+    public void Dispose() { }
 
     public string GetCartId()
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-        var session = httpContext?.Session;
-        if (session is null)
-        {
+        var session = _httpContextAccessor.HttpContext?.Session;
+        if (session == null)
             return Guid.NewGuid().ToString();
-        }
 
         var cartId = session.GetString(CartSessionKey);
-        if (string.IsNullOrWhiteSpace(cartId))
+        if (string.IsNullOrEmpty(cartId))
         {
-            cartId = !string.IsNullOrWhiteSpace(httpContext?.User.Identity?.Name)
-                ? httpContext!.User.Identity!.Name!
-                : Guid.NewGuid().ToString();
+            var userName = _httpContextAccessor.HttpContext?.User?.Identity?.Name;
+            if (!string.IsNullOrWhiteSpace(userName))
+            {
+                cartId = userName;
+            }
+            else
+            {
+                cartId = Guid.NewGuid().ToString();
+            }
             session.SetString(CartSessionKey, cartId);
         }
-
         return cartId;
     }
 
     public List<CartItem> GetCartItems()
     {
-        var cartId = GetCartId();
-        using var db = _dbFactory.CreateDbContext();
-        return db.ShoppingCartItems
+        ShoppingCartId = GetCartId();
+        return _db.ShoppingCartItems
             .Include(c => c.Product)
-            .Where(c => c.CartId == cartId)
-            .OrderBy(c => c.ProductId)
+            .Where(c => c.CartId == ShoppingCartId)
             .ToList();
     }
 
     public decimal GetTotal()
     {
-        var total = GetCartItems().Sum(item => item.Product.UnitPrice * item.Quantity);
-        return Convert.ToDecimal(total);
+        ShoppingCartId = GetCartId();
+        var total = (from cartItems in _db.ShoppingCartItems
+                     where cartItems.CartId == ShoppingCartId
+                     select (int?)cartItems.Quantity * cartItems.Product.UnitPrice).Sum();
+        return (decimal)(total ?? 0);
+    }
+
+    public ShoppingCartActions GetCart()
+    {
+        ShoppingCartId = GetCartId();
+        return this;
     }
 
     public void UpdateShoppingCartDatabase(string cartId, ShoppingCartUpdates[] cartItemUpdates)
     {
-        using var db = _dbFactory.CreateDbContext();
-        foreach (var cartUpdate in cartItemUpdates)
+        try
         {
-            var item = db.ShoppingCartItems.SingleOrDefault(c => c.CartId == cartId && c.ProductId == cartUpdate.ProductId);
-            if (item is null)
+            var myCart = GetCartItems();
+            foreach (var cartItem in myCart)
             {
-                continue;
-            }
-
-            if (cartUpdate.RemoveItem || cartUpdate.PurchaseQuantity < 1)
-            {
-                db.ShoppingCartItems.Remove(item);
-            }
-            else
-            {
-                item.Quantity = cartUpdate.PurchaseQuantity;
+                foreach (var update in cartItemUpdates)
+                {
+                    if (cartItem.ProductId == update.ProductId)
+                    {
+                        if (update.PurchaseQuantity < 1 || update.RemoveItem)
+                        {
+                            RemoveItem(cartId, cartItem.ProductId);
+                        }
+                        else
+                        {
+                            UpdateItem(cartId, cartItem.ProductId, update.PurchaseQuantity);
+                        }
+                    }
+                }
             }
         }
-
-        db.SaveChanges();
-    }
-
-    public void RemoveItem(string removeCartId, int removeProductId)
-    {
-        using var db = _dbFactory.CreateDbContext();
-        var myItem = db.ShoppingCartItems.SingleOrDefault(c => c.CartId == removeCartId && c.ProductId == removeProductId);
-        if (myItem is not null)
+        catch (Exception exp)
         {
-            db.ShoppingCartItems.Remove(myItem);
-            db.SaveChanges();
+            throw new Exception("ERROR: Unable to Update Cart Database - " + exp.Message, exp);
         }
     }
 
-    public void UpdateItem(string updateCartId, int updateProductId, int quantity)
+    public void RemoveItem(string removeCartID, int removeProductID)
     {
-        using var db = _dbFactory.CreateDbContext();
-        var myItem = db.ShoppingCartItems.SingleOrDefault(c => c.CartId == updateCartId && c.ProductId == updateProductId);
-        if (myItem is not null)
+        var myItem = _db.ShoppingCartItems
+            .FirstOrDefault(c => c.CartId == removeCartID && c.ProductId == removeProductID);
+        if (myItem != null)
+        {
+            _db.ShoppingCartItems.Remove(myItem);
+            _db.SaveChanges();
+        }
+    }
+
+    public void UpdateItem(string updateCartID, int updateProductID, int quantity)
+    {
+        var myItem = _db.ShoppingCartItems
+            .FirstOrDefault(c => c.CartId == updateCartID && c.ProductId == updateProductID);
+        if (myItem != null)
         {
             myItem.Quantity = quantity;
-            db.SaveChanges();
+            _db.SaveChanges();
         }
     }
 
     public void EmptyCart()
     {
-        var cartId = GetCartId();
-        using var db = _dbFactory.CreateDbContext();
-        var cartItems = db.ShoppingCartItems.Where(c => c.CartId == cartId).ToList();
-        if (cartItems.Count == 0)
+        ShoppingCartId = GetCartId();
+        var cartItems = _db.ShoppingCartItems.Where(c => c.CartId == ShoppingCartId);
+        foreach (var cartItem in cartItems)
         {
-            return;
+            _db.ShoppingCartItems.Remove(cartItem);
         }
-
-        db.ShoppingCartItems.RemoveRange(cartItems);
-        db.SaveChanges();
+        _db.SaveChanges();
     }
 
     public int GetCount()
     {
-        return GetCartItems().Sum(item => item.Quantity);
+        ShoppingCartId = GetCartId();
+        int? count = (from cartItems in _db.ShoppingCartItems
+                     where cartItems.CartId == ShoppingCartId
+                     select (int?)cartItems.Quantity).Sum();
+        return count ?? 0;
     }
 
-    public void Dispose()
+    public void MigrateCart(string cartId, string userName)
     {
-    }
-
-    public struct ShoppingCartUpdates
-    {
-        public int ProductId;
-        public int PurchaseQuantity;
-        public bool RemoveItem;
+        var shoppingCart = _db.ShoppingCartItems.Where(c => c.CartId == cartId);
+        foreach (var item in shoppingCart)
+        {
+            item.CartId = userName;
+        }
+        var session = _httpContextAccessor.HttpContext?.Session;
+        session?.SetString(CartSessionKey, userName);
+        _db.SaveChanges();
     }
 }

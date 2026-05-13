@@ -1,10 +1,14 @@
-using Microsoft.AspNetCore.Components;
+// TODO(bwfc-general): This helper class referenced legacy Web Forms APIs and was stubbed during migration.
+// Rebuild using ASP.NET Core equivalents (Identity, Authorization, Configuration).
+using System.Collections.Generic;
 
 namespace WingtipToys.Account;
-
 public partial class OpenAuthProviders
 {
-    [Parameter] public string ReturnUrl { get; set; } = "/";
+    private BlazorWebFormsComponents.ListView<string> providerDetails = default!;
 
-    private List<object> providerDetails { get; } = new();
+    public List<string> GetProviderNames()
+    {
+        return new List<string>();
+    }
 }

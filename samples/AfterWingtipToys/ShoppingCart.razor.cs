@@ -1,55 +1,75 @@
-using Microsoft.AspNetCore.Components;
-using WingtipToys.Logic;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using WingtipToys.Models;
+using WingtipToys.Logic;
+using Microsoft.AspNetCore.Components;
 
-namespace WingtipToys;
-
-public partial class ShoppingCart
+namespace WingtipToys
 {
-    [Inject] public ShoppingCartActions CartActions { get; set; } = default!;
+  public partial class ShoppingCart
+  {
+    [Inject] protected ShoppingCartActions _cartActions { get; set; } = default!;
 
-    private List<CartItem> CartItems { get; set; } = new();
-    private string TotalText { get; set; } = string.Empty;
-    private string ShoppingCartTitleText { get; set; } = "Shopping Cart";
-    private bool HasItems => CartItems.Count > 0;
+    private GridView<CartItem> CartList = default!;
+    private ImageButton CheckoutImageBtn = default!;
+    private TextBox PurchaseQuantity = default!;
+    private CheckBox Remove = default!;
+    private Button UpdateBtn = default!;
+
+    private string _labelTotalText = "Order Total: ";
+    private string _totalText = "";
+    private bool _showButtons = true;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        LoadCart();
+
+        var cartTotal = _cartActions.GetTotal();
+        if (cartTotal > 0)
+        {
+            _totalText = String.Format("{0:c}", cartTotal);
+        }
+        else
+        {
+            _labelTotalText = "";
+            _totalText = "";
+            _showButtons = false;
+        }
     }
 
     public List<CartItem> GetShoppingCartItems()
     {
-        LoadCart();
-        return CartItems;
+        return _cartActions.GetCartItems();
     }
 
-    private void LoadCart()
+    public List<CartItem> UpdateCartItems()
     {
-        CartItems = CartActions.GetCartItems();
-        TotalText = CartActions.GetTotal().ToString("c");
+        var cartId = _cartActions.GetCartId();
+        var items = _cartActions.GetCartItems();
 
-        if (!HasItems)
+        var cartUpdates = new ShoppingCartActions.ShoppingCartUpdates[items.Count];
+        for (var i = 0; i < items.Count; i++)
         {
-            TotalText = string.Empty;
-            ShoppingCartTitleText = "Shopping Cart is Empty";
+            cartUpdates[i].ProductId = items[i].ProductId;
+            cartUpdates[i].PurchaseQuantity = items[i].Quantity;
+            cartUpdates[i].RemoveItem = false;
         }
+
+        _cartActions.UpdateShoppingCartDatabase(cartId, cartUpdates);
+        _totalText = String.Format("{0:c}", _cartActions.GetTotal());
+        return _cartActions.GetCartItems();
     }
 
-    private string GetItemTotal(CartItem item)
+    protected void UpdateBtn_Click()
     {
-        return string.Format("{0:c}", item.Product.UnitPrice * item.Quantity);
+        UpdateCartItems();
     }
 
-    private void UpdateBtn_Click(EventArgs _)
+    protected void CheckoutBtn_Click()
     {
-        LoadCart();
-    }
-
-    private void CheckoutBtn_Click(EventArgs _)
-    {
-        Session["payment_amt"] = CartActions.GetTotal();
+        Session["payment_amt"] = _cartActions.GetTotal();
         Response.Redirect("Checkout/CheckoutStart.aspx");
     }
+  }
 }

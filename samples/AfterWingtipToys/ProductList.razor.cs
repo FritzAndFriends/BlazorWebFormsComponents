@@ -1,3 +1,4 @@
+// TODO(bwfc-query-details): GetProducts now binds through component query properties and a SelectMethod wrapper in the generated .razor file.
 // =============================================================================
 // TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
 //
@@ -21,19 +22,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using WingtipToys.Logic;
-
+using WingtipToys.Models;
+using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
-  public partial class ErrorPage
+  public partial class ProductList
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
-
-    // --- Server Utility Migration ---
-    // TODO(bwfc-server): Server.* calls work automatically via ServerShim on WebFormsPageBase.
-    // Methods found: GetLastError, ClearError
-    // For non-page classes, inject ServerShim via DI.
-    // GetLastError() currently returns null and ClearError() is a no-op compatibility stub.
 
     // --- Request.Form Migration ---
     // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
@@ -41,12 +36,8 @@ namespace WingtipToys
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
-    private Panel DetailedErrorPanel = default!;
-    private Label ErrorDetailedMsg = default!;
-    private Label ErrorHandler = default!;
-    private Label FriendlyErrorMsg = default!;
-    private Label InnerMessage = default!;
-    private Label InnerTrace = default!;
+    private ListView<Product> productList = default!;
+
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
@@ -56,73 +47,28 @@ namespace WingtipToys
         // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
         await base.OnInitializedAsync();
 
-      // Create safe error messages.
-      string generalErrorMsg = "A problem has occurred on this web site. Please try again. " +
-          "If this error continues, please contact support.";
-      string httpErrorMsg = "An HTTP error occurred. Page Not found. Please try again.";
-      string unhandledErrorMsg = "The error was unhandled by application code.";
 
-      // Display safe error message.
-      FriendlyErrorMsg.Text = generalErrorMsg;
+    }
 
-      // Determine where error was handled.
-      string errorHandler = Request.QueryString["handler"];
-      if (errorHandler == null)
+    [Inject] protected ProductContext _productContext { get; set; } = default!;
+
+    public IQueryable<Product> GetProducts(
+                        [QueryString("id")] int? categoryId)
+    {
+      IQueryable<Product> query = _productContext.Products;
+
+      if (categoryId.HasValue && categoryId > 0)
       {
-        errorHandler = "Error Page";
+        query = query.Where(p => p.CategoryID == categoryId);
       }
 
-      // Get the last error from the server.
-      Exception ex = Server.GetLastError();
-
-      // Get the error number passed as a querystring value.
-      string errorMsg = Request.QueryString["msg"];
-      if (errorMsg == "404")
+      if (!String.IsNullOrEmpty(CategoryName))
       {
-        ex = new InvalidOperationException(httpErrorMsg, ex);
-        FriendlyErrorMsg.Text = ex.Message;
+        query = query.Where(p =>
+                            String.Compare(p.Category.CategoryName,
+                            CategoryName) == 0);
       }
-
-      // If the exception no longer exists, create a generic exception.
-      if (ex == null)
-      {
-        ex = new Exception(unhandledErrorMsg);
-      }
-
-      // Show error details to only you (developer). LOCAL ACCESS ONLY.
-      // Show error details in development environment.
-      // Request.IsLocal not available in Blazor — use environment check or always show for now
-      {
-        // Detailed Error Message.
-        ErrorDetailedMsg.Text = ex.Message;
-
-        // Show where the error was handled.
-        ErrorHandler.Text = errorHandler;
-
-        // Show local access details.
-        DetailedErrorPanel.Visible = true;
-
-        if (ex.InnerException != null)
-        {
-          InnerMessage.Text = ex.GetType().ToString() + "<br/>" +
-              ex.InnerException.Message;
-          InnerTrace.Text = ex.InnerException.StackTrace;
-        }
-        else
-        {
-          InnerMessage.Text = ex.GetType().ToString();
-          if (ex.StackTrace != null)
-          {
-            InnerTrace.Text = ex.StackTrace.ToString().TrimStart();
-          }
-        }
-      }
-
-      // Log the exception.
-      ExceptionUtility.LogException(ex, errorHandler);
-
-      // Clear the error from the server.
-      Server.ClearError();
+      return query;
     }
   }
 }

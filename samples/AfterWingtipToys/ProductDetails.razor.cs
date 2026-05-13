@@ -18,42 +18,58 @@
 //   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
 //   TODO(bwfc-general): User controls → Blazor component references
 // =============================================================================
-using Microsoft.AspNetCore.Components;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using WingtipToys.Models;
+using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
   public partial class ProductDetails
   {
+    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
+
+    // --- Request.Form Migration ---
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
+    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
+    // Form keys found: key
+    // For non-page classes, inject RequestShim via DI.
+
     private FormView<Product> productDetail = default!;
+    [Parameter] public string? productName { get; set; }
 
-    [Inject] public IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
-    [Parameter] public string? ProductName { get; set; }
+    // --- ConfigurationManager Migration ---
+    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
+    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
-    public IQueryable<Product> GetProduct()
+    protected override async Task OnInitializedAsync()
     {
-      int? productId = null;
-      if (int.TryParse(Request.QueryString["ProductID"], out var parsedProductId))
-      {
-        productId = parsedProductId;
-      }
+        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
+        await base.OnInitializedAsync();
 
-      using var db = DbFactory.CreateDbContext();
-      IQueryable<Product> query = db.Products;
+
+    }
+
+    [Inject] protected ProductContext _productContext { get; set; } = default!;
+
+    public IQueryable<Product> GetProduct(
+                        [QueryString("ProductID")] int? productId)
+    {
+      IQueryable<Product> query = _productContext.Products;
       if (productId.HasValue && productId > 0)
       {
         query = query.Where(p => p.ProductID == productId);
       }
-      else if (!string.IsNullOrEmpty(ProductName))
+      else if (!String.IsNullOrEmpty(productName))
       {
-        query = query.Where(p => string.Compare(p.ProductName, ProductName) == 0);
+        query = query.Where(p =>
+                  String.Compare(p.ProductName, productName) == 0);
       }
       else
       {
-        return Array.Empty<Product>().AsQueryable();
+        query = null;
       }
-
-      return query.ToList().AsQueryable();
+      return query;
     }
   }
 }
