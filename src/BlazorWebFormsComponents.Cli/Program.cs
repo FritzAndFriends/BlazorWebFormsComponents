@@ -72,6 +72,8 @@ class Program
         services.AddSingleton<IMarkupTransform, EnhancedNavAnnotationTransform>();
         services.AddSingleton<IMarkupTransform, GetRouteUrlMarkupTransform>();
         services.AddSingleton<IMarkupTransform, HtmlBoilerplateStripTransform>();
+        services.AddSingleton<IMarkupTransform, MarkupCleanupTransform>();
+        services.AddSingleton<IMarkupTransform, LabelFieldBindTransform>();
 
         // Register code-behind transforms in order
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
@@ -92,6 +94,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, MethodNameCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefNullSafetyTransform>();
+        services.AddSingleton<ICodeBehindTransform, LabelFieldBindCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();
         services.AddSingleton<ICodeBehindTransform, RequestFormTransform>();
         services.AddSingleton<ICodeBehindTransform, QueryStringTypeAnnotationTransform>();
@@ -99,6 +102,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, GetRouteUrlTransform>();
         services.AddSingleton<ICodeBehindTransform, CartSessionKeyTransform>();
         services.AddSingleton<ICodeBehindTransform, SessionDetectTransform>();
+        services.AddSingleton<ICodeBehindTransform, SessionGetStringNullSafetyTransform>();
         services.AddSingleton<ICodeBehindTransform, ViewStateDetectTransform>();
         services.AddSingleton<ICodeBehindTransform, IsPostBackTransform>();
         services.AddSingleton<ICodeBehindTransform, PageLifecycleTransform>();
@@ -114,6 +118,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, TitlePropertyCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
         services.AddSingleton<ICodeBehindTransform, TypeMismatchFixTransform>();
+        services.AddSingleton<ICodeBehindTransform, DisposeReadonlyFieldTransform>();
 
         // Scaffolding
         services.AddSingleton<IRuntimeSignalDetector, EntityFrameworkRuntimeSignalDetector>();

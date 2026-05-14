@@ -22,6 +22,12 @@ public class FileMetadata
     public Dictionary<string, string> ComponentRefs { get; set; } = new();
 
     /// <summary>
+    /// Maps Label control ID → backing field name (e.g., "lblTotal" → "_lblTotal_Text").
+    /// Populated by LabelFieldBindTransform, consumed by LabelFieldBindCodeBehindTransform.
+    /// </summary>
+    public Dictionary<string, string> LabelFieldBindings { get; set; } = new();
+
+    /// <summary>
     /// Markup content after markup transforms. Set by pipeline before code-behind transforms.
     /// Code-behind transforms may modify this to update markup references (e.g., method renames).
     /// </summary>
@@ -50,5 +56,6 @@ public enum FileType
 {
     Page,
     Master,
-    Control
+    Control,
+    CodeFile
 }

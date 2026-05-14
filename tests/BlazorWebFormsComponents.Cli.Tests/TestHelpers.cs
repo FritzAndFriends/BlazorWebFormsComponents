@@ -225,6 +225,8 @@ public static class TestHelpers
             new EnhancedNavAnnotationTransform(),
             new GetRouteUrlMarkupTransform(),
             new HtmlBoilerplateStripTransform(),
+            new MarkupCleanupTransform(),
+            new LabelFieldBindTransform(),
         };
 
         var codeBehindTransforms = new List<ICodeBehindTransform>
@@ -247,6 +249,7 @@ public static class TestHelpers
             new MethodNameCollisionTransform(),
             new ComponentRefCodeBehindTransform(),
             new ComponentRefNullSafetyTransform(),
+            new LabelFieldBindCodeBehindTransform(),
             new ResponseRedirectTransform(),
             new RequestFormTransform(),
             new QueryStringTypeAnnotationTransform(),
@@ -254,6 +257,7 @@ public static class TestHelpers
             new GetRouteUrlTransform(),
             new CartSessionKeyTransform(),
             new SessionDetectTransform(),
+            new SessionGetStringNullSafetyTransform(),
             new ViewStateDetectTransform(),
             new IsPostBackTransform(),
             new PageLifecycleTransform(),
@@ -268,6 +272,7 @@ public static class TestHelpers
             new TitlePropertyCodeBehindTransform(),
             new MarkupReferencedMemberStubTransform(),
             new TypeMismatchFixTransform(),
+            new DisposeReadonlyFieldTransform(),
         };
 
         return new MigrationPipeline(markupTransforms, codeBehindTransforms, CreateDefaultSemanticPatterns());

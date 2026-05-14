@@ -125,7 +125,7 @@ public class SourceFileCopier
             {
                 SourceFilePath = file,
                 OutputFilePath = Path.Combine(outputPath, relativePath),
-                FileType = FileType.Page, // Doesn't matter for UsingStrip/EF transforms
+                FileType = FileType.CodeFile, // Standalone .cs — not a page/control/master code-behind
                 OriginalContent = content
             };
 

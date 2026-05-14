@@ -46,28 +46,51 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
         @"(?:List|IEnumerable|IList|ICollection)<(?<type>\w+)>\s+(?<name>\w+)\s*\(",
         RegexOptions.Compiled);
 
+    // Matches LINQ query syntax: from x in dbVar.TableName
+    private static readonly Regex LinqQuerySyntaxRegex = new(
+        @"from\s+\w+\s+in\s+(?<dbExpr>\w+\.\w+)",
+        RegexOptions.Compiled);
+
     public string Name => "EagerLoadNavigation";
     public int Order => 109; // Run right after SelectMethodMaterialize (108)
 
+    // Matches navigation property access in LINQ: x.Nav.Property (dotted member access on a range variable)
+    private static readonly Regex LinqNavAccessRegex = new(
+        @"(?:select|where|orderby|let)\s+[^;]*?\b\w+\.(?<nav>[A-Z]\w*)\.(?<prop>[A-Z]\w*)",
+        RegexOptions.Compiled);
+
     public string Apply(string content, FileMetadata metadata)
     {
-        if (metadata.FileType != FileType.Page && metadata.FileType != FileType.Control)
-            return content;
+        HashSet<string> navProps;
 
-        // Read the paired markup file to find navigation property references
-        var markupPath = metadata.OutputFilePath?.Replace(".razor.cs", ".razor");
-        if (markupPath == null || !File.Exists(markupPath))
-            return content;
+        if (metadata.FileType == FileType.Page || metadata.FileType == FileType.Control)
+        {
+            // For pages/controls, read the paired markup file for nav property references
+            var markupPath = metadata.OutputFilePath?.Replace(".razor.cs", ".razor");
+            if (markupPath == null || !File.Exists(markupPath))
+                return content;
 
-        var markup = File.ReadAllText(markupPath);
-        var navProps = ExtractNavigationProperties(markup);
+            var markup = File.ReadAllText(markupPath);
+            navProps = ExtractNavigationProperties(markup);
+        }
+        else if (metadata.FileType == FileType.CodeFile)
+        {
+            // For service/standalone classes, extract nav props from LINQ expressions in the code
+            navProps = ExtractNavigationPropertiesFromCode(content);
+        }
+        else
+        {
+            return content;
+        }
+
         if (navProps.Count == 0)
             return content;
 
         // Check if content has any query methods that could benefit from .Include()
         if (!content.Contains("CreateDbContext()", StringComparison.Ordinal) &&
             !content.Contains("IQueryable<", StringComparison.Ordinal) &&
-            !content.Contains(".ToList()", StringComparison.Ordinal))
+            !content.Contains(".ToList()", StringComparison.Ordinal) &&
+            !LinqQuerySyntaxRegex.IsMatch(content))
             return content;
 
         // Ensure Microsoft.EntityFrameworkCore using is present
@@ -98,6 +121,17 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
                     RegexOptions.None,
                     TimeSpan.FromMilliseconds(500));
             }
+        }
+
+        // Handle LINQ query syntax: from x in _db.Table select x.Nav.Prop
+        // Insert .Include() on the data source: from x in _db.Table.Include(...)
+        if (modified == content)
+        {
+            modified = LinqQuerySyntaxRegex.Replace(content, match =>
+            {
+                var dbExpr = match.Groups["dbExpr"].Value;
+                return match.Value.Replace(dbExpr, dbExpr + includeChain);
+            });
         }
 
         if (modified == content)
@@ -135,6 +169,22 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
         {
             var firstSegment = m.Groups["path"].Value.Split('.')[0];
             navProps.Add(firstSegment);
+        }
+
+        return navProps;
+    }
+
+    /// <summary>
+    /// Extracts navigation property names from LINQ expressions in code.
+    /// E.g., select c.Product.UnitPrice → "Product"
+    /// </summary>
+    internal static HashSet<string> ExtractNavigationPropertiesFromCode(string content)
+    {
+        var navProps = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (Match m in LinqNavAccessRegex.Matches(content))
+        {
+            navProps.Add(m.Groups["nav"].Value);
         }
 
         return navProps;
