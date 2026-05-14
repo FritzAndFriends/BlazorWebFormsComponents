@@ -757,6 +757,95 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
+
+## GridViewRow Compatibility
+
+BWFC provides full Web Forms `GridViewRow` compatibility so that migrated code-behind files compile and work with zero changes. This means patterns like `CartList.Rows[i].FindControl("PurchaseQuantity")` and `GetValues(GridViewRow row)` work exactly as they did in Web Forms.
+
+### Rows Typed Indexer
+
+`GridView<T>.Rows` returns a `GridViewRowCollection<T>` whose indexer returns `GridViewRow<T>` (not `IRow<T>`):
+
+```csharp
+// This "just works" — Rows[i] returns GridViewRow<T>
+for (int i = 0; i < CartList.Rows.Count; i++)
+{
+    GridViewRow<CartItem> row = CartList.Rows[i];
+    // ...
+}
+```
+
+### Implicit Conversion to Non-Generic GridViewRow
+
+`GridViewRow<T>` defines an implicit operator to the non-generic `GridViewRow` class, so method signatures like `GetValues(GridViewRow row)` accept `GridViewRow<T>` instances automatically:
+
+```csharp
+// Web Forms pattern — compiles unchanged in BWFC
+private ShoppingCartUpdates GetValues(GridViewRow row)
+{
+    TextBox quantityTextBox = (TextBox)row.FindControl("PurchaseQuantity");
+    // ...
+}
+
+// Called with the typed row — implicit conversion handles it
+var updates = GetValues(CartList.Rows[i]);
+```
+
+### FindControl on GridViewRow
+
+Both `GridViewRow<T>` and the non-generic `GridViewRow` support `FindControl(string id)`. In SSR mode, `FindControl` returns proxy `TextBox` and `CheckBox` instances populated from form POST data, matching the Web Forms pattern where controls inside `TemplateField` are accessed by ID.
+
+### RowState
+
+`GridViewRow<T>.RowState` returns a `DataControlRowState` flags enum, matching the Web Forms API:
+
+- `DataControlRowState.Normal` — even-indexed rows
+- `DataControlRowState.Alternate` — odd-indexed rows
+- `DataControlRowState.Edit` — row in edit mode
+- `DataControlRowState.Selected` — selected row
+
+### Cells and ExtractValuesFromCell
+
+`GridViewRow<T>.Cells` returns a `DataControlFieldCellCollection` wrapping the row's columns. Each `DataControlFieldCell` exposes a `ContainingField` with an `ExtractValuesFromCell` method that populates an `IOrderedDictionary` with the cell's value:
+
+```csharp
+// Web Forms pattern — works unchanged
+var dict = new OrderedDictionary();
+row.Cells[0].ContainingField.ExtractValuesFromCell(dict, row, DataControlRowState.Normal, true);
+string productName = (string)dict["ProductName"];
+```
+
+### End-to-End WingtipToys Pattern
+
+The canonical WingtipToys `UpdateCartItems()` pattern compiles and runs with zero code changes:
+
+```csharp
+public struct ShoppingCartUpdates
+{
+    public int ProductId;
+    public int PurchaseQuantity;
+    public bool RemoveItem;
+}
+
+private ShoppingCartUpdates GetValues(GridViewRow row)
+{
+    var updates = new ShoppingCartUpdates();
+    updates.PurchaseQuantity = int.Parse(
+        ((TextBox)row.FindControl("PurchaseQuantity")).Text);
+    updates.RemoveItem =
+        ((CheckBox)row.FindControl("chkRemove")).Checked;
+    return updates;
+}
+
+protected void UpdateCartItems()
+{
+    for (int i = 0; i < CartList.Rows.Count; i++)
+    {
+        var updates = GetValues(CartList.Rows[i]); // implicit operator
+        // process updates...
+    }
+}
+```
 | `SelectedIndex` | `int` | `-1` | Zero-based index of the selected row. `-1` = no selection. |
 | `SelectedRow` | `ItemType` | `default` | Read-only. Returns the data item for the selected row. |
 | `SelectedValue` | `object` | `null` | Read-only. Returns the `DataKeyNames` value of the selected row. |

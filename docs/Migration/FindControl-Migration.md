@@ -344,6 +344,31 @@ public class BaseWebFormsComponent : ComponentBase
 
 **What it does:** Searches the current component's child controls and all descendants recursively for one with the matching ID. This mirrors the deep-search behavior that migrated Web Forms code typically expects.
 
+### GridViewRow.FindControl — Data Row Controls
+
+For data controls like `GridView`, `FindControl` also works on individual rows. `GridViewRow<T>` and the non-generic `GridViewRow` shim both support `FindControl(string id)`:
+
+```csharp
+// This Web Forms pattern compiles and works unchanged in BWFC:
+GridViewRow row = CartList.Rows[i];  // implicit operator from GridViewRow<T>
+TextBox qty = (TextBox)row.FindControl("PurchaseQuantity");
+CheckBox remove = (CheckBox)row.FindControl("chkRemove");
+```
+
+In SSR mode, `FindControl` returns proxy `TextBox` and `CheckBox` instances whose `Text` and `Checked` properties are populated from the form POST data. This means migrated code that reads control values inside a postback handler works without modification.
+
+**Key compatibility features:**
+
+| Feature | Description |
+|---------|-------------|
+| `Rows[i]` typed indexer | Returns `GridViewRow<T>`, not `IRow<T>` |
+| Implicit conversion | `GridViewRow<T>` converts to non-generic `GridViewRow` automatically |
+| `FindControl` on rows | Returns proxy controls populated from form POST data |
+| `Cells` collection | `DataControlFieldCellCollection` with `ContainingField.ExtractValuesFromCell()` |
+| `RowState` | `DataControlRowState` flags enum (Normal, Alternate, Edit, Selected) |
+
+See [GridView — GridViewRow Compatibility](../DataControls/GridView.md#gridviewrow-compatibility) for full details and code examples.
+
 ---
 
 ## Complete DepartmentPortal Migration Examples
