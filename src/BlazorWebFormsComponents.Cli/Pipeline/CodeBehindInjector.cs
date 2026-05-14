@@ -64,7 +64,6 @@ public static class CodeBehindInjector
 		// Process members line-by-line, skipping duplicate [Parameter] declarations
 		var lines = members.Split('\n');
 		var result = new StringBuilder();
-		var skipNext = false;
 
 		for (var i = 0; i < lines.Length; i++)
 		{
@@ -86,17 +85,11 @@ public static class CodeBehindInjector
 				if (propMatch.Success && existingNames.Contains(propMatch.Groups["name"].Value))
 				{
 					// Skip this parameter attribute + property declaration lines
-					skipNext = true;
+					// Advance past all lookahead lines that were part of this declaration
+					var linesToSkip = lookAhead - i - 1;
+					i += linesToSkip;
 					continue;
 				}
-			}
-
-			if (skipNext)
-			{
-				// Skip the property line that follows the duplicate [Parameter] attribute
-				if (trimmed.Contains('{') || trimmed.Contains(';'))
-					skipNext = false;
-				continue;
 			}
 
 			result.AppendLine(lines[i]);
