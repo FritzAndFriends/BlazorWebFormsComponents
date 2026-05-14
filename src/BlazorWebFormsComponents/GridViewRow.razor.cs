@@ -58,6 +58,64 @@ namespace BlazorWebFormsComponents
 		[Parameter] public IDictionary<string, string> FormRowData { get; set; }
 
 		/// <summary>
+		/// Gets the state of the row (Normal, Edit, Selected, etc.).
+		/// Mirrors System.Web.UI.WebControls.GridViewRow.RowState.
+		/// </summary>
+		public DataControlRowState RowState
+		{
+			get
+			{
+				var state = DataControlRowState.Normal;
+				if (RowIndex % 2 == 1) state |= DataControlRowState.Alternate;
+				if (IsEditing) state |= DataControlRowState.Edit;
+				if (IsSelected) state |= DataControlRowState.Selected;
+				return state;
+			}
+		}
+
+		/// <summary>
+		/// Gets the cells in this row, wrapping each column as a <see cref="DataControlFieldCell"/>.
+		/// Mirrors System.Web.UI.WebControls.GridViewRow.Cells for migration compatibility.
+		/// </summary>
+		public DataControlFieldCellCollection Cells
+		{
+			get
+			{
+				if (_cells == null)
+				{
+					var cellList = new List<DataControlFieldCell>();
+					if (Columns != null)
+					{
+						foreach (var column in Columns)
+						{
+							DataControlField dcf;
+							if (column is BoundField<ItemType> bf)
+								dcf = new BoundDataControlField<ItemType>(bf, DataItem);
+							else
+								dcf = new TemplateDataControlField(column.HeaderText);
+
+							cellList.Add(new DataControlFieldCell(dcf));
+						}
+					}
+					_cells = new DataControlFieldCellCollection(cellList);
+				}
+				return _cells;
+			}
+		}
+		private DataControlFieldCellCollection _cells;
+
+		/// <summary>
+		/// Implicit conversion to the non-generic <see cref="GridViewRow"/> shim,
+		/// enabling Web Forms method signatures like <c>GetValues(GridViewRow row)</c>
+		/// to accept <c>GridView.Rows[i]</c> without an explicit cast.
+		/// </summary>
+		public static implicit operator GridViewRow(GridViewRow<ItemType> source)
+		{
+			if (source == null) return null;
+			return new GridViewRow(source);
+		}
+
+		/// <summary>
 		/// The form naming context for this row, cascaded to child controls.
 		/// Provides the naming prefix (e.g., "CartList$ctl04") so child controls
 		/// can generate Web Forms-compatible form field names.
@@ -67,6 +125,9 @@ namespace BlazorWebFormsComponents
 		protected override void OnParametersSet()
 		{
 			base.OnParametersSet();
+
+			// Invalidate cached cells when parameters change
+			_cells = null;
 
 			// Build the naming context: GridView's UniqueID + ctl{nn} for this row
 			var gridUniqueId = GridView?.UniqueID ?? GridView?.ID;

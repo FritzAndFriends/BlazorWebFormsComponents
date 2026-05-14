@@ -332,12 +332,34 @@ namespace BlazorWebFormsComponents
 		public List<IColumn<ItemType>> ColumnList{ get; set; } = new List<IColumn<ItemType>>();
 
 		/// <summary>
-		/// The Rows of the GridView
+		/// The Rows of the GridView. Returns a <see cref="GridViewRowCollection{T}"/>
+		/// whose indexer yields <see cref="GridViewRow{T}"/> directly, enabling the
+		/// Web Forms <c>CartList.Rows[i].FindControl("X")</c> pattern without a cast.
 		/// </summary>
-		public List<IRow<ItemType>> Rows { get => RowList; set => RowList = value; }
+		public GridViewRowCollection<ItemType> Rows { get => _rows; set => _rows = value; }
 
 		///<inheritdoc/>
-		public List<IRow<ItemType>> RowList { get; set; } = new List<IRow<ItemType>>();
+		List<IRow<ItemType>> IRowCollection<ItemType>.RowList
+		{
+			get => _rows;
+			set
+			{
+				if (value is GridViewRowCollection<ItemType> gvrc)
+					_rows = gvrc;
+				else
+				{
+					_rows = new GridViewRowCollection<ItemType>();
+					_rows.AddRange(value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// The backing row collection.
+		/// </summary>
+		public GridViewRowCollection<ItemType> RowList { get => _rows; set => _rows = value; }
+
+		private GridViewRowCollection<ItemType> _rows = new GridViewRowCollection<ItemType>();
 
 		#region Templates
 		/// <summary>
