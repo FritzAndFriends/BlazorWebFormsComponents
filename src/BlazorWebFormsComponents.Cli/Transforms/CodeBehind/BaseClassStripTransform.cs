@@ -4,10 +4,10 @@ using BlazorWebFormsComponents.Cli.Pipeline;
 namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 
 /// <summary>
-/// Removes Web Forms and Blazor base class declarations from code-behind partial classes.
-/// The .razor file handles inheritance via @inherits (typically WebFormsPageBase from _Imports.razor),
-/// so the partial class must not declare a conflicting base class.
-/// Strips: System.Web.UI.Page/MasterPage/UserControl, ComponentBase, and their short forms.
+/// Replaces Web Forms base class declarations with WebFormsPageBase for Page/Master types,
+/// or strips them entirely for Control/CodeFile types.
+/// Page and Master code-behind classes get ": WebFormsPageBase" so pages automatically have
+/// access to Request, Response, Session, Server, Cache, ClientScript, IsPostBack, and ViewState shims.
 /// </summary>
 public class BaseClassStripTransform : ICodeBehindTransform
 {
@@ -20,6 +20,13 @@ public class BaseClassStripTransform : ICodeBehindTransform
 
     public string Apply(string content, FileMetadata metadata)
     {
+        if (metadata.FileType is FileType.Page or FileType.Master)
+        {
+            // Replace the Web Forms base class with WebFormsPageBase
+            return BaseClassRegex.Replace(content, "$1 : WebFormsPageBase");
+        }
+
+        // For Controls and CodeFiles, strip the base class entirely
         return BaseClassRegex.Replace(content, "$1");
     }
 }

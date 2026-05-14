@@ -22,7 +22,7 @@ using System;
 
 namespace MyApp
 {
-    public partial class TC26_GetRouteUrl
+    public partial class TC26_GetRouteUrl : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 

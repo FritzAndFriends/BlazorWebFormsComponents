@@ -31,7 +31,7 @@
 using System;
 namespace MyApp
 {
-    public partial class TC29_Combined
+    public partial class TC29_Combined : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
