@@ -77,6 +77,7 @@ class Program
 
         // Register code-behind transforms in order
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
+        services.AddSingleton<ICodeBehindTransform, NestedClassCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, UsingStripTransform>();
         services.AddSingleton<ICodeBehindTransform, IdentityUsingTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpUtilityRewriteTransform>();

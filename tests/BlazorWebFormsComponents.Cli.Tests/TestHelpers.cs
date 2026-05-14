@@ -232,6 +232,7 @@ public static class TestHelpers
         var codeBehindTransforms = new List<ICodeBehindTransform>
         {
             new TodoHeaderTransform(),
+            new NestedClassCollisionTransform(),
             new UsingStripTransform(),
             new IdentityUsingTransform(),
             new HttpUtilityRewriteTransform(),

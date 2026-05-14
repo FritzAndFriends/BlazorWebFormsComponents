@@ -48,9 +48,14 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
             || metadata.FileType == FileType.Control
             || PageBaseRegex.IsMatch(content);
 
-        // Collect unique context type names
+        // Extract the containing class name to prevent self-injection
+        var containingClassMatch = Regex.Match(content, @"class\s+(\w+)", RegexOptions.Compiled);
+        var containingClassName = containingClassMatch.Success ? containingClassMatch.Groups[1].Value : "";
+
+        // Collect unique context type names, excluding the containing class itself
         var contextTypes = matches
             .Select(m => m.Groups["type"].Value)
+            .Where(t => !string.Equals(t, containingClassName, StringComparison.Ordinal))
             .Distinct(StringComparer.Ordinal)
             .ToList();
 

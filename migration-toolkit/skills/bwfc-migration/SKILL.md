@@ -56,6 +56,7 @@ Read these during L2 work:
 
 | Document | Content |
 |----------|---------|
+| **[REPAIR-PLAYBOOK.md](REPAIR-PLAYBOOK.md)** | Expert triage sequence — fix errors in this order for fastest repair |
 | **[WORKFLOW.md](WORKFLOW.md)** | L1→L2→L3 migration phases, CLI options, TODO categories, per-page checklist |
 | **[CONFIG-REFERENCE.md](CONFIG-REFERENCE.md)** | Project setup, shim table, WebFormsForm, ClientScript, PostBack |
 | **[PATTERNS.md](PATTERNS.md)** | Expression/file/directive conversion, Master Page → Shell, gotchas, troubleshooting |
@@ -64,6 +65,8 @@ Read these during L2 work:
 | **[AJAX-TOOLKIT.md](AJAX-TOOLKIT.md)** | Ajax Control Toolkit migration (14 components) |
 
 ## L2 Break-Fix Playbook
+
+**Start here → [REPAIR-PLAYBOOK.md](REPAIR-PLAYBOOK.md)** — step-by-step triage order encoding expert repair sequence. Fix errors in the prescribed order to minimize backtracking.
 
 Load only the recipes matching your errors — keep context lean.
 
@@ -78,3 +81,7 @@ Load only the recipes matching your errors — keep context lean.
 | `CS1061: 'RequestShim' ... 'IsLocal'` | `recipes/request-shim-gaps.md` |
 | `CS0103` on OAuth fields | `recipes/oauth-page-stubs.md` |
 | `CS0246: 'IDatabaseInitializer'` | `recipes/database-seed-initializer.md` |
+| `Session.SetString(key, = null)` garbled syntax | `recipes/session-transform-garbling.md` |
+| Circular DI: class injects itself | `recipes/circular-self-injection.md` |
+| `CS1503`/`CS0123`: EventCallback signature | `recipes/eventcallback-signature-mismatch.md` |
+| `CS0542`: nested class same name as outer | `recipes/nested-class-collision.md` |

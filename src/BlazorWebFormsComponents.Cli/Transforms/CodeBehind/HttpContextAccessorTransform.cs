@@ -37,8 +37,9 @@ public class HttpContextAccessorTransform : ICodeBehindTransform
         RegexOptions.Compiled);
 
     // Session assignment: HttpContext.Current.Session["key"] = value;
+    // Uses (?!=) negative lookahead after first = to exclude == (comparison) and != patterns
     private static readonly Regex SessionAssignRegex = new(
-        @"(?:System\.Web\.)?HttpContext\.Current\.Session\[(?<key>[^\]]+)\]\s*=\s*(?<value>[^;]+);",
+        @"(?:System\.Web\.)?HttpContext\.Current\.Session\[(?<key>[^\]]+)\]\s*(?<!=)=(?!=)\s*(?<value>[^;]+);",
         RegexOptions.Compiled);
 
     // Matches class declaration to find insertion point

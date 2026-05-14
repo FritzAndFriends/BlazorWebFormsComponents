@@ -6,7 +6,8 @@ namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 /// <summary>
 /// Late-pass markup cleanup that fixes common HTML issues in generated .razor files:
 /// - Self-closing non-void elements: &lt;td/&gt; → &lt;td&gt;&lt;/td&gt;
-/// - Unclosed inline formatting elements within text blocks
+/// - Unclosed inline formatting tags: &lt;b&gt;text&lt;b&gt; → &lt;b&gt;text&lt;/b&gt;
+/// - Orphan closing tags without matching openers
 /// These patterns cause Razor compilation errors or broken rendering.
 /// </summary>
 public class MarkupCleanupTransform : IMarkupTransform
@@ -26,6 +27,11 @@ public class MarkupCleanupTransform : IMarkupTransform
         @"<(?<tag>[a-zA-Z][\w-]*)(?<attrs>[^>]*?)\s*/>",
         RegexOptions.Compiled);
 
+    // Unclosed inline formatting: <b>text<b> (should be <b>text</b>)
+    private static readonly Regex UnclosedInlineRegex = new(
+        @"<(?<tag>b|i|u|s|em|strong|small|mark|sub|sup)(?<attrs>[^>]*)>(?<content>[^<]*)<\k<tag>(?=[>\s])",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     public string Apply(string content, FileMetadata metadata)
     {
         // Fix self-closing non-void elements
@@ -44,6 +50,15 @@ public class MarkupCleanupTransform : IMarkupTransform
 
             // Convert to open+close pair
             return $"<{tag}{attrs}></{tag}>";
+        });
+
+        // Fix unclosed inline formatting tags: <b>text<b> → <b>text</b>
+        content = UnclosedInlineRegex.Replace(content, match =>
+        {
+            var tag = match.Groups["tag"].Value;
+            var attrs = match.Groups["attrs"].Value;
+            var innerContent = match.Groups["content"].Value;
+            return $"<{tag}{attrs}>{innerContent}</{tag}";
         });
 
         return content;
