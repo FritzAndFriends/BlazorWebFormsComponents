@@ -62,7 +62,15 @@ Run 41 finished green at 25/25 acceptance tests in 47:54 from a fresh output fol
 - **2026-05-07T15:15:19-04:00:** Compile-surface quarantine should keep a benchmark-path allowlist. Stub-safe handling of Account/Admin/Checkout pages is useful, but quarantining `ProductList`, `AddToCart`, or `ShoppingCart` adds avoidable manual repair work on Wingtip fixtures.
 - **2026-05-07T15:38:16-04:00:** Quarantine heuristics work better with a two-tier rule: never quarantine essential product/cart/home/contact/about pages for incidental signals, but still quarantine Account/Admin/Checkout paths or pages with strong blockers such as compile-surface failures. That keeps benchmark flows intact without weakening build safety.
 - **2026-05-07T15:38:16-04:00:** Semantic page rewrites that emit raw `<form>` tags should be post-processed centrally so they always carry the SSR contract (`<AntiforgeryToken />` plus a deterministic form name). Doing that in the semantic catalog hardens both account/action pages and any future form-emitting patterns without duplicating logic.
+- **2026-05-15T09:55:50-04:00:** `ComponentRefCodeBehindTransform.ClassOpenRegex` was `partial\s+class\s+\w+\s*\{` — this fails to match whenever `BaseClassStripTransform` (Order 200) runs first and rewrites the declaration to `public partial class Foo : WebFormsPageBase`. The base-class/interface list between the class name and `{` breaks the match. Fixed by changing `\s*\{` to `[^{]*\{`. This was the #1 error source in Run 80 (15+ of 28 unique CS0103 errors — `CartList`, `UpdateBtn`, etc.). The fix is surgical: one regex character class change, 3 regression tests added, 35/35 passing.
+- **2026-05-15T09:55:50-04:00:** Transform interaction order contracts matter. When a code-behind transform reads a class declaration header, it must account for all transforms with lower Order values that may have modified that header. `ClassOpenRegex`-style patterns should use `[^{]*` not `\s*` between the class name and `{` to survive base-class or interface annotations added by earlier transforms.
 
 
 ≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
 
+
+### 2026-05-15T14:02:20Z: ComponentRefCodeBehindTransform regex fix validated
+
+Fixed ClassOpenRegex from partial\s+class\s+\w+\s*\{ to partial\s+class\s+\w+[^{]*\{ to match classes with base classes injected by earlier transforms. Added 3 regression test cases. All 35/35 ComponentRef tests pass, full suite 729/729 green.
+
+**Rule:** Any code-behind transform locating class body opening brace must use [^{]*{ pattern.

@@ -7,6 +7,37 @@
 
 ## Learnings
 
+### 2026-05-15T09:55:50-04:00: ComponentRefCodeBehindTransform Test Audit
+
+**Task:** Write/audit tests for `ComponentRefCodeBehindTransform` field generation.
+
+**Outcome:** Test file at `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/ComponentRefCodeBehindTransformTests.cs` already contained comprehensive coverage — 10 tests, all passing.
+
+**Tests verified (all green):**
+- `OrderIs220` — transform slot is correct
+- `InjectsFieldForLabel` / `InjectsFieldForGenericGridView` — basic and generic field emission
+- `InjectsMultipleFields` — all entries in ComponentRefs get declarations
+- `InsertsAfterClassOpeningBrace` — positional correctness vs methods
+- `SkipsWhenNoComponentRefs` — empty dict returns content unchanged
+- `SkipsWhenNoClassFound` — no `partial class` match → passthrough
+- `SkipsExistingFieldDeclaration` — duplicate-guard using identifier regex
+- `FieldsAreSortedAlphabetically` — deterministic output ordering
+- `WorksWithGenericListViewType` — generic type strings preserved verbatim
+
+**Key patterns observed:**
+- `CreateMetadata()` factory accepts `Dictionary<string, string>?` for ComponentRefs
+- Field format expected: `private {Type} {id} = default!;` (null-forgiving initializer)
+- Duplicate detection checks for existing access-modifier + identifier pattern
+- `CountOccurrences()` helper used for duplicate-guard assertions
+
+**Key file paths:**
+- Transform: `src/BlazorWebFormsComponents.Cli/Transforms/CodeBehind/ComponentRefCodeBehindTransform.cs`
+- Tests: `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/ComponentRefCodeBehindTransformTests.cs`
+- Markup counterpart: `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/ComponentRefMarkupTransformTests.cs`
+
+**Build:** `dotnet build tests/BlazorWebFormsComponents.Cli.Tests --nologo` → 0 errors, 9 warnings (pre-existing)
+**Test run:** 10/10 passed, 0 failed
+
 ### 2026-05-07T13:58:11-04:00: Cart session-key QA
 
 - Added QA coverage for a new `CartSessionKeyTransform` that rewrites cart/basket `Session.Id` usage to a stable session-backed `cart-key` helper using BWFC `SessionShim` semantics.
@@ -68,3 +99,7 @@
 
 ≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
 
+
+### 2026-05-15T14:02:20Z: ComponentRef test validation complete
+
+Confirmed 10/10 ComponentRef tests passing. Test coverage is complete — no further work needed. Field declaration pattern is sound. Bishop's implementation ready for merge.
