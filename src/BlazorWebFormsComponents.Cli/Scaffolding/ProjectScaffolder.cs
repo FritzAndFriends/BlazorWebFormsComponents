@@ -132,6 +132,7 @@ public class ProjectScaffolder
         }
 
         var bwfcReference = ResolveBwfcReference(outputRoot);
+        var bwfcTargetsImport = ResolveBwfcTargetsImport(outputRoot);
 
         var csproj = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
 
@@ -146,7 +147,7 @@ public class ProjectScaffolder
   <ItemGroup>
 {bwfcReference}{additionalPackages}
   </ItemGroup>
-
+{bwfcTargetsImport}
 </Project>
 ";
 
@@ -175,6 +176,33 @@ public class ProjectScaffolder
         }
 
         return @"    <PackageReference Include=""Fritz.BlazorWebFormsComponents"" Version=""*"" />";
+    }
+
+    private static string ResolveBwfcTargetsImport(string outputRoot)
+    {
+        var outputFullPath = Path.GetFullPath(outputRoot);
+        var current = new DirectoryInfo(outputFullPath);
+
+        while (current is not null)
+        {
+            var candidate = Path.Combine(current.FullName, "src", "BlazorWebFormsComponents", "BlazorWebFormsComponents.csproj");
+            if (File.Exists(candidate))
+            {
+                var targetsDir = Path.GetDirectoryName(candidate)!;
+                var targetsFile = Path.Combine(targetsDir, "build", "Fritz.BlazorWebFormsComponents.targets");
+                if (File.Exists(targetsFile))
+                {
+                    var targetsRelative = Path.GetRelativePath(outputFullPath, targetsFile)
+                        .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                    return $@"
+  <Import Project=""{targetsRelative}"" />
+";
+                }
+                return "";
+            }
+            current = current.Parent;
+        }
+        return "";
     }
 
 

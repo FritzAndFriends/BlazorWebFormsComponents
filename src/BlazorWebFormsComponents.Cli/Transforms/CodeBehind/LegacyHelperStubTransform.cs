@@ -36,7 +36,7 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
         RegexOptions.Compiled);
 
     private static readonly Regex ClassDeclRegex = new(
-        @"(?:public|internal)\s+(?<static>static\s+)?class\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)(?:\s*:\s*(?<bases>[^{\r\n]+))?",
+        @"(?:public|internal)\s+(?<static>static\s+)?(?:(?:sealed|abstract|partial)\s+)*class\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)(?:\s*:\s*(?<bases>[^{\r\n]+))?",
         RegexOptions.Compiled);
 
     // Matches public method signatures: public [static] ReturnType MethodName(params)
@@ -54,9 +54,9 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
         @"public\s+const\s+(?<type>\S+)\s+(?<name>\w+)\s*=\s*(?<value>[^;]+);",
         RegexOptions.Compiled);
 
-    // Matches nested type declarations: public struct/class/enum Name { ... }
+    // Matches nested type declarations: public [sealed/static/abstract/partial] struct/class/enum Name { ... }
     private static readonly Regex NestedTypeRegex = new(
-        @"public\s+(?<kind>struct|class|enum)\s+(?<name>[A-Za-z_]\w*)\s*\{",
+        @"public\s+(?:(?:sealed|static|abstract|partial)\s+)*(?<kind>struct|class|enum)\s+(?<name>[A-Za-z_]\w*)(?:\s*:\s*[^{\r\n]+)?\s*\{",
         RegexOptions.Compiled);
 
     // Matches fields inside nested types: public Type Name;
@@ -97,54 +97,131 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
         var nsMatch = NamespaceRegex.Match(content);
         var ns = nsMatch.Success ? nsMatch.Groups["ns"].Value : null;
 
-        var classMatch = ClassDeclRegex.Match(content);
-        var className = classMatch.Success
-            ? classMatch.Groups["name"].Value
-            : Path.GetFileNameWithoutExtension(metadata.OutputFilePath);
-        var isStatic = classMatch.Success && classMatch.Groups["static"].Success;
+        // Find all top-level class declarations
+        var classMatches = ClassDeclRegex.Matches(content);
+        if (classMatches.Count == 0)
+        {
+            // Fallback: generate a single stub with file name
+            return BuildSingleClassStub(content, ns,
+                Path.GetFileNameWithoutExtension(metadata.OutputFilePath),
+                isStatic: false, interfaces: new List<string>());
+        }
 
-        // Extract interfaces (filter out legacy base classes)
-        var interfaces = ExtractInterfaces(classMatch);
+        if (classMatches.Count == 1)
+        {
+            var classMatch = classMatches[0];
+            var className = classMatch.Groups["name"].Value;
+            var isStatic = classMatch.Groups["static"].Success;
+            var interfaces = ExtractInterfaces(classMatch);
+            return BuildSingleClassStub(content, ns, className, isStatic, interfaces);
+        }
 
-        // Extract public API surface
+        // Multiple top-level classes: scope each class to its own body
+        var sb = new StringBuilder();
+        sb.AppendLine("// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.");
+        sb.AppendLine("// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.");
+
+        if (!string.IsNullOrWhiteSpace(ns))
+        {
+            sb.AppendLine();
+            sb.AppendLine($"namespace {ns};");
+        }
+
+        var allClassNames = classMatches.Select(m => m.Groups["name"].Value).ToHashSet(StringComparer.Ordinal);
+
+        for (var i = 0; i < classMatches.Count; i++)
+        {
+            var classMatch = classMatches[i];
+            var className = classMatch.Groups["name"].Value;
+            var isStatic = classMatch.Groups["static"].Success;
+            var interfaces = ExtractInterfaces(classMatch);
+
+            // Find the class body: from opening brace to matching close
+            var braceStart = content.IndexOf('{', classMatch.Index + classMatch.Length - 1);
+            if (braceStart < 0) continue;
+            var braceEnd = FindMatchingBrace(content, braceStart);
+            if (braceEnd < 0) continue;
+
+            var classBody = content[braceStart..(braceEnd + 1)];
+
+            var methods = ExtractMethods(classBody, className);
+            var properties = ExtractProperties(classBody);
+            var constants = ExtractConstants(classBody);
+            var nestedTypes = ExtractNestedTypes(classBody)
+                .Where(nt => !allClassNames.Contains(nt.Name))
+                .ToList();
+
+            sb.AppendLine();
+            var staticMod = isStatic ? "static " : "";
+            var interfaceList = interfaces.Count > 0 ? $" : {string.Join(", ", interfaces)}" : "";
+            sb.AppendLine($"public {staticMod}partial class {className}{interfaceList}");
+            sb.AppendLine("{");
+
+            foreach (var c in constants)
+                sb.AppendLine($"    public const {c.Type} {c.Name} = {c.Value};");
+            if (constants.Count > 0) sb.AppendLine();
+
+            foreach (var p in properties)
+                sb.AppendLine($"    public {p.Type} {p.Name} {{ get; set; }}");
+            if (properties.Count > 0) sb.AppendLine();
+
+            foreach (var m in methods)
+            {
+                var modsPrefix = string.IsNullOrEmpty(m.Modifiers) ? "" : $"{m.Modifiers} ";
+                var body = GetMethodBody(m, interfaces.Contains("IDisposable"));
+                sb.AppendLine($"    public {modsPrefix}{m.ReturnType} {m.Name}({m.Parameters}) {body}");
+            }
+
+            foreach (var nt in nestedTypes)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"    public {nt.Kind} {nt.Name}");
+                sb.AppendLine("    {");
+                foreach (var f in nt.Fields)
+                    sb.AppendLine($"        public {f.Type} {f.Name};");
+                sb.AppendLine("    }");
+            }
+
+            sb.AppendLine("}");
+        }
+
+        return sb.ToString();
+    }
+
+    private static string BuildSingleClassStub(string content, string? ns,
+        string className, bool isStatic, List<string> interfaces)
+    {
         var methods = ExtractMethods(content, className);
         var properties = ExtractProperties(content);
         var constants = ExtractConstants(content);
-        var nestedTypes = ExtractNestedTypes(content);
+        var nestedTypes = ExtractNestedTypes(content)
+            .Where(nt => nt.Name != className)
+            .ToList();
 
         var sb = new StringBuilder();
         sb.AppendLine("// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.");
         sb.AppendLine("// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.");
-        sb.AppendLine();
 
         if (!string.IsNullOrWhiteSpace(ns))
         {
-            sb.AppendLine($"namespace {ns};");
             sb.AppendLine();
+            sb.AppendLine($"namespace {ns};");
         }
 
+        sb.AppendLine();
         var staticMod = isStatic ? "static " : "";
         var interfaceList = interfaces.Count > 0 ? $" : {string.Join(", ", interfaces)}" : "";
         sb.AppendLine($"public {staticMod}partial class {className}{interfaceList}");
         sb.AppendLine("{");
 
-        // Constants
         foreach (var c in constants)
-        {
             sb.AppendLine($"    public const {c.Type} {c.Name} = {c.Value};");
-        }
-
         if (constants.Count > 0) sb.AppendLine();
 
-        // Properties
         foreach (var p in properties)
-        {
             sb.AppendLine($"    public {p.Type} {p.Name} {{ get; set; }}");
-        }
-
         if (properties.Count > 0) sb.AppendLine();
 
-        // Methods
         foreach (var m in methods)
         {
             var modsPrefix = string.IsNullOrEmpty(m.Modifiers) ? "" : $"{m.Modifiers} ";
@@ -152,16 +229,13 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
             sb.AppendLine($"    public {modsPrefix}{m.ReturnType} {m.Name}({m.Parameters}) {body}");
         }
 
-        // Nested types
         foreach (var nt in nestedTypes)
         {
             sb.AppendLine();
             sb.AppendLine($"    public {nt.Kind} {nt.Name}");
             sb.AppendLine("    {");
             foreach (var f in nt.Fields)
-            {
                 sb.AppendLine($"        public {f.Type} {f.Name};");
-            }
             sb.AppendLine("    }");
         }
 
