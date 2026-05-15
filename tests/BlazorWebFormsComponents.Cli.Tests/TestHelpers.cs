@@ -266,6 +266,7 @@ public static class TestHelpers
             new IsPostBackTransform(),
             new PageLifecycleTransform(),
             new EventHandlerSignatureTransform(),
+            new InnerTextRewriteTransform(),
             new DataBindTransform(),
             new ClientScriptTransform(),
             new UrlCleanupTransform(),

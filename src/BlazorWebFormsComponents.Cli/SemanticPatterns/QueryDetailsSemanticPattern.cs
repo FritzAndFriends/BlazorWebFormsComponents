@@ -153,12 +153,15 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
         foreach (Match match in RouteDataParameterRegex.Matches(parameters))
         {
             var name = match.Groups["name"].Value;
+            // Route data parameters preserve original casing because the RouteParameterWiringTransform
+            // generates [Parameter] properties with the exact route template name (e.g., categoryName).
+            // Using ToPropertyName would PascalCase it (CategoryName), mismatching the existing property.
             boundParameters.Add(new BoundParameter(
                 "route",
                 match.Groups["type"].Value.Trim(),
                 name,
                 name,
-                SemanticPatternUtilities.ToPropertyName(name)));
+                name));
         }
 
         return boundParameters;

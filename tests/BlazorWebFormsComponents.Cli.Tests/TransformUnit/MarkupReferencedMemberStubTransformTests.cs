@@ -26,7 +26,7 @@ public class MarkupReferencedMemberStubTransformTests
         Assert.Contains("private object? _orderTotal; // TODO: migrate from Web Forms code-behind", result);
         Assert.Contains("protected object? FormatTotal()", result);
         Assert.Contains("return null;", result);
-        Assert.Contains("protected void PlaceOrder(object? sender, EventArgs e)", result);
+        Assert.Contains("protected void PlaceOrder()", result);
     }
 
     [Fact]
@@ -42,6 +42,44 @@ public class MarkupReferencedMemberStubTransformTests
         };
 
         var input = "namespace TestApp;\n\npublic partial class ShoppingCart\n{\n    private object? _cartTotal;\n\n    protected object? FormatTotal()\n    {\n        return _cartTotal;\n    }\n\n    protected void Checkout(object? sender, EventArgs e)\n    {\n    }\n}";
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Equal(input, result);
+    }
+
+    [Fact]
+    public void AddsPropertyStub_ForParenthesizedPascalCaseReferences()
+    {
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Register.aspx",
+            OutputFilePath = "Register.razor.cs",
+            FileType = FileType.Page,
+            OriginalContent = string.Empty,
+            MarkupContent = "<h3>Register with your @(ProviderName) account</h3>"
+        };
+
+        var input = "namespace TestApp;\n\npublic partial class Register : BlazorWebFormsComponents.WebFormsPageBase\n{\n}";
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("private string ProviderName { get; set; } = \"\"; // TODO: migrate from Web Forms code-behind", result);
+    }
+
+    [Fact]
+    public void DoesNotAddPropertyStub_WhenAlreadyDeclared()
+    {
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Register.aspx",
+            OutputFilePath = "Register.razor.cs",
+            FileType = FileType.Page,
+            OriginalContent = string.Empty,
+            MarkupContent = "<h3>Register with your @(ProviderName) account</h3>"
+        };
+
+        var input = "namespace TestApp;\n\npublic partial class Register\n{\n    private string ProviderName { get; set; } = \"External\";\n}";
 
         var result = _transform.Apply(input, metadata);
 

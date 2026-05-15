@@ -28,6 +28,11 @@ public class MarkupReferencedMemberStubTransform : ICodeBehindTransform
         @"@\(\s*(?<name>_[A-Za-z]\w*)\s*\)",
         RegexOptions.Compiled);
 
+    // Matches @(PascalCaseName) for property references like @(ProviderName)
+    private static readonly Regex ParenthesizedPropertyReferenceRegex = new(
+        @"@\(\s*(?<name>[A-Z][A-Za-z0-9_]*)\s*\)",
+        RegexOptions.Compiled);
+
     private static readonly Regex EventHandlerRegex = new(
         @"\b(?:OnClick|OnCommand|OnTextChanged|OnSelectedIndexChanged|OnCheckedChanged|OnRowCommand|OnRowEditing|OnRowUpdating|OnRowCancelingEdit|OnRowDeleting|OnRowDataBound|OnPageIndexChanging|OnSorting|OnItemCommand|OnItemDataBound|OnDataBound|OnLoad|OnInit|OnPreRender|OnSelectedDateChanged|OnDayRender|OnVisibleMonthChanged|OnServerValidate|OnCreatingUser|OnCreatedUser|OnAuthenticate|OnLoggedIn|OnLoggingIn)\s*=\s*""@(?<name>[A-Za-z_]\w*)""",
         RegexOptions.Compiled);
@@ -82,6 +87,13 @@ public class MarkupReferencedMemberStubTransform : ICodeBehindTransform
             .OrderBy(name => name, StringComparer.Ordinal)
             .ToList();
 
+        var propertyNames = CollectMatches(metadata.MarkupContent, ParenthesizedPropertyReferenceRegex)
+            .Where(name => !RazorKeywords.Contains(name))
+            .Distinct(StringComparer.Ordinal)
+            .Where(name => !HasDeclaredMember(content, name))
+            .OrderBy(name => name, StringComparer.Ordinal)
+            .ToList();
+
         var eventHandlerNames = CollectMatches(metadata.MarkupContent, EventHandlerRegex)
             .Distinct(StringComparer.Ordinal)
             .Where(name => !HasDeclaredMethod(content, name))
@@ -96,13 +108,14 @@ public class MarkupReferencedMemberStubTransform : ICodeBehindTransform
             .OrderBy(name => name, StringComparer.Ordinal)
             .ToList();
 
-        if (fieldNames.Count == 0 && renderMethodNames.Count == 0 && eventHandlerNames.Count == 0)
+        if (fieldNames.Count == 0 && propertyNames.Count == 0 && renderMethodNames.Count == 0 && eventHandlerNames.Count == 0)
         {
             return content;
         }
 
         var stubs = new List<string>();
         stubs.AddRange(fieldNames.Select(name => $"    private object? {name}; // TODO: migrate from Web Forms code-behind"));
+        stubs.AddRange(propertyNames.Select(name => $"    private string {name} {{ get; set; }} = \"\"; // TODO: migrate from Web Forms code-behind"));
         stubs.AddRange(renderMethodNames.Select(CreateRenderMethodStub));
         stubs.AddRange(eventHandlerNames.Select(CreateEventHandlerStub));
 
@@ -126,7 +139,7 @@ public class MarkupReferencedMemberStubTransform : ICodeBehindTransform
         $"    protected object? {name}()\n    {{\n        // TODO: migrate from Web Forms code-behind\n        return null;\n    }}";
 
     private static string CreateEventHandlerStub(string name) =>
-        $"    protected void {name}(object? sender, EventArgs e)\n    {{\n        // TODO: migrate from Web Forms code-behind\n    }}";
+        $"    protected void {name}()\n    {{\n        // TODO: migrate from Web Forms code-behind\n    }}";
 
     private static bool HasDeclaredMember(string content, string name)
     {

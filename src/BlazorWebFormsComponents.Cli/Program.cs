@@ -111,6 +111,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, IsPostBackTransform>();
         services.AddSingleton<ICodeBehindTransform, PageLifecycleTransform>();
         services.AddSingleton<ICodeBehindTransform, EventHandlerSignatureTransform>();
+        services.AddSingleton<ICodeBehindTransform, InnerTextRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, DataBindTransform>();
         services.AddSingleton<ICodeBehindTransform, ClientScriptTransform>();
         services.AddSingleton<ICodeBehindTransform, UrlCleanupTransform>();

@@ -191,10 +191,10 @@ public class SemanticPatternCatalogTests : IDisposable
         Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", result.Markup);
         Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", result.CodeBehind);
         Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public int? ProductId { get; set; }", result.CodeBehind);
-        Assert.Contains("public string? ProductName { get; set; }", result.CodeBehind);
+        Assert.Contains("public string? productName { get; set; }", result.CodeBehind);
         Assert.Contains("TODO(bwfc-query-details)", result.CodeBehind);
         // Swing 3: wrapper auto-wires to the code-behind method instead of returning empty data
-        Assert.Contains("var query = GetProduct(ProductId, ProductName);", result.CodeBehind);
+        Assert.Contains("var query = GetProduct(ProductId, productName);", result.CodeBehind);
         Assert.DoesNotContain("Array.Empty", result.CodeBehind);
         Assert.Single(result.AppliedPatterns);
         Assert.Equal("pattern-query-details", result.AppliedPatterns[0].PatternId);
@@ -254,7 +254,7 @@ public class SemanticPatternCatalogTests : IDisposable
 
         Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", result.Markup);
         Assert.Contains("GetProductQueryDetails_SelectMethod", result.CodeBehind);
-        Assert.Contains("var query = GetProduct(ProductId, ProductName);", result.CodeBehind);
+        Assert.Contains("var query = GetProduct(ProductId, productName);", result.CodeBehind);
         Assert.Single(result.AppliedPatterns);
     }
 
