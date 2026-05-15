@@ -5,8 +5,8 @@ namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 
 /// <summary>
 /// Transforms Web Forms event handler signatures to Blazor-compatible signatures:
-///   - Standard EventArgs → strip both params: Handler()
-///   - Specialized EventArgs → strip sender, keep EventArgs: Handler(SpecializedEventArgs e)
+///   - Strip the 'object sender' parameter, keep EventArgs param
+///   - Normalize ImageClickEventArgs → EventArgs (BWFC components use EventCallback&lt;EventArgs&gt;)
 /// </summary>
 public class EventHandlerSignatureTransform : ICodeBehindTransform
 {
@@ -19,6 +19,13 @@ public class EventHandlerSignatureTransform : ICodeBehindTransform
     private static readonly Regex HandlerRegex = new(
         @"((?:(?:protected|private|public|internal)\s+)?(?:(?:static|virtual|override|new|sealed|abstract|async)\s+)*(?:void|Task(?:<[^>]+>)?)\s+\w+)\s*\(\s*object\s+\w+\s*,\s*(\w*EventArgs)\s+(\w+)\s*\)",
         RegexOptions.Compiled);
+
+    // Web Forms EventArgs types that don't exist in Blazor or don't match BWFC component signatures.
+    // These are normalized to EventArgs so the handler matches EventCallback<EventArgs>.
+    private static readonly HashSet<string> NormalizedToEventArgs = new(StringComparer.Ordinal)
+    {
+        "ImageClickEventArgs",
+    };
 
     private const int MaxIterations = 200;
 
@@ -34,17 +41,12 @@ public class EventHandlerSignatureTransform : ICodeBehindTransform
             var eventArgsType = match.Groups[2].Value;
             var eventArgsParam = match.Groups[3].Value;
 
-            string replacement;
-            if (eventArgsType == "EventArgs")
-            {
-                // Standard EventArgs — strip both params entirely
-                replacement = $"{prefix}()";
-            }
-            else
-            {
-                // Specialized EventArgs — strip sender, keep EventArgs param
-                replacement = $"{prefix}({eventArgsType} {eventArgsParam})";
-            }
+            // Normalize Web Forms-only EventArgs types to standard EventArgs
+            if (NormalizedToEventArgs.Contains(eventArgsType))
+                eventArgsType = "EventArgs";
+
+            // Always keep the EventArgs param — BWFC components use EventCallback<EventArgs>
+            var replacement = $"{prefix}({eventArgsType} {eventArgsParam})";
 
             content = content[..match.Index] + replacement + content[(match.Index + match.Length)..];
         }

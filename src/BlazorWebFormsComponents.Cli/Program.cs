@@ -51,6 +51,7 @@ class Program
         services.AddSingleton<IMarkupTransform, FormWrapperTransform>();
         services.AddSingleton<IMarkupTransform, DisplayExpressionTransform>();
         services.AddSingleton<IMarkupTransform, ExpressionTransform>();
+        services.AddSingleton<IMarkupTransform, ColorAttributeTransform>();
         services.AddSingleton<IMarkupTransform, ServerCodeBlockTransform>();
         services.AddSingleton<IMarkupTransform, LoginViewTransform>();
         services.AddSingleton<IMarkupTransform, SelectMethodTransform>();

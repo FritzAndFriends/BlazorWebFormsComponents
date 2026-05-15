@@ -51,7 +51,7 @@ namespace MyApp
             var path = "~/Images/logo.png";
         }
 
-        protected void Button_Click()
+        protected void Button_Click(EventArgs e)
         {
             Response.Redirect("/Checkout", false);
         }

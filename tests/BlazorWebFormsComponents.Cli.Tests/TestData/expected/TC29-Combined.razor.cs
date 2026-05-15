@@ -59,7 +59,7 @@ namespace MyApp
                         BindGrid();
         }
 
-        protected void SaveButton_Click()
+        protected void SaveButton_Click(EventArgs e)
         {
             // Save logic
             Response.Redirect("/Confirmation");

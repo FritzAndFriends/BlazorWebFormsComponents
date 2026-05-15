@@ -199,6 +199,7 @@ public static class TestHelpers
             // Order 490-500: Expressions
             new DisplayExpressionTransform(),
             new ExpressionTransform(),
+            new ColorAttributeTransform(),
             // Order 510: Statement block conversion (before LoginViewTransform)
             new ServerCodeBlockTransform(),
             // Order 510-520: Semantic controls

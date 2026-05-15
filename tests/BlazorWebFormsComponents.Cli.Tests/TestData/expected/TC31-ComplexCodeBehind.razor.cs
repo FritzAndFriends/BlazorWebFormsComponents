@@ -85,13 +85,13 @@ namespace ContosoAdmin
             }
         }
 
-        protected void Export_Click()
+        protected void Export_Click(EventArgs e)
         {
             var reportPath = GetRouteUrl( /* TODO(bwfc-route-url): converted from Page route lookup – ensure page inherits WebFormsPageBase */ "ReportRoute", new { format = "csv" });
             Response.Redirect(reportPath);
         }
 
-        protected void Refresh_Click()
+        protected void Refresh_Click(EventArgs e)
         {
             Response.Redirect("/Admin/Dashboard");
         }

@@ -36,12 +36,12 @@ namespace MyApp
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
-        protected void Button_Click()
+        protected void Button_Click(EventArgs e)
         {
             // Handle button click
         }
 
-        protected void LinkButton_Click()
+        protected void LinkButton_Click(EventArgs e)
         {
             // Handle link click
         }
