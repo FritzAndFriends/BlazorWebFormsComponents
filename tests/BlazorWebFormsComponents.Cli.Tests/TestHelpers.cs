@@ -221,6 +221,7 @@ public static class TestHelpers
             // Order 800-820: Normalize & templates
             new TemplatePlaceholderTransform(),
             new TemplateContextTransform(),
+            new TemplateToStringTransform(),
             new AttributeNormalizeTransform(),
             new DataSourceIdTransform(),
             new EnhancedNavAnnotationTransform(),
@@ -249,6 +250,7 @@ public static class TestHelpers
             new ClassNameAlignTransform(),
             new NamespaceAlignTransform(),
             new MethodNameCollisionTransform(),
+            new SelfInstantiationTransform(),
             new ComponentRefCodeBehindTransform(),
             new ComponentRefNullSafetyTransform(),
             new LabelFieldBindCodeBehindTransform(),
@@ -271,6 +273,7 @@ public static class TestHelpers
             new LegacyHelperStubTransform(),
             new RouteParameterWiringTransform(),
             new RouteDataParameterPromotionTransform(),
+            new DuplicateRouteParameterTransform(),
             new TitlePropertyCodeBehindTransform(),
             new MarkupReferencedMemberStubTransform(),
             new TypeMismatchFixTransform(),

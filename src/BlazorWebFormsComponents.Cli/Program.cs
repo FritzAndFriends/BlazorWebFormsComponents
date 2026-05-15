@@ -68,6 +68,7 @@ class Program
         services.AddSingleton<IMarkupTransform, UrlReferenceTransform>();
         services.AddSingleton<IMarkupTransform, TemplatePlaceholderTransform>();
         services.AddSingleton<IMarkupTransform, TemplateContextTransform>();
+        services.AddSingleton<IMarkupTransform, TemplateToStringTransform>();
         services.AddSingleton<IMarkupTransform, AttributeNormalizeTransform>();
         services.AddSingleton<IMarkupTransform, DataSourceIdTransform>();
         services.AddSingleton<IMarkupTransform, EnhancedNavAnnotationTransform>();
@@ -94,6 +95,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, ClassNameAlignTransform>();
         services.AddSingleton<ICodeBehindTransform, NamespaceAlignTransform>();
         services.AddSingleton<ICodeBehindTransform, MethodNameCollisionTransform>();
+        services.AddSingleton<ICodeBehindTransform, SelfInstantiationTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefNullSafetyTransform>();
         services.AddSingleton<ICodeBehindTransform, LabelFieldBindCodeBehindTransform>();
@@ -117,6 +119,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, LegacyHelperStubTransform>();
         services.AddSingleton<ICodeBehindTransform, RouteParameterWiringTransform>();
         services.AddSingleton<ICodeBehindTransform, RouteDataParameterPromotionTransform>();
+        services.AddSingleton<ICodeBehindTransform, DuplicateRouteParameterTransform>();
         services.AddSingleton<ICodeBehindTransform, TitlePropertyCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
         services.AddSingleton<ICodeBehindTransform, TypeMismatchFixTransform>();

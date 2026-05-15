@@ -73,7 +73,7 @@ public class GridViewColumnItemTypeTransformTests
         Assert.Contains("<GridView id=\"CartList\" AutoGenerateColumns=\"false\" ItemType=\"CartItem\">", result);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", result);
         Assert.Contains("<ItemTemplate Context=\"Item\">", result);
-        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", result);
+        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity.ToString()\"></TextBox>", result);
         Assert.Equal(1, CountOccurrences(result, "<TemplateField"));
         Assert.DoesNotContain("<BoundField", result);
     }

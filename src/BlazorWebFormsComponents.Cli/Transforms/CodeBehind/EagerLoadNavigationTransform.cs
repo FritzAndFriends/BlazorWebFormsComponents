@@ -58,10 +58,10 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
         @"\b\w+\.(?<nav>[A-Z]\w*)\.(?<prop>(?>(?:[A-Z]\w*)))(?!\s*\()",
         RegexOptions.Compiled);
 
-    // Matches injected DbContext field access before LINQ method calls:
-    // _db.TableName.Where(...), _context.Products.Select(...)
+    // Matches injected DbContext field access before LINQ method calls or direct materializers:
+    // _db.TableName.Where(...), _context.Products.Select(...), _db.TableName.ToList()
     private static readonly Regex InjectedDbFieldBeforeLinqRegex = new(
-        @"(?<dbset>_\w+\.\w+)(?=\s*\.(?:Where|OrderBy|OrderByDescending|Select|SingleOrDefault|FirstOrDefault|Any|Count|Take|Skip|GroupBy))",
+        @"(?<dbset>_\w+\.\w+)(?=\s*\.(?:Where|OrderBy|OrderByDescending|Select|SingleOrDefault|FirstOrDefault|Any|Count|Take|Skip|GroupBy|ToList|ToArray|First|Single))",
         RegexOptions.Compiled);
 
     // Matches DbContext field declarations: private readonly XxxContext _field;
@@ -147,7 +147,7 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
             {
                 var dbVar = dbMatch.Groups["var"].Value;
                 modified = Regex.Replace(modified,
-                    $@"({Regex.Escape(dbVar)}\.\w+)(?=\s*(?:\.Where|\.OrderBy|\.Select|\s*;))",
+                    $@"({Regex.Escape(dbVar)}\.\w+)(?=\s*(?:\.Where|\.OrderBy|\.Select|\.ToList|\.ToArray|\.First|\.FirstOrDefault|\.Single|\.SingleOrDefault|\s*;))",
                     m => m.Value.Contains(".Include(") ? m.Value : $"{m.Value}{includeChain}",
                     RegexOptions.None,
                     TimeSpan.FromMilliseconds(500));

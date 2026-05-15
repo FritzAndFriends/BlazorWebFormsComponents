@@ -12,7 +12,7 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
 {
     private const string Marker = "TODO(bwfc-query-details)";
     private static readonly Regex SelectMethodRegex = new(
-        @"SelectMethod=""(?<method>[A-Za-z_][A-Za-z0-9_]*)""",
+        @"SelectMethod\s*=\s*""(?<method>[A-Za-z_][A-Za-z0-9_]*)""",
         RegexOptions.Compiled);
     private static readonly Regex QueryStringParameterRegex = new(
         @"\[QueryString(?:\(\s*""(?<binding>[^""]+)""\s*\))?\]\s*(?<type>[^,\r\n]+?)\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)",

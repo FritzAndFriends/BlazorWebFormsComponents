@@ -209,6 +209,40 @@ public class EagerLoadNavigationTransformTests
     }
 
     [Fact]
+    public void Apply_InjectsIncludeOnInjectedDbFieldBeforeDirectToList()
+    {
+        var input = """
+            using System.Linq;
+
+            public class ShoppingCartActions
+            {
+                private readonly ProductContext _db;
+
+                public List<CartItem> GetCartItems()
+                {
+                    return _db.ShoppingCartItems.ToList();
+                }
+
+                public decimal GetTotal()
+                {
+                    decimal total = 0;
+                    foreach (var item in GetCartItems())
+                    {
+                        total += item.Product.UnitPrice;
+                    }
+
+                    return total;
+                }
+            }
+            """;
+
+        var result = _transform.Apply(input, MakeCodeFileMetadata());
+
+        Assert.Contains("return _db.ShoppingCartItems.Include(x => x.Product).ToList();", result);
+        Assert.Contains("using Microsoft.EntityFrameworkCore;", result);
+    }
+
+    [Fact]
     public void Apply_HandlesMultipleQueriesInSameFile()
     {
         var input = """

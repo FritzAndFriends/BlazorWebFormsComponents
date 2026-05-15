@@ -203,6 +203,62 @@ public class SemanticPatternCatalogTests : IDisposable
     }
 
     [Fact]
+    public void Catalog_QueryDetailsPattern_HandlesSpaceAroundEqualsInSelectMethod()
+    {
+        var catalog = new SemanticPatternCatalog([new QueryDetailsSemanticPattern()]);
+        var migrationContext = new MigrationContext
+        {
+            SourcePath = "input",
+            OutputPath = "output",
+            Options = new MigrationOptions()
+        };
+        var sourceFile = new SourceFile
+        {
+            MarkupPath = Path.Combine("input", "ProductDetails.aspx"),
+            OutputPath = Path.Combine("output", "ProductDetails.razor"),
+            FileType = FileType.Page
+        };
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = sourceFile.MarkupPath,
+            OutputFilePath = sourceFile.OutputPath,
+            FileType = sourceFile.FileType,
+            OriginalContent = "<FormView />"
+        };
+        var report = new MigrationReport();
+
+        // Note: SelectMethod ="GetProduct" has a space before the equals sign (matches WingtipToys source)
+        var result = catalog.Apply(
+            migrationContext,
+            sourceFile,
+            metadata,
+            """
+            @page "/ProductDetails"
+
+            <FormView ItemType="Product" SelectMethod ="GetProduct" />
+            """,
+            """
+            using WingtipToys.Models;
+
+            public partial class ProductDetails
+            {
+                public IQueryable<Product> GetProduct(
+                    [QueryString("ProductID")] int? productId,
+                    [RouteData] string productName)
+                {
+                    return Enumerable.Empty<Product>().AsQueryable();
+                }
+            }
+            """,
+            report);
+
+        Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", result.Markup);
+        Assert.Contains("GetProductQueryDetails_SelectMethod", result.CodeBehind);
+        Assert.Contains("var query = GetProduct(ProductId, ProductName);", result.CodeBehind);
+        Assert.Single(result.AppliedPatterns);
+    }
+
+    [Fact]
     public void Catalog_ActionPagesPattern_ReplacesInertMarkupWithHandlerStub()
     {
         var catalog = new SemanticPatternCatalog([new ActionPagesSemanticPattern()]);
