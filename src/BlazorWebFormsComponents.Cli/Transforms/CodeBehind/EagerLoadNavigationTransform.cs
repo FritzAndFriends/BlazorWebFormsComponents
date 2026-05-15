@@ -228,12 +228,22 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
     /// general member access (item.Product.ProductID) patterns.
     /// Filters out known non-navigation property names to reduce false positives.
     /// </summary>
+    // Matches using directives, comments, and string literals that should be excluded from nav property detection
+    private static readonly Regex NonCodeLineRegex = new(
+        @"^\s*(?:using\s|//|#|\[assembly:)",
+        RegexOptions.Compiled | RegexOptions.Multiline);
+
     internal static HashSet<string> ExtractNavigationPropertiesFromCode(string content)
     {
         var navProps = new HashSet<string>(StringComparer.Ordinal);
 
+        // Strip using directives and comment lines to avoid false positives
+        // (e.g., System.Collections.Generic → "Collections", Microsoft.AspNetCore.Http → "AspNetCore")
+        var codeOnly = string.Join("\n",
+            content.Split('\n').Where(line => !NonCodeLineRegex.IsMatch(line)));
+
         // LINQ keyword access: select/where/orderby c.Nav.Prop
-        foreach (Match m in LinqNavAccessRegex.Matches(content))
+        foreach (Match m in LinqNavAccessRegex.Matches(codeOnly))
         {
             var nav = m.Groups["nav"].Value;
             if (!NonNavPropertyNames.Contains(nav))
@@ -242,7 +252,7 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
 
         // General member access: item.Nav.Prop (catches foreach loops, assignments, etc.)
         // Method calls are already excluded by the regex negative lookahead
-        foreach (Match m in MemberNavAccessRegex.Matches(content))
+        foreach (Match m in MemberNavAccessRegex.Matches(codeOnly))
         {
             var nav = m.Groups["nav"].Value;
             if (!NonNavPropertyNames.Contains(nav) && char.IsUpper(nav[0]) && nav.Length > 2)

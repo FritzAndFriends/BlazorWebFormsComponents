@@ -93,6 +93,35 @@ public class EagerLoadNavigationTransformTests
         Assert.Empty(result);
     }
 
+    [Fact]
+    public void ExtractNavigationPropertiesFromCode_IgnoresUsingStatements()
+    {
+        var code = """
+            using System;
+            using System.Collections.Generic;
+            using System.Linq;
+            using Microsoft.AspNetCore.Http;
+            using Microsoft.EntityFrameworkCore;
+
+            public class ShoppingCartActions
+            {
+                public decimal GetTotal()
+                {
+                    var total = (from cartItems in _db.ShoppingCartItems
+                                 select cartItems.Product.UnitPrice).Sum();
+                    return total;
+                }
+            }
+            """;
+
+        var result = EagerLoadNavigationTransform.ExtractNavigationPropertiesFromCode(code);
+
+        Assert.Contains("Product", result);
+        Assert.DoesNotContain("Collections", result);
+        Assert.DoesNotContain("AspNetCore", result);
+        Assert.DoesNotContain("EntityFrameworkCore", result);
+    }
+
     #endregion
 
     #region Strategy 1: .ToList().AsQueryable()
