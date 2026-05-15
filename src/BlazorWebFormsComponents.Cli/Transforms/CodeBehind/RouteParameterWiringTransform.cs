@@ -98,7 +98,7 @@ public class RouteParameterWiringTransform : ICodeBehindTransform
         // Ensure Microsoft.AspNetCore.Components using is present
         if (!content.Contains("using Microsoft.AspNetCore.Components;", StringComparison.Ordinal))
         {
-            var lastUsing = Regex.Match(content, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
+            var lastUsing = Regex.Match(content, @"^using\s+[^;(\n]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
             if (lastUsing.Success)
             {
                 var insertAt = lastUsing.Index + lastUsing.Length;

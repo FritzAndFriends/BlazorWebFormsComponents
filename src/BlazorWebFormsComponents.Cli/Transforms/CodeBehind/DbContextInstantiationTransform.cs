@@ -207,7 +207,7 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
         // Ensure Microsoft.AspNetCore.Components using is present for [Inject] (only for pages)
         if (isPageOrComponent && content.Contains(InjectAttr) && !content.Contains("using Microsoft.AspNetCore.Components;", StringComparison.Ordinal))
         {
-            var lastUsing = Regex.Match(content, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
+            var lastUsing = Regex.Match(content, @"^using\s+[^;(\n]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
             if (lastUsing.Success)
             {
                 var insertAt = lastUsing.Index + lastUsing.Length;

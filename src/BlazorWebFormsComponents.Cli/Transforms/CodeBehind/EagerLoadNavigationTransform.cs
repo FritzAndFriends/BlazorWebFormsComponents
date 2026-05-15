@@ -140,7 +140,7 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
         // Add the using statement if needed
         if (needsUsing)
         {
-            var lastUsing = Regex.Match(modified, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
+            var lastUsing = Regex.Match(modified, @"^using\s+[^;(\n]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
             if (lastUsing.Success)
             {
                 var insertAt = lastUsing.Index + lastUsing.Length;

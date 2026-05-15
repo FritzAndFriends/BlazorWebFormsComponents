@@ -340,8 +340,8 @@ public class MigrationPipeline
                 var usingLine = $"using {svc.Namespace};";
                 if (!content.Contains(usingLine, StringComparison.Ordinal))
                 {
-                    // Insert after last using statement
-                    var lastUsing = Regex.Match(content, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
+                    // Insert after last using-directive (not using-block statements)
+                    var lastUsing = Regex.Match(content, @"^using\s+[^;(\n]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
                     if (lastUsing.Success)
                     {
                         var insertAt = lastUsing.Index + lastUsing.Length;
