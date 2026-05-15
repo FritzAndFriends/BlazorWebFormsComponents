@@ -94,17 +94,13 @@ We've run the WingtipToys migration **81 times** from scratch, measuring every i
 
 ### Error Reduction Over Time
 
-```
-Run 01 (Mar 4)   ████████████████████████████████████████  ~566s total, manual L2
-Run 25 (Mar 26)  ████████████████████████████████████████  382 build errors
-Run 40 (May 7)   ██████████████████████                    ~22 min, 25/25 tests
-Run 70 (May 13)  ████████████████                          ~16 min, 8 errors, 25/25
-Run 77 (May 14)  █████████████                             15 errors, 25/25
-Run 80 (May 15)  ██████████                                28 errors*, 25/25, ~10 min
-Run 81 (May 15)  ███████                                   14 errors, 25/25, 4:18 L1+L2
-```
+![Build Error Reduction](charts/error-reduction.svg)
 
-*\*Run 80 had 28 errors due to the ComponentRef regex bug — fixed in Run 81.*
+*Runs 78–80 show temporary regression behavior while specific migration bugs were being repaired; the trend line shows the overall downward trajectory from 382 initial errors to 14.*
+
+### L1+L2 Migration Time Trend
+
+![L1+L2 Migration Time Trend](charts/migration-time.svg)
 
 ### Key Milestones
 
@@ -120,6 +116,10 @@ Run 81 (May 15)  ███████                                   14 erro
 | **77** | May 14 | 15 errors, 25/25 (DeduplicateParameters fix) |
 | **80** | May 15 | Template @ref skip, variable name preservation |
 | **81** | May 15 | **4:18 L1+L2, 14 errors, 25/25 tests** |
+
+### Acceptance Test Stability
+
+![Acceptance Test Results](charts/acceptance-tests.svg)
 
 ### Results at a Glance (Run 81)
 
@@ -212,7 +212,9 @@ Migrated Blazor applications run **faster** than the Web Forms originals — wit
 
 **Average speedup: 1.14–2.15× faster.** Blazor on .NET 10 vs. Web Forms on .NET Framework 4.8 under IIS Express.
 
-### Response Time Charts
+![Runtime Performance Comparison](charts/runtime-performance.svg)
+
+### Detailed Response Time Charts
 
 ![WingtipToys Response Times](../benchmarks/response-times-wingtiptoys.svg)
 
