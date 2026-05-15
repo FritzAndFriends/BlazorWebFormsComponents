@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using WingtipToys.Models;
 
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 namespace WingtipToys.Logic
 {
   public class ShoppingCartActions : IDisposable
@@ -30,7 +30,7 @@ namespace WingtipToys.Logic
       // Retrieve the product from the database.           
       ShoppingCartId = GetCartId();
 
-      var cartItem = _db.ShoppingCartItems.SingleOrDefault(
+      var cartItem = _db.ShoppingCartItems.Include(x => x.Product).SingleOrDefault(
           c => c.CartId == ShoppingCartId
           && c.ProductId == id);
       if (cartItem == null)
@@ -89,7 +89,7 @@ namespace WingtipToys.Logic
     {
       ShoppingCartId = GetCartId();
 
-      return _db.ShoppingCartItems.Include(c => c.Product).Where(
+      return _db.ShoppingCartItems.Include(x => x.Product).Where(
           c => c.CartId == ShoppingCartId).ToList();
     }
 
@@ -100,7 +100,7 @@ namespace WingtipToys.Logic
       // the current price for each of those products in the cart.  
       // Sum all product price totals to get the cart total.   
       decimal? total = decimal.Zero;
-      total = (decimal?)(from cartItems in _db.ShoppingCartItems
+      total = (decimal?)(from cartItems in _db.ShoppingCartItems.Include(x => x.Product)
                          where cartItems.CartId == ShoppingCartId
                          select (decimal?)((int?)cartItems.Quantity *
                          cartItems.Product.UnitPrice)).Sum();
@@ -109,9 +109,11 @@ namespace WingtipToys.Logic
 
     public ShoppingCartActions GetCart()
     {
-      var cart = this;
-      cart.ShoppingCartId = cart.GetCartId();
-      return cart;
+      using (var cart = this)
+      {
+        cart.ShoppingCartId = cart.GetCartId();
+        return cart;
+      }
     }
 
     public void UpdateShoppingCartDatabase(String cartId, ShoppingCartUpdates[] CartItemUpdates)
@@ -154,7 +156,7 @@ namespace WingtipToys.Logic
 
         try
         {
-          var myItem = (from c in _db.ShoppingCartItems where c.CartId == removeCartID && c.Product.ProductID == removeProductID select c).FirstOrDefault();
+          var myItem = (from c in _db.ShoppingCartItems.Include(x => x.Product) where c.CartId == removeCartID && c.Product.ProductID == removeProductID select c).FirstOrDefault();
           if (myItem != null)
           {
             // Remove Item.
@@ -175,7 +177,7 @@ namespace WingtipToys.Logic
 
         try
         {
-          var myItem = (from c in _db.ShoppingCartItems where c.CartId == updateCartID && c.Product.ProductID == updateProductID select c).FirstOrDefault();
+          var myItem = (from c in _db.ShoppingCartItems.Include(x => x.Product) where c.CartId == updateCartID && c.Product.ProductID == updateProductID select c).FirstOrDefault();
           if (myItem != null)
           {
             myItem.Quantity = quantity;
@@ -207,7 +209,7 @@ namespace WingtipToys.Logic
       ShoppingCartId = GetCartId();
 
       // Get the count of each item in the cart and sum them up          
-      int? count = (from cartItems in _db.ShoppingCartItems
+      int? count = (from cartItems in _db.ShoppingCartItems.Include(x => x.Product)
                     where cartItems.CartId == ShoppingCartId
                     select (int?)cartItems.Quantity).Sum();
       // Return 0 if all entries are null         

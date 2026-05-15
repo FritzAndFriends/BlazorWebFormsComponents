@@ -4,10 +4,10 @@ namespace WingtipToys.Account;
 public partial class RegisterExternalLogin
 {
     private TextBox email = default!;
-    private string ProviderName = "";
 
+    private string ProviderName { get; set; } = "External";
 
-    protected void LogIn_Click(EventArgs e)
+    protected void LogIn_Click()
     {
         // TODO: migrate from Web Forms code-behind
     }

@@ -76,22 +76,13 @@ namespace WingtipToys
   
     [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
 
-
-
     private global::System.Linq.IQueryable<Product> GetProductsQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-
     {
-
         totalRowCount = 0;
-
         // TODO(bwfc-query-details): Wrapper delegates to the code-behind GetProducts method.
-
         var query = GetProducts(CategoryId, categoryName);
-
         if (query != null) totalRowCount = query.Count();
-
         return query ?? global::System.Linq.Enumerable.Empty<Product>().AsQueryable();
-
     }
 }
 }

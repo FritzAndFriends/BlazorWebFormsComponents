@@ -42,12 +42,12 @@ namespace WingtipToys
     // For non-page classes, inject RequestShim via DI.
 
     private Panel DetailedErrorPanel = default!;
+
+    [Inject]
+    protected ExceptionUtility ExceptionUtility { get; set; } = default!;
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
-    [Inject]
-    protected ExceptionUtility _exceptionUtility { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -88,7 +88,7 @@ namespace WingtipToys
       }
 
       // Show error details to only you (developer). LOCAL ACCESS ONLY.
-      if (true) // Request.IsLocal — always show details in migrated app
+      if (Request.IsLocal)
       {
         // Detailed Error Message.
         _ErrorDetailedMsg_Text = ex.Message;
@@ -116,7 +116,7 @@ namespace WingtipToys
       }
 
       // Log the exception.
-      _exceptionUtility.LogException(ex, errorHandler);
+      ExceptionUtility.LogException(ex, errorHandler);
 
       // Clear the error from the server.
       Server.ClearError();

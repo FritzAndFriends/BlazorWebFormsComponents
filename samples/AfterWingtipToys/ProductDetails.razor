@@ -2,7 +2,7 @@
 @page "/Product/{productName}"
 <PageTitle>Product Details</PageTitle>
 
-    <FormView id="productDetail" @ref="productDetail" ItemType="Product" SelectMethod ="GetProduct" RenderOuterTable="false">
+    <FormView id="productDetail" @ref="productDetail" ItemType="Product" SelectMethod="GetProductQueryDetails_SelectMethod" RenderOuterTable="false">
         <ItemTemplate Context="Item">
             <div>
                 <h1>@Item.ProductName</h1>

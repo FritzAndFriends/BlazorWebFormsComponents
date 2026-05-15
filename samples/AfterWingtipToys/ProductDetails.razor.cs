@@ -74,5 +74,16 @@ namespace WingtipToys
       }
       return query;
     }
-  }
+  
+    [Parameter, SupplyParameterFromQuery(Name = "ProductID")] public int? ProductId { get; set; }
+
+    private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        totalRowCount = 0;
+        // TODO(bwfc-query-details): Wrapper delegates to the code-behind GetProduct method.
+        var query = GetProduct(ProductId, productName);
+        if (query != null) totalRowCount = query.Count();
+        return query ?? global::System.Linq.Enumerable.Empty<Product>().AsQueryable();
+    }
+}
 }

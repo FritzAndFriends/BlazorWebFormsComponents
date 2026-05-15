@@ -26,7 +26,7 @@ namespace WingtipToys.Logic
       // Include logic for logging exceptions
       // Get the absolute path to the log file
       string logFile = "App_Data/ErrorLog.txt";
-      logFile = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", logFile);
+      logFile = Path.Combine(AppContext.BaseDirectory, logFile);
 
       // Open the log file for append and write the log
       StreamWriter sw = new StreamWriter(logFile, true);
