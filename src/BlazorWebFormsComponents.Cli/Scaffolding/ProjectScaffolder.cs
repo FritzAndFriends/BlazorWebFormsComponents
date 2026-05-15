@@ -243,7 +243,7 @@ public class ProjectScaffolder
 </head>
 
 @* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
-<body>
+<body data-enhance-nav=""false"">
     <Routes />
     <script src=""_framework/blazor.web.js""></script>
     <script src=""_content/Fritz.BlazorWebFormsComponents/js/Basepage.js""></script>
