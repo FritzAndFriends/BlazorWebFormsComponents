@@ -235,6 +235,128 @@ public class ComponentRefMarkupTransformTests
             ComponentRefMarkupTransform.ResolveFieldType("DropDownList", ""));
     }
 
+    [Fact]
+    public void SkipsRefInsideItemTemplate()
+    {
+        var input = """
+            <GridView id="CartList" ItemType="CartItem" AutoGenerateColumns="false">
+                <Columns>
+                    <TemplateField HeaderText="Quantity">
+                        <ItemTemplate Context="Item">
+                            <TextBox id="PurchaseQuantity" Width="40" Text="@Item.Quantity" />
+                        </ItemTemplate>
+                    </TemplateField>
+                    <TemplateField HeaderText="Remove">
+                        <ItemTemplate Context="Item">
+                            <CheckBox id="Remove" />
+                        </ItemTemplate>
+                    </TemplateField>
+                </Columns>
+            </GridView>
+            """;
+        var metadata = MetadataWithCodeBehind;
+
+        var result = _transform.Apply(input, metadata);
+
+        // GridView itself should get @ref (it's outside templates)
+        Assert.Contains(@"@ref=""CartList""", result);
+        Assert.Equal("GridView<CartItem>", metadata.ComponentRefs["CartList"]);
+
+        // Controls inside ItemTemplate should NOT get @ref
+        Assert.DoesNotContain(@"@ref=""PurchaseQuantity""", result);
+        Assert.DoesNotContain(@"@ref=""Remove""", result);
+        Assert.False(metadata.ComponentRefs.ContainsKey("PurchaseQuantity"));
+        Assert.False(metadata.ComponentRefs.ContainsKey("Remove"));
+    }
+
+    [Fact]
+    public void SkipsRefInsideEditItemTemplate()
+    {
+        var input = """
+            <GridView id="gvData" ItemType="Product">
+                <Columns>
+                    <TemplateField>
+                        <EditItemTemplate Context="Item">
+                            <TextBox id="txtEdit" Text="@Item.Name" />
+                        </EditItemTemplate>
+                    </TemplateField>
+                </Columns>
+            </GridView>
+            """;
+        var metadata = MetadataWithCodeBehind;
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains(@"@ref=""gvData""", result);
+        Assert.DoesNotContain(@"@ref=""txtEdit""", result);
+    }
+
+    [Fact]
+    public void SkipsRefInsideNestedTemplates()
+    {
+        var input = """
+            <ListView id="outerList" ItemType="Category">
+                <ItemTemplate Context="cat">
+                    <Repeater id="innerRepeater" ItemType="Product">
+                        <ItemTemplate Context="prod">
+                            <Label id="lblInner" Text="@prod.Name" />
+                        </ItemTemplate>
+                    </Repeater>
+                </ItemTemplate>
+            </ListView>
+            """;
+        var metadata = MetadataWithCodeBehind;
+
+        var result = _transform.Apply(input, metadata);
+
+        // Outer ListView gets @ref
+        Assert.Contains(@"@ref=""outerList""", result);
+        // Inner controls do NOT get @ref
+        Assert.DoesNotContain(@"@ref=""innerRepeater""", result);
+        Assert.DoesNotContain(@"@ref=""lblInner""", result);
+    }
+
+    [Fact]
+    public void AllowsRefOutsideTemplates()
+    {
+        var input = """
+            <Label id="lblTitle" Text="Header" />
+            <GridView id="gv1" ItemType="Product">
+                <Columns>
+                    <TemplateField>
+                        <ItemTemplate Context="Item">
+                            <TextBox id="txtInside" />
+                        </ItemTemplate>
+                    </TemplateField>
+                </Columns>
+            </GridView>
+            <Button id="btnSave" Text="Save" />
+            """;
+        var metadata = MetadataWithCodeBehind;
+
+        var result = _transform.Apply(input, metadata);
+
+        // Outside-template controls get @ref
+        Assert.Contains(@"@ref=""lblTitle""", result);
+        Assert.Contains(@"@ref=""gv1""", result);
+        Assert.Contains(@"@ref=""btnSave""", result);
+        // Inside-template control does NOT
+        Assert.DoesNotContain(@"@ref=""txtInside""", result);
+        Assert.Equal(3, metadata.ComponentRefs.Count);
+    }
+
+    [Fact]
+    public void BuildTemplateRanges_DetectsNestedTemplates()
+    {
+        var input = """
+            prefix<ItemTemplate>inner1<EditItemTemplate>inner2</EditItemTemplate>inner3</ItemTemplate>suffix
+            """;
+        var ranges = ComponentRefMarkupTransform.BuildTemplateRanges(input);
+
+        // Should have 2 ranges (outer ItemTemplate and inner EditItemTemplate)
+        Assert.Equal(2, ranges.Count);
+    }
+
     private static int CountOccurrences(string text, string pattern)
     {
         var count = 0;

@@ -328,11 +328,14 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Empty(report.Errors);
         Assert.Contains("<BoundField ItemType=\"CartItem\" DataField=\"ProductID\" HeaderText=\"ID\" />", defaultRazor);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", defaultRazor);
-        Assert.Contains("<TextBox id=\"PurchaseQuantity\" @ref=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", defaultRazor);
+        // Controls inside templates should NOT have @ref (they're per-row instances)
+        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", defaultRazor);
+        Assert.DoesNotContain("@ref=\"PurchaseQuantity\"", defaultRazor);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Item Total\">", defaultRazor);
         Assert.Contains("@(String.Format(\"{0:c}\", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))", defaultRazor);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Remove Item\">", defaultRazor);
-        Assert.Contains("<CheckBox id=\"Remove\" @ref=\"Remove\"></CheckBox>", defaultRazor);
+        Assert.Contains("<CheckBox id=\"Remove\"></CheckBox>", defaultRazor);
+        Assert.DoesNotContain("@ref=\"Remove\"", defaultRazor);
         Assert.Equal(3, defaultRazor.Split("<TemplateField", StringSplitOptions.None).Length - 1);
     }
 

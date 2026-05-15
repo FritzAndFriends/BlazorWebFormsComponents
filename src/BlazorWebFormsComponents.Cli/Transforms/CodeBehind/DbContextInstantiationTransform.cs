@@ -59,9 +59,23 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
             .Distinct(StringComparer.Ordinal)
             .ToList();
 
+        // Pre-scan for original variable names used with each context type.
+        // e.g., "ProductContext _db = new ProductContext()" → type=ProductContext, var=_db
+        var originalVarNames = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (Match m in NewContextRegex.Matches(content))
+        {
+            var type = m.Groups["type"].Value;
+            var varName = m.Groups["var"].Value;
+            if (!originalVarNames.ContainsKey(type))
+                originalVarNames[type] = varName;
+        }
+
         foreach (var contextType in contextTypes)
         {
-            var fieldName = "_" + char.ToLowerInvariant(contextType[0]) + contextType[1..];
+            // Preserve the original variable name when possible; fall back to generated name
+            var fieldName = originalVarNames.TryGetValue(contextType, out var origVar) && origVar.StartsWith('_')
+                ? origVar
+                : "_" + char.ToLowerInvariant(contextType[0]) + contextType[1..];
 
             // Replace field declarations like: XxxContext _db = new XxxContext();
             // or: Namespace.XxxContext _db = new Namespace.XxxContext();

@@ -8,6 +8,8 @@ namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 /// In Web Forms, ID="X" on a server control auto-generates a code-behind field.
 /// In Blazor, @ref="X" is needed for code-behind to reference the component instance.
 /// Only applies when a code-behind file exists (otherwise @ref would have no backing field).
+/// Skips controls inside template blocks (ItemTemplate, EditItemTemplate, etc.)
+/// because @ref cannot capture per-row instances inside repeating templates.
 /// </summary>
 public class ComponentRefMarkupTransform : IMarkupTransform
 {
@@ -34,11 +36,29 @@ public class ComponentRefMarkupTransform : IMarkupTransform
         "RequiredFieldValidator", "CompareValidator", "RangeValidator"
     };
 
+    // Template element names where @ref should NOT be added to child controls.
+    // Controls inside these blocks are instantiated per data row — a single @ref field
+    // cannot capture multiple instances.
+    private static readonly HashSet<string> TemplateElements = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "ItemTemplate", "EditItemTemplate", "AlternatingItemTemplate",
+        "HeaderTemplate", "FooterTemplate", "InsertItemTemplate",
+        "EmptyDataTemplate", "GroupTemplate", "LayoutTemplate",
+        "SeparatorTemplate", "ContentTemplate", "SelectedItemTemplate"
+    };
+
+    // Matches opening and closing template tags to compute nesting ranges.
+    private static readonly Regex TemplateTagRegex = new(
+        @"<(/?)(" + string.Join("|", TemplateElements) + @")(?:\s[^>]*)?>",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
     public string Apply(string content, FileMetadata metadata)
     {
         // Only add @ref if there's a code-behind to hold the field declarations
         if (metadata.CodeBehindContent == null)
             return content;
+
+        var templateRanges = BuildTemplateRanges(content);
 
         return ComponentTagRegex.Replace(content, match =>
         {
@@ -56,6 +76,10 @@ public class ComponentRefMarkupTransform : IMarkupTransform
             if (attrs.Contains("@ref="))
                 return match.Value;
 
+            // Skip controls inside template blocks — @ref can't capture per-row instances
+            if (IsInsideTemplate(match.Index, templateRanges))
+                return match.Value;
+
             // Resolve the BWFC type for the code-behind field declaration
             var fieldType = ResolveFieldType(tagName, attrs);
             metadata.ComponentRefs[controlId] = fieldType;
@@ -66,6 +90,48 @@ public class ComponentRefMarkupTransform : IMarkupTransform
 
             return $"<{tagName}{newAttrs}{closing}";
         });
+    }
+
+    /// <summary>
+    /// Builds a list of (start, end) ranges for template block content.
+    /// A position inside any range is considered "inside a template".
+    /// Handles nested templates correctly via a depth counter per template name.
+    /// </summary>
+    internal static List<(int Start, int End)> BuildTemplateRanges(string content)
+    {
+        var ranges = new List<(int Start, int End)>();
+        var openStack = new Stack<int>();
+
+        foreach (Match m in TemplateTagRegex.Matches(content))
+        {
+            var isClosing = m.Groups[1].Value == "/";
+            if (!isClosing)
+            {
+                // Opening tag — push the position just after the tag
+                openStack.Push(m.Index + m.Length);
+            }
+            else if (openStack.Count > 0)
+            {
+                // Closing tag — pop the most recent opening and record the range
+                var start = openStack.Pop();
+                ranges.Add((start, m.Index));
+            }
+        }
+
+        return ranges;
+    }
+
+    /// <summary>
+    /// Returns true if the given position falls within any template range.
+    /// </summary>
+    internal static bool IsInsideTemplate(int position, List<(int Start, int End)> ranges)
+    {
+        foreach (var (start, end) in ranges)
+        {
+            if (position >= start && position < end)
+                return true;
+        }
+        return false;
     }
 
     /// <summary>
