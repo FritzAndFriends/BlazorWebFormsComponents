@@ -390,5 +390,35 @@ public class EagerLoadNavigationTransformTests
         Assert.DoesNotContain(".Include(", result);
     }
 
+    [Fact]
+    public void Apply_SkipsSelfReferencingIncludeOnDbSet()
+    {
+        var input = """
+            using System.Linq;
+
+            public class ShoppingCartActions
+            {
+                private readonly ProductContext _db;
+
+                public void AddToCart(int id)
+                {
+                    var product = _db.Products.SingleOrDefault(p => p.ProductID == id);
+                    var cartItem = _db.ShoppingCartItems.Where(c => c.CartId == "abc").ToList();
+                    foreach (var item in cartItem)
+                    {
+                        total += item.Product.UnitPrice;
+                    }
+                }
+            }
+            """;
+
+        var result = _transform.Apply(input, MakeCodeFileMetadata());
+
+        // _db.ShoppingCartItems should get .Include(x => x.Product) since CartItem has Product nav
+        Assert.Contains("_db.ShoppingCartItems.Include(x => x.Product).Where(", result);
+        // _db.Products should NOT get .Include(x => x.Product) since Product doesn't have a Product nav
+        Assert.DoesNotContain("_db.Products.Include(x => x.Product)", result);
+    }
+
     #endregion
 }

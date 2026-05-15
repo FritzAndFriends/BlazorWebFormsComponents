@@ -178,7 +178,18 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
                     return match.Value;
                 if (modified[..(match.Index + match.Length)].Contains(dbset + includeChain))
                     return match.Value; // Already injected by a prior strategy
-                return dbset + includeChain;
+
+                // Filter out nav properties that match the DbSet name to avoid self-referencing
+                // e.g., _db.Products should not get .Include(x => x.Product) since Product doesn't have a Product nav
+                var tableName = dbset.Split('.')[1];
+                var filteredNavProps = navProps
+                    .Where(p => !tableName.StartsWith(p, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                if (filteredNavProps.Count == 0)
+                    return match.Value;
+
+                var filteredChain = string.Join("", filteredNavProps.Select(p => $".Include(x => x.{p})"));
+                return dbset + filteredChain;
             });
         }
 
