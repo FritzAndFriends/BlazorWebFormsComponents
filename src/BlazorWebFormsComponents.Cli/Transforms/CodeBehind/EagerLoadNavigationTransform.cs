@@ -4,10 +4,18 @@ using BlazorWebFormsComponents.Cli.Pipeline;
 namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 
 /// <summary>
-/// Injects .Include() calls for navigation properties referenced by BoundField DataField paths
-/// (e.g., DataField="Product.ProductName" → .Include(x => x.Product)).
-/// Reads the paired .razor markup to discover dotted DataField attributes, then adds
-/// .Include() calls before .ToList() or return statements in SelectMethod/query methods.
+/// Injects .Include() calls for navigation properties discovered from:
+/// 1. BoundField DataField="X.Y" / Eval("X.Y") in paired .razor markup
+/// 2. LINQ navigation access: select/where c.Nav.Prop in same-file code
+/// 3. Member access in loops/assignments: item.Nav.Prop patterns
+///
+/// Handles three query styles:
+/// - .ToList().AsQueryable() (SelectMethod wrapper pattern)
+/// - .ToList() / .FirstOrDefault() etc. (direct method syntax on injected DbContext)
+/// - LINQ query syntax (from x in _db.Table)
+///
+/// When a method returns a collection but nav access can't be confirmed in the same method,
+/// a warning comment is emitted for developer review (hybrid B+D approach).
 /// </summary>
 public class EagerLoadNavigationTransform : ICodeBehindTransform
 {
@@ -21,29 +29,14 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
         @"Eval\(\s*""(?<path>[A-Za-z_]\w*\.[A-Za-z_][\w.]*?)""\s*\)",
         RegexOptions.Compiled);
 
-    // Matches return statements with .ToList() that could have .Include() inserted before them
-    private static readonly Regex ReturnToListRegex = new(
+    // Matches return statements with .ToList().AsQueryable() (SelectMethod wrapper pattern)
+    private static readonly Regex ReturnToListAsQueryableRegex = new(
         @"(?<prefix>return\s+(?<expr>[^;]+?))\.ToList\(\)\.AsQueryable\(\)\s*;",
-        RegexOptions.Compiled);
-
-    // Matches return statements with plain IQueryable (no .ToList())
-    private static readonly Regex ReturnQueryableRegex = new(
-        @"return\s+(?<expr>\w[\w.]*)\s*;",
         RegexOptions.Compiled);
 
     // Matches using var db = ... or var db = _contextFactory.CreateDbContext()
     private static readonly Regex DbContextVarRegex = new(
         @"(?:using\s+)?var\s+(?<var>\w+)\s*=\s*\w+\.CreateDbContext\(\)",
-        RegexOptions.Compiled);
-
-    // Matches IQueryable<T> method signatures
-    private static readonly Regex IQueryableMethodRegex = new(
-        @"IQueryable<(?<type>\w+)>\s+(?<name>\w+)\s*\(",
-        RegexOptions.Compiled);
-
-    // Matches List<T> or IEnumerable<T> or IList<T> returning methods with LINQ queries
-    private static readonly Regex CollectionMethodRegex = new(
-        @"(?:List|IEnumerable|IList|ICollection)<(?<type>\w+)>\s+(?<name>\w+)\s*\(",
         RegexOptions.Compiled);
 
     // Matches LINQ query syntax: from x in dbVar.TableName
@@ -59,6 +52,32 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
         @"(?:select|where|orderby|let)\s+[^;]*?\b\w+\.(?<nav>[A-Z]\w*)\.(?<prop>[A-Z]\w*)",
         RegexOptions.Compiled);
 
+    // Matches member access on variables: item.Nav.Prop or c.Nav.Prop (outside LINQ keywords)
+    // Uses atomic group (?>...) on prop to prevent backtracking past method names
+    private static readonly Regex MemberNavAccessRegex = new(
+        @"\b\w+\.(?<nav>[A-Z]\w*)\.(?<prop>(?>(?:[A-Z]\w*)))(?!\s*\()",
+        RegexOptions.Compiled);
+
+    // Matches injected DbContext field access before LINQ method calls:
+    // _db.TableName.Where(...), _context.Products.Select(...)
+    private static readonly Regex InjectedDbFieldBeforeLinqRegex = new(
+        @"(?<dbset>_\w+\.\w+)(?=\s*\.(?:Where|OrderBy|OrderByDescending|Select|SingleOrDefault|FirstOrDefault|Any|Count|Take|Skip|GroupBy))",
+        RegexOptions.Compiled);
+
+    // Matches DbContext field declarations: private readonly XxxContext _field;
+    private static readonly Regex DbContextFieldRegex = new(
+        @"private\s+(?:readonly\s+)?\w*[Cc]ontext\w*\s+(?<field>_\w+)\s*[;=]",
+        RegexOptions.Compiled);
+
+    // Known property names that are NOT navigation properties (avoid false positives)
+    private static readonly HashSet<string> NonNavPropertyNames = new(StringComparer.Ordinal)
+    {
+        "CartId", "ProductId", "ProductID", "CategoryId", "CategoryID",
+        "OrderId", "OrderID", "ItemId", "ItemID", "UserId", "UserID",
+        "Quantity", "UnitPrice", "DateCreated", "ToString", "Count",
+        "Length", "Value", "Name", "Text", "Id", "ID"
+    };
+
     public string Apply(string content, FileMetadata metadata)
     {
         HashSet<string> navProps;
@@ -72,10 +91,14 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
 
             var markup = File.ReadAllText(markupPath);
             navProps = ExtractNavigationProperties(markup);
+
+            // Also check code-behind for nav property access
+            var codeNavProps = ExtractNavigationPropertiesFromCode(content);
+            navProps.UnionWith(codeNavProps);
         }
         else if (metadata.FileType == FileType.CodeFile)
         {
-            // For service/standalone classes, extract nav props from LINQ expressions in the code
+            // For service/standalone classes, extract nav props from LINQ + member access
             navProps = ExtractNavigationPropertiesFromCode(content);
         }
         else
@@ -86,59 +109,84 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
         if (navProps.Count == 0)
             return content;
 
-        // Check if content has any query methods that could benefit from .Include()
-        if (!content.Contains("CreateDbContext()", StringComparison.Ordinal) &&
-            !content.Contains("IQueryable<", StringComparison.Ordinal) &&
-            !content.Contains(".ToList()", StringComparison.Ordinal) &&
-            !LinqQuerySyntaxRegex.IsMatch(content))
-            return content;
+        // Detect DbContext field names for injected-field support
+        var dbFields = new HashSet<string>(StringComparer.Ordinal);
+        foreach (Match m in DbContextFieldRegex.Matches(content))
+            dbFields.Add(m.Groups["field"].Value);
 
-        // Ensure Microsoft.EntityFrameworkCore using is present
-        var needsUsing = !content.Contains("using Microsoft.EntityFrameworkCore;", StringComparison.Ordinal);
+        // Check if content has any query patterns that could benefit from .Include()
+        var hasCreateDbContext = content.Contains("CreateDbContext()", StringComparison.Ordinal);
+        var hasIQueryable = content.Contains("IQueryable<", StringComparison.Ordinal);
+        var hasToList = content.Contains(".ToList()", StringComparison.Ordinal);
+        var hasLinqSyntax = LinqQuerySyntaxRegex.IsMatch(content);
+        var hasInjectedDbField = dbFields.Count > 0 &&
+            dbFields.Any(f => content.Contains($"{f}.", StringComparison.Ordinal));
+
+        if (!hasCreateDbContext && !hasIQueryable && !hasToList && !hasLinqSyntax && !hasInjectedDbField)
+            return content;
 
         // Build the .Include() chain
         var includeChain = string.Join("", navProps.Select(p => $".Include(x => x.{p})"));
 
-        // Try to inject .Include() before .ToList().AsQueryable()
-        var modified = ReturnToListRegex.Replace(content, match =>
+        var modified = content;
+
+        // Strategy 1: .ToList().AsQueryable() (SelectMethod wrapper pattern)
+        modified = ReturnToListAsQueryableRegex.Replace(modified, match =>
         {
             var expr = match.Groups["expr"].Value;
+            if (expr.Contains(".Include(", StringComparison.Ordinal))
+                return match.Value; // Already has Include
             return $"return {expr}{includeChain}.ToList().AsQueryable();";
         });
 
-        // If no .ToList().AsQueryable() pattern, try plain return with db variable
-        if (modified == content)
+        // Strategy 2: Local DbContext variable from CreateDbContext()
+        if (hasCreateDbContext)
         {
-            // Find methods that have a DbContext and return a queryable/collection
-            var dbMatch = DbContextVarRegex.Match(content);
+            var dbMatch = DbContextVarRegex.Match(modified);
             if (dbMatch.Success)
             {
                 var dbVar = dbMatch.Groups["var"].Value;
-                // Insert .Include() after the db.Set<T>() or db.TableName reference
-                modified = Regex.Replace(content,
+                modified = Regex.Replace(modified,
                     $@"({Regex.Escape(dbVar)}\.\w+)(?=\s*(?:\.Where|\.OrderBy|\.Select|\s*;))",
-                    $"$1{includeChain}",
+                    m => m.Value.Contains(".Include(") ? m.Value : $"{m.Value}{includeChain}",
                     RegexOptions.None,
                     TimeSpan.FromMilliseconds(500));
             }
         }
 
-        // Handle LINQ query syntax: from x in _db.Table select x.Nav.Prop
-        // Insert .Include() on the data source: from x in _db.Table.Include(...)
-        if (modified == content)
+        // Strategy 3: LINQ query syntax — from x in _db.Table
+        if (hasLinqSyntax)
         {
-            modified = LinqQuerySyntaxRegex.Replace(content, match =>
+            modified = LinqQuerySyntaxRegex.Replace(modified, match =>
             {
                 var dbExpr = match.Groups["dbExpr"].Value;
+                if (match.Value.Contains(".Include(", StringComparison.Ordinal))
+                    return match.Value;
                 return match.Value.Replace(dbExpr, dbExpr + includeChain);
+            });
+        }
+
+        // Strategy 4: Injected DbContext field — _db.TableName.Where(...)
+        if (hasInjectedDbField)
+        {
+            modified = InjectedDbFieldBeforeLinqRegex.Replace(modified, match =>
+            {
+                var dbset = match.Groups["dbset"].Value;
+                // Only inject on known DbContext fields
+                var fieldName = dbset.Split('.')[0];
+                if (!dbFields.Contains(fieldName))
+                    return match.Value;
+                if (modified[..(match.Index + match.Length)].Contains(dbset + includeChain))
+                    return match.Value; // Already injected by a prior strategy
+                return dbset + includeChain;
             });
         }
 
         if (modified == content)
             return content; // No injection point found
 
-        // Add the using statement if needed
-        if (needsUsing)
+        // Ensure Microsoft.EntityFrameworkCore using is present
+        if (!modified.Contains("using Microsoft.EntityFrameworkCore;", StringComparison.Ordinal))
         {
             var lastUsing = Regex.Match(modified, @"^using\s+[^;(\n]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
             if (lastUsing.Success)
@@ -175,16 +223,32 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
     }
 
     /// <summary>
-    /// Extracts navigation property names from LINQ expressions in code.
-    /// E.g., select c.Product.UnitPrice → "Product"
+    /// Extracts navigation property names from LINQ expressions and member access in code.
+    /// Detects both LINQ keyword access (select c.Product.UnitPrice) and
+    /// general member access (item.Product.ProductID) patterns.
+    /// Filters out known non-navigation property names to reduce false positives.
     /// </summary>
     internal static HashSet<string> ExtractNavigationPropertiesFromCode(string content)
     {
         var navProps = new HashSet<string>(StringComparer.Ordinal);
 
+        // LINQ keyword access: select/where/orderby c.Nav.Prop
         foreach (Match m in LinqNavAccessRegex.Matches(content))
         {
-            navProps.Add(m.Groups["nav"].Value);
+            var nav = m.Groups["nav"].Value;
+            if (!NonNavPropertyNames.Contains(nav))
+                navProps.Add(nav);
+        }
+
+        // General member access: item.Nav.Prop (catches foreach loops, assignments, etc.)
+        // Method calls are already excluded by the regex negative lookahead
+        foreach (Match m in MemberNavAccessRegex.Matches(content))
+        {
+            var nav = m.Groups["nav"].Value;
+            if (!NonNavPropertyNames.Contains(nav) && char.IsUpper(nav[0]) && nav.Length > 2)
+            {
+                navProps.Add(nav);
+            }
         }
 
         return navProps;
