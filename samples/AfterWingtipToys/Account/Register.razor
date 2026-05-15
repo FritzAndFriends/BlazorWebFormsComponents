@@ -37,9 +37,3 @@
     </div>
 </form>
 <p><a href="/Account/Login">Already have an account? Sign in</a></p>
-
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "error")] public string? Error { get; set; }
-
-    [Parameter, SupplyParameterFromQuery(Name = "returnUrl")] public string? ReturnUrl { get; set; }
-}

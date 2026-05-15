@@ -36,7 +36,7 @@ using WingtipToys.Models;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys.Checkout
 {
-  public partial class CheckoutReview
+  public partial class CheckoutReview : WebFormsPageBase
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -50,22 +50,18 @@ namespace WingtipToys.Checkout
     // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
     // For non-page classes, inject ResponseShim via DI.
 
-    private Label Address = default!;
     private Button CheckoutConfirm = default!;
-    private Label City = default!;
-    private Label FirstName = default!;
-    private Label LastName = default!;
     private GridView<object> OrderItemList = default!;
-    private Label PostalCode = default!;
     private DetailsView<object> ShipInfo = default!;
-    private Label State = default!;
-    private Label Total = default!;
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
     [Inject]
-    protected ProductContext _productContext { get; set; } = default!;
+    protected ShoppingCartActions _shoppingCartActions { get; set; } = default!;
+
+    [Inject]
+    protected ProductContext _db { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -122,9 +118,9 @@ namespace WingtipToys.Checkout
             _db.SaveChanges();
 
             // Get the shopping cart items and process them.
-            using (WingtipToys.Logic.ShoppingCartActions usersShoppingCart = new WingtipToys.Logic.ShoppingCartActions())
-            {
-              List<CartItem> myOrderList = usersShoppingCart.GetCartItems();
+            // DbContext 'ShoppingCartActions' is injected via DI
+
+              List<CartItem> myOrderList = _shoppingCartActions.GetCartItems();
 
               // Add OrderDetail information to the DB for each product purchased.
               for (int i = 0; i < myOrderList.Count; i++)
@@ -148,11 +144,13 @@ namespace WingtipToys.Checkout
               // Display Order information.
               List<Order> orderList = new List<Order>();
               orderList.Add(myOrder);
-              ShipInfo.DataSource = orderList;
-              
+              ShipInfo?.DataSource = orderList;
+              ShipInfo?.DataBind();
+
               // Display OrderDetails.
-              OrderItemList.DataSource = myOrderList;
-                          }
+              OrderItemList?.DataSource = myOrderList;
+              OrderItemList?.DataBind();
+
           }
           else
           {
@@ -160,7 +158,7 @@ namespace WingtipToys.Checkout
           }
     }
 
-    protected void CheckoutConfirm_Click()
+    protected void CheckoutConfirm_Click(EventArgs e)
     {
       Session["userCheckoutCompleted"] = "true";
       Response.Redirect("~/Checkout/CheckoutComplete.aspx");

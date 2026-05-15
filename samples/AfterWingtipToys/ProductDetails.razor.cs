@@ -25,7 +25,7 @@ using WingtipToys.Models;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
-  public partial class ProductDetails
+  public partial class ProductDetails : WebFormsPageBase
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -42,6 +42,9 @@ namespace WingtipToys
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
+    [Inject]
+    protected ProductContext _productContext { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
@@ -50,12 +53,12 @@ namespace WingtipToys
 
     }
 
-    [Inject] protected ProductContext _productContext { get; set; } = default!;
-
     public IQueryable<Product> GetProduct(
-                        [QueryString("ProductID")] int? productId)
+                        [QueryString("ProductID")] int? productId,
+                        [RouteData] string productName)
     {
-      IQueryable<Product> query = _productContext.Products;
+      var _db = _productContext; // Injected via DI
+      IQueryable<Product> query = _db.Products;
       if (productId.HasValue && productId > 0)
       {
         query = query.Where(p => p.ProductID == productId);

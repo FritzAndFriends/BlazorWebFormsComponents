@@ -1,14 +1,14 @@
-// TODO(bwfc-general): This helper class referenced legacy Web Forms APIs and was stubbed during migration.
-// Rebuild using ASP.NET Core equivalents (Identity, Authorization, Configuration).
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
 namespace WingtipToys.Account;
 public partial class RegisterExternalLogin
 {
-    private BlazorWebFormsComponents.TextBox email = default!;
+    private TextBox email = default!;
+    private string ProviderName = "";
 
-    protected string ProviderName { get; set; } = "External";
 
-    protected void LogIn_Click()
+    protected void LogIn_Click(EventArgs e)
     {
-        // TODO: Implement external login registration
+        // TODO: migrate from Web Forms code-behind
     }
 }

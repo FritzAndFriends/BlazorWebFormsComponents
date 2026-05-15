@@ -83,11 +83,3 @@
 @ChildContent
 </ChildContent>
 </MasterPage>
-
-@code {
-    [Parameter]
-    public RenderFragment? ChildContent { get; set; }
-
-    [Parameter]
-    public RenderFragment? ChildComponents { get; set; }
-}

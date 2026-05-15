@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using WingtipToys.Models;
 
+using WingtipToys.Logic;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -21,7 +22,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDbContext<ProductContext>(options =>
     options.UseSqlServer(connectionString));
-builder.Services.AddScoped<WingtipToys.Logic.ShoppingCartActions>();
 
 var identityBuilder = builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
@@ -37,6 +37,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 
+
+// Service classes discovered with constructor injection — registered for DI
+builder.Services.AddScoped<AddProducts>();
+builder.Services.AddScoped<ExceptionUtility>();
+builder.Services.AddScoped<ShoppingCartActions>();
 builder.Services.AddBlazorWebFormsComponents();
 
 var app = builder.Build();

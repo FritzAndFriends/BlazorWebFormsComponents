@@ -19,7 +19,7 @@
                     </table>
                 </EmptyDataTemplate>
                 <EmptyItemTemplate>
-                    <td/>
+                    <td></td>
                 </EmptyItemTemplate>
                 <GroupTemplate Context="items">
                     <tr id="itemPlaceholderContainer">
@@ -33,7 +33,7 @@
                                 <td>
                                   <a href="@($"/Product/{Item.ProductName}")">
                                     <image src='/Catalog/Images/Thumbs/@Item.ImagePath'
-                                      width="100" height="75" border="1" />
+                                      width="100" height="75" border="1"></image>
                                   </a>
                                 </td>
                             </tr>
@@ -80,19 +80,3 @@
             </ListView>
         </div>
     </section>
-
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
-    [Parameter] public string? CategoryName { get; set; }
-
-    private global::System.Linq.IQueryable<Product> GetProductsQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-    {
-        totalRowCount = 0;
-        var query = GetProducts(CategoryId);
-        if (query != null)
-        {
-            totalRowCount = query.Count();
-        }
-        return query ?? new global::System.Linq.EnumerableQuery<Product>(global::System.Array.Empty<Product>());
-    }
-}

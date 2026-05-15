@@ -44,11 +44,3 @@
 </form>
 <p><a href="/Account/Register">Register as a new user</a></p>
 <p><a href="#">Forgot your password?</a></p>
-
-@code {
-    [Parameter, SupplyParameterFromQuery(Name = "error")] public string? Error { get; set; }
-
-    [Parameter, SupplyParameterFromQuery(Name = "registered")] public int? Registered { get; set; }
-
-    [Parameter, SupplyParameterFromQuery(Name = "returnUrl")] public string? ReturnUrl { get; set; }
-}

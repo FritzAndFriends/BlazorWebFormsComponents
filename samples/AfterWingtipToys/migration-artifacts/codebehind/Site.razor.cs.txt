@@ -1,7 +1,15 @@
-// TODO(bwfc-general): This helper class referenced legacy Web Forms APIs and was stubbed during migration.
-// Rebuild using ASP.NET Core equivalents (Identity, Authorization, Configuration).
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
 namespace WingtipToys;
-public class Site
+public partial class Site
 {
-    // Stubbed — original file referenced legacy namespaces not available in .NET 10.
+    private ListView<Category> categoryList = default!;
+    private Image Image1 = default!;
+    private ContentPlaceHolder MainContent = default!;
+    public RenderFragment? ChildContent { get; set; }
+
+    public IQueryable<Category> GetCategories() => throw new NotImplementedException();
+
+    [Parameter]
+    public RenderFragment? ChildComponents { get; set; }
 }

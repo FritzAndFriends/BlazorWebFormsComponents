@@ -33,7 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace WingtipToys.Checkout
 {
-  public partial class CheckoutStart
+  public partial class CheckoutStart : WebFormsPageBase
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 

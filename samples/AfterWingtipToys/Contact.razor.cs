@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace WingtipToys
 {
-  public partial class Contact
+  public partial class Contact : WebFormsPageBase
   {
 	protected string Title { get; set; } = "Contact";
 

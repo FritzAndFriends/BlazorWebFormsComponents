@@ -1,7 +1,10 @@
-// TODO(bwfc-general): This helper class referenced legacy Web Forms APIs and was stubbed during migration.
-// Rebuild using ASP.NET Core equivalents (Identity, Authorization, Configuration).
+using UserLoginInfo = BlazorWebFormsComponents.Identity.UserLoginInfo;
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
 namespace WingtipToys.Account;
-public class ManageLogins
+public partial class ManageLogins
 {
-    // Stubbed — original file referenced legacy namespaces not available in .NET 10.
+    private PlaceHolder successMessage = default!;
+    public IEnumerable<UserLoginInfo> GetLogins() => throw new NotImplementedException();
+    public void RemoveLogin(string loginProvider, string providerKey) { }
 }

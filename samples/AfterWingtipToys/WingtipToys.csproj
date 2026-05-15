@@ -17,4 +17,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
   </ItemGroup>
 
+  <Import Project="..\..\src\BlazorWebFormsComponents\build\Fritz.BlazorWebFormsComponents.targets" />
+
 </Project>

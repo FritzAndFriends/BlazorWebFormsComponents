@@ -14,17 +14,9 @@
         <section class="content-wrapper main-content clear-fix">
             <ContentPlaceHolder id="MainContent" @ref="MainContent" />
         </section>
-        <friendlyUrls:ViewSwitcher />
+        <friendlyUrls:ViewSwitcher></friendlyUrls>
     </div>
     
 @ChildContent
 </ChildContent>
 </MasterPage>
-
-@code {
-    [Parameter]
-    public RenderFragment? ChildContent { get; set; }
-
-    [Parameter]
-    public RenderFragment? ChildComponents { get; set; }
-}

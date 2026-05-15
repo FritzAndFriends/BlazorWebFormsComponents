@@ -3,10 +3,6 @@
 // Full original source preserved in migration-artifacts/compile-surface/Global.asax.cs.txt
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using WingtipToys.Logic;
-using WingtipToys.Models;
 
 namespace WingtipToys;
 

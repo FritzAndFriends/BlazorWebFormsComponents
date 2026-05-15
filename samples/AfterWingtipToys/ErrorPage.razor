@@ -3,25 +3,25 @@
 
     <h2>Error:</h2>
     <p></p>
-    <Label id="FriendlyErrorMsg" @ref="FriendlyErrorMsg" Text="Label" Font-Size="Large" style="color: red"></Label>
+    <span>@_FriendlyErrorMsg_Text</span>
 
     <Panel id="DetailedErrorPanel" @ref="DetailedErrorPanel" Visible="false">
         <p>&nbsp;</p>
         <h4>Detailed Error:</h4>
         <p>
-            <Label id="ErrorDetailedMsg" @ref="ErrorDetailedMsg" Font-Size="Small" /><br />
+            <span>@_ErrorDetailedMsg_Text</span><br />
         </p>
 
         <h4>Error Handler:</h4>
         <p>
-            <Label id="ErrorHandler" @ref="ErrorHandler" Font-Size="Small" /><br />
+            <span>@_ErrorHandler_Text</span><br />
         </p>
 
         <h4>Detailed Error Message:</h4>
         <p>
-            <Label id="InnerMessage" @ref="InnerMessage" Font-Size="Small" /><br />
+            <span>@_InnerMessage_Text</span><br />
         </p>
         <p>
-            <Label id="InnerTrace" @ref="InnerTrace"  />
+            <span>@_InnerTrace_Text</span>
         </p>
     </Panel>

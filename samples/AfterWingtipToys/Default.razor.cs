@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace WingtipToys
 {
-  public partial class Default
+  public partial class Default : WebFormsPageBase
   {
 	protected string Title { get; set; } = "Welcome";
 
@@ -54,7 +54,7 @@ namespace WingtipToys
 
     }
 
-    private void Page_Error()
+    private void Page_Error(EventArgs e)
     {
       // Get last error from the server.
       Exception exc = Server.GetLastError();

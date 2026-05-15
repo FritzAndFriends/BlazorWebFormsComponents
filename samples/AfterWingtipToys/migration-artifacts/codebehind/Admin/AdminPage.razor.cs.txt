@@ -24,9 +24,10 @@ using System.Linq;
 using WingtipToys.Models;
 using WingtipToys.Logic;
 
+using Microsoft.AspNetCore.Components;
 namespace WingtipToys.Admin
 {
-  public partial class AdminPage
+  public partial class AdminPage : WebFormsPageBase
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -57,9 +58,7 @@ namespace WingtipToys.Admin
     private Label LabelAddImageFile = default!;
     private Label LabelAddName = default!;
     private Label LabelAddPrice = default!;
-    private Label LabelAddStatus = default!;
     private Label LabelRemoveProduct = default!;
-    private Label LabelRemoveStatus = default!;
     private FileUpload ProductImage = default!;
     private RegularExpressionValidator RegularExpressionValidator1 = default!;
     private Button RemoveProductButton = default!;
@@ -71,6 +70,9 @@ namespace WingtipToys.Admin
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
+    [Inject]
+    protected ProductContext _productContext { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
@@ -79,16 +81,16 @@ namespace WingtipToys.Admin
       string productAction = Request.QueryString["ProductAction"];
       if (productAction == "add")
       {
-        LabelAddStatus.Text = "Product added!";
+        _LabelAddStatus_Text = "Product added!";
       }
 
       if (productAction == "remove")
       {
-        LabelRemoveStatus.Text = "Product removed!";
+        _LabelRemoveStatus_Text = "Product removed!";
       }
     }
 
-    protected void AddProductButton_Click()
+    protected void AddProductButton_Click(EventArgs e)
     {
       Boolean fileOK = false;
       String path = Server.MapPath("~/Catalog/Images/");
@@ -116,7 +118,7 @@ namespace WingtipToys.Admin
         }
         catch (Exception ex)
         {
-          LabelAddStatus.Text = ex.Message;
+          _LabelAddStatus_Text = ex.Message;
         }
 
         // Add product data to DB.
@@ -131,39 +133,39 @@ namespace WingtipToys.Admin
         }
         else
         {
-          LabelAddStatus.Text = "Unable to add new product to database.";
+          _LabelAddStatus_Text = "Unable to add new product to database.";
         }
       }
       else
       {
-        LabelAddStatus.Text = "Unable to accept file type.";
+        _LabelAddStatus_Text = "Unable to accept file type.";
       }
     }
 
     public IQueryable GetCategories()
     {
-      var _db = new WingtipToys.Models.ProductContext();
+      var _db = _productContext; // Injected via DI
       IQueryable query = _db.Categories;
       return query;
     }
 
     public IQueryable GetProducts()
     {
-      var _db = new WingtipToys.Models.ProductContext();
+      var _db = _productContext; // Injected via DI
       IQueryable query = _db.Products;
       return query;
     }
 
-    protected void RemoveProductButton_Click()
+    protected void RemoveProductButton_Click(EventArgs e)
     {
-      using (var _db = new WingtipToys.Models.ProductContext())
-      {
+      // DbContext 'ProductContext' is injected via DI
+
         int productId = Convert.ToInt16(DropDownRemoveProduct.SelectedValue);
-        var myItem = (from c in _db.Products where c.ProductID == productId select c).FirstOrDefault();
+        var myItem = (from c in _productContext.Products where c.ProductID == productId select c).FirstOrDefault();
         if (myItem != null)
         {
-          _db.Products.Remove(myItem);
-          _db.SaveChanges();
+          _productContext.Products.Remove(myItem);
+          _productContext.SaveChanges();
 
           // Reload the page.
           string pageUrl = Request.Url.AbsoluteUri.Substring(0, Request.Url.AbsoluteUri.Count() - Request.Url.Query.Count());
@@ -171,9 +173,9 @@ namespace WingtipToys.Admin
         }
         else
         {
-          LabelRemoveStatus.Text = "Unable to locate product.";
+          _LabelRemoveStatus_Text = "Unable to locate product.";
         }
-      }
+      
     }
   }
 }

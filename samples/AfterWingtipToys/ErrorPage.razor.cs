@@ -25,7 +25,7 @@ using WingtipToys.Logic;
 
 namespace WingtipToys
 {
-  public partial class ErrorPage
+  public partial class ErrorPage : WebFormsPageBase
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -42,14 +42,12 @@ namespace WingtipToys
     // For non-page classes, inject RequestShim via DI.
 
     private Panel DetailedErrorPanel = default!;
-    private Label ErrorDetailedMsg = default!;
-    private Label ErrorHandler = default!;
-    private Label FriendlyErrorMsg = default!;
-    private Label InnerMessage = default!;
-    private Label InnerTrace = default!;
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+
+    [Inject]
+    protected ExceptionUtility _exceptionUtility { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -63,7 +61,7 @@ namespace WingtipToys
       string unhandledErrorMsg = "The error was unhandled by application code.";
 
       // Display safe error message.
-      FriendlyErrorMsg.Text = generalErrorMsg;
+      _FriendlyErrorMsg_Text = generalErrorMsg;
 
       // Determine where error was handled.
       string errorHandler = Request.QueryString["handler"];
@@ -80,7 +78,7 @@ namespace WingtipToys
       if (errorMsg == "404")
       {
         ex = new InvalidOperationException(httpErrorMsg, ex);
-        FriendlyErrorMsg.Text = ex.Message;
+        _FriendlyErrorMsg_Text = ex.Message;
       }
 
       // If the exception no longer exists, create a generic exception.
@@ -90,39 +88,49 @@ namespace WingtipToys
       }
 
       // Show error details to only you (developer). LOCAL ACCESS ONLY.
-      // Show error details in development environment.
-      // Request.IsLocal not available in Blazor — use environment check or always show for now
+      if (true) // Request.IsLocal — always show details in migrated app
       {
         // Detailed Error Message.
-        ErrorDetailedMsg.Text = ex.Message;
+        _ErrorDetailedMsg_Text = ex.Message;
 
         // Show where the error was handled.
-        ErrorHandler.Text = errorHandler;
+        _ErrorHandler_Text = errorHandler;
 
         // Show local access details.
-        DetailedErrorPanel.Visible = true;
+        DetailedErrorPanel?.Visible = true;
 
         if (ex.InnerException != null)
         {
-          InnerMessage.Text = ex.GetType().ToString() + "<br/>" +
+          _InnerMessage_Text = ex.GetType().ToString() + "<br/>" +
               ex.InnerException.Message;
-          InnerTrace.Text = ex.InnerException.StackTrace;
+          _InnerTrace_Text = ex.InnerException.StackTrace;
         }
         else
         {
-          InnerMessage.Text = ex.GetType().ToString();
+          _InnerMessage_Text = ex.GetType().ToString();
           if (ex.StackTrace != null)
           {
-            InnerTrace.Text = ex.StackTrace.ToString().TrimStart();
+            _InnerTrace_Text = ex.StackTrace.ToString().TrimStart();
           }
         }
       }
 
       // Log the exception.
-      ExceptionUtility.LogException(ex, errorHandler);
+      _exceptionUtility.LogException(ex, errorHandler);
 
       // Clear the error from the server.
       Server.ClearError();
     }
-  }
+  
+
+    private object? _ErrorDetailedMsg_Text; // TODO: migrate from Web Forms code-behind
+
+    private object? _ErrorHandler_Text; // TODO: migrate from Web Forms code-behind
+
+    private object? _FriendlyErrorMsg_Text; // TODO: migrate from Web Forms code-behind
+
+    private object? _InnerMessage_Text; // TODO: migrate from Web Forms code-behind
+
+    private object? _InnerTrace_Text; // TODO: migrate from Web Forms code-behind
+}
 }

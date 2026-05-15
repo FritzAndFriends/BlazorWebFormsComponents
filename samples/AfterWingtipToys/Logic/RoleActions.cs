@@ -1,8 +1,8 @@
-// TODO(bwfc-general): This helper class referenced legacy Web Forms APIs and was stubbed during migration.
-// Rebuild using ASP.NET Core equivalents (Identity, Authorization, Configuration).
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+
 namespace WingtipToys.Logic;
 
-public class RoleActions
+public partial class RoleActions
 {
-    // Stubbed — original file referenced legacy namespaces not available in .NET 10.
 }

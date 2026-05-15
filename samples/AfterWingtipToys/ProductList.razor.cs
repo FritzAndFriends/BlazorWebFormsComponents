@@ -1,4 +1,3 @@
-// TODO(bwfc-query-details): GetProducts now binds through component query properties and a SelectMethod wrapper in the generated .razor file.
 // =============================================================================
 // TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
 //
@@ -26,7 +25,7 @@ using WingtipToys.Models;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
-  public partial class ProductList
+  public partial class ProductList : WebFormsPageBase
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -37,10 +36,14 @@ namespace WingtipToys
     // For non-page classes, inject RequestShim via DI.
 
     private ListView<Product> productList = default!;
+    [Parameter] public string? categoryName { get; set; }
 
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+
+    [Inject]
+    protected ProductContext _productContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -50,25 +53,45 @@ namespace WingtipToys
 
     }
 
-    [Inject] protected ProductContext _productContext { get; set; } = default!;
-
     public IQueryable<Product> GetProducts(
-                        [QueryString("id")] int? categoryId)
+                        [QueryString("id")] int? categoryId,
+                        [RouteData] string categoryName)
     {
-      IQueryable<Product> query = _productContext.Products;
+      var _db = _productContext; // Injected via DI
+      IQueryable<Product> query = _db.Products;
 
       if (categoryId.HasValue && categoryId > 0)
       {
         query = query.Where(p => p.CategoryID == categoryId);
       }
 
-      if (!String.IsNullOrEmpty(CategoryName))
+      if (!String.IsNullOrEmpty(categoryName))
       {
         query = query.Where(p =>
                             String.Compare(p.Category.CategoryName,
-                            CategoryName) == 0);
+                            categoryName) == 0);
       }
       return query;
     }
-  }
+  
+    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
+
+
+
+    private global::System.Linq.IQueryable<Product> GetProductsQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+
+    {
+
+        totalRowCount = 0;
+
+        // TODO(bwfc-query-details): Wrapper delegates to the code-behind GetProducts method.
+
+        var query = GetProducts(CategoryId, categoryName);
+
+        if (query != null) totalRowCount = query.Count();
+
+        return query ?? global::System.Linq.Enumerable.Empty<Product>().AsQueryable();
+
+    }
+}
 }
