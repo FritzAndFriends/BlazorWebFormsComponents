@@ -388,13 +388,15 @@ public class PipelineIntegrationTests : IDisposable
         Assert.True(File.Exists(markupPath));
         Assert.True(File.Exists(codeBehindPath));
         Assert.True(File.Exists(artifactPath));
-        Assert.True(File.Exists(manifestPath));
-        Assert.Contains("Page Not Yet Migrated", File.ReadAllText(markupPath));
-        Assert.Contains("public partial class LegacyShell : BlazorWebFormsComponents.WebFormsPageBase", File.ReadAllText(codeBehindPath));
-
-        using var manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(manifestPath));
-        var quarantinedPages = manifest.RootElement.GetProperty("pages");
-        Assert.Contains(quarantinedPages.EnumerateArray(), page => page.GetProperty("originalFilePath").GetString() == "LegacyShell.aspx");
+        // With compile-surface blockers no longer acting as a strong quarantine signal for
+        // non-quarantinable paths, LegacyShell gets best-effort output instead of a stub.
+        // The manifest is only written when pages are actually quarantined.
+        Assert.False(File.Exists(manifestPath), "Manifest should not be written when no pages are quarantined.");
+        // The markup should be the actual transformed page, not a stub
+        Assert.DoesNotContain("Page Not Yet Migrated", File.ReadAllText(markupPath));
+        // The code-behind is emitted to the compile surface with the transformed content
+        var codeBehindContent = File.ReadAllText(codeBehindPath);
+        Assert.Contains("LegacyShell", codeBehindContent);
     }
 
     [Fact]

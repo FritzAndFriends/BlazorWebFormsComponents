@@ -167,6 +167,86 @@ public class PageQuarantineDetectorTests
         Assert.Contains("Split the admin workflow", decision.SuggestedApproach);
     }
 
+    [Fact]
+    public void AnalyzeLate_DoesNotQuarantineStudentsPageWithCompileSurfaceBlockerOnly()
+    {
+        // ContosoUniversity core page — must never be quarantined solely because of compile issues.
+        var metadata = CreateMetadata(
+            @"D:\input\Students.aspx",
+            @"D:\output\Students.razor",
+            "<asp:GridView ID=\"StudentsGrid\" SelectMethod=\"GetStudents\" runat=\"server\" />",
+            "namespace TestApp; public partial class Students : WebFormsPageBase { }");
+        var emissionPlan = new CodeBehindEmissionPlan(EmitToCompileSurface: false, ArtifactReason: "Unresolved compile-surface blockers", ArtifactContent: metadata.CodeBehindContent);
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/Students\"", metadata.CodeBehindContent, emissionPlan);
+
+        Assert.False(decision.ShouldQuarantine);
+    }
+
+    [Fact]
+    public void AnalyzeLate_DoesNotQuarantineCoursesPageWithCompileSurfaceBlockerOnly()
+    {
+        var metadata = CreateMetadata(
+            @"D:\input\Courses.aspx",
+            @"D:\output\Courses.razor",
+            "<asp:GridView ID=\"CoursesGrid\" SelectMethod=\"GetCourses\" runat=\"server\" />",
+            "namespace TestApp; public partial class Courses : WebFormsPageBase { }");
+        var emissionPlan = new CodeBehindEmissionPlan(EmitToCompileSurface: false, ArtifactReason: "Unresolved compile-surface blockers", ArtifactContent: metadata.CodeBehindContent);
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/Courses\"", metadata.CodeBehindContent, emissionPlan);
+
+        Assert.False(decision.ShouldQuarantine);
+    }
+
+    [Fact]
+    public void AnalyzeLate_DoesNotQuarantineInstructorsPageWithCompileSurfaceBlockerOnly()
+    {
+        var metadata = CreateMetadata(
+            @"D:\input\Instructors.aspx",
+            @"D:\output\Instructors.razor",
+            "<asp:GridView ID=\"InstructorsGrid\" SelectMethod=\"GetInstructors\" runat=\"server\" />",
+            "namespace TestApp; public partial class Instructors : WebFormsPageBase { }");
+        var emissionPlan = new CodeBehindEmissionPlan(EmitToCompileSurface: false, ArtifactReason: "Unresolved compile-surface blockers", ArtifactContent: metadata.CodeBehindContent);
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/Instructors\"", metadata.CodeBehindContent, emissionPlan);
+
+        Assert.False(decision.ShouldQuarantine);
+    }
+
+    [Fact]
+    public void AnalyzeLate_DoesNotQuarantineRootLevelPageWithCompileSurfaceBlockerOnly()
+    {
+        // Any root-level page (no subdirectory) is treated as essential and should not be
+        // quarantined merely because of compile-surface blockers.
+        var metadata = CreateMetadata(
+            @"D:\input\Departments.aspx",
+            @"D:\output\Departments.razor",
+            "<asp:ListView ID=\"DeptList\" runat=\"server\" />",
+            "namespace TestApp; public partial class Departments : WebFormsPageBase { }");
+        var emissionPlan = new CodeBehindEmissionPlan(EmitToCompileSurface: false, ArtifactReason: "Compile surface blocker", ArtifactContent: metadata.CodeBehindContent);
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/Departments\"", metadata.CodeBehindContent, emissionPlan);
+
+        Assert.False(decision.ShouldQuarantine);
+    }
+
+    [Fact]
+    public void AnalyzeLate_QuarantinesAdminPageEvenWithOnlyCompileSurfaceBlocker()
+    {
+        // Admin pages on quarantinable paths are still quarantined even without payment/identity signals.
+        var metadata = CreateMetadata(
+            @"D:\input\Admin\Reports.aspx",
+            @"D:\output\Admin\Reports.razor",
+            "<asp:GridView ID=\"ReportsGrid\" runat=\"server\" />",
+            "namespace TestApp.Admin; public partial class Reports { }");
+        var emissionPlan = new CodeBehindEmissionPlan(EmitToCompileSurface: false, ArtifactReason: "Compile surface blocker", ArtifactContent: metadata.CodeBehindContent);
+
+        var decision = _detector.AnalyzeLate(metadata, "@page \"/Admin/Reports\"", metadata.CodeBehindContent, emissionPlan);
+
+        Assert.True(decision.ShouldQuarantine);
+        Assert.Contains("Unresolved compile-surface blockers", decision.DetectedFeatures);
+    }
+
     private static FileMetadata CreateMetadata(string sourcePath, string outputPath, string originalMarkup, string? originalCodeBehind) => new()
     {
         SourceFilePath = sourcePath,

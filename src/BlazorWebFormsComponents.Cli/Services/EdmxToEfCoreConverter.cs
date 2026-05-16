@@ -428,7 +428,19 @@ public sealed class EdmxToEfCoreConverter
         var lines = new List<string>();
 
         var keyProperties = entity.Properties.Where(property => property.IsKey).Select(property => property.Name).ToList();
-        if (keyProperties.Count > 1)
+        if (keyProperties.Count == 1)
+        {
+            // Emit explicit HasKey() when the single PK name does not follow EF Core conventions
+            // (i.e., not "Id" and not "{EntityName}Id" case-insensitively).
+            // EF Core discovers conventional keys automatically; non-conventional names need
+            // an explicit HasKey() call even when [Key] data annotation is also present.
+            var keyName = keyProperties[0];
+            var isConventional = string.Equals(keyName, "Id", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(keyName, $"{entity.Name}Id", StringComparison.OrdinalIgnoreCase);
+            if (!isConventional)
+                lines.Add($"entity.HasKey(e => e.{keyName});");
+        }
+        else if (keyProperties.Count > 1)
         {
             lines.Add($"entity.HasKey(e => new {{ {string.Join(", ", keyProperties.Select(name => $"e.{name}"))} }});");
         }

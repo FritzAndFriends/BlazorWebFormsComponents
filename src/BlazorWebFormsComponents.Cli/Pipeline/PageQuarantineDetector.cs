@@ -363,6 +363,14 @@ public sealed partial class PageQuarantineDetector
     private static bool IsEssentialPage(string relativeSourcePath)
     {
         var normalizedPath = relativeSourcePath.Replace('\\', '/');
+
+        // Pages on clearly quarantinable paths are never essential — admin, account, and
+        // checkout pages are quarantined regardless of any keyword match in the filename.
+        if (IsClearlyQuarantinablePath(normalizedPath))
+        {
+            return false;
+        }
+
         var fileName = Path.GetFileName(normalizedPath);
 
         if (fileName.Equals("Default.aspx", StringComparison.OrdinalIgnoreCase)
@@ -374,6 +382,7 @@ public sealed partial class PageQuarantineDetector
             return true;
         }
 
+        // E-commerce patterns
         return normalizedPath.Contains("Product", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.Contains("Catalog", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.Contains("Item", StringComparison.OrdinalIgnoreCase)
@@ -381,7 +390,21 @@ public sealed partial class PageQuarantineDetector
             || normalizedPath.Contains("Cart", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.Contains("Shopping", StringComparison.OrdinalIgnoreCase)
             || normalizedPath.Contains("Basket", StringComparison.OrdinalIgnoreCase)
-            || normalizedPath.Contains("AddTo", StringComparison.OrdinalIgnoreCase);
+            || normalizedPath.Contains("AddTo", StringComparison.OrdinalIgnoreCase)
+            // Education / university patterns
+            || normalizedPath.Contains("Student", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Course", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Instructor", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Department", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Enrollment", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Faculty", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Grade", StringComparison.OrdinalIgnoreCase)
+            // General CRUD / content patterns applicable to any app domain
+            || normalizedPath.Contains("Dashboard", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Report", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Overview", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Browse", StringComparison.OrdinalIgnoreCase)
+            || normalizedPath.Contains("Search", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsRedirectOnlyPage(string markup, string? codeBehind)
@@ -434,8 +457,13 @@ public sealed partial class PageQuarantineDetector
 
     private static bool HasStrongSingleSignal(IReadOnlyList<string> features)
     {
-        return features.Contains("Payment or checkout integration", StringComparer.Ordinal)
-            || features.Contains("Unresolved compile-surface blockers", StringComparer.Ordinal);
+        // Payment/checkout integration alone is dangerous to emit — quarantine immediately.
+        // "Unresolved compile-surface blockers" is intentionally NOT a strong signal here:
+        // compile issues on a non-quarantinable page should produce best-effort output with
+        // a warning comment, not a silent quarantine. Pages on clearly quarantinable paths
+        // (Account/*, Admin/*, Checkout/*, Mobile) are still quarantined by the
+        // IsClearlyQuarantinablePath check at line 187 regardless of signal count.
+        return features.Contains("Payment or checkout integration", StringComparer.Ordinal);
     }
 
     private static int CountDataSourceSignals(string content)

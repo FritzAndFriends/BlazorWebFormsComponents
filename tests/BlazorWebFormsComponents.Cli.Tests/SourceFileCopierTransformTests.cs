@@ -81,6 +81,44 @@ public class SourceFileCopierTransformTests : IDisposable
         Assert.Contains("WebUtility.UrlEncode(value)", copied);
     }
 
+    [Fact]
+    public async Task CopySourceFilesAsync_AppliesConstructorInjectionToBllFileWithInlineDbContext()
+    {
+        // Verifies that DbContextInstantiationTransform runs on BLL/Logic files copied
+        // by SourceFileCopier, replacing inline new XxxEntities() with constructor injection.
+        // Reproduces the ContosoUniversity pattern where BLL classes use inline DbContext creation.
+        var inputDir = Path.Combine(_rootDir, "input");
+        var outputDir = Path.Combine(_rootDir, "output");
+        Directory.CreateDirectory(Path.Combine(inputDir, "BLL"));
+        Directory.CreateDirectory(outputDir);
+
+        await File.WriteAllTextAsync(Path.Combine(inputDir, "BLL", "Students_Logic.cs"), """
+            namespace TestApp.BLL;
+
+            public class Students_Logic
+            {
+                public void DeleteStudent(int id)
+                {
+                    ContosoUniversityEntities db = new ContosoUniversityEntities();
+                    db.Students.Remove(db.Students.First(s => s.StudentID == id));
+                    db.SaveChanges();
+                }
+            }
+            """);
+
+        var copier = new SourceFileCopier(new OutputWriter(), GetCodeBehindTransforms());
+        var report = new MigrationReport();
+
+        await copier.CopySourceFilesAsync(inputDir, outputDir, [], verbose: false, report);
+
+        var copied = await File.ReadAllTextAsync(Path.Combine(outputDir, "BLL", "Students_Logic.cs"));
+        Assert.DoesNotContain("new ContosoUniversityEntities()", copied);
+        Assert.Contains("private readonly ContosoUniversityEntities", copied);
+        Assert.Contains("_contosoUniversityEntities", copied);
+        // Constructor injection: parameter added to constructor
+        Assert.Contains("public Students_Logic(ContosoUniversityEntities", copied);
+    }
+
     private static IReadOnlyList<ICodeBehindTransform> GetCodeBehindTransforms()
     {
         var pipeline = TestHelpers.CreateDefaultPipeline();
