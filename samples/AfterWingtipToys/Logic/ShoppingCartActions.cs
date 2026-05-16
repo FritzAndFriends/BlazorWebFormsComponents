@@ -11,7 +11,7 @@ namespace WingtipToys.Logic
   {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    private ProductContext _db;
+    private readonly ProductContext _db;
 
     public ShoppingCartActions(ProductContext db, IHttpContextAccessor httpContextAccessor)
     {
@@ -63,7 +63,7 @@ namespace WingtipToys.Logic
       if (_db != null)
       {
         _db.Dispose();
-        _db = null;
+
       }
     }
 
@@ -109,11 +109,8 @@ namespace WingtipToys.Logic
 
     public ShoppingCartActions GetCart()
     {
-      using (var cart = this)
-      {
-        cart.ShoppingCartId = cart.GetCartId();
-        return cart;
-      }
+      this.ShoppingCartId = this.GetCartId();
+      return this;
     }
 
     public void UpdateShoppingCartDatabase(String cartId, ShoppingCartUpdates[] CartItemUpdates)

@@ -1,36 +1,27 @@
 using ContosoUniversity.Models;
 using ContosoUniversity.BLL;
-using Microsoft.AspNetCore.Components;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace ContosoUniversity;
 
 public partial class Courses : BlazorWebFormsComponents.WebFormsPageBase
 {
     [Inject] private Courses_Logic coursLogic { get; set; } = default!;
-    [Inject] private ContosoUniversityEntities _db { get; set; } = default!;
+    [Inject] private ContosoUniversityEntities _context { get; set; } = default!;
 
     private DropDownList<string> drpDepartments = default!;
     private GridView<Cours> grvCourses = default!;
-    private TextBox txtCourse = default!;
-    private DetailsView<Cours> dtlCourses = default!;
-
-    private List<string> _departmentNames = new();
+    private List<string> departments = new();
+    private List<Cours> courseResults = new();
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-        _departmentNames = _db.Departments.Select(d => d.DepartmentName).ToList();
+        departments = _context.Departments.Select(d => d.DepartmentName).ToList();
     }
 
-    private void btnSearchCourse_Click()
+    public IEnumerable<Cours> grvCourses_GetData()
     {
-        grvCourses.DataSource = coursLogic.GetCourses(drpDepartments.SelectedValue);
-    }
-
-    private void search_Click()
-    {
-        dtlCourses.DataSource = coursLogic.GetCourse(txtCourse.Text);
-        txtCourse.Text = string.Empty;
+        return courseResults;
     }
 }

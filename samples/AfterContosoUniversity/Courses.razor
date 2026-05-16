@@ -1,28 +1,21 @@
 @page "/Courses"
 @inherits BlazorWebFormsComponents.WebFormsPageBase
+<PageTitle>Contoso University - Courses</PageTitle>
 
 <link href="CSS/CSS_Courses.css" rel="stylesheet" />
 
 <div id="dropList">
     <h1 id="hdrCourse">Select Course</h1>
-    <DropDownList ItemType="string" @ref="drpDepartments" id="drpDepartments" DataSource="_departmentNames" />
-    <Button Text="Search Courses" OnClick="btnSearchCourse_Click" />
+    <DropDownList ItemType="string" @ref="drpDepartments" DataSource="departments" />
     <br /><br />
-    <GridView ItemType="ContosoUniversity.Models.Cours" @ref="grvCourses"
+    <GridView ItemType="ContosoUniversity.Models.Cours"
+        @ref="grvCourses"
         AutoGenerateColumns="false"
-        EmptyDataText="Chose Department To Display Courses">
+        EmptyDataText="Choose Department To Display Courses">
         <Columns>
             <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="CourseID" HeaderText="ID" />
             <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="CourseName" HeaderText="Course Name" />
-            <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="StudentsMax" HeaderText="Max Capacity" />
+            <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="Credits" HeaderText="Credits" />
         </Columns>
     </GridView>
-</div>
-<div id="autoComplete">
-    <h1 id="crsByName">Courses By Name</h1>
-    <TextBox @ref="txtCourse" id="txtCourse" placeholder="Search Course..." />
-    <Button Text="Search" OnClick="search_Click" id="search" />
-    <br /><br />
-    <DetailsView ItemType="ContosoUniversity.Models.Cours" @ref="dtlCourses"
-        CssClass="details" />
 </div>

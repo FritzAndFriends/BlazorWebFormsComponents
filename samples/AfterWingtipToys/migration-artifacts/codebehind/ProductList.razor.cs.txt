@@ -80,7 +80,7 @@ namespace WingtipToys
     {
         totalRowCount = 0;
         // TODO(bwfc-query-details): Wrapper delegates to the code-behind GetProducts method.
-        var query = GetProducts(CategoryId, CategoryName);
+        var query = GetProducts(CategoryId, categoryName);
         if (query != null) totalRowCount = query.Count();
         return query ?? global::System.Linq.Enumerable.Empty<Product>().AsQueryable();
     }

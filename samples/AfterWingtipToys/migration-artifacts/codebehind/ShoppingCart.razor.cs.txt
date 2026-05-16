@@ -80,7 +80,7 @@ namespace WingtipToys
         {
           _LabelTotalText_Text = "";
           _lblTotal_Text = "";
-          ShoppingCartTitle.InnerText = "Shopping Cart is Empty";
+          ShoppingCartTitle = "Shopping Cart is Empty";
           UpdateBtn?.Visible = false;
           CheckoutImageBtn?.Visible = false;
         }

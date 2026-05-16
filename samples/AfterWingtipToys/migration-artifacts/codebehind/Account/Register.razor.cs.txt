@@ -11,7 +11,7 @@ public partial class Register
     private TextBox Password = default!;
 
 
-    protected void CreateUser_Click(object? sender, EventArgs e)
+    protected void CreateUser_Click()
     {
         // TODO: migrate from Web Forms code-behind
     }

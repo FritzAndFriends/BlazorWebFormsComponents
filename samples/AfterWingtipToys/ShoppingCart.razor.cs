@@ -55,8 +55,8 @@ namespace WingtipToys
     private GridView<CartItem> CartList = default!;
     private ImageButton CheckoutImageBtn = default!;
     private Button UpdateBtn = default!;
-    private string _shoppingCartTitle = "Shopping Cart";
-    private ShoppingCartActions actions => _shoppingCartActions;
+    private string _ShoppingCartTitle = "Shopping Cart";
+    private string ShoppingCartTitle { get => _ShoppingCartTitle; set => _ShoppingCartTitle = value; }
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
@@ -82,7 +82,7 @@ namespace WingtipToys
         {
           _LabelTotalText_Text = "";
           _lblTotal_Text = "";
-          _shoppingCartTitle = "Shopping Cart is Empty";
+          ShoppingCartTitle = "Shopping Cart is Empty";
           UpdateBtn?.Visible = false;
           CheckoutImageBtn?.Visible = false;
         }
@@ -92,7 +92,7 @@ namespace WingtipToys
     public List<CartItem> GetShoppingCartItems()
     {
 
-      return actions.GetCartItems();
+      return _shoppingCartActions.GetCartItems();
     }
 
     public List<CartItem> UpdateCartItems()

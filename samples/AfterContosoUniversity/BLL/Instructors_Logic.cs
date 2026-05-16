@@ -5,30 +5,23 @@ namespace ContosoUniversity.BLL;
 
 public partial class Instructors_Logic
 {
-    private readonly ContosoUniversityEntities _db;
+    private readonly ContosoUniversityEntities _context;
 
-    public Instructors_Logic(ContosoUniversityEntities db)
+    public Instructors_Logic(ContosoUniversityEntities context)
     {
-        _db = db;
+        _context = context;
     }
 
-    public List<Instructor> getInstructors()
-    {
-        return _db.Instructors.ToList();
-    }
+    public List<Instructor> getInstructors() =>
+        _context.Instructors.Include(i => i.Courses).ToList();
 
     public List<Instructor> GetSortedInstrucors(string expression, string direction)
     {
-        var instructors = _db.Instructors.AsQueryable();
-
-        instructors = expression switch
-        {
-            "InstructorID" => direction == "asc" ? instructors.OrderBy(i => i.InstructorID) : instructors.OrderByDescending(i => i.InstructorID),
-            "FirstName" => direction == "asc" ? instructors.OrderBy(i => i.FirstName) : instructors.OrderByDescending(i => i.FirstName),
-            "LastName" => direction == "asc" ? instructors.OrderBy(i => i.LastName) : instructors.OrderByDescending(i => i.LastName),
-            _ => instructors.OrderBy(i => i.InstructorID)
-        };
-
-        return instructors.ToList();
+        var query = _context.Instructors.Include(i => i.Courses).AsQueryable();
+        if (direction == "ASC")
+            query = query.OrderBy(i => EF.Property<object>(i, expression));
+        else
+            query = query.OrderByDescending(i => EF.Property<object>(i, expression));
+        return query.ToList();
     }
 }

@@ -15,7 +15,7 @@ public partial class Login
     private CheckBox RememberMe = default!;
 
 
-    protected void LogIn(object? sender, EventArgs e)
+    protected void LogIn()
     {
         // TODO: migrate from Web Forms code-behind
     }

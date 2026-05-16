@@ -3,23 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using ContosoUniversity.Models;
 
-namespace ContosoUniversity.Bll
+namespace ContosoUniversity.BLL
 {
     public class Enrollmet_Logic
     {
-        private readonly ContosoUniversityEntities _db;
+        private readonly ContosoUniversityEntities _context;
 
-        public Enrollmet_Logic(ContosoUniversityEntities db)
+        public Enrollmet_Logic(ContosoUniversityEntities context)
         {
-            _db = db;
+            _context = context;
         }
 
         #region Get Enrollments List
         public Dictionary<string, int> Get_Enrollment_ByDate()
         {
-            var enrollments = from enrl in _db.Enrollments
-                              group enrl by enrl.Date into d
-                              select new { Date = d.Key, Count = d.Select(enrl => enrl.EnrollmentID).Count() };
+            var enrollments = _context.Enrollments
+                .GroupBy(e => e.Date.Date)
+                .Select(g => new { Date = g.Key, Count = g.Count() })
+                .ToList();
 
             Dictionary<string, int> entries = new Dictionary<string, int>();
 
@@ -29,7 +30,6 @@ namespace ContosoUniversity.Bll
             }
 
             return entries;
-
         }
         #endregion
     }

@@ -34,11 +34,13 @@ public partial class ContosoUniversityEntities : DbContext
 
         modelBuilder.Entity<Department>(entity =>
         {
+            entity.HasKey(e => e.DepartmentID);
             entity.ToTable("Departments");
         });
 
         modelBuilder.Entity<Enrollment>(entity =>
         {
+            entity.HasKey(e => e.EnrollmentID);
             entity.HasOne(d => d.Cours)
                 .WithMany(p => p.Enrollments)
                 .HasForeignKey(d => d.CourseID)
@@ -51,11 +53,13 @@ public partial class ContosoUniversityEntities : DbContext
 
         modelBuilder.Entity<Instructor>(entity =>
         {
+            entity.HasKey(e => e.InstructorID);
             entity.ToTable("Instructors");
         });
 
         modelBuilder.Entity<Student>(entity =>
         {
+            entity.HasKey(e => e.StudentID);
             entity.ToTable("Students");
         });
 

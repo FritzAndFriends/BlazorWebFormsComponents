@@ -1,16 +1,18 @@
 @page "/Students"
 @inherits BlazorWebFormsComponents.WebFormsPageBase
+<PageTitle>Contoso University - Students</PageTitle>
 
 <link href="CSS/Students_CSS.css" rel="stylesheet" />
 
-<WebFormsForm>
 <div id="grvStudentsData">
-    <GridView ItemType="object" @ref="grv" CssClass="grv"
+    <GridView ItemType="object"
+        @ref="grv"
+        DataSource="studentData"
+        CssClass="grv"
         AutoGenerateColumns="false"
         EmptyDataText="There are no records to display"
-        SelectMethod="grv_GetData"
-        BackColor='@("White")' BorderColor='@("#3366CC")' BorderStyle="@BorderStyle.None" BorderWidth="1"
-        CellPadding="4">
+        BackColor='@("White")' BorderColor='@("#3366CC")' BorderWidth="1"
+        CellPadding="4" Height="336" Width="416">
         <Columns>
             <BoundField ItemType="object" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
             <BoundField ItemType="object" DataField="FullName" HeaderText="Student Name" />
@@ -18,28 +20,20 @@
             <BoundField ItemType="object" DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
             <BoundField ItemType="object" DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
         </Columns>
+        <ChildComponents>
+            <FooterStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' />
+            <HeaderStyle BackColor='@("#003399")' Font-Bold="true" ForeColor='@("#CCCCFF")' />
+            <PagerStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' HorizontalAlign="@HorizontalAlign.Left" />
+            <RowStyle BackColor='@("White")' ForeColor='@("#003399")' />
+            <SelectedRowStyle BackColor='@("#009999")' Font-Bold="true" ForeColor='@("#CCFF99")' />
+        </ChildComponents>
     </GridView>
 </div>
 <div id="addStud">
     <h1 id="addStudent">Add Student</h1>
-    <table class="tabAddStud">
-        <tr><td>First Name</td><td><TextBox @ref="txtFirstName" id="txtFirstName" placeholder="Type Your First Name..." /></td></tr>
-        <tr><td>Last Name</td><td><TextBox @ref="txtLastName" id="txtLastName" placeholder="Type Your Last Name..." /></td></tr>
-        <tr><td>Birth Date</td><td><TextBox @ref="txtBirthDate" id="txtBirthDate" placeholder="dd.mm.year" /></td></tr>
-        <tr><td>Email</td><td><TextBox @ref="txtEmail" id="txtEmail" placeholder="Email is Optional..." /></td></tr>
-        <tr><td>Course Name</td><td><DropDownList ItemType="string" @ref="dropListCourses" id="dropListCourses" DataSource="_courseNames" /></td></tr>
-        <tr><td></td><td>
-            <Button CssClass="insert" Text="New Enrollment" OnClick="btnInsert_Click" id="btnInsert" />
-            &nbsp;&nbsp;
-            <Button Text="Clear" OnClick="btnClear_Click" id="btnClear" />
-        </td></tr>
-    </table>
+    <p><em>Student enrollment form coming soon.</em></p>
 </div>
 <div id="ajax">
     <h1 id="searchStud">Search Student</h1>
-    <TextBox CssClass="txtSearch" @ref="txtSearch" id="txtSearch" placeholder="Type Student Name..." />
-    <Button Text="Show Student Info" OnClick="btnSearch_Click" CssClass="btnInfo" id="btnSearch" />
-    <DetailsView ItemType="object" @ref="studentData" id="studentData"
-        CssClass="detailsView" BorderColor='@("Black")' ForeColor='@("Black")' />
+    <p><em>Student search coming soon.</em></p>
 </div>
-</WebFormsForm>

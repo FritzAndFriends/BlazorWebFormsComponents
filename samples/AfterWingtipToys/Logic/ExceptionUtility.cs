@@ -9,7 +9,7 @@ namespace WingtipToys.Logic
   // Create our own utility for exceptions
   public sealed class ExceptionUtility
   {
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private static IHttpContextAccessor _httpContextAccessor;
 
     public ExceptionUtility(IHttpContextAccessor httpContextAccessor)
     {
@@ -21,7 +21,7 @@ namespace WingtipToys.Logic
     { }
 
     // Log an Exception
-    public void LogException(Exception exc, string source)
+    public static void LogException(Exception exc, string source)
     {
       // Include logic for logging exceptions
       // Get the absolute path to the log file
