@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using BlazorWebFormsComponents.Cli.Io;
 
@@ -125,6 +126,10 @@ public class WebConfigTransformer
 
     private static string NormalizeConnectionString(string connStr)
     {
+        // EF6 metadata connection strings wrap the real SQL connection string inside
+        // a provider connection string parameter. Unwrap it first.
+        connStr = UnwrapEf6ConnectionString(connStr);
+
         if (!connStr.Contains("AttachDbFilename=|DataDirectory|", StringComparison.OrdinalIgnoreCase))
             return connStr;
 
@@ -189,6 +194,37 @@ public class WebConfigTransformer
                 .Split(['-', '_', ' '], StringSplitOptions.RemoveEmptyEntries)
                 .Select(segment => char.ToUpperInvariant(segment[0]) + segment[1..].ToLowerInvariant()))
         };
+    }
+
+    // Matches EF6 metadata connection strings:
+    //   metadata=res://*/...;provider=System.Data.SqlClient;provider connection string="actual conn string"
+    private static readonly Regex Ef6MetadataRegex = new(
+        @"^\s*metadata\s*=\s*res://",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly Regex Ef6ProviderConnectionStringRegex = new(
+        @"provider\s+connection\s+string\s*=\s*""(?<inner>[^""]*)""",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    /// <summary>
+    /// Unwraps EF6 metadata connection strings to extract the inner SQL connection string.
+    /// EF6 format: metadata=res://*/...;provider=System.Data.SqlClient;provider connection string="Data Source=...;Initial Catalog=..."
+    /// Returns the inner provider connection string, or the original if not EF6 format.
+    /// </summary>
+    private static string UnwrapEf6ConnectionString(string connStr)
+    {
+        if (!Ef6MetadataRegex.IsMatch(connStr))
+            return connStr;
+
+        var match = Ef6ProviderConnectionStringRegex.Match(connStr);
+        if (match.Success)
+        {
+            var inner = match.Groups["inner"].Value;
+            // The inner string may use &quot; for quotes (from XML) — unescape
+            return inner.Replace("&quot;", "\"");
+        }
+
+        return connStr;
     }
 
     private static string? FindWebConfig(string sourcePath)

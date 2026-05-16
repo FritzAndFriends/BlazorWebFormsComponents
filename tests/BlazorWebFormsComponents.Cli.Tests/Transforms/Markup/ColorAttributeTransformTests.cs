@@ -59,12 +59,28 @@ public class ColorAttributeTransformTests
     }
 
     [Fact]
-    public void Apply_HexColor_LeavesUnchanged()
+    public void Apply_HexColor_WrapsAsStringExpression()
     {
-        // Hex values start with # not a letter, so regex won't match
+        // Hex values like #FF0000 must be wrapped to avoid Razor treating # as a preprocessor directive
         var input = """<Panel BackColor="#FF0000" />""";
         var result = _transform.Apply(input, MakeMetadata());
-        Assert.Equal(input, result);
+        Assert.Contains("""BackColor='@("#FF0000")'""", result);
+    }
+
+    [Fact]
+    public void Apply_ShortHexColor_WrapsAsStringExpression()
+    {
+        var input = """<Panel ForeColor="#333" />""";
+        var result = _transform.Apply(input, MakeMetadata());
+        Assert.Contains("""ForeColor='@("#333")'""", result);
+    }
+
+    [Fact]
+    public void Apply_HexColor_BorderColor_WrapsAsStringExpression()
+    {
+        var input = """<GridView BorderColor="#3366CC" />""";
+        var result = _transform.Apply(input, MakeMetadata());
+        Assert.Contains("""BorderColor='@("#3366CC")'""", result);
     }
 
     [Fact]

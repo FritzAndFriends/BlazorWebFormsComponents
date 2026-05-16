@@ -4,9 +4,12 @@ using BlazorWebFormsComponents.Cli.Pipeline;
 namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 
 /// <summary>
-/// Resolves bare color name attributes to string expressions that use WebColor's implicit conversion.
+/// Resolves bare color name attributes and hex color attributes to string expressions
+/// that use WebColor's implicit conversion.
 /// Web Forms: BackColor="Transparent" → Blazor: BackColor='@("Transparent")'
-/// Without this, the Razor compiler treats bare color names as C# identifiers (CS0103).
+/// Web Forms: ForeColor="#333333" → Blazor: ForeColor='@("#333333")'
+/// Without this, the Razor compiler treats bare color names as C# identifiers (CS0103)
+/// and hex values as preprocessor directives.
 /// </summary>
 public class ColorAttributeTransform : IMarkupTransform
 {
@@ -20,9 +23,23 @@ public class ColorAttributeTransform : IMarkupTransform
         @"(?<attr>(?:Back|Fore|Border)Color)\s*=\s*""(?<value>[A-Z][a-zA-Z]+)""",
         RegexOptions.Compiled);
 
+    // Matches color attributes with hex values (#RGB, #RRGGBB, #RRGGBBAA).
+    private static readonly Regex HexColorAttributeRegex = new(
+        @"(?<attr>(?:Back|Fore|Border)Color)\s*=\s*""(?<value>#[0-9A-Fa-f]{3,8})""",
+        RegexOptions.Compiled);
+
     public string Apply(string content, FileMetadata metadata)
     {
-        return ColorAttributeRegex.Replace(content, match =>
+        // Handle hex color values first
+        content = HexColorAttributeRegex.Replace(content, match =>
+        {
+            var attr = match.Groups["attr"].Value;
+            var value = match.Groups["value"].Value;
+            return $"{attr}='@(\"{value}\")'";
+        });
+
+        // Handle named color values
+        content = ColorAttributeRegex.Replace(content, match =>
         {
             var attr = match.Groups["attr"].Value;
             var value = match.Groups["value"].Value;
@@ -34,6 +51,8 @@ public class ColorAttributeTransform : IMarkupTransform
             // Wrap as string expression — WebColor's implicit operator handles the conversion
             return $"{attr}='@(\"{value}\")'";
         });
+
+        return content;
     }
 }
 

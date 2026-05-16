@@ -51,9 +51,15 @@ public class AttributeNormalizeTransform : IMarkupTransform
         ["Display"] = "ValidatorDisplay"
     };
 
-    // Dimension attributes for px stripping
+    // Dimension attributes for unit suffix stripping (px, em, pt, %)
     private static readonly string[] UnitAttributes =
         ["Width", "Height", "BorderWidth", "CellPadding", "CellSpacing"];
+
+    // Hyphenated CSS-style attributes that Razor cannot parse as component parameters.
+    // These cause CS errors because Razor interprets the hyphen as subtraction.
+    private static readonly Regex HyphenatedAttributeRegex = new(
+        @"\s+(?:Font-Size|Font-Weight|Font-Style|Font-Family|Font-Names|Font-Overline|Font-Strikeout|Font-Underline|Line-Height|Letter-Spacing|Word-Spacing|Text-Decoration)\s*=\s*""[^""]*""",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public string Apply(string content, FileMetadata metadata)
     {
@@ -80,12 +86,15 @@ public class AttributeNormalizeTransform : IMarkupTransform
             });
         }
 
-        // Unit normalization: strip "px" suffix
+        // Unit normalization: strip "px", "em", "pt" suffixes from dimension attributes
         foreach (var attr in UnitAttributes)
         {
-            var unitRegex = new Regex($@"{Regex.Escape(attr)}=""(\d+)px""");
+            var unitRegex = new Regex($@"{Regex.Escape(attr)}=""(\d+)(?:px|em|pt|%)""");
             content = unitRegex.Replace(content, $"{attr}=\"$1\"");
         }
+
+        // Remove hyphenated CSS-style attributes that Razor cannot parse
+        content = HyphenatedAttributeRegex.Replace(content, "");
 
         return content;
     }

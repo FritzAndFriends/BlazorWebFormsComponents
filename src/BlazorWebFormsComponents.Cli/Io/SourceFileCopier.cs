@@ -94,6 +94,11 @@ public class SourceFileCopier
         var quarantinedCount = 0;
         var discoveredServiceClasses = new List<DiscoveredServiceClass>();
 
+        // Track fully-qualified class names to detect duplicates.
+        // Web Forms projects sometimes have the same class in multiple files
+        // (e.g., a BLL class and a generated model stub) which causes CS0101.
+        var copiedClassNames = new HashSet<string>(StringComparer.Ordinal);
+
         foreach (var file in Directory.EnumerateFiles(sourcePath, "*.cs", SearchOption.AllDirectories))
         {
             var fullPath = Path.GetFullPath(file);
@@ -154,6 +159,29 @@ public class SourceFileCopier
                 quarantinedCount++;
                 continue;
             }
+
+            // Detect duplicate classes: if a class with the same fully-qualified name
+            // was already copied from another file, skip this one to avoid CS0101.
+            var fileNamespace = NamespaceRegex.Match(content);
+            var fileClasses = ClassRegex.Matches(content);
+            var isDuplicate = false;
+            if (fileNamespace.Success && fileClasses.Count > 0)
+            {
+                var ns = fileNamespace.Groups["ns"].Value;
+                foreach (Match cm in fileClasses)
+                {
+                    var fqn = $"{ns}.{cm.Groups["name"].Value}";
+                    if (!copiedClassNames.Add(fqn))
+                    {
+                        isDuplicate = true;
+                        if (verbose)
+                            Console.WriteLine($"  Skipped duplicate class: {fqn} in {relativePath}");
+                        break;
+                    }
+                }
+            }
+            if (isDuplicate)
+                continue;
 
             var destPath = Path.Combine(outputPath, relativePath);
             await _outputWriter.WriteFileAsync(destPath, content, $"Source: {relativePath}");
