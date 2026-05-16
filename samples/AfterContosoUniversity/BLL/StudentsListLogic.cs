@@ -1,175 +1,178 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Models;
-
+using ContosoUniversity;
+using Microsoft.EntityFrameworkCore;
 namespace ContosoUniversity.Bll
 {
     public class StudentsListLogic
     {
-        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
+        private readonly ContosoUniversityEntities _db;
 
-        public StudentsListLogic(IDbContextFactory<ContosoUniversityEntities> factory)
+        public StudentsListLogic(ContosoUniversityEntities db)
         {
-            _factory = factory;
+            _db = db;
         }
 
-        public List<object> GetJoinedTableData()
+        #region GettingJoinedTables
+        public List<Object> GetJoinedTableData()
         {
-            using var db = _factory.CreateDbContext();
-            var newTab = new List<object>();
+            List<Object> newTab = new List<object>();
 
-            var students = db.Students
-                .Include(s => s.Enrollments)
-                .ToList();
+            var joinedTab = _db.Students.Join(_db.Enrollments, stud => stud.StudentID, enr => enr.StudentID, (stud, enr) => enr);
 
-            foreach (var s in students)
+            var groupedTab = from tab in joinedTab
+                             group tab by new { tab.Date, tab.Student.LastName, tab.Student.FirstName, tab.Student.Email, tab.Student.StudentID } into grpTab
+                             select new { ID = grpTab.Key.StudentID, Date = grpTab.Key.Date, FirstName = grpTab.Key.FirstName, LastName = grpTab.Key.LastName, Email = grpTab.Key.Email, Count = grpTab.Select(cache => cache).Count() };
+
+            foreach (var entry in groupedTab)
             {
                 newTab.Add(new
                 {
-                    ID = s.StudentID,
-                    Date = s.Enrollments.Any()
-                        ? s.Enrollments.Min(e => e.Date).ToShortDateString()
-                        : DateTime.Today.ToShortDateString(),
-                    FullName = string.Format("{0} {1}", s.FirstName, s.LastName),
-                    Email = s.Email,
-                    Count = s.Enrollments.Count,
+                    ID = entry.ID,
+                    Date = entry.Date.ToShortDateString(),
+                    FullName = string.Format("{0} {1}", entry.FirstName, entry.LastName),
+                    Email = entry.Email,
+                    Count = entry.Count,
                 });
             }
 
             return newTab;
         }
+        #endregion
 
+        #region UpdateStudentData
         public void UpdateStudentData(int id, string name, string email = null)
         {
-            using var db = _factory.CreateDbContext();
-            var student = db.Students.First(stud => stud.StudentID == id);
+            Student student = _db.Students.First(stud => stud.StudentID == id);
 
             if (name != null)
             {
-                var arr = name.Split(' ');
+                string[] arr = name.Split(' ');
+
                 if (arr.Length > 1)
                 {
                     student.FirstName = arr[0];
                     student.LastName = arr[1];
                     student.Email = email;
-                    db.SaveChanges();
+
+                    _db.SaveChanges();
                 }
             }
         }
+        #endregion
 
+        #region Delete Students
         public void DeleteStudent(int id)
         {
-            using var db = _factory.CreateDbContext();
-            db.Students.Remove(db.Students.First(stud => stud.StudentID == id));
-            db.SaveChanges();
+            _db.Students.Remove(_db.Students.First(stud => stud.StudentID == id));
+            _db.SaveChanges();
         }
+        #endregion
 
+        #region Inserting new entry to Student and Enrollment Table
         public void InsertNewEntry(string firstName, string lastName, DateTime birthDate, string course, string email = "Has not specified")
         {
-            using var db = _factory.CreateDbContext();
             int courseId, studentId = 0;
 
-            var student = db.Students
-                .FirstOrDefault(stud => stud.FirstName == firstName && stud.LastName == lastName && stud.BirthDate == birthDate && stud.Email == email);
+            Student newStudent = new Student();
+            Enrollment newEnrollment = new Enrollment();
 
-            if (student == null)
+            var student = (from stud in _db.Students
+                           where stud.FirstName == firstName && stud.LastName == lastName && stud.BirthDate == birthDate && stud.Email == email
+                           select stud).FirstOrDefault();
+
+            if (student as Student == null)
             {
-                var newStudent = new Student
+                AddingNewStudent(firstName, lastName, birthDate, email);
+
+                foreach (var stud in _db.Students)
                 {
-                    FirstName = firstName,
-                    LastName = lastName,
-                    BirthDate = birthDate,
-                    Email = email
-                };
-                db.Students.Add(newStudent);
-                db.SaveChanges();
-                studentId = newStudent.StudentID;
+                    studentId = stud.StudentID;
+                }
+                courseId = (from crs in _db.Courses
+                            where crs.CourseName == course
+                            select crs).FirstOrDefault().CourseID;
+
+                AddingNewEnrollment(studentId, courseId);
             }
             else
             {
-                studentId = student.StudentID;
-            }
+                studentId = (student as Student).StudentID;
 
-            var courseEntity = db.Courses.FirstOrDefault(crs => crs.CourseName == course);
-            if (courseEntity != null)
-            {
-                courseId = courseEntity.CourseID;
-                var newEnrollment = new Enrollment
-                {
-                    CourseID = courseId,
-                    Date = DateTime.Now,
-                    StudentID = studentId
-                };
-                db.Enrollments.Add(newEnrollment);
-                db.SaveChanges();
+                courseId = (from crs in _db.Courses
+                            where crs.CourseName == course
+                            select crs).FirstOrDefault().CourseID;
+
+                AddingNewEnrollment(studentId, courseId);
             }
         }
 
+        private void AddingNewStudent(string firstName, string lastName, DateTime birthDate, string email = "Has not specified")
+        {
+            Student newStudent = new Student();
+
+            newStudent.FirstName = firstName;
+            newStudent.LastName = lastName;
+            newStudent.BirthDate = birthDate;
+            newStudent.Email = email;
+
+            _db.Students.Add(newStudent);
+            _db.SaveChanges();
+        }
+
+        private void AddingNewEnrollment(int studentId, int courseId)
+        {
+            Enrollment newEnrollment = new Enrollment();
+
+            newEnrollment.CourseID = courseId;
+            newEnrollment.Date = DateTime.Now;
+            newEnrollment.StudentID = studentId;
+
+            _db.Enrollments.Add(newEnrollment);
+            _db.SaveChanges();
+        }
+
+        #endregion
+
+        #region Getting Student Info
         public List<object> GetStudents(string name)
         {
-            using var db = _factory.CreateDbContext();
-            var studentsInfo = new List<object>();
+            string[] arr;
+            List<object> studentsInfo = new List<object>();
 
-            if (!string.IsNullOrEmpty(name))
+            if (!String.IsNullOrEmpty(name))
             {
-                var arr = name.Split(' ');
+                arr = name.Split(' ');
                 if (arr.Length > 1)
                 {
                     var firstName = arr[0];
                     var lastName = arr[1];
 
-                    var students = db.Students
-                        .Where(stud => stud.FirstName == firstName && stud.LastName == lastName)
-                        .ToList();
+                    var students = (from stud in _db.Students
+                                    where stud.FirstName == firstName && stud.LastName == lastName
+                                    select stud).ToList<Student>();
 
-                    foreach (var stud in students)
+                    if (students != null)
                     {
-                        studentsInfo.Add(new
+                        foreach (Student stud in students)
                         {
-                            FirstName = stud.FirstName,
-                            LastName = stud.LastName,
-                            Email = stud.Email,
-                            BirthDate = stud.BirthDate.ToShortDateString(),
-                            StudentID = stud.StudentID
-                        });
+                            var student = new
+                            {
+                                FirstName = stud.FirstName,
+                                LastName = stud.LastName,
+                                Email = stud.Email,
+                                BirthDate = stud.BirthDate.ToShortDateString(),
+                                StudentID = stud.StudentID
+                            };
+                            studentsInfo.Add(student);
+                        }
                     }
                 }
             }
             return studentsInfo;
         }
-
-        public List<string> GetCourseNames()
-        {
-            using var db = _factory.CreateDbContext();
-            return db.Courses.Select(c => c.CourseName).ToList();
-        }
-
-        public List<string> GetStudentAutoComplete(string prefixText)
-        {
-            using var db = _factory.CreateDbContext();
-            return db.Students
-                .Where(s => s.FirstName.StartsWith(prefixText))
-                .Select(s => s.FirstName + " " + s.LastName)
-                .Take(20)
-                .ToList();
-        }
-
-        public List<string> GetDepartmentNames()
-        {
-            using var db = _factory.CreateDbContext();
-            return db.Departments.Select(d => d.DepartmentName).ToList();
-        }
-
-        public List<string> GetCourseAutoComplete(string prefixText)
-        {
-            using var db = _factory.CreateDbContext();
-            return db.Courses
-                .Where(c => c.CourseName.StartsWith(prefixText))
-                .Select(c => c.CourseName)
-                .Take(20)
-                .ToList();
-        }
+        #endregion
     }
 }

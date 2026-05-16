@@ -21,9 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ContosoUniversity.Models;
+using ContosoUniversity.Bll;
+
+
 namespace ContosoUniversity
 {
-    public partial class Home : WebFormsPageBase
+    public partial class About : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -33,6 +37,7 @@ namespace ContosoUniversity
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
+    private GridView<object> EnrollmentsStat = default!;
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
@@ -42,7 +47,18 @@ namespace ContosoUniversity
             // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
             await base.OnInitializedAsync();
 
+            
+        }
 
+        // The return type can be changed to IEnumerable, however to support
+        // paging and sorting, the following parameters must be added:
+        //     int maximumRows
+        //     int startRowIndex
+        //     out int totalRowCount
+        //     string sortByExpression
+        public Dictionary<string, int> EnrollmentsStat_GetData()
+        {
+            return new Enrollmet_Logic().Get_Enrollment_ByDate();
         }
     }
 }

@@ -1,43 +1,34 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace ContosoUniversity.BLL
+namespace ContosoUniversity.BLL;
+
+public partial class Instructors_Logic
 {
-    public class Instructors_Logic
+    private readonly ContosoUniversityEntities _db;
+
+    public Instructors_Logic(ContosoUniversityEntities db)
     {
-        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
+        _db = db;
+    }
 
-        public Instructors_Logic(IDbContextFactory<ContosoUniversityEntities> factory)
+    public List<Instructor> getInstructors()
+    {
+        return _db.Instructors.ToList();
+    }
+
+    public List<Instructor> GetSortedInstrucors(string expression, string direction)
+    {
+        var instructors = _db.Instructors.AsQueryable();
+
+        instructors = expression switch
         {
-            _factory = factory;
-        }
+            "InstructorID" => direction == "asc" ? instructors.OrderBy(i => i.InstructorID) : instructors.OrderByDescending(i => i.InstructorID),
+            "FirstName" => direction == "asc" ? instructors.OrderBy(i => i.FirstName) : instructors.OrderByDescending(i => i.FirstName),
+            "LastName" => direction == "asc" ? instructors.OrderBy(i => i.LastName) : instructors.OrderByDescending(i => i.LastName),
+            _ => instructors.OrderBy(i => i.InstructorID)
+        };
 
-        public List<Instructor> getInstructors()
-        {
-            using var db = _factory.CreateDbContext();
-            return db.Instructors.ToList();
-        }
-
-        public List<Instructor> GetSortedInstrucors(string expression, string direction)
-        {
-            using var db = _factory.CreateDbContext();
-            IQueryable<Instructor> query = db.Instructors;
-
-            if (!string.IsNullOrEmpty(expression))
-            {
-                query = expression switch
-                {
-                    "InstructorID" => direction == "asc" ? query.OrderBy(i => i.InstructorID) : query.OrderByDescending(i => i.InstructorID),
-                    "FirstName" => direction == "asc" ? query.OrderBy(i => i.FirstName) : query.OrderByDescending(i => i.FirstName),
-                    "LastName" => direction == "asc" ? query.OrderBy(i => i.LastName) : query.OrderByDescending(i => i.LastName),
-                    _ => query
-                };
-            }
-
-            return query.ToList();
-        }
+        return instructors.ToList();
     }
 }

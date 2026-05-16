@@ -1,22 +1,29 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Components;
+using ContosoUniversity.Models;
 using ContosoUniversity.Bll;
+using Microsoft.AspNetCore.Components;
+
 
 namespace ContosoUniversity
 {
-    public partial class About
+    public partial class About : WebFormsPageBase
     {
-        [Inject] private Enrollmet_Logic enrollmetLogic { get; set; } = default!;
+    [Inject] private Enrollmet_Logic _enrollmetLogic { get; set; } = default!;
 
-        private List<KeyValuePair<string, int>> _enrollmentStats = new();
+    private GridView<object> EnrollmentsStat = default!;
 
-        protected override void OnInitialized()
+        protected override async Task OnInitializedAsync()
         {
-            _enrollmentStats = enrollmetLogic.Get_Enrollment_ByDate()
-                .Select(kvp => new KeyValuePair<string, int>(kvp.Key, kvp.Value))
-                .ToList();
+            await base.OnInitializedAsync();
+
+            
+        }
+
+        public Dictionary<string, int> EnrollmentsStat_GetData()
+        {
+            return _enrollmetLogic.Get_Enrollment_ByDate();
         }
     }
 }

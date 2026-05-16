@@ -1,77 +1,64 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Components;
-using BlazorWebFormsComponents;
 using ContosoUniversity.Models;
 using ContosoUniversity.Bll;
+using Microsoft.AspNetCore.Components;
+using System.Linq;
 
-namespace ContosoUniversity
+namespace ContosoUniversity;
+
+public partial class Students : BlazorWebFormsComponents.WebFormsPageBase
 {
-    public partial class Students
+    [Inject] private StudentsListLogic studLogic { get; set; } = default!;
+    [Inject] private ContosoUniversityEntities _db { get; set; } = default!;
+
+    private GridView<object> grv = default!;
+    private TextBox txtFirstName = default!;
+    private TextBox txtLastName = default!;
+    private TextBox txtBirthDate = default!;
+    private TextBox txtEmail = default!;
+    private DropDownList<string> dropListCourses = default!;
+    private TextBox txtSearch = default!;
+    private DetailsView<object> studentData = default!;
+
+    private List<string> _courseNames = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        [Inject] private StudentsListLogic studLogic { get; set; } = default!;
+        await base.OnInitializedAsync();
+        _courseNames = _db.Courses.Select(c => c.CourseName).ToList();
+    }
 
-        private List<object> _students = new();
-        private List<string> _courseNames = new();
-        private string _selectedCourse = "";
-        private string _firstName = "";
-        private string _lastName = "";
-        private string _birthDate = "";
-        private string _email = "";
-        private string _searchText = "";
-        private List<object> _studentDetails = new();
+    public List<object> grv_GetData()
+    {
+        return studLogic.GetJoinedTableData();
+    }
 
-        protected override void OnInitialized()
+    private void btnInsert_Click()
+    {
+        DateTime birth;
+        try
         {
-            _students = studLogic.GetJoinedTableData();
-            _courseNames = studLogic.GetCourseNames();
+            birth = DateTime.Parse(txtBirthDate.Text);
+        }
+        catch
+        {
+            return;
         }
 
-        private void grv_DeleteItem(int id)
-        {
-            studLogic.DeleteStudent(id);
-            _students = studLogic.GetJoinedTableData();
-        }
+        studLogic.InsertNewEntry(txtFirstName.Text, txtLastName.Text, birth, dropListCourses.SelectedValue, txtEmail.Text);
+        grv.DataSource = studLogic.GetJoinedTableData();
+    }
 
-        private void grv_RowUpdating(GridViewUpdateEventArgs e)
-        {
-            // BWFC GridViewUpdateEventArgs has RowIndex only — full edit support requires manual implementation
-        }
+    private void btnClear_Click()
+    {
+        txtFirstName.Text = string.Empty;
+        txtLastName.Text = string.Empty;
+        txtBirthDate.Text = string.Empty;
+        txtEmail.Text = string.Empty;
+    }
 
-        private void btnInsert_Click()
-        {
-            DateTime birth;
-            try
-            {
-                birth = DateTime.Parse(_birthDate);
-            }
-            catch
-            {
-                return;
-            }
-
-            studLogic.InsertNewEntry(_firstName, _lastName, birth, _selectedCourse, string.IsNullOrEmpty(_email) ? "Has not specified" : _email);
-            _students = studLogic.GetJoinedTableData();
-            btnClear_Click();
-        }
-
-        private void btnClear_Click()
-        {
-            _firstName = "";
-            _lastName = "";
-            _birthDate = "";
-            _email = "";
-            _selectedCourse = "";
-        }
-
-        private void btnSearch_Click()
-        {
-            if (!string.IsNullOrEmpty(_searchText))
-            {
-                _studentDetails = studLogic.GetStudents(_searchText);
-                _searchText = "";
-            }
-        }
+    private void btnSearch_Click()
+    {
+        studentData.DataSource = studLogic.GetStudents(txtSearch.Text);
+        txtSearch.Text = string.Empty;
     }
 }

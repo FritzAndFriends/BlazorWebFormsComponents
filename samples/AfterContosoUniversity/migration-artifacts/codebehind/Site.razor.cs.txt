@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace ContosoUniversity
 {
-    public partial class Home : WebFormsPageBase
+    public partial class Site : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -33,6 +33,8 @@ namespace ContosoUniversity
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
+    private ContentPlaceHolder ContentPlaceHolder1 = default!;
+    private ContentPlaceHolder head = default!;
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
@@ -44,5 +46,11 @@ namespace ContosoUniversity
 
 
         }
-    }
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildComponents { get; set; }
+}
 }

@@ -1,33 +1,42 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Components;
-using BlazorWebFormsComponents;
 using ContosoUniversity.Models;
 using ContosoUniversity.BLL;
+using Microsoft.AspNetCore.Components;
 
-namespace ContosoUniversity
+namespace ContosoUniversity;
+
+public partial class Instructors : BlazorWebFormsComponents.WebFormsPageBase
 {
-    public partial class Instructors
+    [Inject] private Instructors_Logic instructorsLogic { get; set; } = default!;
+
+    private GridView<Instructor> grvInstructors = default!;
+
+    protected override async Task OnInitializedAsync()
     {
-        [Inject] private Instructors_Logic instructorsLogic { get; set; } = default!;
+        await base.OnInitializedAsync();
 
-        private List<Instructor> _instructors = new();
-        private string _sortDirection = "desc";
+        ViewState["SortDirection"] = "desc";
+    }
 
-        protected override void OnInitialized()
+    public List<Instructor> grvInstructors_GetData()
+    {
+        return instructorsLogic.getInstructors();
+    }
+
+    private void grvInstructors_Sorting(BlazorWebFormsComponents.GridViewSortEventArgs e)
+    {
+        grvInstructors.DataSource = instructorsLogic.GetSortedInstrucors(e.SortExpression, ViewState["SortDirection"]?.ToString() ?? "asc");
+        ChangeSortDirection();
+    }
+
+    private void ChangeSortDirection()
+    {
+        if (ViewState["SortDirection"]?.ToString() == "asc")
         {
-            _instructors = instructorsLogic.getInstructors();
+            ViewState["SortDirection"] = "desc";
         }
-
-        private void grvInstructors_Sorting(GridViewSortEventArgs e)
+        else
         {
-            _instructors = instructorsLogic.GetSortedInstrucors(e.SortExpression, _sortDirection);
-            ChangeSortDirection();
-        }
-
-        private void ChangeSortDirection()
-        {
-            _sortDirection = _sortDirection == "asc" ? "desc" : "asc";
+            ViewState["SortDirection"] = "asc";
         }
     }
 }

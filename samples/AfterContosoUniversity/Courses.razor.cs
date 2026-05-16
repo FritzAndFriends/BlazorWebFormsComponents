@@ -1,44 +1,36 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Components;
 using ContosoUniversity.Models;
 using ContosoUniversity.BLL;
-using ContosoUniversity.Bll;
+using Microsoft.AspNetCore.Components;
+using System.Linq;
 
-namespace ContosoUniversity
+namespace ContosoUniversity;
+
+public partial class Courses : BlazorWebFormsComponents.WebFormsPageBase
 {
-    public partial class Courses
+    [Inject] private Courses_Logic coursLogic { get; set; } = default!;
+    [Inject] private ContosoUniversityEntities _db { get; set; } = default!;
+
+    private DropDownList<string> drpDepartments = default!;
+    private GridView<Cours> grvCourses = default!;
+    private TextBox txtCourse = default!;
+    private DetailsView<Cours> dtlCourses = default!;
+
+    private List<string> _departmentNames = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        [Inject] private Courses_Logic coursLogic { get; set; } = default!;
-        [Inject] private StudentsListLogic studLogic { get; set; } = default!;
+        await base.OnInitializedAsync();
+        _departmentNames = _db.Departments.Select(d => d.DepartmentName).ToList();
+    }
 
-        private List<string> _departments = new();
-        private string _selectedDepartment = "";
-        private List<Cours> _courses = new();
-        private string _courseSearchText = "";
-        private List<Cours> _courseDetails = new();
+    private void btnSearchCourse_Click()
+    {
+        grvCourses.DataSource = coursLogic.GetCourses(drpDepartments.SelectedValue);
+    }
 
-        protected override void OnInitialized()
-        {
-            _departments = studLogic.GetDepartmentNames();
-        }
-
-        private void btnSearchCourse_Click()
-        {
-            if (!string.IsNullOrEmpty(_selectedDepartment))
-            {
-                _courses = coursLogic.GetCourses(_selectedDepartment);
-            }
-        }
-
-        private void search_Click()
-        {
-            if (!string.IsNullOrEmpty(_courseSearchText))
-            {
-                _courseDetails = coursLogic.GetCourse(_courseSearchText);
-                _courseSearchText = "";
-            }
-        }
+    private void search_Click()
+    {
+        dtlCourses.DataSource = coursLogic.GetCourse(txtCourse.Text);
+        txtCourse.Text = string.Empty;
     }
 }
