@@ -64,6 +64,9 @@ Run 41 finished green at 25/25 acceptance tests in 47:54 from a fresh output fol
 - **2026-05-07T15:38:16-04:00:** Semantic page rewrites that emit raw `<form>` tags should be post-processed centrally so they always carry the SSR contract (`<AntiforgeryToken />` plus a deterministic form name). Doing that in the semantic catalog hardens both account/action pages and any future form-emitting patterns without duplicating logic.
 - **2026-05-15T09:55:50-04:00:** `ComponentRefCodeBehindTransform.ClassOpenRegex` was `partial\s+class\s+\w+\s*\{` — this fails to match whenever `BaseClassStripTransform` (Order 200) runs first and rewrites the declaration to `public partial class Foo : WebFormsPageBase`. The base-class/interface list between the class name and `{` breaks the match. Fixed by changing `\s*\{` to `[^{]*\{`. This was the #1 error source in Run 80 (15+ of 28 unique CS0103 errors — `CartList`, `UpdateBtn`, etc.). The fix is surgical: one regex character class change, 3 regression tests added, 35/35 passing.
 - **2026-05-15T09:55:50-04:00:** Transform interaction order contracts matter. When a code-behind transform reads a class declaration header, it must account for all transforms with lower Order values that may have modified that header. `ClassOpenRegex`-style patterns should use `[^{]*` not `\s*` between the class name and `{` to survive base-class or interface annotations added by earlier transforms.
+- **2026-05-15T11:43:54.133-04:00:** Self-instantiation cleanup is safest as a dedicated post-alignment code-behind pass: after class naming settles, replace only zero-argument `new CurrentClass()` calls with `this` so DI constructor pages and helpers stop re-constructing themselves without touching user variable names or argumentful instantiations.
+- **2026-05-15T11:43:54.133-04:00:** BWFC template `Text` bindings need a late markup normalization step after `TemplateContextTransform`. Converting simple `Text="@Item.X"` bindings inside item templates to `Text="@Item.X.ToString()"` fixes `TextBox.Text` string mismatches without disturbing richer expressions or non-template markup.
+- **2026-05-15T11:43:54.133-04:00:** Route-parameter collision cleanup should dedupe only true case-insensitive duplicates and keep the property whose casing exactly matches the `@page` token when one exists. That preserves Blazor route binding while removing the extra `[Parameter]` member that triggers duplicate-parameter runtime failures.
 
 
 ≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
@@ -74,3 +77,21 @@ Run 41 finished green at 25/25 acceptance tests in 47:54 from a fresh output fol
 Fixed ClassOpenRegex from partial\s+class\s+\w+\s*\{ to partial\s+class\s+\w+[^{]*\{ to match classes with base classes injected by earlier transforms. Added 3 regression test cases. All 35/35 ComponentRef tests pass, full suite 729/729 green.
 
 **Rule:** Any code-behind transform locating class body opening brace must use [^{]*{ pattern.
+
+### 2026-05-16: Benchmark Pattern Fixes — Contoso/Wingtip Patterns 1/3/6/7
+
+Four automation gaps from ContosoUniversity (Run 24) and WingtipToys benchmark analysis were fixed:
+
+**Pattern 1 — "Entities" suffix DI injection (`DbContextInstantiationTransform`):**  
+`ContosoUniversityEntities` (EF6 T4 naming pattern ending in "Entities") was not matched by the transform regex — added `Entities` and `DataContext` to both `NewContextRegex` and `NewContextExprRegex` suffix lists. Same fix covers LINQ-to-SQL `DataContext` subclasses.
+
+**Pattern 3 — EDMX T4 artifact exclusion (`EdmxToEfCoreConverter`):**  
+`Model1.Context.cs` and `Model1.Designer.cs` (T4-generated EF6 companion files) were not excluded by `SourceFileCopier`. The EF Core converter generates a new `ContosoUniversityEntities.cs` → CS0101 duplicate type. Fixed by adding both `{stem}.Context.cs` and `{stem}.Designer.cs` to `excludedSourceFiles` alongside the existing `{stem}.cs`.
+
+**Pattern 6 — NamespaceAlign on BLL/source files (`SourceFileCopier`):**  
+BLL files copied via `SourceFileCopier` were not having `NamespaceAlignTransform` applied because: (a) `"NamespaceAlign"` was not in the transform allow-list, (b) `FileMetadata` was not populated with `OutputRootPath`/`ProjectNamespace`, and (c) `CopySourceFilesAsync` had no way to receive `projectNamespace`. Fixed all three; `MigrationPipeline` now passes `projectName` as `projectNamespace`.
+
+**Pattern 7 — HTML server control ID string field stubs (`InnerTextRewriteTransform`):**  
+`<div id="ShoppingCartTitle" runat="server">` in markup, `ShoppingCartTitle.InnerText = "..."` in code-behind. After InnerText rewrite, `ShoppingCartTitle` was undeclared → CS0103. Transform now collects PascalCase identifiers from `.InnerText`/`.InnerHtml` patterns before rewriting, then injects `private string X = "";` stubs for any that are not already declared. camelCase and `_underscore` identifiers are intentionally excluded.
+
+Added 9 new tests (InnerTextRewrite: 6 new, DbContextInstantiation: 4 new replaced 2, EdmxConverter: 1 new). Full suite: 802/802 green.

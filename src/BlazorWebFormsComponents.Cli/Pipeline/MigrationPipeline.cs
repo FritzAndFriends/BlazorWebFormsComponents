@@ -183,7 +183,7 @@ public class MigrationPipeline
             }
 
             var copyResult = await _sourceFileCopier.CopySourceFilesAsync(
-                context.SourcePath, context.OutputPath, context.SourceFiles, context.Options.Verbose, report, excludedSourceFiles, scaffoldedClassNames);
+                context.SourcePath, context.OutputPath, context.SourceFiles, context.Options.Verbose, report, excludedSourceFiles, scaffoldedClassNames, projectName);
             report.FilesWritten += copyResult.TotalCount;
 
             // Post-process Program.cs to register discovered service classes in DI

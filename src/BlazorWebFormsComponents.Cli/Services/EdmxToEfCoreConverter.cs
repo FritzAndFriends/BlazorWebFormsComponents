@@ -60,6 +60,11 @@ public sealed class EdmxToEfCoreConverter
 
             var stem = Path.GetFileNameWithoutExtension(edmxFile);
             excludedSourceFiles.Add(Path.Combine(Path.GetDirectoryName(edmxFile)!, $"{stem}.cs"));
+            // Also exclude the T4-generated DbContext file (Model1.Context.cs) to avoid
+            // CS0101 duplicate class when the EDMX converter generates its own EF Core context.
+            excludedSourceFiles.Add(Path.Combine(Path.GetDirectoryName(edmxFile)!, $"{stem}.Context.cs"));
+            // Exclude the designer file as well (Model1.Designer.cs) — auto-generated, not needed.
+            excludedSourceFiles.Add(Path.Combine(Path.GetDirectoryName(edmxFile)!, $"{stem}.Designer.cs"));
             report.AddManualItem(Path.GetRelativePath(sourcePath, edmxFile), 0, "EDMX", "EDMX converted to EF Core entities and DbContext — verify generated relationships and configuration.");
         }
 

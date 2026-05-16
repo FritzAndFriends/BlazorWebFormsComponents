@@ -11,15 +11,17 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
 {
     // Matches field/variable assignments like: XxxContext _db = new XxxContext();
     // or using blocks like: using (XxxContext _db = new XxxContext())
+    // "Entities" covers EF6 T4-generated DbContext names like ContosoUniversityEntities.
+    // "DataContext" covers LINQ-to-SQL DataContext subclasses.
     private static readonly Regex NewContextRegex = new(
-        @"(?<type>\w+(?:Context|Actions|Service|Manager|Helper|Repository|Provider))\s+(?<var>\w+)\s*=\s*new\s+\k<type>\s*\(\s*\)",
+        @"(?<type>\w+(?:Context|Entities|DataContext|Actions|Service|Manager|Helper|Repository|Provider))\s+(?<var>\w+)\s*=\s*new\s+\k<type>\s*\(\s*\)",
         RegexOptions.Compiled);
 
     // Matches just the `new XxxType()` expression for known service/context patterns,
     // with optional namespace prefix.
-    // e.g., new ProductContext(), new ShoppingCartActions(), new OrderService()
+    // e.g., new ProductContext(), new ContosoUniversityEntities(), new ShoppingCartActions()
     private static readonly Regex NewContextExprRegex = new(
-        @"new\s+(?:(?<ns>[\w.]+)\.)?(?<type>\w+(?:Context|Actions|Service|Manager|Helper|Repository|Provider))\s*\(\s*\)",
+        @"new\s+(?:(?<ns>[\w.]+)\.)?(?<type>\w+(?:Context|Entities|DataContext|Actions|Service|Manager|Helper|Repository|Provider))\s*\(\s*\)",
         RegexOptions.Compiled);
 
     // Check if a class already has an [Inject] property for a given type

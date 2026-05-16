@@ -83,6 +83,34 @@ public sealed class EdmxToEfCoreConverterTests : IDisposable
         Assert.Contains(createInvalidFile ? "Unable to read EDMX XML" : "EDMX file not found", result.ErrorMessage!, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public async Task ConvertAsync_Batch_ExcludesT4GeneratedSourceFiles()
+    {
+        // Verifies that after EDMX conversion, Model1.cs, Model1.Context.cs, and
+        // Model1.Designer.cs are all added to excludedSourceFiles so SourceFileCopier
+        // won't copy the EF6 T4 artifacts alongside the EF Core output (CS0101).
+        var sourceRoot = CreateDirectory("batch-excl");
+        var modelsDir = CreateDirectory("batch-excl", "Models");
+        var sourceFile = CreateFile("batch-excl", Path.Combine("Models", "Model1.edmx"), SampleEdmx);
+        var outputPath = CreateDirectory("batch-excl", "out");
+
+        // Create the T4-generated companion files that should be excluded
+        var t4Context = Path.Combine(modelsDir, "Model1.Context.cs");
+        var t4Entities = Path.Combine(modelsDir, "Model1.cs");
+        var t4Designer = Path.Combine(modelsDir, "Model1.Designer.cs");
+        File.WriteAllText(t4Context, "// T4 context");
+        File.WriteAllText(t4Entities, "// T4 entities");
+        File.WriteAllText(t4Designer, "// T4 designer");
+
+        var converter = new EdmxToEfCoreConverter();
+        var report = new BlazorWebFormsComponents.Cli.Pipeline.MigrationReport();
+        var excluded = await converter.ConvertAsync(sourceRoot, outputPath, "StoreProject", dryRun: false, report);
+
+        Assert.Contains(t4Context, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains(t4Entities, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains(t4Designer, excluded, StringComparer.OrdinalIgnoreCase);
+    }
+
     private string CreateDirectory(params string[] segments)
     {
         var path = Path.Combine([_testRoot, .. segments]);

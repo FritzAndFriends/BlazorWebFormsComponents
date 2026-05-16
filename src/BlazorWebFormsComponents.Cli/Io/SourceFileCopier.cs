@@ -61,7 +61,7 @@ public class SourceFileCopier
         _outputWriter = outputWriter;
         // Only apply a subset of transforms relevant to non-page .cs files
         _transforms = transforms
-            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "HttpContextAccessor" or "SelectMethodMaterialize" or "LegacyHelperStub" or "TypeMismatchFix" or "EagerLoadNavigation" or "DisposeReadonlyField")
+            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "HttpContextAccessor" or "SelectMethodMaterialize" or "LegacyHelperStub" or "TypeMismatchFix" or "EagerLoadNavigation" or "DisposeReadonlyField" or "NamespaceAlign")
             .OrderBy(t => t.Order)
             .ToList();
     }
@@ -77,7 +77,8 @@ public class SourceFileCopier
         bool verbose,
         MigrationReport report,
         ISet<string>? additionalExcludedFiles = null,
-        ISet<string>? scaffoldedClassNames = null)
+        ISet<string>? scaffoldedClassNames = null,
+        string? projectNamespace = null)
     {
         if (!Directory.Exists(sourcePath))
             return new SourceFileCopyResult(0, 0, []);
@@ -131,7 +132,9 @@ public class SourceFileCopier
                 SourceFilePath = file,
                 OutputFilePath = Path.Combine(outputPath, relativePath),
                 FileType = FileType.CodeFile, // Standalone .cs — not a page/control/master code-behind
-                OriginalContent = content
+                OriginalContent = content,
+                OutputRootPath = outputPath,
+                ProjectNamespace = projectNamespace
             };
 
             foreach (var transform in _transforms)
