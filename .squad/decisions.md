@@ -146,3 +146,137 @@ The duplicate-detection regex (`(?:private|protected|public|internal)\s+\w+.*\b{
 correctly handles the case where an existing declaration is present.
 
 
+# 2026-05-16: Route Parameter Collision Dedupe
+
+**Date:** 2026-05-15T11:43:54.133-04:00  
+**Author:** Bishop  
+**Status:** Established
+
+## Decision
+
+When the migration pipeline leaves multiple `[Parameter]` properties whose names match the same `@page` route token case-insensitively, keep the property whose casing exactly matches the route token if one exists, and remove the other duplicates.
+
+## Why
+
+Blazor treats parameter names case-insensitively, so pairs like `categoryName` and `CategoryName` trigger a runtime duplicate-parameter failure even though they look distinct in generated code. Preferring the exact route-token casing preserves route binding semantics while removing the extra wrapper-generated property.
+
+## Scope
+
+Apply this rule in CLI post-processing for page code-behind after route-parameter promotion, using the paired `.razor` file to discover route tokens.
+
+
+# 2026-05-16: DepartmentPortal Migration Blocker Issues Filed
+
+**Date:** 2026-05-16T15:22:00-04:00  
+**Author:** Bishop  
+**Status:** Informational — issues filed, no code changes
+
+## Summary
+
+Three GitHub issues were created in `fritzandfriends/BlazorWebFormsComponents` to track DepartmentPortal migration blockers identified by Forge's gap analysis.
+
+| Issue | # | Labels | Priority |
+|-------|---|--------|----------|
+| CLI: Add code-only server control scaffolder for DepartmentPortal-style controls | [#549](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/549) | enhancement, migration-toolkit | Tier 1 / P1 |
+| CLI: Parse namespace-level tag prefix registrations from Web.config | [#550](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/550) | enhancement, migration-toolkit | Tier 1 / P2 |
+| Review analyzers for step-by-step YARP-based incremental migration workflow | [#551](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/551) | enhancement, analyzers, future | Future |
+
+## New Labels Provisioned
+
+Three labels were created to support these and future issues:
+
+- **`migration-toolkit`** — CLI migration pipeline and toolkit enhancements
+- **`analyzers`** — Roslyn analyzer work
+- **`future`** — Scheduled for future implementation, not immediate
+
+## Design Decisions
+
+### Issue #549 — CodeOnlyControlScaffolder
+
+Base class mapping established for the scaffolder:
+
+| Web Forms Base | BWFC Base Class |
+|---------------|-----------------|
+| `WebControl` | `BaseStyledComponent` |
+| `CompositeControl` | `BaseWebFormsComponent` |
+| `DataBoundControl` | `DataBoundComponent<T>` |
+| `Control` | `BaseWebFormsComponent` |
+
+This scaffolder must run **before markup transforms** in the pipeline so that `LocalTagNamespaceResolutionTransform` has the emitted stub inventory available during markup resolution.
+
+### Issue #550 — LocalTagNamespaceResolutionTransform
+
+This transform is the markup-side companion to Issue #549. Dependency order: CodeOnlyControlScaffolder runs first (scaffold phase), LocalTagNamespaceResolutionTransform uses the output during markup phase. Both must be registered in `Program.cs` DI and `TestHelpers.CreateDefaultPipeline()` per project conventions.
+
+### Issue #551 — YARP Analyzer Review
+
+Scoped as a spike/review — no implementation expected immediately. Output should be documented in `docs/Analyzers/` or as issue comments. Assigned `future` label to signal post-DepartmentPortal scheduling.
+
+
+# 2026-05-16: Automated Migration with Copilot Doc Placement and Pattern
+
+**Date:** 2026-05-16T15:22:00-04:00  
+**Author:** Beast (Technical Writer)  
+**Status:** Established — nav and doc pattern locked
+
+## Decision
+
+`docs/Migration/AutomatedMigrationWithCopilot.md` is placed under the **Plan** subsection of the Migration nav, alongside the existing "Automated Migration Guide" (the older four-step pipeline doc).
+
+```yaml
+- Plan:
+    - Automated Migration Guide: Migration/AutomatedMigration.md
+    - Automated Migration with Copilot: Migration/AutomatedMigrationWithCopilot.md
+```
+
+## Rationale
+
+The existing Migration docs divide into theory (Methodology.md), quick path (QuickStart.md), older pipeline (AutomatedMigration.md), and strategy (Strategies.md). A Copilot-specific guide belongs in Plan because it describes *how to plan and execute* a full automated migration — not a specific implementation pattern like MasterPages.md.
+
+The new guide is differentiated from existing docs by:
+
+1. Being anchored to a specific proven benchmark (WingtipToys, 26/26 acceptance tests)
+2. Covering the Copilot-specific workflow (prompt patterns, skill file references)
+3. Including the prescan → migrate → build → L2 Copilot repair → run → acceptance test → iterate loop
+4. Surfacing benchmark numbers (WingtipToys 26/26, ContosoUniversity 37/40)
+
+## Pattern Established
+
+New migration guides at this level of detail should:
+
+- Be anchored to at least one proven benchmark app with acceptance test results
+- Include a complete end-to-end walkthrough (not just concepts)
+- Close with a tips section covering the most common mistakes
+- Link to existing docs for theory and component references rather than duplicating them
+
+
+# 2026-05-16: User Directive — ContosoUniversity Benchmark Target
+
+**Date:** 2026-05-16T13:10:29-04:00  
+**Author:** Jeffrey T. Fritz  
+**Status:** Guidance captured
+
+## What
+
+ContosoUniversity is much simpler than WingtipToys and should be migrated in less than 5 minutes. This is the benchmark target.
+
+## Why
+
+User request — captured for team memory.
+
+
+# 2026-05-16: User Directive — DepartmentPortal Migration Strategy
+
+**Date:** 2026-05-16T15:22:00-04:00  
+**Author:** Jeffrey T. Fritz  
+**Status:** Guidance captured
+
+## What
+
+Code-only server controls (P1) should migrate using existing shim control classes — we need a migration class in the CLI, not new components. Namespace tag prefix (P2) is confirmed as a real gap. Both should be parked as GitHub issues. Also: generate a migration document about steps to migrate automatically with Copilot, and schedule future work to review analyzers for step-by-step slower migration with YARP.
+
+## Why
+
+User request — captured for team memory. This strategy unlocks DepartmentPortal migration without new component implementations.
+
+

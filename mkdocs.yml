@@ -215,6 +215,7 @@ nav:
           - Migration Strategies: Migration/Strategies.md
           - .NET Standard to the Rescue: Migration/NET-Standard.md
           - Automated Migration Guide: Migration/AutomatedMigration.md
+          - Automated Migration with Copilot: Migration/AutomatedMigrationWithCopilot.md
           - Roslyn Analyzers: Migration/Analyzers.md
       - Guides:
           - ClientScript Migration: Migration/ClientScriptMigrationGuide.md
