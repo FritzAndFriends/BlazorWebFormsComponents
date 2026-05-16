@@ -103,3 +103,15 @@
 ### 2026-05-15T14:02:20Z: ComponentRef test validation complete
 
 Confirmed 10/10 ComponentRef tests passing. Test coverage is complete — no further work needed. Field declaration pattern is sound. Bishop's implementation ready for merge.
+
+### 2026-05-16T15:45:00-04:00: WingtipToys Run 88 benchmark
+
+**Task:** Execute a fresh WingtipToys benchmark run against CLI fix set `d591d8d2` and compare to Run 87.
+
+**Outcome:** Run 88 stayed green at 26/26 acceptance tests. The new InnerText stub behavior removed the prior `ShoppingCartTitle` compile break, reducing fresh L1 build errors from 4 to 3; the remaining manual fixes were the `actions` → `_shoppingCartActions` rename, the non-page `Server.MapPath` logging gap in `ExceptionUtility`, and the `ShoppingCartActions.GetCart()` self-instantiation pattern.
+
+**Benchmark notes:**
+- `bwfc-migrate.ps1` still resolved the nested `samples\WingtipToys\WingtipToys` root automatically.
+- L1 migration stayed at 19 seconds; build repair dropped to 63 seconds.
+- Startup smoke checks for `/`, `/ProductList`, `/About`, and `/Account/Login` all returned HTTP 200 before test execution.
+- Three of the four target fixes (`Entities`/`DataContext`, EDMX T4 exclusion, BLL namespace alignment) were not directly exercised by WingtipToys, so they still need another benchmark for validation.

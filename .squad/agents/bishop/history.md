@@ -3,6 +3,26 @@
 **Owner:** Jeffrey T. Fritz  
 **Role:** CLI pipeline development, WingtipToys migration benchmark automation  
 
+## Run Summary (Runs 34-41)
+
+### Run 41 — ContosoUniversity benchmark quality fixes (commit 31f927d0)
+Three targeted CLI fixes to reduce over-quarantine and improve data model coverage:
+
+**Fix 1 — Quarantine tuning (PageQuarantineDetector):**
+- Expanded `IsEssentialPage()` with education patterns (Student, Course, Instructor, Department, Enrollment, Faculty, Grade) and general CRUD patterns (Dashboard, Report, Overview, Browse, Search).
+- Added IsClearlyQuarantinablePath() guard at the start of `IsEssentialPage()` so Admin/Account/Checkout pages remain quarantinable even when their filename matches an essential keyword (e.g., Admin/Reports.aspx).
+- Removed compile-surface from `HasStrongSingleSignal()`: pages with only compile issues on non-quarantinable paths now get best-effort output (emit + artifact) instead of a silent quarantine stub.
+- Updated pipeline integration test for LegacyShell.aspx: now expects actual markup emission and no manifest, not a quarantine stub.
+
+**Fix 2 — EDMX HasKey() for non-conventional PKs (EdmxToEfCoreConverter):**
+- `BuildEntityModelConfiguration()` now emits `entity.HasKey(e => e.{KeyName})` when key name is not `Id` or `{EntityName}Id` (case-insensitive), matching EF Core discovery convention.
+- Example: Cours.CourseID → needs HasKey(); Student.StudentID → conventional, no HasKey().
+
+**Fix 3 — BLL/service DI injection verification:**
+- Confirmed existing SourceFileCopier already applies DbContextInstantiation transform to copied source files. Added end-to-end test covering BLL files with inline `new XxxEntities()`.
+
+**Tests:** 810/810 CLI tests pass.
+
 ## Run Summary (Runs 34-40)
 - **Run 34:** ServerCodeBlockTransform (Order 510), TemplateFieldChildComponentsTransform (Order 620). 25/25 tests. Key: CartSessionStore singleton for SSR persistence, Minimal API for Playwright testing.
 - **Run 35:** Gap fixes G1/G3/G8/G10. DisplayExpressionTransform, HttpUtilityRewriteTransform, EfContextConstructorTransform. 25/25 tests.
@@ -95,3 +115,11 @@ BLL files copied via `SourceFileCopier` were not having `NamespaceAlignTransform
 `<div id="ShoppingCartTitle" runat="server">` in markup, `ShoppingCartTitle.InnerText = "..."` in code-behind. After InnerText rewrite, `ShoppingCartTitle` was undeclared → CS0103. Transform now collects PascalCase identifiers from `.InnerText`/`.InnerHtml` patterns before rewriting, then injects `private string X = "";` stubs for any that are not already declared. camelCase and `_underscore` identifiers are intentionally excluded.
 
 Added 9 new tests (InnerTextRewrite: 6 new, DbContextInstantiation: 4 new replaced 2, EdmxConverter: 1 new). Full suite: 802/802 green.
+
+## Learnings (2026-05-16 — DepartmentPortal issue triage)
+
+- **2026-05-16T15:22:00-04:00:** `gh issue create` with large PowerShell here-strings (`@"..."`) can hang indefinitely on Windows. The reliable pattern is to write the body to a file in the project directory and use `--body-file` instead. Never use `/tmp`; use a `.squad/` scratch path and clean it up immediately after.
+- **2026-05-16T15:22:00-04:00:** The three DepartmentPortal Tier 1 blockers most directly owned by the CLI pipeline are: (P1) code-only control discovery via `CodeOnlyControlScaffolder`, (P2) namespace-level `tagPrefix` parsing in `WebConfigTransformer` + `LocalTagNamespaceResolutionTransform`. These are prerequisites for each other and must be built together — the scaffolder emits the stubs; the resolution transform consumes them.
+- **2026-05-16T15:22:00-04:00:** When creating GitHub labels for new issue categories, confirm they don't already exist (`gh label list`) before creating. Three new labels were provisioned: `migration-toolkit`, `analyzers`, `future` — all suitable for ongoing use across CLI and analyzer issues.
+- **2026-05-16T16:04:23-04:00:** The four Contoso benchmark fixes in `d591d8d2` reduce first-pass compile cleanup, but they do **not** yet move the end-to-end benchmark under five minutes because compile-surface quarantine still removes `Students`, `Courses`, and `Instructors`. For Contoso-class apps, quarantine remains the biggest lever on total benchmark time.
+- **2026-05-16T16:04:23-04:00:** Legacy page-level CSS IDs such as `#ajax`, `#dropList`, and `#grvStudentsData` can shove rebuilt static-SSR controls off-screen enough for Playwright clicks to fail even when the markup is valid. When L2 rebuilds core pages, add explicit layout normalization (or isolate the legacy CSS) before judging interaction failures.
