@@ -184,6 +184,38 @@ public class GridViewColumnItemTypeTransformTests
         Assert.DoesNotContain("<BoundField", result);
     }
 
+    [Fact]
+    public void UsesParentGridViewItemTypeForCommandField()
+    {
+        var input = """
+            <GridView ItemType="StudentRow" AutoGenerateColumns="false">
+                <Columns>
+                    <CommandField ButtonType="Button" ShowDeleteButton="true" />
+                </Columns>
+            </GridView>
+            """;
+
+        var result = _transform.Apply(input, TestMetadata);
+
+        Assert.Contains("<CommandField ItemType=\"StudentRow\" ButtonType=\"Button\" ShowDeleteButton=\"true\" />", result);
+    }
+
+    [Fact]
+    public void PipelinePreservesBoundFieldReadOnlyAndCommandField()
+    {
+        var result = TransformMarkup("""
+            <asp:GridView ID="grv" runat="server" AutoGenerateColumns="False" ItemType="ContosoUniversity.Models.StudentRow">
+                <Columns>
+                    <asp:CommandField HeaderText="Delete Student" ShowDeleteButton="True" ButtonType="Button" />
+                    <asp:BoundField DataField="ID" HeaderText="Student ID" ReadOnly="True" />
+                </Columns>
+            </asp:GridView>
+            """);
+
+        Assert.Contains("<CommandField ItemType=\"StudentRow\" HeaderText=\"Delete Student\" ShowDeleteButton=\"true\" ButtonType=\"Button\" />", result);
+        Assert.Contains("<BoundField ItemType=\"StudentRow\" DataField=\"ID\" HeaderText=\"Student ID\" ReadOnly=\"true\" />", result);
+    }
+
     private static string TransformMarkup(string input)
     {
         var pipeline = TestHelpers.CreateDefaultPipeline();

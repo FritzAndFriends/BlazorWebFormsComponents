@@ -20,14 +20,15 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 500 | ExpressionTransform | Markup | Markup | Convert `<%: %>`, `<%= %>`, and inline data expressions to Razor |
 | 510 | ServerCodeBlockTransform | Markup | Markup | Convert `<% ... %>` statement blocks to Razor control flow |
 | 510 | LoginViewTransform | Markup | Markup | Convert `<asp:LoginView>` → `<AuthorizeView>` |
-| 520 | SelectMethodTransform | Markup | Markup | Flag SelectMethod/InsertMethod/etc. |
+| 520 | SelectMethodTransform | Markup | Markup | Preserve SelectMethod / InsertMethod / UpdateMethod / DeleteMethod model-binding attributes |
+| 550 | WebMethodAnnotationTransform | Code-Behind | Code-Behind | Flag legacy static WebMethod endpoints and normalize `Page_PreRenderComplete` for lifecycle conversion |
 | 600 | AjaxToolkitPrefixTransform | Markup | Markup | Remove `ajaxToolkit:` prefixes |
 | 610 | AspPrefixTransform | Markup | Markup | Remove `asp:` prefixes from controls |
 | 615 | DataBindingAttributeTransform | Markup | Markup | Convert `<%# ... %>` and `<%= ... %>` attribute values to `@(...)` |
 | 615 | ValidatorGenericTypeTransform | Markup | Markup | Add explicit `Type="string"` / `InputType="string"` defaults for generic BWFC validators |
 | 620 | TemplateFieldChildComponentsTransform | Markup | Markup | Wrap TemplateField style children in `<ChildComponents>` |
 | 700 | AttributeStripTransform | Markup | Markup | Remove `runat="server"`, preserve BWFC `ItemType`, add generic fallbacks |
-| 705 | GridViewColumnItemTypeTransform | Markup | Markup | Propagate typed `GridView ItemType` values to `BoundField` / `TemplateField` child columns |
+| 705 | GridViewColumnItemTypeTransform | Markup | Markup | Propagate typed `GridView ItemType` values to `BoundField` / `TemplateField` / `ButtonField` / `CommandField` child columns |
 | 710 | EventWiringTransform | Markup | Markup | Convert `OnClick="X"` → `OnClick="@X"` |
 | 720 | UrlReferenceTransform | Markup | Markup | Convert `~/` paths to `/` |
 | 750 | ComponentRefMarkupTransform | Markup | Markup | Convert control IDs to `@ref`-compatible component references |

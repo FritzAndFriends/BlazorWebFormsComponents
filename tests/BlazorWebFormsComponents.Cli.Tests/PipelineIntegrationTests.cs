@@ -258,6 +258,44 @@ public class PipelineIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task Pipeline_RegistersBllClassesInProgramCs()
+    {
+        var (inputDir, outputDir) = CreateRepoScopedProjectDir("bll-di");
+        Directory.CreateDirectory(Path.Combine(inputDir, "BLL"));
+
+        File.WriteAllText(Path.Combine(inputDir, "Default.aspx"), """
+            <%@ Page Language="C#" AutoEventWireup="true" %>
+            <asp:Label ID="Label1" runat="server" Text="Hello" />
+            """);
+
+        File.WriteAllText(Path.Combine(inputDir, "BLL", "StudentsListLogic.cs"), """
+            namespace TestApp.BLL;
+
+            public class StudentsListLogic
+            {
+                public int CountStudents() => 42;
+            }
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false, SkipScaffold = false },
+            SourceFiles = sourceFiles
+        };
+
+        await pipeline.ExecuteAsync(context);
+
+        var programCs = File.ReadAllText(Path.Combine(outputDir, "Program.cs"));
+        Assert.Contains("using input.BLL;", programCs);
+        Assert.Contains("builder.Services.AddScoped<StudentsListLogic>();", programCs);
+    }
+
+    [Fact]
     public async Task Pipeline_EmitsShimCompatiblePageCodeBehindIntoCompileSurface()
     {
         var (inputDir, outputDir) = CreateTempProjectDir(includeCodeBehind: true);

@@ -1,3 +1,5 @@
+using System.Collections.Specialized;
+
 namespace BlazorWebFormsComponents
 {
 	/// <summary>
@@ -16,6 +18,25 @@ namespace BlazorWebFormsComponents
 		/// Whether the cell is visible.
 		/// </summary>
 		public bool Visible => ContainingField?.Visible ?? true;
+
+		/// <summary>
+		/// Gets the display text for the cell, matching the Web Forms <c>Cells[i].Text</c> pattern.
+		/// </summary>
+		public string Text
+		{
+			get
+			{
+				if (ContainingField == null)
+					return string.Empty;
+
+				var values = new OrderedDictionary();
+				ContainingField.ExtractValuesFromCell(values, this, DataControlRowState.Normal, includeReadOnly: true);
+				if (values.Count == 0)
+					return string.Empty;
+
+				return values[0]?.ToString() ?? string.Empty;
+			}
+		}
 
 		/// <summary>
 		/// Creates a new DataControlFieldCell wrapping the specified field.

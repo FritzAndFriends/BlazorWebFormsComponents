@@ -109,6 +109,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, SessionGetStringNullSafetyTransform>();
         services.AddSingleton<ICodeBehindTransform, ViewStateDetectTransform>();
         services.AddSingleton<ICodeBehindTransform, IsPostBackTransform>();
+        services.AddSingleton<ICodeBehindTransform, WebMethodAnnotationTransform>();
         services.AddSingleton<ICodeBehindTransform, PageLifecycleTransform>();
         services.AddSingleton<ICodeBehindTransform, EventHandlerSignatureTransform>();
         services.AddSingleton<ICodeBehindTransform, InnerTextRewriteTransform>();

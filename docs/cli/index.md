@@ -118,8 +118,8 @@ webforms-to-blazor convert \
 The tool applies an ordered transform pipeline and then a semantic pattern catalog:
 
 1. **Directives** (5) — Page, Master, Control, Register, Import directives
-2. **Markup** (21) — Controls, expressions, master-page script cleanup, display-expression cleanup, templates, validator typing, typed GridView columns, data binding
-3. **Code-Behind** (28) — Using statements, cart session-key stabilization, HttpUtility/EF modernization, IQueryable SelectMethod materialization, base classes, lifecycle, event handlers, compile-surface stubs, markup-driven safety stubs
+2. **Markup** (21) — Controls, expressions, master-page script cleanup, display-expression cleanup, templates, validator typing, typed GridView columns (including `CommandField`), and CRUD model-binding attributes
+3. **Code-Behind** (29) — Using statements, cart session-key stabilization, HttpUtility/EF modernization, IQueryable SelectMethod materialization, WebMethod TODO annotation, base classes, lifecycle, event handlers, compile-surface stubs, markup-driven safety stubs
 
 See **[Transform Reference](transforms.md)** for the flat transform list and **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** for the bounded semantic pass that runs afterward.
 

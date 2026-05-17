@@ -119,6 +119,31 @@ public class SourceFileCopierTransformTests : IDisposable
         Assert.Contains("public Students_Logic(ContosoUniversityEntities", copied);
     }
 
+    [Fact]
+    public async Task CopySourceFilesAsync_RegistersParameterlessBllClassesForDi()
+    {
+        var inputDir = Path.Combine(_rootDir, "input");
+        var outputDir = Path.Combine(_rootDir, "output");
+        Directory.CreateDirectory(Path.Combine(inputDir, "BLL"));
+        Directory.CreateDirectory(outputDir);
+
+        await File.WriteAllTextAsync(Path.Combine(inputDir, "BLL", "Courses_Logic.cs"), """
+            namespace TestApp.BLL;
+
+            public class Courses_Logic
+            {
+                public int CountCourses() => 3;
+            }
+            """);
+
+        var copier = new SourceFileCopier(new OutputWriter(), GetCodeBehindTransforms());
+        var report = new MigrationReport();
+
+        var result = await copier.CopySourceFilesAsync(inputDir, outputDir, [], verbose: false, report);
+
+        Assert.Contains(result.DiscoveredServiceClasses, svc => svc.ClassName == "Courses_Logic" && svc.Namespace == "TestApp.BLL");
+    }
+
     private static IReadOnlyList<ICodeBehindTransform> GetCodeBehindTransforms()
     {
         var pipeline = TestHelpers.CreateDefaultPipeline();

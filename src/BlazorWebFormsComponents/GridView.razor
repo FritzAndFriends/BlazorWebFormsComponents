@@ -113,6 +113,8 @@
 	</table>
 }
 
-<CascadingValue Value="this" Name="ColumnCollection">
-	@Columns
+<CascadingValue Name="ParentGridView" Value="this" IsFixed="true">
+	<CascadingValue Value="this" Name="ColumnCollection">
+		@Columns
+	</CascadingValue>
 </CascadingValue>

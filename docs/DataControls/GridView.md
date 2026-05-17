@@ -3,9 +3,10 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 ## Features supported in Blazor
 
 - Readonly grid
-- Bound, Button, Hyperlink, and Template columns
+- Bound, Button, Hyperlink, Template, and Command columns
 - **Paging** - `AllowPaging`, `PageSize`, `PageIndex`, `PageIndexChanged` event
 - **Sorting** - `AllowSorting`, `SortExpression`, `SortDirection`, `Sorting`/`Sorted` events
+- **CRUD model binding** - `SelectMethod`, `UpdateMethod`, `DeleteMethod`, `DataKeyNames`, and `GridViewUpdateEventArgs.Keys` / `NewValues`
 - **Row Editing** - `EditIndex`, `RowEditing`, `RowUpdating`, `RowDeleting`, `RowCancelingEdit` events
 - **Selection** - `SelectedIndex`, `SelectedRow`, `SelectedValue`, `AutoGenerateSelectButton`, `SelectedIndexChanging`/`SelectedIndexChanged` events
 - **Style Sub-Components** - `RowStyle`, `AlternatingRowStyle`, `HeaderStyle`, `FooterStyle`, `SelectedRowStyle`, `EditRowStyle`, `EmptyDataRowStyle`, `PagerStyle`
@@ -16,10 +17,11 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 
 - The `RowCommand.CommandSource` object will be populated with the `ButtonField` object
 - **Context attribute** - When using `<TemplateField>`, add `Context="Item"` to access the current row item as `@Item` instead of Blazor's default `@context`
-- **ItemType cascading** - The `ItemType` parameter is automatically cascaded from the GridView to child columns. You only need to specify it once on the GridView, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField) will automatically infer the type. For backward compatibility, you can still explicitly specify `ItemType` on individual columns if desired.
+- **ItemType cascading** - The `ItemType` parameter is automatically cascaded from the GridView to child columns. You only need to specify it once on the GridView, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField, CommandField) will automatically infer the type. For backward compatibility, you can still explicitly specify `ItemType` on individual columns if desired.
+- **CRUD model binding** - `UpdateMethod` and `DeleteMethod` now participate in the built-in GridView command flow. When a row update fires, `GridViewUpdateEventArgs.Keys`, `OldValues`, and `NewValues` are populated for `BoundField` columns, while `DataKeyNames` values are forwarded to string-based `UpdateMethod` / `DeleteMethod` handlers.
 - **Paging** - When `AllowPaging="true"`, the GridView automatically paginates the data source using `Skip()`/`Take()`. A numeric pager is rendered below the grid. The `PageIndexChanged` event fires with a `PageChangedEventArgs` containing `NewPageIndex`, `OldPageIndex`, `TotalPages`, `StartRowIndex`, and `Cancel`.
 - **Sorting** - When `AllowSorting="true"`, column headers become clickable. You must handle the `Sorting` event to apply the sort to your data source. The `Sorted` event fires after the sort completes. Both events use `GridViewSortEventArgs` with `SortExpression`, `SortDirection`, and `Cancel` properties.
-- **Row Editing** - Set `EditIndex` to the zero-based row index to put a row in edit mode (`-1` means no row is being edited). An auto-generated command column appears when at least one editing event callback is registered.
+- **Row Editing** - Set `EditIndex` to the zero-based row index to put a row in edit mode (`-1` means no row is being edited). Use `<CommandField ShowEditButton="true" />` and `<CommandField ShowDeleteButton="true" />` to preserve Web Forms command-column positions while still using BWFC row events and CRUD methods.
 - **Selection** - Set `SelectedIndex` to highlight a row. `SelectedRow` returns the data item for the selected row, and `SelectedValue` returns the `DataKeyNames` value. When `AutoGenerateSelectButton="true"`, a "Select" link column is added automatically. The `SelectedIndexChanging` event fires before the selection changes (cancellable), and `SelectedIndexChanged` fires after.
 - **Style Sub-Components** - Use `<RowStyle>`, `<AlternatingRowStyle>`, `<HeaderStyle>`, `<FooterStyle>`, `<SelectedRowStyle>`, `<EditRowStyle>`, `<EmptyDataRowStyle>`, and `<PagerStyle>` child components to configure `TableItemStyle` properties (CssClass, BackColor, ForeColor, etc.) for each section of the grid.
 - **Display Properties** - `ShowHeader` and `ShowFooter` toggle header/footer rows. `Caption` and `CaptionAlign` add a `<caption>` element. `GridLines` controls table borders. `UseAccessibleHeader` renders `<th>` with `scope="col"`. `CellPadding` and `CellSpacing` set table spacing. `ShowHeaderWhenEmpty` shows column headers even when the data source is empty. `EmptyDataTemplate` renders custom content when there are no data rows.

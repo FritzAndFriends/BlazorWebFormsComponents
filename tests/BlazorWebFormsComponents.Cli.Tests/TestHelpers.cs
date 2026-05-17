@@ -264,6 +264,7 @@ public static class TestHelpers
             new SessionGetStringNullSafetyTransform(),
             new ViewStateDetectTransform(),
             new IsPostBackTransform(),
+            new WebMethodAnnotationTransform(),
             new PageLifecycleTransform(),
             new EventHandlerSignatureTransform(),
             new InnerTextRewriteTransform(),

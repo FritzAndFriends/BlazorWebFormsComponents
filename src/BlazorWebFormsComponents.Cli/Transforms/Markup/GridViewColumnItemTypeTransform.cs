@@ -18,7 +18,7 @@ public sealed class GridViewColumnItemTypeTransform : IMarkupTransform
         RegexOptions.Compiled | RegexOptions.Singleline);
 
     private static readonly Regex ColumnTagRegex = new(
-        @"<(?<tag>BoundField|TemplateField|HyperLinkField|ButtonField)\b(?<attrs>[^>]*?)(?<close>\s*/?>)",
+        @"<(?<tag>BoundField|TemplateField|HyperLinkField|ButtonField|CommandField)\b(?<attrs>[^>]*?)(?<close>\s*/?>)",
         RegexOptions.Compiled | RegexOptions.Singleline);
 
     private static readonly Regex ItemTypeRegex = new(

@@ -190,8 +190,9 @@ public class SourceFileCopier
             await _outputWriter.WriteFileAsync(destPath, content, $"Source: {relativePath}");
             copiedCount++;
 
-            // Detect service classes that received constructor injection from transforms
-            var serviceClass = DetectServiceClass(content);
+            // Detect service classes for DI registration. BLL/Logic classes are always
+            // registered, even when they still use parameterless construction.
+            var serviceClass = DetectServiceClass(content, relativePath);
             if (serviceClass != null)
                 discoveredServiceClasses.Add(serviceClass);
         }
@@ -332,10 +333,10 @@ public class SourceFileCopier
     }
 
     /// <summary>
-    /// Detects whether a transformed source file contains a non-page class with constructor injection,
-    /// indicating it needs DI registration in Program.cs.
+    /// Detects whether a transformed source file should be registered for DI in Program.cs.
+    /// BLL/Logic classes are always registered; other classes must have constructor injection.
     /// </summary>
-    private static DiscoveredServiceClass? DetectServiceClass(string content)
+    private static DiscoveredServiceClass? DetectServiceClass(string content, string relativePath)
     {
         var classMatch = ClassRegex.Match(content);
         if (!classMatch.Success)
@@ -351,10 +352,18 @@ public class SourceFileCopier
         if (Regex.IsMatch(content, @"\bstatic\s+class\b"))
             return null;
 
-        // Look for constructors with parameters (sign of DI injection from transforms)
-        var ctorMatch = InjectedConstructorRegex.Match(content);
-        if (!ctorMatch.Success || ctorMatch.Groups["name"].Value != className)
-            return null;
+        var pathSegments = relativePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var isLogicService = pathSegments.Any(segment =>
+            string.Equals(segment, "BLL", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(segment, "Logic", StringComparison.OrdinalIgnoreCase));
+
+        if (!isLogicService)
+        {
+            // Outside BLL/Logic folders, only register classes that received constructor injection.
+            var ctorMatch = InjectedConstructorRegex.Match(content);
+            if (!ctorMatch.Success || ctorMatch.Groups["name"].Value != className)
+                return null;
+        }
 
         var nsMatch = NamespaceRegex.Match(content);
         var namespaceName = nsMatch.Success ? nsMatch.Groups["ns"].Value : null;
