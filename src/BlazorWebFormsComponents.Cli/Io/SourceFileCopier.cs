@@ -61,7 +61,7 @@ public class SourceFileCopier
         _outputWriter = outputWriter;
         // Only apply a subset of transforms relevant to non-page .cs files
         _transforms = transforms
-            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "HttpContextAccessor" or "SelectMethodMaterialize" or "LegacyHelperStub" or "TypeMismatchFix" or "EagerLoadNavigation" or "DisposeReadonlyField" or "NamespaceAlign")
+            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "HttpContextAccessor" or "SelectMethodMaterialize" or "SelfInstantiation" or "ServerShim" or "LegacyHelperStub" or "TypeMismatchFix" or "EagerLoadNavigation" or "DisposeReadonlyField" or "NamespaceAlign")
             .OrderBy(t => t.Order)
             .ToList();
     }

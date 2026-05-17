@@ -82,6 +82,77 @@ public class SourceFileCopierTransformTests : IDisposable
     }
 
     [Fact]
+    public async Task CopySourceFilesAsync_RewritesHelperMapPathCalls()
+    {
+        var inputDir = Path.Combine(_rootDir, "input");
+        var outputDir = Path.Combine(_rootDir, "output");
+        Directory.CreateDirectory(Path.Combine(inputDir, "Logic"));
+        Directory.CreateDirectory(outputDir);
+
+        await File.WriteAllTextAsync(Path.Combine(inputDir, "Logic", "ExceptionUtility.cs"), """
+            using System.Web;
+            
+            namespace TestApp.Logic;
+            
+            public static class ExceptionUtility
+            {
+                public static string GetLogFile()
+                {
+                    return HttpContext.Current.Server.MapPath("~/App_Data/ErrorLog.txt");
+                }
+            }
+            """);
+
+        var copier = new SourceFileCopier(new OutputWriter(), GetCodeBehindTransforms());
+        var report = new MigrationReport();
+
+        await copier.CopySourceFilesAsync(inputDir, outputDir, [], verbose: false, report);
+
+        var copied = await File.ReadAllTextAsync(Path.Combine(outputDir, "Logic", "ExceptionUtility.cs"));
+        Assert.Contains("using System.IO;", copied);
+        Assert.DoesNotContain("using System.Web;", copied);
+        Assert.Contains("Path.Combine(AppContext.BaseDirectory, \"App_Data\", \"ErrorLog.txt\")", copied);
+    }
+
+    [Fact]
+    public async Task CopySourceFilesAsync_RewritesLogicSelfInstantiationPattern()
+    {
+        var inputDir = Path.Combine(_rootDir, "input");
+        var outputDir = Path.Combine(_rootDir, "output");
+        Directory.CreateDirectory(Path.Combine(inputDir, "Logic"));
+        Directory.CreateDirectory(outputDir);
+
+        await File.WriteAllTextAsync(Path.Combine(inputDir, "Logic", "ShoppingCartActions.cs"), """
+            namespace TestApp.Logic;
+            
+            public class ShoppingCartActions
+            {
+                public string ShoppingCartId { get; set; } = string.Empty;
+            
+                public ShoppingCartActions GetCart()
+                {
+                    using (var cart = new ShoppingCartActions())
+                    {
+                        cart.ShoppingCartId = "abc";
+                        return cart;
+                    }
+                }
+            }
+            """);
+
+        var copier = new SourceFileCopier(new OutputWriter(), GetCodeBehindTransforms());
+        var report = new MigrationReport();
+
+        await copier.CopySourceFilesAsync(inputDir, outputDir, [], verbose: false, report);
+
+        var copied = await File.ReadAllTextAsync(Path.Combine(outputDir, "Logic", "ShoppingCartActions.cs"));
+        Assert.DoesNotContain("new ShoppingCartActions()", copied);
+        Assert.DoesNotContain("using (var cart =", copied);
+        Assert.Contains("this.ShoppingCartId = \"abc\";", copied);
+        Assert.Contains("return this;", copied);
+    }
+
+    [Fact]
     public async Task CopySourceFilesAsync_AppliesConstructorInjectionToBllFileWithInlineDbContext()
     {
         // Verifies that DbContextInstantiationTransform runs on BLL/Logic files copied
