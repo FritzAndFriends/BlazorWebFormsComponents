@@ -390,7 +390,10 @@ public class MigrationPipeline
         var markup = markupContent;
         foreach (var transform in _markupTransforms)
         {
-            markup = transform.Apply(markup, metadata);
+            var transformedMarkup = transform.Apply(markup, metadata);
+            if (!string.Equals(transformedMarkup, markup, StringComparison.Ordinal))
+                report.TransformsApplied++;
+            markup = transformedMarkup;
         }
 
         // Set markup content for code-behind transforms to reference/modify
@@ -402,7 +405,10 @@ public class MigrationPipeline
         {
             foreach (var transform in _codeBehindTransforms)
             {
-                codeBehind = transform.Apply(codeBehind, metadata);
+                var transformedCodeBehind = transform.Apply(codeBehind, metadata);
+                if (!string.Equals(transformedCodeBehind, codeBehind, StringComparison.Ordinal))
+                    report.TransformsApplied++;
+                codeBehind = transformedCodeBehind;
             }
         }
 

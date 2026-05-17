@@ -86,13 +86,14 @@ public sealed class EdmxToEfCoreConverterTests : IDisposable
     [Fact]
     public async Task ConvertAsync_Batch_ExcludesT4GeneratedSourceFiles()
     {
-        // Verifies that after EDMX conversion, Model1.cs, Model1.Context.cs, and
-        // Model1.Designer.cs are all added to excludedSourceFiles so SourceFileCopier
-        // won't copy the EF6 T4 artifacts alongside the EF Core output (CS0101).
+        // Verifies that after EDMX conversion, both the T4 companion files and any
+        // source files that share names with generated EF Core outputs are excluded,
+        // and stale legacy output artifacts are removed on rerun.
         var sourceRoot = CreateDirectory("batch-excl");
         var modelsDir = CreateDirectory("batch-excl", "Models");
-        var sourceFile = CreateFile("batch-excl", Path.Combine("Models", "Model1.edmx"), SampleEdmx);
+        _ = CreateFile("batch-excl", Path.Combine("Models", "Model1.edmx"), SampleEdmx);
         var outputPath = CreateDirectory("batch-excl", "out");
+        var outputModelsDir = CreateDirectory("batch-excl", "out", "Models");
 
         // Create the T4-generated companion files that should be excluded
         var t4Context = Path.Combine(modelsDir, "Model1.Context.cs");
@@ -102,6 +103,16 @@ public sealed class EdmxToEfCoreConverterTests : IDisposable
         File.WriteAllText(t4Entities, "// T4 entities");
         File.WriteAllText(t4Designer, "// T4 designer");
 
+        // Create source entity files that would otherwise overwrite the generated EF Core output.
+        var customerSource = Path.Combine(modelsDir, "Customer.cs");
+        var orderSource = Path.Combine(modelsDir, "Order.cs");
+        File.WriteAllText(customerSource, "// EF6 customer");
+        File.WriteAllText(orderSource, "// EF6 order");
+
+        // Seed stale legacy output to verify reruns clean it up.
+        var staleOutputContext = Path.Combine(outputModelsDir, "Model1.Context.cs");
+        File.WriteAllText(staleOutputContext, "// stale output");
+
         var converter = new EdmxToEfCoreConverter();
         var report = new BlazorWebFormsComponents.Cli.Pipeline.MigrationReport();
         var excluded = await converter.ConvertAsync(sourceRoot, outputPath, "StoreProject", dryRun: false, report);
@@ -109,6 +120,9 @@ public sealed class EdmxToEfCoreConverterTests : IDisposable
         Assert.Contains(t4Context, excluded, StringComparer.OrdinalIgnoreCase);
         Assert.Contains(t4Entities, excluded, StringComparer.OrdinalIgnoreCase);
         Assert.Contains(t4Designer, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains(customerSource, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains(orderSource, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.False(File.Exists(staleOutputContext));
     }
 
     [Fact]

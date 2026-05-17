@@ -144,6 +144,40 @@ public class SourceFileCopierTransformTests : IDisposable
         Assert.Contains(result.DiscoveredServiceClasses, svc => svc.ClassName == "Courses_Logic" && svc.Namespace == "TestApp.BLL");
     }
 
+    [Fact]
+    public async Task CopySourceFilesAsync_NormalizesExcludedPathsAndPreservesFolderCasing()
+    {
+        var inputDir = Path.Combine(_rootDir, "InputRoot");
+        var outputDir = Path.Combine(_rootDir, "OutputRoot");
+        Directory.CreateDirectory(Path.Combine(inputDir, "BLL"));
+        Directory.CreateDirectory(Path.Combine(inputDir, "Models"));
+        Directory.CreateDirectory(outputDir);
+
+        var bllFile = Path.Combine(inputDir, "BLL", "Courses_Logic.cs");
+        var excludedModel = Path.Combine(inputDir, "Models", "Model1.Context.cs");
+
+        await File.WriteAllTextAsync(bllFile, "namespace TestApp.BLL; public class Courses_Logic { }");
+        await File.WriteAllTextAsync(excludedModel, "namespace TestApp.Models; public class Model1Context { }");
+
+        var relativeInputDir = Path.GetRelativePath(Directory.GetCurrentDirectory(), inputDir);
+        var relativeOutputDir = Path.GetRelativePath(Directory.GetCurrentDirectory(), outputDir);
+        var relativeExcludedModel = Path.GetRelativePath(Directory.GetCurrentDirectory(), excludedModel);
+
+        var copier = new SourceFileCopier(new OutputWriter(), GetCodeBehindTransforms());
+        var report = new MigrationReport();
+
+        await copier.CopySourceFilesAsync(
+            relativeInputDir,
+            relativeOutputDir,
+            [],
+            verbose: false,
+            report,
+            new HashSet<string>(StringComparer.OrdinalIgnoreCase) { relativeExcludedModel });
+
+        Assert.True(File.Exists(Path.Combine(outputDir, "BLL", "Courses_Logic.cs")));
+        Assert.False(File.Exists(Path.Combine(outputDir, "Models", "Model1.Context.cs")));
+    }
+
     private static IReadOnlyList<ICodeBehindTransform> GetCodeBehindTransforms()
     {
         var pipeline = TestHelpers.CreateDefaultPipeline();

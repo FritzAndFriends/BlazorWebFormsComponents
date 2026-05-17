@@ -46,4 +46,15 @@ public class MarkupCleanupTransformTests
 
         result.ShouldBe("<br/>");
     }
+
+    [Fact]
+    public void MissingChildCloser_IsInsertedBeforeParentClose()
+    {
+        const string input = "<UpdatePanel>\n    <div id=\"autoComplete\">\n        <DetailsView></DetailsView>\n</UpdatePanel>";
+
+        var result = _sut.Apply(input, MakeMetadata());
+
+        result.ShouldContain("</div>");
+        result.IndexOf("</div>", StringComparison.Ordinal).ShouldBeLessThan(result.IndexOf("</UpdatePanel>", StringComparison.Ordinal));
+    }
 }

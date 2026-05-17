@@ -32,6 +32,8 @@ public sealed class EdmxToEfCoreConverter
 
     public async Task<HashSet<string>> ConvertAsync(string sourcePath, string outputPath, string projectName, bool dryRun, MigrationReport report)
     {
+        var normalizedSourcePath = Path.GetFullPath(sourcePath);
+        var normalizedOutputPath = Path.GetFullPath(outputPath);
         var excludedSourceFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var edmxFiles = Directory.EnumerateFiles(sourcePath, "*.edmx", SearchOption.AllDirectories)
             .Where(file => Path.GetDirectoryName(file)?.EndsWith("Models", StringComparison.OrdinalIgnoreCase) == true)
@@ -48,9 +50,10 @@ public sealed class EdmxToEfCoreConverter
 
         foreach (var edmxFile in edmxFiles)
         {
-            var relativeDir = Path.GetDirectoryName(Path.GetRelativePath(sourcePath, edmxFile)) ?? string.Empty;
-            var targetDirectory = Path.Combine(outputPath, relativeDir);
-            var result = await ConvertAsync(new EdmxConversionOptions(edmxFile, targetDirectory, $"{projectName}.Models"));
+            var normalizedEdmxPath = Path.GetFullPath(edmxFile);
+            var relativeDir = Path.GetDirectoryName(Path.GetRelativePath(normalizedSourcePath, normalizedEdmxPath)) ?? string.Empty;
+            var targetDirectory = Path.Combine(normalizedOutputPath, relativeDir);
+            var result = await ConvertAsync(new EdmxConversionOptions(normalizedEdmxPath, targetDirectory, $"{projectName}.Models"));
 
             if (!result.Success)
             {
@@ -58,17 +61,45 @@ public sealed class EdmxToEfCoreConverter
                 continue;
             }
 
-            var stem = Path.GetFileNameWithoutExtension(edmxFile);
-            excludedSourceFiles.Add(Path.Combine(Path.GetDirectoryName(edmxFile)!, $"{stem}.cs"));
-            // Also exclude the T4-generated DbContext file (Model1.Context.cs) to avoid
-            // CS0101 duplicate class when the EDMX converter generates its own EF Core context.
-            excludedSourceFiles.Add(Path.Combine(Path.GetDirectoryName(edmxFile)!, $"{stem}.Context.cs"));
-            // Exclude the designer file as well (Model1.Designer.cs) — auto-generated, not needed.
-            excludedSourceFiles.Add(Path.Combine(Path.GetDirectoryName(edmxFile)!, $"{stem}.Designer.cs"));
-            report.AddManualItem(Path.GetRelativePath(sourcePath, edmxFile), 0, "EDMX", "EDMX converted to EF Core entities and DbContext — verify generated relationships and configuration.");
+            var stem = Path.GetFileNameWithoutExtension(normalizedEdmxPath);
+            var sourceModelsDirectory = Path.GetDirectoryName(normalizedEdmxPath)!;
+            var excludedForModel = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                Path.Combine(sourceModelsDirectory, $"{stem}.cs"),
+                Path.Combine(sourceModelsDirectory, $"{stem}.Context.cs"),
+                Path.Combine(sourceModelsDirectory, $"{stem}.Designer.cs")
+            };
+
+            foreach (var generatedFile in result.GeneratedFiles)
+            {
+                var sourceCounterpart = Path.Combine(sourceModelsDirectory, Path.GetFileName(generatedFile));
+                if (File.Exists(sourceCounterpart))
+                    excludedForModel.Add(Path.GetFullPath(sourceCounterpart));
+            }
+
+            foreach (var excludedFile in excludedForModel)
+            {
+                excludedSourceFiles.Add(Path.GetFullPath(excludedFile));
+                DeleteStaleExcludedOutput(targetDirectory, excludedFile, result.GeneratedFiles);
+            }
+
+            report.AddManualItem(Path.GetRelativePath(normalizedSourcePath, normalizedEdmxPath), 0, "EDMX", "EDMX converted to EF Core entities and DbContext — verify generated relationships and configuration.");
         }
 
         return excludedSourceFiles;
+    }
+
+    private static void DeleteStaleExcludedOutput(string targetDirectory, string excludedSourceFile, IReadOnlyList<string> generatedFiles)
+    {
+        var outputCandidate = Path.Combine(targetDirectory, Path.GetFileName(excludedSourceFile));
+        if (!File.Exists(outputCandidate))
+            return;
+
+        var generatedNames = new HashSet<string>(generatedFiles.Select(Path.GetFileName), StringComparer.OrdinalIgnoreCase);
+        if (generatedNames.Contains(Path.GetFileName(outputCandidate)))
+            return;
+
+        File.Delete(outputCandidate);
     }
 
     public async Task<EdmxConversionResult> ConvertAsync(EdmxConversionOptions options, CancellationToken cancellationToken = default)

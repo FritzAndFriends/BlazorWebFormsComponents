@@ -83,6 +83,12 @@ public class SourceFileCopier
         if (!Directory.Exists(sourcePath))
             return new SourceFileCopyResult(0, 0, []);
 
+        var normalizedSourcePath = Path.GetFullPath(sourcePath);
+        var normalizedOutputPath = Path.GetFullPath(outputPath);
+        var normalizedExcludedFiles = additionalExcludedFiles is null
+            ? null
+            : new HashSet<string>(additionalExcludedFiles.Select(Path.GetFullPath), StringComparer.OrdinalIgnoreCase);
+
         // Build set of code-behind paths to skip (already handled by page pipeline)
         var codeBehindPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (var pf in pageFiles)
@@ -108,10 +114,10 @@ public class SourceFileCopier
             if (codeBehindPaths.Contains(fullPath))
                 continue;
 
-            if (additionalExcludedFiles is not null && additionalExcludedFiles.Contains(fullPath))
+            if (normalizedExcludedFiles is not null && normalizedExcludedFiles.Contains(fullPath))
                 continue;
 
-            var relativePath = Path.GetRelativePath(sourcePath, file);
+            var relativePath = GetRelativePathPreservingSourceCasing(normalizedSourcePath, fullPath);
             var fileName = Path.GetFileName(file);
 
             // Skip excluded directories
@@ -130,22 +136,26 @@ public class SourceFileCopier
             var metadata = new FileMetadata
             {
                 SourceFilePath = file,
-                OutputFilePath = Path.Combine(outputPath, relativePath),
+                SourceRootPath = normalizedSourcePath,
+                OutputFilePath = Path.Combine(normalizedOutputPath, relativePath),
                 FileType = FileType.CodeFile, // Standalone .cs — not a page/control/master code-behind
                 OriginalContent = content,
-                OutputRootPath = outputPath,
+                OutputRootPath = normalizedOutputPath,
                 ProjectNamespace = projectNamespace
             };
 
             foreach (var transform in _transforms)
             {
-                content = transform.Apply(content, metadata);
+                var transformed = transform.Apply(content, metadata);
+                if (!string.Equals(transformed, content, StringComparison.Ordinal))
+                    report.TransformsApplied++;
+                content = transformed;
             }
 
             var decision = Classify(relativePath, fileName, topDir, content);
             if (decision.ShouldQuarantine)
             {
-                var artifactPath = Path.Combine(outputPath, "migration-artifacts", "compile-surface", relativePath + ".txt");
+                var artifactPath = Path.Combine(normalizedOutputPath, "migration-artifacts", "compile-surface", relativePath + ".txt");
                 var quarantinedContent = BuildQuarantineArtifact(relativePath, decision.Reason!, content);
                 await _outputWriter.WriteFileAsync(artifactPath, quarantinedContent, $"Compile-surface artifact: {relativePath}");
                 report.AddManualItem(relativePath, 0, "bwfc-compile-surface", decision.Reason!);
@@ -155,7 +165,7 @@ public class SourceFileCopier
                 var stub = BuildCompileStub(content, relativePath, decision.Reason!, scaffoldedClassNames);
                 if (stub != null)
                 {
-                    var stubPath = Path.Combine(outputPath, relativePath);
+                    var stubPath = Path.Combine(normalizedOutputPath, relativePath);
                     await _outputWriter.WriteFileAsync(stubPath, stub, $"Compile stub: {relativePath}");
                 }
 
@@ -186,7 +196,7 @@ public class SourceFileCopier
             if (isDuplicate)
                 continue;
 
-            var destPath = Path.Combine(outputPath, relativePath);
+            var destPath = Path.Combine(normalizedOutputPath, relativePath);
             await _outputWriter.WriteFileAsync(destPath, content, $"Source: {relativePath}");
             copiedCount++;
 
@@ -205,6 +215,17 @@ public class SourceFileCopier
             Console.WriteLine($"  Service classes discovered for DI: {discoveredServiceClasses.Count}");
 
         return new SourceFileCopyResult(copiedCount, quarantinedCount, discoveredServiceClasses);
+    }
+
+    private static string GetRelativePathPreservingSourceCasing(string normalizedSourcePath, string fullPath)
+    {
+        var root = normalizedSourcePath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var prefix = root + Path.DirectorySeparatorChar;
+
+        if (fullPath.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return fullPath[prefix.Length..];
+
+        return Path.GetRelativePath(root, fullPath);
     }
 
     private static CompileSurfaceDecision Classify(string relativePath, string fileName, string topDir, string content)

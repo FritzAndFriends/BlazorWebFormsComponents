@@ -1421,6 +1421,51 @@ public class PipelineIntegrationTests : IDisposable
         Assert.True(File.Exists(Path.Combine(outputDir, "migration-artifacts", "compile-surface", "Startup.Auth.cs.txt")));
     }
 
+    [Fact]
+    public async Task ExecuteAsync_CountsAppliedTransforms_AndStripsLegacySystemWebReferences()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir(includeWebConfig: true, includeCodeBehind: true);
+
+        File.WriteAllText(Path.Combine(inputDir, "Default.aspx.cs"), """
+            using System;
+            using System.Collections.Generic;
+            using System.Web.UI;
+            
+            namespace TestApp
+            {
+                public partial class _Default : Page
+                {
+                    [System.Web.Services.WebMethod]
+                    [System.Web.Script.Services.ScriptMethod]
+                    public static List<string> GetCompletionList(string prefixText, int count)
+                    {
+                        return new List<string>();
+                    }
+                }
+            }
+            """);
+
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+        var pipeline = CreateFullPipeline();
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            SourceFiles = sourceFiles,
+            Options = new MigrationOptions { Verbose = false }
+        };
+
+        var report = await pipeline.ExecuteAsync(context);
+
+        Assert.True(report.TransformsApplied > 0, $"Expected transforms to be counted, got {report.TransformsApplied}");
+
+        var codeBehind = File.ReadAllText(Path.Combine(outputDir, "Default.razor.cs"));
+        Assert.DoesNotContain("using System.Web", codeBehind);
+        Assert.DoesNotContain("System.Web.Services", codeBehind);
+        Assert.DoesNotContain("System.Web.Script.Services", codeBehind);
+    }
+
     // ───────────────────────────────────────────────────────────────
     //  MigrationReport
     // ───────────────────────────────────────────────────────────────

@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.RegularExpressions;
 using BlazorWebFormsComponents.Cli.Pipeline;
 
@@ -7,6 +8,7 @@ namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 /// Late-pass markup cleanup that fixes common HTML issues in generated .razor files:
 /// - Self-closing non-void elements: &lt;td/&gt; → &lt;td&gt;&lt;/td&gt;
 /// - Unclosed inline formatting tags: &lt;b&gt;text&lt;b&gt; → &lt;b&gt;text&lt;/b&gt;
+/// - Missing closing tags before a parent closes
 /// - Orphan closing tags without matching openers
 /// These patterns cause Razor compilation errors or broken rendering.
 /// </summary>
@@ -49,6 +51,11 @@ public class MarkupCleanupTransform : IMarkupTransform
         @"</(?<tag>[a-zA-Z][\w-]*)\s*>",
         RegexOptions.Compiled);
 
+    // Generic tag token used to auto-close unbalanced containers before their parent closes.
+    private static readonly Regex TagTokenRegex = new(
+        @"</?(?<tag>[A-Za-z][\w-]*)(?:\s[^<>]*?)?\s*/?>",
+        RegexOptions.Compiled);
+
     public string Apply(string content, FileMetadata metadata)
     {
         // Fix self-closing non-void elements
@@ -78,10 +85,66 @@ public class MarkupCleanupTransform : IMarkupTransform
             return $"<{tag}{attrs}>{innerContent}</{tag}";
         });
 
-        // Remove orphan closing tags (closing tags with no matching opener)
+        content = CloseUnbalancedOpenTags(content);
         content = RemoveOrphanClosingTags(content);
 
         return content;
+    }
+
+    private static string CloseUnbalancedOpenTags(string content)
+    {
+        var builder = new StringBuilder(content.Length + 64);
+        var openTags = new Stack<string>();
+        var lastIndex = 0;
+
+        foreach (Match match in TagTokenRegex.Matches(content))
+        {
+            builder.Append(content, lastIndex, match.Index - lastIndex);
+            lastIndex = match.Index + match.Length;
+
+            var tag = match.Groups["tag"].Value;
+            var token = match.Value;
+
+            if (token.Length > 1 && token[1] == '/')
+            {
+                if (openTags.Count == 0)
+                {
+                    builder.Append(token);
+                    continue;
+                }
+
+                var stackSnapshot = openTags.ToArray();
+                var matchingDepth = Array.FindIndex(stackSnapshot, openTag => string.Equals(openTag, tag, StringComparison.OrdinalIgnoreCase));
+                if (matchingDepth < 0)
+                {
+                    builder.Append(token);
+                    continue;
+                }
+
+                for (var i = 0; i < matchingDepth; i++)
+                {
+                    builder.Append($"</{openTags.Pop()}>");
+                }
+
+                openTags.Pop();
+                builder.Append(token);
+                continue;
+            }
+
+            builder.Append(token);
+            if (token.EndsWith("/>", StringComparison.Ordinal) || VoidElements.Contains(tag))
+                continue;
+
+            openTags.Push(tag);
+        }
+
+        builder.Append(content, lastIndex, content.Length - lastIndex);
+        while (openTags.Count > 0)
+        {
+            builder.Append($"</{openTags.Pop()}>");
+        }
+
+        return builder.ToString();
     }
 
     private static string RemoveOrphanClosingTags(string content)

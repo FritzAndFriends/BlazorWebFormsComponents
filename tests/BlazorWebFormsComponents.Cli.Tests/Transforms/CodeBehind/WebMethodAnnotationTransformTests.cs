@@ -23,10 +23,11 @@ public class WebMethodAnnotationTransformTests
     }
 
     [Fact]
-    public void AddsTodoAboveLegacyWebMethod()
+    public void AddsTodoAndRemovesLegacySystemWebWebMethodAttributes()
     {
         var input = """
             [System.Web.Services.WebMethod]
+            [System.Web.Script.Services.ScriptMethod]
             public static List<string> GetCompletionList(string prefixText, int count)
             {
                 return new List<string>();
@@ -36,7 +37,9 @@ public class WebMethodAnnotationTransformTests
         var result = _transform.Apply(input, TestMetadata);
 
         Assert.Contains("TODO(bwfc-webmethod)", result);
-        Assert.Contains("[System.Web.Services.WebMethod]", result);
+        Assert.Contains("Legacy [WebMethod] attribute removed", result);
+        Assert.Contains("Legacy [ScriptMethod] attribute removed", result);
+        Assert.DoesNotContain("System.Web", result);
     }
 
     [Fact]
