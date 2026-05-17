@@ -16,12 +16,12 @@ public class DataBindTransform : ICodeBehindTransform
 
     // Matches: controlId.DataSource = expression;
     private static readonly Regex DataSourceAssignRegex = new(
-        @"(\w+)\.DataSource\s*=\s*(.+?)\s*;",
+        @"(?:this\.)?(\w+)\.DataSource\s*=\s*(.+?)\s*;",
         RegexOptions.Compiled);
 
     // Matches: controlId.DataBind();
     private static readonly Regex DataBindCallRegex = new(
-        @"\w+\.DataBind\(\)\s*;[ \t]*\r?\n?",
+        @"[ \t]*(?:this\.)?\w+\.DataBind\(\)\s*;[ \t]*\r?\n?",
         RegexOptions.Compiled);
 
     public string Apply(string content, FileMetadata metadata)

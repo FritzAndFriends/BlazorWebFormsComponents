@@ -76,7 +76,7 @@ public class LegacyHelperStubTransformTests
         {
             SourceFilePath = @"D:\input\Logic\ShoppingCartActions.cs",
             OutputFilePath = @"D:\output\Logic\ShoppingCartActions.cs",
-            FileType = FileType.Page,
+            FileType = FileType.CodeFile,
             OriginalContent = content,
         };
 
@@ -109,7 +109,7 @@ public class LegacyHelperStubTransformTests
         {
             SourceFilePath = @"D:\input\Logic\CacheHelper.cs",
             OutputFilePath = @"D:\output\Logic\CacheHelper.cs",
-            FileType = FileType.Page,
+            FileType = FileType.CodeFile,
             OriginalContent = content,
         };
 
@@ -138,7 +138,7 @@ public class LegacyHelperStubTransformTests
         {
             SourceFilePath = @"D:\input\Logic\PayPalFunctions.cs",
             OutputFilePath = @"D:\output\Logic\PayPalFunctions.cs",
-            FileType = FileType.Page,
+            FileType = FileType.CodeFile,
             OriginalContent = content,
         };
 
@@ -170,7 +170,7 @@ public class LegacyHelperStubTransformTests
         {
             SourceFilePath = @"D:\input\IdentityHelper.cs",
             OutputFilePath = @"D:\output\IdentityHelper.cs",
-            FileType = FileType.Page,
+            FileType = FileType.CodeFile,
             OriginalContent = content,
         };
 
@@ -180,11 +180,14 @@ public class LegacyHelperStubTransformTests
         Assert.Contains("public void SignIn(string userName)", result);
     }
 
-    [Fact]
-    public void PageCodeBehind_IsSkipped()
+    [Theory]
+    [InlineData(FileType.Page, @"D:\input\MyPage.aspx", @"D:\output\MyPage.razor.cs")]
+    [InlineData(FileType.Master, @"D:\input\Site.master", @"D:\output\Site.razor.cs")]
+    [InlineData(FileType.Control, @"D:\input\Widget.ascx", @"D:\output\Widget.razor.cs")]
+    public void PageMasterAndControlCodeBehinds_AreSkipped(FileType fileType, string sourcePath, string outputPath)
     {
         var content = """
-            using System.Web;
+            using System.Configuration;
             
             namespace TestApp;
             
@@ -192,23 +195,53 @@ public class LegacyHelperStubTransformTests
             {
                 protected void Page_Load(object sender, EventArgs e)
                 {
-                    var x = HttpContext.Current;
+                    var setting = ConfigurationManager.AppSettings["Mode"];
                 }
             }
             """;
 
         var metadata = new FileMetadata
         {
-            SourceFilePath = @"D:\input\MyPage.aspx.cs",
-            OutputFilePath = @"D:\output\MyPage.razor.cs",
-            FileType = FileType.Page,
+            SourceFilePath = sourcePath,
+            OutputFilePath = outputPath,
+            FileType = fileType,
             OriginalContent = content,
         };
 
         var result = _transform.Apply(content, metadata);
 
-        // Page code-behinds are NOT processed by this transform
+        Assert.Equal(content, result);
         Assert.DoesNotContain("Auto-generated API-compatible stub", result);
+    }
+
+    [Fact]
+    public void ProtectedHelperMethods_ArePreservedInStub()
+    {
+        var content = """
+            using System.Configuration;
+
+            namespace TestApp;
+
+            public class ConfigHelper
+            {
+                protected void LoadSetting(object sender, EventArgs e)
+                {
+                    var mode = ConfigurationManager.AppSettings["Mode"];
+                }
+            }
+            """;
+
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = @"D:\input\ConfigHelper.cs",
+            OutputFilePath = @"D:\output\ConfigHelper.cs",
+            FileType = FileType.CodeFile,
+            OriginalContent = content,
+        };
+
+        var result = _transform.Apply(content, metadata);
+
+        Assert.Contains("protected void LoadSetting(object sender, EventArgs e) { }", result);
     }
 
     [Fact]
@@ -232,7 +265,7 @@ public class LegacyHelperStubTransformTests
         {
             SourceFilePath = @"D:\input\SecurityHelper.cs",
             OutputFilePath = @"D:\output\SecurityHelper.cs",
-            FileType = FileType.Page,
+            FileType = FileType.CodeFile,
             OriginalContent = content,
         };
 

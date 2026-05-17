@@ -39,9 +39,9 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
         @"(?:public|internal)\s+(?<static>static\s+)?(?:(?:sealed|abstract|partial)\s+)*class\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)(?:\s*:\s*(?<bases>[^{\r\n]+))?",
         RegexOptions.Compiled);
 
-    // Matches public method signatures: public [static] ReturnType MethodName(params)
+    // Matches public/protected method signatures: [public|protected] [static] ReturnType MethodName(params)
     private static readonly Regex MethodRegex = new(
-        @"public\s+(?<mods>(?:(?:static|override|virtual|async)\s+)*)(?<returnType>[\w<>\[\]?,\s]+?)\s+(?<name>[A-Za-z_]\w*)\s*\((?<params>[^)]*)\)\s*\{",
+        @"(?<access>public|protected)\s+(?<mods>(?:(?:static|override|virtual|async)\s+)*)(?<returnType>[\w<>\[\]?,\s]+?)\s+(?<name>[A-Za-z_]\w*)\s*\((?<params>[^)]*)\)\s*\{",
         RegexOptions.Compiled);
 
     // Matches public properties: public Type Name { get; set; }
@@ -70,10 +70,18 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
     public string Apply(string content, FileMetadata metadata)
     {
         // Only process standalone .cs files (not page/master/control code-behinds)
-        var sourcePath = metadata.SourceFilePath ?? metadata.OutputFilePath;
-        if (sourcePath.EndsWith(".aspx.cs", StringComparison.OrdinalIgnoreCase)
+        var sourcePath = metadata.SourceFilePath ?? string.Empty;
+        var outputPath = metadata.OutputFilePath ?? string.Empty;
+        if (metadata.FileType == FileType.Page
+            || metadata.FileType == FileType.Master
+            || metadata.FileType == FileType.Control
+            || sourcePath.EndsWith(".aspx.cs", StringComparison.OrdinalIgnoreCase)
             || sourcePath.EndsWith(".ascx.cs", StringComparison.OrdinalIgnoreCase)
-            || sourcePath.EndsWith(".master.cs", StringComparison.OrdinalIgnoreCase))
+            || sourcePath.EndsWith(".master.cs", StringComparison.OrdinalIgnoreCase)
+            || outputPath.EndsWith(".aspx.cs", StringComparison.OrdinalIgnoreCase)
+            || outputPath.EndsWith(".ascx.cs", StringComparison.OrdinalIgnoreCase)
+            || outputPath.EndsWith(".master.cs", StringComparison.OrdinalIgnoreCase)
+            || outputPath.EndsWith(".razor.cs", StringComparison.OrdinalIgnoreCase))
             return content;
 
         // Check for legacy namespace imports that have no automated transform
@@ -169,7 +177,7 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
             {
                 var modsPrefix = string.IsNullOrEmpty(m.Modifiers) ? "" : $"{m.Modifiers} ";
                 var body = GetMethodBody(m, interfaces.Contains("IDisposable"));
-                sb.AppendLine($"    public {modsPrefix}{m.ReturnType} {m.Name}({m.Parameters}) {body}");
+                sb.AppendLine($"    {m.AccessModifier} {modsPrefix}{m.ReturnType} {m.Name}({m.Parameters}) {body}");
             }
 
             foreach (var nt in nestedTypes)
@@ -226,7 +234,7 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
         {
             var modsPrefix = string.IsNullOrEmpty(m.Modifiers) ? "" : $"{m.Modifiers} ";
             var body = GetMethodBody(m, interfaces.Contains("IDisposable"));
-            sb.AppendLine($"    public {modsPrefix}{m.ReturnType} {m.Name}({m.Parameters}) {body}");
+            sb.AppendLine($"    {m.AccessModifier} {modsPrefix}{m.ReturnType} {m.Name}({m.Parameters}) {body}");
         }
 
         foreach (var nt in nestedTypes)
@@ -289,7 +297,8 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
             var key = $"{name}({parameters})";
             if (!seen.Add(key)) continue;
 
-            methods.Add(new MethodInfo(mods, returnType, name, parameters));
+            var accessModifier = m.Groups["access"].Value;
+            methods.Add(new MethodInfo(accessModifier, mods, returnType, name, parameters));
         }
         return methods;
     }
@@ -375,7 +384,7 @@ public class LegacyHelperStubTransform : ICodeBehindTransform
         return -1;
     }
 
-    private sealed record MethodInfo(string Modifiers, string ReturnType, string Name, string Parameters);
+    private sealed record MethodInfo(string AccessModifier, string Modifiers, string ReturnType, string Name, string Parameters);
     private sealed record PropertyInfo(string Type, string Name);
     private sealed record ConstInfo(string Type, string Name, string Value);
     private sealed record FieldInfo(string Type, string Name);
