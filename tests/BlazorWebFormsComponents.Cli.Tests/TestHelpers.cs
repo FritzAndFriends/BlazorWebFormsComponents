@@ -227,6 +227,7 @@ public static class TestHelpers
             new EnhancedNavAnnotationTransform(),
             new GetRouteUrlMarkupTransform(),
             new HtmlBoilerplateStripTransform(),
+            new SsrFormContractTransform(),
             new MarkupCleanupTransform(),
             new LabelFieldBindTransform(),
         };
@@ -279,6 +280,7 @@ public static class TestHelpers
             new TitlePropertyCodeBehindTransform(),
             new MarkupReferencedMemberStubTransform(),
             new TypeMismatchFixTransform(),
+            new IdentityCodeBehindQuarantineTransform(),
             new DisposeReadonlyFieldTransform(),
         };
 

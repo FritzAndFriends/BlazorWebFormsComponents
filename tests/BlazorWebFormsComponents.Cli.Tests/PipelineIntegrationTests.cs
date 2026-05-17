@@ -674,7 +674,7 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Contains("action=\"/Account/LoginHandler\"", loginMarkup);
         Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", loginMarkup);
         Assert.Contains("class=\"form-horizontal\"", loginMarkup);
-        Assert.Contains("@formname=\"bwfc-form-1\"", loginMarkup);
+        Assert.Contains("@formname=\"LoginForm\"", loginMarkup);
         Assert.Contains("<AntiforgeryToken />", loginMarkup);
         Assert.Contains("type=\"email\"", loginMarkup);
         Assert.Contains("type=\"password\"", loginMarkup);

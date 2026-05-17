@@ -57,7 +57,7 @@ public sealed class SemanticPatternCatalog
             report.SemanticPatternsApplied++;
         }
 
-        markup = FormAntiforgeryPostProcessor.Apply(markup);
+        markup = FormAntiforgeryPostProcessor.Apply(markup, metadata);
         metadata.MarkupContent = markup;
 
         return new SemanticPatternExecutionResult(markup, codeBehind, appliedPatterns);

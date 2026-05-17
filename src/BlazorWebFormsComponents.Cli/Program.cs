@@ -74,6 +74,7 @@ class Program
         services.AddSingleton<IMarkupTransform, EnhancedNavAnnotationTransform>();
         services.AddSingleton<IMarkupTransform, GetRouteUrlMarkupTransform>();
         services.AddSingleton<IMarkupTransform, HtmlBoilerplateStripTransform>();
+        services.AddSingleton<IMarkupTransform, SsrFormContractTransform>();
         services.AddSingleton<IMarkupTransform, MarkupCleanupTransform>();
         services.AddSingleton<IMarkupTransform, LabelFieldBindTransform>();
 
@@ -125,6 +126,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, TitlePropertyCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, MarkupReferencedMemberStubTransform>();
         services.AddSingleton<ICodeBehindTransform, TypeMismatchFixTransform>();
+        services.AddSingleton<ICodeBehindTransform, IdentityCodeBehindQuarantineTransform>();
         services.AddSingleton<ICodeBehindTransform, DisposeReadonlyFieldTransform>();
 
         // Scaffolding

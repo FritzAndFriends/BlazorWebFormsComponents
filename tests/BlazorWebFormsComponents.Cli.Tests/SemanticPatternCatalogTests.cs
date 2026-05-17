@@ -308,7 +308,7 @@ public class SemanticPatternCatalogTests : IDisposable
         Assert.Contains("<PageTitle>AddToCart</PageTitle>", result.Markup);
         Assert.Contains("TODO(bwfc-action-pages)", result.Markup);
         Assert.Contains("action=\"/__bwfc/actions/AddToCart\"", result.Markup);
-        Assert.Contains("@formname=\"bwfc-form-1\"", result.Markup);
+        Assert.Contains("@formname=\"AddToCartForm\"", result.Markup);
         Assert.Contains("<AntiforgeryToken />", result.Markup);
         Assert.Contains("document.getElementById('bwfc-action-pages-form')?.submit();", result.Markup);
         Assert.Contains("[Parameter, SupplyParameterFromQuery(Name = \"ProductID\")] public string? ProductID { get; set; }", result.CodeBehind);
