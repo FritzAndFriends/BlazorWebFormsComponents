@@ -172,9 +172,9 @@
 }
 
 @* Field definitions via child content *@
-@if (Fields != null)
+@if ((Fields ?? ChildContent) != null)
 {
 	<CascadingValue Value="this" Name="ColumnCollection">
-		@Fields
+		@(Fields ?? ChildContent)
 	</CascadingValue>
 }

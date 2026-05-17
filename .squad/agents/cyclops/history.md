@@ -9,6 +9,23 @@
 
 <!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
 
+### 2026-05-17: DetailsView BoundField support on prerender
+
+**Task:** Fix `DetailsView` so explicit `BoundField` definitions work during prerender without falling back to auto-generated rows.
+
+**Changes delivered:**
+- Updated `DetailsView<ItemType>` to implement `IColumnCollection<ItemType>` and collect explicit child columns like `GridView` does.
+- Mapped collected `IColumn<ItemType>` definitions into `DetailsViewField` adapters so existing row rendering can reuse `BoundField.Render()` / `RenderEdit()`.
+- Updated `DetailsView.razor` to cascade `ColumnCollection` for either `<Fields>` content or direct child content.
+- Hardened `BaseColumn<ItemType>` registration/disposal with null guards so unsupported or early prerender cases do not throw.
+- Added bUnit coverage for explicit field order, direct child-content aliasing, and edit-mode rendering.
+
+**Important paths:**
+- `src/BlazorWebFormsComponents/DetailsView.razor`
+- `src/BlazorWebFormsComponents/DetailsView.razor.cs`
+- `src/BlazorWebFormsComponents/BaseColumn.cs`
+- `src/BlazorWebFormsComponents.Test/DetailsView/BoundFields.razor`
+
 
 ### 2026-04-28: CLI Semantic Pattern Catalog Entries
 

@@ -23,7 +23,7 @@ namespace BlazorWebFormsComponents
 
 		public void Dispose()
 		{
-			ParentColumnsCollection.RemoveColumn(this);
+			ParentColumnsCollection?.RemoveColumn(this);
 		}
 
 		public abstract RenderFragment Render(ItemType item);
@@ -36,7 +36,7 @@ namespace BlazorWebFormsComponents
 		///<inheritdoc/>
 		protected override void OnInitialized()
 		{
-			ParentColumnsCollection.AddColumn(this);
+			ParentColumnsCollection?.AddColumn(this);
 		}
 	}
 }
