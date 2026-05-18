@@ -226,6 +226,13 @@ public class ProgramCsEmitter
         // 4f. Map Razor components (static SSR only — no interactive render mode)
         // NEVER add .AddInteractiveServerRenderMode() — migrated apps target static SSR only.
         sb.AppendLine();
+
+        // 4f-1. Root redirect when a default page was detected
+        if (!string.IsNullOrEmpty(profile.DefaultPageRoute))
+        {
+            sb.AppendLine($"app.MapGet(\"/\", () => Results.Redirect(\"{profile.DefaultPageRoute}\"));");
+        }
+
         sb.AppendLine($"app.MapRazorComponents<{projectName}.Components.App>();");
 
         // 4g. Identity seed data

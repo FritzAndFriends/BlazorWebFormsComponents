@@ -70,6 +70,12 @@ public class RuntimeProfile
     public string? CustomErrorRedirect { get; set; }
 
     /// <summary>
+    /// Default page name detected from Default.aspx or Web.config defaultDocument.
+    /// Used to generate a root "/" redirect in Program.cs.
+    /// </summary>
+    public string? DefaultPageRoute { get; set; }
+
+    /// <summary>
     /// Authentication mode from Web.config &lt;authentication mode="..."&gt; (Forms, Windows, None).
     /// </summary>
     public string? AuthenticationMode { get; set; }

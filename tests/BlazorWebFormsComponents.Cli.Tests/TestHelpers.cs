@@ -169,7 +169,8 @@ public static class TestHelpers
             new GlobalAsaxRuntimeSignalDetector(),
             new WebConfigRuntimeSignalDetector(),
             new AjaxToolkitRuntimeSignalDetector(),
-            new SqlClientRuntimeSignalDetector()
+            new SqlClientRuntimeSignalDetector(),
+            new DefaultPageRuntimeSignalDetector()
         ]);
 
     public static ProjectScaffolder CreateDefaultScaffolder() =>
@@ -272,6 +273,8 @@ public static class TestHelpers
             new EventHandlerSignatureTransform(),
             new InnerTextRewriteTransform(),
             new DataBindTransform(),
+            new DataSourceParameterBindingTransform(),
+            new StaticItemsParameterBindingTransform(),
             new ClientScriptTransform(),
             new UrlCleanupTransform(),
             new CompileSurfaceStubTransform(quarantineDetector),

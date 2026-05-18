@@ -115,6 +115,8 @@ class Program
         services.AddSingleton<ICodeBehindTransform, EventHandlerSignatureTransform>();
         services.AddSingleton<ICodeBehindTransform, InnerTextRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, DataBindTransform>();
+        services.AddSingleton<ICodeBehindTransform, DataSourceParameterBindingTransform>();
+        services.AddSingleton<ICodeBehindTransform, StaticItemsParameterBindingTransform>();
         services.AddSingleton<ICodeBehindTransform, ClientScriptTransform>();
         services.AddSingleton<ICodeBehindTransform, UrlCleanupTransform>();
         services.AddSingleton<PageQuarantineDetector>();
@@ -137,6 +139,7 @@ class Program
         services.AddSingleton<IRuntimeSignalDetector, WebConfigRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, AjaxToolkitRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, SqlClientRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, DefaultPageRuntimeSignalDetector>();
         services.AddSingleton<RuntimeDetector>();
         services.AddSingleton<ProgramCsEmitter>();
         services.AddSingleton<MasterPageToLayoutConverter>();
