@@ -66,9 +66,28 @@ public EventCallback<ChangeEventArgs> OnSelectedIndexChanged { get; set; }
 public bool AutoPostBack { get; set; }
 
 /// <summary>
+/// Cascading form naming context from parent GridViewRow or similar container.
+/// </summary>
+[CascadingParameter(Name = "FormNamingContext")]
+protected FormNamingContext FormNamingContext { get; set; }
+
+/// <summary>
 /// Gets the currently selected item.
 /// </summary>
 public ListItem SelectedItem => GetItems().FirstOrDefault(i => i.Value == SelectedValue);
+
+/// <summary>
+/// Gets the form field name for this DropDownList, following Web Forms UniqueID conventions.
+/// </summary>
+internal string FormName
+{
+	get
+	{
+		if (FormNamingContext != null && !string.IsNullOrEmpty(ID))
+			return FormNamingContext.GetChildUniqueID(ID);
+		return UniqueID;
+	}
+}
 
 private async Task HandleChange(ChangeEventArgs e)
 {
