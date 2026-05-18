@@ -1,0 +1,29 @@
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+namespace ContosoUniversity;
+public partial class Courses
+{
+    private AutoCompleteExtender AutoCompleteExtender1 = default!;
+    private Button btnSearchCourse = default!;
+    private DropDownList<object> drpDepartments = default!;
+    private DetailsView<object> dtlCourses = default!;
+    private GridView<object> grvCourses = default!;
+    private Button search = default!;
+    private TextBox txtCourse = default!;
+
+
+    protected void btnSearchCourse_Click()
+    {
+        // TODO: migrate from Web Forms code-behind
+    }
+
+    protected void grvCourses_PageIndexChanging()
+    {
+        // TODO: migrate from Web Forms code-behind
+    }
+
+    protected void search_Click()
+    {
+        // TODO: migrate from Web Forms code-behind
+    }
+}

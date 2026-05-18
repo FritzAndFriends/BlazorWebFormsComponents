@@ -5,7 +5,7 @@
 	{
 		var cut = Render(@<GridView ItemType="Widget"
 			AutoGenerateColumns="false"
-			SelectMethod="GetWidgets">
+			Items="@(Widget.SimpleWidgetList.Take(1))">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
@@ -29,3 +29,4 @@
 		return Widget.SimpleWidgetList.Take(1).AsQueryable();
 	}
 }
+

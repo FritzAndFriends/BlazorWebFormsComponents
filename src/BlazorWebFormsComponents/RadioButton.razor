@@ -8,17 +8,17 @@
 			@if (TextAlign == Enums.TextAlign.Left)
 			{
 				<label for="@_inputId">@Text</label>
-				<input id="@_inputId" type="radio" name="@EffectiveGroupName" checked="@Checked" disabled="@(!Enabled)" @onchange="HandleChange" />
+				<input id="@_inputId" type="radio" name="@EffectiveGroupName" checked="@Checked" disabled="@(!Enabled)" @onchange="HandleChange" @attributes="GetAutoPostBackAttributes(AutoPostBack)" />
 			}
 			else
 			{
-				<input id="@_inputId" type="radio" name="@EffectiveGroupName" checked="@Checked" disabled="@(!Enabled)" @onchange="HandleChange" />
+				<input id="@_inputId" type="radio" name="@EffectiveGroupName" checked="@Checked" disabled="@(!Enabled)" @onchange="HandleChange" @attributes="GetAutoPostBackAttributes(AutoPostBack)" />
 				<label for="@_inputId">@Text</label>
 			}
 		</span>
 	}
 	else
 	{
-		<input id="@_inputId" type="radio" name="@EffectiveGroupName" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" title="@ToolTip" @onchange="HandleChange" />
+		<input id="@_inputId" type="radio" name="@EffectiveGroupName" checked="@Checked" disabled="@(!Enabled)" class="@CssClass" style="@Style" title="@ToolTip" @onchange="HandleChange" @attributes="GetAutoPostBackAttributes(AutoPostBack)" />
 	}
 }

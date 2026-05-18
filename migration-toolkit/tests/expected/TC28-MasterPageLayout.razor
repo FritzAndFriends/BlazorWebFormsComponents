@@ -1,0 +1,45 @@
+@inherits LayoutComponentBase
+@* TODO(bwfc-master-page): Review head content extraction for App.razor *@
+
+@using System.Web.Optimization
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contoso University - @(Page.Title)</title>
+    <link href="/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="/Content/Site.css" rel="stylesheet" />
+    @* Custom styles for the university theme *@
+</head>
+<body>
+    <form id="mainForm">
+        <nav class="navbar navbar-default">
+            <div class="container">
+                <HyperLink NavigateUrl="/Default.aspx" CssClass="navbar-brand">
+                    Contoso University
+                </HyperLink>
+                <ul class="nav navbar-nav">
+                    <li><a href="/Students.aspx">Students</a></li>
+                    <li><a href="/Courses.aspx">Courses</a></li>
+                </ul>
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <a href="/Account/Login.aspx">Log in</a>
+                    </NotAuthorized>
+                    <Authorized>
+                        <LoginName id="LoginName1" />
+                    </Authorized>
+                </AuthorizeView>
+            </div>
+        </nav>
+        <div class="container body-content">
+            @Body
+            <hr />
+            <footer>
+                <p>&copy; @(DateTime.Now.Year) - Contoso University</p>
+            </footer>
+        </div>
+    </form>
+</body>
+</html>

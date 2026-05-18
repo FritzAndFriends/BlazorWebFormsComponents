@@ -29,22 +29,42 @@
 
 	private IRenderedComponent<TestPage> RenderWithHttpContext()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
 		mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
 		Services.AddSingleton<IHttpContextAccessor>(mockHttpAccessor.Object);
 		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
 		Services.AddScoped<IPageService, PageService>();
+		RegisterShimServices();
 		return Render<TestPage>();
 	}
 
 	private IRenderedComponent<TestPage> RenderWithoutHttpContext()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
 		mockHttpAccessor.Setup(x => x.HttpContext).Returns((HttpContext)null);
 		Services.AddSingleton<IHttpContextAccessor>(mockHttpAccessor.Object);
 		Services.AddSingleton<LinkGenerator>(new Mock<LinkGenerator>().Object);
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
 		Services.AddScoped<IPageService, PageService>();
+		RegisterShimServices();
 		return Render<TestPage>();
+	}
+
+	private void RegisterShimServices()
+	{
+		var mockEnv = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+		mockEnv.Setup(e => e.WebRootPath).Returns(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wwwroot"));
+		mockEnv.Setup(e => e.ContentRootPath).Returns(System.IO.Path.GetTempPath());
+		Services.AddSingleton<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(mockEnv.Object);
+		Services.AddMemoryCache();
+		Services.AddScoped<CacheShim>();
+		Services.AddScoped<ServerShim>();
+		Services.AddScoped<ClientScriptShim>();
 	}
 
 	[Fact]

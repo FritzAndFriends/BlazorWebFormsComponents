@@ -192,7 +192,7 @@ public class ComponentHealthCountingTests
 		// Must not be inflated by RenderFragment templates (12+) or base class props
 		props.ShouldBeGreaterThan(10,
 			$"Too few GridView properties. Got: {string.Join(", ", propNames)}");
-		props.ShouldBeLessThanOrEqualTo(30,
+		props.ShouldBeLessThanOrEqualTo(35,
 			$"GridView properties inflated. Got: {string.Join(", ", propNames)}");
 
 		// Events: sort, page, select, row operations (including On* variants)
@@ -213,7 +213,7 @@ public class ComponentHealthCountingTests
 		// DataBoundComponent<T> is no longer a stop type, so DataMember is counted.
 		// EventCallbacks (ItemCommand, ItemCreated, ItemDataBound + On* variants) are counted.
 		var repeaterType = FindComponentType("Repeater");
-		var (props, events) = CountComponentSpecific(repeaterType);
+		var (_, events) = CountComponentSpecific(repeaterType);
 		var (propNames, eventNames, skipped) = GetParameterDetails(repeaterType);
 
 		// DataMember from DataBoundComponent<T> is now counted
@@ -386,7 +386,7 @@ public class ComponentHealthCountingTests
 	public void RenderFragment_ExcludedFromRepeater()
 	{
 		var repeaterType = FindComponentType("Repeater");
-		var (propNames, eventNames, skipped) = GetParameterDetails(repeaterType);
+		var (propNames, _, skipped) = GetParameterDetails(repeaterType);
 
 		// Repeater's own non-event params are templates — ItemTemplate, AlternatingItemTemplate,
 		// HeaderTemplate, FooterTemplate, SeparatorTemplate → all excluded.

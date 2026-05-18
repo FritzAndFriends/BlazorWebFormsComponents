@@ -3,9 +3,10 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 ## Features supported in Blazor
 
 - Readonly grid
-- Bound, Button, Hyperlink, and Template columns
+- Bound, Button, Hyperlink, Template, and Command columns
 - **Paging** - `AllowPaging`, `PageSize`, `PageIndex`, `PageIndexChanged` event
 - **Sorting** - `AllowSorting`, `SortExpression`, `SortDirection`, `Sorting`/`Sorted` events
+- **CRUD model binding** - `SelectMethod`, `UpdateMethod`, `DeleteMethod`, `DataKeyNames`, and `GridViewUpdateEventArgs.Keys` / `NewValues`
 - **Row Editing** - `EditIndex`, `RowEditing`, `RowUpdating`, `RowDeleting`, `RowCancelingEdit` events
 - **Selection** - `SelectedIndex`, `SelectedRow`, `SelectedValue`, `AutoGenerateSelectButton`, `SelectedIndexChanging`/`SelectedIndexChanged` events
 - **Style Sub-Components** - `RowStyle`, `AlternatingRowStyle`, `HeaderStyle`, `FooterStyle`, `SelectedRowStyle`, `EditRowStyle`, `EmptyDataRowStyle`, `PagerStyle`
@@ -16,10 +17,11 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 
 - The `RowCommand.CommandSource` object will be populated with the `ButtonField` object
 - **Context attribute** - When using `<TemplateField>`, add `Context="Item"` to access the current row item as `@Item` instead of Blazor's default `@context`
-- **ItemType cascading** - The `ItemType` parameter is automatically cascaded from the GridView to child columns. You only need to specify it once on the GridView, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField) will automatically infer the type. For backward compatibility, you can still explicitly specify `ItemType` on individual columns if desired.
+- **ItemType cascading** - The `ItemType` parameter is automatically cascaded from the GridView to child columns. You only need to specify it once on the GridView, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField, CommandField) will automatically infer the type. For backward compatibility, you can still explicitly specify `ItemType` on individual columns if desired.
+- **CRUD model binding** - `UpdateMethod` and `DeleteMethod` now participate in the built-in GridView command flow. When a row update fires, `GridViewUpdateEventArgs.Keys`, `OldValues`, and `NewValues` are populated for `BoundField` columns, while `DataKeyNames` values are forwarded to string-based `UpdateMethod` / `DeleteMethod` handlers.
 - **Paging** - When `AllowPaging="true"`, the GridView automatically paginates the data source using `Skip()`/`Take()`. A numeric pager is rendered below the grid. The `PageIndexChanged` event fires with a `PageChangedEventArgs` containing `NewPageIndex`, `OldPageIndex`, `TotalPages`, `StartRowIndex`, and `Cancel`.
 - **Sorting** - When `AllowSorting="true"`, column headers become clickable. You must handle the `Sorting` event to apply the sort to your data source. The `Sorted` event fires after the sort completes. Both events use `GridViewSortEventArgs` with `SortExpression`, `SortDirection`, and `Cancel` properties.
-- **Row Editing** - Set `EditIndex` to the zero-based row index to put a row in edit mode (`-1` means no row is being edited). An auto-generated command column appears when at least one editing event callback is registered.
+- **Row Editing** - Set `EditIndex` to the zero-based row index to put a row in edit mode (`-1` means no row is being edited). Use `<CommandField ShowEditButton="true" />` and `<CommandField ShowDeleteButton="true" />` to preserve Web Forms command-column positions while still using BWFC row events and CRUD methods.
 - **Selection** - Set `SelectedIndex` to highlight a row. `SelectedRow` returns the data item for the selected row, and `SelectedValue` returns the `DataKeyNames` value. When `AutoGenerateSelectButton="true"`, a "Select" link column is added automatically. The `SelectedIndexChanging` event fires before the selection changes (cancellable), and `SelectedIndexChanged` fires after.
 - **Style Sub-Components** - Use `<RowStyle>`, `<AlternatingRowStyle>`, `<HeaderStyle>`, `<FooterStyle>`, `<SelectedRowStyle>`, `<EditRowStyle>`, `<EmptyDataRowStyle>`, and `<PagerStyle>` child components to configure `TableItemStyle` properties (CssClass, BackColor, ForeColor, etc.) for each section of the grid.
 - **Display Properties** - `ShowHeader` and `ShowFooter` toggle header/footer rows. `Caption` and `CaptionAlign` add a `<caption>` element. `GridLines` controls table borders. `UseAccessibleHeader` renders `<th>` with `scope="col"`. `CellPadding` and `CellSpacing` set table spacing. `ShowHeaderWhenEmpty` shows column headers even when the data source is empty. `EmptyDataTemplate` renders custom content when there are no data rows.
@@ -30,441 +32,444 @@ The GridView component is meant to emulate the asp:GridView control in markup an
     - Sorting does not automatically re-sort the data source; you must handle the `Sorting` event and apply the sort yourself.
     - `SelectedIndexChanging` uses `GridViewSelectEventArgs` with a `Cancel` property to prevent selection.
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:GridView
-    AccessKey="string"
-    AllowPaging="True|False"
-    AllowSorting="True|False"
-    AutoGenerateColumns="True|False"
-    AutoGenerateDeleteButton="True|False"
-    AutoGenerateEditButton="True|False"
-    AutoGenerateSelectButton="True|False"
-    BackColor="color name|#dddddd"
-    BackImageUrl="uri"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    Caption="string"
-    CaptionAlign="NotSet|Top|Bottom|Left|Right"
-    CellPadding="integer"
-    CellSpacing="integer"
-    CssClass="string"
-    DataKeyNames="string"
-    DataMember="string"
-    DataSource="string"
-    DataSourceID="string"
-    EditIndex="integer"
-    EmptyDataText="string"
-    Enabled="True|False"
-    EnableSortingAndPagingCallbacks="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    GridLines="None|Horizontal|Vertical|Both"
-    Height="size"
-    HorizontalAlign="NotSet|Left|Center|Right|Justify"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDataBound="DataBound event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPageIndexChanged="PageIndexChanged event handler"
-    OnPageIndexChanging="PageIndexChanging event handler"
-    OnPreRender="PreRender event handler"
-    OnRowCancelingEdit="RowCancelingEdit event handler"
-    OnRowCommand="RowCommand event handler"
-    OnRowCreated="RowCreated event handler"
-    OnRowDataBound="RowDataBound event handler"
-    OnRowDeleted="RowDeleted event handler"
-    OnRowDeleting="RowDeleting event handler"
-    OnRowEditing="RowEditing event handler"
-    OnRowUpdated="RowUpdated event handler"
-    OnRowUpdating="RowUpdating event handler"
-    OnSelectedIndexChanged="SelectedIndexChanged event handler"
-    OnSelectedIndexChanging="SelectedIndexChanging event handler"
-    OnSorted="Sorted event handler"
-    OnSorting="Sorting event handler"
-    OnUnload="Unload event handler"
-    PageIndex="integer"
-    PagerSettings-FirstPageImageUrl="uri"
-    PagerSettings-FirstPageText="string"
-    PagerSettings-LastPageImageUrl="uri"
-    PagerSettings-LastPageText="string"
-    PagerSettings-Mode="NextPrevious|Numeric|NextPreviousFirstLast|
-        NumericFirstLast"
-    PagerSettings-NextPageImageUrl="uri"
-    PagerSettings-NextPageText="string"
-    PagerSettings-PageButtonCount="integer"
-    PagerSettings-Position="Bottom|Top|TopAndBottom"
-    PagerSettings-PreviousPageImageUrl="uri"
-    PagerSettings-PreviousPageText="string"
-    PagerSettings-Visible="True|False"
-    PageSize="integer"
-    RowHeaderColumn="string"
-    runat="server"
-    SelectedIndex="integer"
-    ShowFooter="True|False"
-    ShowHeader="True|False"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    ToolTip="string"
-    UseAccessibleHeader="True|False"
-    Visible="True|False"
-    Width="size"
->
-        <AlternatingRowStyle />
-        <Columns>
-                <asp:BoundField
-                    AccessibleHeaderText="string"
-                    ApplyFormatInEditMode="True|False"
-                    ConvertEmptyStringToNull="True|False"
-                    DataField="string"
-                    DataFormatString="string"
-                    FooterText="string"
-                    HeaderImageUrl="uri"
-                    HeaderText="string"
-                    HtmlEncode="True|False"
-                    InsertVisible="True|False"
-                    NullDisplayText="string"
-                    ReadOnly="True|False"
-                    ShowHeader="True|False"
-                    SortExpression="string"
-                    Visible="True|False"
->
-                        <ControlStyle />
-                        <FooterStyle />
-                        <HeaderStyle />
-                        <ItemStyle />
-                </asp:BoundField>
-                <asp:ButtonField
-                    AccessibleHeaderText="string"
-                    ButtonType="Button|Image|Link"
-                    CausesValidation="True|False"
-                    CommandName="string"
-                    DataTextField="string"
-                    DataTextFormatString="string"
-                    FooterText="string"
-                    HeaderImageUrl="uri"
-                    HeaderText="string"
-                    ImageUrl="uri"
-                    InsertVisible="True|False"
-                    ShowHeader="True|False"
-                    SortExpression="string"
-                    Text="string"
-                    ValidationGroup="string"
-                    Visible="True|False"
->
-                        <ControlStyle />
-                        <FooterStyle />
-                        <HeaderStyle />
-                        <ItemStyle />
-                </asp:ButtonField>
-                <asp:CheckBoxField
-                    AccessibleHeaderText="string"
-                    DataField="string"
-                    FooterText="string"
-                    HeaderImageUrl="uri"
-                    HeaderText="string"
-                    InsertVisible="True|False"
-                    ReadOnly="True|False"
-                    ShowHeader="True|False"
-                    SortExpression="string"
-                    Text="string"
-                    Visible="True|False"
->
-                        <ControlStyle />
-                        <FooterStyle />
-                        <HeaderStyle />
-                        <ItemStyle />
-                </asp:CheckBoxField>
-                <asp:CommandField
-                    AccessibleHeaderText="string"
-                    ButtonType="Button|Image|Link"
-                    CancelImageUrl="uri"
-                    CancelText="string"
-                    CausesValidation="True|False"
-                    DeleteImageUrl="uri"
-                    DeleteText="string"
-                    EditImageUrl="uri"
-                    EditText="string"
-                    FooterText="string"
-                    HeaderImageUrl="uri"
-                    HeaderText="string"
-                    InsertImageUrl="uri"
-                    InsertText="string"
-                    InsertVisible="True|False"
-                    NewImageUrl="uri"
-                    NewText="string"
-                    SelectImageUrl="uri"
-                    SelectText="string"
-                    ShowCancelButton="True|False"
-                    ShowDeleteButton="True|False"
-                    ShowEditButton="True|False"
-                    ShowHeader="True|False"
-                    ShowInsertButton="True|False"
-                    ShowSelectButton="True|False"
-                    SortExpression="string"
-                    UpdateImageUrl="uri"
-                    UpdateText="string"
-                    ValidationGroup="string"
-                    Visible="True|False"
->
-                        <ControlStyle />
-                        <FooterStyle />
-                        <HeaderStyle />
-                        <ItemStyle />
-                </asp:CommandField>
-                <asp:DynamicField
-                    AccessibleHeaderText="string"
-                    ApplyFormatInEditMode="True|False"
-                    ConvertEmptyStringToNull="True|False"
-                    DataField="string"
-                    DataFormatString="string"
-                    FooterText="string"
-                    HeaderImageUrl="uri"
-                    HeaderText="string"
-                    HtmlEncode="True|False"
-                    InsertVisible="True|False"
-                    NullDisplayText="string"
-                    ShowHeader="True|False"
-                    UIHint="string"
-                    Visible="True|False"
->
-                        <ControlStyle />
-                        <FooterStyle />
-                        <HeaderStyle />
-                        <ItemStyle />
-                </asp:DynamicField>
-                <asp:HyperLinkField
-                    AccessibleHeaderText="string"
-                    DataNavigateUrlFields="string"
-                    DataNavigateUrlFormatString="string"
-                    DataTextField="string"
-                    DataTextFormatString="string"
-                    FooterText="string"
-                    HeaderImageUrl="uri"
-                    HeaderText="string"
-                    InsertVisible="True|False"
-                    NavigateUrl="uri"
-                    ShowHeader="True|False"
-                    SortExpression="string"
-                    Target="string|_blank|_parent|_search|_self|_top"
-                    Text="string"
-                    Visible="True|False"
->
-                        <ControlStyle />
-                        <FooterStyle />
-                        <HeaderStyle />
-                        <ItemStyle />
-                </asp:HyperLinkField>
-                <asp:ImageField
-                    AccessibleHeaderText="string"
-                    AlternateText="string"
-                    ConvertEmptyStringToNull="True|False"
-                    DataAlternateTextField="string"
-                    DataAlternateTextFormatString="string"
-                    DataImageUrlField="string"
-                    DataImageUrlFormatString="string"
-                    FooterText="string"
-                    HeaderImageUrl="uri"
-                    HeaderText="string"
-                    InsertVisible="True|False"
-                    NullDisplayText="string"
-                    NullImageUrl="uri"
-                    ReadOnly="True|False"
-                    ShowHeader="True|False"
-                    SortExpression="string"
-                    Visible="True|False"
->
-                        <ControlStyle />
-                        <FooterStyle />
-                        <HeaderStyle />
-                        <ItemStyle />
-                </asp:ImageField>
-                <asp:TemplateField
-                    AccessibleHeaderText="string"
-                    ConvertEmptyStringToNull="True|False"
-                    FooterText="string"
-                    HeaderImageUrl="uri"
-                    HeaderText="string"
-                    InsertVisible="True|False"
-                    ShowHeader="True|False"
-                    SortExpression="string"
-                    Visible="True|False"
->
+Currently, not every syntax element of Web Forms GridView is supported. In the meantime, the following GridView in Blazor syntax will only include the implemented ones. **Non-implemented elements will be included later**.
+
+=== "Web Forms"
+
+    ```html
+    <asp:GridView
+        AccessKey="string"
+        AllowPaging="True|False"
+        AllowSorting="True|False"
+        AutoGenerateColumns="True|False"
+        AutoGenerateDeleteButton="True|False"
+        AutoGenerateEditButton="True|False"
+        AutoGenerateSelectButton="True|False"
+        BackColor="color name|#dddddd"
+        BackImageUrl="uri"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        Caption="string"
+        CaptionAlign="NotSet|Top|Bottom|Left|Right"
+        CellPadding="integer"
+        CellSpacing="integer"
+        CssClass="string"
+        DataKeyNames="string"
+        DataMember="string"
+        DataSource="string"
+        DataSourceID="string"
+        EditIndex="integer"
+        EmptyDataText="string"
+        Enabled="True|False"
+        EnableSortingAndPagingCallbacks="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        GridLines="None|Horizontal|Vertical|Both"
+        Height="size"
+        HorizontalAlign="NotSet|Left|Center|Right|Justify"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDataBound="DataBound event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPageIndexChanged="PageIndexChanged event handler"
+        OnPageIndexChanging="PageIndexChanging event handler"
+        OnPreRender="PreRender event handler"
+        OnRowCancelingEdit="RowCancelingEdit event handler"
+        OnRowCommand="RowCommand event handler"
+        OnRowCreated="RowCreated event handler"
+        OnRowDataBound="RowDataBound event handler"
+        OnRowDeleted="RowDeleted event handler"
+        OnRowDeleting="RowDeleting event handler"
+        OnRowEditing="RowEditing event handler"
+        OnRowUpdated="RowUpdated event handler"
+        OnRowUpdating="RowUpdating event handler"
+        OnSelectedIndexChanged="SelectedIndexChanged event handler"
+        OnSelectedIndexChanging="SelectedIndexChanging event handler"
+        OnSorted="Sorted event handler"
+        OnSorting="Sorting event handler"
+        OnUnload="Unload event handler"
+        PageIndex="integer"
+        PagerSettings-FirstPageImageUrl="uri"
+        PagerSettings-FirstPageText="string"
+        PagerSettings-LastPageImageUrl="uri"
+        PagerSettings-LastPageText="string"
+        PagerSettings-Mode="NextPrevious|Numeric|NextPreviousFirstLast|
+            NumericFirstLast"
+        PagerSettings-NextPageImageUrl="uri"
+        PagerSettings-NextPageText="string"
+        PagerSettings-PageButtonCount="integer"
+        PagerSettings-Position="Bottom|Top|TopAndBottom"
+        PagerSettings-PreviousPageImageUrl="uri"
+        PagerSettings-PreviousPageText="string"
+        PagerSettings-Visible="True|False"
+        PageSize="integer"
+        RowHeaderColumn="string"
+        runat="server"
+        SelectedIndex="integer"
+        ShowFooter="True|False"
+        ShowHeader="True|False"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        ToolTip="string"
+        UseAccessibleHeader="True|False"
+        Visible="True|False"
+        Width="size"
+    >
+            <AlternatingRowStyle />
+            <Columns>
+                    <asp:BoundField
+                        AccessibleHeaderText="string"
+                        ApplyFormatInEditMode="True|False"
+                        ConvertEmptyStringToNull="True|False"
+                        DataField="string"
+                        DataFormatString="string"
+                        FooterText="string"
+                        HeaderImageUrl="uri"
+                        HeaderText="string"
+                        HtmlEncode="True|False"
+                        InsertVisible="True|False"
+                        NullDisplayText="string"
+                        ReadOnly="True|False"
+                        ShowHeader="True|False"
+                        SortExpression="string"
+                        Visible="True|False"
+    >
                             <ControlStyle />
                             <FooterStyle />
                             <HeaderStyle />
                             <ItemStyle />
-                        <AlternatingItemTemplate>
-                            <!-- child controls -->
-                        </AlternatingItemTemplate>
-                        <EditItemTemplate>
-                            <!-- child controls -->
-                        </EditItemTemplate>
-                        <FooterTemplate>
-                            <!-- child controls -->
-                        </FooterTemplate>
-                        <HeaderTemplate>
-                            <!-- child controls -->
-                        </HeaderTemplate>
-                        <InsertItemTemplate>
-                            <!-- child controls -->
-                        </InsertItemTemplate>
-                        <ItemTemplate>
-                            <!-- child controls -->
-                        </ItemTemplate>
-                </asp:TemplateField>
+                    </asp:BoundField>
+                    <asp:ButtonField
+                        AccessibleHeaderText="string"
+                        ButtonType="Button|Image|Link"
+                        CausesValidation="True|False"
+                        CommandName="string"
+                        DataTextField="string"
+                        DataTextFormatString="string"
+                        FooterText="string"
+                        HeaderImageUrl="uri"
+                        HeaderText="string"
+                        ImageUrl="uri"
+                        InsertVisible="True|False"
+                        ShowHeader="True|False"
+                        SortExpression="string"
+                        Text="string"
+                        ValidationGroup="string"
+                        Visible="True|False"
+    >
+                            <ControlStyle />
+                            <FooterStyle />
+                            <HeaderStyle />
+                            <ItemStyle />
+                    </asp:ButtonField>
+                    <asp:CheckBoxField
+                        AccessibleHeaderText="string"
+                        DataField="string"
+                        FooterText="string"
+                        HeaderImageUrl="uri"
+                        HeaderText="string"
+                        InsertVisible="True|False"
+                        ReadOnly="True|False"
+                        ShowHeader="True|False"
+                        SortExpression="string"
+                        Text="string"
+                        Visible="True|False"
+    >
+                            <ControlStyle />
+                            <FooterStyle />
+                            <HeaderStyle />
+                            <ItemStyle />
+                    </asp:CheckBoxField>
+                    <asp:CommandField
+                        AccessibleHeaderText="string"
+                        ButtonType="Button|Image|Link"
+                        CancelImageUrl="uri"
+                        CancelText="string"
+                        CausesValidation="True|False"
+                        DeleteImageUrl="uri"
+                        DeleteText="string"
+                        EditImageUrl="uri"
+                        EditText="string"
+                        FooterText="string"
+                        HeaderImageUrl="uri"
+                        HeaderText="string"
+                        InsertImageUrl="uri"
+                        InsertText="string"
+                        InsertVisible="True|False"
+                        NewImageUrl="uri"
+                        NewText="string"
+                        SelectImageUrl="uri"
+                        SelectText="string"
+                        ShowCancelButton="True|False"
+                        ShowDeleteButton="True|False"
+                        ShowEditButton="True|False"
+                        ShowHeader="True|False"
+                        ShowInsertButton="True|False"
+                        ShowSelectButton="True|False"
+                        SortExpression="string"
+                        UpdateImageUrl="uri"
+                        UpdateText="string"
+                        ValidationGroup="string"
+                        Visible="True|False"
+    >
+                            <ControlStyle />
+                            <FooterStyle />
+                            <HeaderStyle />
+                            <ItemStyle />
+                    </asp:CommandField>
+                    <asp:DynamicField
+                        AccessibleHeaderText="string"
+                        ApplyFormatInEditMode="True|False"
+                        ConvertEmptyStringToNull="True|False"
+                        DataField="string"
+                        DataFormatString="string"
+                        FooterText="string"
+                        HeaderImageUrl="uri"
+                        HeaderText="string"
+                        HtmlEncode="True|False"
+                        InsertVisible="True|False"
+                        NullDisplayText="string"
+                        ShowHeader="True|False"
+                        UIHint="string"
+                        Visible="True|False"
+    >
+                            <ControlStyle />
+                            <FooterStyle />
+                            <HeaderStyle />
+                            <ItemStyle />
+                    </asp:DynamicField>
+                    <asp:HyperLinkField
+                        AccessibleHeaderText="string"
+                        DataNavigateUrlFields="string"
+                        DataNavigateUrlFormatString="string"
+                        DataTextField="string"
+                        DataTextFormatString="string"
+                        FooterText="string"
+                        HeaderImageUrl="uri"
+                        HeaderText="string"
+                        InsertVisible="True|False"
+                        NavigateUrl="uri"
+                        ShowHeader="True|False"
+                        SortExpression="string"
+                        Target="string|_blank|_parent|_search|_self|_top"
+                        Text="string"
+                        Visible="True|False"
+    >
+                            <ControlStyle />
+                            <FooterStyle />
+                            <HeaderStyle />
+                            <ItemStyle />
+                    </asp:HyperLinkField>
+                    <asp:ImageField
+                        AccessibleHeaderText="string"
+                        AlternateText="string"
+                        ConvertEmptyStringToNull="True|False"
+                        DataAlternateTextField="string"
+                        DataAlternateTextFormatString="string"
+                        DataImageUrlField="string"
+                        DataImageUrlFormatString="string"
+                        FooterText="string"
+                        HeaderImageUrl="uri"
+                        HeaderText="string"
+                        InsertVisible="True|False"
+                        NullDisplayText="string"
+                        NullImageUrl="uri"
+                        ReadOnly="True|False"
+                        ShowHeader="True|False"
+                        SortExpression="string"
+                        Visible="True|False"
+    >
+                            <ControlStyle />
+                            <FooterStyle />
+                            <HeaderStyle />
+                            <ItemStyle />
+                    </asp:ImageField>
+                    <asp:TemplateField
+                        AccessibleHeaderText="string"
+                        ConvertEmptyStringToNull="True|False"
+                        FooterText="string"
+                        HeaderImageUrl="uri"
+                        HeaderText="string"
+                        InsertVisible="True|False"
+                        ShowHeader="True|False"
+                        SortExpression="string"
+                        Visible="True|False"
+    >
+                                <ControlStyle />
+                                <FooterStyle />
+                                <HeaderStyle />
+                                <ItemStyle />
+                            <AlternatingItemTemplate>
+                                <!-- child controls -->
+                            </AlternatingItemTemplate>
+                            <EditItemTemplate>
+                                <!-- child controls -->
+                            </EditItemTemplate>
+                            <FooterTemplate>
+                                <!-- child controls -->
+                            </FooterTemplate>
+                            <HeaderTemplate>
+                                <!-- child controls -->
+                            </HeaderTemplate>
+                            <InsertItemTemplate>
+                                <!-- child controls -->
+                            </InsertItemTemplate>
+                            <ItemTemplate>
+                                <!-- child controls -->
+                            </ItemTemplate>
+                    </asp:TemplateField>
+            </Columns>
+            <EditRowStyle />
+            <EmptyDataRowStyle />
+            <EmptyDataTemplate>
+                <!-- child controls -->
+            </EmptyDataTemplate>
+            <FooterStyle />
+            <HeaderStyle />
+            <PagerSettings
+                FirstPageImageUrl="uri"
+                FirstPageText="string"
+                LastPageImageUrl="uri"
+                LastPageText="string"
+                Mode="NextPrevious|Numeric|NextPreviousFirstLast|
+                    NumericFirstLast"
+                NextPageImageUrl="uri"
+                NextPageText="string"
+                OnPropertyChanged="PropertyChanged event handler"
+                PageButtonCount="integer"
+                Position="Bottom|Top|TopAndBottom"
+                PreviousPageImageUrl="uri"
+                PreviousPageText="string"
+                Visible="True|False"
+            />
+            <PagerStyle />
+            <PagerTemplate>
+                <!-- child controls -->
+            </PagerTemplate>
+            <RowStyle />
+            <SelectedRowStyle />
+    </asp:GridView>
+    ```
+
+=== "Blazor"
+
+    ```html
+    <GridView
+        runat="server"
+        AllowPaging=bool
+        AllowSorting=bool
+        AutoGenerateColumns=bool
+        AutoGenerateSelectButton=bool
+        Caption=string
+        CaptionAlign=TableCaptionAlign
+        CellPadding=int
+        CellSpacing=int
+        CssClass=string
+        DataKeyNames=string
+        DataSource=IEnumerable
+        EditIndex=int
+        EmptyDataText=string
+        Enabled=bool
+        GridLines=GridLines
+        ID=string
+        Items=IEnumerable
+        ItemType=Type
+        OnDataBinding=EventCallBack
+        OnDataBound=EventCallBack
+        OnItemDataBound=EventCallBack
+        OnInit=EventCallBack
+        OnLoad=EventCallBack
+        OnPreRender=EventCallBack
+        OnUnload=EventCallBack
+        OnDisposed=EventCallBack
+        PageIndex=int
+        PageIndexChanged=EventCallBack<PageChangedEventArgs>
+        PageSize=int
+        RowCancelingEdit=EventCallBack<GridViewCancelEditEventArgs>
+        RowDeleting=EventCallBack<GridViewDeleteEventArgs>
+        RowEditing=EventCallBack<GridViewEditEventArgs>
+        RowUpdating=EventCallBack<GridViewUpdateEventArgs>
+        SelectedIndex=int
+        SelectedIndexChanged=EventCallBack<int>
+        SelectedIndexChanging=EventCallBack<GridViewSelectEventArgs>
+        SelectMethod=SelectHandler
+        ShowFooter=bool
+        ShowHeader=bool
+        ShowHeaderWhenEmpty=bool
+        SortDirection=SortDirection
+        SortExpression=string
+        Sorted=EventCallBack<GridViewSortEventArgs>
+        Sorting=EventCallBack<GridViewSortEventArgs>
+        TabIndex=int
+        UseAccessibleHeader=bool
+        Visible=bool
+    >
+        <AlternatingRowStyle CssClass="string" BackColor="WebColor" ... />
+        <Columns>
+            <!-- Note: ItemType is optional on columns and will be automatically 
+                 inferred from the parent GridView. You can still explicitly 
+                 specify ItemType on individual columns for clarity if desired. -->
+            <BoundField
+                        DataField=string
+                        DataFormatString=string
+                        HeaderText=string
+                        ItemType=Type (optional, inferred from parent)
+                        Visible=bool
+            >
+            </BoundField>
+            <HyperLinkField
+                AccessibleHeaderText="string"
+                DataNavigateUrlFields="string"
+                DataNavigateUrlFormatString="string"
+                DataTextField="string"
+                DataTextFormatString="string"
+                HeaderText="string"
+                ItemType=Type (optional, inferred from parent)
+                NavigateUrl="uri"
+                Target="string|_blank|_parent|_search|_self|_top"
+                Text="string"
+                Visible="True|False">
+            </HyperLinkField>
+            <TemplateField
+                     HeaderText=string
+                     ItemType=Type (optional, inferred from parent)
+                     Visible=bool
+            >
+                <ItemTemplate Context="Item">
+                    <!-- Child Content -->
+                <ItemTemplate>
+            </TemplateField>
         </Columns>
-        <EditRowStyle />
-        <EmptyDataRowStyle />
+        <EditRowStyle CssClass="string" BackColor="WebColor" ... />
+        <EmptyDataRowStyle CssClass="string" BackColor="WebColor" ... />
         <EmptyDataTemplate>
-            <!-- child controls -->
+            <!-- Custom content when no data rows -->
         </EmptyDataTemplate>
-        <FooterStyle />
-        <HeaderStyle />
-        <PagerSettings
-            FirstPageImageUrl="uri"
-            FirstPageText="string"
-            LastPageImageUrl="uri"
-            LastPageText="string"
-            Mode="NextPrevious|Numeric|NextPreviousFirstLast|
-                NumericFirstLast"
-            NextPageImageUrl="uri"
-            NextPageText="string"
-            OnPropertyChanged="PropertyChanged event handler"
-            PageButtonCount="integer"
-            Position="Bottom|Top|TopAndBottom"
-            PreviousPageImageUrl="uri"
-            PreviousPageText="string"
-            Visible="True|False"
-        />
-        <PagerStyle />
-        <PagerTemplate>
-            <!-- child controls -->
-        </PagerTemplate>
-        <RowStyle />
-        <SelectedRowStyle />
-</asp:GridView>
-```
+        <FooterStyle CssClass="string" BackColor="WebColor" ... />
+        <HeaderStyle CssClass="string" BackColor="WebColor" ... />
+        <PagerStyle CssClass="string" BackColor="WebColor" ... />
+        <RowStyle CssClass="string" BackColor="WebColor" ... />
+        <SelectedRowStyle CssClass="string" BackColor="WebColor" ... />
+    </GridView>
+    
+    ```
 
-## Blazor Syntax
-
-Currently, not every syntax element of Web Forms GridView is supported. In the meantime, the following GridView in Blazor syntax will only include the implemented ones. **Non-implemented elements will be included later**.
-
-``` html
-<GridView
-    runat="server"
-    AllowPaging=bool
-    AllowSorting=bool
-    AutoGenerateColumns=bool
-    AutoGenerateSelectButton=bool
-    Caption=string
-    CaptionAlign=TableCaptionAlign
-    CellPadding=int
-    CellSpacing=int
-    CssClass=string
-    DataKeyNames=string
-    DataSource=IEnumerable
-    EditIndex=int
-    EmptyDataText=string
-    Enabled=bool
-    GridLines=GridLines
-    ID=string
-    Items=IEnumerable
-    ItemType=Type
-    OnDataBinding=EventCallBack
-    OnDataBound=EventCallBack
-    OnItemDataBound=EventCallBack
-    OnInit=EventCallBack
-    OnLoad=EventCallBack
-    OnPreRender=EventCallBack
-    OnUnload=EventCallBack
-    OnDisposed=EventCallBack
-    PageIndex=int
-    PageIndexChanged=EventCallBack<PageChangedEventArgs>
-    PageSize=int
-    RowCancelingEdit=EventCallBack<GridViewCancelEditEventArgs>
-    RowDeleting=EventCallBack<GridViewDeleteEventArgs>
-    RowEditing=EventCallBack<GridViewEditEventArgs>
-    RowUpdating=EventCallBack<GridViewUpdateEventArgs>
-    SelectedIndex=int
-    SelectedIndexChanged=EventCallBack<int>
-    SelectedIndexChanging=EventCallBack<GridViewSelectEventArgs>
-    SelectMethod=SelectHandler
-    ShowFooter=bool
-    ShowHeader=bool
-    ShowHeaderWhenEmpty=bool
-    SortDirection=SortDirection
-    SortExpression=string
-    Sorted=EventCallBack<GridViewSortEventArgs>
-    Sorting=EventCallBack<GridViewSortEventArgs>
-    TabIndex=int
-    UseAccessibleHeader=bool
-    Visible=bool
->
-    <AlternatingRowStyle CssClass="string" BackColor="WebColor" ... />
-    <Columns>
-        <!-- Note: ItemType is optional on columns and will be automatically 
-             inferred from the parent GridView. You can still explicitly 
-             specify ItemType on individual columns for clarity if desired. -->
-        <BoundField
-                    DataField=string
-                    DataFormatString=string
-                    HeaderText=string
-                    ItemType=Type (optional, inferred from parent)
-                    Visible=bool
-        >
-        </BoundField>
-        <HyperLinkField
-            AccessibleHeaderText="string"
-            DataNavigateUrlFields="string"
-            DataNavigateUrlFormatString="string"
-            DataTextField="string"
-            DataTextFormatString="string"
-            HeaderText="string"
-            ItemType=Type (optional, inferred from parent)
-            NavigateUrl="uri"
-            Target="string|_blank|_parent|_search|_self|_top"
-            Text="string"
-            Visible="True|False">
-        </HyperLinkField>
-        <TemplateField
-                 HeaderText=string
-                 ItemType=Type (optional, inferred from parent)
-                 Visible=bool
-        >
-            <ItemTemplate Context="Item">
-                <!-- Child Content -->
-            <ItemTemplate>
-        </TemplateField>
-    </Columns>
-    <EditRowStyle CssClass="string" BackColor="WebColor" ... />
-    <EmptyDataRowStyle CssClass="string" BackColor="WebColor" ... />
-    <EmptyDataTemplate>
-        <!-- Custom content when no data rows -->
-    </EmptyDataTemplate>
-    <FooterStyle CssClass="string" BackColor="WebColor" ... />
-    <HeaderStyle CssClass="string" BackColor="WebColor" ... />
-    <PagerStyle CssClass="string" BackColor="WebColor" ... />
-    <RowStyle CssClass="string" BackColor="WebColor" ... />
-    <SelectedRowStyle CssClass="string" BackColor="WebColor" ... />
-</GridView>
-
-```
 
 ## Examples
 
@@ -754,6 +759,95 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
+
+## GridViewRow Compatibility
+
+BWFC provides full Web Forms `GridViewRow` compatibility so that migrated code-behind files compile and work with zero changes. This means patterns like `CartList.Rows[i].FindControl("PurchaseQuantity")` and `GetValues(GridViewRow row)` work exactly as they did in Web Forms.
+
+### Rows Typed Indexer
+
+`GridView<T>.Rows` returns a `GridViewRowCollection<T>` whose indexer returns `GridViewRow<T>` (not `IRow<T>`):
+
+```csharp
+// This "just works" — Rows[i] returns GridViewRow<T>
+for (int i = 0; i < CartList.Rows.Count; i++)
+{
+    GridViewRow<CartItem> row = CartList.Rows[i];
+    // ...
+}
+```
+
+### Implicit Conversion to Non-Generic GridViewRow
+
+`GridViewRow<T>` defines an implicit operator to the non-generic `GridViewRow` class, so method signatures like `GetValues(GridViewRow row)` accept `GridViewRow<T>` instances automatically:
+
+```csharp
+// Web Forms pattern — compiles unchanged in BWFC
+private ShoppingCartUpdates GetValues(GridViewRow row)
+{
+    TextBox quantityTextBox = (TextBox)row.FindControl("PurchaseQuantity");
+    // ...
+}
+
+// Called with the typed row — implicit conversion handles it
+var updates = GetValues(CartList.Rows[i]);
+```
+
+### FindControl on GridViewRow
+
+Both `GridViewRow<T>` and the non-generic `GridViewRow` support `FindControl(string id)`. In SSR mode, `FindControl` returns proxy `TextBox` and `CheckBox` instances populated from form POST data, matching the Web Forms pattern where controls inside `TemplateField` are accessed by ID.
+
+### RowState
+
+`GridViewRow<T>.RowState` returns a `DataControlRowState` flags enum, matching the Web Forms API:
+
+- `DataControlRowState.Normal` — even-indexed rows
+- `DataControlRowState.Alternate` — odd-indexed rows
+- `DataControlRowState.Edit` — row in edit mode
+- `DataControlRowState.Selected` — selected row
+
+### Cells and ExtractValuesFromCell
+
+`GridViewRow<T>.Cells` returns a `DataControlFieldCellCollection` wrapping the row's columns. Each `DataControlFieldCell` exposes a `ContainingField` with an `ExtractValuesFromCell` method that populates an `IOrderedDictionary` with the cell's value:
+
+```csharp
+// Web Forms pattern — works unchanged
+var dict = new OrderedDictionary();
+row.Cells[0].ContainingField.ExtractValuesFromCell(dict, row, DataControlRowState.Normal, true);
+string productName = (string)dict["ProductName"];
+```
+
+### End-to-End WingtipToys Pattern
+
+The canonical WingtipToys `UpdateCartItems()` pattern compiles and runs with zero code changes:
+
+```csharp
+public struct ShoppingCartUpdates
+{
+    public int ProductId;
+    public int PurchaseQuantity;
+    public bool RemoveItem;
+}
+
+private ShoppingCartUpdates GetValues(GridViewRow row)
+{
+    var updates = new ShoppingCartUpdates();
+    updates.PurchaseQuantity = int.Parse(
+        ((TextBox)row.FindControl("PurchaseQuantity")).Text);
+    updates.RemoveItem =
+        ((CheckBox)row.FindControl("chkRemove")).Checked;
+    return updates;
+}
+
+protected void UpdateCartItems()
+{
+    for (int i = 0; i < CartList.Rows.Count; i++)
+    {
+        var updates = GetValues(CartList.Rows[i]); // implicit operator
+        // process updates...
+    }
+}
+```
 | `SelectedIndex` | `int` | `-1` | Zero-based index of the selected row. `-1` = no selection. |
 | `SelectedRow` | `ItemType` | `default` | Read-only. Returns the data item for the selected row. |
 | `SelectedValue` | `object` | `null` | Read-only. Returns the `DataKeyNames` value of the selected row. |
@@ -807,3 +901,14 @@ All style sub-components use `TableItemStyle` which supports:
 | `ShowHeaderWhenEmpty` | `bool` | `false` | Show column headers when data source is empty |
 | `EmptyDataText` | `string` | `null` | Text shown when data source is empty |
 | `EmptyDataTemplate` | `RenderFragment` | `null` | Custom template shown when data source is empty |
+
+## See Also
+
+- [DataGrid](DataGrid.md) — Legacy grid control
+- [DataList](DataList.md) — For custom layout of repeating data
+- [Repeater](Repeater.md) — For lightweight data repetition
+- [ListView](ListView.md) — Full-featured list with CRUD and paging
+- [DetailsView](DetailsView.md) — Single record display
+- [FormView](FormView.md) — Custom single record layout
+- [DataPager](DataPager.md) — Shared paging for multiple controls
+- [PagerSettings](PagerSettings.md) — Shared pager configuration

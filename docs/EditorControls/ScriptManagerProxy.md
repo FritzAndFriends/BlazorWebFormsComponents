@@ -22,35 +22,37 @@ No features are actively supported. The component silently accepts its presence 
 - **Service references** (`Services` collection) — Use dependency injection and `HttpClient`
 - **AuthenticationService, ProfileService, RoleService** — Use ASP.NET Core Identity
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ScriptManagerProxy
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    Visible="True|False"
->
-    <Scripts>
-        <asp:ScriptReference Path="~/Scripts/custom.js" />
-    </Scripts>
-    <Services>
-        <asp:ServiceReference Path="~/WebServices/MyService.asmx" />
-    </Services>
-</asp:ScriptManagerProxy>
-```
+=== "Web Forms"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:ScriptManagerProxy
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        Visible="True|False"
+    >
+        <Scripts>
+            <asp:ScriptReference Path="~/Scripts/custom.js" />
+        </Scripts>
+        <Services>
+            <asp:ServiceReference Path="~/WebServices/MyService.asmx" />
+        </Services>
+    </asp:ScriptManagerProxy>
+    ```
 
-```razor
-@* Include during migration to prevent compilation errors *@
-<ScriptManagerProxy />
-```
+=== "Blazor"
+
+    ```razor
+    @* Include during migration to prevent compilation errors *@
+    <ScriptManagerProxy />
+    ```
 
 ## HTML Output
 

@@ -1,0 +1,33 @@
+@* Migrated from: DepartmentPortal/Employees.aspx
+   Original: Employee directory page with DepartmentFilter, SearchBox, EmployeeList, and Pager.
+   Uses EmployeeDataGrid (custom server control) — BWFC analysis target. *@
+
+@page "/employees"
+
+<PageTitle>Employees - Department Portal</PageTitle>
+
+<PageHeader Title="Employee Directory" Subtitle="Browse and search employees across all departments" />
+
+<Breadcrumb Items="@(new[] { ("Home", "/"), ("Employees", "") })" />
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <DepartmentFilter />
+    </div>
+    <div class="col-md-4 offset-md-4">
+        <SearchBox Placeholder="Search employees..." />
+    </div>
+</div>
+
+<EmployeeDataGrid DataSource="@employees" AllowSorting="true" AllowPaging="true" PageSize="10" AllowSearch="true" />
+
+@code {
+    private List<AfterDepartmentPortal.Models.Employee> employees = new()
+    {
+        new() { Id = 1, Name = "Alice Johnson", Title = "Software Engineer", Department = "Engineering" },
+        new() { Id = 2, Name = "Bob Smith", Title = "Project Manager", Department = "Operations" },
+        new() { Id = 3, Name = "Carol Davis", Title = "Designer", Department = "Creative" }
+    };
+}
+
+<Pager />

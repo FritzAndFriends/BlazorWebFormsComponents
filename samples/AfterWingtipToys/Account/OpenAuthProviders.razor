@@ -1,14 +1,13 @@
 <div id="socialLoginList">
     <h4>Use another service to log in.</h4>
     <hr />
-    <ListView ID="providerDetails" ItemType="String"
-        SelectMethod="@GetProviderNames">
-@* TODO: SelectMethod="GetProviderNames" preserved — convert to delegate: SelectMethod="@((maxRows, startRow, sort, out total) => YourService.GetProviderNames(maxRows, startRow, sort, out total))" *@
-        <ItemTemplate>
+    <ListView id="providerDetails" @ref="providerDetails" ItemType="String"
+        SelectMethod="GetProviderNames">
+        <ItemTemplate Context="Item">
             <p>
-                <button type="submit" class="btn btn-default" name="provider" value="@context"
-                    title="Log in using your @context account.">
-                    @context
+                <button type="submit" class="btn btn-default" name="provider" value="@Item"
+                    title="Log in using your @Item account.">
+                    @Item
                 </button>
             </p>
         </ItemTemplate>
@@ -19,4 +18,3 @@
         </EmptyDataTemplate>
     </ListView>
 </div>
-

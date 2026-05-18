@@ -8,7 +8,7 @@ namespace BlazorWebFormsComponents.Analyzers
 {
     /// <summary>
     /// Analyzer that detects ViewState["key"] usage patterns.
-    /// Blazor has no ViewState; suggest using component state instead.
+    /// ViewState works as a migration shim; suggests native Blazor state for new code.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public class ViewStateUsageAnalyzer : DiagnosticAnalyzer
@@ -16,8 +16,8 @@ namespace BlazorWebFormsComponents.Analyzers
         public const string DiagnosticId = "BWFC002";
 
         private static readonly LocalizableString Title = "ViewState usage detected";
-        private static readonly LocalizableString MessageFormat = "'{0}' uses ViewState \u2014 Blazor has no ViewState. Use component state (fields/properties) instead.";
-        private static readonly LocalizableString Description = "Flags ViewState[\"key\"] patterns in code. Blazor has no ViewState; use component state instead.";
+        private static readonly LocalizableString MessageFormat = "'{0}' uses ViewState \u2014 this works as a migration shim via ViewStateDictionary. For new code, prefer component fields or [Parameter] properties.";
+        private static readonly LocalizableString Description = "Flags ViewState[\"key\"] patterns in code. ViewState works during migration via ViewStateDictionary; prefer native Blazor state for new code.";
         private const string Category = "Usage";
 
         private static readonly DiagnosticDescriptor Rule = new DiagnosticDescriptor(
@@ -25,7 +25,7 @@ namespace BlazorWebFormsComponents.Analyzers
             Title,
             MessageFormat,
             Category,
-            DiagnosticSeverity.Warning,
+            DiagnosticSeverity.Info,
             isEnabledByDefault: true,
             description: Description);
 

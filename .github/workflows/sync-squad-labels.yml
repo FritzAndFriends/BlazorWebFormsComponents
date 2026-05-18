@@ -1,15 +1,7 @@
 name: Sync Squad Labels
 
 on:
-  push:
-    paths:
-      - '.squad/team.md'
-      - '.ai-team/team.md'
   workflow_dispatch:
-
-permissions:
-  issues: write
-  contents: read
 
 jobs:
   sync-labels:
@@ -24,11 +16,7 @@ jobs:
             const fs = require('fs');
             let teamFile = '.squad/team.md';
             if (!fs.existsSync(teamFile)) {
-              teamFile = '.ai-team/team.md';
-            }
-
-            if (!fs.existsSync(teamFile)) {
-              core.info('No .squad/team.md or .ai-team/team.md found — skipping label sync');
+              core.info('No .squad/team.md found — skipping label sync');
               return;
             }
 
@@ -103,6 +91,8 @@ jobs:
               { name: 'priority:p2', color: 'FBCA04', description: 'Next sprint' }
             ];
 
+            function slugify(t) { return t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+
             // Ensure the base "squad" triage label exists
             const labels = [
               { name: 'squad', color: SQUAD_COLOR, description: 'Squad triage inbox — Lead will assign to a member' }
@@ -110,7 +100,7 @@ jobs:
 
             for (const member of members) {
               labels.push({
-                name: `squad:${member.name.toLowerCase()}`,
+                name: `squad:${slugify(member.name)}`,
                 color: MEMBER_COLOR,
                 description: `Assigned to ${member.name} (${member.role})`
               });

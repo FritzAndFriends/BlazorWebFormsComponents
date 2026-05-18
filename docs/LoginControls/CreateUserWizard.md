@@ -33,46 +33,48 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 !!! warning "Authentication Integration"
     The CreateUserWizard does NOT create users directly. You must handle the `OnCreatingUser` event and use ASP.NET Identity's `UserManager<T>.CreateAsync()` or your own registration service to create the user account.
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:CreateUserWizard
-    ID="CreateUserWizard1"
-    RequireEmail="True"
-    DisplaySideBar="False"
-    OnCreatedUser="CreateUserWizard1_CreatedUser"
-    runat="server" />
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:CreateUserWizard
+        ID="CreateUserWizard1"
+        RequireEmail="True"
+        DisplaySideBar="False"
+        OnCreatedUser="CreateUserWizard1_CreatedUser"
+        runat="server" />
+    ```
 
-```razor
-<CreateUserWizard ID="CreateUserWizard1"
-    RequireEmail="true"
-    DisplaySideBar="false"
-    OnCreatingUser="HandleCreatingUser"
-    OnCreatedUser="HandleCreatedUser"
-    OnCreateUserError="HandleError" />
+=== "Blazor"
 
-@code {
-    private async Task HandleCreatingUser(LoginCancelEventArgs e)
-    {
-        // Use UserManager to create the user
-        // var result = await UserManager.CreateAsync(new AppUser { UserName = ... }, password);
-        // if (!result.Succeeded) { e.Cancel = true; }
+    ```razor
+    <CreateUserWizard ID="CreateUserWizard1"
+        RequireEmail="true"
+        DisplaySideBar="false"
+        OnCreatingUser="HandleCreatingUser"
+        OnCreatedUser="HandleCreatedUser"
+        OnCreateUserError="HandleError" />
+
+    @code {
+        private async Task HandleCreatingUser(LoginCancelEventArgs e)
+        {
+            // Use UserManager to create the user
+            // var result = await UserManager.CreateAsync(new AppUser { UserName = ... }, password);
+            // if (!result.Succeeded) { e.Cancel = true; }
+        }
+
+        private void HandleCreatedUser(EventArgs e)
+        {
+            // User created successfully — handle login, redirect, etc.
+        }
+
+        private void HandleError(CreateUserErrorEventArgs e)
+        {
+            // Display error: e.ErrorMessage
+        }
     }
-
-    private void HandleCreatedUser(EventArgs e)
-    {
-        // User created successfully — handle login, redirect, etc.
-    }
-
-    private void HandleError(CreateUserErrorEventArgs e)
-    {
-        // Display error: e.ErrorMessage
-    }
-}
-```
+    ```
 
 ## HTML Output
 

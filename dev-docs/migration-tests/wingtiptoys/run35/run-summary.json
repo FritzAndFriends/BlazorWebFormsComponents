@@ -1,0 +1,16 @@
+{
+  "start": "2026-05-06T16:36:40.1393601-04:00",
+  "prepSeconds": 0.23,
+  "layer1Seconds": 14.98,
+  "repairSeconds": 603.34,
+  "buildSeconds": 3.99,
+  "startupSeconds": 0.58,
+  "testsSeconds": 34.45,
+  "screenshotsSeconds": 97.45,
+  "fileCount": 191,
+  "relevantFileCount": 111,
+  "imageCount": 6,
+  "buildExitCode": 0,
+  "testsExitCode": 0,
+  "totalBeforeReportSeconds": 798.75
+}

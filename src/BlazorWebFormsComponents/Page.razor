@@ -1,16 +1,16 @@
-@inherits ComponentBase
-@implements IDisposable
-@if (!string.IsNullOrEmpty(_currentTitle))
+@inherits WebFormsPageBase
+
+@if (!string.IsNullOrEmpty(CurrentTitle))
 {
-    <PageTitle>@_currentTitle</PageTitle>
+    <PageTitle>@CurrentTitle</PageTitle>
 }
 <HeadContent>
-@if (!string.IsNullOrEmpty(_currentMetaDescription))
+@if (!string.IsNullOrEmpty(CurrentMetaDescription))
 {
-    <meta name="description" content="@_currentMetaDescription" />
+    <meta name="description" content="@CurrentMetaDescription" />
 }
-@if (!string.IsNullOrEmpty(_currentMetaKeywords))
+@if (!string.IsNullOrEmpty(CurrentMetaKeywords))
 {
-    <meta name="keywords" content="@_currentMetaKeywords" />
+    <meta name="keywords" content="@CurrentMetaKeywords" />
 }
 </HeadContent>

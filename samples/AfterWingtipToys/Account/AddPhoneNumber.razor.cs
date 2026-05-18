@@ -1,12 +1,8 @@
 namespace WingtipToys.Account;
 
-// TODO: Requires ASP.NET Core Identity migration — phone number management needs UserManager
-public partial class AddPhoneNumber
+public partial class AddPhoneNumber : BlazorWebFormsComponents.WebFormsPageBase
 {
-    private string Phone { get; set; } = "";
-
-    private void PhoneNumber_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
-    {
-        // TODO: Implement with UserManager
-    }
+    // TODO: Migrate from Account/AddPhoneNumber.aspx
+    // Original features: ASP.NET Identity or membership APIs
+    // Quarantine reason: Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.
 }

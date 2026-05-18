@@ -1,0 +1,240 @@
+@inherits Bunit.TestContext
+@using BlazorWebFormsComponents.Theming
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+@using Moq
+
+@code {
+
+	public ContainerPropagationTests()
+	{
+		Services.AddSingleton<Microsoft.AspNetCore.DataProtection.IDataProtectionProvider>(
+			new Microsoft.AspNetCore.DataProtection.EphemeralDataProtectionProvider());
+		Services.AddSingleton<Microsoft.AspNetCore.Routing.LinkGenerator>(new Mock<Microsoft.AspNetCore.Routing.LinkGenerator>().Object);
+		Services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor>(new Mock<Microsoft.AspNetCore.Http.IHttpContextAccessor>().Object);
+	}
+
+	/// <summary>
+	/// EnableTheming=false on parent Panel blocks child theming (Issue #369 / WI-5).
+	/// Child Button inside a Panel with EnableTheming=false should not receive theme.
+	/// </summary>
+	[Fact]
+	public void EnableThemingFalse_OnParent_BlocksChildTheming()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue))
+			.ForControl("Panel", skin => skin
+				.Set(s => s.BackColor, Red));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Panel EnableTheming="false">
+					<ChildContent>
+						<Button Text="Child" />
+					</ChildContent>
+				</Panel>
+			</ThemeProvider>
+		);
+
+		// Panel should not be themed
+		var div = cut.Find("div");
+		div.HasAttribute("style").ShouldBeFalse();
+
+		// Button inside should NOT be themed (ancestor has EnableTheming=false)
+		var input = cut.Find("input");
+		input.HasAttribute("style").ShouldBeFalse();
+	}
+
+	/// <summary>
+	/// EnableTheming=false doesn't affect siblings.
+	/// A Panel with EnableTheming=false next to a Button shouldn't block Button's theming.
+	/// </summary>
+	[Fact]
+	public void EnableThemingFalse_DoesNotAffectSiblings()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue))
+			.ForControl("Panel", skin => skin
+				.Set(s => s.BackColor, Red));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Panel EnableTheming="false">
+					<ChildContent>
+						<text>Panel Content</text>
+					</ChildContent>
+				</Panel>
+				<Button Text="Sibling" />
+			</ThemeProvider>
+		);
+
+		// Panel should not be themed
+		var div = cut.Find("div");
+		div.HasAttribute("style").ShouldBeFalse();
+
+		// Sibling Button SHOULD be themed (not affected by Panel's EnableTheming)
+		var input = cut.Find("input");
+		input.GetAttribute("style").ShouldContain("background-color:Blue");
+	}
+
+	/// <summary>
+	/// Nested containers propagate EnableTheming=false.
+	/// Panel > Panel > Button chain should propagate the ancestor's EnableTheming=false.
+	/// </summary>
+	[Fact]
+	public void EnableThemingFalse_PropagatesThroughNestedContainers()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue))
+			.ForControl("Panel", skin => skin
+				.Set(s => s.BackColor, Red));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Panel EnableTheming="false">
+					<ChildContent>
+						<Panel>
+							<ChildContent>
+								<Button Text="Nested" />
+							</ChildContent>
+						</Panel>
+					</ChildContent>
+				</Panel>
+			</ThemeProvider>
+		);
+
+		// Outer panel: no theme
+		var outerDiv = cut.FindAll("div")[0];
+		outerDiv.HasAttribute("style").ShouldBeFalse();
+
+		// Inner panel: no theme (ancestor blocked)
+		var innerDiv = cut.FindAll("div")[1];
+		innerDiv.HasAttribute("style").ShouldBeFalse();
+
+		// Button: no theme (ancestor chain blocked)
+		var input = cut.Find("input");
+		input.HasAttribute("style").ShouldBeFalse();
+	}
+
+	/// <summary>
+	/// EnableTheming=true (default) allows theming.
+	/// Panel with default EnableTheming containing a Button should allow both to be themed.
+	/// </summary>
+	[Fact]
+	public void EnableThemingTrue_AllowsTheming()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue))
+			.ForControl("Panel", skin => skin
+				.Set(s => s.BackColor, Red));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Panel>
+					<ChildContent>
+						<Button Text="Child" />
+					</ChildContent>
+				</Panel>
+			</ThemeProvider>
+		);
+
+		// Panel should be themed
+		var div = cut.Find("div");
+		div.GetAttribute("style").ShouldContain("background-color:Red");
+
+		// Button inside should be themed
+		var input = cut.Find("input");
+		input.GetAttribute("style").ShouldContain("background-color:Blue");
+	}
+
+	/// <summary>
+	/// EnableTheming on child can't override parent's false.
+	/// Even if child has EnableTheming=true explicitly, parent's false takes precedence.
+	/// </summary>
+	[Fact]
+	public void ChildEnableThemingTrue_CannotOverrideParentFalse()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Panel EnableTheming="false">
+					<ChildContent>
+						<Button Text="Child" EnableTheming="true" />
+					</ChildContent>
+				</Panel>
+			</ThemeProvider>
+		);
+
+		// Button should NOT be themed (parent blocks it)
+		var input = cut.Find("input");
+		input.HasAttribute("style").ShouldBeFalse();
+	}
+
+	/// <summary>
+	/// Mixed container levels with theming control.
+	/// Outer=true, Middle=false, Inner=true → Inner respects Middle's false.
+	/// </summary>
+	[Fact]
+	public void MixedEnableTheming_MiddleFalse_BlocksInner()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Panel EnableTheming="true">
+					<ChildContent>
+						<Panel EnableTheming="false">
+							<ChildContent>
+								<Panel EnableTheming="true">
+									<ChildContent>
+										<Button Text="Deep" />
+									</ChildContent>
+								</Panel>
+							</ChildContent>
+						</Panel>
+					</ChildContent>
+				</Panel>
+			</ThemeProvider>
+		);
+
+		// Button deep inside should NOT be themed (middle ancestor blocked)
+		var input = cut.Find("input");
+		input.HasAttribute("style").ShouldBeFalse();
+	}
+
+	/// <summary>
+	/// EnableTheming=false on the component itself takes precedence.
+	/// Even if parent allows theming, component's own EnableTheming=false wins.
+	/// </summary>
+	[Fact]
+	public void ComponentEnableThemingFalse_OverridesParentTrue()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var cut = Render(
+			@<ThemeProvider Theme="theme">
+				<Panel>
+					<ChildContent>
+						<Button Text="NoTheme" EnableTheming="false" />
+					</ChildContent>
+				</Panel>
+			</ThemeProvider>
+		);
+
+		// Button should NOT be themed (its own EnableTheming=false)
+		var input = cut.Find("input");
+		input.HasAttribute("style").ShouldBeFalse();
+	}
+
+}

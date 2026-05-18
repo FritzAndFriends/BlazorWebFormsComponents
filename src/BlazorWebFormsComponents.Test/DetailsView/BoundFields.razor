@@ -1,0 +1,67 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void DetailsView_BoundFields_RenderExplicitRowsInDeclaredOrder()
+	{
+		var items = new List<Widget>
+		{
+			new() { Id = 42, Name = "OrderedWidget", Price = 9.99M, LastUpdate = DateTime.Today }
+		};
+
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="false">
+				<Fields>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
+					<BoundField ItemType="Widget" DataField="Id" HeaderText="Widget Id" />
+				</Fields>
+			</DetailsView>);
+
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBe(2);
+		rows[0].Children[0].TextContent.ShouldBe("Widget Name");
+		rows[0].Children[1].TextContent.ShouldBe("OrderedWidget");
+		rows[1].Children[0].TextContent.ShouldBe("Widget Id");
+		rows[1].Children[1].TextContent.ShouldBe("42");
+		cut.Markup.ShouldNotContain(">Price<");
+	}
+
+	[Fact]
+	public void DetailsView_BoundFields_SupportChildContentAlias()
+	{
+		var items = new List<Widget>
+		{
+			new() { Id = 7, Name = "AliasWidget", Price = 3.50M, LastUpdate = DateTime.Today }
+		};
+
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="false">
+				<BoundField ItemType="Widget" DataField="Name" HeaderText="Alias Name" />
+			</DetailsView>);
+
+		var rows = cut.FindAll("tr");
+		rows.Count.ShouldBe(1);
+		rows[0].Children[0].TextContent.ShouldBe("Alias Name");
+		rows[0].Children[1].TextContent.ShouldBe("AliasWidget");
+	}
+
+	[Fact]
+	public void DetailsView_BoundFields_EditMode_RendersEditableInputs()
+	{
+		var items = new List<Widget>
+		{
+			new() { Id = 11, Name = "EditableWidget", Price = 12.34M, LastUpdate = DateTime.Today }
+		};
+
+		var cut = Render(
+			@<DetailsView Items="items" ItemType="Widget" AutoGenerateRows="false" DefaultMode="BlazorWebFormsComponents.Enums.DetailsViewMode.Edit">
+				<Fields>
+					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+				</Fields>
+			</DetailsView>);
+
+		var input = cut.Find("input[name='Name']");
+		input.GetAttribute("value").ShouldBe("EditableWidget");
+	}
+}

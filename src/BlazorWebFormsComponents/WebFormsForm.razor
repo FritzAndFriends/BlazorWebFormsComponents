@@ -1,0 +1,120 @@
+@namespace BlazorWebFormsComponents
+@inherits ComponentBase
+@using Microsoft.AspNetCore.Components
+@using Microsoft.Extensions.Primitives
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+
+@if (_isInteractive)
+{
+    <form @ref="_formRef"
+          method="@MethodString"
+          action="@Action"
+          data-interactive="true"
+          @onsubmit="HandleSubmit"
+          @onsubmit:preventDefault
+          @attributes="HtmlAttributes">
+        @ChildContent
+    </form>
+}
+else
+{
+    <form method="@MethodString"
+          action="@Action"
+          @attributes="HtmlAttributes">
+        @ChildContent
+    </form>
+}
+
+@code {
+    private ElementReference _formRef;
+    private bool _isInteractive;
+    private IJSObjectReference? _jsModule;
+
+    [Inject] private IJSRuntime JSRuntime { get; set; } = null!;
+
+    /// <summary>
+    /// Gets or sets the HTTP method used to submit the form.
+    /// Defaults to <see cref="FormMethod.Post"/>.
+    /// </summary>
+    [Parameter] public FormMethod Method { get; set; } = FormMethod.Post;
+
+    /// <summary>
+    /// Gets or sets the form action URL. When null, the form posts to the current page.
+    /// </summary>
+    [Parameter] public string? Action { get; set; }
+
+    /// <summary>
+    /// Gets or sets the child content rendered inside the form element.
+    /// </summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>
+    /// Raised when the form is submitted. In interactive mode, form data
+    /// is captured via JS interop and passed as the callback argument,
+    /// enabling <c>Request.Form["key"]</c> population via
+    /// <see cref="WebFormsPageBase.SetRequestFormData"/>.
+    /// </summary>
+    [Parameter] public EventCallback<FormSubmitEventArgs> OnSubmit { get; set; }
+
+    /// <summary>
+    /// Captures any additional HTML attributes applied to the component
+    /// and renders them on the underlying <c>&lt;form&gt;</c> element.
+    /// </summary>
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? HtmlAttributes { get; set; }
+
+    private string MethodString => Method == FormMethod.Get ? "get" : "post";
+
+    protected override void OnInitialized()
+    {
+        // _isInteractive starts false; set in OnAfterRender which only runs
+        // on interactive circuits (never during prerendering or static SSR).
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && !_isInteractive)
+        {
+            _isInteractive = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (_jsModule == null)
+        {
+            _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                "import", "./_content/Fritz.BlazorWebFormsComponents/js/bwfc-webformsform.js");
+        }
+
+        // Read form data from the DOM via JS interop
+        var rawData = await _jsModule.InvokeAsync<Dictionary<string, string[]>>(
+            "readFormData", _formRef);
+
+        var formData = new Dictionary<string, StringValues>();
+        if (rawData != null)
+        {
+            foreach (var kvp in rawData)
+            {
+                formData[kvp.Key] = new StringValues(kvp.Value);
+            }
+        }
+
+        await OnSubmit.InvokeAsync(new FormSubmitEventArgs(formData));
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_jsModule != null)
+        {
+            try
+            {
+                await _jsModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException) { }
+            catch (ObjectDisposedException) { }
+        }
+    }
+}

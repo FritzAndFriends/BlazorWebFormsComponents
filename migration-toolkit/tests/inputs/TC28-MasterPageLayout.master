@@ -1,0 +1,44 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="TC28-MasterPageLayout.master.cs" Inherits="ContosoUniversity.SiteMaster" %>
+<%@ Import Namespace="System.Web.Optimization" %>
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contoso University - <%: Page.Title %></title>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <%-- Custom styles for the university theme --%>
+</head>
+<body>
+    <form id="mainForm" runat="server">
+        <nav class="navbar navbar-default">
+            <div class="container">
+                <asp:HyperLink NavigateUrl="~/Default.aspx" CssClass="navbar-brand" runat="server">
+                    Contoso University
+                </asp:HyperLink>
+                <ul class="nav navbar-nav">
+                    <li><a href="~/Students.aspx" runat="server">Students</a></li>
+                    <li><a href="~/Courses.aspx" runat="server">Courses</a></li>
+                </ul>
+                <asp:LoginView ID="LoginView1" runat="server">
+                    <AnonymousTemplate>
+                        <a href="~/Account/Login.aspx" runat="server">Log in</a>
+                    </AnonymousTemplate>
+                    <LoggedInTemplate>
+                        <asp:LoginName ID="LoginName1" runat="server" />
+                    </LoggedInTemplate>
+                </asp:LoginView>
+            </div>
+        </nav>
+        <div class="container body-content">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server">
+            </asp:ContentPlaceHolder>
+            <hr />
+            <footer>
+                <p>&copy; <%: DateTime.Now.Year %> - Contoso University</p>
+            </footer>
+        </div>
+    </form>
+</body>
+</html>

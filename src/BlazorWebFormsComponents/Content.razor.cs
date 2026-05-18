@@ -1,53 +1,109 @@
 using Microsoft.AspNetCore.Components;
+using System;
 using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// A component that emulates ASP.NET Web Forms Content control.
-	/// Provides content for a ContentPlaceHolder in a master page.
+	/// Provides a named content fragment to the <see cref="ContentPlaceHolder"/>
+	/// whose <see cref="BaseWebFormsComponent.ID"/> matches
+	/// <see cref="ContentPlaceHolderID"/>.
 	/// </summary>
 	/// <remarks>
-	/// In Web Forms, Content controls are used in child pages to provide content
-	/// for ContentPlaceHolder controls defined in the master page.
-	/// 
-	/// In Blazor, this is done by placing content within layout sections or the @Body area.
-	/// This component provides Web Forms-style syntax for developers migrating to Blazor.
-	/// 
-	/// Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.content
+	/// <para>
+	/// Content renders no visible HTML. It simply registers <see cref="ChildContent"/>
+	/// with the nearest ancestor <see cref="MasterPageContext"/>.
+	/// </para>
+	/// <para>
+	/// This keeps the migration-facing <c>&lt;Content&gt;</c> tag while shifting the
+	/// implementation toward a layout-like named-section registry.
+	/// </para>
 	/// </remarks>
 	public partial class Content : ContentBase
 	{
-		/// <summary>
-		/// The content to be rendered in the associated ContentPlaceHolder
-		/// </summary>
+		private string _registeredContentPlaceHolderId;
+
+		/// <summary>The content fragment to inject into the matching placeholder.</summary>
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
 		/// <summary>
-		/// The ID of the ContentPlaceHolder this content is for
+		/// The <see cref="BaseWebFormsComponent.ID"/> of the
+		/// <see cref="ContentPlaceHolder"/> that should receive this content.
 		/// </summary>
 		[Parameter]
 		public string ContentPlaceHolderID { get; set; }
 
+		/// <summary>
+		/// The shared master-page context cascaded by <see cref="MasterPage"/> or
+		/// <see cref="MasterPageLayoutBase"/>.
+		/// </summary>
+		[CascadingParameter]
+		private MasterPageContext MasterContext { get; set; }
+
+		/// <summary>
+		/// Direct reference to the parent <see cref="MasterPage"/> component.
+		/// Retained for backward compatibility when older markup only cascades the parent.
+		/// </summary>
 		[CascadingParameter]
 		private MasterPage ParentMasterPage { get; set; }
 
-		protected override async Task OnInitializedAsync()
+		/// <summary>
+		/// Returns <c>true</c> when no <see cref="MasterPageContext"/> or
+		/// <see cref="MasterPage"/> parent is available, meaning the content should
+		/// render inline as a fallback (e.g. in SSR or non-master-page scenarios).
+		/// </summary>
+		private bool ShouldRenderInline =>
+			MasterContext == null && ParentMasterPage == null;
+
+		/// <inheritdoc />
+		protected override void OnParametersSet()
 		{
-			// Register this content with the parent MasterPage
-			if (ParentMasterPage != null && !string.IsNullOrEmpty(ContentPlaceHolderID))
+			if (string.IsNullOrWhiteSpace(ContentPlaceHolderID))
 			{
-				ParentMasterPage.ContentSections[ContentPlaceHolderID] = ChildContent;
+				return;
 			}
 
-			await base.OnInitializedAsync();
+			var context = MasterContext ?? ParentMasterPage?.Context;
+			if (context == null)
+			{
+				// No master-page context — will render inline via the .razor fallback.
+				return;
+			}
+
+			if (string.Equals(_registeredContentPlaceHolderId, ContentPlaceHolderID, StringComparison.OrdinalIgnoreCase))
+			{
+				return;
+			}
+
+			if (!string.IsNullOrWhiteSpace(_registeredContentPlaceHolderId))
+			{
+				context.SetContent(_registeredContentPlaceHolderId, null);
+			}
+
+			context.SetContent(ContentPlaceHolderID, ChildContent);
+			_registeredContentPlaceHolderId = ContentPlaceHolderID;
+		}
+
+		/// <summary>
+		/// Clears the registered slot so the <see cref="ContentPlaceHolder"/> falls back
+		/// to its default content when this <see cref="Content"/> component is removed
+		/// from the render tree.
+		/// </summary>
+		protected override async ValueTask Dispose(bool disposing)
+		{
+			if (disposing && !string.IsNullOrWhiteSpace(_registeredContentPlaceHolderId))
+			{
+				var context = MasterContext ?? ParentMasterPage?.Context;
+				context?.SetContent(_registeredContentPlaceHolderId, null);
+			}
+
+			await base.Dispose(disposing);
 		}
 	}
 
-	/// <summary>
-	/// Base class for Content component
-	/// </summary>
+	/// <summary>Base class for <see cref="Content"/> component.</summary>
 	public abstract class ContentBase : BaseWebFormsComponent
 	{
 	}

@@ -1,33 +1,19 @@
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Components;
-using BlazorWebFormsComponents;
 using ContosoUniversity.Models;
 using ContosoUniversity.BLL;
 
-namespace ContosoUniversity
+namespace ContosoUniversity;
+
+public partial class Instructors : BlazorWebFormsComponents.WebFormsPageBase
 {
-    public partial class Instructors
+    [Inject] private Instructors_Logic instructorsLogic { get; set; } = default!;
+
+    private GridView<Instructor> grvInstructors = default!;
+    private List<Instructor> instructorData = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        [Inject] private Instructors_Logic instructorsLogic { get; set; } = default!;
-
-        private List<Instructor> _instructors = new();
-        private string _sortDirection = "desc";
-
-        protected override void OnInitialized()
-        {
-            _instructors = instructorsLogic.getInstructors();
-        }
-
-        private void grvInstructors_Sorting(GridViewSortEventArgs e)
-        {
-            _instructors = instructorsLogic.GetSortedInstrucors(e.SortExpression, _sortDirection);
-            ChangeSortDirection();
-        }
-
-        private void ChangeSortDirection()
-        {
-            _sortDirection = _sortDirection == "asc" ? "desc" : "asc";
-        }
+        await base.OnInitializedAsync();
+        ViewState["SortDirection"] = "desc";
+        instructorData = instructorsLogic.getInstructors();
     }
 }

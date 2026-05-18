@@ -2,6 +2,22 @@ Migration from ASP<span></span>.NET Web Forms to Blazor is not simple and this r
 
 We, the maintainers of this project, believe that with a little ingenuity the markup from a Web Forms application can be copied over with minimal changes and function similarly to its original purpose.  We believe that well formatted and maintained code in Web Forms should be easily migrated.  Applications that are a significant mix of C# and markup will have a more difficult time going through this process.
 
+## The Strangler Fig Pattern: Migration Philosophy
+
+The recommended migration approach is the **Strangler Fig pattern** — named after the biological process where strangler fig trees grow around a host tree, gradually replacing it. In software, this means **incrementally migrating from Web Forms to Blazor while both systems run in parallel**, rather than attempting a complete rewrite all at once.
+
+**Key principles:**
+
+- **Keep both systems running** — Legacy Web Forms app continues in production
+- **Migrate incrementally** — Move one page, control, or feature at a time  
+- **Zero downtime** — Routes traffic seamlessly between systems
+- **Use shims to bridge** — ClientScriptShim, SessionShim, and others let migrated code work unchanged
+- **Modernize at your pace** — Refactor from shims to native Blazor patterns on your schedule
+
+BWFC's analyzers, CLI tool, and runtime shims are specifically designed to support this pattern. For a comprehensive guide on how to apply the Strangler Fig approach, see the **[Strangler Fig Pattern guide](StranglerFigPattern.md)**.
+
+---
+
 ## Readiness Planning
 
 Migrating an application to Blazor is not a trivial process and it would be great to have some indication ahead of time how much work is needed and what steps you need to take to prepare to migrate.  Check our migration [readiness document](migration_readiness.md) to help determine how much work will be needed for your application to begin the process.

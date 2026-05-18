@@ -1,0 +1,479 @@
+@page "/ControlSamples/ClientScript"
+@inject IJSRuntime JS
+
+<PageTitle>ClientScript Migration Patterns</PageTitle>
+
+<h2>ClientScript Migration Patterns</h2>
+
+<p>This sample demonstrates how to migrate common ASP.NET Web Forms <code>Page.ClientScript</code>
+   and <code>ScriptManager</code> JavaScript patterns to Blazor using <code>IJSRuntime</code>,
+   component lifecycle events, and native Blazor event handling.</p>
+
+<div class="alert alert-info">
+    <h4 class="alert-heading">Migration Principle</h4>
+    <p class="mb-0">Prefer <code>IJSRuntime</code> over wrapper shims. Blazor's component model replaces
+    the Web Forms postback lifecycle — use <code>OnAfterRenderAsync</code> for DOM-touching JavaScript
+    and <code>@@onclick</code> / <code>EventCallback</code> for event handling.</p>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Section 1: Startup Scripts ═══════════════════════════ *@
+
+<h3>1. Startup Script Migration</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code class="language-csharp">protected void Page_Load(object sender, EventArgs e)
+{
+    if (!IsPostBack)
+    {
+        Page.ClientScript.RegisterStartupScript(
+            this.GetType(),
+            "InitializeUI",
+            "initializePage('Page loaded!');",
+            addScriptTags: true);
+    }
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor)</h4>
+        <pre><code class="language-csharp">@@inject IJSRuntime JS
+
+@@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initializePage",
+                "Page loaded via IJSRuntime!");
+        }
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — Startup Script</h5>
+        <p>The message below was set by <code>IJSRuntime</code> calling <code>initializePage()</code>
+           during <code>OnAfterRenderAsync(firstRender: true)</code>:</p>
+        <p id="startup-output" class="fw-bold">⏳ Waiting for OnAfterRenderAsync...</p>
+        <p class="text-muted mt-2">
+            <strong>Key point:</strong> <code>OnAfterRenderAsync</code> with <code>if (firstRender)</code>
+            is the Blazor equivalent of <code>if (!IsPostBack)</code> +
+            <code>RegisterStartupScript</code>. It runs after the component's DOM is available.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Section 2: Script Includes ═══════════════════════════ *@
+
+<h3>2. Script Include Migration</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code class="language-csharp">protected void Page_Load(object sender, EventArgs e)
+{
+    Page.ClientScript.RegisterClientScriptInclude(
+        "customScript",
+        ResolveUrl("~/Scripts/custom.js"));
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor)</h4>
+        <pre><code class="language-html">&lt;!-- Option A: Static tag in App.razor or layout --&gt;
+&lt;script src="js/clientscript-demo.js"&gt;&lt;/script&gt;
+
+&lt;!-- Option B: Dynamic import via IJSRuntime --&gt;
+@@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Dynamic module import
+            await JS.InvokeVoidAsync("import", "./js/my-module.js");
+        }
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — Script Include</h5>
+        <p>This page includes <code>js/clientscript-demo.js</code> via a <code>&lt;script&gt;</code>
+           tag in the layout. The startup script demo above calls a function defined in that file.</p>
+        <p>Script include status: <strong class="text-success">@_scriptIncludeStatus</strong></p>
+        <p class="text-muted mt-2">
+            <strong>Key point:</strong> Web Forms' <code>RegisterClientScriptInclude()</code> becomes a
+            static <code>&lt;script src="..."&gt;</code> tag. For conditional loading, use
+            <code>IJSRuntime.InvokeAsync("import", ...)</code>.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Section 3: Focus Management ═══════════════════════════ *@
+
+<h3>3. Focus Management (replacing ScriptManager.SetFocus)</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code class="language-csharp">protected void Page_Load(object sender, EventArgs e)
+{
+    // Using ScriptManager
+    ScriptManager.GetCurrent(Page).SetFocus(txtSearch);
+
+    // Or using ClientScript
+    Page.SetFocus("txtSearch");
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor)</h4>
+        <pre><code class="language-csharp">// Option A: ElementReference + FocusAsync (preferred)
+&lt;input @@ref="_searchBox" type="text" /&gt;
+
+@@code {
+    private ElementReference _searchBox;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await _searchBox.FocusAsync();
+        }
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — Focus Management</h5>
+        <p>Click the button to set focus to the search box using <code>ElementReference.FocusAsync()</code>:</p>
+        <div class="d-flex gap-2 align-items-center">
+            <input @ref="_searchBox" type="text" class="form-control" style="max-width:300px;"
+                   placeholder="Search box (will receive focus)" id="demo-search-box" />
+            <button class="btn btn-primary" @onclick="SetFocusToSearch">Set Focus</button>
+        </div>
+        <p class="mt-2">Focus set count: <strong>@_focusCount</strong></p>
+        <p class="text-muted mt-2">
+            <strong>Key point:</strong> <code>ElementReference.FocusAsync()</code> is the direct replacement
+            for <code>ScriptManager.SetFocus()</code>. No JavaScript needed — it's built into Blazor.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Section 4: Event Handlers ═══════════════════════════ *@
+
+<h3>4. Event Handler Migration (replacing GetPostBackEventReference)</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code class="language-csharp">// IPostBackEventHandler implementation
+public class MyControl : UserControl, IPostBackEventHandler
+{
+    public void RaisePostBackEvent(string eventArgument)
+    {
+        if (eventArgument == "delete")
+            OnDeleteRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    // Generate client-side postback trigger
+    string script = Page.ClientScript.GetPostBackEventReference(
+        new PostBackOptions(this, "delete"));
+    // Produces: __doPostBack('ctl00$MyControl','delete')
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor)</h4>
+        <pre><code class="language-csharp">// Direct event binding — no postback needed
+&lt;button @@onclick="HandleDelete"&gt;Delete&lt;/button&gt;
+&lt;button @@onclick='() =&gt; HandleAction("archive")'&gt;Archive&lt;/button&gt;
+
+@@code {
+    [Parameter]
+    public EventCallback OnDeleteRequested { get; set; }
+
+    private async Task HandleDelete()
+    {
+        await OnDeleteRequested.InvokeAsync();
+    }
+
+    private async Task HandleAction(string action)
+    {
+        _lastAction = action;
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — Event Handlers</h5>
+        <p>In Web Forms, events went through <code>__doPostBack()</code> and <code>IPostBackEventHandler</code>.
+           In Blazor, events are direct method calls:</p>
+        <div class="d-flex gap-2 flex-wrap">
+            <button class="btn btn-danger" @onclick="HandleDelete">
+                🗑️ Delete
+            </button>
+            <button class="btn btn-warning" @onclick='() => HandleAction("archive")'>
+                📦 Archive
+            </button>
+            <button class="btn btn-info" @onclick='() => HandleAction("export")'>
+                📤 Export
+            </button>
+            <button class="btn btn-secondary" @onclick="ResetActions">
+                🔄 Reset
+            </button>
+        </div>
+        @if (_actionLog.Count > 0)
+        {
+            <div class="mt-3">
+                <h6>Action Log:</h6>
+                <ul class="list-group list-group-flush">
+                    @foreach (var entry in _actionLog)
+                    {
+                        <li class="list-group-item py-1">@entry</li>
+                    }
+                </ul>
+            </div>
+        }
+        <p class="text-muted mt-2">
+            <strong>Key point:</strong> Blazor's <code>@@onclick</code> and <code>EventCallback</code>
+            completely replace <code>__doPostBack()</code> and <code>GetPostBackEventReference()</code>.
+            Events are strongly-typed C# method calls — no string-based event arguments needed.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Section 5: JS Interop with DOM ═══════════════════════════ *@
+
+<h3>5. DOM Manipulation (replacing RegisterClientScriptBlock)</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code class="language-csharp">Page.ClientScript.RegisterClientScriptBlock(
+    this.GetType(),
+    "HighlightRow",
+    "function highlightRow(id) { " +
+    "  document.getElementById(id).style.backgroundColor = '#ffc'; " +
+    "}",
+    addScriptTags: true);</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor)</h4>
+        <pre><code class="language-csharp">// Define function in a .js file, call via IJSRuntime
+await JS.InvokeVoidAsync("highlightElement",
+    "my-element", "#ffffcc");
+
+// Or better — use Blazor's built-in binding:
+&lt;div style="@@(_isHighlighted ? "background:#ffc" : "")"&gt;
+    Content
+&lt;/div&gt;</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — DOM Manipulation</h5>
+        <p>Two approaches: JS interop for complex DOM work, or Blazor binding for simple styling:</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Via IJSRuntime:</h6>
+                <div id="js-highlight-target" class="p-3 border rounded mb-2">
+                    This box is highlighted via <code>IJSRuntime</code>
+                </div>
+                <button class="btn btn-sm btn-outline-warning" @onclick="HighlightViaJs">
+                    Highlight via JS
+                </button>
+            </div>
+            <div class="col-md-6">
+                <h6>Via Blazor Binding (Preferred):</h6>
+                <div class="p-3 border rounded mb-2"
+                     style="@(_isHighlighted ? "background-color: #d4edda; transition: background-color 0.3s ease;" : "transition: background-color 0.3s ease;")">
+                    This box is highlighted via Blazor <code>@@bind</code>
+                </div>
+                <button class="btn btn-sm btn-outline-success" @onclick="ToggleHighlight">
+                    Toggle Blazor Highlight
+                </button>
+            </div>
+        </div>
+
+        <p class="text-muted mt-2">
+            <strong>Key point:</strong> For simple styling, use Blazor's binding (<code>style="@@(...)"</code>).
+            Reserve <code>IJSRuntime</code> for cases where you need to call third-party libraries or
+            manipulate the DOM in ways Blazor can't express.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Source Code ═══════════════════════════ *@
+
+<h3>Source Code</h3>
+
+<p>Complete <code>@@code</code> block for this page:</p>
+
+<pre><code class="language-csharp">@@inject IJSRuntime JS
+
+@@code {
+    private ElementReference _searchBox;
+    private int _focusCount;
+    private bool _isHighlighted;
+    private string _scriptIncludeStatus = "Loaded ✓";
+    private List&lt;string&gt; _actionLog = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Startup script — equivalent of RegisterStartupScript
+            await JS.InvokeVoidAsync("initializePage", "Page loaded via IJSRuntime!");
+        }
+    }
+
+    private async Task SetFocusToSearch()
+    {
+        // Equivalent of ScriptManager.SetFocus()
+        await _searchBox.FocusAsync();
+        _focusCount++;
+    }
+
+    private void HandleDelete()
+    {
+        _actionLog.Insert(0, $"[{DateTime.Now:HH:mm:ss}] 🗑️ Delete requested");
+    }
+
+    private void HandleAction(string action)
+    {
+        _actionLog.Insert(0, $"[{DateTime.Now:HH:mm:ss}] Action: {action}");
+    }
+
+    private async Task HighlightViaJs()
+    {
+        await JS.InvokeVoidAsync("highlightElement", "js-highlight-target", "#fff3cd");
+    }
+
+    private void ToggleHighlight()
+    {
+        _isHighlighted = !_isHighlighted;
+    }
+}</code></pre>
+
+<hr />
+
+@* ═══════════════════════════ Migration Quick Reference ═══════════════════════════ *@
+
+<h3>Migration Quick Reference</h3>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Web Forms Pattern</th>
+            <th>Blazor Equivalent</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>RegisterStartupScript()</code></td>
+            <td><code>OnAfterRenderAsync</code> + <code>IJSRuntime</code></td>
+            <td>Guard with <code>if (firstRender)</code></td>
+        </tr>
+        <tr>
+            <td><code>RegisterClientScriptInclude()</code></td>
+            <td><code>&lt;script src="..."&gt;</code> in layout</td>
+            <td>Static includes go in App.razor</td>
+        </tr>
+        <tr>
+            <td><code>RegisterClientScriptBlock()</code></td>
+            <td>Named JS function + <code>IJSRuntime</code></td>
+            <td>Move inline JS to <code>.js</code> files</td>
+        </tr>
+        <tr>
+            <td><code>ScriptManager.SetFocus()</code></td>
+            <td><code>ElementReference.FocusAsync()</code></td>
+            <td>No JS interop needed</td>
+        </tr>
+        <tr>
+            <td><code>GetPostBackEventReference()</code></td>
+            <td><code>@@onclick</code> / <code>EventCallback</code></td>
+            <td>Direct method calls replace <code>__doPostBack</code></td>
+        </tr>
+        <tr>
+            <td><code>IPostBackEventHandler</code></td>
+            <td><code>[Parameter] EventCallback</code></td>
+            <td>Strongly-typed events replace string arguments</td>
+        </tr>
+        <tr>
+            <td><code>if (!IsPostBack)</code></td>
+            <td><code>if (firstRender)</code></td>
+            <td>In <code>OnAfterRenderAsync</code></td>
+        </tr>
+    </tbody>
+</table>
+
+@code {
+    private ElementReference _searchBox;
+    private int _focusCount;
+    private bool _isHighlighted;
+    private string _scriptIncludeStatus = "Loaded ✓";
+    private List<string> _actionLog = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Equivalent of Page.ClientScript.RegisterStartupScript()
+            await JS.InvokeVoidAsync("initializePage", "Page loaded via IJSRuntime!");
+        }
+    }
+
+    private async Task SetFocusToSearch()
+    {
+        // Equivalent of ScriptManager.SetFocus()
+        await _searchBox.FocusAsync();
+        _focusCount++;
+    }
+
+    private void HandleDelete()
+    {
+        _actionLog.Insert(0, $"[{DateTime.Now:HH:mm:ss}] 🗑️ Delete requested");
+    }
+
+    private void HandleAction(string action)
+    {
+        _actionLog.Insert(0, $"[{DateTime.Now:HH:mm:ss}] Action: {action}");
+    }
+
+    private void ResetActions()
+    {
+        _actionLog.Clear();
+    }
+
+    private async Task HighlightViaJs()
+    {
+        await JS.InvokeVoidAsync("highlightElement", "js-highlight-target", "#fff3cd");
+    }
+
+    private void ToggleHighlight()
+    {
+        _isHighlighted = !_isHighlighted;
+    }
+}

@@ -1,0 +1,306 @@
+@page "/migration/request-form"
+@using Microsoft.AspNetCore.Components.Web
+@attribute [ExcludeFromInteractiveRouting]
+@inherits WebFormsPageBase
+
+<PageTitle>Request.Form Migration Demo</PageTitle>
+
+<h2>Request.Form Migration</h2>
+
+<p>This sample demonstrates the <code>FormShim</code> that provides Web Forms-compatible
+   <code>Request.Form</code> access in Blazor. The shim wraps <code>IFormCollection</code>
+   and exposes the same <code>NameValueCollection</code>-style API used in Web Forms
+   code-behind.</p>
+
+<div class="alert alert-info">
+    <strong>📋 SSR Note:</strong> This page uses <strong>Static Server Rendering (SSR)</strong> via
+    <code>[ExcludeFromInteractiveRouting]</code> so that the HTML form submits via a real HTTP POST —
+    exactly how Web Forms worked. <code>Request.Form</code> values are populated from the POST body,
+    just like <code>Request.Form</code> in ASP.NET Web Forms.
+</div>
+
+<hr />
+
+<h3>Try It — Submit the Form</h3>
+<p>Fill in the fields below and click <strong>Submit Form</strong>. The values will be read
+   using <code>Request.Form</code> and displayed in the results section.</p>
+
+<div class="card" data-audit-control="form-input">
+    <div class="card-body">
+        <h5 class="card-title">User Profile Form</h5>
+        <form method="post" @formname="requestFormDemo">
+            <AntiforgeryToken />
+            <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" name="username"
+                       placeholder="Enter your username"
+                       value="@(submittedUsername ?? "")" />
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="text" class="form-control" id="email" name="email"
+                       placeholder="Enter your email"
+                       value="@(submittedEmail ?? "")" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Favorite Colors</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="colors" value="Red"
+                           id="colorRed" checked="@IsColorSelected("Red")" />
+                    <label class="form-check-label" for="colorRed">Red</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="colors" value="Green"
+                           id="colorGreen" checked="@IsColorSelected("Green")" />
+                    <label class="form-check-label" for="colorGreen">Green</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="colors" value="Blue"
+                           id="colorBlue" checked="@IsColorSelected("Blue")" />
+                    <label class="form-check-label" for="colorBlue">Blue</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="colors" value="Yellow"
+                           id="colorYellow" checked="@IsColorSelected("Yellow")" />
+                    <label class="form-check-label" for="colorYellow">Yellow</label>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Form</button>
+        </form>
+    </div>
+</div>
+
+@if (isPostBack)
+{
+    <div class="card border-success mt-3" data-audit-control="form-results">
+        <div class="card-body">
+            <h5 class="card-title text-success">✅ Form Submitted — Request.Form Values</h5>
+            <table class="table table-sm table-bordered" style="max-width: 600px;">
+                <thead>
+                    <tr>
+                        <th>API Call</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Request.Form["username"]</code></td>
+                        <td><strong>@(submittedUsername ?? "(null)")</strong></td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form["email"]</code></td>
+                        <td><strong>@(submittedEmail ?? "(null)")</strong></td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form.GetValues("colors")</code></td>
+                        <td>
+                            <strong>
+                                @(submittedColors != null
+                                    ? string.Join(", ", submittedColors)
+                                    : "(null — no checkboxes selected)")
+                            </strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form.Count</code></td>
+                        <td><strong>@formFieldCount</strong></td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form.AllKeys</code></td>
+                        <td><strong>@string.Join(", ", formKeys)</strong></td>
+                    </tr>
+                    <tr>
+                        <td><code>Request.Form.ContainsKey("username")</code></td>
+                        <td><strong>@containsUsername</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<hr />
+
+<h3>Before / After Code Comparison</h3>
+
+<h4>1. Basic Form Field Access</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h5>Before (Web Forms)</h5>
+        <pre><code>// In Page_Load or button click handler
+string username = Request.Form["username"];
+string email = Request.Form["email"];
+if (username != null)
+{
+    lblGreeting.Text = "Hello, " + username;
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>After (Blazor with BWFC)</h5>
+        <pre><code>// Same code works in SSR mode!
+string username = Request.Form["username"];
+string email = Request.Form["email"];
+if (username != null)
+{
+    greeting = "Hello, " + username;
+}
+// TODO(bwfc-general): Migrate to EditForm + @@bind
+// for full interactive Blazor support.</code></pre>
+    </div>
+</div>
+
+<h4 class="mt-3">2. Multi-Value Fields (GetValues)</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h5>Before (Web Forms)</h5>
+        <pre><code>// Get all selected checkbox values
+string[] colors = Request.Form.GetValues("colors");
+if (colors != null)
+{
+    foreach (string color in colors)
+    {
+        // process each selected color
+    }
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>After (Blazor with BWFC)</h5>
+        <pre><code>// Same call works in SSR mode!
+string[] colors = Request.Form.GetValues("colors");
+if (colors != null)
+{
+    foreach (string color in colors)
+    {
+        // process each selected color
+    }
+}
+// TODO(bwfc-general): Migrate to @@bind with
+// List&lt;string&gt; for interactive checkbox groups.</code></pre>
+    </div>
+</div>
+
+<h4 class="mt-3">3. Form Metadata</h4>
+<div class="row">
+    <div class="col-md-6">
+        <h5>Before (Web Forms)</h5>
+        <pre><code>// Inspect form contents
+string[] keys = Request.Form.AllKeys;
+int fieldCount = Request.Form.Count;
+bool hasName = Request.Form.AllKeys.Contains("name");</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>After (Blazor with BWFC)</h5>
+        <pre><code>// Same properties available!
+string[] keys = Request.Form.AllKeys;
+int fieldCount = Request.Form.Count;
+bool hasName = Request.Form.ContainsKey("name");</code></pre>
+    </div>
+</div>
+
+<hr />
+
+<h3>Migration Guidance</h3>
+<p>The <code>Request.Form</code> shim enables your Web Forms code to compile in Blazor
+   without changes. For full interactive support, migrate to Blazor's <code>EditForm</code>
+   and <code>@@bind</code> pattern. The shim works as a stepping stone during migration.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h5>Web Forms / BWFC Shim</h5>
+        <pre><code>// Works in SSR, returns null in interactive
+string name = Request.Form["name"];
+string email = Request.Form["email"];
+
+// Process the form data
+if (name != null)
+{
+    SaveUser(name, email);
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h5>Full Blazor (target state)</h5>
+        <pre><code>// Interactive-friendly with two-way binding
+&lt;EditForm Model="@@formModel" OnValidSubmit="HandleSubmit"&gt;
+    &lt;InputText @@bind-Value="formModel.Name" /&gt;
+    &lt;InputText @@bind-Value="formModel.Email" /&gt;
+    &lt;button type="submit"&gt;Submit&lt;/button&gt;
+&lt;/EditForm&gt;
+
+@@code {
+    private UserModel formModel = new();
+    private void HandleSubmit()
+    {
+        SaveUser(formModel.Name, formModel.Email);
+    }
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="form-migration-guidance">
+    <div class="card-body">
+        <h5 class="card-title">Migration Path Summary</h5>
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th>Web Forms Pattern</th>
+                    <th>BWFC Shim (compiles now)</th>
+                    <th>Full Blazor (target)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>Request.Form["field"]</code></td>
+                    <td>Same — works in SSR</td>
+                    <td><code>@@bind-Value</code> on <code>InputText</code></td>
+                </tr>
+                <tr>
+                    <td><code>Request.Form.GetValues("checkboxes")</code></td>
+                    <td>Same — works in SSR</td>
+                    <td><code>@@bind</code> with <code>List&lt;string&gt;</code></td>
+                </tr>
+                <tr>
+                    <td><code>Request.Form.AllKeys</code></td>
+                    <td>Same — works in SSR</td>
+                    <td>Model properties / reflection</td>
+                </tr>
+                <tr>
+                    <td><code>Request.Form.Count</code></td>
+                    <td>Same — works in SSR</td>
+                    <td>Model-based validation</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="text-muted mb-0">
+            <strong>Tip:</strong> Use <code>// TODO(bwfc-general): Migrate to EditForm + @@bind</code>
+            comments alongside your shim code to track what needs updating for full Blazor interactivity.
+        </p>
+    </div>
+</div>
+
+@code {
+    private bool isPostBack;
+    private string? submittedUsername;
+    private string? submittedEmail;
+    private string[]? submittedColors;
+    private int formFieldCount;
+    private string[] formKeys = Array.Empty<string>();
+    private bool containsUsername;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (Request.Form.Count > 0)
+        {
+            isPostBack = true;
+            submittedUsername = Request.Form["username"];
+            submittedEmail = Request.Form["email"];
+            submittedColors = Request.Form.GetValues("colors");
+            formFieldCount = Request.Form.Count;
+            formKeys = Request.Form.AllKeys;
+            containsUsername = Request.Form.ContainsKey("username");
+        }
+    }
+
+    private bool IsColorSelected(string color)
+        => submittedColors?.Contains(color) == true;
+}

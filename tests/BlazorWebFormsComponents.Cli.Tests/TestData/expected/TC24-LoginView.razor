@@ -1,0 +1,11 @@
+@page "/TC24-LoginView"
+<PageTitle>Login Test</PageTitle>
+<AuthorizeView>
+    <NotAuthorized>
+        <p>Please log in to continue.</p>
+    </NotAuthorized>
+    <Authorized>
+        <p>Welcome back!</p>
+    </Authorized>
+    @* TODO(bwfc-identity): Convert RoleGroups to policy-based AuthorizeView *@
+</AuthorizeView>

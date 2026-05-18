@@ -86,9 +86,10 @@ public EventCallback<EventArgs> SelectedIndexChanged { get; set; }
 public EventCallback<EventArgs> TextChanged { get; set; }
 
 /// <summary>
-/// Gets or sets whether the control automatically posts back when selection changes. Migration stub.
+/// Gets or sets whether the control automatically posts back when selection changes.
+/// BulletedList is a display-only control that does not support AutoPostBack.
 /// </summary>
-[Parameter]
+[Parameter, Obsolete("BulletedList does not support AutoPostBack. Use OnClick event instead.")]
 public bool AutoPostBack { get; set; }
 
 /// <summary>

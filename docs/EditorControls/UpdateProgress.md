@@ -22,56 +22,56 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **Automatic UpdatePanel association** — Does not automatically show/hide based on UpdatePanel async postback state; use Blazor component state instead
 - **ScriptManager integration** — Not applicable; Blazor does not use ScriptManager
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server" />
+=== "Web Forms"
 
-<asp:UpdatePanel ID="UpdatePanel1" runat="server">
-    <ContentTemplate>
-        <!-- Content here -->
-    </ContentTemplate>
-</asp:UpdatePanel>
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-<asp:UpdateProgress
-    AssociatedUpdatePanelID="string"
-    DisplayAfter="integer"
-    DynamicLayout="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    Visible="True|False"
->
-    <ProgressTemplate>
-        <div>Loading, please wait...</div>
-    </ProgressTemplate>
-</asp:UpdateProgress>
-```
+    <asp:UpdatePanel ID="UpdatePanel1" runat="server">
+        <ContentTemplate>
+            <!-- Content here -->
+        </ContentTemplate>
+    </asp:UpdatePanel>
 
-## Blazor Razor Syntax
-
-### Basic Usage
-
-```razor
-@if (isLoading)
-{
-    <UpdateProgress>
+    <asp:UpdateProgress
+        AssociatedUpdatePanelID="string"
+        DisplayAfter="integer"
+        DynamicLayout="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        Visible="True|False"
+    >
         <ProgressTemplate>
             <div>Loading, please wait...</div>
         </ProgressTemplate>
-    </UpdateProgress>
-}
+    </asp:UpdateProgress>
+    ```
 
-@code {
-    private bool isLoading = false;
-}
-```
+=== "Blazor"
+
+    ```razor
+    @if (isLoading)
+    {
+        <UpdateProgress>
+            <ProgressTemplate>
+                <div>Loading, please wait...</div>
+            </ProgressTemplate>
+        </UpdateProgress>
+    }
+
+    @code {
+        private bool isLoading = false;
+    }
+    ```
 
 ### With Properties (Migration)
 

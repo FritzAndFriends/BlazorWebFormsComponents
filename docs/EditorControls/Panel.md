@@ -20,37 +20,47 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 - `DefaultButton` - JavaScript-based button targeting is not implemented
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Panel
-    ID="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DefaultButton="string"
-    Direction="NotSet|LeftToRight|RightToLeft"
-    Enabled="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Size="string"
-    ForeColor="color name|#dddddd"
-    GroupingText="string"
-    Height="size"
-    HorizontalAlign="NotSet|Left|Center|Right|Justify"
-    ScrollBars="None|Horizontal|Vertical|Both|Auto"
-    Visible="True|False"
-    Width="size"
-    Wrap="True|False"
-    runat="server">
-    
-    <!-- Child content here -->
-    
-</asp:Panel>
-```
+=== "Web Forms"
+
+    ```html
+    <asp:Panel
+        ID="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DefaultButton="string"
+        Direction="NotSet|LeftToRight|RightToLeft"
+        Enabled="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Size="string"
+        ForeColor="color name|#dddddd"
+        GroupingText="string"
+        Height="size"
+        HorizontalAlign="NotSet|Left|Center|Right|Justify"
+        ScrollBars="None|Horizontal|Vertical|Both|Auto"
+        Visible="True|False"
+        Width="size"
+        Wrap="True|False"
+        runat="server">
+        
+        <!-- Child content here -->
+        
+    </asp:Panel>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <Panel>
+        <p>This is content inside a panel.</p>
+    </Panel>
+    ```
 
 ## Blazor Syntax
 
@@ -248,5 +258,6 @@ When migrating from Web Forms to Blazor:
 
 ## See Also
 
-- [PlaceHolder](PlaceHolder.md) - Container with no wrapper element
-- [Label](Label.md) - Display text
+- [PlaceHolder](PlaceHolder.md) — Container with no wrapper element
+- [MultiView](MultiView.md) — Multi-view container
+- [Label](Label.md) — Display text

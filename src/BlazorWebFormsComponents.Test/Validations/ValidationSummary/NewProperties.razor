@@ -48,7 +48,7 @@
 		cut.FindComponent<AspNetValidationSummary>().Instance.ShowMessageBox.ShouldBeTrue();
 	}
 
-	private ExampleModel model = new ExampleModel();
+	private readonly ExampleModel model = new ExampleModel();
 
 	public class ExampleModel
 	{

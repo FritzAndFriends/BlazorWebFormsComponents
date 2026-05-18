@@ -80,6 +80,10 @@ Milestone plans, audits, and post-fix reports tracking project progress across d
 
 Feature proposals and design documents for new functionality.
 
+| File | Description |
+|------|-------------|
+| `p1-p5-custom-controls-framework.md` | P1–P5 Custom Controls drop-in replacement framework — TagKey, enums, DataBound, templates, shims |
+
 ---
 
 ### `/reports/`

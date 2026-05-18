@@ -1,17 +1,8 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Checkout;
 
-public partial class CheckoutStart
+public partial class CheckoutStart : BlazorWebFormsComponents.WebFormsPageBase
 {
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
-    {
-        // TODO: Implement PayPal Express Checkout integration
-        // Original used Session["payment_amt"], NVPAPICaller.ShortcutExpressCheckout()
-        // For now, redirect to error page indicating checkout not yet implemented
-        NavigationManager.NavigateTo("/CheckoutError?ErrorCode=NotImplemented&Desc=PayPal+checkout+not+yet+migrated");
-        await Task.CompletedTask;
-    }
+    // TODO: Migrate from Checkout/CheckoutStart.aspx
+    // Original features: Non-essential path (auto-quarantined)
+    // Quarantine reason: Page is located in a non-essential path (Checkout/CheckoutStart.aspx) that typically requires manual migration of legacy Web Forms APIs.
 }

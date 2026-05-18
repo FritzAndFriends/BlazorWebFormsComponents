@@ -4,10 +4,24 @@
 {
 	@if (TextMode == TextBoxMode.MultiLine)
 	{
-		<textarea @attributes="CalculatedAttributes" @oninput="HandleInput" @onchange="HandleChange">@Text</textarea>
+		@if (GetAutoPostBackScript(AutoPostBack) is string autoPostBackScript1)
+		{
+			<textarea @attributes="CalculatedAttributes" @oninput="HandleInput" onchange="@autoPostBackScript1">@Text</textarea>
+		}
+		else
+		{
+			<textarea @attributes="CalculatedAttributes" @oninput="HandleInput" @onchange="HandleChange">@Text</textarea>
+		}
 	}
 	else
 	{
-		<input type="@CalculatedType" value="@Text" @attributes="CalculatedAttributes" @oninput="HandleInput" @onchange="HandleChange" />
+		@if (GetAutoPostBackScript(AutoPostBack) is string autoPostBackScript2)
+		{
+			<input type="@CalculatedType" value="@Text" @attributes="CalculatedAttributes" @oninput="HandleInput" onchange="@autoPostBackScript2" />
+		}
+		else
+		{
+			<input type="@CalculatedType" value="@Text" @attributes="CalculatedAttributes" @oninput="HandleInput" @onchange="HandleChange" />
+		}
 	}
 }

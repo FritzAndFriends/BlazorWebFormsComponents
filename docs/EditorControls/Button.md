@@ -31,56 +31,71 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **UseSubmitBehavior** - Not supported; Blazor buttons trigger click events and you can inspect the form regardless
 - **AccessKey** - Use HTML `accesskey` attribute directly if needed
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Button
-    AccessKey="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    CausesValidation="True|False"
-    CommandArgument="string"
-    CommandName="string"
-    CssClass="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnClick="Click event handler"
-    OnClientClick="string"
-    OnCommand="Command event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    PostBackUrl="uri"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    Text="string"
-    ToolTip="string"
-    UseSubmitBehavior="True|False"
-    ValidationGroup="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms"
+
+    ```html
+    <asp:Button
+        AccessKey="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        CausesValidation="True|False"
+        CommandArgument="string"
+        CommandName="string"
+        CssClass="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnClick="Click event handler"
+        OnClientClick="string"
+        OnCommand="Command event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        PostBackUrl="uri"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        Text="string"
+        ToolTip="string"
+        UseSubmitBehavior="True|False"
+        ValidationGroup="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <Button Text="Click Me" OnClick="HandleClick" />
+
+    @code {
+        void HandleClick()
+        {
+            // Handle the click
+        }
+    }
+    ```
 
 ## Blazor Razor Syntax
 
@@ -329,7 +344,11 @@ protected void btnSave_Click(object sender, EventArgs e)
 
 ## See Also
 
-- [LinkButton](LinkButton.md) - A button that renders as a hyperlink
-- [ImageButton](ImageButton.md) - A button that displays an image
-- [RequiredFieldValidator](../ValidationControls/RequiredFieldValidator.md) - Validate required fields
-- [Live Demo](https://blazorwebformscomponents.azurewebsites.net/ControlSamples/Button) - Interactive Button samples
+- [LinkButton](LinkButton.md) — A button that renders as a hyperlink
+- [ImageButton](ImageButton.md) — A button that displays an image
+- [CheckBox](CheckBox.md) — Single checkbox control
+- [CheckBoxList](CheckBoxList.md) — Multiple checkboxes with multi-select
+- [RadioButton](RadioButton.md) — Individual radio button
+- [RadioButtonList](RadioButtonList.md) — Multiple radio buttons with single selection
+- [RequiredFieldValidator](../ValidationControls/RequiredFieldValidator.md) — Validate required fields
+- [Live Demo](https://blazorwebformscomponents.azurewebsites.net/ControlSamples/Button) — Interactive Button samples

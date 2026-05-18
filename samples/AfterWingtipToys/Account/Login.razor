@@ -1,62 +1,46 @@
-@page "/Login"
-<PageTitle>Log in</PageTitle>
-<h2>@(Title).</h2>
-
-    <div class="row">
-        <div class="col-md-8">
-            <section id="loginForm">
-                <div class="form-horizontal">
-                    <h4>Use a local account to log in.</h4>
-                    <hr />
-                    <PlaceHolder ID="ErrorMessage" Visible="false">
-                        <p class="text-danger">
-                            <Literal ID="FailureText" />
-                        </p>
-                    </PlaceHolder>
-                    <div class="form-group">
-                        <Label AssociatedControlID="Email" CssClass="col-md-2 control-label">Email</Label>
-                        <div class="col-md-10">
-                            <TextBox ID="Email" CssClass="form-control" TextMode="TextBoxMode.Email" />
-                            <RequiredFieldValidator ControlToValidate="Email"
-                                CssClass="text-danger" ErrorMessage="The email field is required." />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <Label AssociatedControlID="Password" CssClass="col-md-2 control-label">Password</Label>
-                        <div class="col-md-10">
-                            <TextBox ID="Password" TextMode="TextBoxMode.Password" CssClass="form-control" />
-                            <RequiredFieldValidator ControlToValidate="Password" CssClass="text-danger" ErrorMessage="The password field is required." />
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <div class="checkbox">
-                                <CheckBox ID="RememberMe" />
-                                <Label AssociatedControlID="RememberMe">Remember me?</Label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="col-md-offset-2 col-md-10">
-                            <Button OnClick="LogIn" Text="Log in" CssClass="btn btn-default" />
-                        </div>
-                    </div>
-                </div>
-                <p>
-                    <HyperLink ID="RegisterHyperLink">Register as a new user</HyperLink>
-                </p>
-                <p>
-                    @* Enable this once you have account confirmation enabled for password reset functionality
-                    <HyperLink ID="ForgotPasswordHyperLink">Forgot your password?</HyperLink>
-                    *@
-                </p>
-            </section>
-        </div>
-
-        <div class="col-md-4">
-            <section id="socialLoginForm">
-                <OpenAuthProviders ID="OpenAuthLogin" />
-            </section>
+@page "/Account/Login"
+<h1>Login</h1>
+@* TODO(bwfc-identity): Wire this account page to ASP.NET Core Identity or your app's authentication service. *@
+@* TODO(bwfc-identity): Recreate validation and submit handling with EditForm, minimal APIs, or an equivalent SSR-safe endpoint. *@
+@if (Registered.GetValueOrDefault() != 0)
+{
+    <p class="text-success">Registration succeeded. Please log in.</p>
+}
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <p class="text-danger">@Error</p>
+}
+<form method="post" action="/Account/LoginHandler" class="form-horizontal" @formname="bwfc-form-1">
+    <AntiforgeryToken />
+    @if (!string.IsNullOrWhiteSpace(ReturnUrl))
+    {
+        <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+    }
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="email">Email</label>
+        <div class="col-md-10">
+            <input id="email" name="Email" type="email" class="form-control" />
         </div>
     </div>
-
+    <div class="form-group">
+        <label class="col-md-2 control-label" for="password">Password</label>
+        <div class="col-md-10">
+            <input id="password" name="Password" type="password" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <div class="checkbox">
+                <input id="remember-me" name="RememberMe" type="checkbox" />
+                <label for="remember-me">Remember me?</label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <button type="submit" class="btn btn-default">Log in</button>
+        </div>
+    </div>
+</form>
+<p><a href="/Account/Register">Register as a new user</a></p>
+<p><a href="#">Forgot your password?</a></p>

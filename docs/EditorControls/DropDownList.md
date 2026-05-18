@@ -21,73 +21,73 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - AppendDataBoundItems is not implemented
 - DataSourceID is not supported - bind directly to collections via `Items` parameter
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:DropDownList
-    AccessKey="string"
-    AutoPostBack="True|False"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DataSourceID="string"
-    DataTextField="string"
-    DataValueField="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnSelectedIndexChanged="SelectedIndexChanged event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SelectedIndex="number"
-    SelectedValue="string"
-    TabIndex="integer"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size">
-    
-    <asp:ListItem Value="value1" Text="Display Text 1" Selected="True|False" />
-    <asp:ListItem Value="value2" Text="Display Text 2" />
-    
-</asp:DropDownList>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:DropDownList
+        AccessKey="string"
+        AutoPostBack="True|False"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DataSourceID="string"
+        DataTextField="string"
+        DataValueField="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnSelectedIndexChanged="SelectedIndexChanged event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SelectedIndex="number"
+        SelectedValue="string"
+        TabIndex="integer"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size">
 
-### Static Items
+        <asp:ListItem Value="value1" Text="Display Text 1" Selected="True|False" />
+        <asp:ListItem Value="value2" Text="Display Text 2" />
 
-```razor
-<DropDownList TItem="object" StaticItems="items" @bind-SelectedValue="selectedValue" />
+    </asp:DropDownList>
+    ```
 
-@code {
-    private string selectedValue = "";
-    
-    private ListItemCollection items = new()
-    {
-        new ListItem("Select...", ""),
-        new ListItem("Option One", "1"),
-        new ListItem("Option Two", "2"),
-        new ListItem("Option Three", "3")
-    };
-}
-```
+=== "Blazor"
+
+    ```razor
+    <DropDownList TItem="object" StaticItems="items" @bind-SelectedValue="selectedValue" />
+
+    @code {
+        private string selectedValue = "";
+
+        private ListItemCollection items = new()
+        {
+            new ListItem("Select...", ""),
+            new ListItem("Option One", "1"),
+            new ListItem("Option Two", "2"),
+            new ListItem("Option Three", "3")
+        };
+    }
+    ```
 
 ### Data Binding
 
@@ -217,6 +217,8 @@ When migrating from Web Forms:
 
 ## See Also
 
-- [ListBox](ListBox.md) - Multiple selection list control
-- [CheckBoxList](CheckBoxList.md) - Multiple checkboxes in a list
-- [RadioButtonList](RadioButtonList.md) - Radio button selection list
+- [ListBox](ListBox.md) — Multiple selection list control
+- [CheckBoxList](CheckBoxList.md) — Multiple checkboxes in a list
+- [RadioButtonList](RadioButtonList.md) — Radio button selection list
+- [TextBox](TextBox.md) — Single-line text input
+- [Label](Label.md) — Display text labels

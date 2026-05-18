@@ -1,0 +1,7 @@
+  Determining projects to restore...
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageReference Microsoft.AspNetCore.Components will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageReference Microsoft.AspNetCore.Components.Web will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageReference Microsoft.AspNetCore.Components.Authorization will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+D:\BlazorWebFormsComponents\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj : warning NU1510: PackageReference Microsoft.AspNetCore.Routing will not be pruned. Consider removing this package from your dependencies, as it is likely unnecessary. [D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj]
+  Restored D:\BlazorWebFormsComponents\samples\AfterWingtipToys\WingtipToys.csproj (in 639 ms).
+  2 of 3 projects are up-to-date for restore.

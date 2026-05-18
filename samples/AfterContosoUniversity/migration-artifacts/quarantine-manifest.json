@@ -1,0 +1,28 @@
+{
+  "pages": [
+    {
+      "originalFilePath": "Courses.aspx",
+      "detectedUnsupportedFeatures": [
+        "Unresolved compile-surface blockers"
+      ],
+      "reasonForQuarantine": "Lowercase HTML elements with server IDs still require explicit server-element shims.",
+      "suggestedMigrationApproach": "Port the remaining server-control or lifecycle logic into BWFC-compatible components, services, or semantic patterns before re-enabling the page."
+    },
+    {
+      "originalFilePath": "Instructors.aspx",
+      "detectedUnsupportedFeatures": [
+        "Unresolved compile-surface blockers"
+      ],
+      "reasonForQuarantine": "Lowercase HTML elements with server IDs still require explicit server-element shims.",
+      "suggestedMigrationApproach": "Port the remaining server-control or lifecycle logic into BWFC-compatible components, services, or semantic patterns before re-enabling the page."
+    },
+    {
+      "originalFilePath": "Students.aspx",
+      "detectedUnsupportedFeatures": [
+        "Unresolved compile-surface blockers"
+      ],
+      "reasonForQuarantine": "Lowercase HTML elements with server IDs still require explicit server-element shims.",
+      "suggestedMigrationApproach": "Port the remaining server-control or lifecycle logic into BWFC-compatible components, services, or semantic patterns before re-enabling the page."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Site.master.cs" Inherits="MyApp.SiteMaster" %>
+<!DOCTYPE html>
+<html>
+<head runat="server">
+    <title>My Site</title>
+    <link href="~/Content/Site.css" rel="stylesheet" />
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div class="container">
+            <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                <p>Default content</p>
+            </asp:ContentPlaceHolder>
+        </div>
+    </form>
+</body>
+</html>

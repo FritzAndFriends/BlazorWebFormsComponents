@@ -1,13 +1,15 @@
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
 namespace WingtipToys.Account;
-
-// TODO: Requires ASP.NET Core Identity migration — external login registration needs UserManager/SignInManager
 public partial class RegisterExternalLogin
 {
-    private string ProviderName { get; set; } = "";
-    private string Email { get; set; } = "";
+    private TextBox email = default!;
 
-    private void LogIn_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
+
+    private string ProviderName { get; set; } = ""; // TODO: migrate from Web Forms code-behind
+
+    protected void LogIn_Click()
     {
-        // TODO: Implement with UserManager/SignInManager
+        // TODO: migrate from Web Forms code-behind
     }
 }

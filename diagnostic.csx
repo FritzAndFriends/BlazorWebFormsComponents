@@ -1,0 +1,10 @@
+using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.Transforms.Markup;
+var t = new MasterPageTransform();
+var meta = new FileMetadata { SourceFilePath = "Site.master", OutputFilePath = "Site.razor", FileType = FileType.Master, OriginalContent = "" };
+var input = "<head runat=\"server\">\n    <title>My Site</title>\n    <link href=\"/site.css\" rel=\"stylesheet\" />\n</head>\n<body></body>";
+var result = t.Apply(input, meta);
+Console.WriteLine("=== RESULT ===");
+Console.WriteLine(result);
+Console.WriteLine("=== END ===");
+Console.WriteLine("Contains '<head>': " + result.Contains("<head>"));

@@ -28,6 +28,36 @@ Added 5 smoke test InlineData entries (M9 audit gaps: ListView/CrudOperations, L
 
 ## Summary: PR #377 DetailsView Integration Test Fix (2026-02-26)
 
+- DetailsView smoke + interaction tests initially waited for DOMContentLoaded
+- FormView/DetailsView bind data in OnAfterRenderAsync — DOMContentLoaded fires before data binding completes
+- Switched targeted DetailsView interaction tests to WaitUntilState.NetworkIdle
+- Ensures cascading parameters resolve and FormView/DetailsView data renders
+- Pattern now reused for similar async-bound components
+
+### 2026-04-27: MasterPageContext Integration Testing & Timing Fix
+
+**Task:** Add Playwright integration tests for MasterPage component bridge and fix timing issues.
+
+**Test coverage added:**
+- `tests/Integration/MasterPageTests.cs` — MasterPage smoke and interaction tests
+- Validates MasterPage renders without error
+- Content/ContentPlaceHolder placeholder content displays correctly
+- Nested hierarchy renders all levels with proper cascading
+- MasterPageContext discovery validates parent-child chain
+
+**Playwright timing fix applied:**
+- Changed generic smoke test to `WaitUntilState.NetworkIdle` (from default DOMContentLoaded)
+- Ensures asynchronous cascading parameter resolution completes before assertions
+- Eliminates race condition where ContentPlaceHolder context wasn't available yet
+- Same pattern used successfully for DetailsView (PR #377)
+- Impact: Test now waits for all network activity (CSS/JS) to complete before assertions
+
+**Test results:**
+- ✅ All MasterPage integration tests passing
+- ✅ No console errors specific to component tree
+- ✅ ContentPlaceHolder content visible and interactive
+- ✅ Timing fix eliminates flaky test failures
+
 Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs after DetailsView sample pages migrated to Product model. All 7 DetailsView integration tests passing.
 
 ## Summary: M17 AJAX Control Integration Tests (2026-02-27)
@@ -35,8 +65,6 @@ Fixed 5 stale Customer→Product assertions in InteractiveComponentTests.cs afte
 Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitution) as `AjaxControl_Loads_WithoutErrors` Theory group. Added 1 interaction test for Timer auto-increment. Build green.
 
 ## Team Updates (Current)
-
-📌 Team update (2026-03-17): #471 & #472 resolved. GUID IDs removed from CheckBox/RadioButton/RadioButtonList; L1 script test suite 100% passing. FileUpload already compliant. May need CheckBoxList audit. — decided by Cyclops
 
 📌 Team update (2026-02-26): WebFormsPage unified wrapper — inherits NamingContainer, adds Theme cascading — decided by Jeffrey T. Fritz, Forge
 📌 Team update (2026-02-26): SharedSampleObjects is the single source for sample data parity — decided by Jeffrey T. Fritz
@@ -89,129 +117,19 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
  Team update (2026-03-05): Migration report image paths must use ../../../ (3-level traversal) for repo-root assets  decided by Beast
 
- Team update (2026-03-06): CRITICAL  Git workflow: feature branches from dev, PRs target dev. NEVER push to or merge into upstream main (production releases only).  directed by Jeff Fritz
-
- Team update (2026-03-06): CONTROL-COVERAGE.md updated  library ships 153 Razor components (was listed as 58). ContentPlaceHolder reclassified from 'Not Supported' to Infrastructure Controls. Reference updated CONTROL-COVERAGE.md for accurate component inventory.  decided by Forge
-
-� Team update (2026-03-06): LoginView is a native BWFC component  do NOT replace with AuthorizeView in migration guidance. Both migration-standards SKILL.md files (in .ai-team/skills/ and migration-toolkit/skills/) must be kept in sync. WebFormsPageBase patterns corrected in all supporting docs.  decided by Beast
-
- Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
+ Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
 
 
- Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
-
- Team update (2026-03-08): @using BlazorWebFormsComponents.LoginControls must be in every generated _Imports.razor  decided by Cyclops
+ Team update (2026-03-06): Layer 2 conventions established  Button OnClick uses EventArgs (not MouseEventArgs), code-behind class names must match .razor filenames exactly, use EF Core wildcard versions for .NET 10, CartStateService replaces Session, GridView needs explicit TItem  decided by Cyclops
 
 
- Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. Integration test Program.cs patterns updated  no longer need manual `AddHttpContextAccessor()`.  decided by Cyclops
+ Team update (2026-03-06): bwfc-migrate.ps1 uses -Path and -Output params (not -SourcePath/-DestinationPath). ProjectName is auto-detected  decided by Bishop
 
 
- Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+ Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz
+
+📌 Team update (2026-05-07T12:43): Run 40 complete — 25/25 acceptance tests, 21:55 runtime (-43% vs Run 39). RuntimeDetector/ProgramCsEmitter scaffold validated. BWFC controls preserved on acceptance path. Next focus: runtime scaffold automation, compile-surface debt reduction — decided by Bishop
 
 
- Team update (2026-03-11): ItemType renames must cover ALL consumers (tests, samples, docs)  not just component source. CI may only surface first few errors.  decided by Cyclops
-
-### UpdatePanel Integration Test Coverage (2026-03-13)
-
-**Summary:** Added 3 Playwright interaction tests for UpdatePanel ContentTemplate enhancement. Tests cover Block mode, ContentTemplate syntax, and Inline mode with proper assertion patterns for Blazor state updates.
-
-**Tests added:**
-1. `UpdatePanel_BlockMode_RendersAsDivAndInteractsCorrectly` — Block mode (default), button click
-2. `UpdatePanel_ContentTemplate_RendersAndInteractsCorrectly` — Web Forms syntax, alert styling, interaction
-3. `UpdatePanel_InlineMode_RendersAndRefreshesCorrectly` — Inline mode (span), time display, Refresh button
-
-**Patterns:** `WaitUntilState.NetworkIdle` for page navigation (AJAX control standard), `Filter(HasTextString)` for element targeting (strict-mode safety), 500ms/1000ms waits for state updates, ISO timestamp console filtering, regex time validation.
-
-**Coverage:** 1 smoke test (existing) + 3 interaction tests = 4 total UpdatePanel tests, all passing.
-
-📌 Team update (2026-03-13): UpdatePanel integration tests complete — 3 interaction tests covering all rendering modes and interactive behaviors. All 4 UpdatePanel tests passing (1 smoke + 3 interaction). Follows established AJAX control test conventions.
-
-### Students GridView LEFT JOIN Fix + Test Timing Verification (2026-03-14)
-
-**Summary:** Verified Playwright test timing fixes already in place. `StudentsPageTests.cs` contains all required improvements: BlurAsync on last field, 1000ms post-click wait, 3-second retry loop.
-
-**Verification:** No new changes needed. Test infrastructure already stable and meets requirements.
-
-📌 Team update (2026-03-14): Students LEFT JOIN fix completed by Cyclops — replaced SelectMany (INNER JOIN) with Students.Include(Enrollments) loop. Students without enrollments appear with Count=0, Date=DateTime.Today. Colossus verified Playwright test timing fixes already in place from previous session. All tests passing. Commit d3dc610f.
-
-
-**Summary:** 40 tests total — 11 passed, 29 failed, 0 skipped (33.5s duration)
-
-**Breakdown by test class:**
-
-| Class | Total | Passed | Failed | Root Cause |
-|---|---|---|---|---|
-| NavigationTests | 11 | 2 | 9 | .aspx URLs → 404; `/` → 404; DB pages → 500 |
-| HomePageTests | 4 | 0 | 4 | `/Home.aspx` → 404 (missing middleware) |
-| AboutPageTests | 5 | 0 | 5 | `/About.aspx` → 404 (missing middleware) |
-| StudentsPageTests | 9 | 4 | 5 | `/Students.aspx` → 404; DB → 500 |
-| CoursesPageTests | 6 | 4 | 2 | `/Courses.aspx` → 404; DB → 500 |
-| InstructorsPageTests | 5 | 1 | 4 | `/Instructors.aspx` → 404; DB → 500 |
-
-**⚠ 4 of 11 "passed" tests are vacuously true** — guard clauses (`if element.Count > 0`) skip assertions when page is 404.
-
-**Three root causes identified:**
-
-1. **Missing `app.UseBlazorWebFormsComponents()` middleware** (affects 20+ tests): Program.cs calls `AddBlazorWebFormsComponents()` for DI but never calls `UseBlazorWebFormsComponents()` in the middleware pipeline. Without this, `.aspx` URL rewriting is absent — all test navigations to `/Home.aspx`, `/About.aspx`, etc. return 404. This is a **Phase 2/3 (L2 transform) gap**.
-
-2. **SQL Server LocalDB unavailable** (affects 3 `AllPages_ReturnHttp200` tests + cascading): `/Students`, `/Courses`, `/Instructors` return HTTP 500 because the `ContosoUniversity` database doesn't exist or the connection string targets `(localdb)\mssqllocaldb`. This is an **infrastructure/seed-data gap** — not a migration defect.
-
-3. **No root route `/`** (affects 6 `NavLink_NavigatesToCorrectPage` tests): Tests start at `BaseUrl + "/"` which returns 404 — no `@page "/"` route exists. Navigation link tests can't find any elements.
-
-**Infrastructure notes:**
-- `--no-launch-profile` required to honor `ASPNETCORE_URLS`; launchSettings.json overrides to ports 5000/5001
-- Playwright Chromium installed successfully; browser automation works
-- App starts in ~2s, Production mode by default with `--no-launch-profile`
-
-### UpdatePanel Integration Tests (2026-03-13)
-
-**Summary:** Added 3 interaction tests for the UpdatePanel component after ContentTemplate RenderFragment parameter was added.
-
-**Tests added to `InteractiveComponentTests.cs`:**
-1. `UpdatePanel_BlockMode_RendersAsDivAndInteractsCorrectly` — Verifies Block mode (default) renders as a `<div>`, content displays correctly, and button clicks update the counter.
-2. `UpdatePanel_ContentTemplate_RendersAndInteractsCorrectly` — Verifies Web Forms `<ContentTemplate>` syntax works, alert div renders with correct styling, and button interaction updates the counter.
-3. `UpdatePanel_InlineMode_RendersAndRefreshesCorrectly` — Verifies Inline mode renders as a `<span>` wrapper, time display is visible, and Refresh button triggers Blazor re-render with updated time value.
-
-**Patterns followed:**
-- Used `WaitUntilState.NetworkIdle` for page navigation (consistent with AJAX control patterns)
-- Used `Filter(new() { HasTextString = "..." })` pattern for specific element targeting to avoid strict-mode violations
-- Used `500ms` wait after button clicks for Blazor state updates (conservative for CI stability)
-- Used `1000ms` wait for time refresh test to ensure seconds change
-- Console error filtering: ISO timestamp pattern + "Failed to load resource" (standard pattern)
-- Regex pattern `@"\d{1,2}:\d{2}:\d{2} (AM|PM)"` to verify time format without asserting exact equality (time changes between reads)
-
-**Coverage:**
-- Smoke test already existed: `[InlineData("/ControlSamples/UpdatePanel")]` in `AjaxControl_Loads_WithoutErrors` Theory group (line 234, ControlSampleTests.cs)
-- 3 new interaction tests verify all three rendering modes (Block, ContentTemplate, Inline) and their interactive behaviors
-- All 8 UpdatePanel tests passing (5 smoke + 3 interaction)
-
-
-📌 Team update (2026-03-16): Playwright infrastructure confirmed shipping. Unblocks HTML Fidelity dimension for Component Health Dashboard v1. — Forge
-
-### Validator + New Page Integration Tests (2026-03-17)
-
-**Summary:** Added 14 new integration tests — 11 interaction tests and 3 smoke tests.
-
-**Smoke tests added to `ControlSampleTests.cs`:**
-- `[InlineData("/ControlSamples/Content")]`, `[InlineData("/ControlSamples/ContentPlaceHolder")]`, `[InlineData("/ControlSamples/View")]` in `UtilityFeature_Loads_WithoutErrors` Theory group.
-
-**Interaction tests added to `InteractiveComponentTests.cs`:**
-1. `CompareValidator_InvalidValue_ShowsError` — submits "5" (not > 10), asserts error text appears
-2. `CompareValidator_ValidValue_SubmitsSuccessfully` — submits "15", asserts no error
-3. `RangeValidator_OutOfRange_ShowsError` — submits "1800" (below 1900–2100), asserts error
-4. `RangeValidator_InRange_SubmitsSuccessfully` — submits "2000", asserts no error
-5. `RegularExpressionValidator_NonMatching_ShowsError` — submits "abc" (not 5-digit), asserts error
-6. `RegularExpressionValidator_Matching_SubmitsSuccessfully` — submits "12345", asserts no error
-7. `CustomValidator_InvalidValue_ShowsError` — submits "Banana" (doesn't start with A), asserts error
-8. `CustomValidator_ValidValue_SubmitsSuccessfully` — submits "Apple", asserts no error
-9. `ValidationSummary_InvalidSubmit_ShowsSummaryWithMultipleErrors` — submits empty, asserts summary header + error messages
-10. `Content_Renders_MasterPageDemoElements` — verifies heading and content rendered
-11. `ContentPlaceHolder_Renders_DemoContent` — verifies heading and content rendered
-12. `View_ClickThrough_ChangesVisibleContent` — verifies initial view, clicks button, checks content persists
-
-**Patterns:** Used `data-audit-control` locators for all validators, `PressSequentiallyAsync` + `Tab` for input fields, `TextContentAsync()` on container + `Assert.Contains`/`DoesNotContain` for error text validation, `#region` blocks per component. Content/ContentPlaceHolder/View tests written defensively since pages are being created in parallel by Jubilee.
-
-**Files modified:**
-- `samples/AfterBlazorServerSide.Tests/ControlSampleTests.cs` — 3 new `[InlineData]` entries
-- `samples/AfterBlazorServerSide.Tests/InteractiveComponentTests.cs` — 11 new `[Fact]` methods
-
+📌 Team update (2026-05-07T13:17): Bishop completed GridView/ListView template emission fixes — ItemType propagation and explicit placeholder contexts now reduce acceptance-test repair surface on data-bound pages. CLI: 603/603 tests. Next: Run 41 validation — decided by Bishop

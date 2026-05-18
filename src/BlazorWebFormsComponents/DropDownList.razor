@@ -5,7 +5,8 @@
 @if (Visible)
 {
 	<select id="@ClientID" class="@CssClass" style="@Style" title="@ToolTip"
-			disabled="@(!Enabled)" @onchange="HandleChange">
+			disabled="@(!Enabled)" @onchange="HandleChange"
+			@attributes="GetAutoPostBackAttributes(AutoPostBack)">
 		@foreach (var item in GetItems())
 		{
 			<option value="@item.Value" selected="@(item.Value == SelectedValue)">

@@ -1,0 +1,154 @@
+@page "/migration/session"
+@inherits WebFormsPageBase
+
+<PageTitle>Session State Migration Demo</PageTitle>
+
+<h2>Session State Migration</h2>
+
+<p>This sample demonstrates the <code>SessionShim</code> that provides Web Forms-compatible
+   <code>Session["key"]</code> access in Blazor. The shim uses ASP.NET Core <code>ISession</code>
+   in SSR mode and falls back to in-memory storage in interactive Blazor Server mode.</p>
+
+<hr />
+
+<h3>1. Setting &amp; Getting Session Values</h3>
+<p>In Web Forms, you stored values with <code>Session["key"] = value</code> and retrieved them
+   with <code>(string)Session["key"]</code>. The BWFC shim supports the same pattern.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>// Store a value
+Session["UserName"] = txtName.Text;
+
+// Retrieve a value
+var name = (string)Session["UserName"];</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same code works!
+Session["UserName"] = userName;
+
+// Retrieve a value
+var name = (string)Session["UserName"];</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="session-setget-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Set &amp; Get</h5>
+        <div class="mb-3">
+            <label class="form-label">Enter a value to store in session:</label>
+            <div class="input-group">
+                <input type="text" class="form-control" @bind="inputValue"
+                       placeholder="Type something..." />
+                <button class="btn btn-primary" @onclick="StoreValue">Store in Session</button>
+            </div>
+        </div>
+        <p>
+            Stored value for key <code>"UserName"</code>:
+            <strong>@((string?)Session["UserName"] ?? "(empty)")</strong>
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>2. Session.Count</h3>
+<p>Check how many items are currently stored in the session.</p>
+
+<div class="card mt-3" data-audit-control="session-count-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Count</h5>
+        <p>Items in session: <strong>@Session.Count</strong></p>
+    </div>
+</div>
+
+<hr />
+
+<h3>3. Type-Safe Access with Get&lt;T&gt;()</h3>
+<p>The shim provides <code>Session.Get&lt;T&gt;(key)</code> for strongly-typed retrieval,
+   avoiding manual casts.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>// Requires manual cast
+var count = (int)Session["ClickCount"];
+Session["ClickCount"] = count + 1;</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Type-safe access
+var count = Session.Get&lt;int&gt;("ClickCount");
+Session["ClickCount"] = count + 1;</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="session-typesafe-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Typed Counter</h5>
+        <p>Click count (stored as <code>int</code>): <strong>@(Session.Get<int>("ClickCount"))</strong></p>
+        <button class="btn btn-success" @onclick="IncrementCounter">Increment Counter</button>
+    </div>
+</div>
+
+<hr />
+
+<h3>4. Clear Session</h3>
+<p>Call <code>Session.Clear()</code> to remove all session values, just like in Web Forms.</p>
+
+<div class="card mt-3" data-audit-control="session-clear-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Clear</h5>
+        <p>Items in session: <strong>@Session.Count</strong></p>
+        <button class="btn btn-danger" @onclick="ClearSession">Clear All Session Values</button>
+    </div>
+</div>
+
+<hr />
+
+<h3>5. Setup Required</h3>
+<p>The session shim is automatically registered when you call
+   <code>AddBlazorWebFormsComponents()</code>. You also need to enable the session middleware:</p>
+
+<pre><code>// Program.cs
+builder.Services.AddBlazorWebFormsComponents(); // registers SessionShim + AddSession()
+
+var app = builder.Build();
+app.UseSession();                  // enable session middleware
+app.UseBlazorWebFormsComponents();
+</code></pre>
+
+<p>Then inherit from <code>WebFormsPageBase</code> in your component to access <code>Session</code>:</p>
+
+<pre><code>@@inherits WebFormsPageBase
+
+@@code {
+    protected override void OnInitialized()
+    {
+        Session["Greeting"] = "Hello from Blazor!";
+        var greeting = (string?)Session["Greeting"];
+    }
+}</code></pre>
+
+@code {
+    private string inputValue = "";
+
+    private void StoreValue()
+    {
+        Session["UserName"] = inputValue;
+    }
+
+    private void IncrementCounter()
+    {
+        var count = Session.Get<int>("ClickCount");
+        Session["ClickCount"] = count + 1;
+    }
+
+    private void ClearSession()
+    {
+        Session.Clear();
+        inputValue = "";
+    }
+}

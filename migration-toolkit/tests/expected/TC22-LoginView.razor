@@ -1,0 +1,12 @@
+@page "/TC22-LoginView"
+<PageTitle>Login View Test</PageTitle>
+<AuthorizeView>
+    <NotAuthorized>
+        <p>You are not logged in.</p>
+        <a href="/Login.aspx">Log in</a>
+    </NotAuthorized>
+    <Authorized>
+        <p>Welcome back!</p>
+    </Authorized>
+    @* TODO(bwfc-identity): Convert RoleGroups to policy-based AuthorizeView *@
+</AuthorizeView>

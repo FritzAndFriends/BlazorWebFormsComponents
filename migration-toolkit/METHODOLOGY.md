@@ -10,10 +10,11 @@
 ┌─────────────────────┐    ┌─────────────────────┐    ┌─────────────────────┐
 │    Layer 1           │    │    Layer 2           │    │    Layer 3           │
 │    AUTOMATED         │───▶│    COPILOT-ASSISTED  │───▶│    ARCHITECTURE      │
-│                      │    │                      │    │                      │
-│  bwfc-migrate.ps1    │    │  Copilot + Skill     │    │  Human + Copilot     │
-│  ~40% of work        │    │  ~45% of work        │    │  ~15% of work        │
-│  ~30 seconds         │    │  ~2–4 hours          │    │  ~8–12 hours         │
+│    + SHIMS           │    │                      │    │                      │
+│  webforms-to-blazor   │    │  Copilot + Skill     │    │  Human + Copilot     │
+│  CLI or PS1 script    │    │                      │    │                      │
+│  ~60% of work        │    │  ~30% of work        │    │  ~10% of work        │
+│  ~30 seconds         │    │  ~1–3 hours          │    │  ~8–12 hours         │
 │  100% accuracy       │    │  High accuracy       │    │  Requires judgment   │
 └─────────────────────┘    └─────────────────────┘    └─────────────────────┘
          │                          │                          │
@@ -25,7 +26,7 @@ Each layer handles a different *kind* of work, not just a different *amount*. Th
 
 | Layer | Intelligence Required | Tool | Error Rate |
 |---|---|---|---|
-| Layer 1 | None — pure regex/pattern matching | PowerShell script | ~0% (deterministic) |
+| Layer 1 | None — compiled transforms or regex matching | `webforms-to-blazor` CLI or PowerShell script | ~0% (deterministic) |
 | Layer 2 | Pattern recognition — knows BWFC control mappings | Copilot with migration skill | Low (guided by rules) |
 | Layer 3 | Judgment — understands your app's architecture | Human + Copilot with data migration skill | Varies (depends on decisions) |
 
@@ -55,9 +56,10 @@ The scan report tells you whether BWFC is a good fit before you invest time in m
 
 ## Layer 1: Automated Transforms
 
-**Tool:** [`scripts/bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1)
+**Primary tool:** [`webforms-to-blazor` CLI](../src/BlazorWebFormsComponents.Cli/) — compiled C# transforms that scaffold a **.NET 10 Blazor Web App using static server-side rendering (SSR)**
+**Alternative:** [`scripts/bwfc-migrate.ps1`](../scripts/bwfc-migrate.ps1) — lightweight PowerShell regex transforms that target the same **.NET 10 Blazor SSR** output
 
-Layer 1 handles every transform that can be expressed as a regex find-and-replace. These are mechanical, deterministic, and 100% accurate. No human judgment needed.
+Layer 1 handles every transform that can be applied mechanically. The CLI tool applies compiled, unit-tested transforms with a migration report; the PowerShell script provides simpler regex-based transforms for quick starts. **Both tools standardize on .NET 10 Blazor SSR as the migration target — not global interactive Blazor Server mode.**
 
 ### What Layer 1 Does
 
@@ -68,19 +70,42 @@ Layer 1 handles every transform that can be expressed as a regex find-and-replac
 | Expression conversions (`<%: %>` → `@()`) | ~35 | 100% |
 | `ItemType` → `TItem` conversions | 8 | 100% |
 | Content wrapper removals (`<asp:Content>`) | 28 | 100% |
+| Runnable master-page shell generation | Master pages | 100% |
 | URL conversions (`~/` → `/`) | All | 100% |
 | File renaming (`.aspx` → `.razor`) | 33 | 100% |
 | Project scaffold (`.csproj`, `Program.cs`, `_Imports.razor`, `App.razor`) | Full | ✅ |
 
-`_Imports.razor` includes `@inherits BlazorWebFormsComponents.WebFormsPageBase` so that all converted pages get `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` without per-page injection. The layout scaffold includes `<BlazorWebFormsComponents.Page />` to render `<PageTitle>` and `<meta>` tags.
+The CLI generates `_Imports.razor` with `@inherits BlazorWebFormsComponents.WebFormsPageBase` so every page automatically gets `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack`, `Session`, `Response`, `Request`, `Server`, `Cache`, and `ClientScript` — with the same API as Web Forms. The scaffolded app targets **static SSR on .NET 10**, preserving the Web Forms request/response lifecycle by default.
+
+The CLI also generates `Program.cs` with `builder.Services.AddBlazorWebFormsComponents()`, which registers all the shim infrastructure (SessionShim, ResponseShim, RequestShim, CacheShim, ServerShim, ClientScriptShim, ViewStateShim) automatically.
+
+### Shim Infrastructure
+
+When `AddBlazorWebFormsComponents()` is called in `Program.cs` and pages inherit from `WebFormsPageBase` (via `@inherits` in `_Imports.razor`), the following Web Forms APIs **work AS-IS** with no code changes:
+
+| Shim | What It Enables |
+|------|----------------|
+| **Page.Title / Page.MetaDescription / Page.MetaKeywords** | Set metadata from code-behind — auto-rendered by `<Page />` |
+| **IsPostBack** | Returns `false` on first render, `true` on subsequent interactions |
+| **Response.Redirect("~/path")** | Auto-strips `~/` prefix and `.aspx` extension, uses `NavigationManager` internally |
+| **Request.Url / Request.QueryString["key"]** | Reads current URL and query parameters |
+| **Request.Form["key"]** | Reads form POST data (wrap form in `<WebFormsForm>`) |
+| **Session["key"]** | Scoped in-memory dictionary — works like Web Forms Session |
+| **Cache["key"]** | In-memory application cache |
+| **Server.MapPath("~/path")** | Maps virtual paths to physical paths |
+| **Page.ClientScript.RegisterStartupScript(...)** | Registers client-side scripts via JS interop |
+| **ViewState["key"]** | Compile-compatible dictionary (in-memory, not serialized to page) |
+| **__doPostBack / IPostBackEventHandler** | PostBack event support with JS interop |
+
+This means that code-behind files referencing `Response.Redirect`, `Session`, `Request`, `IsPostBack`, `Page.Title`, `Cache`, `Server.MapPath`, or `ClientScript` **compile and run unchanged** — no manual conversion required.
 
 ### What Layer 1 Does NOT Do
 
 - Convert `SelectMethod` to `Items` binding (requires understanding the data flow)
-- Convert code-behind lifecycle methods (requires semantic understanding)
+- Convert code-behind lifecycle methods like `Page_Load` signature (requires semantic understanding)
 - Replace DataSource controls (requires architecture decisions)
 - Wire authentication (requires knowing your auth strategy)
-- Convert Master Pages to layouts (partially — removes directives but doesn't create `@Body`)
+- Collapse migrated master pages all the way to final native `@layout` / `@Body` layouts
 
 These are intentionally left for Layer 2 and Layer 3.
 
@@ -104,19 +129,45 @@ After Layer 1, pages fall into three readiness categories:
 
 Layer 2 handles transforms that follow consistent patterns but require understanding control semantics. A human *could* do these mechanically, but it's tedious and error-prone. Copilot with the BWFC migration skill handles them reliably.
 
-### What Layer 2 Handles
+**L2 Principle: Wire up data binding and lifecycle — NOT to replace shims with native patterns.**
+
+The shims ARE the L2 strategy. If the original Web Forms code says `Session["CartId"]`, the migrated code says `Session["CartId"]`. The shim makes this work. Don't reinvent what already exists. Layer 2 is about making data flow through the page and connecting event handlers — NOT about converting `Response.Redirect()` to `NavigationManager.NavigateTo()`. That's an optional Layer 3 optimization.
+
+### What Shims Handle Automatically (no Layer 2 work needed)
+
+These items were previously Layer 2 manual transforms but are now handled AS-IS by BWFC shims:
+
+| Pattern | Status |
+|---|---|
+| `Response.Redirect("~/path")` | ✅ Works AS-IS via ResponseShim — auto-strips `~/` and `.aspx` |
+| `IsPostBack` checks in code-behind | ✅ Works AS-IS via WebFormsPageBase |
+| `Session["key"]` access | ✅ Works AS-IS via SessionShim — no longer needs Layer 3 decision |
+| `Page.Title`, `Page.MetaDescription` | ✅ Works AS-IS via WebFormsPageBase + `<Page />` |
+| `Request.QueryString["key"]` | ✅ Works AS-IS via RequestShim |
+| `Cache["key"]` | ✅ Works AS-IS via CacheShim |
+| `Server.MapPath("~/path")` | ✅ Works AS-IS via ServerShim |
+
+### What Layer 2 Still Handles
 
 | Transform | Before | After |
 |---|---|---|
 | Data binding | `SelectMethod="GetProducts"` | `Items="products"` + `OnInitializedAsync` |
 | Template context | `<%#: Item.Name %>` | `@Item.Name` with `Context="Item"` |
-| Lifecycle methods | `Page_Load` with `IsPostBack` check | `OnInitializedAsync` |
+| Lifecycle methods | `Page_Load(object sender, EventArgs e)` signature | `OnInitializedAsync` (the `IsPostBack` inside works AS-IS) |
 | Event handlers | `void Btn_Click(object sender, EventArgs e)` | `void Btn_Click()` |
-| Navigation | `Response.Redirect("~/path")` | `NavigationManager.NavigateTo("/path")` |
-| Form wrappers | `<form runat="server">` | Removed (or `<EditForm>` where needed) |
-| Layout conversion | `<asp:ContentPlaceHolder ID="MainContent">` | `@Body` |
+| Form wrappers | `<form runat="server">` | Removed, or `<WebFormsForm>` for Request.Form, or `<EditForm>` for validation |
+| Master/content contract normalization | Page-specific `<asp:Content>` sections | `<ChildComponents><Content ContentPlaceHolderID="..." />...</ChildComponents>` |
+| Optional native layout cleanup | Single-slot `<MasterPage>` shell | `@layout` + `@Body` when the shell has truly become a single body slot |
 | Query parameters | `[QueryString] int? id` | `[SupplyParameterFromQuery]` |
 | Route parameters | `[RouteData] int id` | `@page "/path/{id:int}"` + `[Parameter]` |
+
+For master pages, the current migration strategy is:
+
+1. **Layer 1** emits a runnable BWFC shell using `<MasterPage>`, optional `<Head>`, and `<ChildContent>`.
+2. **Layer 2** normalizes child pages so their named regions become `<Content>` blocks grouped under `<ChildComponents>`.
+3. **Layer 3** optionally simplifies the result to native Blazor layouts when only a single body slot remains and the named-section bridge is no longer needed.
+
+To keep this extensible, recurring page-shape rewrites should live in an isolated **semantic pattern catalog** rather than being added as one-off regex transforms. Each pattern can then be introduced as its own matcher/applicator pair with targeted fixtures and docs. See `docs\cli\semantic-pattern-catalog.md` in the main repo for the contributor contract.
 
 ### How to Use Layer 2
 
@@ -141,6 +192,17 @@ Layer 2 is "high accuracy" rather than "100% accuracy" because:
 
 Always review Copilot's changes before committing.
 
+### Shim Path vs. Native Blazor Path
+
+> **You have a choice.** BWFC shims get your app compiling and running fast — but they're not the only option long-term.
+>
+> | Approach | When to Use | Example |
+> |---|---|---|
+> | **Shim path** (keep AS-IS) | Migration speed is the priority; code works correctly; team isn't ready to learn Blazor-native patterns yet | `Response.Redirect("~/Products")` — works via ResponseShim |
+> | **Native Blazor path** (refactor later) | **Layer 3 optimization** — post-migration polish; team is comfortable with Blazor; want to reduce BWFC dependency | `NavigationManager.NavigateTo("/Products")` — native Blazor |
+>
+> **Recommendation:** Use shims to get migrated fast (Layer 2), then refactor to native Blazor incrementally in Layer 3 as your team builds Blazor expertise. Both paths produce working code. **Replacing shims with native patterns is OPTIONAL, not required.**
+
 ---
 
 ## Layer 3: Architecture Decisions
@@ -150,17 +212,20 @@ Always review Copilot's changes before committing.
 
 Layer 3 is the ~15% of migration work that requires understanding your application's architecture. No script or AI can make these decisions for you — but the data migration skill and Copilot can guide you through the options and trade-offs.
 
+**Important:** Replacing shims with native Blazor patterns (e.g., `Response.Redirect()` → `NavigationManager.NavigateTo()`) is an **OPTIONAL Layer 3 optimization**, not a migration requirement. Your app works with the shims. Native patterns are for teams that want to reduce BWFC dependency long-term.
+
 ### Common Layer 3 Decisions
 
 | Decision | Web Forms Pattern | Blazor Options |
 |---|---|---|
 | **Data access** | `SqlDataSource`, inline `DbContext` | EF Core + injected service, Dapper, repository pattern |
-| **Session state** | `Session["key"]` | Scoped service, `ProtectedSessionStorage`, circuit state |
 | **Authentication** | ASP.NET Membership / Identity | ASP.NET Core Identity, external provider, cookie auth |
 | **Global.asax** | `Application_Start`, `Application_Error` | `Program.cs` middleware pipeline |
 | **Web.config** | `<connectionStrings>`, `<appSettings>` | `appsettings.json`, user secrets, environment variables |
 | **HTTP handlers** | `IHttpHandler`, `IHttpModule` | ASP.NET Core middleware |
 | **Third-party APIs** | Direct `WebRequest`/`WebClient` calls | `HttpClient` via DI with `IHttpClientFactory` |
+
+> **Note:** Session state (`Session["key"]`) is no longer a Layer 3 decision. BWFC's `SessionShim` provides a scoped in-memory dictionary that works AS-IS. If you need persistent/distributed session state, that's still an architecture decision — but the code compiles and runs without changes.
 
 ### Using the Data Migration Skill
 
@@ -223,8 +288,8 @@ Based on the [WingtipToys proof-of-concept](../planning-docs/WINGTIPTOYS-MIGRATI
 | Layer | Solo Developer | With Copilot/Agents |
 |---|---|---|
 | Layer 0 (scan) | 5 minutes | 5 minutes |
-| Layer 1 (automated) | ~30 seconds | ~30 seconds |
-| Layer 2 (structural) | 8–12 hours | 2–4 hours |
+| Layer 1 (automated + shims) | ~30 seconds | ~30 seconds |
+| Layer 2 (structural) | 6–10 hours | 1–3 hours |
 | Layer 3 (architecture) | 10–14 hours | 8–12 hours |
 | **L3-opt (optional)** | **1–2 hours** | **30–60 minutes** |
 | **Total** | **18–28 hours** | **10–17 hours** |

@@ -1,10 +1,56 @@
 Migration might not be the correct term for this process, it could appear to be more of a rewrite using Blazor. In this article, you will learn how to get started rewriting your Web Forms application using Blazor with the Blazor Web Forms Components package.
 
-The output project from this operation will be a .NET Core 3.1 project running server-side Blazor.  This is the current desired result as this is the supported LTS version of .NET Core and Blazor that was published in December 2019.  With the schedule of .NET releases (as of Feb. 2020), we should expect to update to the next LTS version, .NET 6 between November 2021 and November 2022.
+The output project from this operation should be a **.NET 10 Blazor Web App using static server-side rendering (SSR)**. BWFC migrations target SSR by default because it preserves the Web Forms request/response model — including `HttpContext`, cookies, redirects, and form posts — while still giving you a clean path to add interactivity only where it is truly needed.
 
 ## Step 0 - Acknowledgement
 
 The first step is a step of acknowledgement.  This process is not 100% and is not guaranteed to deliver a Blazor application without some amount of rewriting.  Applications are written in many different ways, and the tools provided here are attempting to get your project *CLOSE* to Blazor so that you have to rewrite as little code as possible.
+
+## Migration Philosophy: The Strangler Fig Pattern
+
+BWFC is built around the **Strangler Fig migration pattern** — the practice of incrementally replacing a legacy system while keeping it running in parallel, rather than attempting a complete rewrite all at once.
+
+Instead of taking your Web Forms app offline for weeks to rewrite everything, the Strangler Fig approach lets you:
+
+- **Migrate one page or feature at a time** — without stopping the legacy app
+- **Keep both running in parallel** — with traffic routing between them
+- **Use zero-rewrite shims** — ClientScriptShim, SessionShim, and others let code work unchanged
+- **Modernize at your own pace** — refactor shims to native Blazor patterns on your schedule
+
+For a detailed guide on how to apply this pattern, see the **[Strangler Fig Pattern documentation](StranglerFigPattern.md)**.
+
+## Phase 1: Just Make It Compile (Compilation Shims)
+
+Before diving into deep architectural changes, BWFC provides **compilation shims** that allow migrated code to compile unchanged. This phase focuses on making your Web Forms code work in a Blazor project with minimal refactoring.
+
+### Phase 1 Features
+
+The BWFC migration toolkit includes:
+
+| Feature | What It Does | More Info |
+|---------|-------------|-----------|
+| **ConfigurationManager Shim** | Migrated BLL/DAL code accesses `ConfigurationManager.AppSettings["key"]` and `ConnectionStrings["name"]` unchanged | [Configuration Manager Guide](Phase1-ConfigurationManager.md) |
+| **App_Start Stubs** | `BundleConfig` and `RouteConfig` files compile as-is; bundle/route processing happens in Blazor alternatives | [App_Start Stubs Guide](Phase1-AppStartStubs.md) |
+| **L1 Automated Script** | Mechanical transforms: `web.config` → `appsettings.json`, `.aspx` → `.razor`, `IsPostBack` guard unwrapping, selective `using` retention | [Automated Migration Guide](AutomatedMigration.md) |
+
+### Phase 1 Workflow
+
+1. **Scan** your Web Forms app: `bwfc-scan.ps1` inventories controls and readiness
+2. **Run L1 Script**: `bwfc-migrate.ps1` performs mechanical transforms and web.config extraction
+3. **Enable Shims**: Call `AddBlazorWebFormsComponents()` in `Program.cs`
+4. **Compile**: Your migrated project compiles with minimal code changes
+5. **Plan Phase 2**: Identify which shims to replace with Blazor-native patterns
+
+### When to Move to Phase 2
+
+Phase 1 gets your code **compiling**. Plan Phase 2 migration when you're ready to:
+
+- Replace `ConfigurationManager` with dependency injection
+- Replace bundling stubs with Blazor CSS/JS Isolation
+- Implement proper routing with `@page` directives
+- Add proper configuration providers (Azure Key Vault, etc.)
+
+See [Automated Migration Guide](AutomatedMigration.md) for next steps.
 
 ## Step 1 - Readiness
 
@@ -20,15 +66,13 @@ There is a separate [strategy document](NET-Standard.md) with instructions to mi
 
 **A side benefit**: this is a good architecture practice that should allow you to test your business logic independently from your web project.  Try starting a unit test project with xUnit, NUnit or MSTest to exercise some of your business logic.  You will be able to run your tests either in the Visual Studio Test Runner or at the command line using `dotnet test`
 
-## Step 3 - Create a new Blazor Server Project
+## Step 3 - Create a new .NET 10 Blazor SSR Project
 
-Create your new Blazor Server-Side project either in Visual Studio 2019, Visual Studio for Mac, or at the command line.  With Visual Studio, follow these steps:
+Create your new **.NET 10 Blazor Web App configured for static SSR**. The `webforms-to-blazor` CLI and `bwfc-migrate.ps1` scaffolds already target this setup automatically.
 
 >> ADD IMAGES
 
-At the command-line you can execute the following command to create your Blazor Server-Side project:
-
-`dotnet new blazorserver -f netcoreapp3.1 -o <<DESTINATION FOLDER>>`
+If you are creating the host manually, choose the .NET 10 Blazor Web App template and keep the app in static SSR mode as your migration baseline. Do **not** start from global interactive server mode.
 
 Add a NuGet reference to the BlazorWebFormsComponents package on the command-line as follows:
 
@@ -38,7 +82,7 @@ Next, add references to the projects converted to .NET Standard in the previous 
 
 >> ADD IMAGES
 
-On the command-line you can add references using the dotnet CLI tools in your Blazor Server-Side project folder with syntax like:
+On the command-line you can add references using the dotnet CLI tools in your .NET 10 Blazor project folder with syntax like:
 
 `dotnet add reference ../MyLibrary`
 
@@ -52,7 +96,7 @@ This will allow you to reference the components from the library directly.  With
 
 ## Step 4 - Master Pages
 
-Master Pages in Web Forms are a combination of two concepts in Blazor: a host page and a Blazor layout.  In Blazor Server-Side the host page is a razor page by default in `Pages/_Host.cshtml` that bootstraps the Blazor application and hosts all static CSS and JavaScript references.
+Master Pages in Web Forms are a combination of two concepts in Blazor: the app shell and a Blazor layout. In a .NET 10 Blazor SSR app, `Components/App.razor` defines the document shell and hosts your static CSS and JavaScript references.
 
 You will want to place any CSS or JavaScript references from your MasterPages into this host page.  The rest of your MasterPage layout inside the `BODY` tag will need to be migrated to a layout razor file.  In the simplest scenario where you have one MasterPage with *ONLY* HTML content and it has one main content area, you will want to overwrite the content in `Shared/MainLayout.razor`
 

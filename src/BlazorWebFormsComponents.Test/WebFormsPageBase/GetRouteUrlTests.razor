@@ -73,13 +73,29 @@
 
 	private (IRenderedComponent<TestPage> cut, CapturingLinkGenerator linkGen) RenderWithCapturingLinkGen()
 	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
 		var linkGen = new CapturingLinkGenerator();
 		Services.AddSingleton<LinkGenerator>(linkGen);
 		var mockHttpAccessor = new Mock<IHttpContextAccessor>();
 		mockHttpAccessor.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
 		Services.AddSingleton<IHttpContextAccessor>(mockHttpAccessor.Object);
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
 		Services.AddScoped<IPageService, PageService>();
+		RegisterShimServices();
 		return (Render<TestPage>(), linkGen);
+	}
+
+	private void RegisterShimServices()
+	{
+		var mockEnv = new Mock<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>();
+		mockEnv.Setup(e => e.WebRootPath).Returns(System.IO.Path.Combine(System.IO.Path.GetTempPath(), "wwwroot"));
+		mockEnv.Setup(e => e.ContentRootPath).Returns(System.IO.Path.GetTempPath());
+		Services.AddSingleton<Microsoft.AspNetCore.Hosting.IWebHostEnvironment>(mockEnv.Object);
+		Services.AddMemoryCache();
+		Services.AddScoped<CacheShim>();
+		Services.AddScoped<ServerShim>();
+		Services.AddScoped<ClientScriptShim>();
 	}
 
 	[Fact]

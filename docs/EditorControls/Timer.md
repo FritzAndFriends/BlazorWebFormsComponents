@@ -24,42 +24,42 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **EnableViewState** - Blazor handles state differently; use component state instead
 - **OnDataBinding, OnDisposed, OnInit, OnLoad, OnPreRender, OnUnload** - Use Blazor lifecycle methods instead
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server" />
+=== "Web Forms"
 
-<asp:Timer
-    Enabled="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    Interval="integer"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnTick="Tick event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    Visible="True|False"
-/>
-```
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-## Blazor Razor Syntax
+    <asp:Timer
+        Enabled="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        Interval="integer"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnTick="Tick event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        Visible="True|False"
+    />
+    ```
 
-### Basic Timer
+=== "Blazor"
 
-```razor
-<Timer Interval="5000" OnTick="HandleTick" />
+    ```razor
+    <Timer Interval="5000" OnTick="HandleTick" />
 
-@code {
-    void HandleTick()
-    {
-        // Called every 5 seconds
+    @code {
+        void HandleTick()
+        {
+            // Called every 5 seconds
+        }
     }
-}
-```
+    ```
 
 ### Timer with Enable/Disable
 

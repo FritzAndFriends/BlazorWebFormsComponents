@@ -1,0 +1,38 @@
+@* Migrated from: DepartmentPortal/Controls/QuickStats.ascx
+   Original: Dashboard widget displaying summary statistics — employee count,
+   active announcements, upcoming training courses, departments. *@
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>@PortalDataProvider.GetEmployees().Count</h3>
+                <p class="text-muted">Employees</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>@PortalDataProvider.GetDepartments().Count</h3>
+                <p class="text-muted">Departments</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>@PortalDataProvider.GetAnnouncements().Count(a => a.IsActive)</h3>
+                <p class="text-muted">Active Announcements</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h3>@PortalDataProvider.GetCourses().Count</h3>
+                <p class="text-muted">Training Courses</p>
+            </div>
+        </div>
+    </div>
+</div>

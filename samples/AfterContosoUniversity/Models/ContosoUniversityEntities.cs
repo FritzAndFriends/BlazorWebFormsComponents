@@ -1,65 +1,67 @@
-using System;
 using Microsoft.EntityFrameworkCore;
 
-namespace ContosoUniversity.Models
+namespace ContosoUniversity.Models;
+
+public partial class ContosoUniversityEntities : DbContext
 {
-    public class ContosoUniversityEntities : DbContext
+    public ContosoUniversityEntities(DbContextOptions<ContosoUniversityEntities> options) : base(options)
     {
-        public ContosoUniversityEntities(DbContextOptions<ContosoUniversityEntities> options) : base(options) { }
+    }
 
-        public DbSet<Cours> Courses { get; set; }
-        public DbSet<Department> Departments { get; set; }
-        public DbSet<Enrollment> Enrollments { get; set; }
-        public DbSet<Instructor> Instructors { get; set; }
-        public DbSet<Student> Students { get; set; }
+    public DbSet<Cours> Courses { get; set; } = null!;
+    public DbSet<Department> Departments { get; set; } = null!;
+    public DbSet<Enrollment> Enrollments { get; set; } = null!;
+    public DbSet<Instructor> Instructors { get; set; } = null!;
+    public DbSet<Student> Students { get; set; } = null!;
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Cours>(entity =>
         {
-            modelBuilder.Entity<Cours>(entity =>
-            {
-                entity.ToTable("Courses");
+            entity.HasKey(e => e.CourseID);
+            entity.ToTable("Courses");
+            entity.HasOne(d => d.Department)
+                .WithMany(p => p.Courses)
+                .HasForeignKey(d => d.DepartmentID)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(d => d.Instructor)
+                .WithMany(p => p.Courses)
+                .HasForeignKey(d => d.InstructorID)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
-                entity.HasOne(d => d.Instructor)
-                    .WithMany(p => p.Courses)
-                    .HasForeignKey(d => d.InstructorID)
-                    .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.HasKey(e => e.DepartmentID);
+            entity.ToTable("Departments");
+        });
 
-                entity.HasOne(d => d.Department)
-                    .WithMany(p => p.Courses)
-                    .HasForeignKey(d => d.DepartmentID)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
+        modelBuilder.Entity<Enrollment>(entity =>
+        {
+            entity.HasKey(e => e.EnrollmentID);
+            entity.HasOne(d => d.Cours)
+                .WithMany(p => p.Enrollments)
+                .HasForeignKey(d => d.CourseID)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(d => d.Student)
+                .WithMany(p => p.Enrollments)
+                .HasForeignKey(d => d.StudentID)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
-            modelBuilder.Entity<Department>(entity =>
-            {
-                entity.ToTable("Departments");
-            });
+        modelBuilder.Entity<Instructor>(entity =>
+        {
+            entity.HasKey(e => e.InstructorID);
+            entity.ToTable("Instructors");
+        });
 
-            modelBuilder.Entity<Enrollment>(entity =>
-            {
+        modelBuilder.Entity<Student>(entity =>
+        {
+            entity.HasKey(e => e.StudentID);
+            entity.ToTable("Students");
+        });
 
-                entity.HasOne(d => d.Cours)
-                    .WithMany(p => p.Enrollments)
-                    .HasForeignKey(d => d.CourseID)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasOne(d => d.Student)
-                    .WithMany(p => p.Enrollments)
-                    .HasForeignKey(d => d.StudentID)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<Instructor>(entity =>
-            {
-                entity.ToTable("Instructors");
-            });
-
-            modelBuilder.Entity<Student>(entity =>
-            {
-                entity.ToTable("Students");
-            });
-
-        }
     }
 }
-

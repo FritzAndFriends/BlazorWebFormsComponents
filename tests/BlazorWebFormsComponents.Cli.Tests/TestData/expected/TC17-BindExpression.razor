@@ -1,0 +1,9 @@
+@page "/TC17-BindExpression"
+<PageTitle>Bind Test</PageTitle>
+<FormView ItemType="object" id="FormView1">
+    <EditItemTemplate Context="Item">
+        <TextBox id="txtName" @bind-Value="Item.ProductName" />
+        <TextBox id="txtPrice" @bind-Value="Item.Price" />
+        <DropDownList ItemType="object" id="ddlCategory" @bind-Value="Item.CategoryId" />
+    </EditItemTemplate>
+</FormView>

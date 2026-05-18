@@ -8,7 +8,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 - `ID` — identifier to match with Content control's ContentPlaceHolderID
 - `ChildContent` — default content to display if no Content control provides a replacement
-- Auto-registration with parent MasterPage component
+- Resolves named content from the nearest MasterPage host
 - Renders content provided by child pages via Content controls, or falls back to default ChildContent
 
 ## Web Forms Features NOT Supported
@@ -16,54 +16,54 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - Multiple master pages cascading placeholders (use nested layouts in Blazor instead)
 - Master page inheritance chains with placeholders
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<!-- Site.Master -->
-<%@ Master Language="C#" %>
-<html>
-<head>
-    <title><%: Page.Title %></title>
-</head>
-<body>
-    <div class="header">
-        <h1>My Website</h1>
-    </div>
-    
-    <asp:ContentPlaceHolder ID="MainContent" runat="server">
-        <p>Default content if no page overrides this placeholder</p>
-    </asp:ContentPlaceHolder>
-    
-    <div class="footer">
-        <p>&copy; 2024 My Company</p>
-    </div>
-</body>
-</html>
-```
+=== "Web Forms"
 
-## Blazor Syntax
-
-ContentPlaceHolder components are placed within the ChildContent of a MasterPage component. They automatically register with the parent MasterPage.
-
-### Basic ContentPlaceHolder with Default Content
-
-```razor
-<MasterPage>
-    <ChildContent>
+    ```html
+    <!-- Site.Master -->
+    <%@ Master Language="C#" %>
+    <html>
+    <head>
+        <title><%: Page.Title %></title>
+    </head>
+    <body>
         <div class="header">
             <h1>My Website</h1>
         </div>
-        
-        <ContentPlaceHolder ID="MainContent">
-            <p>This is the default content for the main area.</p>
-        </ContentPlaceHolder>
-        
+
+        <asp:ContentPlaceHolder ID="MainContent" runat="server">
+            <p>Default content if no page overrides this placeholder</p>
+        </asp:ContentPlaceHolder>
+
         <div class="footer">
             <p>&copy; 2024 My Company</p>
         </div>
-    </ChildContent>
-</MasterPage>
-```
+    </body>
+    </html>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <MasterPage>
+        <ChildContent>
+            <div class="header">
+                <h1>My Website</h1>
+            </div>
+
+            <ContentPlaceHolder ID="MainContent">
+                <p>This is the default content for the main area.</p>
+            </ContentPlaceHolder>
+
+            <div class="footer">
+                <p>&copy; 2024 My Company</p>
+            </div>
+        </ChildContent>
+    </MasterPage>
+    ```
+
+ContentPlaceHolder components live in the shell's `ChildContent`. The MasterPage host re-renders when matching `Content` sections change, so the placeholder itself stays a thin reader over the current named-section registry.
 
 ### Multiple ContentPlaceHolders
 
@@ -138,9 +138,11 @@ ContentPlaceHolder renders either the content provided by a child page's Content
             <p>Default</p>
         </ContentPlaceHolder>
     </ChildContent>
-    <Content ContentPlaceHolderID="Main">
-        <p>Custom Content</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="Main">
+            <p>Custom Content</p>
+        </Content>
+    </ChildComponents>
 </MasterPage>
 ```
 

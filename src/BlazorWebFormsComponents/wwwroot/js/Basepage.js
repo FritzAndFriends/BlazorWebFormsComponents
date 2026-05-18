@@ -52,6 +52,13 @@
     }
   };
 
+  Page.Focus = function(elementId) {
+    var el = document.getElementById(elementId);
+    if (el && typeof el.focus === 'function') {
+      el.focus();
+    }
+  };
+
   window.bwfc = window.bwfc ?? {};
   window.bwfc.Page = Page;
   window.bwfc.Validation = Validation;

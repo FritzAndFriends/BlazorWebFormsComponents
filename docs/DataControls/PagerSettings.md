@@ -26,62 +26,64 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **OnPropertyChanged** event — Not applicable in Blazor's reactive model
 - **RenderNonBreakingSpacesBetweenControls** — Not implemented
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-In Web Forms, `PagerSettings` is configured as a child element or via dash-separated attributes:
+=== "Web Forms"
 
-```html
-<asp:FormView ID="FormView1" runat="server" AllowPaging="True">
-    <PagerSettings
-        Mode="NextPreviousFirstLast"
-        FirstPageText="First"
-        LastPageText="Last"
-        NextPageText="Next"
-        PreviousPageText="Previous"
-        PageButtonCount="10"
-        Position="Bottom"
-        Visible="True"
-        FirstPageImageUrl="~/images/first.gif"
-        LastPageImageUrl="~/images/last.gif"
-        NextPageImageUrl="~/images/next.gif"
-        PreviousPageImageUrl="~/images/prev.gif"
-    />
-    <ItemTemplate>
-        <!-- content -->
-    </ItemTemplate>
-</asp:FormView>
-```
+    In Web Forms, `PagerSettings` is configured as a child element or via dash-separated attributes:
 
-Or using dash-separated attributes on the parent control:
+    ```html
+    <asp:FormView ID="FormView1" runat="server" AllowPaging="True">
+        <PagerSettings
+            Mode="NextPreviousFirstLast"
+            FirstPageText="First"
+            LastPageText="Last"
+            NextPageText="Next"
+            PreviousPageText="Previous"
+            PageButtonCount="10"
+            Position="Bottom"
+            Visible="True"
+            FirstPageImageUrl="~/images/first.gif"
+            LastPageImageUrl="~/images/last.gif"
+            NextPageImageUrl="~/images/next.gif"
+            PreviousPageImageUrl="~/images/prev.gif"
+        />
+        <ItemTemplate>
+            <!-- content -->
+        </ItemTemplate>
+    </asp:FormView>
+    ```
 
-```html
-<asp:GridView ID="GridView1" runat="server"
-    AllowPaging="True"
-    PagerSettings-Mode="NumericFirstLast"
-    PagerSettings-FirstPageText="First"
-    PagerSettings-LastPageText="Last"
-    PagerSettings-PageButtonCount="5"
-    PagerSettings-Position="TopAndBottom" />
-```
+    Or using dash-separated attributes on the parent control:
 
-## Blazor Syntax
+    ```html
+    <asp:GridView ID="GridView1" runat="server"
+        AllowPaging="True"
+        PagerSettings-Mode="NumericFirstLast"
+        PagerSettings-FirstPageText="First"
+        PagerSettings-LastPageText="Last"
+        PagerSettings-PageButtonCount="5"
+        PagerSettings-Position="TopAndBottom" />
+    ```
 
-```razor
-<FormView DataSource="@Items" ItemType="Product" AllowPaging="true">
-    <PagerSettings
-        Mode="PagerButtons.NextPreviousFirstLast"
-        FirstPageText="First"
-        LastPageText="Last"
-        NextPageText="Next >"
-        PreviousPageText="< Previous"
-        PageButtonCount="10"
-        Position="PagerPosition.Bottom"
-        Visible="true" />
-    <ItemTemplate Context="Item">
-        <!-- content -->
-    </ItemTemplate>
-</FormView>
-```
+=== "Blazor"
+
+    ```razor
+    <FormView DataSource="@Items" ItemType="Product" AllowPaging="true">
+        <PagerSettings
+            Mode="PagerButtons.NextPreviousFirstLast"
+            FirstPageText="First"
+            LastPageText="Last"
+            NextPageText="Next >"
+            PreviousPageText="< Previous"
+            PageButtonCount="10"
+            Position="PagerPosition.Bottom"
+            Visible="true" />
+        <ItemTemplate Context="Item">
+            <!-- content -->
+        </ItemTemplate>
+    </FormView>
+    ```
 
 ## Properties Reference
 
@@ -153,29 +155,29 @@ Or using dash-separated attributes on the parent control:
 3. **Position enum** — Web Forms `Position="TopAndBottom"` becomes `Position="PagerPosition.TopAndBottom"`
 4. **Image URLs** — Image URL properties work the same way but should use Blazor static asset paths instead of `~/` server-relative paths
 
-### Before (Web Forms)
+=== "Web Forms"
 
-```html
-<asp:GridView ID="gv1" runat="server" AllowPaging="True">
-    <PagerSettings
-        Mode="NumericFirstLast"
-        FirstPageText="First"
-        LastPageText="Last"
-        Position="TopAndBottom" />
-</asp:GridView>
-```
+    ```html
+    <asp:GridView ID="gv1" runat="server" AllowPaging="True">
+        <PagerSettings
+            Mode="NumericFirstLast"
+            FirstPageText="First"
+            LastPageText="Last"
+            Position="TopAndBottom" />
+    </asp:GridView>
+    ```
 
-### After (Blazor)
+=== "Blazor"
 
-```razor
-<GridView ItemType="Product" Items="@Products" AllowPaging="true">
-    <PagerSettings
-        Mode="PagerButtons.NumericFirstLast"
-        FirstPageText="First"
-        LastPageText="Last"
-        Position="PagerPosition.TopAndBottom" />
-</GridView>
-```
+    ```razor
+    <GridView ItemType="Product" Items="@Products" AllowPaging="true">
+        <PagerSettings
+            Mode="PagerButtons.NumericFirstLast"
+            FirstPageText="First"
+            LastPageText="Last"
+            Position="PagerPosition.TopAndBottom" />
+    </GridView>
+    ```
 
 ## See Also
 

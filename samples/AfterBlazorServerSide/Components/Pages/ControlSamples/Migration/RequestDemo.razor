@@ -1,0 +1,104 @@
+@page "/migration/request"
+@inherits WebFormsPageBase
+
+<PageTitle>Request Migration Demo</PageTitle>
+
+<h2>Request Migration</h2>
+
+<p>This sample demonstrates the <code>RequestShim</code> that provides Web Forms-compatible
+   <code>Request.QueryString</code>, <code>Request.Url</code>, and <code>Request.Cookies</code>
+   access in Blazor. The shim falls back to <code>NavigationManager</code> when
+   <code>HttpContext</code> is unavailable (interactive mode).</p>
+
+<hr />
+
+<h3>1. Request.QueryString</h3>
+<p>Access query string parameters using the same dictionary-style syntax as Web Forms.
+   The shim falls back to parsing from <code>NavigationManager.Uri</code> in interactive mode.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>string name = Request.QueryString["name"];
+string id = Request.QueryString["id"];</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same code works!
+string name = Request.QueryString["name"];
+string id = Request.QueryString["id"];</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="querystring-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - QueryString</h5>
+        <p>Try navigating to:
+            <a href="/migration/request?name=test&amp;id=42">/migration/request?name=test&amp;id=42</a>
+        </p>
+        <p>
+            <code>Request.QueryString["name"]</code>: <strong>@(Request.QueryString["name"].ToString() is { Length: > 0 } name ? name : "(not set)")</strong>
+        </p>
+        <p>
+            <code>Request.QueryString["id"]</code>: <strong>@(Request.QueryString["id"].ToString() is { Length: > 0 } id ? id : "(not set)")</strong>
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>2. Request.Url</h3>
+<p>Access the full request URL. Falls back to <code>NavigationManager.Uri</code>
+   in interactive mode.</p>
+
+<div class="card mt-3" data-audit-control="url-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Request.Url</h5>
+        <p>
+            Current URL: <strong>@Request.Url.ToString()</strong>
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>3. Request.Cookies (with SSR Guard)</h3>
+<p>Cookies require <code>HttpContext</code> and are only available during SSR/pre-render.
+   In interactive mode, <code>Request.Cookies</code> returns an empty collection.
+   Use the <code>IsHttpContextAvailable</code> guard pattern.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>string theme = Request.Cookies["theme"]?.Value;</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Guard for HttpContext availability
+if (IsHttpContextAvailable)
+{
+    var theme = Request.Cookies["theme"];
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="cookies-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Cookies</h5>
+        <p>
+            <code>IsHttpContextAvailable</code>: <strong>@IsHttpContextAvailable</strong>
+        </p>
+        @if (IsHttpContextAvailable)
+        {
+            <p>HttpContext is available — cookies can be read from the HTTP request.</p>
+        }
+        else
+        {
+            <p class="text-muted">HttpContext is not available (interactive mode).
+               Cookies return empty. This is expected and the shim degrades gracefully.</p>
+        }
+    </div>
+</div>
+
+@code {
+}

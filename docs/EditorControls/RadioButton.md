@@ -20,56 +20,58 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `AutoPostBack` - Not needed in Blazor. Use the `OnCheckedChanged` event instead.
 - `GroupName` with client-side validation - Use Blazor's validation components instead.
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:RadioButton 
-    ID="string"
-    Text="string"
-    GroupName="string"
-    Checked="True|False"
-    TextAlign="Left|Right"
-    Enabled="True|False"
-    AutoPostBack="True|False"
-    OnCheckedChanged="CheckedChanged event handler"
-    BackColor="color name|#dddddd"
-    ForeColor="color name|#dddddd"
-    CssClass="string"
-    runat="server" 
-/>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:RadioButton 
+        ID="string"
+        Text="string"
+        GroupName="string"
+        Checked="True|False"
+        TextAlign="Left|Right"
+        Enabled="True|False"
+        AutoPostBack="True|False"
+        OnCheckedChanged="CheckedChanged event handler"
+        BackColor="color name|#dddddd"
+        ForeColor="color name|#dddddd"
+        CssClass="string"
+        runat="server" 
+    />
+    ```
 
-```razor
-<!-- Simple radio button -->
-<RadioButton Text="Option A" />
+=== "Blazor"
 
-<!-- Grouped radio buttons (mutually exclusive) -->
-<RadioButton Text="Small" GroupName="Size" Checked="@(size == "Small")" 
-             OnCheckedChanged="@(() => size = "Small")" />
-<RadioButton Text="Medium" GroupName="Size" Checked="@(size == "Medium")" 
-             OnCheckedChanged="@(() => size = "Medium")" />
-<RadioButton Text="Large" GroupName="Size" Checked="@(size == "Large")" 
-             OnCheckedChanged="@(() => size = "Large")" />
+    ```razor
+    <!-- Simple radio button -->
+    <RadioButton Text="Option A" />
 
-<!-- Text alignment -->
-<RadioButton Text="Label on left" TextAlign="Enums.TextAlign.Left" GroupName="Align" />
-<RadioButton Text="Label on right" TextAlign="Enums.TextAlign.Right" GroupName="Align" />
+    <!-- Grouped radio buttons (mutually exclusive) -->
+    <RadioButton Text="Small" GroupName="Size" Checked="@(size == "Small")" 
+                 OnCheckedChanged="@(() => size = "Small")" />
+    <RadioButton Text="Medium" GroupName="Size" Checked="@(size == "Medium")" 
+                 OnCheckedChanged="@(() => size = "Medium")" />
+    <RadioButton Text="Large" GroupName="Size" Checked="@(size == "Large")" 
+                 OnCheckedChanged="@(() => size = "Large")" />
 
-<!-- Two-way binding -->
-<RadioButton Text="Subscribe" Checked="@isSubscribed" 
-             CheckedChanged="@((value) => isSubscribed = value)" />
+    <!-- Text alignment -->
+    <RadioButton Text="Label on left" TextAlign="Enums.TextAlign.Left" GroupName="Align" />
+    <RadioButton Text="Label on right" TextAlign="Enums.TextAlign.Right" GroupName="Align" />
 
-<!-- Disabled radio button -->
-<RadioButton Text="Cannot select" Enabled="false" />
+    <!-- Two-way binding -->
+    <RadioButton Text="Subscribe" Checked="@isSubscribed" 
+                 CheckedChanged="@((value) => isSubscribed = value)" />
 
-<!-- Styled radio button -->
-<RadioButton Text="Styled" CssClass="custom-radio" BackColor="LightBlue" GroupName="Styled" />
+    <!-- Disabled radio button -->
+    <RadioButton Text="Cannot select" Enabled="false" />
 
-<!-- Radio button without text (no span wrapper) -->
-<RadioButton GroupName="NoLabel" />
-```
+    <!-- Styled radio button -->
+    <RadioButton Text="Styled" CssClass="custom-radio" BackColor="LightBlue" GroupName="Styled" />
+
+    <!-- Radio button without text (no span wrapper) -->
+    <RadioButton GroupName="NoLabel" />
+    ```
 
 ## Key Behaviors
 
@@ -145,6 +147,7 @@ Radio buttons with the same `GroupName` share the same HTML `name` attribute, wh
 
 ## See Also
 
-- [Button](Button.md) - For submit/command buttons
-- [LinkButton](LinkButton.md) - For hyperlink-style buttons
-- [Validation Controls](../ValidationControls/) - For form validation
+- [CheckBox](CheckBox.md) — Individual checkbox
+- [RadioButtonList](RadioButtonList.md) — Multiple radio buttons with single selection
+- [DropDownList](DropDownList.md) — Single selection dropdown
+- [ListBox](ListBox.md) — Multiple selection list control

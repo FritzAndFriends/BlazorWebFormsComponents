@@ -1,0 +1,28 @@
+@page "/TC30-DataDrivenPage"
+<PageTitle>Product Catalog</PageTitle>
+@using ContosoStore.Models
+
+    <h1>Product Catalog</h1>
+    @* Product search and filter controls *@
+    <div class="search-bar">
+        <TextBox id="txtSearch" CssClass="form-control" />
+        <Button id="btnSearch" Text="Search" OnClick="@Search_Click" CssClass="btn btn-primary" />
+    </div>
+    <GridView ItemType="object" id="gvProducts" Items="@dsProductsData" AutoGenerateColumns="false"
+        AllowPaging="true" AllowSorting="true" PageSize="10"
+        CssClass="table table-striped" GridLines="@GridLines.None">
+        <Columns>
+            <BoundField ItemType="object" DataField="ProductName" HeaderText="Product" SortExpression="ProductName" />
+            <BoundField ItemType="object" DataField="UnitPrice" HeaderText="Price" DataFormatString="{0:C}" />
+        </Columns>
+    </GridView>
+    @* TODO(bwfc-datasource): Implement IdsProductsDataService to replace SqlDataSource *@
+    <h2>Featured Products</h2>
+    <Repeater id="rptFeatured" ItemType="Product" SelectMethod="GetFeaturedProducts">
+        <ItemTemplate Context="Item">
+            <div class="product-card">
+                <h4>@Item.ProductName</h4>
+                <span class="price">@Item.UnitPrice</span>
+            </div>
+        </ItemTemplate>
+    </Repeater>

@@ -66,6 +66,53 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+function Resolve-BwfcCliProject {
+    param([string]$StartPath)
+
+    $currentDir = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($StartPath))
+    while ($null -ne $currentDir) {
+        $candidate = Join-Path $currentDir.FullName 'src\BlazorWebFormsComponents.Cli\BlazorWebFormsComponents.Cli.csproj'
+        if (Test-Path $candidate) {
+            return $candidate
+        }
+
+        $currentDir = $currentDir.Parent
+    }
+
+    throw "Could not locate BlazorWebFormsComponents.Cli.csproj from '$StartPath'."
+}
+
+$cliProject = Resolve-BwfcCliProject -StartPath $PSScriptRoot
+
+$cliArgs = @(
+    'run',
+    '--project', $cliProject,
+    '--',
+    'migrate',
+    '--input', $Path,
+    '--output', $Output,
+    '--overwrite'
+)
+
+if ($SkipProjectScaffold) {
+    $cliArgs += '--skip-scaffold'
+}
+
+if ($WhatIfPreference) {
+    $cliArgs += '--dry-run'
+}
+
+if ($VerbosePreference -eq 'Continue') {
+    $cliArgs += '--verbose'
+}
+
+& dotnet @cliArgs
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+
+return
+
 #region --- Configuration ---
 
 $WebFormsExtensions = @('.aspx', '.ascx', '.master')
@@ -134,6 +181,18 @@ function New-ProjectScaffold {
         [string]$ProjectName
     )
 
+    $bwfcReference = '<PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />'
+    $currentDir = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($OutputRoot))
+    while ($null -ne $currentDir) {
+        $candidate = Join-Path $currentDir.FullName 'src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj'
+        if (Test-Path $candidate) {
+            $relative = [System.IO.Path]::GetRelativePath([System.IO.Path]::GetFullPath($OutputRoot), $candidate) -replace '/', '\'
+            $bwfcReference = "<ProjectReference Include=`"$relative`" />"
+            break
+        }
+        $currentDir = $currentDir.Parent
+    }
+
     # .csproj
     $csprojContent = @"
 <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -145,7 +204,7 @@ function New-ProjectScaffold {
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />
+    $bwfcReference
   </ItemGroup>
 
 </Project>
@@ -161,19 +220,18 @@ function New-ProjectScaffold {
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
-@using $ProjectName
+    @using $ProjectName
 "@
 
     # Program.cs
     $programContent = @"
 // TODO: Review and adjust this generated Program.cs for your application needs.
+// Generated for .NET 10 Blazor static SSR. Keep interactive render modes opt-in and page-specific.
 using BlazorWebFormsComponents;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
 
 builder.Services.AddBlazorWebFormsComponents();
 
@@ -189,8 +247,7 @@ app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseAntiforgery();
 
-app.MapRazorComponents<$ProjectName.Components.App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<$ProjectName.Components.App>();
 
 app.Run();
 "@
@@ -256,12 +313,12 @@ function New-AppRazorScaffold {
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <base href="/" />
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <HeadOutlet />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
-    <script src="_framework/blazor.web.js"></script>
+    @* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
+    <Routes />
 </body>
 
 </html>

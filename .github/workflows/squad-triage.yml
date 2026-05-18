@@ -1,12 +1,7 @@
 name: Squad Triage
 
 on:
-  issues:
-    types: [labeled]
-
-permissions:
-  issues: write
-  contents: read
+  workflow_dispatch:
 
 jobs:
   triage:
@@ -22,13 +17,10 @@ jobs:
             const fs = require('fs');
             const issue = context.payload.issue;
 
-            // Read team roster — check .squad/ first, fall back to .ai-team/
+            // Read team roster
             let teamFile = '.squad/team.md';
             if (!fs.existsSync(teamFile)) {
-              teamFile = '.ai-team/team.md';
-            }
-            if (!fs.existsSync(teamFile)) {
-              core.warning('No .squad/team.md or .ai-team/team.md found — cannot triage');
+              core.warning('No .squad/team.md found — cannot triage');
               return;
             }
 
@@ -88,11 +80,8 @@ jobs:
               }
             }
 
-            // Read routing rules — check .squad/ first, fall back to .ai-team/
+            // Read routing rules
             let routingFile = '.squad/routing.md';
-            if (!fs.existsSync(routingFile)) {
-              routingFile = '.ai-team/routing.md';
-            }
             let routingContent = '';
             if (fs.existsSync(routingFile)) {
               routingContent = fs.readFileSync(routingFile, 'utf8');
@@ -110,9 +99,11 @@ jobs:
               return;
             }
 
+            function slugify(t) { return t.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+
             // Build triage context
             const memberList = members.map(m =>
-              `- **${m.name}** (${m.role}) → label: \`squad:${m.name.toLowerCase()}\``
+              `- **${m.name}** (${m.role}) → label: \`squad:${slugify(m.name)}\``
             ).join('\n');
 
             // Determine best assignee based on issue content and routing
@@ -189,7 +180,7 @@ jobs:
             }
 
             const isCopilot = assignedMember.name === '@copilot';
-            const assignLabel = isCopilot ? 'squad:copilot' : `squad:${assignedMember.name.toLowerCase()}`;
+            const assignLabel = isCopilot ? 'squad:copilot' : `squad:${slugify(assignedMember.name)}`;
 
             // Add the member-specific label
             await github.rest.issues.addLabels({

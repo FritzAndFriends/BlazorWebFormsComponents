@@ -37,6 +37,12 @@ public class AllAnalyzersIntegrationTests
         "BWFC012", // RunatServerAnalyzer
         "BWFC013", // ResponseObjectUsageAnalyzer
         "BWFC014", // RequestObjectUsageAnalyzer
+        "BWFC020", // ViewStatePropertyPatternAnalyzer
+        "BWFC021", // FindControlUsageAnalyzer
+        "BWFC022", // PageClientScriptUsageAnalyzer
+        "BWFC023", // IPostBackEventHandlerUsageAnalyzer
+        "BWFC024", // ScriptManagerUsageAnalyzer
+        "BWFC025", // NonSerializableViewStateAnalyzer
     };
 
     #region ID Registration and Uniqueness
@@ -96,14 +102,15 @@ public class AllAnalyzersIntegrationTests
     }
 
     [Fact]
-    public void AllAnalyzers_HaveUsageCategory()
+    public void AllAnalyzers_HaveValidCategory()
     {
+        var validCategories = new[] { "Usage", "Migration" };
         foreach (var analyzerType in AllAnalyzerTypes)
         {
             var analyzer = CreateAnalyzer(analyzerType);
             foreach (var descriptor in analyzer.SupportedDiagnostics)
             {
-                Assert.Equal("Usage", descriptor.Category);
+                Assert.Contains(descriptor.Category, validCategories);
             }
         }
     }

@@ -1,0 +1,166 @@
+@page "/migration/server-mappath"
+@inherits WebFormsPageBase
+
+<PageTitle>Server Utilities Migration Demo</PageTitle>
+
+<h2>Server Utilities Migration</h2>
+
+<p>This sample demonstrates the <code>ServerShim</code> that provides Web Forms-compatible
+   <code>Server.MapPath()</code>, <code>Server.HtmlEncode()</code>, <code>Server.UrlEncode()</code>,
+   and <code>ResolveUrl()</code> in Blazor.</p>
+
+<hr />
+
+<h3>1. Server.MapPath()</h3>
+<p>In Web Forms, <code>Server.MapPath("~/uploads")</code> resolved a virtual path to a physical
+   path. The BWFC shim provides the same API backed by <code>IWebHostEnvironment</code>.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>string path = Server.MapPath("~/uploads");
+// Returns: C:\inetpub\wwwroot\uploads</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same code works!
+string path = Server.MapPath("~/uploads");
+// Returns: /app/wwwroot/uploads</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="mappath-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - MapPath</h5>
+        <p>
+            <code>Server.MapPath("~/images")</code> resolves to:
+        </p>
+        <p><strong>@mappedPath</strong></p>
+    </div>
+</div>
+
+<hr />
+
+<h3>2. Server.HtmlEncode()</h3>
+<p>Encodes text for safe HTML display, preventing XSS. Same API as Web Forms.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>string safe = Server.HtmlEncode(userInput);
+lblOutput.Text = safe;</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same code works!
+string safe = Server.HtmlEncode(userInput);</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="htmlencode-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - HtmlEncode</h5>
+        <div class="mb-3">
+            <label class="form-label">Enter text with HTML characters:</label>
+            <div class="input-group">
+                <input type="text" class="form-control" @bind="htmlInput"
+                       placeholder='Try: <script>alert("xss")</script>' />
+                <button class="btn btn-primary" @onclick="EncodeHtml">HtmlEncode</button>
+            </div>
+        </div>
+        <p>
+            Encoded output: <strong>@htmlEncoded</strong>
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>3. Server.UrlEncode()</h3>
+<p>Encodes text for safe use in URLs. Same API as Web Forms.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>string encoded = Server.UrlEncode(searchTerm);
+Response.Redirect("search.aspx?q=" + encoded);</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same code works!
+string encoded = Server.UrlEncode(searchTerm);</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="urlencode-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - UrlEncode</h5>
+        <div class="mb-3">
+            <label class="form-label">Enter text to URL-encode:</label>
+            <div class="input-group">
+                <input type="text" class="form-control" @bind="urlInput"
+                       placeholder="Try: hello world & more" />
+                <button class="btn btn-primary" @onclick="EncodeUrl">UrlEncode</button>
+            </div>
+        </div>
+        <p>
+            Encoded output: <strong>@urlEncoded</strong>
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>4. ResolveUrl()</h3>
+<p><code>ResolveUrl("~/Products.aspx")</code> strips the <code>~/</code> prefix and
+   <code>.aspx</code> extension, producing a clean Blazor route.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>string url = ResolveUrl("~/Products.aspx");
+// Returns: /Products.aspx</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same call, cleaner output
+string url = ResolveUrl("~/Products.aspx");
+// Returns: /Products</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="resolveurl-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - ResolveUrl</h5>
+        <p>
+            <code>ResolveUrl("~/Products.aspx")</code> returns:
+            <strong>@resolvedUrl</strong>
+        </p>
+    </div>
+</div>
+
+@code {
+    private string mappedPath = "";
+    private string htmlInput = "";
+    private string htmlEncoded = "(enter text and click HtmlEncode)";
+    private string urlInput = "";
+    private string urlEncoded = "(enter text and click UrlEncode)";
+    private string resolvedUrl = "";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        mappedPath = Server.MapPath("~/images");
+        resolvedUrl = ResolveUrl("~/Products.aspx");
+    }
+
+    private void EncodeHtml()
+    {
+        htmlEncoded = Server.HtmlEncode(htmlInput);
+    }
+
+    private void EncodeUrl()
+    {
+        urlEncoded = Server.UrlEncode(urlInput);
+    }
+}

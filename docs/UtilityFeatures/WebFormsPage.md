@@ -1,6 +1,6 @@
 # WebFormsPage
 
-The `WebFormsPage` component is a unified legacy support wrapper that combines naming container and theming support into a single component. It mirrors `System.Web.UI.Page` — the root class of every Web Forms page — which established the naming scope for all child controls and applied the page-level theme.
+The `WebFormsPage` component is a unified legacy support wrapper that combines naming container and theming support into a single component. It also composes the lightweight `<Page />` head renderer by default, so layout-level page metadata flows through the same shared page shim used by converted page code-behind.
 
 Place `WebFormsPage` in your layout to give all pages automatic ID mangling (naming container) and theme/skin support without per-page configuration.
 
@@ -10,15 +10,17 @@ In ASP.NET Web Forms, the `Page` class provided several structural services to a
 
 1. **Naming Container** — The page was the root `INamingContainer`, generating fully-qualified client IDs like `ctl00_MainContent_MyButton`
 2. **Theme Application** — The `<%@ Page Theme="..." %>` directive applied skin files to all controls
-3. **ViewState** — The page serialized control state to a hidden field (not replicated — Blazor preserves state in component fields)
+3. **Page head rendering** — The page owned the document title and related metadata
+4. **ViewState** — The page serialized control state to a hidden field (not replicated — Blazor preserves state in component fields)
 
-`WebFormsPage` combines the first two capabilities into a single Blazor component.
+`WebFormsPage` combines naming, theming, and optional page-head rendering into a single Blazor component.
 
 ## Features Supported in Blazor
 
 - **Naming Container** — Cascades naming scope to child components, prefixing IDs with the container's ID
 - **UseCtl00Prefix** — Optionally prepends `ctl00` to the naming hierarchy for full Web Forms ID compatibility
 - **Theme Cascading** — Passes a `ThemeConfiguration` to all child styled components via `CascadingValue`
+- **Page Head Rendering** — Renders `<Page />` by default so `Title`, `MetaDescription`, and `MetaKeywords` flow to `<PageTitle>` and `<meta>` tags
 - **Visible** — Controls whether child content renders (inherited from `BaseWebFormsComponent`)
 
 ### Blazor Notes
@@ -43,7 +45,7 @@ Place `WebFormsPage` in your `MainLayout.razor` wrapping `@Body`:
 }
 ```
 
-This mirrors how `<form runat="server">` wrapped all page content in Web Forms. Every page automatically gets naming scope and theming.
+This mirrors how `<form runat="server">` wrapped all page content in Web Forms. Every page automatically gets naming scope, theming, and page-head rendering.
 
 ### Per-Page Usage
 
@@ -101,6 +103,7 @@ When you only need ID mangling, omit the `Theme` parameter:
 | `ID` | `string` | `null` | Sets the naming scope prefix for child component IDs |
 | `UseCtl00Prefix` | `bool` | `false` | When true, prepends `ctl00` to the naming hierarchy |
 | `Theme` | `ThemeConfiguration` | `null` | Theme configuration to cascade to child components |
+| `RenderPageHead` | `bool` | `true` | When true, renders the shared `<Page />` head component before page content |
 | `Visible` | `bool` | `true` | Controls whether child content renders |
 | `ChildContent` | `RenderFragment` | — | The page content |
 
@@ -108,9 +111,34 @@ When you only need ID mangling, omit the `Theme` parameter:
 
 | Component | Purpose | When to Use |
 |---|---|---|
-| `WebFormsPage` | Combined naming + theming | Layout-level wrapper for full legacy support |
+| `WebFormsPage` | Combined naming + theming + optional head rendering | Layout-level wrapper for full legacy support |
 | `NamingContainer` | Naming scope only | When you need nested naming scopes within a page |
 | `ThemeProvider` | Theme cascading only | When demonstrating theming in isolation |
+| `Page` | Head rendering only | When you need document title/meta rendering without the layout wrapper |
+
+## IsPostBack Property
+
+The `WebFormsPageBase` class provides an `IsPostBack` property for Web Forms compatibility:
+
+```csharp
+public bool IsPostBack => false;  // Always false in page context
+```
+
+> **Important:** `IsPostBack` always returns `false` at the page level because Blazor pages don't have HTTP postback semantics. For component-level postback detection (in SSR or interactive modes), use `IsPostBack` on `BaseWebFormsComponent` instead.
+
+For page-level initialization patterns, use the Blazor lifecycle directly:
+
+```razor
+@inherits WebFormsPageBase
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Replaces if (!IsPostBack) pattern
+        LoadInitialData();
+    }
+}
+```
 
 ## Moving On
 
@@ -119,9 +147,11 @@ As you refactor away from Web Forms patterns:
 1. **ID Mangling** — Consider using Blazor's built-in `@ref` instead of string-based IDs for element references
 2. **Theming** — Consider migrating to CSS custom properties or a CSS framework for theming
 3. **ViewState** — Blazor preserves component state automatically in component fields; no hidden field serialization needed
+4. **Form Patterns** — For forms that need postback-like behavior in SSR, use ViewState and IsPostBack on components (see ViewStateAndPostBack.md)
 
 ## See Also
 
 - [ID Rendering](IDRendering.md) — How component IDs work in this library
 - [Themes and Skins](../Migration/ThemesAndSkins.md) — Migration guide for Web Forms themes
 - [ViewState](ViewState.md) — How ViewState is emulated
+- [ViewState and PostBack Shim](ViewStateAndPostBack.md) — Comprehensive guide to mode-adaptive PostBack detection and state persistence

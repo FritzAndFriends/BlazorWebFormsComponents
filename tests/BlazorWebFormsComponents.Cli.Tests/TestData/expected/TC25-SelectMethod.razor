@@ -1,0 +1,21 @@
+@page "/TC25-SelectMethod"
+<PageTitle>Products</PageTitle>
+<ListView id="ProductList"
+    ItemType="Product"
+    SelectMethod="GetProducts">
+    <ItemTemplate Context="Item">
+        <tr>
+            <td><%# Item.Name %></td>
+        </tr>
+    </ItemTemplate>
+</ListView>
+<FormView id="DetailView"
+    ItemType="Product"
+    SelectMethod="GetProduct"
+    InsertMethod="InsertProduct"
+    UpdateMethod="UpdateProduct"
+    DeleteMethod="DeleteProduct">
+    <ItemTemplate Context="Item">
+        <span><%# Item.Description %></span>
+    </ItemTemplate>
+</FormView>

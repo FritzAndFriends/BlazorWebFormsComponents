@@ -1,17 +1,8 @@
-using System.Linq;
-using Microsoft.AspNetCore.Identity;
-
 namespace WingtipToys.Account;
 
-// TODO: Requires ASP.NET Core Identity migration — external login management needs UserManager
-public partial class ManageLogins
+public partial class ManageLogins : BlazorWebFormsComponents.WebFormsPageBase
 {
-    private string SuccessMessage { get; set; } = "";
-
-    private IQueryable<UserLoginInfo> GetLogins(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-    {
-        // TODO: Implement with UserManager to return user's external logins
-        totalRowCount = 0;
-        return Array.Empty<UserLoginInfo>().AsQueryable();
-    }
+    // TODO: Migrate from Account/ManageLogins.aspx
+    // Original features: ASP.NET Identity or membership APIs
+    // Quarantine reason: Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.
 }

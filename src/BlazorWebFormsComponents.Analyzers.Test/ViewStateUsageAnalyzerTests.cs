@@ -27,7 +27,7 @@ public class PageBase
 ";
 
     private static DiagnosticResult ExpectBWFC002(string memberName) =>
-        new DiagnosticResult(ViewStateUsageAnalyzer.DiagnosticId, DiagnosticSeverity.Warning)
+        new DiagnosticResult(ViewStateUsageAnalyzer.DiagnosticId, DiagnosticSeverity.Info)
             .WithArguments(memberName);
 
     #region Positive cases — BWFC002 SHOULD fire

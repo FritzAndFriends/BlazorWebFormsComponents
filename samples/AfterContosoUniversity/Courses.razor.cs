@@ -1,44 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNetCore.Components;
 using ContosoUniversity.Models;
 using ContosoUniversity.BLL;
-using ContosoUniversity.Bll;
+using Microsoft.EntityFrameworkCore;
 
-namespace ContosoUniversity
+namespace ContosoUniversity;
+
+public partial class Courses : BlazorWebFormsComponents.WebFormsPageBase
 {
-    public partial class Courses
+    [Inject] private Courses_Logic coursLogic { get; set; } = default!;
+    [Inject] private ContosoUniversityEntities _context { get; set; } = default!;
+
+    private DropDownList<string> drpDepartments = default!;
+    private GridView<Cours> grvCourses = default!;
+    private List<string> departments = new();
+    private List<Cours> courseResults = new();
+
+    protected override async Task OnInitializedAsync()
     {
-        [Inject] private Courses_Logic coursLogic { get; set; } = default!;
-        [Inject] private StudentsListLogic studLogic { get; set; } = default!;
+        await base.OnInitializedAsync();
+        departments = _context.Departments.Select(d => d.DepartmentName).ToList();
+    }
 
-        private List<string> _departments = new();
-        private string _selectedDepartment = "";
-        private List<Cours> _courses = new();
-        private string _courseSearchText = "";
-        private List<Cours> _courseDetails = new();
-
-        protected override void OnInitialized()
-        {
-            _departments = studLogic.GetDepartmentNames();
-        }
-
-        private void btnSearchCourse_Click()
-        {
-            if (!string.IsNullOrEmpty(_selectedDepartment))
-            {
-                _courses = coursLogic.GetCourses(_selectedDepartment);
-            }
-        }
-
-        private void search_Click()
-        {
-            if (!string.IsNullOrEmpty(_courseSearchText))
-            {
-                _courseDetails = coursLogic.GetCourse(_courseSearchText);
-                _courseSearchText = "";
-            }
-        }
+    public IEnumerable<Cours> grvCourses_GetData()
+    {
+        return courseResults;
     }
 }

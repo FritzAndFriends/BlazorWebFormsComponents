@@ -1,0 +1,10 @@
+using UserLoginInfo = BlazorWebFormsComponents.Identity.UserLoginInfo;
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+namespace WingtipToys.Account;
+public partial class ManageLogins
+{
+    private PlaceHolder successMessage = default!;
+    public IEnumerable<UserLoginInfo> GetLogins() => throw new NotImplementedException();
+    public void RemoveLogin(string loginProvider, string providerKey) { }
+}

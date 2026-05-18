@@ -1,0 +1,15 @@
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+namespace WingtipToys.Account;
+public partial class Manage
+{
+    private string _PhoneNumber_Text = "";
+    private HyperLink ChangePassword = default!;
+    private HyperLink CreatePassword = default!;
+    private PlaceHolder successMessage = default!;
+    public bool HasPhoneNumber { get; set; }
+    public bool TwoFactorEnabled { get; set; }
+    public bool TwoFactorBrowserRemembered { get; set; }
+    public int LoginsCount { get; set; }
+
+}

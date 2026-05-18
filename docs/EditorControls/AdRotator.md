@@ -162,46 +162,69 @@ Execute code after data binding:
 - `EnableTheming` / `SkinID` - Blazor uses CSS for theming.
 - `EnableViewState` - Blazor doesn't use ViewState.
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:AdRotator
-    AccessKey="string"
-    AdvertisementFile="uri"
-    AlternateTextField="string"
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    DataMember="string"
-    DataSource="string"
-    DataSourceID="string"
-    Enabled="True|False"
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ForeColor="color name|#dddddd"
-    Height="size"
-    ID="string"
-    ImageUrlField="string"
-    KeywordFilter="string"
-    NavigateUrlField="string"
-    OnAdCreated="AdCreated event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDataBound="DataBound event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    Target="string|_blank|_parent|_search|_self|_top"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms"
+
+    ```html
+    <asp:AdRotator
+        AccessKey="string"
+        AdvertisementFile="uri"
+        AlternateTextField="string"
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        DataMember="string"
+        DataSource="string"
+        DataSourceID="string"
+        Enabled="True|False"
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ForeColor="color name|#dddddd"
+        Height="size"
+        ID="string"
+        ImageUrlField="string"
+        KeywordFilter="string"
+        NavigateUrlField="string"
+        OnAdCreated="AdCreated event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDataBound="DataBound event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        Target="string|_blank|_parent|_search|_self|_top"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <AdRotator
+        AdvertisementFile="Ads.xml"
+        KeywordFilter="technology"
+        Target="_blank"
+        OnAdCreated="HandleAdCreated"
+        CssClass="ad-banner"
+        BorderStyle="Solid"
+        BorderWidth="1px" />
+
+    @code {
+        private void HandleAdCreated(AdCreatedEventArgs e)
+        {
+            // Modify ad properties before rendering
+            e.AlternateText = $"Special: {e.AlternateText}";
+        }
+    }
+    ```

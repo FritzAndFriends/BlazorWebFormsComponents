@@ -14,9 +14,16 @@ namespace BlazorWebFormsComponents
 
 		[Parameter] public virtual string SortExpression { get; set; }
 
+		/// <summary>
+		/// The form naming context for the current row being rendered.
+		/// Set by GridViewRow before calling Render/RenderEdit so that
+		/// BoundField and other column types can generate row-scoped form field names.
+		/// </summary>
+		public FormNamingContext CurrentFormNamingContext { get; set; }
+
 		public void Dispose()
 		{
-			ParentColumnsCollection.RemoveColumn(this);
+			ParentColumnsCollection?.RemoveColumn(this);
 		}
 
 		public abstract RenderFragment Render(ItemType item);
@@ -29,7 +36,7 @@ namespace BlazorWebFormsComponents
 		///<inheritdoc/>
 		protected override void OnInitialized()
 		{
-			ParentColumnsCollection.AddColumn(this);
+			ParentColumnsCollection?.AddColumn(this);
 		}
 	}
 }

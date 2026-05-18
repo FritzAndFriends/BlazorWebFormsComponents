@@ -5,23 +5,42 @@ The Literal component is meant to emulate the asp:Literal control in markup and 
 - `Mode` specifies how the content in the Literal component is rendered
 - `Text` the text content of the Literal component
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:Literal
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    Mode="Transform|PassThrough|Encode"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Text="string"
-    Visible="True|False"
-/>
-```
+=== "Web Forms"
+
+    ```html
+    <asp:Literal
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        Mode="Transform|PassThrough|Encode"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Text="string"
+        Visible="True|False"
+    />
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <!-- Render raw HTML content -->
+    <Literal Text="Hello, <strong>World</strong>!" Mode="PassThrough" />
+
+    <!-- HTML-encode the output for safe display -->
+    <Literal Text="<script>alert('xss')</script>" Mode="Encode" />
+
+    <!-- Dynamic text from code -->
+    <Literal Text="@message" />
+
+    @code {
+        private string message = "Welcome to <em>Blazor</em>!";
+    }
+    ```

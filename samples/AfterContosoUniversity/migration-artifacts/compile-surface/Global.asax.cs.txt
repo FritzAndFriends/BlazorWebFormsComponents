@@ -1,0 +1,12 @@
+// TODO: Review — 'Global.asax.cs' was quarantined from the generated Blazor SSR compile surface.
+// TODO: Reason — Legacy bootstrap file 'Global.asax.cs' was quarantined from the generated compile surface.
+// TODO: Move or rewrite only the relevant pieces into Program.cs, services, middleware, or application code.
+
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+
+namespace ContosoUniversity;
+
+public partial class Global
+{
+}

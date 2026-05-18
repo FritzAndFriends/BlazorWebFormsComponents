@@ -7,24 +7,7 @@ name: Squad Heartbeat (Ralph)
 # Run 'squad upgrade' to sync installed copies from source templates.
 
 on:
-  # DISABLED: Cron heartbeat commented out pre-migration — re-enable when ready
-  # schedule:
-  #   # Every 30 minutes — adjust or remove if not needed
-  #   - cron: '*/30 * * * *'
-
-  # React to completed work or new squad work
-  issues:
-    types: [closed, labeled]
-  pull_request:
-    types: [closed]
-
-  # Manual trigger
   workflow_dispatch:
-
-permissions:
-  issues: write
-  contents: read
-  pull-requests: read
 
 jobs:
   heartbeat:
@@ -112,9 +95,6 @@ jobs:
             const fs = require('fs');
 
             let teamFile = '.squad/team.md';
-            if (!fs.existsSync(teamFile)) {
-              teamFile = '.ai-team/team.md';
-            }
             if (!fs.existsSync(teamFile)) return;
 
             const content = fs.readFileSync(teamFile, 'utf8');
@@ -159,7 +139,7 @@ jobs:
                     agent_assignment: {
                       target_repo: `${context.repo.owner}/${context.repo.repo}`,
                       base_branch: repoData.default_branch,
-                      custom_instructions: `Read .squad/team.md (or .ai-team/team.md) for team context and .squad/routing.md (or .ai-team/routing.md) for routing rules.`
+                      custom_instructions: `Read .squad/team.md for team context and .squad/routing.md for routing rules.`
                     }
                   });
                   core.info(`Assigned copilot-swe-agent[bot] to #${issue.number}`);

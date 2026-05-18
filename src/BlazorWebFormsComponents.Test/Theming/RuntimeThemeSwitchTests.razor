@@ -1,0 +1,297 @@
+@inherits Bunit.TestContext
+@using BlazorWebFormsComponents.Theming
+@using BlazorWebFormsComponents.Enums
+@using static BlazorWebFormsComponents.WebColor
+@using Moq
+
+@code {
+
+	public RuntimeThemeSwitchTests()
+	{
+		Services.AddSingleton<Microsoft.AspNetCore.DataProtection.IDataProtectionProvider>(
+			new Microsoft.AspNetCore.DataProtection.EphemeralDataProtectionProvider());
+		Services.AddSingleton<Microsoft.AspNetCore.Routing.LinkGenerator>(new Mock<Microsoft.AspNetCore.Routing.LinkGenerator>().Object);
+		Services.AddSingleton<Microsoft.AspNetCore.Http.IHttpContextAccessor>(new Mock<Microsoft.AspNetCore.Http.IHttpContextAccessor>().Object);
+	}
+
+	/// <summary>
+	/// Theme change triggers re-render (Issue #369 / WI-5).
+	/// When ThemeProvider.Theme changes, child components should update.
+	/// Test by rendering with two different themes.
+	/// </summary>
+	[Fact]
+	public void ThemeChange_WithDifferentThemes_ShowsDifferentStyles()
+	{
+		var theme1 = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var theme2 = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Red));
+
+		// Render with theme1
+		var cut1 = Render(
+			@<ThemeProvider Theme="theme1">
+				<Button Text="Dynamic" />
+			</ThemeProvider>
+		);
+
+		// Should be Blue
+		var input1 = cut1.Find("input");
+		input1.GetAttribute("style").ShouldContain("background-color:Blue");
+
+		// Render with theme2
+		var cut2 = Render(
+			@<ThemeProvider Theme="theme2">
+				<Button Text="Dynamic" />
+			</ThemeProvider>
+		);
+
+		// Should be Red
+		var input2 = cut2.Find("input");
+		input2.GetAttribute("style").ShouldContain("background-color:Red");
+		input2.GetAttribute("style").ShouldNotContain("background-color:Blue");
+	}
+
+	/// <summary>
+	/// No theme vs with theme comparison.
+	/// Verify behavior difference between null theme and theme present.
+	/// </summary>
+	[Fact]
+	public void NoTheme_VsTheme_ShowsDifference()
+	{
+		ThemeConfiguration noTheme = null;
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		// Render with no theme
+		var cut1 = Render(
+			@<ThemeProvider Theme="noTheme">
+				<Button Text="Dynamic" />
+			</ThemeProvider>
+		);
+
+		// Should have no styles
+		var input1 = cut1.Find("input");
+		input1.HasAttribute("style").ShouldBeFalse();
+
+		// Render with theme
+		var cut2 = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Dynamic" />
+			</ThemeProvider>
+		);
+
+		// Should have Blue background
+		var input2 = cut2.Find("input");
+		input2.GetAttribute("style").ShouldContain("background-color:Blue");
+	}
+
+	/// <summary>
+	/// Theme vs no theme shows style removal.
+	/// Verify that without theme, no styles are applied.
+	/// </summary>
+	[Fact]
+	public void Theme_VsNoTheme_ShowsStyleRemoval()
+	{
+		var theme = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+		ThemeConfiguration noTheme = null;
+
+		// Render with theme
+		var cut1 = Render(
+			@<ThemeProvider Theme="theme">
+				<Button Text="Dynamic" />
+			</ThemeProvider>
+		);
+
+		// Should be Blue
+		var input1 = cut1.Find("input");
+		input1.GetAttribute("style").ShouldContain("background-color:Blue");
+
+		// Render without theme
+		var cut2 = Render(
+			@<ThemeProvider Theme="noTheme">
+				<Button Text="Dynamic" />
+			</ThemeProvider>
+		);
+
+		// Should have no style
+		var input2 = cut2.Find("input");
+		input2.HasAttribute("style").ShouldBeFalse();
+	}
+
+	/// <summary>
+	/// ThemeMode StyleSheetTheme vs Theme comparison.
+	/// Verify different override behavior between modes.
+	/// </summary>
+	[Fact]
+	public void ThemeMode_StyleSheetTheme_VsTheme_ShowsDifferentBehavior()
+	{
+		var themeStyleSheet = new ThemeConfiguration()
+			.WithMode(ThemeMode.StyleSheetTheme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var themeTheme = new ThemeConfiguration()
+			.WithMode(ThemeMode.Theme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		// Render with StyleSheetTheme mode
+		var cut1 = Render(
+			@<ThemeProvider Theme="themeStyleSheet">
+				<Button Text="Test" BackColor="Red" />
+			</ThemeProvider>
+		);
+
+		// StyleSheetTheme mode: explicit Red wins
+		var input1 = cut1.Find("input");
+		input1.GetAttribute("style").ShouldContain("background-color:Red");
+
+		// Render with Theme mode
+		var cut2 = Render(
+			@<ThemeProvider Theme="themeTheme" Mode="ThemeMode.Theme">
+				<Button Text="Test" BackColor="Red" />
+			</ThemeProvider>
+		);
+
+		// Theme mode: theme Blue overrides explicit Red
+		var input2 = cut2.Find("input");
+		input2.GetAttribute("style").ShouldContain("background-color:Blue");
+		input2.GetAttribute("style").ShouldNotContain("background-color:Red");
+	}
+
+	/// <summary>
+	/// Different themes affect multiple controls differently.
+	/// All themed controls apply their respective theme.
+	/// </summary>
+	[Fact]
+	public void DifferentThemes_MultipleControls_ShowDifferentStyles()
+	{
+		var theme1 = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue))
+			.ForControl("Label", skin => skin
+				.Set(s => s.ForeColor, Green));
+
+		var theme2 = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Red))
+			.ForControl("Label", skin => skin
+				.Set(s => s.ForeColor, Yellow));
+
+		// Render with theme1
+		var cut1 = Render(
+			@<ThemeProvider Theme="theme1">
+				<Button Text="Btn" />
+				<Label Text="Lbl" />
+			</ThemeProvider>
+		);
+
+		// theme1 colors
+		cut1.Find("input").GetAttribute("style").ShouldContain("background-color:Blue");
+		cut1.Find("span").GetAttribute("style").ShouldContain("color:Green");
+
+		// Render with theme2
+		var cut2 = Render(
+			@<ThemeProvider Theme="theme2">
+				<Button Text="Btn" />
+				<Label Text="Lbl" />
+			</ThemeProvider>
+		);
+
+		// theme2 colors
+		cut2.Find("input").GetAttribute("style").ShouldContain("background-color:Red");
+		cut2.Find("span").GetAttribute("style").ShouldContain("color:Yellow");
+	}
+
+	/// <summary>
+	/// Different themes with SkinID show different styles.
+	/// Verify that theme changes affect both default and named skins.
+	/// </summary>
+	[Fact]
+	public void DifferentThemes_WithSkinID_ShowDifferentStyles()
+	{
+		var theme1 = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue))
+			.ForControl("Button", "highlight", skin => skin
+				.Set(s => s.BackColor, Yellow));
+
+		var theme2 = new ThemeConfiguration()
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Red))
+			.ForControl("Button", "highlight", skin => skin
+				.Set(s => s.BackColor, Green));
+
+		// Render with theme1
+		var cut1 = Render(
+			@<ThemeProvider Theme="theme1">
+				<Button Text="Default" />
+				<Button Text="Highlight" SkinID="highlight" />
+			</ThemeProvider>
+		);
+
+		// theme1: default=Blue, highlight=Yellow
+		var buttons1 = cut1.FindAll("input");
+		buttons1[0].GetAttribute("style").ShouldContain("background-color:Blue");
+		buttons1[1].GetAttribute("style").ShouldContain("background-color:Yellow");
+
+		// Render with theme2
+		var cut2 = Render(
+			@<ThemeProvider Theme="theme2">
+				<Button Text="Default" />
+				<Button Text="Highlight" SkinID="highlight" />
+			</ThemeProvider>
+		);
+
+		// theme2: default=Red, highlight=Green
+		var buttons2 = cut2.FindAll("input");
+		buttons2[0].GetAttribute("style").ShouldContain("background-color:Red");
+		buttons2[1].GetAttribute("style").ShouldContain("background-color:Green");
+	}
+
+	/// <summary>
+	/// Multiple themes in StyleSheetTheme mode all preserve explicit values.
+	/// </summary>
+	[Fact]
+	public void MultipleThemes_PreserveExplicitValues_InStyleSheetThemeMode()
+	{
+		var theme1 = new ThemeConfiguration()
+			.WithMode(ThemeMode.StyleSheetTheme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Blue));
+
+		var theme2 = new ThemeConfiguration()
+			.WithMode(ThemeMode.StyleSheetTheme)
+			.ForControl("Button", skin => skin
+				.Set(s => s.BackColor, Green));
+
+		// Render with theme1
+		var cut1 = Render(
+			@<ThemeProvider Theme="theme1">
+				<Button Text="Explicit" BackColor="Red" />
+			</ThemeProvider>
+		);
+
+		// Explicit Red wins over theme1 Blue
+		var input1 = cut1.Find("input");
+		input1.GetAttribute("style").ShouldContain("background-color:Red");
+
+		// Render with theme2
+		var cut2 = Render(
+			@<ThemeProvider Theme="theme2">
+				<Button Text="Explicit" BackColor="Red" />
+			</ThemeProvider>
+		);
+
+		// Explicit Red still wins over theme2 Green
+		var input2 = cut2.Find("input");
+		input2.GetAttribute("style").ShouldContain("background-color:Red");
+	}
+
+}

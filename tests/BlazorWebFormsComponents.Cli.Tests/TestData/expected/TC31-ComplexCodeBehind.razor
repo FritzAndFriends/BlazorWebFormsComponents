@@ -1,0 +1,13 @@
+@page "/TC31-ComplexCodeBehind"
+<PageTitle>Admin Dashboard</PageTitle>
+<h1>Admin Dashboard</h1>
+<Label id="lblStatus" Text="Loading..." />
+<GridView ItemType="object" id="gvUsers" AutoGenerateColumns="false" CssClass="table" GridLines="@GridLines.Both"
+    OnRowCommand="@Users_RowCommand">
+    <Columns>
+        <BoundField ItemType="object" DataField="UserName" HeaderText="User" />
+        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
+    </Columns>
+</GridView>
+<Button id="btnExport" Text="Export Report" OnClick="@Export_Click" />
+<Button id="btnRefresh" Text="Refresh" OnClick="@Refresh_Click" />

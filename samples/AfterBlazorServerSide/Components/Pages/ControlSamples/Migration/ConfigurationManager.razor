@@ -1,0 +1,177 @@
+@page "/ControlSamples/Migration/ConfigurationManager"
+@inject IConfiguration Configuration
+@using BlazorWebFormsComponents
+
+<PageTitle>ConfigurationManager Shim Sample</PageTitle>
+
+<h2>ConfigurationManager Migration Shim</h2>
+
+<p>This sample demonstrates the <code>ConfigurationManager</code> static shim that allows Web Forms code 
+   accessing <code>ConfigurationManager.AppSettings</code> and <code>ConfigurationManager.ConnectionStrings</code> 
+   to work in Blazor without code changes.</p>
+
+<hr />
+
+<h3>1. Reading AppSettings</h3>
+<p>In Web Forms, you'd read app settings from <code>Web.config</code>. The BWFC shim reads from 
+   <code>IConfiguration</code> instead, using the "AppSettings" section.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>&lt;!-- Web.config --&gt;
+&lt;configuration&gt;
+  &lt;appSettings&gt;
+    &lt;add key="SiteName" value="My Site" /&gt;
+    &lt;add key="MaxItemsPerPage" value="25" /&gt;
+  &lt;/appSettings&gt;
+&lt;/configuration&gt;
+
+// Code-behind
+var siteName = ConfigurationManager.AppSettings["SiteName"];
+var maxItems = ConfigurationManager.AppSettings["MaxItemsPerPage"];</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// appsettings.json
+{
+  "AppSettings": {
+    "SiteName": "BlazorWebFormsComponents Demo",
+    "MaxItemsPerPage": "25"
+  }
+}
+
+// Same code works!
+var siteName = ConfigurationManager.AppSettings["SiteName"];
+var maxItems = ConfigurationManager.AppSettings["MaxItemsPerPage"];</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="appsettings-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - AppSettings</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>SiteName</code></td>
+                    <td><strong>@BlazorWebFormsComponents.ConfigurationManager.AppSettings["SiteName"]</strong></td>
+                </tr>
+                <tr>
+                    <td><code>MaxItemsPerPage</code></td>
+                    <td><strong>@BlazorWebFormsComponents.ConfigurationManager.AppSettings["MaxItemsPerPage"]</strong></td>
+                </tr>
+                <tr>
+                    <td><code>EnableFeatureX</code></td>
+                    <td><strong>@BlazorWebFormsComponents.ConfigurationManager.AppSettings["EnableFeatureX"]</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<hr />
+
+<h3>2. Reading ConnectionStrings</h3>
+<p>Connection strings work the same way — the shim reads from the "ConnectionStrings" section of 
+   <code>IConfiguration</code>.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>&lt;!-- Web.config --&gt;
+&lt;connectionStrings&gt;
+  &lt;add name="DefaultConnection" 
+       connectionString="Server=..." /&gt;
+&lt;/connectionStrings&gt;
+
+// Code-behind
+var connStr = ConfigurationManager
+    .ConnectionStrings["DefaultConnection"]
+    .ConnectionString;</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// appsettings.json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=..."
+  }
+}
+
+// Same code works!
+var connStr = ConfigurationManager
+    .ConnectionStrings["DefaultConnection"]
+    .ConnectionString;</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="connectionstrings-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - ConnectionStrings</h5>
+        @if (BlazorWebFormsComponents.ConfigurationManager.ConnectionStrings["DefaultConnection"] != null)
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Connection String</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>DefaultConnection</code></td>
+                        <td><strong>@BlazorWebFormsComponents.ConfigurationManager.ConnectionStrings["DefaultConnection"]?.ConnectionString</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">No connection strings configured in appsettings.json</p>
+        }
+    </div>
+</div>
+
+<hr />
+
+<h3>3. Setup Required</h3>
+<p>To enable the ConfigurationManager shim, add this line to your <code>Program.cs</code> 
+   after calling <code>UseBlazorWebFormsComponents()</code>:</p>
+
+<pre><code>app.UseBlazorWebFormsComponents();
+app.UseConfigurationManagerShim();  // Enable ConfigurationManager shim
+</code></pre>
+
+<hr />
+
+<h3>4. Direct IConfiguration Access (Recommended for New Code)</h3>
+<p>The ConfigurationManager shim is for <strong>migration compatibility</strong>. For new Blazor code, 
+   inject <code>IConfiguration</code> directly:</p>
+
+<pre><code>@@inject IConfiguration Configuration
+
+@@code {
+    private string siteName = "";
+    
+    protected override void OnInitialized()
+    {
+        siteName = Configuration["AppSettings:SiteName"] ?? "";
+    }
+}</code></pre>
+
+<div class="card mt-3" data-audit-control="iconfiguration-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Native IConfiguration</h5>
+        <p>Site Name (via injected IConfiguration): <strong>@Configuration["AppSettings:SiteName"]</strong></p>
+    </div>
+</div>
+
+@code {
+    // No code needed for static ConfigurationManager access
+}

@@ -1,108 +1,238 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// A component that emulates ASP.NET Web Forms MasterPage functionality.
-	/// In Blazor, MasterPages are replaced by Layout components, but this component
-	/// provides a familiar API for developers migrating from Web Forms.
+	/// Wrap your master-page chrome (header, nav, footer) inside this component and use
+	/// <see cref="ContentPlaceHolder"/> controls to define named content slots. Child
+	/// pages provide slot content via <see cref="Content"/> controls.
 	/// </summary>
 	/// <remarks>
-	/// Web Forms MasterPages define a template for pages, with ContentPlaceHolder
-	/// controls that child pages can populate with Content controls.
-	/// 
-	/// In Blazor, layouts use @Body and @RenderSection to achieve similar functionality.
-	/// This MasterPage component acts as a bridge, allowing Web Forms-style markup
-	/// to work in Blazor by internally using Blazor's layout system.
-	/// 
-	/// The Head parameter allows you to define head content that will be automatically
-	/// wrapped in a HeadContent component, bridging the gap between Web Forms' 
-	/// &lt;head runat="server"&gt; and Blazor's HeadContent approach. You can include
-	/// &lt;title&gt; elements directly in the Head content and they will work correctly.
-	/// 
-	/// Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.masterpage
+	/// <para>
+	/// MasterPage cascades a <see cref="MasterPageContext"/> to all descendants so that
+	/// <see cref="Content"/> controls can register named fragments and the host can
+	/// re-render like a lightweight layout/section shim. <see cref="ContentPlaceHolder"/>
+	/// then simply reads its named slot from the shared context.
+	/// </para>
+	/// <para>
+	/// For Blazor layout scenarios (migrated master pages used with <c>@layout</c>),
+	/// inherit <see cref="MasterPageLayoutBase"/> in the layout component instead.
+	/// </para>
+	/// <para>
+	/// Original Microsoft documentation:
+	/// https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.masterpage
+	/// </para>
 	/// </remarks>
 	public partial class MasterPage : MasterPageBase
 	{
 		/// <summary>
-		/// The content of the master page template, which contains the layout and ContentPlaceHolder controls
+		/// The content of the master page template, which typically contains layout
+		/// structure and <see cref="ContentPlaceHolder"/> controls.
 		/// </summary>
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
 		/// <summary>
-		/// Optional head content that will be automatically wrapped in a HeadContent component.
-		/// This provides a bridge between Web Forms' &lt;head runat="server"&gt; and Blazor's HeadContent.
-		/// Content defined here will be rendered in the document's &lt;head&gt; section via HeadOutlet.
-		/// You can include &lt;title&gt; elements directly in the Head content.
+		/// Optional head content wrapped in a <c>HeadContent</c> component, bridging
+		/// Web Forms' <c>&lt;head runat="server"&gt;</c> to Blazor's <c>HeadOutlet</c>.
 		/// </summary>
-		/// <example>
-		/// &lt;MasterPage&gt;
-		///     &lt;Head&gt;
-		///         &lt;title&gt;My Page Title&lt;/title&gt;
-		///         &lt;link href="css/site.css" rel="stylesheet" /&gt;
-		///         &lt;meta name="description" content="My site" /&gt;
-		///     &lt;/Head&gt;
-		///     &lt;ChildContent&gt;
-		///         &lt;!-- Page layout here --&gt;
-		///     &lt;/ChildContent&gt;
-		/// &lt;/MasterPage&gt;
-		/// </example>
 		[Parameter]
 		public RenderFragment Head { get; set; }
 
 		/// <summary>
-		/// Collection of ContentPlaceHolder controls defined in this master page
+		/// Shared section registry consumed by <see cref="ContentPlaceHolder"/> and
+		/// populated by <see cref="Content"/>.
 		/// </summary>
-		internal Dictionary<string, ContentPlaceHolder> ContentPlaceHolders { get; } = new Dictionary<string, ContentPlaceHolder>();
+		internal MasterPageContext Context { get; } = new();
 
 		/// <summary>
-		/// Registers a ContentPlaceHolder with this MasterPage
+		/// Read-only view of the content sections that have been registered by
+		/// <see cref="Content"/> controls. Keyed by <c>ContentPlaceHolderID</c>.
 		/// </summary>
-		internal void RegisterContentPlaceHolder(ContentPlaceHolder placeholder)
+		internal IReadOnlyDictionary<string, RenderFragment> ContentSections =>
+			_contentSectionsView ??= new MasterPageContentSectionsView(Context);
+
+		private MasterPageContentSectionsView _contentSectionsView;
+		private bool _renderQueued;
+
+		/// <summary>
+		/// Gets the content registered for <paramref name="placeHolderId"/>, or <c>null</c>.
+		/// </summary>
+		internal RenderFragment GetContentForPlaceHolder(string placeHolderId) =>
+			Context.GetContent(placeHolderId);
+
+		/// <summary>
+		/// Called by <see cref="ContentPlaceHolder"/> controls to announce their presence.
+		/// Retained for backward compatibility.
+		/// </summary>
+		[Obsolete("ContentPlaceHolder controls now resolve content directly from MasterPageContext.")]
+		internal void RegisterContentPlaceHolder(ContentPlaceHolder placeholder) { }
+
+		/// <inheritdoc />
+		protected override void OnInitialized()
 		{
-			if (!string.IsNullOrEmpty(placeholder.ID))
-			{
-				ContentPlaceHolders[placeholder.ID] = placeholder;
-			}
+			base.OnInitialized();
+			Context.SectionsChanged += OnSectionsChanged;
 		}
 
-		/// <summary>
-		/// Gets the content for a specific ContentPlaceHolder from child pages
-		/// </summary>
-		internal RenderFragment GetContentForPlaceHolder(string placeHolderId)
+		private void OnSectionsChanged()
 		{
-			if (ContentSections != null && ContentSections.TryGetValue(placeHolderId, out var contentSection))
+			if (_renderQueued)
 			{
-				return contentSection;
+				return;
 			}
-			return null;
+
+			_renderQueued = true;
+			_ = InvokeAsync(() =>
+			{
+				_renderQueued = false;
+				StateHasChanged();
+			});
 		}
 
-		/// <summary>
-		/// Content sections provided by child pages that use this master page
-		/// </summary>
-		internal Dictionary<string, RenderFragment> ContentSections { get; set; } = new Dictionary<string, RenderFragment>();
+		/// <inheritdoc />
+		protected override async ValueTask Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				Context.SectionsChanged -= OnSectionsChanged;
+				Context.Dispose();
+			}
+
+			await base.Dispose(disposing);
+		}
 	}
 
 	/// <summary>
-	/// Base class for MasterPage components
+	/// Read-only dictionary view over a <see cref="MasterPageContext"/> for backward
+	/// compatibility with code that accesses <see cref="MasterPage.ContentSections"/>.
+	/// </summary>
+	internal sealed class MasterPageContentSectionsView : IReadOnlyDictionary<string, RenderFragment>
+	{
+		private readonly MasterPageContext _ctx;
+
+		public MasterPageContentSectionsView(MasterPageContext ctx) => _ctx = ctx;
+
+		public RenderFragment this[string key] => _ctx.GetContent(key) ?? throw new KeyNotFoundException(key);
+		public IEnumerable<string> Keys => _ctx.RegisteredIds;
+		public IEnumerable<RenderFragment> Values
+		{
+			get
+			{
+				foreach (var id in _ctx.RegisteredIds)
+				{
+					yield return _ctx.GetContent(id);
+				}
+			}
+		}
+
+		public int Count => System.Linq.Enumerable.Count(_ctx.RegisteredIds);
+		public bool ContainsKey(string key) => _ctx.HasContent(key);
+
+		public bool TryGetValue(string key, out RenderFragment value)
+		{
+			value = _ctx.GetContent(key);
+			return value != null;
+		}
+
+		public IEnumerator<KeyValuePair<string, RenderFragment>> GetEnumerator()
+		{
+			foreach (var id in _ctx.RegisteredIds)
+			{
+				yield return new KeyValuePair<string, RenderFragment>(id, _ctx.GetContent(id));
+			}
+		}
+
+		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+	}
+
+	/// <summary>
+	/// Base class for the <see cref="MasterPage"/> component. Carries the shared
+	/// obsolete Web Forms properties that migration tooling may emit.
 	/// </summary>
 	public abstract class MasterPageBase : BaseWebFormsComponent
 	{
 		/// <summary>
-		/// Gets or sets the title of the page. In Web Forms, this is typically set by child pages
-		/// and propagated to the master page's title element.
+		/// The page title. In Blazor use the <c>PageTitle</c> component instead.
 		/// </summary>
-		[Parameter, Obsolete("Use @page directive with @title in Blazor, or set Title via PageTitle component")]
+		[Parameter, Obsolete("Use PageTitle component or set Title via IPageService instead.")]
 		public string Title { get; set; }
 
 		/// <summary>
-		/// Gets or sets the path to a parent master page for nested master pages
+		/// Path to a parent master page (nested master pages).
+		/// In Blazor, use the <c>@layout</c> directive on the layout component instead.
 		/// </summary>
-		[Parameter, Obsolete("Nested master pages are not commonly used in Blazor. Use nested layouts instead by setting @layout directive")]
+		[Parameter, Obsolete("Use the @layout directive for nested layouts in Blazor.")]
 		public string MasterPageFile { get; set; }
+	}
+
+	/// <summary>
+	/// Abstract base class for Blazor layout components that emulate ASP.NET Web Forms
+	/// master pages. Inherit this class in your migrated <c>.razor</c> layout files
+	/// (those that use <c>@layout</c> from child pages) when you want to preserve named
+	/// <see cref="ContentPlaceHolder"/> / <see cref="Content"/> slot relationships.
+	/// </summary>
+	public abstract class MasterPageLayoutBase : LayoutComponentBase, IAsyncDisposable
+	{
+		private static readonly FieldInfo s_renderFragmentField =
+			typeof(ComponentBase).GetField("_renderFragment", BindingFlags.NonPublic | BindingFlags.Instance)
+			?? throw new InvalidOperationException(
+				"ComponentBase._renderFragment field not found. " +
+				"This Blazor version may not be compatible with MasterPageLayoutBase.");
+
+		private readonly RenderFragment _baseRenderFragment;
+		private bool _renderQueued;
+
+		/// <summary>
+		/// The shared context that coordinates ContentPlaceHolder / Content communication.
+		/// Automatically cascaded to all descendants by this base class.
+		/// </summary>
+		protected MasterPageContext Context { get; } = new();
+
+		/// <summary>Initialises the context cascade wrapper.</summary>
+		protected MasterPageLayoutBase()
+		{
+			_baseRenderFragment = (RenderFragment)s_renderFragmentField.GetValue(this)!;
+			s_renderFragmentField.SetValue(this, (RenderFragment)ContextWrappedRenderTree);
+			Context.SectionsChanged += OnSectionsChanged;
+
+			void ContextWrappedRenderTree(RenderTreeBuilder builder)
+			{
+				builder.OpenComponent<CascadingValue<MasterPageContext>>(0);
+				builder.AddAttribute(1, nameof(CascadingValue<object>.Value), Context);
+				builder.AddAttribute(2, nameof(CascadingValue<object>.IsFixed), false);
+				builder.AddAttribute(3, nameof(CascadingValue<object>.ChildContent), _baseRenderFragment);
+				builder.CloseComponent();
+			}
+		}
+
+		private void OnSectionsChanged()
+		{
+			if (_renderQueued)
+			{
+				return;
+			}
+
+			_renderQueued = true;
+			_ = InvokeAsync(() =>
+			{
+				_renderQueued = false;
+				StateHasChanged();
+			});
+		}
+
+		/// <inheritdoc />
+		public ValueTask DisposeAsync()
+		{
+			Context.SectionsChanged -= OnSectionsChanged;
+			Context.Dispose();
+			return ValueTask.CompletedTask;
+		}
 	}
 }

@@ -1,22 +1,8 @@
 @inherits NamingContainer
-@implements IDisposable
 
-@if (RenderPageHead && _pageServiceAvailable)
+@if (RenderPageHead)
 {
-	@if (!string.IsNullOrEmpty(_currentTitle))
-	{
-		<PageTitle>@_currentTitle</PageTitle>
-	}
-	<HeadContent>
-	@if (!string.IsNullOrEmpty(_currentMetaDescription))
-	{
-		<meta name="description" content="@_currentMetaDescription" />
-	}
-	@if (!string.IsNullOrEmpty(_currentMetaKeywords))
-	{
-		<meta name="keywords" content="@_currentMetaKeywords" />
-	}
-	</HeadContent>
+    <Page />
 }
 
 @if (Visible)

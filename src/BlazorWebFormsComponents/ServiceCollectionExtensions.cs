@@ -1,6 +1,10 @@
 using System;
+using System.IO;
 using BlazorWebFormsComponents.Diagnostics;
+using BlazorWebFormsComponents.Theming;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BlazorWebFormsComponents;
@@ -30,12 +34,52 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddBlazorWebFormsComponents(this IServiceCollection services, Action<BlazorWebFormsComponentsOptions>? configure)
     {
         services.AddHttpContextAccessor();
+        services.AddDistributedMemoryCache();
+        services.AddSession();
         services.AddScoped<BlazorWebFormsJsInterop>();
         services.AddScoped<IPageService, PageService>();
+        services.AddScoped<SessionShim>();
+        services.AddMemoryCache();
+        services.AddScoped<ServerShim>();
+        services.AddScoped<CacheShim>();
+        services.AddScoped<ClientScriptShim>();
+        services.AddScoped(sp => new ScriptManagerShim(sp.GetRequiredService<ClientScriptShim>()));
 
         var options = new BlazorWebFormsComponentsOptions();
         configure?.Invoke(options);
         services.AddSingleton(options);
+
+        // Auto-discover Web Forms themes from wwwroot/App_Themes (or custom path).
+        // Uses IWebHostEnvironment at resolution time so WebRootPath is available.
+        services.AddSingleton<ThemeConfiguration>(sp =>
+        {
+            var env = sp.GetService<IWebHostEnvironment>();
+            var themesRelPath = options.ThemesPath ?? "App_Themes";
+
+            // Empty string means auto-discovery is explicitly disabled
+            if (string.IsNullOrEmpty(themesRelPath) && options.ThemesPath is not null)
+                return new ThemeConfiguration();
+
+            var webRoot = env?.WebRootPath ?? "";
+            if (string.IsNullOrEmpty(webRoot))
+                return new ThemeConfiguration();
+
+            var fullPath = Path.Combine(webRoot, themesRelPath);
+            if (!Directory.Exists(fullPath))
+                return new ThemeConfiguration();
+
+            var config = SkinFileParser.ParseThemeFolder(fullPath);
+            config.Mode = options.ThemeMode;
+
+            // Auto-discover CSS files in the theme folder
+            foreach (var css in Directory.GetFiles(fullPath, "*.css", SearchOption.AllDirectories))
+            {
+                var relativePath = Path.GetRelativePath(webRoot, css).Replace('\\', '/');
+                config.WithCssFile(relativePath);
+            }
+
+            return config;
+        });
 
         return services;
     }
@@ -66,13 +110,16 @@ public static class ServiceCollectionExtensions
 
         // Fallback: look for a pre-generated snapshot alongside the running assembly
         var assemblyDir = System.IO.Path.GetDirectoryName(typeof(ComponentHealthService).Assembly.Location) ?? "";
-        var snapshotPath = System.IO.Path.Combine(assemblyDir, HealthSnapshotGenerator.SnapshotFileName);
+        var snapshotFileName = HealthSnapshotGenerator.SnapshotFileName;
+        var snapshotPath = System.IO.Path.Combine(assemblyDir,
+            snapshotFileName.TrimStart(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar));
         var snapshotReports = HealthSnapshotGenerator.LoadSnapshot(snapshotPath);
 
         // Also check the app's base directory (common for published apps)
         if (snapshotReports == null)
         {
-            snapshotPath = System.IO.Path.Combine(System.AppContext.BaseDirectory, HealthSnapshotGenerator.SnapshotFileName);
+            snapshotPath = System.IO.Path.Combine(System.AppContext.BaseDirectory,
+                snapshotFileName.TrimStart(System.IO.Path.DirectorySeparatorChar, System.IO.Path.AltDirectorySeparatorChar));
             snapshotReports = HealthSnapshotGenerator.LoadSnapshot(snapshotPath);
         }
 
@@ -93,6 +140,25 @@ public static class ServiceCollectionExtensions
     }
 
     /// <summary>
+    /// Initializes the <see cref="ConfigurationManager"/> shim from the application's
+    /// <see cref="IConfiguration"/>. Call this in Program.cs after building the app:
+    /// <code>
+    /// var app = builder.Build();
+    /// app.UseConfigurationManagerShim();
+    /// </code>
+    /// This enables migrated Web Forms code to use
+    /// <c>ConfigurationManager.AppSettings["key"]</c> and
+    /// <c>ConfigurationManager.ConnectionStrings["name"]</c>.
+    /// </summary>
+    /// <param name="app">The web application</param>
+    /// <returns>The web application for chaining</returns>
+    public static WebApplication UseConfigurationManagerShim(this WebApplication app)
+    {
+        ConfigurationManager.Initialize(app.Configuration);
+        return app;
+    }
+
+    /// <summary>
     /// Adds BlazorWebFormsComponents middleware to the application pipeline.
     /// Configurable via <see cref="BlazorWebFormsComponentsOptions"/>:
     /// <list type="bullet">
@@ -107,6 +173,14 @@ public static class ServiceCollectionExtensions
     {
         var options = app.ApplicationServices.GetService<BlazorWebFormsComponentsOptions>()
                      ?? new BlazorWebFormsComponentsOptions();
+
+        // Initialize ConfigurationManager shim so migrated code can use
+        // ConfigurationManager.AppSettings["key"] and .ConnectionStrings["name"]
+        var config = app.ApplicationServices.GetService<IConfiguration>();
+        if (config is not null)
+        {
+            ConfigurationManager.Initialize(config);
+        }
 
         if (options.EnableAspxUrlRewriting)
         {

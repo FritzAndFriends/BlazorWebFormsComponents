@@ -38,7 +38,12 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public EventCallback<ChangeEventArgs> OnCheckedChanged { get; set; }
 
-		[Parameter, Obsolete("AutoPostBack is not supported in Blazor. Use OnCheckedChanged event instead.")]
+		/// <summary>
+		/// Gets or sets whether the control automatically posts back when the value changes.
+		/// In SSR mode, emits <c>onchange="this.form.submit()"</c> on the HTML element.
+		/// In Interactive mode, Blazor's native event binding handles change events automatically.
+		/// </summary>
+		[Parameter]
 		public bool AutoPostBack { get; set; }
 
 		private string EffectiveGroupName => !string.IsNullOrEmpty(GroupName)

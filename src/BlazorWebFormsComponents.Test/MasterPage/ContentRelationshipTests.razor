@@ -1,0 +1,160 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void Content_WithMatchingPlaceholderID_InjectsContent()
+	{
+		// Content registered to "MainContent" should replace the placeholder default.
+		var cut = Render(@<MasterPage>
+			<Content ContentPlaceHolderID="MainContent">
+				<h2 class="injected">From Content Control</h2>
+			</Content>
+			<ContentPlaceHolder ID="MainContent">
+				<p class="default">Default content</p>
+			</ContentPlaceHolder>
+		</MasterPage>);
+
+		cut.Find(".injected").TextContent.ShouldBe("From Content Control");
+		cut.Markup.ShouldNotContain("default");
+	}
+
+	[Fact]
+	public void Content_WithNonMatchingPlaceholderID_ShowsDefault()
+	{
+		// Content targeting a different ID should not affect MainContent placeholder.
+		var cut = Render(@<MasterPage>
+			<Content ContentPlaceHolderID="SideBar">
+				<span class="sidebar">Sidebar content</span>
+			</Content>
+			<ContentPlaceHolder ID="MainContent">
+				<p class="default">Default main</p>
+			</ContentPlaceHolder>
+		</MasterPage>);
+
+		cut.Find(".default").TextContent.ShouldBe("Default main");
+		cut.Markup.ShouldNotContain("sidebar");
+	}
+
+	[Fact]
+	public void Content_WithEmptyPlaceholderID_DoesNotInject()
+	{
+		// Content with no ContentPlaceHolderID must not interfere with any placeholder.
+		var cut = Render(@<MasterPage>
+			<Content ContentPlaceHolderID="">
+				<span class="orphan">Orphan content</span>
+			</Content>
+			<ContentPlaceHolder ID="MainContent">
+				<p class="default">Default remains</p>
+			</ContentPlaceHolder>
+		</MasterPage>);
+
+		cut.Find(".default").TextContent.ShouldBe("Default remains");
+	}
+
+	[Fact]
+	public void MultipleContent_InjectIntoMultiplePlaceholders()
+	{
+		// Two Content controls each target distinct ContentPlaceHolder IDs.
+		var cut = Render(@<MasterPage>
+			<Content ContentPlaceHolderID="Header">
+				<h1 class="page-title">My Page Title</h1>
+			</Content>
+			<Content ContentPlaceHolderID="Body">
+				<article class="page-body">Page body text</article>
+			</Content>
+			<ContentPlaceHolder ID="Header">
+				<h1>Default header</h1>
+			</ContentPlaceHolder>
+			<ContentPlaceHolder ID="Body">
+				<p>Default body</p>
+			</ContentPlaceHolder>
+		</MasterPage>);
+
+		cut.Find(".page-title").TextContent.ShouldBe("My Page Title");
+		cut.Find(".page-body").TextContent.ShouldBe("Page body text");
+	}
+
+	[Fact]
+	public void ContentPlaceHolder_WithoutMasterParent_RendersDefaultContent()
+	{
+		// ContentPlaceHolder rendered standalone (no parent MasterPage) should show its default.
+		var cut = Render(@<ContentPlaceHolder ID="Standalone">
+			<p class="standalone-default">Standalone default</p>
+		</ContentPlaceHolder>);
+
+		cut.Find(".standalone-default").TextContent.ShouldBe("Standalone default");
+	}
+
+	[Fact]
+	public void MasterPage_ContentPlaceHolders_RegistrationDoesNotThrow()
+	{
+		// Registering ContentPlaceHolders in MasterPage.ContentPlaceHolders must not throw.
+		Should.NotThrow(() => Render(@<MasterPage>
+			<ContentPlaceHolder ID="A">
+				<div class="a">A</div>
+			</ContentPlaceHolder>
+			<ContentPlaceHolder ID="B">
+				<div class="b">B</div>
+			</ContentPlaceHolder>
+		</MasterPage>));
+	}
+
+	[Fact]
+	public void Content_WithMasterPage_RegistersInContentSections()
+	{
+		// After rendering, the MasterPage instance must have the content section registered.
+		var cut = Render(@<MasterPage>
+			<Content ContentPlaceHolderID="Main">
+				<p class="registered">Registered</p>
+			</Content>
+			<ContentPlaceHolder ID="Main">
+				<p class="fallback">Fallback</p>
+			</ContentPlaceHolder>
+		</MasterPage>);
+
+		var masterPage = cut.FindComponent<MasterPage>().Instance;
+		masterPage.ContentSections.ContainsKey("Main").ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Content_InChildComponents_InjectsIntoPlaceholderInChildContent()
+	{
+		var cut = Render(@<MasterPage>
+			<ChildContent>
+				<div class="shell">
+					<ContentPlaceHolder ID="MainContent">
+						<p class="default">Default content</p>
+					</ContentPlaceHolder>
+				</div>
+			</ChildContent>
+			<ChildComponents>
+				<Content ContentPlaceHolderID="MainContent">
+					<h2 class="injected">Injected from ChildComponents</h2>
+				</Content>
+			</ChildComponents>
+		</MasterPage>);
+
+		cut.Find(".injected").TextContent.ShouldBe("Injected from ChildComponents");
+		cut.Markup.ShouldNotContain("Default content");
+	}
+
+	[Fact]
+	public void ContentPlaceHolder_DefaultContent_RemainsWhenChildComponentsDoNotTargetSlot()
+	{
+		var cut = Render(@<MasterPage>
+			<ChildContent>
+				<ContentPlaceHolder ID="MainContent">
+					<p class="default">Default main</p>
+				</ContentPlaceHolder>
+			</ChildContent>
+			<ChildComponents>
+				<Content ContentPlaceHolderID="Sidebar">
+					<span class="sidebar">Sidebar content</span>
+				</Content>
+			</ChildComponents>
+		</MasterPage>);
+
+		cut.Find(".default").TextContent.ShouldBe("Default main");
+		cut.Markup.ShouldNotContain("sidebar");
+	}
+}

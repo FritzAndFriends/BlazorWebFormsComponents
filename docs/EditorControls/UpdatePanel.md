@@ -24,44 +24,44 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **ContentTemplate as a separate element** — Use `ChildContent` directly between tags
 - **ScriptManager dependency** — Not needed; Blazor manages updates natively
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ScriptManager ID="ScriptManager1" runat="server" />
+=== "Web Forms"
 
-<asp:UpdatePanel
-    ChildrenAsTriggers="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    RenderMode="Block|Inline"
-    runat="server"
-    UpdateMode="Always|Conditional"
-    Visible="True|False"
->
-    <ContentTemplate>
-        <!-- Content here -->
-    </ContentTemplate>
-    <Triggers>
-        <asp:AsyncPostBackTrigger ControlID="btnRefresh" EventName="Click" />
-    </Triggers>
-</asp:UpdatePanel>
-```
+    ```html
+    <asp:ScriptManager ID="ScriptManager1" runat="server" />
 
-## Blazor Razor Syntax
+    <asp:UpdatePanel
+        ChildrenAsTriggers="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        RenderMode="Block|Inline"
+        runat="server"
+        UpdateMode="Always|Conditional"
+        Visible="True|False"
+    >
+        <ContentTemplate>
+            <!-- Content here -->
+        </ContentTemplate>
+        <Triggers>
+            <asp:AsyncPostBackTrigger ControlID="btnRefresh" EventName="Click" />
+        </Triggers>
+    </asp:UpdatePanel>
+    ```
 
-### Basic UpdatePanel
+=== "Blazor"
 
-```razor
-<UpdatePanel>
-    <p>This content is wrapped in a div.</p>
-</UpdatePanel>
-```
+    ```razor
+    <UpdatePanel>
+        <p>This content is wrapped in a div.</p>
+    </UpdatePanel>
+    ```
 
 ### Inline Render Mode
 

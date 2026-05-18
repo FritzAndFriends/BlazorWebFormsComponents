@@ -13,44 +13,46 @@ The LoginName component displays the name of the currently logged-in user. It au
 
 - All core features are supported
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:LoginName
-    BackColor="color name|#dddddd"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
-        Inset|Outset"
-    BorderWidth="size"
-    CssClass="string"
-    Enabled="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
-        Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    FormatString="string"
-    Height="size"
-    ID="string"
-    runat="server"
-    SkinID="string"
-    Style="string"
-    TabIndex="integer"
-    ToolTip="string"
-    Visible="True|False"
-    Width="size"
-/>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:LoginName
+        BackColor="color name|#dddddd"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|
+            Inset|Outset"
+        BorderWidth="size"
+        CssClass="string"
+        Enabled="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|
+            Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        FormatString="string"
+        Height="size"
+        ID="string"
+        runat="server"
+        SkinID="string"
+        Style="string"
+        TabIndex="integer"
+        ToolTip="string"
+        Visible="True|False"
+        Width="size"
+    />
+    ```
 
-```razor
-<LoginName FormatString="Welcome, {0}!" />
-```
+=== "Blazor"
+
+    ```razor
+    <LoginName FormatString="Welcome, {0}!" />
+    ```
 
 ## Usage Notes
 

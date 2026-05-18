@@ -1,54 +1,26 @@
 @page "/AddToCart"
-@using Microsoft.EntityFrameworkCore
 
-@inject NavigationManager NavigationManager
-@inject IDbContextFactory<ProductContext> DbFactory
-@inject IHttpContextAccessor HttpContextAccessor
 
-@code {
-    [SupplyParameterFromQuery(Name = "productID")]
-    public int? ProductID { get; set; }
+<PageTitle>AddToCart</PageTitle>
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (ProductID.HasValue && ProductID > 0)
-        {
-            using var db = DbFactory.CreateDbContext();
-            var cartId = GetCartId();
-            var existingItem = await db.ShoppingCartItems
-                .FirstOrDefaultAsync(c => c.CartId == cartId && c.ProductId == ProductID.Value);
+<div class="alert alert-warning" role="status">
+    <h1>AddToCart</h1>
+    <p>This migrated page preserves the original action-on-navigation contract by posting to a generated HTTP endpoint as soon as the shell renders.</p>
+    <p>TODO(bwfc-action-pages): move the original side effect into the generated endpoint or a scoped service before removing this helper page.</p>
+    <p>Detected query string inputs: ProductID.</p>
+    <p>Detected side effect: <code>AddToCart</code>.</p>
+    <p>Expected redirect target: <a href="/ShoppingCart">/ShoppingCart</a>.</p>
+</div>
 
-            if (existingItem != null)
-            {
-                existingItem.Quantity++;
-            }
-            else
-            {
-                var cartItem = new CartItem
-                {
-                    ItemId = Guid.NewGuid().ToString(),
-                    CartId = cartId,
-                    ProductId = ProductID.Value,
-                    Quantity = 1,
-                    DateCreated = DateTime.Now
-                };
-                db.ShoppingCartItems.Add(cartItem);
-            }
-            await db.SaveChangesAsync();
-        }
+<form id="bwfc-action-pages-form" method="post" action="/__bwfc/actions/AddToCart" @formname="bwfc-form-1">
+    <AntiforgeryToken />
+    <input type="hidden" name="ProductID" value="@ProductID" />
+    <noscript>
+        <p>This page normally continues automatically. JavaScript is disabled, so use the button below.</p>
+        <button type="submit" class="btn btn-primary">Continue AddToCart</button>
+    </noscript>
+</form>
 
-        NavigationManager.NavigateTo("/ShoppingCart");
-    }
-
-    private string GetCartId()
-    {
-        var httpContext = HttpContextAccessor.HttpContext;
-        if (httpContext?.Request.Cookies.TryGetValue("CartId", out var cartId) == true && !string.IsNullOrEmpty(cartId))
-            return cartId;
-
-        var newCartId = Guid.NewGuid().ToString();
-        httpContext?.Response.Cookies.Append("CartId", newCartId, new CookieOptions { Expires = DateTimeOffset.Now.AddDays(30) });
-        return newCartId;
-    }
-}
-
+<script>
+document.getElementById('bwfc-action-pages-form')?.submit();
+</script>

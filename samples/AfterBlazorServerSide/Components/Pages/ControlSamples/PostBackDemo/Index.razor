@@ -1,0 +1,214 @@
+@page "/ControlSamples/PostBackDemo"
+@inherits WebFormsPageBase
+
+<PageTitle>PostBack &amp; ScriptManager Demo</PageTitle>
+
+<h2>PostBack &amp; ScriptManager Demo</h2>
+
+<p>This sample demonstrates the Phase 2 <strong>ClientScript</strong> postback shims.
+   These methods return the same JavaScript strings as Web Forms, letting migrated
+   code-behind work unchanged in Blazor.</p>
+
+<div class="alert alert-info">
+    <h4 class="alert-heading">💡 What this shows</h4>
+    <ul class="mb-0">
+        <li><code>GetPostBackEventReference()</code> — returns a <code>__doPostBack('id','arg')</code> JS string</li>
+        <li><code>GetPostBackClientHyperlink()</code> — returns a <code>javascript:__doPostBack(...)</code> URL</li>
+        <li><code>ScriptManagerShim.GetCurrent(this)</code> — obtains a ScriptManager, registers startup scripts</li>
+    </ul>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Section 1: GetPostBackEventReference ═══════════════════════════ *@
+
+<h3>1. GetPostBackEventReference</h3>
+
+<p><code>ClientScript.GetPostBackEventReference(this, "save")</code> returns a
+   <code>__doPostBack</code> call string — the same pattern Web Forms uses for server-side
+   event wiring.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code class="language-csharp">string script = ClientScript.GetPostBackEventReference(this, "save");
+btnSave.Attributes["onclick"] = script;</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code class="language-csharp">// Same API — works unchanged
+_postBackScript = ClientScript.GetPostBackEventReference(this, "save");
+// Wire via onclick="@@_postBackScript"</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="postback-event-reference-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — PostBack via Button</h5>
+        <p>Click the button to fire <code>__doPostBack</code> from JavaScript.
+           The <code>PostBack</code> event on <code>WebFormsPageBase</code> receives it server-side.</p>
+        <button id="postback-button" class="btn btn-primary" onclick="@_postBackScript">
+            Trigger PostBack
+        </button>
+        <p class="mt-2">Generated script: <code id="postback-script">@_postBackScript</code></p>
+        <p id="postback-result" class="fw-bold">@_postBackMessage</p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Section 2: GetPostBackClientHyperlink ═══════════════════════════ *@
+
+<h3>2. GetPostBackClientHyperlink</h3>
+
+<p><code>ClientScript.GetPostBackClientHyperlink(this, "navigate")</code> returns a
+   <code>javascript:__doPostBack(...)</code> URL — drop it into an <code>href</code>
+   and it triggers a postback when clicked.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code class="language-csharp">lnk.NavigateUrl = ClientScript.GetPostBackClientHyperlink(this, "navigate");</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code class="language-csharp">// Same call
+_hyperlink = ClientScript.GetPostBackClientHyperlink(this, "navigate");</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="postback-hyperlink-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — PostBack via Hyperlink</h5>
+        <p>An anchor tag whose <code>href</code> is a <code>javascript:__doPostBack</code> URL:</p>
+        <a id="postback-link" href="@_postBackHyperlink" class="btn btn-outline-primary">
+            Click to PostBack via Link
+        </a>
+        <p class="mt-2">Generated href: <code id="hyperlink-script">@_postBackHyperlink</code></p>
+        <p id="hyperlink-result" class="fw-bold">@_hyperlinkMessage</p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Section 3: ScriptManager.GetCurrent ═══════════════════════════ *@
+
+<h3>3. ScriptManager.GetCurrent</h3>
+
+<p><code>ScriptManager.GetCurrent(this)</code> returns a <code>ScriptManagerShim</code> that
+   wraps <code>ClientScriptShim</code>. You can call <code>RegisterStartupScript</code> on it —
+   the same code you wrote in Web Forms.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code class="language-csharp">var sm = ScriptManager.GetCurrent(this);
+sm.RegisterStartupScript(GetType(), "init",
+    "document.getElementById('target').innerText = 'Hello!';",
+    true);</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code class="language-csharp">// Same pattern
+var sm = ScriptManagerShim.GetCurrent(this);
+sm.RegisterStartupScript(GetType(), "init",
+    "document.getElementById('target').innerText = 'Hello!';",
+    true);</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="scriptmanager-getcurrent-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — ScriptManager Startup Script</h5>
+        <p>On first render, <code>ScriptManagerShim.GetCurrent(this).RegisterStartupScript(...)</code>
+           sets the text below via JavaScript — just like Web Forms.</p>
+        <div id="scriptmanager-target" class="alert alert-secondary">
+            (waiting for startup script…)
+        </div>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Section 4: Source Code ═══════════════════════════ *@
+
+<h3>Source Code</h3>
+
+<pre><code class="language-csharp">@@page "/ControlSamples/PostBackDemo"
+@@inherits WebFormsPageBase
+
+@@code {
+    private string _postBackScript = "";
+    private string _postBackMessage = "No postback received yet.";
+    private string _postBackHyperlink = "";
+    private string _hyperlinkMessage = "No hyperlink postback received yet.";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // GetPostBackEventReference — same call as Web Forms
+        _postBackScript = ClientScript.GetPostBackEventReference(this, "save");
+
+        // GetPostBackClientHyperlink — same call as Web Forms
+        _postBackHyperlink = ClientScript.GetPostBackClientHyperlink(this, "navigate");
+
+        // Subscribe to PostBack event
+        PostBack += (sender, args) =>
+        {
+            if (args.EventArgument == "save")
+                _postBackMessage = $"PostBack received! Target: {args.EventTarget}, Argument: {args.EventArgument}";
+            else if (args.EventArgument == "navigate")
+                _hyperlinkMessage = $"Hyperlink PostBack! Target: {args.EventTarget}, Argument: {args.EventArgument}";
+            StateHasChanged();
+        };
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var sm = ScriptManagerShim.GetCurrent(this);
+            sm.RegisterStartupScript(GetType(), "smDemo",
+                "document.getElementById('scriptmanager-target').innerText = " +
+                "'ScriptManager startup script executed!';",
+                true);
+        }
+    }
+}</code></pre>
+
+@code {
+    private string _postBackScript = "";
+    private string _postBackMessage = "No postback received yet.";
+    private string _postBackHyperlink = "";
+    private string _hyperlinkMessage = "No hyperlink postback received yet.";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        _postBackScript = ClientScript.GetPostBackEventReference(this, "save");
+        _postBackHyperlink = ClientScript.GetPostBackClientHyperlink(this, "navigate");
+
+        PostBack += (sender, args) =>
+        {
+            if (args.EventArgument == "save")
+                _postBackMessage = $"PostBack received! Target: {args.EventTarget}, Argument: {args.EventArgument}";
+            else if (args.EventArgument == "navigate")
+                _hyperlinkMessage = $"Hyperlink PostBack! Target: {args.EventTarget}, Argument: {args.EventArgument}";
+
+            StateHasChanged();
+        };
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var sm = ScriptManagerShim.GetCurrent(this);
+            sm.RegisterStartupScript(GetType(), "smDemo",
+                "document.getElementById('scriptmanager-target').innerText = 'ScriptManager startup script executed!';",
+                true);
+        }
+    }
+}

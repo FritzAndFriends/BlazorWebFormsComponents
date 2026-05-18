@@ -1,0 +1,205 @@
+@page "/migration/cache"
+@inherits WebFormsPageBase
+
+<PageTitle>Cache Migration Demo</PageTitle>
+
+<h2>Cache Migration</h2>
+
+<p>This sample demonstrates the <code>CacheShim</code> that provides Web Forms-compatible
+   <code>Cache["key"]</code> access in Blazor, backed by ASP.NET Core <code>IMemoryCache</code>.</p>
+
+<hr />
+
+<h3>1. Setting &amp; Getting Cache Values</h3>
+<p>In Web Forms, you cached data with <code>HttpRuntime.Cache["key"] = value</code>.
+   The BWFC shim supports the identical pattern.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>// Store a value
+HttpRuntime.Cache["UserName"] = txtName.Text;
+
+// Retrieve a value
+var name = (string)Cache["UserName"];</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same pattern!
+Cache["UserName"] = userName;
+
+// Retrieve a value
+var name = (string)Cache["UserName"];</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="cache-setget-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Set &amp; Get</h5>
+        <div class="mb-3">
+            <label class="form-label">Key:</label>
+            <input type="text" class="form-control mb-2" @bind="cacheKey"
+                   placeholder="Enter cache key" />
+            <label class="form-label">Value:</label>
+            <div class="input-group">
+                <input type="text" class="form-control" @bind="cacheValue"
+                       placeholder="Enter value to cache" />
+                <button class="btn btn-primary" @onclick="SetCacheValue">Store in Cache</button>
+                <button class="btn btn-secondary" @onclick="GetCacheValue">Get from Cache</button>
+            </div>
+        </div>
+        <p>
+            Retrieved value: <strong>@cacheRetrieved</strong>
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>2. Type-Safe Access with Get&lt;T&gt;()</h3>
+<p>The shim provides <code>Cache.Get&lt;T&gt;(key)</code> for strongly-typed retrieval.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>// Requires manual cast
+var count = (int)Cache["HitCount"];
+Cache["HitCount"] = count + 1;</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Type-safe access
+var count = Cache.Get&lt;int&gt;("HitCount");
+Cache["HitCount"] = count + 1;</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="cache-typed-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Typed Counter</h5>
+        <p>Hit count (stored as <code>int</code>): <strong>@(Cache.Get<int>("HitCount"))</strong></p>
+        <button class="btn btn-success" @onclick="IncrementCounter">Increment Counter</button>
+    </div>
+</div>
+
+<hr />
+
+<h3>3. Remove Cache Items</h3>
+<p>Call <code>Cache.Remove(key)</code> to evict an item, just like in Web Forms.
+   The method returns the removed value.</p>
+
+<div class="card mt-3" data-audit-control="cache-remove-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Remove</h5>
+        <div class="mb-3">
+            <button class="btn btn-primary me-2" @onclick="StoreForRemoval">Store "TestItem"</button>
+            <button class="btn btn-warning me-2" @onclick="RemoveCacheItem">Remove "TestItem"</button>
+            <button class="btn btn-info" @onclick="CheckCacheItem">Check "TestItem"</button>
+        </div>
+        <p>
+            Status: <strong>@removeStatus</strong>
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>4. Sliding Expiration</h3>
+<p>Cache items can be stored with a sliding expiration, just like Web Forms.
+   Items expire if not accessed within the sliding window.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>Cache.Insert("data", value, null,
+    Cache.NoAbsoluteExpiration,
+    TimeSpan.FromSeconds(30));</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Simplified API
+Cache.Insert("data", value,
+    TimeSpan.FromSeconds(30));</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="cache-expiration-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Sliding Expiration</h5>
+        <div class="mb-3">
+            <button class="btn btn-primary me-2" @onclick="StoreWithExpiration">Store with 5s Sliding Expiration</button>
+            <button class="btn btn-info" @onclick="CheckExpiration">Check Value</button>
+        </div>
+        <p>
+            Status: <strong>@expirationStatus</strong>
+        </p>
+    </div>
+</div>
+
+@code {
+    private string cacheKey = "MyKey";
+    private string cacheValue = "";
+    private string cacheRetrieved = "(empty)";
+    private string removeStatus = "(click Store, then Remove, then Check)";
+    private string expirationStatus = "(click Store, wait 5+ seconds, then Check)";
+
+    private void SetCacheValue()
+    {
+        if (!string.IsNullOrWhiteSpace(cacheKey))
+        {
+            Cache[cacheKey] = cacheValue;
+            cacheRetrieved = $"Stored '{cacheValue}' with key '{cacheKey}'";
+        }
+    }
+
+    private void GetCacheValue()
+    {
+        if (!string.IsNullOrWhiteSpace(cacheKey))
+        {
+            var value = (string?)Cache[cacheKey];
+            cacheRetrieved = value ?? "(null - key not found)";
+        }
+    }
+
+    private void IncrementCounter()
+    {
+        var count = Cache.Get<int>("HitCount");
+        Cache["HitCount"] = count + 1;
+    }
+
+    private void StoreForRemoval()
+    {
+        Cache["TestItem"] = "I exist!";
+        removeStatus = "Stored: 'I exist!'";
+    }
+
+    private void RemoveCacheItem()
+    {
+        var removed = Cache.Remove("TestItem");
+        removeStatus = removed != null
+            ? $"Removed: '{removed}'"
+            : "Nothing to remove (key not found)";
+    }
+
+    private void CheckCacheItem()
+    {
+        var value = (string?)Cache["TestItem"];
+        removeStatus = value != null
+            ? $"Found: '{value}'"
+            : "Not found (null)";
+    }
+
+    private void StoreWithExpiration()
+    {
+        Cache.Insert("ExpiringItem", "I will expire!", TimeSpan.FromSeconds(5));
+        expirationStatus = "Stored with 5-second sliding expiration. Wait 5+ seconds and click Check.";
+    }
+
+    private void CheckExpiration()
+    {
+        var value = (string?)Cache["ExpiringItem"];
+        expirationStatus = value != null
+            ? $"Still cached: '{value}'"
+            : "Expired! (null)";
+    }
+}

@@ -1,0 +1,112 @@
+@page "/migration/response-redirect"
+@inherits WebFormsPageBase
+
+<PageTitle>Response.Redirect Migration Demo</PageTitle>
+
+<h2>Response.Redirect Migration</h2>
+
+<p>This sample demonstrates the <code>ResponseShim</code> that provides Web Forms-compatible
+   <code>Response.Redirect()</code> in Blazor. The shim automatically strips <code>~/</code>
+   prefixes and <code>.aspx</code> extensions for clean Blazor routing.</p>
+
+<hr />
+
+<h3>1. Basic Redirect</h3>
+<p>Call <code>Response.Redirect(url)</code> to navigate, just like in Web Forms.
+   The shim wraps <code>NavigationManager.NavigateTo()</code>.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>Response.Redirect("/Session.aspx");</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same code works!
+Response.Redirect("/migration/session");</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="redirect-basic-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Basic Redirect</h5>
+        <p>Click the button to navigate to the Session demo page:</p>
+        <button class="btn btn-primary" @onclick="RedirectToSession">Response.Redirect("/migration/session")</button>
+    </div>
+</div>
+
+<hr />
+
+<h3>2. Tilde &amp; .aspx Auto-Stripping</h3>
+<p><code>Response.Redirect("~/Products.aspx")</code> automatically strips <code>~/</code>
+   prefix and <code>.aspx</code> extension, producing a clean Blazor route.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>Response.Redirect("~/Products.aspx");
+// Navigates to: /Products.aspx</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same call, auto-cleaned
+Response.Redirect("~/Products.aspx");
+// Navigates to: /Products</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="redirect-tilde-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Tilde &amp; .aspx Stripping</h5>
+        <p>The shim transforms the URL before navigation:</p>
+        <p>
+            Input: <code>~/migration/session.aspx</code><br />
+            After stripping: <strong>@tildeStrippedUrl</strong>
+        </p>
+        <button class="btn btn-primary" @onclick="RedirectWithTilde">Response.Redirect("~/migration/session.aspx")</button>
+    </div>
+</div>
+
+<hr />
+
+<h3>3. ResolveUrl for Link Generation</h3>
+<p><code>ResolveUrl()</code> performs the same <code>~/</code> and <code>.aspx</code>
+   stripping without navigating — useful for building URLs in markup.</p>
+
+<div class="card mt-3" data-audit-control="resolveurl-strip-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - ResolveUrl</h5>
+        <p>
+            <code>ResolveUrl("~/Products.aspx")</code> returns:
+            <strong>@ResolveUrl("~/Products.aspx")</strong>
+        </p>
+        <p>
+            <code>ResolveUrl("~/migration/session.aspx")</code> returns:
+            <strong>@ResolveUrl("~/migration/session.aspx")</strong>
+        </p>
+        <p>
+            <code>ResolveUrl("~/images/logo.png")</code> returns:
+            <strong>@ResolveUrl("~/images/logo.png")</strong>
+        </p>
+    </div>
+</div>
+
+@code {
+    private string tildeStrippedUrl = "";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        tildeStrippedUrl = ResolveUrl("~/migration/session.aspx");
+    }
+
+    private void RedirectToSession()
+    {
+        Response.Redirect("/migration/session");
+    }
+
+    private void RedirectWithTilde()
+    {
+        Response.Redirect("~/migration/session.aspx");
+    }
+}

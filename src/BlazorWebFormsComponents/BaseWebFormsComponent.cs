@@ -2,8 +2,10 @@
 using BlazorWebFormsComponents.Theming;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Rendering;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -65,9 +67,17 @@ namespace BlazorWebFormsComponents
 
 		/// <summary>
 		/// Gets the client-side ID of the control, including parent naming containers.
-		/// Returns null if no ID is set.
+		/// Uses underscore (_) as separator. Returns null if no ID is set.
 		/// </summary>
 		public string ClientID => ComponentIdGenerator.GetClientID(this);
+
+		/// <summary>
+		/// Gets the unique ID of the control for form submission, including parent naming containers.
+		/// Uses dollar sign ($) as separator, matching ASP.NET Web Forms UniqueID behavior.
+		/// This value is used as the HTML <c>name</c> attribute for form controls.
+		/// Returns null if no ID is set.
+		/// </summary>
+		public string UniqueID => ComponentIdGenerator.GetUniqueID(this);
 
 		/// <summary>
 		/// While ViewState is supported by this library, this parameter does nothing
@@ -146,11 +156,118 @@ namespace BlazorWebFormsComponents
 		public string ToolTip { get; set; }
 
 		/// <summary>
-		/// ViewState is supported for compatibility with those components and pages that add and retrieve items from ViewState.!--  It is not binary compatible, but is syntax compatible
+		/// Dictionary-based state storage emulating ASP.NET Web Forms ViewState.
+		/// In ServerInteractive mode, persists for the component's lifetime (in-memory).
+		/// In SSR mode, round-trips via a protected hidden form field.
+		///
+		/// <para><b>Migration shim — not a destination.</b> This exists so Web Forms
+		/// <c>ViewState["key"]</c> patterns compile and run correctly during migration.
+		/// Once running, refactor to <c>[Parameter]</c> properties, component fields, or
+		/// cascading values. Unlike Web Forms, this is opt-in, per-component, dirty-tracked,
+		/// and encrypted by default.</para>
 		/// </summary>
-		/// <value></value>
-		[Obsolete("ViewState is supported for compatibility and is discouraged for future use")]
-		public Dictionary<string, object> ViewState { get; } = new Dictionary<string, object>();
+		public ViewStateDictionary ViewState { get; } = new();
+
+		/// <summary>
+		/// Returns <c>true</c> when the current request is a postback (form POST in SSR mode)
+		/// or after the first initialization (in ServerInteractive mode).
+		/// Matches the ASP.NET Web Forms <c>Page.IsPostBack</c> semantics.
+		/// </summary>
+		public bool IsPostBack
+		{
+			get
+			{
+				// SSR mode: HttpContext is available — check HTTP method
+				if (HttpContextAccessor?.HttpContext is { } context)
+					return HttpMethods.IsPost(context.Request.Method);
+
+				// ServerInteractive mode: track initialization state
+				return _hasInitialized;
+			}
+		}
+
+		/// <summary>
+		/// Detects the current rendering mode based on HttpContext availability.
+		/// </summary>
+		protected WebFormsRenderMode CurrentRenderMode
+			=> IsHttpContextAvailable ? WebFormsRenderMode.StaticSSR : WebFormsRenderMode.InteractiveServer;
+
+		/// <summary>
+		/// Returns <c>true</c> when an <see cref="HttpContext"/> is available
+		/// (SSR or pre-render), <c>false</c> during interactive WebSocket rendering.
+		/// </summary>
+		protected bool IsHttpContextAvailable
+			=> HttpContextAccessor?.HttpContext is not null;
+
+		/// <summary>
+		/// Returns the HTML onchange attribute value for AutoPostBack behavior.
+		/// In SSR mode with AutoPostBack=true, returns "this.form.submit()" to trigger a form POST.
+		/// In Interactive mode or when AutoPostBack=false, returns null (Blazor handles events natively).
+		/// </summary>
+		protected string? GetAutoPostBackScript(bool autoPostBack)
+		{
+			if (!autoPostBack) return null;
+			if (CurrentRenderMode == WebFormsRenderMode.StaticSSR)
+				return "this.form.submit()";
+			return null;
+		}
+
+		private static readonly IReadOnlyDictionary<string, object> _emptyAttributes =
+			new Dictionary<string, object>();
+
+		/// <summary>
+		/// Returns an attribute dictionary containing onchange="this.form.submit()" when
+		/// AutoPostBack is true in SSR mode. Returns an empty dictionary otherwise.
+		/// Used via @attributes splatting to avoid compile-time conflicts with @onchange.
+		/// </summary>
+		protected IReadOnlyDictionary<string, object> GetAutoPostBackAttributes(bool autoPostBack)
+		{
+			var script = GetAutoPostBackScript(autoPostBack);
+			if (script != null)
+			{
+				return new Dictionary<string, object> { ["onchange"] = script };
+			}
+			return _emptyAttributes;
+		}
+
+		/// <summary>
+		/// Optional data protection provider for ViewState encryption in SSR mode.
+		/// Resolved lazily from the service provider — null when not registered.
+		/// ViewState serialization is skipped when unavailable.
+		/// </summary>
+		private IDataProtectionProvider _dataProtectionProvider;
+		private bool _dataProtectionResolved;
+		private IDataProtectionProvider DataProtectionProvider
+		{
+			get
+			{
+				if (!_dataProtectionResolved)
+				{
+					_dataProtectionProvider = ServiceProvider?.GetService(typeof(IDataProtectionProvider)) as IDataProtectionProvider;
+					_dataProtectionResolved = true;
+				}
+				return _dataProtectionProvider;
+			}
+		}
+
+		/// <summary>
+		/// Lazy-resolved logger for ViewState size warnings.
+		/// </summary>
+		private ILogger _logger;
+		private bool _loggerResolved;
+		private ILogger Logger
+		{
+			get
+			{
+				if (!_loggerResolved)
+				{
+					var factory = ServiceProvider?.GetService(typeof(ILoggerFactory)) as ILoggerFactory;
+					_logger = factory?.CreateLogger<BaseWebFormsComponent>();
+					_loggerResolved = true;
+				}
+				return _logger;
+			}
+		}
 
 		/// <summary>
 		/// Is the content of this component rendered and visible to your users?
@@ -160,6 +277,19 @@ namespace BlazorWebFormsComponents
 
 		[Obsolete("This method doesn't do anything in Blazor")]
 		public void DataBind() { }
+
+		/// <summary>
+		/// Sets input focus to the control. Matches the ASP.NET Web Forms Control.Focus() method.
+		/// Uses fire-and-forget JS interop to focus the element by its ClientID.
+		/// Gracefully no-ops during SSR pre-render when JsRuntime is unavailable.
+		/// </summary>
+		public virtual void Focus()
+		{
+			var id = ClientID;
+			if (JsRuntime is null || string.IsNullOrEmpty(id)) return;
+
+			_ = JsRuntime.InvokeVoidAsync("bwfc.Page.Focus", id);
+		}
 
 		/// <summary>
 		/// 🚨🚨 Placeholders are not available in Blazor 🚨🚨
@@ -198,6 +328,7 @@ namespace BlazorWebFormsComponents
 		[Parameter]
 		public EventCallback<EventArgs> OnUnload { get; set; }
 		private bool _UnloadTriggered = false;
+		private bool _hasInitialized;
 
 		/// <summary>
 		/// Event handler to mimic the Web Forms OnDisposed handler and triggered in the Dispose method of this class
@@ -246,16 +377,69 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
+		private ClientScriptShim _clientScript;
+		private bool _clientScriptResolved;
+
+		/// <summary>
+		/// Provides access to client script registration methods, emulating
+		/// <c>Page.ClientScript</c> from ASP.NET Web Forms.
+		/// Scripts are queued and automatically flushed via IJSRuntime
+		/// in OnAfterRenderAsync.
+		/// </summary>
+		public ClientScriptShim ClientScript
+		{
+			get
+			{
+				if (!_clientScriptResolved)
+				{
+					_clientScript = ServiceProvider?.GetService(typeof(ClientScriptShim)) as ClientScriptShim;
+					_clientScriptResolved = true;
+				}
+				return _clientScript;
+			}
+		}
+
 		protected override void OnParametersSet()
 		{
 			base.OnParametersSet();
 
-			if (!EnableTheming || CascadedTheme == null) return;
+			if (!EnableTheming || !IsThemingEnabledByAncestors() || CascadedTheme == null) return;
 
-			var skin = CascadedTheme.GetSkin(GetType().Name, SkinID);
-			if (skin == null) return;
+			// Strip generic arity suffix (e.g., "GridView`1" → "GridView")
+			// so theme registrations use simple names like "GridView", not "GridView`1"
+			var typeName = GetType().Name;
+			var backtickIndex = typeName.IndexOf('`');
+			if (backtickIndex >= 0)
+				typeName = typeName[..backtickIndex];
 
-			ApplyThemeSkin(skin);
+			var skin = CascadedTheme.GetSkin(typeName, SkinID);
+			if (skin == null)
+			{
+				// Log warning if a specific SkinID was requested but not found
+				if (!string.IsNullOrEmpty(SkinID))
+				{
+					Logger?.LogWarning("Theme skin '{SkinID}' not found for control type '{TypeName}'", SkinID, typeName);
+				}
+				return;
+			}
+
+			ApplyThemeSkin(skin, CascadedTheme.Mode);
+		}
+
+		/// <summary>
+		/// Walks up the Parent chain to verify that theming is enabled for all ancestors.
+		/// Returns false if any ancestor has EnableTheming=false, true otherwise.
+		/// </summary>
+		private bool IsThemingEnabledByAncestors()
+		{
+			var current = Parent;
+			while (current != null)
+			{
+				if (!current.EnableTheming)
+					return false;
+				current = current.Parent;
+			}
+			return true;
 		}
 
 		/// <summary>
@@ -263,10 +447,118 @@ namespace BlazorWebFormsComponents
 		/// Called during OnParametersSet when theming is enabled and a matching skin is found.
 		/// The base implementation does nothing — subclasses apply properties relevant to them.
 		/// </summary>
-		protected virtual void ApplyThemeSkin(ControlSkin skin) { }
+		/// <param name="skin">The skin containing property values to apply.</param>
+		/// <param name="mode">The theme mode determining whether to override or default properties.</param>
+		protected virtual void ApplyThemeSkin(ControlSkin skin, ThemeMode mode) { }
+
+		/// <summary>
+		/// Helper method to apply a sub-style from a skin to a target TableItemStyle property.
+		/// Respects ThemeMode: Theme mode overrides all values, StyleSheetTheme mode only sets defaults.
+		/// Returns the modified style (for Theme mode) or the original target with defaults applied (for StyleSheetTheme mode).
+		/// </summary>
+		protected static TableItemStyle ApplySubStyle(TableItemStyle target, TableItemStyle skinStyle, ThemeMode mode)
+		{
+			if (skinStyle == null) return target;
+
+			if (mode == ThemeMode.Theme)
+			{
+				// Theme mode: override — replace entire style
+				return skinStyle;
+			}
+			else
+			{
+				// StyleSheetTheme mode: only set defaults
+				target ??= new TableItemStyle();
+
+				if (target.BackColor == default && skinStyle.BackColor != default)
+					target.BackColor = skinStyle.BackColor;
+
+				if (target.ForeColor == default && skinStyle.ForeColor != default)
+					target.ForeColor = skinStyle.ForeColor;
+
+				if (target.BorderColor == default && skinStyle.BorderColor != default)
+					target.BorderColor = skinStyle.BorderColor;
+
+				if (target.BorderStyle.Value == default && skinStyle.BorderStyle.Value != default)
+					target.BorderStyle = skinStyle.BorderStyle;
+
+				if (target.BorderWidth == default && skinStyle.BorderWidth != default)
+					target.BorderWidth = skinStyle.BorderWidth;
+
+				if (string.IsNullOrEmpty(target.CssClass) && !string.IsNullOrEmpty(skinStyle.CssClass))
+					target.CssClass = skinStyle.CssClass;
+
+				if (target.Height == default && skinStyle.Height != default)
+					target.Height = skinStyle.Height;
+
+				if (target.Width == default && skinStyle.Width != default)
+					target.Width = skinStyle.Width;
+
+				// Font properties
+				if (skinStyle.Font != null)
+				{
+					target.Font ??= new FontInfo();
+
+					if (string.IsNullOrEmpty(target.Font.Name) && string.IsNullOrEmpty(target.Font.Names) && !string.IsNullOrEmpty(skinStyle.Font.Name))
+						target.Font.Name = skinStyle.Font.Name;
+
+					if (target.Font.Size == FontUnit.Empty && skinStyle.Font.Size != FontUnit.Empty)
+						target.Font.Size = skinStyle.Font.Size;
+
+					if (!target.Font.Bold && skinStyle.Font.Bold)
+						target.Font.Bold = true;
+
+					if (!target.Font.Italic && skinStyle.Font.Italic)
+						target.Font.Italic = true;
+
+					if (!target.Font.Underline && skinStyle.Font.Underline)
+						target.Font.Underline = true;
+				}
+
+				// TableItemStyle-specific properties
+				if (target.HorizontalAlign.Value == default && skinStyle.HorizontalAlign.Value != default)
+					target.HorizontalAlign = skinStyle.HorizontalAlign;
+
+				if (target.VerticalAlign.Value == default && skinStyle.VerticalAlign.Value != default)
+					target.VerticalAlign = skinStyle.VerticalAlign;
+
+				// Wrap defaults to true, so only apply if skin explicitly sets it to false
+				if (target.Wrap && !skinStyle.Wrap)
+					target.Wrap = skinStyle.Wrap;
+
+				return target;
+			}
+		}
 
 		protected override async Task OnInitializedAsync()
 		{
+
+			// SSR mode: deserialize ViewState from form POST data
+			if (CurrentRenderMode == WebFormsRenderMode.StaticSSR
+				&& DataProtectionProvider is not null
+				&& !string.IsNullOrEmpty(ID))
+			{
+				var context = HttpContextAccessor.HttpContext!;
+				if (HttpMethods.IsPost(context.Request.Method)
+					&& context.Request.HasFormContentType)
+				{
+					var fieldName = $"__bwfc_viewstate_{ID}";
+					if (context.Request.Form.TryGetValue(fieldName, out var payload)
+						&& !string.IsNullOrEmpty(payload))
+					{
+						var protector = DataProtectionProvider.CreateProtector("BWFC.ViewState");
+						try
+						{
+							var deserialized = ViewStateDictionary.Deserialize(payload!, protector);
+							ViewState.LoadFrom(deserialized);
+						}
+						catch (System.Security.Cryptography.CryptographicException)
+						{
+							// Tampered or expired payload — fail-safe to empty ViewState
+						}
+					}
+				}
+			}
 
 			Parent?.Controls.Add(this);
 
@@ -281,6 +573,7 @@ namespace BlazorWebFormsComponents
 			if (OnPreRender.HasDelegate)
 				await OnPreRender.InvokeAsync(EventArgs.Empty);
 
+			_hasInitialized = true;
 		}
 
 		protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -292,6 +585,12 @@ namespace BlazorWebFormsComponents
 			{
 				await OnUnload.InvokeAsync(EventArgs.Empty);
 				_UnloadTriggered = true;
+			}
+
+			// Auto-flush any queued ClientScript registrations
+			if (_clientScriptResolved && _clientScript != null)
+			{
+				await _clientScript.FlushAsync(JsRuntime);
 			}
 
 			if (firstRender)
@@ -315,6 +614,38 @@ namespace BlazorWebFormsComponents
 
 			}
 
+		}
+
+		/// <summary>
+		/// Renders a hidden form field containing the protected (encrypted + signed) ViewState
+		/// when running in SSR mode and the ViewState has been modified.
+		/// Call this from a component's <c>BuildRenderTree</c> to enable ViewState persistence
+		/// across form POSTs in static SSR mode.
+		/// </summary>
+		/// <param name="builder">The <see cref="RenderTreeBuilder"/> to emit the hidden field into.</param>
+		protected void RenderViewStateField(RenderTreeBuilder builder)
+		{
+			if (string.IsNullOrEmpty(ID))
+				return;
+
+			if (CurrentRenderMode != WebFormsRenderMode.StaticSSR
+				|| !ViewState.IsDirty
+				|| DataProtectionProvider is null)
+			{
+				return;
+			}
+
+			var protector = DataProtectionProvider.CreateProtector("BWFC.ViewState");
+			var payload = ViewState.Serialize(protector, Logger);
+			var fieldName = $"__bwfc_viewstate_{ID}";
+
+			builder.OpenElement(0, "input");
+			builder.AddAttribute(1, "type", "hidden");
+			builder.AddAttribute(2, "name", fieldName);
+			builder.AddAttribute(3, "value", payload);
+			builder.CloseElement();
+
+			ViewState.MarkClean();
 		}
 
 		protected virtual void HandleUnknownAttributes() { }
@@ -363,13 +694,28 @@ namespace BlazorWebFormsComponents
 		public List<BaseWebFormsComponent> Controls { get; set; } = new List<BaseWebFormsComponent>();
 
 		/// <summary>
-		/// Finds a child control by its ID
+		/// Searches this control and all descendants for a control with the specified ID.
+		/// Matches the ASP.NET Web Forms Control.FindControl API name for drop-in migration.
+		/// Checks direct children first, then recurses into the full component tree.
 		/// </summary>
-		/// <param name="controlId"> the ID of the child</param>
-		/// <returns></returns>
-		public BaseWebFormsComponent FindControl(string controlId)
+		/// <param name="controlId">The ID of the control to find.</param>
+		/// <returns>The matching control, or null if not found.</returns>
+		public virtual BaseWebFormsComponent FindControl(string controlId)
 		{
-			return Controls.Find(control => control.ID == controlId);
+			if (string.IsNullOrEmpty(controlId)) return null;
+
+			// Check direct children first
+			var found = Controls.Find(control => control.ID == controlId);
+			if (found != null) return found;
+
+			// Recurse into children
+			foreach (var child in Controls)
+			{
+				found = child.FindControl(controlId);
+				if (found != null) return found;
+			}
+
+			return null;
 		}
 
 		protected event EventHandler BubbledEvent;

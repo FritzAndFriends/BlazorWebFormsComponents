@@ -1,3 +1,5 @@
+@using Microsoft.AspNetCore.Http
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -29,11 +31,11 @@
             .global-footer { margin-left: 0; }
         }
     </style>
-    <HeadOutlet @rendermode="InteractiveServer" />
+    <HeadOutlet @rendermode="@PageRenderMode" />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="@PageRenderMode" />
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
@@ -51,6 +53,7 @@
     <script src="_content/Fritz.BlazorWebFormsComponents/js/Basepage.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
     <script src="js/search.js"></script>
+    <script src="js/clientscript-demo.js"></script>
     <script>
         // Click outside handler for search dropdown
         let clickOutsideHandlers = new Map();
@@ -76,3 +79,11 @@
 </body>
 
 </html>
+
+@code {
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    private IComponentRenderMode? PageRenderMode
+        => HttpContext.AcceptsInteractiveRouting() ? InteractiveServer : null;
+}

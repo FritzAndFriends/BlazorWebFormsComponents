@@ -82,11 +82,9 @@ namespace BlazorWebFormsComponents.CustomControls
 				}
 				else
 				{
-					// For other controls, we need to render them as Blazor components
-					// This is a limitation - composite controls work best with WebControl children
-					throw new NotSupportedException(
-						$"CompositeControl.RenderChildren only supports child controls that inherit from WebControl. " +
-						$"Control type '{control.GetType().Name}' is not supported.");
+					// For non-WebControl children, render their string representation
+					// This is a graceful fallback — composite controls work best with WebControl children
+					writer.Write(control.ToString());
 				}
 			}
 		}

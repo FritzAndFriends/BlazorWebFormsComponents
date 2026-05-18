@@ -5,7 +5,7 @@
 	public void GridView_EmptyDataText_ShowsEmptyMessageWhenNoData()
 	{
 		var cut = Render(@<GridView ItemType="Widget"
-							SelectMethod="GetWidgets"
+							Items="@(Array.Empty<Widget>())"
 							AutoGenerateColumns="true"
 							EmptyDataText="TestText"
 							ShowHeaderWhenEmpty="true">
@@ -25,3 +25,4 @@
 		return widgetList.AsQueryable();
 	}
 }
+

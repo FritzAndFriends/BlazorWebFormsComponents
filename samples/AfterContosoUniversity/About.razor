@@ -1,34 +1,43 @@
 @page "/About"
-<HeadContent>
-     <link href="/CSS/CSS_About.css" rel="stylesheet" />
-     <script src="/JQuery/JQuery_About.js"></script>
-</HeadContent>
-<div id="header">
+<PageTitle></PageTitle>
+
+     <link href="CSS/CSS_About.css" rel="stylesheet" />
+     <script src="JQuery/JQuery_About.js"></script>
+
+
+    <div id="header">
         <h1> Students Body Statistics </h1>
     </div>
      <div id="grv">
-        <GridView Items="@_enrollmentStats" ItemType="KeyValuePair<string, int>"
-            CssClass="grid"
+        <GridView ItemType="object" CssClass="grid" 
+            id="EnrollmentsStat" @ref="EnrollmentsStat" SelectMethod="EnrollmentsStat_GetData" 
             AutoGenerateColumns="false" EmptyDataText="There are no records to display"
-             CellPadding="4" ForeColor="@("#333333")" GridLines="GridLines.None">
-            <AlternatingRowStyleContent><GridViewRowStyle BackColor="WebColor.White" /></AlternatingRowStyleContent>
+             CellPadding="4" ForeColor='@("#333333")' GridLines="@GridLines.None">
             <Columns>
-                <BoundField DataField="Key" HeaderText="Enrollment Date" ReadOnly="true">
-                <HeaderStyle BackColor="WebColor.Black" BorderColor="WebColor.White" BorderStyle="BorderStyle.Solid" Font-Bold="true" Font-Size="30" />
-                <ItemStyle BorderColor="WebColor.White" BorderStyle="BorderStyle.Solid" Font-Size="20" HorizontalAlign="HorizontalAlign.Center" />
+                <BoundField ItemType="object" DataField="Key" HeaderText="Enrollment Date" ReadOnly="true">
                 </BoundField>
-                <BoundField DataField="Value" HeaderText="Students" ReadOnly="true">
-                <FooterStyle BorderStyle="BorderStyle.Solid" />
-                <HeaderStyle BackColor="WebColor.Black" BorderColor="WebColor.White" BorderStyle="BorderStyle.Solid" Font-Bold="true" Font-Size="30" />
-                <ItemStyle BorderColor="WebColor.White" BorderStyle="BorderStyle.Solid" Font-Size="20" HorizontalAlign="HorizontalAlign.Center" />
+                <BoundField ItemType="object" DataField="Value" HeaderText="Students" ReadOnly="true">
                 </BoundField>
             </Columns>
-            <EditRowStyleContent><GridViewRowStyle BackColor="@("#2461BF")" /></EditRowStyleContent>
-            <FooterStyleContent><GridViewRowStyle BackColor="@("#507CD1")" Font-Bold="true" ForeColor="WebColor.White" /></FooterStyleContent>
-            <HeaderStyleContent><GridViewHeaderStyle BackColor="@("#507CD1")" Font-Bold="true" ForeColor="WebColor.White" /></HeaderStyleContent>
-            <PagerStyleContent><GridViewRowStyle BackColor="@("#2461BF")" ForeColor="WebColor.White" HorizontalAlign="HorizontalAlign.Center" /></PagerStyleContent>
-            <RowStyleContent><GridViewRowStyle BackColor="@("#EFF3FB")" /></RowStyleContent>
-            <SelectedRowStyleContent><GridViewRowStyle BackColor="@("#D1DDF1")" Font-Bold="true" ForeColor="@("#333333")" /></SelectedRowStyleContent>
-        </GridView>
+        
+            <ChildComponents>
+                <AlternatingRowStyle BackColor='@("White")' />
+                <HeaderStyle BackColor='@("Black")' BorderColor='@("White")' BorderStyle="@BorderStyle.Solid" Font-Bold="true" />
+                <ItemStyle BorderColor='@("White")' BorderStyle="@BorderStyle.Solid" HorizontalAlign="@HorizontalAlign.Center" />
+                <FooterStyle BorderStyle="@BorderStyle.Solid" />
+                <HeaderStyle BackColor='@("Black")' BorderColor='@("White")' BorderStyle="@BorderStyle.Solid" Font-Bold="true" />
+                <ItemStyle BorderColor='@("White")' BorderStyle="@BorderStyle.Solid" HorizontalAlign="@HorizontalAlign.Center" />
+                <EditRowStyle BackColor='@("#2461BF")' />
+                <FooterStyle BackColor='@("#507CD1")' Font-Bold="true" ForeColor='@("White")' />
+                <HeaderStyle BackColor='@("#507CD1")' Font-Bold="true" ForeColor='@("White")' />
+                <PagerStyle BackColor='@("#2461BF")' ForeColor='@("White")' HorizontalAlign="@HorizontalAlign.Center" />
+                <RowStyle BackColor='@("#EFF3FB")' />
+                <SelectedRowStyle BackColor='@("#D1DDF1")' Font-Bold="true" ForeColor='@("#333333")' />
+                <SortedAscendingCellStyle BackColor='@("#F5F7FB")' />
+                <SortedAscendingHeaderStyle BackColor='@("#6D95E1")' />
+                <SortedDescendingCellStyle BackColor='@("#E9EBEF")' />
+                <SortedDescendingHeaderStyle BackColor='@("#4870BE")' />
+            </ChildComponents>
+</GridView>
     </div>
 

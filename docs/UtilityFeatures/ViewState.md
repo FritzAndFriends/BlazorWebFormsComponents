@@ -16,11 +16,61 @@ ViewState["foo"]
 
 It's a simple syntax and implements a typical Dictionary pattern.  After the PreRender phase of a Page, the content would be serialized and inserted into an HTML hidden input so that it would be available when the Page was posted.
 
-## Implementation
+## Implementation in BlazorWebFormsComponents
 
-In BlazorWebFormsComponents, we want to preserve this API but provide a proper Blazor implementation.  To do this, we have provided a basic `Dictionary<string,object>` property called `ViewState` that you can add items to and retrieve from.  This ViewState is preserved for the duration of the life of the component as your user interacts with it.  This is an in-memory storage on the server (in the case of server-side Blazor) or in the Browser as part of Blazor Web-Assembly.
+BlazorWebFormsComponents now provides `ViewStateDictionary`, a comprehensive implementation of ViewState that works seamlessly across rendering modes:
 
-You can see the implementation in the BaseWebFormsComponent class.
+- **SSR (Server-Side Rendering)** — ViewState automatically serializes to a protected hidden form field for round-tripping through HTTP POSTs
+- **ServerInteractive (Blazor WebSocket)** — ViewState persists in component memory for the lifetime of the component instance
+
+This allows Web Forms patterns to migrate with minimal markup changes.
+
+### Quick Start
+
+```csharp
+// Store a value
+ViewState["UserPreferences"] = new UserSettings { Theme = "Dark" };
+
+// Retrieve a value (null-safe)
+var prefs = ViewState["UserPreferences"];
+
+// Type-safe convenience method
+ViewState.Set<UserSettings>("UserPreferences", userSettings);
+UserSettings retrieved = ViewState.GetValueOrDefault<UserSettings>("UserPreferences", new());
+```
+
+### Detecting Postbacks
+
+Use the `IsPostBack` property to distinguish between first render and postback:
+
+```csharp
+protected override void OnInitialized()
+{
+    if (!IsPostBack)
+    {
+        // First render: load initial data
+        LoadProducts();
+    }
+    else
+    {
+        // Postback: restore state from ViewState
+        RestoreState();
+    }
+}
+```
+
+### Hidden Field Persistence (SSR Only)
+
+When running in SSR, ViewState is automatically round-tripped through a protected hidden form field. Manually emit the field when needed:
+
+```razor
+<form method="post">
+    <TextBox ID="Name" @bind-Value="_name" />
+    <Button Text="Save" @onclick="OnSave" />
+    
+    <RenderViewStateField />
+</form>
+```
 
 ## Moving On
 
@@ -42,3 +92,6 @@ Foo = bar;
 bar = Foo;
 ```
 
+## See Also
+
+- [ViewState and PostBack Shim](ViewStateAndPostBack.md) — Comprehensive guide covering ViewStateDictionary, mode-adaptive IsPostBack, hidden field persistence, and migration patterns

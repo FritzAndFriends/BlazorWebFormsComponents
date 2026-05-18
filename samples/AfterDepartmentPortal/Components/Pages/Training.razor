@@ -1,0 +1,20 @@
+@* Migrated from: DepartmentPortal/Training.aspx
+   Original: Training catalog page with TrainingCatalog user control, category filtering,
+   and enrollment links. Uses asp:GridView bound to PortalDataProvider.GetCourses(). *@
+
+@page "/training"
+
+<PageTitle>Training - Department Portal</PageTitle>
+
+<PageHeader Title="Training Catalog" Subtitle="Browse available courses and enroll" />
+
+<Breadcrumb Items="@(new[] { ("Home", "/"), ("Training", "") })" />
+
+<DepartmentFilter />
+
+<TrainingCatalog />
+
+<Pager />
+
+@* TODO: MyTraining page (/my-training) — shows current user's enrollments.
+   Original was MyTraining.aspx with user-specific enrollment data. *@

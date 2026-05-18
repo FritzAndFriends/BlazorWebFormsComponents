@@ -1,0 +1,26 @@
+@page "/TC29-AuthenticatedPage"
+<PageTitle>Account Dashboard</PageTitle>
+@using System.Web.Security
+    <h1>Account Dashboard</h1>
+    <AuthorizeView>
+        <NotAuthorized>
+            <div class="alert alert-info">
+                <p>Please <a href="/Account/Login.aspx">sign in</a> to access your dashboard.</p>
+                <HyperLink NavigateUrl="/Account/Register.aspx" CssClass="btn btn-primary">
+                    Create an Account
+                </HyperLink>
+            </div>
+        </NotAuthorized>
+        <Authorized>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3>Welcome, <LoginName id="lblUserName" FormatString="{0}" />!</h3>
+                </div>
+                <div class="panel-body">
+                    <p>You are logged in. <a href="/Account/Manage.aspx">Manage your account</a>.</p>
+                    <Button id="btnViewOrders" Text="View Orders" OnClick="@ViewOrders_Click" CssClass="btn btn-default" />
+                </div>
+            </div>
+        </Authorized>
+        @* TODO(bwfc-identity): Convert RoleGroups to policy-based AuthorizeView *@
+    </AuthorizeView>

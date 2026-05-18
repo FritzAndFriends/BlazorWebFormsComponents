@@ -44,13 +44,11 @@ namespace BlazorWebFormsComponents.Analyzers
             var root = await document.GetSyntaxRootAsync(cancellationToken).ConfigureAwait(false);
 
             // Don't add if a TODO comment already exists in leading trivia
-            foreach (var trivia in method.GetLeadingTrivia())
+            if (method.GetLeadingTrivia().Any(t =>
+                t.IsKind(SyntaxKind.SingleLineCommentTrivia) &&
+                t.ToString().Contains("TODO: Convert to EventCallback")))
             {
-                if (trivia.IsKind(SyntaxKind.SingleLineCommentTrivia) &&
-                    trivia.ToString().Contains("TODO: Convert to EventCallback"))
-                {
-                    return document;
-                }
+                return document;
             }
 
             var todoComment = SyntaxFactory.Comment(
@@ -61,13 +59,11 @@ namespace BlazorWebFormsComponents.Analyzers
                 .Add(root.DetectEndOfLine());
 
             // Collect indentation from original method
-            foreach (var trivia in method.GetLeadingTrivia())
+            var indentTrivia = method.GetLeadingTrivia()
+                .FirstOrDefault(t => t.IsKind(SyntaxKind.WhitespaceTrivia));
+            if (indentTrivia.IsKind(SyntaxKind.WhitespaceTrivia))
             {
-                if (trivia.IsKind(SyntaxKind.WhitespaceTrivia))
-                {
-                    newLeadingTrivia = newLeadingTrivia.Add(trivia);
-                    break;
-                }
+                newLeadingTrivia = newLeadingTrivia.Add(indentTrivia);
             }
 
             var newMethod = method.WithLeadingTrivia(newLeadingTrivia);

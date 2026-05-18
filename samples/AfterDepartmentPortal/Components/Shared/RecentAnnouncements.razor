@@ -1,0 +1,17 @@
+@* Migrated from: DepartmentPortal/Controls/DashboardWidget.ascx (as RecentAnnouncements)
+   Original: Dashboard widget showing the latest announcements in a compact list.
+   Bound to PortalDataProvider.GetAnnouncements() with top-N filtering. *@
+
+<div class="recent-announcements">
+    @foreach (var item in PortalDataProvider.GetAnnouncements()
+        .Where(a => a.IsActive)
+        .OrderByDescending(a => a.PublishDate)
+        .Take(5))
+    {
+        <div class="mb-2">
+            <a href="/announcements/@item.Id"><strong>@item.Title</strong></a>
+            <br />
+            <small class="text-muted">@item.PublishDate.ToShortDateString()</small>
+        </div>
+    }
+</div>

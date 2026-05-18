@@ -1,24 +1,8 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Checkout;
 
-public partial class CheckoutComplete
+public partial class CheckoutComplete : BlazorWebFormsComponents.WebFormsPageBase
 {
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
-
-    private string _transactionId = "";
-
-    protected override async Task OnInitializedAsync()
-    {
-        // TODO: Implement PayPal DoCheckoutPayment confirmation
-        // Original used Session["token"], Session["payerId"], Session["payment_amt"]
-        // and NVPAPICaller.DoCheckoutPayment() to finalize order
-        _transactionId = "TODO: PayPal checkout not yet migrated";
-        await Task.CompletedTask;
-    }
-
-    private void Continue_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
-    {
-        NavigationManager.NavigateTo("/");
-    }
+    // TODO: Migrate from Checkout/CheckoutComplete.aspx
+    // Original features: Payment or checkout integration
+    // Quarantine reason: Detected payment-provider integration code that requires manual migration and secrets-safe server orchestration.
 }

@@ -1,0 +1,16 @@
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+namespace WingtipToys.Account;
+public partial class TwoFactorAuthenticationSignIn
+{
+    private TextBox Code = default!;
+    private Button CodeSubmit = default!;
+    private PlaceHolder ErrorMessage = default!;
+    private Literal FailureText = default!;
+    private DropDownList<object> Providers = default!;
+    private Button ProviderSubmit = default!;
+    private CheckBox RememberBrowser = default!;
+    private HiddenField SelectedProvider = default!;
+    private PlaceHolder sendcode = default!;
+    private PlaceHolder verifycode = default!;
+}

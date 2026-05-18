@@ -1,5 +1,7 @@
+@page "/Account/RegisterExternalLogin"
 @page "/RegisterExternalLogin"
 <PageTitle>Register an external login</PageTitle>
+
 <h3>Register with your @(ProviderName) account</h3>
 
     <PlaceHolder>
@@ -15,16 +17,16 @@
             <div class="form-group">
                 <Label AssociatedControlID="email" CssClass="col-md-2 control-label">Email</Label>
                 <div class="col-md-10">
-                    <TextBox ID="email" CssClass="form-control" TextMode="TextBoxMode.Email" />
-                    <RequiredFieldValidator ControlToValidate="email"
-                        Display="Dynamic" CssClass="text-danger" ErrorMessage="Email is required" />
+                    <TextBox id="email" @ref="email" CssClass="form-control" TextMode="@TextBoxMode.Email" />
+                    <RequiredFieldValidator Type="string" ControlToValidate="email"
+                        Display="@ValidatorDisplay.Dynamic" CssClass="text-danger" ErrorMessage="Email is required" />
                     <ModelErrorMessage ModelStateKey="email" CssClass="text-error" />
                 </div>
             </div>
 
             <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
-                    <Button Text="Log in" CssClass="btn btn-default" OnClick="LogIn_Click" />
+                    <Button Text="Log in" CssClass="btn btn-default" OnClick="@LogIn_Click" />
                 </div>
             </div>
         </div>

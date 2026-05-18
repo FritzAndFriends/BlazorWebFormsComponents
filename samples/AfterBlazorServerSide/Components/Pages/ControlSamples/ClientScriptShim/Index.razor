@@ -1,0 +1,530 @@
+@page "/ControlSamples/ClientScriptShim"
+@inject BlazorWebFormsComponents.ClientScriptShim ClientScript
+@inject IJSRuntime JS
+
+<PageTitle>ClientScript Shim: Zero-Rewrite Migration</PageTitle>
+
+<h2>ClientScript Shim: Zero-Rewrite Migration</h2>
+
+<p>Your Web Forms code-behind calls <code>ClientScript.RegisterStartupScript(...)</code> today.
+   With the <strong>ClientScriptShim</strong>, those same calls work in Blazor — no rewrite needed.</p>
+
+<div class="alert alert-success">
+    <h4 class="alert-heading">💡 Recommended Migration Path</h4>
+    <p class="mb-0">The <code>ClientScriptShim</code> lets you keep your existing
+        <code>Page.ClientScript</code> calls intact. Just remove the <code>Page.</code> prefix and the
+        shim handles everything — queuing, deduplication, and execution via <code>IJSRuntime</code>.</p>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Demo 1: RegisterStartupScript ═══════════════════════════ *@
+
+<h3>1. RegisterStartupScript — Same Code, Works in Blazor</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Web Forms Code-Behind (unchanged)</h4>
+        <pre><code class="language-csharp">protected void btnGreet_Click(object sender, EventArgs e)
+{
+    ClientScript.RegisterStartupScript(
+        GetType(),
+        "greeting",
+        "alert('Hello from the server!');",
+        true);
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>Blazor with ClientScriptShim (identical!)</h4>
+        <pre><code class="language-csharp">private void HandleGreet()
+{
+    ClientScript.RegisterStartupScript(
+        GetType(),
+        "greeting",
+        "alert('Hello from the server!');",
+        true);
+    // FlushAsync() runs automatically in OnAfterRenderAsync
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — Startup Script</h5>
+        <p>Click the button to queue a startup script. It executes after the next render cycle,
+           just like Web Forms' <code>RegisterStartupScript</code>.</p>
+        <button class="btn btn-primary" @onclick="HandleGreet">
+            🎉 Say Hello (via Shim)
+        </button>
+        <p class="text-muted mt-2">
+            <strong>Key point:</strong> The <code>ClientScript.RegisterStartupScript()</code> call is
+            <em>identical</em> to what you'd write in Web Forms code-behind. The shim queues the script
+            and flushes it via <code>IJSRuntime</code> during <code>OnAfterRenderAsync</code>.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Demo 2: RegisterClientScriptInclude ═══════════════════════════ *@
+
+<h3>2. RegisterClientScriptInclude — Dynamic Script Loading</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Web Forms Code-Behind</h4>
+        <pre><code class="language-csharp">protected void Page_Load(object sender, EventArgs e)
+{
+    ClientScript.RegisterClientScriptInclude(
+        "moment",
+        "https://cdn.jsdelivr.net/npm/moment@@2.30.1/moment.min.js");
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>Blazor with ClientScriptShim</h4>
+        <pre><code class="language-csharp">private void LoadMomentJs()
+{
+    ClientScript.RegisterClientScriptInclude(
+        "moment",
+        "https://cdn.jsdelivr.net/npm/moment@@2.30.1/moment.min.js");
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — Script Include</h5>
+        <p>Click to dynamically load the Moment.js library. The shim appends a <code>&lt;script&gt;</code> tag to the document head — the same effect as <code>RegisterClientScriptInclude</code> in Web Forms.</p>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <button class="btn btn-info" @onclick="LoadMomentJs">
+                📦 Load Moment.js
+            </button>
+            <button class="btn btn-outline-info" @onclick="CheckMomentLoaded">
+                🔍 Check If Loaded
+            </button>
+        </div>
+        <p class="mt-2">
+            Include registered: <strong>@(_momentRegistered ? "Yes ✓" : "Not yet")</strong>
+        </p>
+        <p id="moment-output" class="fw-bold mt-1">@_momentStatus</p>
+        <p class="text-muted mt-2">
+            <strong>Key point:</strong> The API call is the same. The shim dynamically injects the
+            <code>&lt;script src="..."&gt;</code> tag — no need for layout file changes or static references.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Demo 3: Deduplication ═══════════════════════════ *@
+
+<h3>3. Deduplication — Same Key Runs Once</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Web Forms Pattern</h4>
+        <pre><code class="language-csharp">// Web Forms automatically deduplicates by key:
+if (!ClientScript.IsStartupScriptRegistered(GetType(), "init"))
+{
+    ClientScript.RegisterStartupScript(
+        GetType(), "init",
+        "console.log('Initialized!');", true);
+}
+
+// Registering the same key again is a no-op
+ClientScript.RegisterStartupScript(
+    GetType(), "init",
+    "console.log('Duplicate — ignored!');", true);</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>Blazor — Identical Behavior</h4>
+        <pre><code class="language-csharp">// Same deduplication logic works in Blazor:
+if (!ClientScript.IsStartupScriptRegistered(GetType(), "init"))
+{
+    ClientScript.RegisterStartupScript(
+        GetType(), "init",
+        "console.log('Initialized!');", true);
+}
+
+// Same key = same no-op behavior
+ClientScript.RegisterStartupScript(
+    GetType(), "init",
+    "console.log('Duplicate — ignored!');", true);</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — Deduplication</h5>
+        <p>Click the button multiple times. The <code>IsStartupScriptRegistered</code> check prevents
+           duplicate registration, and even without the check, the shim uses dictionary-based keys
+           so the same key overwrites rather than duplicates.</p>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <button class="btn btn-warning" @onclick="RegisterWithDedup">
+                ⚡ Register Script (with dedup check)
+            </button>
+            <button class="btn btn-outline-secondary" @onclick="ResetDedup">
+                🔄 Reset
+            </button>
+        </div>
+        <p class="mt-2">Registration attempts: <strong>@_dedupAttempts</strong></p>
+        <p>Was already registered: <strong>@(_wasAlreadyRegistered ? "Yes (skipped)" : "No (registered)")</strong></p>
+        <p id="dedup-output" class="fw-bold">@_dedupMessage</p>
+        <p class="text-muted mt-2">
+            <strong>Key point:</strong> <code>IsStartupScriptRegistered()</code> works exactly like Web
+            Forms — check before registering to avoid duplicate execution. The shim's internal dictionary
+            also deduplicates by key, matching Web Forms behavior.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Demo 4: Side-by-Side Comparison ═══════════════════════════ *@
+
+<h3>4. Side-by-Side: Manual IJSRuntime vs. ClientScriptShim</h3>
+
+<p>Compare the two migration approaches. The left column shows the rewrite you'd need
+   with direct <code>IJSRuntime</code>. The right column shows the zero-rewrite shim approach.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <strong>❌ Before: Manual IJSRuntime Rewrite</strong>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Every <code>ClientScript</code> call must be found, understood, and rewritten:</p>
+                <pre><code class="language-csharp">@@inject IJSRuntime JS
+
+@@code {
+    // ❌ Must rewrite: RegisterStartupScript → OnAfterRenderAsync
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("eval",
+                "document.getElementById('msg').innerText = 'Ready!';");
+        }
+    }
+
+    // ❌ Must rewrite: RegisterClientScriptInclude → dynamic import
+    private async Task LoadScript()
+    {
+        await JS.InvokeVoidAsync("eval",
+            "(function(){var s=document.createElement('script');" +
+            "s.src='lib.js';document.head.appendChild(s);})()");
+    }
+
+    // ❌ Must rewrite: IsStartupScriptRegistered → manual tracking
+    private HashSet&lt;string&gt; _registered = new();
+    private async Task RegisterOnce(string key, string script)
+    {
+        if (!_registered.Contains(key))
+        {
+            _registered.Add(key);
+            await JS.InvokeVoidAsync("eval", script);
+        }
+    }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-success">
+            <div class="card-header bg-success text-white">
+                <strong>✅ After: ClientScriptShim (Zero Rewrite)</strong>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Your Web Forms code-behind stays the same:</p>
+                <pre><code class="language-csharp">@@inject ClientScriptShim ClientScript
+
+@@code {
+    // ✅ Unchanged: RegisterStartupScript works as-is
+    protected override void OnInitialized()
+    {
+        ClientScript.RegisterStartupScript(
+            GetType(), "init",
+            "document.getElementById('msg').innerText = 'Ready!';",
+            true);
+    }
+
+    // ✅ Unchanged: RegisterClientScriptInclude works as-is
+    private void LoadScript()
+    {
+        ClientScript.RegisterClientScriptInclude(
+            "myLib", "lib.js");
+    }
+
+    // ✅ Unchanged: IsStartupScriptRegistered works as-is
+    private void RegisterOnce(string key, string script)
+    {
+        if (!ClientScript.IsStartupScriptRegistered(
+                GetType(), key))
+        {
+            ClientScript.RegisterStartupScript(
+                GetType(), key, script, true);
+        }
+    }
+}</code></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo — Both Approaches, Same Result</h5>
+        <p>Click each button to see the same effect achieved two different ways:</p>
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Via IJSRuntime (manual):</h6>
+                <button class="btn btn-outline-warning" @onclick="SetMessageViaJs">
+                    Set Message (IJSRuntime)
+                </button>
+            </div>
+            <div class="col-md-6">
+                <h6>Via ClientScriptShim (zero-rewrite):</h6>
+                <button class="btn btn-outline-success" @onclick="SetMessageViaShim">
+                    Set Message (Shim)
+                </button>
+            </div>
+        </div>
+        <div class="mt-3 p-3 border rounded">
+            <p id="comparison-output" class="fw-bold mb-0">⏳ Click a button above...</p>
+        </div>
+        <p class="text-muted mt-2">
+            <strong>Bottom line:</strong> Both produce the same result, but the shim approach preserves
+            your original code-behind logic. Less rewriting = fewer bugs = faster migration.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Migration Quick Reference ═══════════════════════════ *@
+
+<h3>Migration Quick Reference</h3>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Web Forms API</th>
+            <th>ClientScriptShim Method</th>
+            <th>Change Needed</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><code>Page.ClientScript.RegisterStartupScript(...)</code></td>
+            <td><code>ClientScript.RegisterStartupScript(...)</code></td>
+            <td class="text-success">Remove <code>Page.</code> prefix only</td>
+        </tr>
+        <tr>
+            <td><code>Page.ClientScript.RegisterClientScriptBlock(...)</code></td>
+            <td><code>ClientScript.RegisterClientScriptBlock(...)</code></td>
+            <td class="text-success">Remove <code>Page.</code> prefix only</td>
+        </tr>
+        <tr>
+            <td><code>Page.ClientScript.RegisterClientScriptInclude(...)</code></td>
+            <td><code>ClientScript.RegisterClientScriptInclude(...)</code></td>
+            <td class="text-success">Remove <code>Page.</code> prefix only</td>
+        </tr>
+        <tr>
+            <td><code>Page.ClientScript.IsStartupScriptRegistered(...)</code></td>
+            <td><code>ClientScript.IsStartupScriptRegistered(...)</code></td>
+            <td class="text-success">Remove <code>Page.</code> prefix only</td>
+        </tr>
+        <tr>
+            <td><code>Page.ClientScript.GetPostBackEventReference(...)</code></td>
+            <td>❌ Not supported</td>
+            <td class="text-warning">Use <code>@@onclick</code> / <code>EventCallback</code></td>
+        </tr>
+        <tr>
+            <td><code>Page.ClientScript.GetCallbackEventReference(...)</code></td>
+            <td>❌ Not supported</td>
+            <td class="text-warning">Use <code>IJSRuntime</code> JS-to-.NET interop</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="alert alert-info mt-3">
+    <h5>How to Get the Shim</h5>
+    <ul class="mb-0">
+        <li><strong>Components inheriting <code>BaseWebFormsComponent</code>:</strong> Access it as <code>ClientScript</code> property — it's built in.</li>
+        <li><strong>Razor pages or non-BWFC components:</strong> Inject it with <code>@@inject ClientScriptShim ClientScript</code></li>
+        <li><strong>Service registration:</strong> Call <code>builder.Services.AddBlazorWebFormsComponents()</code> in <code>Program.cs</code></li>
+    </ul>
+</div>
+
+<hr />
+
+@* ═══════════════════════════ Source Code ═══════════════════════════ *@
+
+<h3>Source Code</h3>
+
+<p>Complete <code>@@code</code> block for this page:</p>
+
+<pre><code class="language-csharp">@@inject BlazorWebFormsComponents.ClientScriptShim ClientScript
+@@inject IJSRuntime JS
+
+@@code {
+    private bool _momentRegistered;
+    private string _momentStatus = "";
+    private int _dedupAttempts;
+    private bool _wasAlreadyRegistered;
+    private string _dedupMessage = "";
+
+    // Demo 1: RegisterStartupScript — identical to Web Forms code-behind
+    private void HandleGreet()
+    {
+        ClientScript.RegisterStartupScript(
+            GetType(), "greeting",
+            "alert('Hello from the ClientScriptShim!');", true);
+    }
+
+    // Demo 2: RegisterClientScriptInclude — same API as Web Forms
+    private void LoadMomentJs()
+    {
+        ClientScript.RegisterClientScriptInclude(
+            "moment",
+            "https://cdn.jsdelivr.net/npm/moment@@2.30.1/moment.min.js");
+        _momentRegistered = ClientScript.IsClientScriptIncludeRegistered("moment");
+    }
+
+    // Demo 3: Deduplication with IsStartupScriptRegistered
+    private void RegisterWithDedup()
+    {
+        _dedupAttempts++;
+        _wasAlreadyRegistered = ClientScript.IsStartupScriptRegistered(GetType(), "dedup-demo");
+
+        if (!_wasAlreadyRegistered)
+        {
+            ClientScript.RegisterStartupScript(GetType(), "dedup-demo",
+                "document.getElementById('dedup-output').innerText = " +
+                "'✅ Script executed (first time only!)';", true);
+            _dedupMessage = "Registered and queued for execution.";
+        }
+        else
+        {
+            _dedupMessage = $"Already registered — skipped (attempt #{_dedupAttempts}).";
+        }
+    }
+
+    // Demo 4: Side-by-side comparison handlers
+    private async Task SetMessageViaJs()
+    {
+        await JS.InvokeVoidAsync("eval",
+            "document.getElementById('comparison-output').innerText = " +
+            "'✅ Message set via IJSRuntime (manual rewrite)';");
+    }
+
+    private void SetMessageViaShim()
+    {
+        ClientScript.RegisterStartupScript(GetType(), "comparison",
+            "document.getElementById('comparison-output').innerText = " +
+            "'✅ Message set via ClientScriptShim (zero rewrite!)';", true);
+    }
+
+    // Flush queued scripts after each render
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await ClientScript.FlushAsync(JS);
+    }
+
+    // Reset helpers
+    private void CheckMomentLoaded()
+    {
+        _momentRegistered = ClientScript.IsClientScriptIncludeRegistered("moment");
+        _momentStatus = _momentRegistered
+            ? "Moment.js include is registered ✓"
+            : "Moment.js not yet registered";
+    }
+
+    private void ResetDedup()
+    {
+        _dedupAttempts = 0;
+        _wasAlreadyRegistered = false;
+        _dedupMessage = "";
+    }
+}</code></pre>
+
+@code {
+    private bool _momentRegistered;
+    private string _momentStatus = "";
+    private int _dedupAttempts;
+    private bool _wasAlreadyRegistered;
+    private string _dedupMessage = "";
+
+    // Demo 1: RegisterStartupScript — identical to Web Forms code-behind
+    private void HandleGreet()
+    {
+        ClientScript.RegisterStartupScript(
+            GetType(), "greeting",
+            "alert('Hello from the ClientScriptShim!');", true);
+    }
+
+    // Demo 2: RegisterClientScriptInclude — same API as Web Forms
+    private void LoadMomentJs()
+    {
+        ClientScript.RegisterClientScriptInclude(
+            "moment",
+            "https://cdn.jsdelivr.net/npm/moment@2.30.1/moment.min.js");
+        _momentRegistered = ClientScript.IsClientScriptIncludeRegistered("moment");
+    }
+
+    // Demo 3: Deduplication with IsStartupScriptRegistered
+    private void RegisterWithDedup()
+    {
+        _dedupAttempts++;
+        _wasAlreadyRegistered = ClientScript.IsStartupScriptRegistered(GetType(), "dedup-demo");
+
+        if (!_wasAlreadyRegistered)
+        {
+            ClientScript.RegisterStartupScript(GetType(), "dedup-demo",
+                "document.getElementById('dedup-output').innerText = " +
+                "'✅ Script executed (first time only!)';", true);
+            _dedupMessage = "Registered and queued for execution.";
+        }
+        else
+        {
+            _dedupMessage = $"Already registered — skipped (attempt #{_dedupAttempts}).";
+        }
+    }
+
+    // Demo 4: Side-by-side comparison handlers
+    private async Task SetMessageViaJs()
+    {
+        await JS.InvokeVoidAsync("eval",
+            "document.getElementById('comparison-output').innerText = " +
+            "'✅ Message set via IJSRuntime (manual rewrite)';");
+    }
+
+    private void SetMessageViaShim()
+    {
+        ClientScript.RegisterStartupScript(GetType(), "comparison",
+            "document.getElementById('comparison-output').innerText = " +
+            "'✅ Message set via ClientScriptShim (zero rewrite!)';", true);
+    }
+
+    // Flush queued scripts after each render
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await ClientScript.FlushAsync(JS);
+    }
+
+    private void CheckMomentLoaded()
+    {
+        _momentRegistered = ClientScript.IsClientScriptIncludeRegistered("moment");
+        _momentStatus = _momentRegistered
+            ? "Moment.js include is registered ✓"
+            : "Moment.js not yet registered";
+    }
+
+    private void ResetDedup()
+    {
+        _dedupAttempts = 0;
+        _wasAlreadyRegistered = false;
+        _dedupMessage = "";
+    }
+}

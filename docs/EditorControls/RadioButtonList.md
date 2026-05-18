@@ -27,33 +27,52 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - DataSourceID is not supported - bind directly to collections via `Items` parameter
 - RepeatColumns is not fully implemented
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:RadioButtonList
-    ID="rbl1"
-    runat="server"
-    RepeatDirection="Vertical|Horizontal"
-    RepeatLayout="Table|Flow|OrderedList|UnorderedList"
-    TextAlign="Left|Right"
-    CellPadding="integer"
-    CellSpacing="integer"
-    CssClass="string"
-    Enabled="True|False"
-    Visible="True|False"
-    SelectedValue="string"
-    SelectedIndex="integer"
-    AutoPostBack="True|False"
-    OnSelectedIndexChanged="SelectedIndexChanged event handler"
-    DataTextField="string"
-    DataValueField="string">
-    
-    <asp:ListItem Value="S" Text="Small" />
-    <asp:ListItem Value="M" Text="Medium" Selected="True" />
-    <asp:ListItem Value="L" Text="Large" />
-    
-</asp:RadioButtonList>
-```
+=== "Web Forms"
+
+    ```html
+    <asp:RadioButtonList
+        ID="rbl1"
+        runat="server"
+        RepeatDirection="Vertical|Horizontal"
+        RepeatLayout="Table|Flow|OrderedList|UnorderedList"
+        TextAlign="Left|Right"
+        CellPadding="integer"
+        CellSpacing="integer"
+        CssClass="string"
+        Enabled="True|False"
+        Visible="True|False"
+        SelectedValue="string"
+        SelectedIndex="integer"
+        AutoPostBack="True|False"
+        OnSelectedIndexChanged="SelectedIndexChanged event handler"
+        DataTextField="string"
+        DataValueField="string">
+
+        <asp:ListItem Value="S" Text="Small" />
+        <asp:ListItem Value="M" Text="Medium" Selected="True" />
+        <asp:ListItem Value="L" Text="Large" />
+
+    </asp:RadioButtonList>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <RadioButtonList TItem="object" StaticItems="items" @bind-SelectedValue="selectedSize" />
+
+    @code {
+        private string selectedSize = "M";
+
+        private ListItemCollection items = new()
+        {
+            new ListItem("Small", "S"),
+            new ListItem("Medium", "M"),
+            new ListItem("Large", "L")
+        };
+    }
+    ```
 
 **Rendered HTML (Table layout, Vertical direction):**
 ```html
@@ -68,25 +87,6 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
         <td><input id="rbl1_2" type="radio" name="rbl1" value="L" /><label for="rbl1_2">Large</label></td>
     </tr>
 </table>
-```
-
-## Blazor Syntax
-
-### Static Items
-
-```razor
-<RadioButtonList TItem="object" StaticItems="items" @bind-SelectedValue="selectedSize" />
-
-@code {
-    private string selectedSize = "M";
-    
-    private ListItemCollection items = new()
-    {
-        new ListItem("Small", "S"),
-        new ListItem("Medium", "M"),
-        new ListItem("Large", "L")
-    };
-}
 ```
 
 ### Data Binding
@@ -255,6 +255,8 @@ When migrating from Web Forms:
 
 ## See Also
 
-- [RadioButton](RadioButton.md) - Individual radio button control
-- [DropDownList](DropDownList.md) - Single selection dropdown
-- [CheckBox](CheckBox.md) - Individual checkbox control
+- [RadioButton](RadioButton.md) — Individual radio button
+- [CheckBox](CheckBox.md) — Individual checkbox
+- [CheckBoxList](CheckBoxList.md) — Multiple checkboxes with multi-select
+- [DropDownList](DropDownList.md) — Single selection dropdown
+- [ListBox](ListBox.md) — Multiple selection list control

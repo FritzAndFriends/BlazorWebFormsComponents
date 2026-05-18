@@ -38,29 +38,55 @@ Renders as:
 </PlaceHolder>
 ```
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:PlaceHolder
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    SkinID="string"
-    Visible="True|False"
-/>
-```
+=== "Web Forms"
+
+    ```html
+    <asp:PlaceHolder
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        SkinID="string"
+        Visible="True|False"
+    />
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <!-- Basic usage: renders children with no wrapper element -->
+    <PlaceHolder>
+        <h2>Welcome</h2>
+        <p>This content renders directly into the page.</p>
+    </PlaceHolder>
+
+    <!-- Conditional visibility -->
+    <PlaceHolder Visible="@isLoggedIn">
+        <p>Hello, @username! You have @messageCount new messages.</p>
+        <button @onclick="ViewMessages">View Messages</button>
+    </PlaceHolder>
+
+    @code {
+        private bool isLoggedIn = true;
+        private string username = "Alice";
+        private int messageCount = 3;
+
+        private void ViewMessages() { /* ... */ }
+    }
+    ```
 
 ## Migration Notes
 
-When migrating from Web Forms:
+## See Also
 
-1. Remove `asp:` prefix and `runat="server"`
-2. The `ID` property is not rendered (use Blazor's `@ref` for component references)
-3. Use for conditional rendering of content blocks
+- [Panel](Panel.md) — Div-based container control
+- [MultiView](MultiView.md) — Multi-view container
+- [View](View.md) — Individual view within a MultiView

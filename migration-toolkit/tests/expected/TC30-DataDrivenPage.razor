@@ -1,0 +1,33 @@
+@page "/TC30-DataDrivenPage"
+<PageTitle>Product Catalog</PageTitle>
+@using ContosoStore.Models
+    <h1>Product Catalog</h1>
+    @* Product search and filter controls *@
+    <div class="search-bar">
+        <TextBox id="txtSearch" CssClass="form-control" />
+        <Button id="btnSearch" Text="Search" OnClick="@Search_Click" CssClass="btn btn-primary" />
+    </div>
+    <GridView ItemType="object" id="gvProducts" Items="@dsProductsData" AutoGenerateColumns="false"
+        AllowPaging="true" AllowSorting="true" PageSize="10"
+        CssClass="table table-striped" GridLines="@GridLines.None">
+        <Columns>
+            <BoundField ItemType="object" DataField="ProductName" HeaderText="Product" SortExpression="ProductName" />
+            <BoundField ItemType="object" DataField="UnitPrice" HeaderText="Price" DataFormatString="{0:C}" />
+        </Columns>
+    </GridView>
+    @* TODO(bwfc-datasource): Implement IdsProductsDataService to replace SqlDataSource *@
+    <h2>Featured Products</h2>
+    <Repeater id="rptFeatured" TItem="Product" SelectMethod="GetFeaturedProducts">
+@* TODO(bwfc-select-method): Convert SelectMethod="GetFeaturedProducts" to a code-behind method that sets Items property *@
+        <ItemTemplate>
+            <div class="product-card">
+                <h4>@context.ProductName</h4>
+                <span class="price">@context.UnitPrice</span>
+            </div>
+        </ItemTemplate>
+    </Repeater>
+
+@code {
+    // TODO(bwfc-datasource): Replace dsProductsData with real data from injected service
+    private IEnumerable<object> dsProductsData { get; set; } = Array.Empty<object>();
+}

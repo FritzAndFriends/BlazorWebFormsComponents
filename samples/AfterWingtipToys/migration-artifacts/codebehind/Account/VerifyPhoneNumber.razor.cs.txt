@@ -1,0 +1,9 @@
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+namespace WingtipToys.Account;
+public partial class VerifyPhoneNumber
+{
+    private TextBox Code = default!;
+    private Literal ErrorMessage = default!;
+    private HiddenField PhoneNumber = default!;
+}

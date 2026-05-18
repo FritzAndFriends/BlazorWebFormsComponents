@@ -1,0 +1,36 @@
+@using Shouldly
+
+@code {
+	[Fact]
+	public void CheckBox_WithID_RendersNameAttribute()
+	{
+		var cut = Render(@<CheckBox ID="RemoveItem" Checked="true" />);
+
+		var input = cut.Find("input[type='checkbox']");
+		input.GetAttribute("name").ShouldBe("RemoveItem");
+	}
+
+	[Fact]
+	public void CheckBox_WithoutID_DoesNotRenderNameAttribute()
+	{
+		var cut = Render(@<CheckBox Checked="true" />);
+
+		var input = cut.Find("input[type='checkbox']");
+		input.HasAttribute("name").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void CheckBox_InsideNamingContext_RendersRowScopedName()
+	{
+		var context = new FormNamingContext("CartList$ctl02", 0);
+
+		var cut = Render(
+			@<CascadingValue Value="context" Name="FormNamingContext">
+				<CheckBox ID="RemoveItem" Checked="false" />
+			</CascadingValue>
+		);
+
+		var input = cut.Find("input[type='checkbox']");
+		input.GetAttribute("name").ShouldBe("CartList$ctl02$RemoveItem");
+	}
+}

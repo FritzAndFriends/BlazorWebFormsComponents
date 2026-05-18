@@ -1,0 +1,26 @@
+@* Migrated from: DepartmentPortal/Controls/Breadcrumb.ascx
+   Original: Renders a breadcrumb trail from a list of (label, url) tuples.
+   The last item is rendered as active/current (no link). *@
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        @if (Items != null)
+        {
+            @foreach (var (label, url) in Items)
+            {
+                if (string.IsNullOrEmpty(url))
+                {
+                    <li class="breadcrumb-item active" aria-current="page">@label</li>
+                }
+                else
+                {
+                    <li class="breadcrumb-item"><a href="@url">@label</a></li>
+                }
+            }
+        }
+    </ol>
+</nav>
+
+@code {
+    [Parameter] public IEnumerable<(string Label, string Url)>? Items { get; set; }
+}

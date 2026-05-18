@@ -21,7 +21,7 @@ public class ShoppingCartTests
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // The product list should contain at least one product link
-        var productLinks = page.Locator("a[href*='ProductDetails']");
+        var productLinks = page.Locator("a[href*='/Product/']");
         var count = await productLinks.CountAsync();
         Assert.True(count > 0, "Product list should display at least one product");
     }
@@ -31,19 +31,12 @@ public class ShoppingCartTests
     {
         var page = await _fixture.NewPageAsync();
 
-        // Navigate to the product list
+        // Navigate to the product list — the "Add to Cart" links are here
+        // (original WingtipToys has AddToCart links on ProductList, not ProductDetails)
         await page.GotoAsync($"{TestConfiguration.BaseUrl}/ProductList");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        // Click the first product to view details
-        var firstProduct = page.Locator("a[href*='ProductDetails']").First;
-        await firstProduct.ClickAsync();
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-        Assert.Contains("ProductDetails", page.Url, StringComparison.OrdinalIgnoreCase);
-
-        // Look for an "Add to Cart" link or button and click it
-        // The AddToCart route is typically a link like /AddToCart?productID=N
+        // Look for an "Add to Cart" link and click the first one
         var addToCartLink = page.Locator("a[href*='AddToCart']").First;
         if (await addToCartLink.CountAsync() > 0)
         {
@@ -60,9 +53,9 @@ public class ShoppingCartTests
         // Should end up on the shopping cart page
         Assert.Contains("ShoppingCart", page.Url, StringComparison.OrdinalIgnoreCase);
 
-        // Cart should contain at least one item row
-        // The GridView renders a <table> with data rows
+        // ShoppingCart is InteractiveServer — wait for SignalR to render content
         var cartTable = page.Locator("table");
+        await cartTable.First.WaitForAsync(new() { Timeout = 15000 });
         var tableCount = await cartTable.CountAsync();
         Assert.True(tableCount > 0, "Shopping cart should display a table with the added item");
     }
@@ -152,16 +145,12 @@ public class ShoppingCartTests
     }
 
     /// <summary>
-    /// Helper: navigates to the product list, clicks the first product,
-    /// and adds it to the cart.
+    /// Helper: navigates to the product list and clicks the first "Add to Cart" link.
+    /// Original WingtipToys has AddToCart links on the ProductList page, not ProductDetails.
     /// </summary>
     private static async Task AddFirstProductToCart(IPage page)
     {
         await page.GotoAsync($"{TestConfiguration.BaseUrl}/ProductList");
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-        var firstProduct = page.Locator("a[href*='ProductDetails']").First;
-        await firstProduct.ClickAsync();
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         var addToCartLink = page.Locator("a[href*='AddToCart']").First;
@@ -174,6 +163,9 @@ public class ShoppingCartTests
             var addButton = page.GetByRole(AriaRole.Button, new() { Name = "Add To Cart" });
             await addButton.ClickAsync();
         }
-        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+
+        // ShoppingCart is an InteractiveServer page — wait for it to render via SignalR
+        await page.WaitForURLAsync("**/ShoppingCart**", new() { Timeout = 15000 });
+        await page.Locator("h1").WaitForAsync(new() { Timeout = 15000 });
     }
 }

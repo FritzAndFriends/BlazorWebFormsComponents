@@ -1,27 +1,28 @@
 @page "/ProductDetails"
+@page "/Product/{productName}"
 <PageTitle>Product Details</PageTitle>
-<FormView ID="productDetail" ItemType="Product" SelectMethod="@GetProduct" RenderOuterTable="false">
-        <ItemTemplate Context="context">
+
+    <FormView id="productDetail" @ref="productDetail" ItemType="Product" SelectMethod="GetProductQueryDetails_SelectMethod" RenderOuterTable="false">
+        <ItemTemplate Context="Item">
             <div>
-                <h1>@context.ProductName</h1>
+                <h1>@Item.ProductName</h1>
             </div>
             <br />
             <table>
                 <tr>
                     <td>
-                        <img src="/Catalog/Images/@context.ImagePath" style="border:solid; height:300px" alt="@context.ProductName"/>
+                        <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName"/>
                     </td>
                     <td>&nbsp;</td>  
                     <td style="vertical-align: top; text-align:left;">
-                        <b>Description:</b><br />@context.Description
+                        <b>Description:</b><br />@Item.Description
                         <br />
-                        <span><b>Price:</b>&nbsp;@($"{context.UnitPrice:c}")</span>
+                        <span><b>Price:</b>&nbsp;@(String.Format("{0:c}", Item.UnitPrice))</span>
                         <br />
-                        <span><b>Product Number:</b>&nbsp;@context.ProductID</span>
+                        <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
                         <br />
                     </td>
                 </tr>
             </table>
         </ItemTemplate>
     </FormView>
-

@@ -22,51 +22,51 @@ Original Web Forms documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `AutoPostBack` is not supported in Blazor - use `OnSelectedIndexChanged` event instead
 - `DataSourceID` is not supported - bind directly to collections via `Items` parameter
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:CheckBoxList
-    ID="string"
-    runat="server"
-    AutoPostBack="True|False"
-    CellPadding="integer"
-    CellSpacing="integer"
-    CssClass="string"
-    DataSourceID="string"
-    DataTextField="string"
-    DataValueField="string"
-    Enabled="True|False"
-    RepeatColumns="integer"
-    RepeatDirection="Horizontal|Vertical"
-    RepeatLayout="Table|Flow|OrderedList|UnorderedList"
-    TextAlign="Left|Right"
-    Visible="True|False"
-    OnSelectedIndexChanged="SelectedIndexChanged event handler">
-    
-    <asp:ListItem Value="value1" Text="Option 1" Selected="True|False" />
-    <asp:ListItem Value="value2" Text="Option 2" />
-    
-</asp:CheckBoxList>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:CheckBoxList
+        ID="string"
+        runat="server"
+        AutoPostBack="True|False"
+        CellPadding="integer"
+        CellSpacing="integer"
+        CssClass="string"
+        DataSourceID="string"
+        DataTextField="string"
+        DataValueField="string"
+        Enabled="True|False"
+        RepeatColumns="integer"
+        RepeatDirection="Horizontal|Vertical"
+        RepeatLayout="Table|Flow|OrderedList|UnorderedList"
+        TextAlign="Left|Right"
+        Visible="True|False"
+        OnSelectedIndexChanged="SelectedIndexChanged event handler">
 
-### Static Items
+        <asp:ListItem Value="value1" Text="Option 1" Selected="True|False" />
+        <asp:ListItem Value="value2" Text="Option 2" />
 
-```razor
-<CheckBoxList TItem="object" StaticItems="items" @bind-SelectedValues="selectedValues" />
+    </asp:CheckBoxList>
+    ```
 
-@code {
-    private List<string> selectedValues = new();
-    
-    private ListItemCollection items = new()
-    {
-        new ListItem("Option One", "1"),
-        new ListItem("Option Two", "2"),
-        new ListItem("Option Three", "3")
-    };
-}
-```
+=== "Blazor"
+
+    ```razor
+    <CheckBoxList TItem="object" StaticItems="items" @bind-SelectedValues="selectedValues" />
+
+    @code {
+        private List<string> selectedValues = new();
+
+        private ListItemCollection items = new()
+        {
+            new ListItem("Option One", "1"),
+            new ListItem("Option Two", "2"),
+            new ListItem("Option Three", "3")
+        };
+    }
+    ```
 
 ### Data Binding
 
@@ -288,7 +288,8 @@ When migrating from Web Forms to Blazor:
 
 ## See Also
 
-- [CheckBox](CheckBox.md) - Single checkbox control
-- [DropDownList](DropDownList.md) - Single-select dropdown
-- [RadioButtonList](RadioButtonList.md) - Single-select radio buttons (planned)
-- [ListBox](ListBox.md) - Multiple selection list control (planned)
+- [CheckBox](CheckBox.md) — Single checkbox control
+- [RadioButton](RadioButton.md) — Individual radio button
+- [RadioButtonList](RadioButtonList.md) — Multiple radio buttons with single selection
+- [DropDownList](DropDownList.md) — Single selection dropdown
+- [ListBox](ListBox.md) — Multiple selection list control

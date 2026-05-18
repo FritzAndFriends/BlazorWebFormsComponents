@@ -1,8 +1,8 @@
 # DataGrid
 
-The DataGrid component is meant to emulate the asp:DataGrid control in markup and is defined in the [System.Web.UI.WebControls.DataGrid class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.datagrid?view=netframework-4.8)
+The **DataGrid** component emulates the ASP.NET Web Forms `asp:DataGrid` control. It is defined in the [System.Web.UI.WebControls.DataGrid class](https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.datagrid?view=netframework-4.8).
 
-## Features supported in Blazor
+## Features Supported in Blazor
 
 - Readonly grid
 - Bound, Button, Hyperlink, and Template columns
@@ -36,226 +36,228 @@ The following DataGrid features from Web Forms are not currently supported:
 - Custom paging (AllowCustomPaging, VirtualItemCount)
 - Footer templates
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:DataGrid
-    AllowCustomPaging="True|False"
-    AllowPaging="True|False"
-    AllowSorting="True|False"
-    AutoGenerateColumns="True|False"
-    BackColor="color name|#dddddd"
-    BackImageUrl="uri"
-    BorderColor="color name|#dddddd"
-    BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
-    BorderWidth="size"
-    CellPadding="integer"
-    CellSpacing="integer"
-    CssClass="string"
-    CurrentPageIndex="integer"
-    DataKeyField="string"
-    DataMember="string"
-    DataSource="string"
-    DataSourceID="string"
-    EditItemIndex="integer"
-    EnableViewState="True|False"
-    Font-Bold="True|False"
-    Font-Italic="True|False"
-    Font-Names="string"
-    Font-Overline="True|False"
-    Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
-    Font-Strikeout="True|False"
-    Font-Underline="True|False"
-    ForeColor="color name|#dddddd"
-    GridLines="None|Horizontal|Vertical|Both"
-    HeaderStyle-BackColor="color name|#dddddd"
-    HeaderStyle-Font-Bold="True|False"
-    HorizontalAlign="NotSet|Left|Center|Right|Justify"
-    ID="string"
-    OnCancelCommand="CancelCommand event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDeleteCommand="DeleteCommand event handler"
-    OnEditCommand="EditCommand event handler"
-    OnItemCommand="ItemCommand event handler"
-    OnItemCreated="ItemCreated event handler"
-    OnItemDataBound="ItemDataBound event handler"
-    OnPageIndexChanged="PageIndexChanged event handler"
-    OnSortCommand="SortCommand event handler"
-    OnUpdateCommand="UpdateCommand event handler"
-    PageSize="integer"
-    runat="server"
-    SelectedIndex="integer"
-    ShowFooter="True|False"
-    ShowHeader="True|False"
-    Visible="True|False"
->
-    <AlternatingItemStyle />
-    <Columns>
-        <asp:BoundColumn
-            DataField="string"
-            DataFormatString="string"
-            FooterText="string"
-            HeaderImageUrl="uri"
-            HeaderText="string"
-            ReadOnly="True|False"
-            SortExpression="string"
-            Visible="True|False"
-        >
-            <FooterStyle />
-            <HeaderStyle />
-            <ItemStyle />
-        </asp:BoundColumn>
-        <asp:ButtonColumn
-            ButtonType="LinkButton|PushButton"
-            CausesValidation="True|False"
-            CommandName="string"
-            DataTextField="string"
-            DataTextFormatString="string"
-            FooterText="string"
-            HeaderImageUrl="uri"
-            HeaderText="string"
-            SortExpression="string"
-            Text="string"
-            ValidationGroup="string"
-            Visible="True|False"
-        />
-        <asp:HyperLinkColumn
-            DataNavigateUrlField="string"
-            DataNavigateUrlFormatString="string"
-            DataTextField="string"
-            DataTextFormatString="string"
-            FooterText="string"
-            HeaderImageUrl="uri"
-            HeaderText="string"
-            NavigateUrl="uri"
-            SortExpression="string"
-            Target="string"
-            Text="string"
-            Visible="True|False"
-        />
-        <asp:TemplateColumn
-            FooterText="string"
-            HeaderImageUrl="uri"
-            HeaderText="string"
-            SortExpression="string"
-            Visible="True|False"
-        >
-            <EditItemTemplate>
-                <!-- template content -->
-            </EditItemTemplate>
-            <FooterTemplate>
-                <!-- template content -->
-            </FooterTemplate>
-            <HeaderTemplate>
-                <!-- template content -->
-            </HeaderTemplate>
-            <ItemTemplate>
-                <!-- template content -->
-            </ItemTemplate>
-        </asp:TemplateColumn>
-    </Columns>
-    <EditItemStyle />
-    <FooterStyle />
-    <HeaderStyle />
-    <ItemStyle />
-    <PagerStyle Mode="NextPrev|NumericPages" />
-    <SelectedItemStyle />
-</asp:DataGrid>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:DataGrid
+        AllowCustomPaging="True|False"
+        AllowPaging="True|False"
+        AllowSorting="True|False"
+        AutoGenerateColumns="True|False"
+        BackColor="color name|#dddddd"
+        BackImageUrl="uri"
+        BorderColor="color name|#dddddd"
+        BorderStyle="NotSet|None|Dotted|Dashed|Solid|Double|Groove|Ridge|Inset|Outset"
+        BorderWidth="size"
+        CellPadding="integer"
+        CellSpacing="integer"
+        CssClass="string"
+        CurrentPageIndex="integer"
+        DataKeyField="string"
+        DataMember="string"
+        DataSource="string"
+        DataSourceID="string"
+        EditItemIndex="integer"
+        EnableViewState="True|False"
+        Font-Bold="True|False"
+        Font-Italic="True|False"
+        Font-Names="string"
+        Font-Overline="True|False"
+        Font-Size="string|Smaller|Larger|XX-Small|X-Small|Small|Medium|Large|X-Large|XX-Large"
+        Font-Strikeout="True|False"
+        Font-Underline="True|False"
+        ForeColor="color name|#dddddd"
+        GridLines="None|Horizontal|Vertical|Both"
+        HeaderStyle-BackColor="color name|#dddddd"
+        HeaderStyle-Font-Bold="True|False"
+        HorizontalAlign="NotSet|Left|Center|Right|Justify"
+        ID="string"
+        OnCancelCommand="CancelCommand event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDeleteCommand="DeleteCommand event handler"
+        OnEditCommand="EditCommand event handler"
+        OnItemCommand="ItemCommand event handler"
+        OnItemCreated="ItemCreated event handler"
+        OnItemDataBound="ItemDataBound event handler"
+        OnPageIndexChanged="PageIndexChanged event handler"
+        OnSortCommand="SortCommand event handler"
+        OnUpdateCommand="UpdateCommand event handler"
+        PageSize="integer"
+        runat="server"
+        SelectedIndex="integer"
+        ShowFooter="True|False"
+        ShowHeader="True|False"
+        Visible="True|False"
+    >
+        <AlternatingItemStyle />
+        <Columns>
+            <asp:BoundColumn
+                DataField="string"
+                DataFormatString="string"
+                FooterText="string"
+                HeaderImageUrl="uri"
+                HeaderText="string"
+                ReadOnly="True|False"
+                SortExpression="string"
+                Visible="True|False"
+            >
+                <FooterStyle />
+                <HeaderStyle />
+                <ItemStyle />
+            </asp:BoundColumn>
+            <asp:ButtonColumn
+                ButtonType="LinkButton|PushButton"
+                CausesValidation="True|False"
+                CommandName="string"
+                DataTextField="string"
+                DataTextFormatString="string"
+                FooterText="string"
+                HeaderImageUrl="uri"
+                HeaderText="string"
+                SortExpression="string"
+                Text="string"
+                ValidationGroup="string"
+                Visible="True|False"
+            />
+            <asp:HyperLinkColumn
+                DataNavigateUrlField="string"
+                DataNavigateUrlFormatString="string"
+                DataTextField="string"
+                DataTextFormatString="string"
+                FooterText="string"
+                HeaderImageUrl="uri"
+                HeaderText="string"
+                NavigateUrl="uri"
+                SortExpression="string"
+                Target="string"
+                Text="string"
+                Visible="True|False"
+            />
+            <asp:TemplateColumn
+                FooterText="string"
+                HeaderImageUrl="uri"
+                HeaderText="string"
+                SortExpression="string"
+                Visible="True|False"
+            >
+                <EditItemTemplate>
+                    <!-- template content -->
+                </EditItemTemplate>
+                <FooterTemplate>
+                    <!-- template content -->
+                </FooterTemplate>
+                <HeaderTemplate>
+                    <!-- template content -->
+                </HeaderTemplate>
+                <ItemTemplate>
+                    <!-- template content -->
+                </ItemTemplate>
+            </asp:TemplateColumn>
+        </Columns>
+        <EditItemStyle />
+        <FooterStyle />
+        <HeaderStyle />
+        <ItemStyle />
+        <PagerStyle Mode="NextPrev|NumericPages" />
+        <SelectedItemStyle />
+    </asp:DataGrid>
+    ```
 
-```html
-<DataGrid
-    AllowPaging=bool
-    AllowSorting=bool
-    AutoGenerateColumns=bool
-    Caption=string
-    CellPadding=int
-    CellSpacing=int
-    CssClass=string
-    CurrentPageIndex=int
-    DataKeyField=string
-    DataSource=IEnumerable
-    EditItemIndex=int
-    EmptyDataText=string
-    Enabled=bool
-    GridLines=GridLines
-    ID=string
-    Items=IEnumerable
-    ItemType=Type
-    PageSize=int
-    SelectedIndex=int
-    OnDataBinding=EventCallBack
-    OnDataBound=EventCallBack
-    OnItemCommand=EventCallBack<DataGridCommandEventArgs>
-    OnEditCommand=EventCallBack<DataGridCommandEventArgs>
-    OnCancelCommand=EventCallBack<DataGridCommandEventArgs>
-    OnUpdateCommand=EventCallBack<DataGridCommandEventArgs>
-    OnDeleteCommand=EventCallBack<DataGridCommandEventArgs>
-    ItemCreated=EventCallback<DataGridItemEventArgs>
-    ItemDataBound=EventCallback<DataGridItemEventArgs>
-    PageIndexChanged=EventCallback<DataGridPageChangedEventArgs>
-    SortCommand=EventCallback<DataGridSortCommandEventArgs>
-    SelectedIndexChanged=EventCallback
-    OnInit=EventCallBack
-    OnLoad=EventCallBack
-    OnPreRender=EventCallBack
-    OnUnload=EventCallBack
-    OnDisposed=EventCallBack
-    SelectMethod=SelectHandler
-    ShowHeader=bool
-    ShowFooter=bool
-    TabIndex=int
-    UseAccessibleHeader=bool
-    Visible=bool
->
-    <HeaderStyle BackColor=string ForeColor=string Font-Bold=bool ... />
-    <ItemStyle BackColor=string ForeColor=string ... />
-    <AlternatingItemStyle BackColor=string ForeColor=string ... />
-    <FooterStyle BackColor=string ForeColor=string Font-Italic=bool ... />
-    <PagerStyle BackColor=string ForeColor=string ... />
-    <SelectedItemStyle BackColor=string ForeColor=string ... />
-    <EditItemStyle BackColor=string ForeColor=string ... />
-    <Columns>
-        <BoundField
-            DataField=string
-            DataFormatString=string
-            HeaderText=string
-            Visible=bool
-        />
-        <HyperLinkField
-            DataNavigateUrlFields=string
-            DataNavigateUrlFormatString=string
-            DataTextField=string
-            DataTextFormatString=string
-            HeaderText=string
-            NavigateUrl=string
-            Target=string
-            Text=string
-            Visible=bool
-        />
-        <ButtonField
-            ButtonType=ButtonType
-            CommandName=string
-            DataTextField=string
-            DataTextFormatString=string
-            HeaderText=string
-            ImageUrl=string
-            Text=string
-            Visible=bool
-        />
-        <TemplateField
-            HeaderText=string
-            Visible=bool
-        >
-            <ItemTemplate>
-                <!-- template content -->
-            </ItemTemplate>
-        </TemplateField>
-    </Columns>
-</DataGrid>
-```
+=== "Blazor"
+
+    ```razor
+    <DataGrid
+        AllowPaging=bool
+        AllowSorting=bool
+        AutoGenerateColumns=bool
+        Caption=string
+        CellPadding=int
+        CellSpacing=int
+        CssClass=string
+        CurrentPageIndex=int
+        DataKeyField=string
+        DataSource=IEnumerable
+        EditItemIndex=int
+        EmptyDataText=string
+        Enabled=bool
+        GridLines=GridLines
+        ID=string
+        Items=IEnumerable
+        ItemType=Type
+        PageSize=int
+        SelectedIndex=int
+        OnDataBinding=EventCallBack
+        OnDataBound=EventCallBack
+        OnItemCommand=EventCallBack<DataGridCommandEventArgs>
+        OnEditCommand=EventCallBack<DataGridCommandEventArgs>
+        OnCancelCommand=EventCallBack<DataGridCommandEventArgs>
+        OnUpdateCommand=EventCallBack<DataGridCommandEventArgs>
+        OnDeleteCommand=EventCallBack<DataGridCommandEventArgs>
+        ItemCreated=EventCallback<DataGridItemEventArgs>
+        ItemDataBound=EventCallback<DataGridItemEventArgs>
+        PageIndexChanged=EventCallback<DataGridPageChangedEventArgs>
+        SortCommand=EventCallback<DataGridSortCommandEventArgs>
+        SelectedIndexChanged=EventCallback
+        OnInit=EventCallBack
+        OnLoad=EventCallBack
+        OnPreRender=EventCallBack
+        OnUnload=EventCallBack
+        OnDisposed=EventCallBack
+        SelectMethod=SelectHandler
+        ShowHeader=bool
+        ShowFooter=bool
+        TabIndex=int
+        UseAccessibleHeader=bool
+        Visible=bool
+    >
+        <HeaderStyle BackColor=string ForeColor=string Font-Bold=bool ... />
+        <ItemStyle BackColor=string ForeColor=string ... />
+        <AlternatingItemStyle BackColor=string ForeColor=string ... />
+        <FooterStyle BackColor=string ForeColor=string Font-Italic=bool ... />
+        <PagerStyle BackColor=string ForeColor=string ... />
+        <SelectedItemStyle BackColor=string ForeColor=string ... />
+        <EditItemStyle BackColor=string ForeColor=string ... />
+        <Columns>
+            <BoundField
+                DataField=string
+                DataFormatString=string
+                HeaderText=string
+                Visible=bool
+            />
+            <HyperLinkField
+                DataNavigateUrlFields=string
+                DataNavigateUrlFormatString=string
+                DataTextField=string
+                DataTextFormatString=string
+                HeaderText=string
+                NavigateUrl=string
+                Target=string
+                Text=string
+                Visible=bool
+            />
+            <ButtonField
+                ButtonType=ButtonType
+                CommandName=string
+                DataTextField=string
+                DataTextFormatString=string
+                HeaderText=string
+                ImageUrl=string
+                Text=string
+                Visible=bool
+            />
+            <TemplateField
+                HeaderText=string
+                Visible=bool
+            >
+                <ItemTemplate>
+                    <!-- template content -->
+                </ItemTemplate>
+            </TemplateField>
+        </Columns>
+    </DataGrid>
+    ```
 
 ## Style Sub-Components
 
@@ -294,37 +296,39 @@ When `true`, header cells render as `<th scope="col">` instead of `<td>`, improv
 
 ### Migration Example
 
-**Before (Web Forms):**
-```html
-<asp:DataGrid ID="dgCustomers" runat="server"
-    AutoGenerateColumns="False"
-    GridLines="Both"
-    Caption="Customer List">
-    <HeaderStyle BackColor="#4472C4" ForeColor="White" Font-Bold="True" />
-    <AlternatingItemStyle BackColor="#D6E4F0" />
-    <Columns>
-        <asp:BoundColumn DataField="CustomerID" HeaderText="ID" />
-        <asp:BoundColumn DataField="CompanyName" HeaderText="Company" />
-    </Columns>
-</asp:DataGrid>
-```
+=== "Web Forms"
 
-**After (Blazor):**
-```razor
-<DataGrid ItemType="Customer"
-          AutoGenerateColumns="false"
-          GridLines="GridLines.Both"
-          Caption="Customer List"
-          UseAccessibleHeader="true"
-          SelectMethod="Customer.GetCustomers">
-    <HeaderStyle BackColor="#4472C4" ForeColor="#FFFFFF" Font-Bold="true" />
-    <AlternatingItemStyle BackColor="#D6E4F0" />
-    <Columns>
-        <BoundField DataField="CustomerID" HeaderText="ID" />
-        <BoundField DataField="CompanyName" HeaderText="Company" />
-    </Columns>
-</DataGrid>
-```
+    ```html
+    <asp:DataGrid ID="dgCustomers" runat="server"
+        AutoGenerateColumns="False"
+        GridLines="Both"
+        Caption="Customer List">
+        <HeaderStyle BackColor="#4472C4" ForeColor="White" Font-Bold="True" />
+        <AlternatingItemStyle BackColor="#D6E4F0" />
+        <Columns>
+            <asp:BoundColumn DataField="CustomerID" HeaderText="ID" />
+            <asp:BoundColumn DataField="CompanyName" HeaderText="Company" />
+        </Columns>
+    </asp:DataGrid>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <DataGrid ItemType="Customer"
+              AutoGenerateColumns="false"
+              GridLines="GridLines.Both"
+              Caption="Customer List"
+              UseAccessibleHeader="true"
+              SelectMethod="Customer.GetCustomers">
+        <HeaderStyle BackColor="#4472C4" ForeColor="#FFFFFF" Font-Bold="true" />
+        <AlternatingItemStyle BackColor="#D6E4F0" />
+        <Columns>
+            <BoundField DataField="CustomerID" HeaderText="ID" />
+            <BoundField DataField="CompanyName" HeaderText="Company" />
+        </Columns>
+    </DataGrid>
+    ```
 
 ## Examples
 
@@ -451,7 +455,10 @@ When migrating DataGrid from Web Forms to Blazor:
 
 ## See Also
 
-- [GridView](GridView.md) - The recommended data grid control for new projects
-- [DataList](DataList.md) - For custom layout of repeating data
-- [Repeater](Repeater.md) - For lightweight data repetition
-- [PagerSettings](PagerSettings.md) - Shared pager configuration (used by GridView, FormView, DetailsView)
+- [GridView](GridView.md) — The recommended data grid control for new projects
+- [DataList](DataList.md) — For custom layout of repeating data
+- [Repeater](Repeater.md) — For lightweight data repetition
+- [ListView](ListView.md) — Full-featured list with CRUD and paging
+- [DetailsView](DetailsView.md) — Single record display
+- [FormView](FormView.md) — Custom single record layout
+- [DataPager](DataPager.md) — Shared paging for multiple controls

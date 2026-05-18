@@ -20,29 +20,31 @@ Original Microsoft documentation for the ASP<span></span>.NET ModelErrorMessage 
 - `IsValid` / `Validate()` — ModelErrorMessage is a display-only control; validation logic is handled by the EditContext
 - `HeaderText` / `HeaderStyle` — Not part of the original ModelErrorMessage control
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ModelErrorMessage
-    runat="server"
-    ModelStateKey="string"
-    AssociatedControlID="string"
-    CssClass="string"
-    SetFocusOnError="True|False"
-    ID="string"
-    Visible="True|False"
-/>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:ModelErrorMessage
+        runat="server"
+        ModelStateKey="string"
+        AssociatedControlID="string"
+        CssClass="string"
+        SetFocusOnError="True|False"
+        ID="string"
+        Visible="True|False"
+    />
+    ```
 
-```razor
-<ModelErrorMessage
-    ModelStateKey="NewPassword"
-    AssociatedControlID="password"
-    CssClass="text-danger"
-    SetFocusOnError="true" />
-```
+=== "Blazor"
+
+    ```razor
+    <ModelErrorMessage
+        ModelStateKey="NewPassword"
+        AssociatedControlID="password"
+        CssClass="text-danger"
+        SetFocusOnError="true" />
+    ```
 
 ## HTML Output
 
@@ -115,25 +117,27 @@ Migration from Web Forms to Blazor is straightforward:
 2. Wrap the form in an `<EditForm>` (replacing `<form runat="server">`)
 3. Replace `ModelState.AddModelError()` calls with `ValidationMessageStore.Add()`
 
-### Before (Web Forms)
+### Migration Example
 
-```html
-<asp:ModelErrorMessage runat="server"
-    ModelStateKey="NewPassword"
-    AssociatedControlID="password"
-    CssClass="text-danger"
-    SetFocusOnError="true" />
-```
+=== "Web Forms"
 
-### After (Blazor)
+    ```html
+    <asp:ModelErrorMessage runat="server"
+        ModelStateKey="NewPassword"
+        AssociatedControlID="password"
+        CssClass="text-danger"
+        SetFocusOnError="true" />
+    ```
 
-```razor
-<ModelErrorMessage
-    ModelStateKey="NewPassword"
-    AssociatedControlID="password"
-    CssClass="text-danger"
-    SetFocusOnError="true" />
-```
+=== "Blazor"
+
+    ```razor
+    <ModelErrorMessage
+        ModelStateKey="NewPassword"
+        AssociatedControlID="password"
+        CssClass="text-danger"
+        SetFocusOnError="true" />
+    ```
 
 !!! tip "Code-behind migration"
     The biggest change is in the code-behind: Web Forms uses `ModelState.AddModelError(key, message)` while Blazor uses `ValidationMessageStore.Add(editContext.Field(key), message)` followed by `editContext.NotifyValidationStateChanged()`.

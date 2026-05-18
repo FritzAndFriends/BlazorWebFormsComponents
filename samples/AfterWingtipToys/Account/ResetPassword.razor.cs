@@ -1,13 +1,8 @@
 namespace WingtipToys.Account;
 
-// TODO: Requires ASP.NET Core Identity migration — password reset needs UserManager
-public partial class ResetPassword
+public partial class ResetPassword : BlazorWebFormsComponents.WebFormsPageBase
 {
-    private string Email { get; set; } = "";
-    private string Password { get; set; } = "";
-
-    private void Reset_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
-    {
-        // TODO: Implement with UserManager
-    }
+    // TODO: Migrate from Account/ResetPassword.aspx
+    // Original features: ASP.NET Identity or membership APIs
+    // Quarantine reason: Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.
 }

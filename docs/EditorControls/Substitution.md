@@ -21,41 +21,41 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **Post-cache substitution** — Blazor does not use output caching in the same way; all rendering is dynamic by default
 - **Static method resolution by name** — Use the `SubstitutionCallback` delegate parameter instead of relying on `MethodName` string resolution
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<%@ OutputCache Duration="60" VaryByParam="none" %>
+=== "Web Forms"
 
-<asp:Substitution
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    MethodName="string"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    Visible="True|False"
-/>
-```
+    ```html
+    <%@ OutputCache Duration="60" VaryByParam="none" %>
 
-## Blazor Razor Syntax
+    <asp:Substitution
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        MethodName="string"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        Visible="True|False"
+    />
+    ```
 
-### Basic Usage
+=== "Blazor"
 
-```razor
-<Substitution SubstitutionCallback="GetCurrentTime" />
+    ```razor
+    <Substitution SubstitutionCallback="GetCurrentTime" />
 
-@code {
-    string GetCurrentTime(HttpContext context)
-    {
-        return DateTime.Now.ToString("HH:mm:ss");
+    @code {
+        string GetCurrentTime(HttpContext context)
+        {
+            return DateTime.Now.ToString("HH:mm:ss");
+        }
     }
-}
-```
+    ```
 
 ### With MethodName (Migration Reference)
 

@@ -1,43 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace ContosoUniversity.BLL
+namespace ContosoUniversity.BLL;
+
+public partial class Instructors_Logic
 {
-    public class Instructors_Logic
+    private readonly ContosoUniversityEntities _context;
+
+    public Instructors_Logic(ContosoUniversityEntities context)
     {
-        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
+        _context = context;
+    }
 
-        public Instructors_Logic(IDbContextFactory<ContosoUniversityEntities> factory)
-        {
-            _factory = factory;
-        }
+    public List<Instructor> getInstructors() =>
+        _context.Instructors.Include(i => i.Courses).ToList();
 
-        public List<Instructor> getInstructors()
-        {
-            using var db = _factory.CreateDbContext();
-            return db.Instructors.ToList();
-        }
-
-        public List<Instructor> GetSortedInstrucors(string expression, string direction)
-        {
-            using var db = _factory.CreateDbContext();
-            IQueryable<Instructor> query = db.Instructors;
-
-            if (!string.IsNullOrEmpty(expression))
-            {
-                query = expression switch
-                {
-                    "InstructorID" => direction == "asc" ? query.OrderBy(i => i.InstructorID) : query.OrderByDescending(i => i.InstructorID),
-                    "FirstName" => direction == "asc" ? query.OrderBy(i => i.FirstName) : query.OrderByDescending(i => i.FirstName),
-                    "LastName" => direction == "asc" ? query.OrderBy(i => i.LastName) : query.OrderByDescending(i => i.LastName),
-                    _ => query
-                };
-            }
-
-            return query.ToList();
-        }
+    public List<Instructor> GetSortedInstrucors(string expression, string direction)
+    {
+        var query = _context.Instructors.Include(i => i.Courses).AsQueryable();
+        if (direction == "ASC")
+            query = query.OrderBy(i => EF.Property<object>(i, expression));
+        else
+            query = query.OrderByDescending(i => EF.Property<object>(i, expression));
+        return query.ToList();
     }
 }

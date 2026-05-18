@@ -13,54 +13,56 @@ The LoginView component displays different content based on the user's authentic
 
 - All core features are supported
 
-## WebForms Syntax
+## Syntax Comparison
 
-```html
-<asp:LoginView
-    EnableTheming="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    OnViewChanged="ViewChanged event handler"
-    OnViewChanging="ViewChanging event handler"
-    runat="server"
-    SkinID="string"
-    Visible="True|False">
-    <AnonymousTemplate>
-        <!-- Content for anonymous users -->
-    </AnonymousTemplate>
-    <LoggedInTemplate>
-        <!-- Content for logged-in users -->
-    </LoggedInTemplate>
-    <RoleGroups>
-        <asp:RoleGroup Roles="Admin">
-            <ContentTemplate>
-                <!-- Content for Admin role -->
-            </ContentTemplate>
-        </asp:RoleGroup>
-    </RoleGroups>
-</asp:LoginView>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:LoginView
+        EnableTheming="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnViewChanged="ViewChanged event handler"
+        OnViewChanging="ViewChanging event handler"
+        runat="server"
+        SkinID="string"
+        Visible="True|False">
+        <AnonymousTemplate>
+            <!-- Content for anonymous users -->
+        </AnonymousTemplate>
+        <LoggedInTemplate>
+            <!-- Content for logged-in users -->
+        </LoggedInTemplate>
+        <RoleGroups>
+            <asp:RoleGroup Roles="Admin">
+                <ContentTemplate>
+                    <!-- Content for Admin role -->
+                </ContentTemplate>
+            </asp:RoleGroup>
+        </RoleGroups>
+    </asp:LoginView>
+    ```
 
-```razor
-<LoginView>
-    <AnonymousTemplate>
-        <p>Please <a href="/login">sign in</a> to continue.</p>
-    </AnonymousTemplate>
-    <LoggedInTemplate>
-        <p>Welcome! You are logged in.</p>
-    </LoggedInTemplate>
-    <RoleGroups>
-        <RoleGroup Roles="Admin,SuperUser">
-            <p>You have administrator access.</p>
-        </RoleGroup>
-        <RoleGroup Roles="Manager">
-            <p>You have manager access.</p>
-        </RoleGroup>
-    </RoleGroups>
-</LoginView>
-```
+=== "Blazor"
+
+    ```razor
+    <LoginView>
+        <AnonymousTemplate>
+            <p>Please <a href="/login">sign in</a> to continue.</p>
+        </AnonymousTemplate>
+        <LoggedInTemplate>
+            <p>Welcome! You are logged in.</p>
+        </LoggedInTemplate>
+        <RoleGroups>
+            <RoleGroup Roles="Admin,SuperUser">
+                <p>You have administrator access.</p>
+            </RoleGroup>
+            <RoleGroup Roles="Manager">
+                <p>You have manager access.</p>
+            </RoleGroup>
+        </RoleGroups>
+    </LoginView>
+    ```
 
 ## Usage Notes
 

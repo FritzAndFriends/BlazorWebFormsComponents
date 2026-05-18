@@ -49,48 +49,48 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - **Rows collection** - Use declarative child content instead
 - **Programmatic row generation** - Build rows in Blazor code
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:Table
-    ID="Table1"
-    Caption="Product List"
-    CaptionAlign="Top"
-    CellPadding="5"
-    CellSpacing="0"
-    GridLines="Both"
-    HorizontalAlign="Center"
-    runat="server">
-    <asp:TableHeaderRow>
-        <asp:TableHeaderCell Scope="Column">Name</asp:TableHeaderCell>
-        <asp:TableHeaderCell Scope="Column">Price</asp:TableHeaderCell>
-    </asp:TableHeaderRow>
-    <asp:TableRow>
-        <asp:TableCell>Widget</asp:TableCell>
-        <asp:TableCell>$10.00</asp:TableCell>
-    </asp:TableRow>
-    <asp:TableFooterRow>
-        <asp:TableCell ColumnSpan="2">Total: $10.00</asp:TableCell>
-    </asp:TableFooterRow>
-</asp:Table>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:Table
+        ID="Table1"
+        Caption="Product List"
+        CaptionAlign="Top"
+        CellPadding="5"
+        CellSpacing="0"
+        GridLines="Both"
+        HorizontalAlign="Center"
+        runat="server">
+        <asp:TableHeaderRow>
+            <asp:TableHeaderCell Scope="Column">Name</asp:TableHeaderCell>
+            <asp:TableHeaderCell Scope="Column">Price</asp:TableHeaderCell>
+        </asp:TableHeaderRow>
+        <asp:TableRow>
+            <asp:TableCell>Widget</asp:TableCell>
+            <asp:TableCell>$10.00</asp:TableCell>
+        </asp:TableRow>
+        <asp:TableFooterRow>
+            <asp:TableCell ColumnSpan="2">Total: $10.00</asp:TableCell>
+        </asp:TableFooterRow>
+    </asp:Table>
+    ```
 
-### Basic Table
+=== "Blazor"
 
-```razor
-<Table>
-    <TableRow>
-        <TableCell>Cell 1</TableCell>
-        <TableCell>Cell 2</TableCell>
-    </TableRow>
-    <TableRow>
-        <TableCell>Cell 3</TableCell>
-        <TableCell>Cell 4</TableCell>
-    </TableRow>
-</Table>
-```
+    ```razor
+    <Table>
+        <TableRow>
+            <TableCell>Cell 1</TableCell>
+            <TableCell>Cell 2</TableCell>
+        </TableRow>
+        <TableRow>
+            <TableCell>Cell 3</TableCell>
+            <TableCell>Cell 4</TableCell>
+        </TableRow>
+    </Table>
+    ```
 
 ### Table with Header and Footer
 

@@ -1,0 +1,23 @@
+@* Migrated from: DepartmentPortal/Controls/AnnouncementCard.ascx
+   Original: Renders a single announcement in card format with title, summary, author, and date.
+   Used as ItemTemplate inside asp:Repeater on Announcements.aspx. *@
+
+<div class="card mb-3">
+    <div class="card-body">
+        <h5 class="card-title">
+            <a href="/announcements/@AnnouncementId">@Title</a>
+        </h5>
+        <p class="card-text">@Summary</p>
+        <p class="card-text">
+            <small class="text-muted">By @Author on @PublishDate.ToShortDateString()</small>
+        </p>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int AnnouncementId { get; set; }
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Summary { get; set; } = string.Empty;
+    [Parameter] public string Author { get; set; } = string.Empty;
+    [Parameter] public DateTime PublishDate { get; set; }
+}

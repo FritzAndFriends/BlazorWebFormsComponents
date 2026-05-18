@@ -1,12 +1,8 @@
 namespace WingtipToys.Account;
 
-// TODO: Requires ASP.NET Core Identity migration — forgot password needs UserManager
-public partial class Forgot
+public partial class Forgot : BlazorWebFormsComponents.WebFormsPageBase
 {
-    private string Email { get; set; } = "";
-
-    private void Forgot_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
-    {
-        // TODO: Implement with UserManager
-    }
+    // TODO: Migrate from Account/Forgot.aspx
+    // Original features: ASP.NET Identity or membership APIs
+    // Quarantine reason: Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.
 }

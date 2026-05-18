@@ -6,7 +6,7 @@
 		const int expectedColumns = 4;
 		var cut = Render(@<GridView ItemType="Widget"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
@@ -48,3 +48,4 @@
 		return Widget.SimpleWidgetList.AsQueryable();
 	}
 }
+

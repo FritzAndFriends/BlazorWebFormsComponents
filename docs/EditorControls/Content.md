@@ -8,53 +8,54 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 
 - `ChildContent` — the content to be rendered in the associated ContentPlaceHolder
 - `ContentPlaceHolderID` — identifies which ContentPlaceHolder this content is for
-- Auto-registration with parent MasterPage component
+- Registers named section content with the nearest MasterPage host
 - Works with MasterPage and ContentPlaceHolder components
 
 ## Web Forms Features NOT Supported
 
-- Master page file path resolution (handled by layout system in Blazor)
-- Multiple content sections in a single page (use separate MasterPage components instead)
+- Direct `MasterPageFile` path resolution (use Blazor layout/component composition instead)
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<!-- MyPage.aspx -->
-<%@ Page Title="Home" Language="C#" MasterPageFile="~/Site.Master" %>
+=== "Web Forms"
 
-<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <h2>Welcome to my page!</h2>
-    <p>This is the page-specific content.</p>
-</asp:Content>
-```
+    ```html
+    <!-- MyPage.aspx -->
+    <%@ Page Title="Home" Language="C#" MasterPageFile="~/Site.Master" %>
 
-## Blazor Syntax
+    <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+        <h2>Welcome to my page!</h2>
+        <p>This is the page-specific content.</p>
+    </asp:Content>
+    ```
 
-Content controls are placed as children of a MasterPage component. They automatically register with their parent MasterPage.
+=== "Blazor"
 
-### Basic Content for a Placeholder
+    ```razor
+    <MasterPage>
+        <ChildContent>
+            <div class="header">
+                <h1>My Website</h1>
+            </div>
 
-```razor
-<MasterPage>
-    <ChildContent>
-        <div class="header">
-            <h1>My Website</h1>
-        </div>
-        
-        <ContentPlaceHolder ID="MainContent">
-            <p>Default content</p>
-        </ContentPlaceHolder>
-        
-        <div class="footer">
-            <p>&copy; 2024</p>
-        </div>
-    </ChildContent>
-    <Content ContentPlaceHolderID="MainContent">
-        <h2>Page Title</h2>
-        <p>This content replaces the MainContent placeholder.</p>
-    </Content>
-</MasterPage>
-```
+            <ContentPlaceHolder ID="MainContent">
+                <p>Default content</p>
+            </ContentPlaceHolder>
+
+            <div class="footer">
+                <p>&copy; 2024</p>
+            </div>
+        </ChildContent>
+        <ChildComponents>
+            <Content ContentPlaceHolderID="MainContent">
+                <h2>Page Title</h2>
+                <p>This content replaces the MainContent placeholder.</p>
+            </Content>
+        </ChildComponents>
+    </MasterPage>
+    ```
+
+Content controls are typically placed inside `ChildComponents` so the shell in `ChildContent` stays separate from the page-level section overrides.
 
 ### Multiple Content Sections
 
@@ -75,13 +76,15 @@ Content controls are placed as children of a MasterPage component. They automati
         </main>
     </ChildContent>
     
-    <Content ContentPlaceHolderID="PageTitle">
-        <h2>My Page Title</h2>
-    </Content>
-    
-    <Content ContentPlaceHolderID="MainContent">
-        <p>Page-specific main content goes here.</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="PageTitle">
+            <h2>My Page Title</h2>
+        </Content>
+        
+        <Content ContentPlaceHolderID="MainContent">
+            <p>Page-specific main content goes here.</p>
+        </Content>
+    </ChildComponents>
 </MasterPage>
 ```
 
@@ -95,13 +98,15 @@ Content controls are placed as children of a MasterPage component. They automati
         </ContentPlaceHolder>
     </ChildContent>
     
-    <Content ContentPlaceHolderID="Body">
-        <article>
-            <h1>Article Title</h1>
-            <p>Article content here.</p>
-            <button>Read More</button>
-        </article>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="Body">
+            <article>
+                <h1>Article Title</h1>
+                <p>Article content here.</p>
+                <button>Read More</button>
+            </article>
+        </Content>
+    </ChildComponents>
 </MasterPage>
 ```
 
@@ -117,9 +122,11 @@ Content does **not render directly** — its ChildContent is injected into the c
             <p>Default</p>
         </ContentPlaceHolder>
     </ChildContent>
-    <Content ContentPlaceHolderID="Main">
-        <p>Custom Content</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="Main">
+            <p>Custom Content</p>
+        </Content>
+    </ChildComponents>
 </MasterPage>
 ```
 
@@ -141,7 +148,7 @@ When migrating from Web Forms to Blazor:
 
 1. **Remove `asp:` prefix and `runat="server"`** — Change `<asp:Content>` to `<Content>`
 2. **Keep ContentPlaceHolderID** — The ID attribute is used the same way to match content with placeholders
-3. **Place within MasterPage** — Content controls must be children of a MasterPage component
+3. **Place under ChildComponents** — Keep Content controls in the page override area instead of mixing them with shell structure
 4. **Rename Master page reference** — Remove `MasterPageFile` directive; instead nest Content controls in the MasterPage component
 
 ### Before (Web Forms)
@@ -202,10 +209,12 @@ When migrating from Web Forms to Blazor:
         </ContentPlaceHolder>
     </ChildContent>
     
-    <Content ContentPlaceHolderID="MainContent">
-        <h2>Welcome!</h2>
-        <p>Page content goes here.</p>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h2>Welcome!</h2>
+            <p>Page content goes here.</p>
+        </Content>
+    </ChildComponents>
 </MasterPage>
 ```
 

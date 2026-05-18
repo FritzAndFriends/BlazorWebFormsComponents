@@ -1,5 +1,5 @@
 @code {
-	ForwardRef<InputBase<int>> Number = new ForwardRef<InputBase<int>>();
+	readonly ForwardRef<InputBase<int>> Number = new ForwardRef<InputBase<int>>();
 
 	[Fact]
 	public void CompareValidator_ControlToCompare_DefaultIsNull()
@@ -37,7 +37,7 @@
 		cut.FindComponent<CompareValidator<int>>().Instance.ControlToCompare.ShouldBe("OtherInput");
 	}
 
-	private ExampleModel model = new ExampleModel();
+	private readonly ExampleModel model = new ExampleModel();
 
 	public class ExampleModel
 	{

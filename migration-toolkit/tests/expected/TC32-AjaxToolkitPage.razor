@@ -1,0 +1,43 @@
+@page "/TC32-AjaxToolkitPage"
+<PageTitle>Customer Management</PageTitle>
+    <h1>Customer Management</h1>
+    <TabContainer id="TabContainer1" ActiveTabIndex="0" CssClass="tabs">
+        <TabPanel id="TabSearch" HeaderText="Search">
+
+                <div class="form-group">
+                    <TextBox id="txtCustomerSearch" CssClass="form-control" />
+                    <AutoCompleteExtender id="aceSearch" TargetControlID="txtCustomerSearch"
+                        ServiceMethod="GetCustomerSuggestions" MinimumPrefixLength="2" />
+                </div>
+                <Button id="btnSearch" Text="Search" OnClick="@Search_Click" />
+
+        </TabPanel>
+        <TabPanel id="TabDetails" HeaderText="Details">
+
+                <Label id="lblCustomerName" />
+                <TextBox id="txtEmail" />
+
+        </TabPanel>
+    </TabContainer>
+    <Accordion id="Accordion1" SelectedIndex="0" FadeTransitions="true">
+        <Panes>
+            <AccordionPane id="paneNotes">
+                <Header>Customer Notes</Header>
+                <Content>
+                    <TextBox id="txtNotes" TextMode="@TextBoxMode.MultiLine" Rows="5" CssClass="form-control" />
+                </Content>
+            </AccordionPane>
+        </Panes>
+    </Accordion>
+    <Button id="btnDelete" Text="Delete Customer" OnClick="@Delete_Click" />
+    <ConfirmButtonExtender id="cbeDelete" TargetControlID="btnDelete"
+        ConfirmText="Are you sure you want to delete this customer?" />
+    <Panel id="pnlModal" CssClass="modal-content" Visible="false">
+        <h3>Confirm Action</h3>
+        <Button id="btnConfirm" Text="Confirm" OnClick="@Confirm_Click" />
+        <Button id="btnCancel" Text="Cancel" />
+    </Panel>
+    <ModalPopupExtender id="mpeConfirm" TargetControlID="btnDelete"
+        PopupControlID="pnlModal" CancelControlID="btnCancel" />
+    @* Rating control has no BWFC equivalent *@
+    @* TODO(bwfc-ajax-toolkit): Convert ajaxToolkit:Rating — no BWFC equivalent yet *@

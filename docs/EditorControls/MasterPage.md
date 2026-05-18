@@ -9,7 +9,7 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `ChildContent` — the master page template layout containing ContentPlaceHolder controls
 - `Head` — optional head content automatically wrapped in HeadContent component (for `<title>`, `<meta>`, `<link>`, etc.)
 - `Visible` — controls whether the entire master page is rendered
-- Content and ContentPlaceHolder registration and management
+- Host-driven named section management through `MasterPageContext`
 - Support for multiple content sections via named ContentPlaceHolders
 - Automatic `<title>` element handling in Head content
 
@@ -19,43 +19,107 @@ Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/sy
 - `MasterPageFile` property — nested master pages use nested layouts instead
 - Direct theme/skin support — use CSS styling instead
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<!-- Site.Master -->
-<%@ Master Language="C#" %>
-<!DOCTYPE html>
-<html>
-<head runat="server">
-    <title>My Site</title>
-    <link rel="stylesheet" href="~/css/site.css" />
-</head>
-<body>
-    <form runat="server">
-        <div class="header">
-            <h1>My Website</h1>
-        </div>
+=== "Web Forms"
+
+    ```html
+    <!-- Site.Master -->
+    <%@ Master Language="C#" %>
+    <!DOCTYPE html>
+    <html>
+    <head runat="server">
+        <title>My Site</title>
+        <link rel="stylesheet" href="~/css/site.css" />
+    </head>
+    <body>
+        <form runat="server">
+            <div class="header">
+                <h1>My Website</h1>
+            </div>
+            
+            <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                <p>Default content</p>
+            </asp:ContentPlaceHolder>
+            
+            <div class="footer">
+                <p>&copy; 2024 My Company</p>
+            </div>
+        </form>
+    </body>
+    </html>
+
+    <!-- MyPage.aspx -->
+    <%@ Page Title="Home" Language="C#" MasterPageFile="~/Site.Master" %>
+
+    <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
+        <h2>Welcome to my page!</h2>
+    </asp:Content>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <!-- MasterLayout.razor -->
+    <MasterPage>
+        <Head>
+            <title>My Site</title>
+            <link rel="stylesheet" href="css/site.css" />
+        </Head>
         
-        <asp:ContentPlaceHolder ID="MainContent" runat="server">
-            <p>Default content</p>
-        </asp:ContentPlaceHolder>
-        
-        <div class="footer">
-            <p>&copy; 2024 My Company</p>
-        </div>
-    </form>
-</body>
-</html>
+        <ChildContent>
+            <div class="header">
+                <h1>My Website</h1>
+            </div>
+            
+            <ContentPlaceHolder ID="MainContent">
+                <p>Default content</p>
+            </ContentPlaceHolder>
+            
+            <div class="footer">
+                <p>&copy; 2024 My Company</p>
+            </div>
+        </ChildContent>
+    </MasterPage>
 
-<!-- MyPage.aspx -->
-<%@ Page Title="Home" Language="C#" MasterPageFile="~/Site.Master" %>
+    <!-- MyPage.razor -->
+    <MasterPage>
+        <Head>
+            <title>My Site - Home</title>
+            <link rel="stylesheet" href="css/site.css" />
+        </Head>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <h2>Welcome to my page!</h2>
-</asp:Content>
-```
+        <ChildContent>
+            <div class="header">
+                <h1>My Website</h1>
+            </div>
 
-## Blazor Syntax
+            <ContentPlaceHolder ID="MainContent">
+                <p>Default content</p>
+            </ContentPlaceHolder>
+
+            <div class="footer">
+                <p>&copy; 2024 My Company</p>
+            </div>
+        </ChildContent>
+
+        <ChildComponents>
+            <Content ContentPlaceHolderID="MainContent">
+                <h2>Welcome to my page!</h2>
+            </Content>
+        </ChildComponents>
+    </MasterPage>
+    ```
+
+## Blazor Usage Examples
+
+### Recommended migration pattern
+
+Use `MasterPage` as the shell host:
+
+1. Put shell structure and `ContentPlaceHolder` regions in `ChildContent`
+2. Put page overrides in `ChildComponents`
+3. Leave default placeholder content in the shell for incremental migration
 
 ### Basic MasterPage with Layout Template
 
@@ -141,24 +205,26 @@ The `Head` parameter allows you to define head content (title, meta tags, styles
         </main>
     </ChildContent>
     
-    <Content ContentPlaceHolderID="PageTitle">
-        <h1>Article Title</h1>
-    </Content>
-    
-    <Content ContentPlaceHolderID="Sidebar">
-        <nav>
-            <ul>
-                <li><a href="/">Home</a></li>
-                <li><a href="/articles">Articles</a></li>
-            </ul>
-        </nav>
-    </Content>
-    
-    <Content ContentPlaceHolderID="MainContent">
-        <article>
-            <p>Article content here</p>
-        </article>
-    </Content>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="PageTitle">
+            <h1>Article Title</h1>
+        </Content>
+        
+        <Content ContentPlaceHolderID="Sidebar">
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/articles">Articles</a></li>
+                </ul>
+            </nav>
+        </Content>
+        
+        <Content ContentPlaceHolderID="MainContent">
+            <article>
+                <p>Article content here</p>
+            </article>
+        </Content>
+    </ChildComponents>
 </MasterPage>
 ```
 
@@ -253,101 +319,101 @@ When migrating from Web Forms to Blazor:
 6. **Nest Content controls** — Content controls are placed as child components of the MasterPage
 7. **Set page title** — Use `PageTitle` component in the `Head` section instead of ASP.NET's dynamic title setting
 
-### Before (Web Forms)
+=== "Web Forms"
 
-```html
-<!-- Site.Master -->
-<%@ Master Language="C#" %>
-<!DOCTYPE html>
-<html>
-<head runat="server">
-    <title>My Site</title>
-    <link rel="stylesheet" href="~/css/site.css" />
-</head>
-<body>
-    <form runat="server">
-        <header>
-            <h1>My Website</h1>
-        </header>
-        
-        <main>
-            <asp:ContentPlaceHolder ID="MainContent" runat="server">
-                <p>Default content</p>
-            </asp:ContentPlaceHolder>
-        </main>
-        
-        <footer>
-            <p>&copy; 2024</p>
-        </footer>
-    </form>
-</body>
-</html>
-
-<!-- MyPage.aspx -->
-<%@ Page Title="Home" MasterPageFile="~/Site.Master" %>
-
-<asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
-    <h2>Welcome!</h2>
-    <p>This is my page.</p>
-</asp:Content>
-```
-
-### After (Blazor)
-
-```razor
-<!-- MasterLayout.razor -->
-<MasterPage>
-    <Head>
+    ```html
+    <!-- Site.Master -->
+    <%@ Master Language="C#" %>
+    <!DOCTYPE html>
+    <html>
+    <head runat="server">
         <title>My Site</title>
-        <link rel="stylesheet" href="css/site.css" />
-    </Head>
-    
-    <ChildContent>
-        <header>
-            <h1>My Website</h1>
-        </header>
-        
-        <main>
-            <ContentPlaceHolder ID="MainContent">
-                <p>Default content</p>
-            </ContentPlaceHolder>
-        </main>
-        
-        <footer>
-            <p>&copy; 2024</p>
-        </footer>
-    </ChildContent>
-</MasterPage>
+        <link rel="stylesheet" href="~/css/site.css" />
+    </head>
+    <body>
+        <form runat="server">
+            <header>
+                <h1>My Website</h1>
+            </header>
+            
+            <main>
+                <asp:ContentPlaceHolder ID="MainContent" runat="server">
+                    <p>Default content</p>
+                </asp:ContentPlaceHolder>
+            </main>
+            
+            <footer>
+                <p>&copy; 2024</p>
+            </footer>
+        </form>
+    </body>
+    </html>
 
-<!-- MyPage.razor -->
-<MasterPage>
-    <Head>
-        <title>My Site - Home</title>
-        <link rel="stylesheet" href="css/site.css" />
-    </Head>
-    
-    <ChildContent>
-        <header>
-            <h1>My Website</h1>
-        </header>
-        
-        <main>
-            <ContentPlaceHolder ID="MainContent">
-                <p>Default content</p>
-            </ContentPlaceHolder>
-        </main>
-        
-        <footer>
-            <p>&copy; 2024</p>
-        </footer>
-    </ChildContent>
-    
-    <Content ContentPlaceHolderID="MainContent">
+    <!-- MyPage.aspx -->
+    <%@ Page Title="Home" MasterPageFile="~/Site.Master" %>
+
+    <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
         <h2>Welcome!</h2>
         <p>This is my page.</p>
-    </Content>
-</MasterPage>
-```
+    </asp:Content>
+    ```
+
+=== "Blazor"
+
+    ```razor
+    <!-- MasterLayout.razor -->
+    <MasterPage>
+        <Head>
+            <title>My Site</title>
+            <link rel="stylesheet" href="css/site.css" />
+        </Head>
+        
+        <ChildContent>
+            <header>
+                <h1>My Website</h1>
+            </header>
+            
+            <main>
+                <ContentPlaceHolder ID="MainContent">
+                    <p>Default content</p>
+                </ContentPlaceHolder>
+            </main>
+            
+            <footer>
+                <p>&copy; 2024</p>
+            </footer>
+        </ChildContent>
+    </MasterPage>
+
+    <!-- MyPage.razor -->
+    <MasterPage>
+        <Head>
+            <title>My Site - Home</title>
+            <link rel="stylesheet" href="css/site.css" />
+        </Head>
+        
+        <ChildContent>
+            <header>
+                <h1>My Website</h1>
+            </header>
+            
+            <main>
+                <ContentPlaceHolder ID="MainContent">
+                    <p>Default content</p>
+                </ContentPlaceHolder>
+            </main>
+            
+            <footer>
+                <p>&copy; 2024</p>
+            </footer>
+        </ChildContent>
+        
+        <Content ContentPlaceHolderID="MainContent">
+            <h2>Welcome!</h2>
+            <p>This is my page.</p>
+        </Content>
+    </MasterPage>
+    ```
 
 ## See Also
 

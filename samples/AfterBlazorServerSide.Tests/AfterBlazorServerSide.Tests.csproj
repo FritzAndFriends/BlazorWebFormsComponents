@@ -21,6 +21,12 @@
     <ProjectReference Include="../AfterBlazorServerSide/AfterBlazorServerSide.csproj" />
   </ItemGroup>
 
+  <Target Name="BuildPlaywrightHostsInRelease" BeforeTargets="VSTest">
+    <MSBuild Projects="../AfterBlazorServerSide/AfterBlazorServerSide.csproj"
+             Targets="Build"
+             Properties="Configuration=Release" />
+  </Target>
+
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>

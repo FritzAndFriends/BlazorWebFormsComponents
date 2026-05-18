@@ -1,0 +1,12 @@
+@* Migrated from: DepartmentPortal/Controls/EmployeeList.ascx
+   Original: Renders a list of employee summary cards using asp:Repeater.
+   TODO: When fully migrated, bind to filtered/paged employee data. *@
+
+<div class="employee-list">
+    <p><em>Employee list component — will render employee cards when fully migrated.</em></p>
+</div>
+
+@code {
+    [Parameter] public string? DepartmentFilter { get; set; }
+    [Parameter] public string? SearchTerm { get; set; }
+}

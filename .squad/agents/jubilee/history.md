@@ -29,6 +29,29 @@
 
 **M15 audit markers (#384):** 10 pages updated with data-audit-control wrappers. 2 new pages (DataPager, LoginView). Validator samples only first variant marked.
 
+### 2026-04-27: MasterPage Sample Page & Component Catalog Updates
+
+**Task:** Create MasterPage sample page and update component catalog for discovery.
+
+**Changes delivered:**
+- **Sample page created:** samples/AfterBlazorServerSide/Components/Pages/ControlSamples/MasterPage/Index.razor
+- Demonstrates multi-level Content nesting patterns
+- Shows ContentPlaceHolder usage with MasterPageContext
+- Includes @ref usage for context validation
+- Sample data aligns with SharedSampleObjects conventions
+
+**Component catalog updates:**
+- Added MasterPage entry to ComponentList.razor
+- Added MasterPage sidebar entry to NavMenu.razor
+- Alphabetical ordering maintained throughout nav sections
+- @page route: /ControlSamples/MasterPage matches standard conventions
+- Updated docs/ComponentList (if present) with MasterPage entry
+
+**Discoverability verified:**
+- Sample page link appears in sidebar navigation
+- ComponentList.razor includes MasterPage with proper categorization
+- Navigation integrates with existing structure (no breaking changes)
+
 **Key patterns:** ComponentCatalog.cs entries: (Name, Category, Route, Description, SubPages?, Keywords?). SubPages appended to base Route for nav. Components without Index.razor use specific sub-page route. Entries grouped by category, alphabetical within. SharedSampleObjects is single source for data parity. data-audit-control markers must be preserved on all audited sections.
 
  Team update (2026-02-27): Branching workflow directive  feature PRs from personal fork to upstream dev, only devmain on upstream  decided by Jeffrey T. Fritz
@@ -96,116 +119,20 @@
 
  Team update (2026-03-04): WebFormsPageBase implemented  decided by Forge, approved by Jeff
 
- Team update (2026-03-06): CRITICAL  Git workflow: feature branches from dev, PRs target dev. NEVER push to or merge into upstream main (production releases only).  directed by Jeff Fritz
-
- Team update (2026-03-06): CONTROL-COVERAGE.md updated  library ships 153 Razor components (was listed as 58). ContentPlaceHolder reclassified from 'Not Supported' to Infrastructure Controls. Reference updated CONTROL-COVERAGE.md for accurate component inventory.  decided by Forge
-
-� Team update (2026-03-06): LoginView is a native BWFC component  do NOT replace with AuthorizeView in migration guidance. Both migration-standards SKILL.md files (in .ai-team/skills/ and migration-toolkit/skills/) must be kept in sync. WebFormsPageBase patterns corrected in all supporting docs.  decided by Beast
-
- Team update (2026-03-06): Only document top-level components and utility features for promotion. Do not promote/document style sub-components, internal infrastructure, or implementation-detail classes.  decided by Jeffrey T. Fritz
-
- Team update (2026-03-06): LoginView must be preserved as BWFC component, not converted to AuthorizeView  decided by Jeff (directive)
+ Team update (2026-03-05): Event handler audit complete  ~50 naming mismatches found, On-prefix aliases recommended  decided by Forge, Rogue
 
 
- Team update (2026-03-08): Default to SSR (Static Server Rendering) with per-component InteractiveServer opt-in; eliminates HttpContext/cookie/session problems  decided by Forge
+ Team update (2026-03-05): 50 On-prefix EventCallback aliases added to data components + migration script AutoPostBack fix  by Cyclops, Rogue
 
-
- Team update (2026-03-11): `AddBlazorWebFormsComponents()` now auto-registers HttpContextAccessor, adds options pattern + `UseBlazorWebFormsComponents()` middleware with .aspx URL rewriting. Sample Program.cs files updated  no longer need manual `AddHttpContextAccessor()`.  decided by Cyclops
-
- Team update (2026-03-11): All generic type params standardized to ItemType (not TItem/TItemType) across all BWFC data-bound components.  decided by Jeffrey T. Fritz
-
-
- Team update (2026-03-11): SelectMethod must be preserved in L1 script and skills  BWFC supports it natively via SelectHandler<ItemType> delegate. All validators exist in BWFC.
-
-
- Team update (2026-03-11): ItemType renames must cover ALL consumers (tests, samples, docs)  not just component source. CI may only surface first few errors.  decided by Cyclops
-
-### UpdatePanel Sample Page Enhancement (2026-03-11)
-
-- **Enhanced `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/UpdatePanel/Default.razor`** with comprehensive demonstrations of new ContentTemplate functionality and BaseStyledComponent inheritance.
-- **Six sample scenarios created:**
-  1. Simple ChildContent (Blazor-native syntax) — direct wrapping without ContentTemplate
-  2. Web Forms ContentTemplate syntax — migration-compatible pattern that eliminates RZ10012 warnings
-  3. Block Mode (default) — explicit demonstration of div rendering
-  4. Inline Mode — span rendering for inline content flows
-  5. Styled UpdatePanel (NEW) — showcasing BackColor, BorderStyle, BorderWidth, BorderColor, CssClass now available via BaseStyledComponent inheritance
-  6. UpdateMode properties — Conditional/Always with ChildrenAsTriggers for migration compatibility
-- **Migration guide section** with Web Forms before/after comparison and step-by-step migration instructions.
-- **All examples use `data-audit-control` markers** (UpdatePanel-1 through UpdatePanel-6) following established audit conventions.
-- **ComponentList.razor updated** — added new AJAX Controls section with ScriptManager, Substitution, Timer, UpdatePanel, UpdateProgress in alphabetical order.
-- **Pattern followed:** Examined Panel/Index.razor and Label/Index.razor to match structure: PageTitle, component description, numbered sections with audit markers, code examples with `<pre><code>` blocks, migration guidance.
-- **Key insight:** UpdatePanel now renders `ContentTemplate ?? ChildContent` — both syntaxes work, enabling gradual L1→L2 migration (L1 keeps ContentTemplate, L2 can switch to ChildContent).
-- **Styling capability:** UpdatePanel inheriting from BaseStyledComponent is a significant enhancement — Web Forms UpdatePanel didn't support direct styling, but BWFC version does, enabling better visual integration.
-
-### UpdatePanel Sample Page Enhancement (2026-03-13)
-
-**Summary:** Enhanced UpdatePanel sample page with 6 usage patterns: ChildContent, ContentTemplate, Block mode, Inline mode, Styled UpdatePanel, UpdateMode properties. Added migration guide section. Applied data-audit-control markers (UpdatePanel-1 through UpdatePanel-6).
-
-**ComponentList.razor update:** Added "AJAX Controls" section with links to ScriptManager, Substitution, Timer, UpdatePanel, UpdateProgress. Mirrors ComponentCatalog.cs organization for consistency.
-
-**Patterns:** Examined Panel/Index.razor and Label/Index.razor as templates. PageTitle, description, numbered sections, code examples with `<pre><code>` blocks, migration guidance.
-
-📌 Team update (2026-03-13): UpdatePanel sample page complete — 6 scenarios + migration guide + audit markers. ComponentList.razor updated with AJAX Controls section. Both changes verified to build clean.
-
-### Ajax Toolkit Extender Sample Pages (2026-03-14)
-
-- **Created `ConfirmButtonExtender/Default.razor`** — 3 demo sections: (1) Basic delete button with confirm dialog, (2) Multiple buttons with different custom confirm messages, (3) Default confirm text. Each section includes status messages that update on confirmed action. Before/after migration comparison with Ajax Control Toolkit markup.
-- **Created `FilteredTextBoxExtender/Default.razor`** — 6 demo sections: (1) Numbers only, (2) Lowercase letters only, (3) Custom valid chars (phone number format), (4) Combined flags (Numbers | LowercaseLetters), (5) All letters with custom chars for name input, (6) InvalidChars mode blocking HTML special characters.
-- **Project reference added** — `BlazorAjaxToolkitComponents.csproj` added to `AfterBlazorServerSide.csproj`.
-- **Using directives added** — `@using BlazorAjaxToolkitComponents` in root `_Imports.razor`, `@using BlazorAjaxToolkitComponents.Enums` in ControlSamples `_Imports.razor`.
-- **ComponentCatalog.cs updated** — Added ConfirmButtonExtender and FilteredTextBoxExtender entries in AJAX category (alphabetical before Timer). NavMenu.razor auto-populates from catalog.
-- **Key pattern:** Extender components render no HTML — they attach JS behavior to a target element via `TargetControlID`. Target elements must have an HTML `id` attribute. Pages must use `@rendermode InteractiveServer` for JS interop.
-- **Lesson:** Used standard HTML `<button>` and `<input>` elements as extender targets (not BWFC components) because extenders resolve targets via `document.getElementById()` — this is the most reliable and migration-faithful approach.
-- **Audit markers:** `data-audit-control` attributes applied (ConfirmButtonExtender-1 through -3, FilteredTextBoxExtender-1 through -6).
-
-### ModalPopupExtender & CollapsiblePanelExtender Sample Pages (2026-03-14)
-
-- **Created `ModalPopupExtender/Default.razor`** — 5 demo sections: (1) Basic modal with OK/Cancel buttons, (2) Custom backdrop CSS via BackgroundCssClass, (3) Drag support with PopupDragHandleControlID, (4) DropShadow enabled, (5) Programmatic show/hide via Blazor conditional rendering. Migration guide with before/after and step-by-step instructions.
-- **Created `CollapsiblePanelExtender/Default.razor`** — 6 demo sections: (1) Basic toggle (same CollapseControlID/ExpandControlID), (2) Separate expand/collapse controls, (3) Dynamic label text with TextLabelID/CollapsedText/ExpandedText, (4) Initially collapsed (Collapsed=true), (5) Horizontal ExpandDirection, (6) AutoCollapse/AutoExpand hover behavior. Migration guide included.
-- **ComponentCatalog.cs updated** — Added CollapsiblePanelExtender and ModalPopupExtender entries in AJAX category (alphabetical order). CollapsiblePanelExtender sorts before ConfirmButtonExtender; ModalPopupExtender sorts after FilteredTextBoxExtender.
-- **Pattern:** Followed established extender sample conventions — `@rendermode InteractiveServer`, standard HTML target elements with `id` attributes, `data-audit-control` markers, before/after migration code blocks, migration steps list.
-- **Audit markers:** `data-audit-control` attributes applied (ModalPopupExtender-1 through -5, CollapsiblePanelExtender-1 through -6).
-- **Build verified:** 0 errors, warnings are pre-existing BL0005 from other pages.
-
-### Component Health Dashboard Page (2026-07-25)
-
-- **Created `Components/Pages/Dashboard.razor`** — Full diagnostic dashboard at `/dashboard` route showing health scores for all tracked BWFC components.
-- **UX features:** Category-grouped tables with worst-first sorting, color-coded scores (green ≥90%, yellow 70-89%, red <70%), fraction display for props/events (e.g. "7/8"), binary ✅/❌ for tests/docs/samples, "N/A" for missing baselines.
-- **Filtering:** Category dropdown, status filter (Complete/Stub/Deferred/NotStarted), sort by Score/Name/Props/Events, show/hide deferred toggle (default: hidden).
-- **Service registration:** Added `AddComponentHealthDashboard(solutionRoot)` call in `Program.cs`. Solution root computed as two directories up from `ContentRootPath`.
-- **ComponentCatalog.cs updated** — Added Dashboard entry under new "Diagnostics" category. NavMenu auto-populates.
-- **No InteractiveServer needed** — Dashboard uses SSR (static server rendering) since it only reads from a singleton service on initialization; no interactive features needed.
-- **Key pattern:** `ComponentHealthService` is registered as singleton via `AddComponentHealthDashboard()` extension method. It takes `solutionRoot` path to locate `dev-docs/reference-baselines.json`, test files, docs, and `ComponentCatalog.cs`.
-- **Build verified:** 0 errors, all warnings pre-existing BL0005.
-
-### AfterBlazorServerSide Navigation UX Changes (2026-03-15)
-
-**Summary:** Two targeted changes to improve component catalog navigation in the sample app:
-
-1. **Alphabetized components in all categories** — Modified `ComponentCatalog.GetByCategory()` to add `.OrderBy(c => c.Name)` to the LINQ chain. This sorts components alphabetically within each category, fixing the out-of-order AJAX section and ensuring consistent organization across all categories.
-
-2. **AJAX category collapsed on desktop by default** — Modified `NavMenu.razor` method `CheckIfDesktopAndExpandCategories()` to exclude the AJAX category from automatic expansion on desktop. The AJAX section now starts collapsed (too many items), while all other categories expand normally. Mobile behavior unchanged (expands only the category containing the current page).
-
-**Why these changes matter:** The component catalog had grown to 20+ AJAX-related controls, making the desktop navigation cluttered. Alphabetization improves discoverability within each section. Collapsing AJAX by default on desktop keeps the nav compact while still maintaining full access (users can expand when needed).
-
-**Files modified:**
-- `samples/AfterBlazorServerSide/ComponentCatalog.cs` (line 193-195)
-- `samples/AfterBlazorServerSide/Components/Layout/NavMenu.razor` (line 86-93)
-
-**Build verification:** `dotnet build` completed with 0 errors, pre-existing warnings only.
-
-### Standalone Sample Pages for Content, ContentPlaceHolder, View (2026-03-19)
-
-- **Created 3 standalone sample pages** — each component now has its own route and dedicated page:
-  - `Components/Pages/ControlSamples/Content/Index.razor` — route `/ControlSamples/Content`. Demos: Web Forms before/after comparison, basic Content with ContentPlaceHolderID, multiple content regions, dynamic content with interactive button. 3 audit markers (Content-1, Content-2, Content-3).
-  - `Components/Pages/ControlSamples/ContentPlaceHolder/Index.razor` — route `/ControlSamples/ContentPlaceHolder`. Demos: default content (no override), content replacement, interactive toggle showing default vs override behavior. 3 audit markers (ContentPlaceHolder-1, ContentPlaceHolder-2, ContentPlaceHolder-3).
-  - `Components/Pages/ControlSamples/View/Index.razor` — route `/ControlSamples/View`. Demos: basic ActiveViewIndex navigation, wizard-style multi-step form, OnActivate/OnDeactivate events with tab UI. 3 audit markers (View-1, View-2, View-3).
-- **Updated ComponentCatalog.cs** — Content route changed from `/control-samples/masterpage` to `/ControlSamples/Content`, ContentPlaceHolder from `/control-samples/masterpage` to `/ControlSamples/ContentPlaceHolder`, View from `/ControlSamples/MultiView` to `/ControlSamples/View`.
-- **Convention:** All three pages use `@rendermode InteractiveServer` for interactive demos, include parameter reference tables, migration notes, and `data-audit-control` markers per project conventions.
-- **Build verified:** 0 errors.
+ Team update (2026-03-05): BWFC control preservation is mandatory  all asp: controls must be preserved as BWFC components in migration output, never flattened to raw HTML. Test-BwfcControlPreservation verifies automatically.  decided by Jeffrey T. Fritz, implemented by Forge
 
 
 
+ Team update (2026-03-05): BWFC control preservation is mandatory  all migration output must use BWFC components, never flatten to raw HTML. Cyclops's decision merged into consolidated block.  decided by Jeffrey T. Fritz, Forge, Cyclops
 
- **Team update (2026-03-20):** Navigation UX improvements (alphabetical sort, AJAX collapse on desktop) + standalone sample pages for Content, ContentPlaceHolder, View. ComponentCatalog updated.  decided by Jubilee
+ Team update (2026-03-06): WebFormsPageBase is the canonical base class for all migrated pages (not ComponentBase). All agents must use WebFormsPageBase  decided by Jeffrey T. Fritz
+ Team update (2026-03-06): LoginView is a native BWFC component  do NOT convert to AuthorizeView. Strip asp: prefix only  decided by Jeffrey T. Fritz
+
+
+≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
 

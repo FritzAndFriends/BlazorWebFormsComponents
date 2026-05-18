@@ -35,40 +35,40 @@ Since this is a stub component, **all features are effectively unsupported**. Th
 - **Error handling** (`AsyncPostBackError`) — Use Blazor's `ErrorBoundary` component
 - **Script combining/bundling** — Use standard ASP.NET Core bundling or a build tool
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:ScriptManager
-    AsyncPostBackErrorMessage="string"
-    AsyncPostBackTimeout="integer"
-    EnableCdn="True|False"
-    EnablePageMethods="True|False"
-    EnablePartialRendering="True|False"
-    EnableScriptGlobalization="True|False"
-    EnableScriptLocalization="True|False"
-    EnableViewState="True|False"
-    ID="string"
-    OnAsyncPostBackError="AsyncPostBackError event handler"
-    OnDataBinding="DataBinding event handler"
-    OnDisposed="Disposed event handler"
-    OnInit="Init event handler"
-    OnLoad="Load event handler"
-    OnPreRender="PreRender event handler"
-    OnUnload="Unload event handler"
-    runat="server"
-    ScriptMode="Auto|Inherit|Debug|Release"
-    Visible="True|False"
-/>
-```
+=== "Web Forms"
 
-## Blazor Razor Syntax
+    ```html
+    <asp:ScriptManager
+        AsyncPostBackErrorMessage="string"
+        AsyncPostBackTimeout="integer"
+        EnableCdn="True|False"
+        EnablePageMethods="True|False"
+        EnablePartialRendering="True|False"
+        EnableScriptGlobalization="True|False"
+        EnableScriptLocalization="True|False"
+        EnableViewState="True|False"
+        ID="string"
+        OnAsyncPostBackError="AsyncPostBackError event handler"
+        OnDataBinding="DataBinding event handler"
+        OnDisposed="Disposed event handler"
+        OnInit="Init event handler"
+        OnLoad="Load event handler"
+        OnPreRender="PreRender event handler"
+        OnUnload="Unload event handler"
+        runat="server"
+        ScriptMode="Auto|Inherit|Debug|Release"
+        Visible="True|False"
+    />
+    ```
 
-### Basic Usage (Migration)
+=== "Blazor"
 
-```razor
-@* Include during migration to prevent compilation errors *@
-<ScriptManager />
-```
+    ```razor
+    @* Include during migration to prevent compilation errors *@
+    <ScriptManager />
+    ```
 
 ### With Properties (All Ignored)
 

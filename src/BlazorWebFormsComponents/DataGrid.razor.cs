@@ -455,5 +455,36 @@ namespace BlazorWebFormsComponents
 			StateHasChanged();
 		}
 
+		/// <summary>
+		/// Applies theme skin properties to this control and its sub-styles.
+		/// </summary>
+		protected override void ApplyThemeSkin(Theming.ControlSkin skin, Theming.ThemeMode mode)
+		{
+			base.ApplyThemeSkin(skin, mode);
+
+			if (skin.SubStyles == null) return;
+
+			if (skin.SubStyles.TryGetValue("HeaderStyle", out var headerStyle))
+				HeaderStyle = ApplySubStyle(HeaderStyle, headerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("ItemStyle", out var itemStyle))
+				ItemStyle = ApplySubStyle(ItemStyle, itemStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("AlternatingItemStyle", out var altItemStyle))
+				AlternatingItemStyle = ApplySubStyle(AlternatingItemStyle, altItemStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("FooterStyle", out var footerStyle))
+				FooterStyle = ApplySubStyle(FooterStyle, footerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("PagerStyle", out var pagerStyle))
+				PagerStyle = ApplySubStyle(PagerStyle, pagerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("SelectedItemStyle", out var selectedItemStyle))
+				SelectedItemStyle = ApplySubStyle(SelectedItemStyle, selectedItemStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("EditItemStyle", out var editItemStyle))
+				EditItemStyle = ApplySubStyle(EditItemStyle, editItemStyle, mode);
+		}
+
 	}
 }

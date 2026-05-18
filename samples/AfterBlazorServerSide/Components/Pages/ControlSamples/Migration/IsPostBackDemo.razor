@@ -1,0 +1,151 @@
+@page "/migration/ispostback"
+@inherits WebFormsPageBase
+
+<PageTitle>IsPostBack Migration Demo</PageTitle>
+
+<h2>IsPostBack Migration</h2>
+
+<p>This sample demonstrates <code>IsPostBack</code> behavior in Blazor. In Web Forms,
+   <code>Page.IsPostBack</code> was <c>false</c> on the initial GET and <c>true</c> on form POSTs.
+   The BWFC shim adapts this for Blazor: <c>false</c> on first render, <c>true</c> on subsequent renders
+   (interactive mode) or on POST requests (SSR mode).</p>
+
+<hr />
+
+<h3>1. IsPostBack Status</h3>
+<p>In Web Forms, <code>IsPostBack</code> indicates whether the page is being loaded for the first time
+   or in response to a postback.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>if (!IsPostBack)
+{
+    // Initial load — bind data
+    GridView1.DataBind();
+}</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Same pattern works!
+if (!IsPostBack)
+{
+    // Initial load — bind data
+    LoadData();
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="ispostback-status-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - IsPostBack Status</h5>
+        <p>
+            Current <code>IsPostBack</code> value: <strong>@IsPostBack</strong>
+        </p>
+        <p>
+            Render count: <strong>@renderCount</strong>
+        </p>
+        <button class="btn btn-primary" @onclick="TriggerRerender">Trigger Re-render</button>
+        <p class="text-muted mt-2">
+            In interactive mode, <code>IsPostBack</code> is <c>false</c> on first render and
+            <c>true</c> after <code>OnInitialized</code> completes.
+            Click the button to see the current value after re-rendering.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>2. Guard Pattern</h3>
+<p>The classic <code>if (!IsPostBack)</code> guard ensures initialization code runs only once,
+   on the first page load.</p>
+
+<div class="card mt-3" data-audit-control="ispostback-guard-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - Guard Pattern</h5>
+        <p>
+            Data loaded on initial render: <strong>@string.Join(", ", initialData)</strong>
+        </p>
+        <p>
+            Initialization ran: <strong>@initCount time(s)</strong>
+        </p>
+        <button class="btn btn-success" @onclick="TriggerRerender">Re-render Page</button>
+        <p class="text-muted mt-2">
+            The data list is populated only when <code>!IsPostBack</code>.
+            Clicking the button re-renders but does not re-initialize the data.
+        </p>
+    </div>
+</div>
+
+<hr />
+
+<h3>3. IsHttpContextAvailable Guard</h3>
+<p>Some Web Forms features (cookies, headers) require <code>HttpContext</code>, which is only
+   available during SSR. Use <code>IsHttpContextAvailable</code> to guard those calls.</p>
+
+<div class="row">
+    <div class="col-md-6">
+        <h4>Before (Web Forms)</h4>
+        <pre><code>// HttpContext always available
+string ip = Request.UserHostAddress;</code></pre>
+    </div>
+    <div class="col-md-6">
+        <h4>After (Blazor with BWFC)</h4>
+        <pre><code>// Guard for availability
+if (IsHttpContextAvailable)
+{
+    // Safe to use HTTP features
+    var cookies = Request.Cookies;
+}</code></pre>
+    </div>
+</div>
+
+<div class="card mt-3" data-audit-control="httpcontext-guard-demo">
+    <div class="card-body">
+        <h5 class="card-title">Live Demo - HttpContext Guard</h5>
+        <p>
+            <code>IsHttpContextAvailable</code>: <strong>@IsHttpContextAvailable</strong>
+        </p>
+        @if (IsHttpContextAvailable)
+        {
+            <p class="text-success">
+                HttpContext is available — HTTP-level features (cookies, headers) work normally.
+            </p>
+        }
+        else
+        {
+            <p class="text-warning">
+                HttpContext is not available (interactive rendering via WebSocket).
+                HTTP-level features degrade gracefully: cookies return empty,
+                QueryString and Url fall back to NavigationManager.
+            </p>
+        }
+    </div>
+</div>
+
+@code {
+    private int renderCount;
+    private List<string> initialData = new();
+    private int initCount;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        if (!IsPostBack)
+        {
+            initialData = new List<string> { "Alpha", "Bravo", "Charlie" };
+            initCount++;
+        }
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        // Track renders for display
+    }
+
+    private void TriggerRerender()
+    {
+        renderCount++;
+    }
+}

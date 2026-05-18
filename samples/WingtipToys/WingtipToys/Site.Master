@@ -50,7 +50,7 @@
                 </div>
                 <div class="navbar-collapse collapse">
                     <ul class="nav navbar-nav">
-                        <li><a runat="server" id="adminLink" visible="false" 
+                        <li><a runat="server" id="adminLink" visible="false"
                           href="~/Admin/AdminPage">Admin</a></li>
                         <li><a runat="server" href="~/">Home</a></li>
                         <li><a runat="server" href="~/About">About</a></li>
@@ -80,12 +80,12 @@
         <div id="TitleContent" style="text-align: center">
             <a runat="server" href="~/">
                 <asp:Image  ID="Image1" runat="server" ImageUrl="~/Images/logo.jpg" BorderStyle="None" />
-            </a>  
-            <br />  
+            </a>
+            <br />
         </div>
-        <div id="CategoryMenu" style="text-align: center">       
-            <asp:ListView ID="categoryList"  
-                ItemType="WingtipToys.Models.Category" 
+        <div id="CategoryMenu" style="text-align: center">
+            <asp:ListView ID="categoryList"
+                ItemType="WingtipToys.Models.Category"
                 runat="server"
                 SelectMethod="GetCategories" >
                 <ItemTemplate>
@@ -103,7 +103,7 @@
             </asp:ContentPlaceHolder>
             <hr />
             <footer>
-                <p>&copy; <%: DateTime.Now.Year %> - Wingtip Toys</p>
+                <p>&copy; 2013 - Wingtip Toys</p>
             </footer>
         </div>
     </form>

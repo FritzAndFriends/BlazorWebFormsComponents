@@ -18,8 +18,11 @@
       - Flags DataSourceID attributes and data source controls for conversion
       - Copies code-behind files with TODO annotations
 
-    Semantic transforms (lifecycle methods, data binding logic, event handlers)
-    are NOT handled here — those require the Copilot skill layer (Layer 2).
+    Code-behind transforms include:
+      - Page lifecycle methods (Page_Load, Page_Init, Page_PreRender) → Blazor equivalents
+      - Event handler signatures → Blazor-compatible signatures (strip sender, adjust EventArgs)
+    Remaining semantic transforms (data binding logic, complex state management)
+    require the Copilot skill layer (Layer 2).
 
 .PARAMETER Path
     Path to the Web Forms project root directory containing .aspx/.ascx/.master files.
@@ -76,8 +79,75 @@ param(
     [switch]$Prescan
 )
 
+Write-Warning @"
+╔══════════════════════════════════════════════════════════════╗
+║  DEPRECATED: This script is deprecated.                     ║
+║  Use the CLI tool instead:                                  ║
+║    webforms-to-blazor migrate --input <src> --output <out>  ║
+║  See: docs/cli/index.md                                     ║
+╚══════════════════════════════════════════════════════════════╝
+"@
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+function Resolve-BwfcCliProject {
+    param([string]$StartPath)
+
+    $currentDir = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($StartPath))
+    while ($null -ne $currentDir) {
+        $candidate = Join-Path $currentDir.FullName 'src\BlazorWebFormsComponents.Cli\BlazorWebFormsComponents.Cli.csproj'
+        if (Test-Path $candidate) {
+            return $candidate
+        }
+
+        $currentDir = $currentDir.Parent
+    }
+
+    throw "Could not locate BlazorWebFormsComponents.Cli.csproj from '$StartPath'."
+}
+
+$cliProject = Resolve-BwfcCliProject -StartPath $PSScriptRoot
+
+$cliArgs = @(
+    'run',
+    '--project', $cliProject,
+    '--'
+)
+
+if ($Prescan) {
+    $cliArgs += @(
+        'prescan',
+        '--input', $Path
+    )
+}
+else {
+    $cliArgs += @(
+        'migrate',
+        '--input', $Path,
+        '--output', $Output,
+        '--overwrite'
+    )
+
+    if ($SkipProjectScaffold) {
+        $cliArgs += '--skip-scaffold'
+    }
+
+    if ($WhatIfPreference) {
+        $cliArgs += '--dry-run'
+    }
+
+    if ($VerbosePreference -eq 'Continue') {
+        $cliArgs += '--verbose'
+    }
+}
+
+& dotnet @cliArgs
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+
+return
 
 #region --- Configuration ---
 
@@ -123,6 +193,11 @@ function Invoke-BwfcPrescan {
         'BWFC012' = @{ Name = 'runat="server"'; Pattern = 'runat\s*=\s*"server"'; Description = 'runat="server" artifacts in strings/comments' }
         'BWFC013' = @{ Name = 'Response Object'; Pattern = 'Response\.(Write|WriteFile|Clear|Flush|End)\s*\('; Description = 'Response object method calls' }
         'BWFC014' = @{ Name = 'Request Object'; Pattern = 'Request\.(Form|Cookies|Headers|Files|QueryString|ServerVariables)\s*[\[\.]'; Description = 'Request object property access' }
+        'BWFC015' = @{ Name = 'Server Utility'; Pattern = 'Server\.(MapPath|HtmlEncode|HtmlDecode|UrlEncode|UrlDecode)\s*\('; Description = 'Server utility calls — use ServerShim on WebFormsPageBase' }
+        'BWFC016' = @{ Name = 'ConfigurationManager'; Pattern = 'ConfigurationManager\.(AppSettings|ConnectionStrings)\s*\['; Description = 'ConfigurationManager access — BWFC provides shim' }
+        'BWFC017' = @{ Name = 'ClientScript'; Pattern = '(Page\.)?ClientScript\.(RegisterStartupScript|RegisterClientScriptBlock|RegisterClientScriptInclude|GetPostBackEventReference)\s*\('; Description = 'ClientScript calls — use ClientScriptShim' }
+        'BWFC018' = @{ Name = 'Cache Access'; Pattern = '\bCache\s*\['; Description = 'Cache dictionary access — use CacheShim on WebFormsPageBase' }
+        'BWFC021' = @{ Name = 'ContentPlaceHolder/MasterPage'; Pattern = '<asp:ContentPlaceHolder|MasterPageFile\s*='; Description = 'Master page placeholder relationships — will be preserved as BWFC ContentPlaceHolder/Content components' }
     }
     
     $csFiles = Get-ChildItem -Path $SourcePath -Filter '*.cs' -Recurse -File
@@ -403,6 +478,18 @@ function New-ProjectScaffold {
         $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore`" Version=`"10.0.0`" />"
     }
 
+    $bwfcReference = '<PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />'
+    $currentDir = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($OutputRoot))
+    while ($null -ne $currentDir) {
+        $candidate = Join-Path $currentDir.FullName 'src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj'
+        if (Test-Path $candidate) {
+            $relative = [System.IO.Path]::GetRelativePath([System.IO.Path]::GetFullPath($OutputRoot), $candidate) -replace '/', '\'
+            $bwfcReference = "<ProjectReference Include=`"$relative`" />"
+            break
+        }
+        $currentDir = $currentDir.Parent
+    }
+
     # .csproj
     $csprojContent = @"
 <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -411,16 +498,21 @@ function New-ProjectScaffold {
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <BwfcMigrationMode>true</BwfcMigrationMode>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />${additionalPackages}
+    ${bwfcReference}${additionalPackages}
   </ItemGroup>
 
 </Project>
 "@
 
-    # _Imports.razor
+    # _Imports.razor — conditionally include BlazorAjaxToolkitComponents
+    $ajaxToolkitLine = ''
+    # $script:HasAjaxToolkitControls is set during ConvertFrom-AjaxToolkitPrefix
+    # At scaffold time it's not yet known, so always include the @using.
+    # A post-processing pass after all files are processed will remove it if unused.
     $importsContent = @"
 @using System.Net.Http
 @using Microsoft.AspNetCore.Authorization
@@ -431,21 +523,20 @@ function New-ProjectScaffold {
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.LoginControls
-@using BlazorAjaxToolkitComponents
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
+@using $ProjectName.Models
 @inherits BlazorWebFormsComponents.WebFormsPageBase
 "@
 
     # Program.cs
     $programContent = @"
 // TODO: Review and adjust this generated Program.cs for your application needs.
+// Generated for .NET 10 Blazor static SSR. Keep interactive render modes opt-in and page-specific.
 using BlazorWebFormsComponents;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
 
 builder.Services.AddBlazorWebFormsComponents();
 
@@ -461,8 +552,7 @@ app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseAntiforgery();
 
-app.MapRazorComponents<$ProjectName.Components.App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<$ProjectName.Components.App>();
 
 app.Run();
 "@
@@ -521,8 +611,32 @@ $dbContextLine
             "builder.Services.AddBlazorWebFormsComponents();`n$modelsServiceBlock"
         )
     }
+    # GlobalUsings.cs — additional global usings for migration projects.
+    # NOTE: The BWFC NuGet package / ProjectReference automatically provides:
+    #   - global using BlazorWebFormsComponents;
+    #   - global using BlazorWebFormsComponents.LoginControls;
+    #   - Page = WebFormsPageBase, MasterPage = LayoutComponentBase
+    #   - ImageClickEventArgs = MouseEventArgs
+    # via buildTransitive/Fritz.BlazorWebFormsComponents.targets.
+    # This file adds Blazor infrastructure usings not covered by the .targets.
+    $globalUsingsContent = @"
+// =============================================================================
+// Global using directives for Web Forms → Blazor migration.
+//
+// Type aliases (Page, MasterPage, ImageClickEventArgs) and BWFC namespaces are
+// provided automatically by the BlazorWebFormsComponents .targets file.
+// This file adds Blazor infrastructure usings for code-behind files.
+//
+// Generated by bwfc-migrate.ps1 — Layer 1 scaffold
+// =============================================================================
 
-    # Properties/launchSettings.json
+// Blazor component infrastructure — provides [Inject], [Parameter],
+// [SupplyParameterFromQuery], NavigationManager, ComponentBase, etc.
+global using Microsoft.AspNetCore.Components;
+global using Microsoft.AspNetCore.Components.Web;
+global using Microsoft.AspNetCore.Components.Routing;
+"@
+
     $launchSettingsContent = @"
 {
   "profiles": {
@@ -543,6 +657,7 @@ $dbContextLine
         $csprojPath = Join-Path $OutputRoot "$ProjectName.csproj"
         $importsPath = Join-Path $OutputRoot "_Imports.razor"
         $programPath = Join-Path $OutputRoot "Program.cs"
+        $globalUsingsPath = Join-Path $OutputRoot "GlobalUsings.cs"
         $propertiesDir = Join-Path $OutputRoot "Properties"
         $launchSettingsPath = Join-Path $propertiesDir "launchSettings.json"
 
@@ -555,6 +670,9 @@ $dbContextLine
         Set-Content -Path $programPath -Value $programContent -Encoding UTF8
         Write-TransformLog -File $programPath -Transform 'Scaffold' -Detail 'Generated Program.cs'
 
+        Set-Content -Path $globalUsingsPath -Value $globalUsingsContent -Encoding UTF8
+        Write-TransformLog -File $globalUsingsPath -Transform 'Scaffold' -Detail 'Generated GlobalUsings.cs (Blazor infrastructure usings)'
+
         New-Item -ItemType Directory -Force $propertiesDir | Out-Null
         Set-Content -Path $launchSettingsPath -Value $launchSettingsContent -Encoding UTF8
         Write-TransformLog -File $launchSettingsPath -Transform 'Scaffold' -Detail 'Generated Properties/launchSettings.json'
@@ -563,6 +681,7 @@ $dbContextLine
         Write-Host "[WhatIf] Would create: $ProjectName.csproj"
         Write-Host "[WhatIf] Would create: _Imports.razor"
         Write-Host "[WhatIf] Would create: Program.cs"
+        Write-Host "[WhatIf] Would create: GlobalUsings.cs"
         Write-Host "[WhatIf] Would create: Properties/launchSettings.json"
     }
 }
@@ -586,10 +705,9 @@ function New-AppRazorScaffold {
     <HeadOutlet />
 </head>
 
-@* SSR by default — add @rendermode="InteractiveServer" to pages that need interactivity *@
+@* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
 <body>
     <Routes />
-    <script src="_framework/blazor.web.js"></script>
 </body>
 
 </html>
@@ -820,7 +938,7 @@ function Invoke-ScriptAutoDetection {
         return
     }
 
-    # Inject <script> tags into App.razor before closing </body> (after blazor.web.js)
+    # Inject <script> tags into App.razor before closing </body>
     $appContent = Get-Content -Path $appRazorPath -Raw
     $injectionBlock = "    @* Auto-detected JS files from Scripts/ *@`n" + ($scriptTags -join "`n") + "`n"
     if ($appContent -match '</body>') {
@@ -845,6 +963,261 @@ function Invoke-ScriptAutoDetection {
             Write-TransformLog -File 'Site.Master' -Transform 'ScriptAutoDetect' -Detail "Flagged <webopt:bundlereference> for scripts: $bundlePath"
         }
     }
+}
+
+#endregion
+
+#region --- Web.config → appsettings.json (GAP-12) ---
+
+function Convert-WebConfigToAppSettings {
+    <#
+    .SYNOPSIS
+        Parses Web.config for appSettings and connectionStrings, generates appsettings.json (GAP-12).
+    .DESCRIPTION
+        Reads <appSettings> keys and <connectionStrings> entries from the source project's Web.config
+        and generates an appsettings.json in the output Blazor project. Merges with any existing
+        appsettings.json content the scaffold already generates.
+    #>
+    param(
+        [string]$SourcePath,
+        [string]$OutputRoot
+    )
+
+    # Find Web.config
+    $webConfigPath = Join-Path $SourcePath 'Web.config'
+    if (-not (Test-Path $webConfigPath)) {
+        $webConfigPath = Join-Path $SourcePath 'web.config'
+    }
+    if (-not (Test-Path $webConfigPath)) {
+        Write-Host '  No Web.config found — skipping appsettings.json generation' -ForegroundColor DarkGray
+        return
+    }
+
+    try {
+        [xml]$webConfig = Get-Content -Path $webConfigPath -Raw -Encoding UTF8
+
+        $appSettings = @{}
+        $connectionStrings = @{}
+
+        # Parse <appSettings>
+        $appSettingsNode = $webConfig.SelectNodes('//appSettings/add')
+        if ($appSettingsNode -and $appSettingsNode.Count -gt 0) {
+            foreach ($node in $appSettingsNode) {
+                $key = $node.GetAttribute('key')
+                $value = $node.GetAttribute('value')
+                if ($key) {
+                    $appSettings[$key] = $value
+                }
+            }
+        }
+
+        # Parse <connectionStrings>
+        $connStrNodes = $webConfig.SelectNodes('//connectionStrings/add')
+        if ($connStrNodes -and $connStrNodes.Count -gt 0) {
+            foreach ($node in $connStrNodes) {
+                $name = $node.GetAttribute('name')
+                $connStr = $node.GetAttribute('connectionString')
+                if ($name -and $connStr) {
+                    # Skip LocalSqlServer and other built-in connection strings
+                    if ($name -ne 'LocalSqlServer' -and $name -ne 'LocalMySqlServer') {
+                        $connectionStrings[$name] = $connStr
+                    }
+                }
+            }
+        }
+
+        if ($appSettings.Count -eq 0 -and $connectionStrings.Count -eq 0) {
+            Write-Host '  Web.config has no appSettings or connectionStrings — skipping' -ForegroundColor DarkGray
+            return
+        }
+
+        # Build the appsettings.json structure
+        $jsonObj = [ordered]@{}
+
+        # Add connection strings section
+        if ($connectionStrings.Count -gt 0) {
+            $connStrSection = [ordered]@{}
+            foreach ($entry in $connectionStrings.GetEnumerator()) {
+                $connStrSection[$entry.Key] = $entry.Value
+            }
+            $jsonObj['ConnectionStrings'] = $connStrSection
+        }
+
+        # Add app settings as top-level keys
+        foreach ($entry in $appSettings.GetEnumerator()) {
+            $jsonObj[$entry.Key] = $entry.Value
+        }
+
+        # Add standard Blazor sections
+        if (-not $jsonObj.Contains('Logging')) {
+            $jsonObj['Logging'] = [ordered]@{
+                'LogLevel' = [ordered]@{
+                    'Default' = 'Information'
+                    'Microsoft.AspNetCore' = 'Warning'
+                }
+            }
+        }
+        if (-not $jsonObj.Contains('AllowedHosts')) {
+            $jsonObj['AllowedHosts'] = '*'
+        }
+
+        $appSettingsPath = Join-Path $OutputRoot 'appsettings.json'
+
+        # Merge with existing appsettings.json if it was already generated
+        if (Test-Path $appSettingsPath) {
+            try {
+                $existingJson = Get-Content -Path $appSettingsPath -Raw -Encoding UTF8 | ConvertFrom-Json -AsHashtable
+                # Merge: existing values take precedence for duplicate keys
+                foreach ($key in $existingJson.Keys) {
+                    if (-not $jsonObj.Contains($key)) {
+                        $jsonObj[$key] = $existingJson[$key]
+                    }
+                    elseif ($key -eq 'ConnectionStrings' -and $existingJson[$key] -is [hashtable]) {
+                        # Merge connection strings
+                        foreach ($csKey in $existingJson[$key].Keys) {
+                            if (-not $jsonObj['ConnectionStrings'].Contains($csKey)) {
+                                $jsonObj['ConnectionStrings'][$csKey] = $existingJson[$key][$csKey]
+                            }
+                        }
+                    }
+                }
+            }
+            catch {
+                # If existing file can't be parsed, overwrite it
+                Write-Host "  Warning: Could not parse existing appsettings.json — overwriting" -ForegroundColor Yellow
+            }
+        }
+
+        if ($PSCmdlet.ShouldProcess($appSettingsPath, "Generate appsettings.json from Web.config")) {
+            $jsonContent = $jsonObj | ConvertTo-Json -Depth 4
+            Set-Content -Path $appSettingsPath -Value $jsonContent -Encoding UTF8
+
+            $totalKeys = $appSettings.Count + $connectionStrings.Count
+            Write-Host "  Generated appsettings.json ($($appSettings.Count) app settings, $($connectionStrings.Count) connection strings)" -ForegroundColor Green
+            Write-TransformLog -File 'appsettings.json' -Transform 'WebConfig' -Detail "Extracted $($appSettings.Count) appSettings key(s) and $($connectionStrings.Count) connectionString(s) from Web.config"
+
+            if ($appSettings.Count -gt 0) {
+                $keyList = ($appSettings.Keys | Sort-Object) -join ', '
+                Write-TransformLog -File 'appsettings.json' -Transform 'WebConfig' -Detail "AppSettings keys: $keyList"
+            }
+            if ($connectionStrings.Count -gt 0) {
+                $connList = ($connectionStrings.Keys | Sort-Object) -join ', '
+                Write-TransformLog -File 'appsettings.json' -Transform 'WebConfig' -Detail "ConnectionStrings: $connList"
+                Write-ManualItem -File 'appsettings.json' -Category 'ConnectionString' -Detail "Connection strings extracted from Web.config — verify and update for target environment: $connList"
+            }
+        }
+        else {
+            Write-Host "[WhatIf] Would generate appsettings.json from Web.config"
+        }
+    }
+    catch {
+        Write-Host "  Warning: Could not parse Web.config — $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-ManualItem -File 'Web.config' -Category 'ParseError' -Detail "Could not parse Web.config for appsettings.json generation: $($_.Exception.Message)"
+    }
+}
+
+#endregion
+
+#region --- App_Start Directory Copy (GAP-22) ---
+
+function Copy-AppStart {
+    <#
+    .SYNOPSIS
+        Copies App_Start/*.cs files to the output project with cleanup (GAP-22).
+    .DESCRIPTION
+        Copies C# files from the source project's App_Start/ directory,
+        strips Web Forms usings, removes [assembly: ...] attributes,
+        and adds TODO comments for patterns needing manual review.
+    #>
+    param(
+        [string]$SourcePath,
+        [string]$OutputRoot
+    )
+
+    $appStartDir = Join-Path $SourcePath 'App_Start'
+    if (-not (Test-Path $appStartDir -PathType Container)) {
+        return 0
+    }
+
+    $csFiles = @(Get-ChildItem -Path $appStartDir -Filter '*.cs' -File)
+    if ($csFiles.Count -eq 0) {
+        return 0
+    }
+
+    $copied = 0
+    Write-Host "Copying $($csFiles.Count) App_Start file(s)..." -ForegroundColor Green
+
+    foreach ($file in $csFiles) {
+        $relPath = "App_Start/$($file.Name)"
+        # Copy to root of output project (not App_Start/ subfolder — Blazor has no App_Start convention)
+        $destFile = Join-Path $OutputRoot $file.Name
+
+        if ($PSCmdlet.ShouldProcess($destFile, "Copy App_Start file")) {
+            $csContent = Get-Content -Path $file.FullName -Raw -Encoding UTF8
+
+            # Add TODO header
+            $csContent = "// TODO: Review — auto-copied from App_Start/$($file.Name). Blazor has no App_Start convention.`n// TODO: Move relevant configuration to Program.cs or appropriate service registration.`n`n" + $csContent
+
+            # Strip [assembly: ...] attributes (can span multiple lines)
+            $assemblyAttrRegex = [regex]'(?m)^\s*\[assembly:\s*[^\]]*\]\s*\r?\n?'
+            $assemblyAttrMatches = $assemblyAttrRegex.Matches($csContent)
+            if ($assemblyAttrMatches.Count -gt 0) {
+                $csContent = $assemblyAttrRegex.Replace($csContent, '')
+                Write-TransformLog -File $relPath -Transform 'AppStart' -Detail "Stripped $($assemblyAttrMatches.Count) [assembly:] attribute(s)"
+            }
+
+            # Strip System.Web.UI.* usings
+            $csContent = $csContent -replace 'using\s+System\.Web\.UI(\.\w+)*;\s*\r?\n?', ''
+
+            # Strip System.Web.Security
+            $csContent = $csContent -replace 'using\s+System\.Web\.Security;\s*\r?\n?', ''
+
+            # Selectively handle System.Web.Optimization (BundleConfig stubs in BWFC)
+            if ($csContent -match 'Bundle|BundleTable|BundleCollection') {
+                $csContent = $csContent -replace 'using\s+System\.Web\.Optimization;\s*\r?\n?', "// using System.Web.Optimization; // BWFC: BundleConfig stubs available via BlazorWebFormsComponents namespace`n"
+            } else {
+                $csContent = $csContent -replace 'using\s+System\.Web\.Optimization;\s*\r?\n?', ''
+            }
+
+            # Selectively handle System.Web.Routing (RouteConfig stubs in BWFC)
+            if ($csContent -match 'Route|RouteTable|RouteCollection') {
+                $csContent = $csContent -replace 'using\s+System\.Web\.Routing;\s*\r?\n?', "// using System.Web.Routing; // BWFC: RouteConfig stubs available via BlazorWebFormsComponents namespace`n"
+            } else {
+                $csContent = $csContent -replace 'using\s+System\.Web\.Routing;\s*\r?\n?', ''
+            }
+
+            # Strip remaining System.Web.* usings
+            $csContent = $csContent -replace 'using\s+System\.Web(\.\w+)*;\s*\r?\n?', ''
+
+            # Strip Microsoft.AspNet.* usings
+            $csContent = $csContent -replace 'using\s+Microsoft\.AspNet(\.\w+)*;\s*\r?\n?', ''
+
+            # Strip Microsoft.Owin.* usings
+            $csContent = $csContent -replace 'using\s+Microsoft\.Owin(\.\w+)*;\s*\r?\n?', ''
+
+            # Strip Owin usings
+            $csContent = $csContent -replace 'using\s+Owin;\s*\r?\n?', ''
+
+            # Add TODO for common patterns that need manual review
+            if ($csContent -match 'WebApiConfig|GlobalConfiguration') {
+                $csContent = $csContent -replace '(class\s+WebApiConfig)', '// TODO: BWFC — Web API configuration should be migrated to minimal API endpoints in Program.cs`n$1'
+                Write-ManualItem -File $relPath -Category 'AppStart' -Detail "WebApiConfig detected — migrate to minimal API endpoints in Program.cs"
+            }
+            if ($csContent -match 'FilterConfig|GlobalFilters') {
+                $csContent = $csContent -replace '(class\s+FilterConfig)', '// TODO: BWFC — Filter configuration should use ASP.NET Core middleware pipeline in Program.cs`n$1'
+                Write-ManualItem -File $relPath -Category 'AppStart' -Detail "FilterConfig detected — migrate to middleware pipeline in Program.cs"
+            }
+
+            Set-Content -Path $destFile -Value $csContent -Encoding UTF8
+            Write-TransformLog -File $relPath -Transform 'AppStart' -Detail "Copied App_Start/$($file.Name) → $($file.Name) (root)"
+            $copied++
+        }
+        else {
+            Write-Host "[WhatIf] Would copy App_Start: $relPath → $($file.Name)"
+        }
+    }
+
+    return $copied
 }
 
 #endregion
@@ -1229,6 +1602,44 @@ function ConvertFrom-Expressions {
     if ($commentMatches.Count -gt 0) {
         $Content = $commentRegex.Replace($Content, '@*$1*@')
         Write-TransformLog -File $RelPath -Transform 'Expression' -Detail "Converted $($commentMatches.Count) comment(s) to Razor syntax"
+    }
+
+    # --- GAP-13: Bind() → @bind two-way binding ---
+    # Bind() is used in EditItemTemplate/InsertItemTemplate for two-way data binding.
+    # When used inside an attribute value (e.g., Text='<%# Bind("Name") %>'), convert to @bind-Value.
+    # When standalone, convert to @context.PropertyName (same as Eval).
+
+    # Bind() inside attribute values: attr='<%# Bind("Prop") %>' → @bind-Value="context.Prop"
+    # Note: We handle the most common case where Bind() is the attribute value for Text, SelectedValue, etc.
+    $bindAttrRegex = [regex]'(\w+)\s*=\s*''<%#\s*Bind\("(\w+)"\)\s*%>'''
+    $bindAttrMatches = $bindAttrRegex.Matches($Content)
+    if ($bindAttrMatches.Count -gt 0) {
+        $Content = $bindAttrRegex.Replace($Content, '@bind-Value="context.$2"')
+        Write-TransformLog -File $RelPath -Transform 'BindExpression' -Detail "Converted $($bindAttrMatches.Count) Bind() attribute(s) to @bind-Value"
+    }
+
+    # Bind() inside attribute values with double quotes: attr="<%# Bind("Prop") %>"
+    $bindAttrDblRegex = [regex]'(\w+)\s*=\s*"<%#\s*Bind\("(\w+)"\)\s*%>"'
+    $bindAttrDblMatches = $bindAttrDblRegex.Matches($Content)
+    if ($bindAttrDblMatches.Count -gt 0) {
+        $Content = $bindAttrDblRegex.Replace($Content, '@bind-Value="context.$2"')
+        Write-TransformLog -File $RelPath -Transform 'BindExpression' -Detail "Converted $($bindAttrDblMatches.Count) Bind() double-quoted attribute(s) to @bind-Value"
+    }
+
+    # Bind() with HTML-encoded delimiter: <%#: Bind("Prop") %> → @context.Prop (read-only context)
+    $bindEncodedRegex = [regex]'<%#:\s*Bind\("(\w+)"\)\s*%>'
+    $bindEncodedMatches = $bindEncodedRegex.Matches($Content)
+    if ($bindEncodedMatches.Count -gt 0) {
+        $Content = $bindEncodedRegex.Replace($Content, '@context.$1')
+        Write-TransformLog -File $RelPath -Transform 'BindExpression' -Detail "Converted $($bindEncodedMatches.Count) encoded Bind() to @context (read-only fallback)"
+    }
+
+    # Standalone Bind(): <%# Bind("Prop") %> → @context.Prop
+    $bindStandaloneRegex = [regex]'<%#\s*Bind\("(\w+)"\)\s*%>'
+    $bindStandaloneMatches = $bindStandaloneRegex.Matches($Content)
+    if ($bindStandaloneMatches.Count -gt 0) {
+        $Content = $bindStandaloneRegex.Replace($Content, '@context.$1')
+        Write-TransformLog -File $RelPath -Transform 'BindExpression' -Detail "Converted $($bindStandaloneMatches.Count) standalone Bind() to @context"
     }
 
     # Data binding with Eval and format string: <%#: Eval("prop", "{0:fmt}") %> → @context.prop.ToString("fmt")
@@ -1785,6 +2196,328 @@ function Add-DataSourceIDWarning {
 
 #region --- Code-Behind Handling ---
 
+function Remove-IsPostBackGuards {
+    <#
+    .SYNOPSIS
+        Unwraps IsPostBack guard patterns from code-behind content (GAP-06).
+    .DESCRIPTION
+        In Web Forms, Page_Load commonly wraps first-load logic in if (!IsPostBack) { ... }.
+        In Blazor, OnInitializedAsync runs only once, so the guard is unnecessary.
+        Simple guards (no else) are unwrapped. Complex guards (with else) get a TODO comment.
+    #>
+    param(
+        [string]$Content,
+        [string]$RelPath
+    )
+
+    $unwrapCount = 0
+    $todoCount = 0
+
+    # --- Simple IsPostBack guards (no else clause) ---
+    # Matches: if (!IsPostBack) { body }, if (!Page.IsPostBack) { body }, if (!this.IsPostBack) { body }
+    # Also: if (IsPostBack == false), if (Page.IsPostBack == false), etc.
+    # Uses brace-counting to find the matching close brace.
+
+    # Patterns that represent "if not postback"
+    $guardPatterns = @(
+        'if\s*\(\s*!(?:Page\.|this\.)?IsPostBack\s*\)',
+        'if\s*\(\s*(?:Page\.|this\.)?IsPostBack\s*==\s*false\s*\)',
+        'if\s*\(\s*false\s*==\s*(?:Page\.|this\.)?IsPostBack\s*\)'
+    )
+    $combinedPattern = '(?:' + ($guardPatterns -join '|') + ')'
+
+    # Process the content iteratively — find each guard and unwrap or annotate
+    $guardRegex = [regex]$combinedPattern
+    $iterations = 0
+    $maxIterations = 50  # safety limit
+
+    while ($guardRegex.IsMatch($Content) -and $iterations -lt $maxIterations) {
+        $iterations++
+        $match = $guardRegex.Match($Content)
+        $matchStart = $match.Index
+        $afterMatch = $matchStart + $match.Length
+
+        # Skip whitespace to find the opening brace
+        $braceStart = $afterMatch
+        while ($braceStart -lt $Content.Length -and $Content[$braceStart] -match '\s') { $braceStart++ }
+
+        if ($braceStart -ge $Content.Length -or $Content[$braceStart] -ne '{') {
+            # No brace found — single-statement guard, skip for safety
+            $Content = $Content.Substring(0, $matchStart) + "/* TODO: IsPostBack guard — review for Blazor */ " + $Content.Substring($matchStart)
+            $todoCount++
+            continue
+        }
+
+        # Brace-count to find matching close brace
+        $depth = 1
+        $pos = $braceStart + 1
+        while ($pos -lt $Content.Length -and $depth -gt 0) {
+            if ($Content[$pos] -eq '{') { $depth++ }
+            elseif ($Content[$pos] -eq '}') { $depth-- }
+            $pos++
+        }
+
+        if ($depth -ne 0) {
+            # Unbalanced braces — skip
+            $Content = $Content.Substring(0, $matchStart) + "/* TODO: IsPostBack guard — could not parse */ " + $Content.Substring($matchStart)
+            $todoCount++
+            continue
+        }
+
+        $braceEnd = $pos - 1  # position of closing brace
+
+        # Check for else clause after the closing brace
+        $afterClose = $braceEnd + 1
+        $checkPos = $afterClose
+        while ($checkPos -lt $Content.Length -and $Content[$checkPos] -match '\s') { $checkPos++ }
+
+        $hasElse = ($checkPos + 3 -lt $Content.Length) -and ($Content.Substring($checkPos, 4) -match '^else\b')
+
+        if ($hasElse) {
+            # Complex case — add TODO comment instead of unwrapping
+            $todoComment = "// TODO: BWFC — IsPostBack guard with else clause. In Blazor, OnInitializedAsync runs once (no postback).`n            // Review: move 'if' body to OnInitializedAsync and 'else' body to an event handler or remove.`n            "
+            $Content = $Content.Substring(0, $matchStart) + $todoComment + $Content.Substring($matchStart)
+            $todoCount++
+        }
+        else {
+            # Simple case — unwrap the guard: extract body, dedent one level, add comment
+            $body = $Content.Substring($braceStart + 1, $braceEnd - $braceStart - 1)
+
+            # Dedent: remove one level of leading whitespace (4 spaces or 1 tab) from each line
+            $bodyLines = $body -split "`n"
+            $dedentedLines = foreach ($line in $bodyLines) {
+                $line -replace '^(    |\t)', ''
+            }
+            $dedentedBody = ($dedentedLines -join "`n").Trim()
+
+            # Determine the indentation of the original if statement
+            $lineStart = $matchStart
+            while ($lineStart -gt 0 -and $Content[$lineStart - 1] -ne "`n") { $lineStart-- }
+            $indent = ''
+            if ($Content.Substring($lineStart, $matchStart - $lineStart) -match '^(\s+)') {
+                $indent = $Matches[1]
+            }
+
+            $replacement = "${indent}// BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change`n"
+            # Re-indent the dedented body
+            foreach ($line in $dedentedBody -split "`n") {
+                if ($line.Trim().Length -gt 0) {
+                    $replacement += "${indent}${line}`n"
+                } else {
+                    $replacement += "`n"
+                }
+            }
+
+            $Content = $Content.Substring(0, $matchStart) + $replacement.TrimEnd("`n") + $Content.Substring($braceEnd + 1)
+            $unwrapCount++
+        }
+    }
+
+    if ($unwrapCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'IsPostBack' -Detail "Unwrapped $unwrapCount simple IsPostBack guard(s)"
+    }
+    if ($todoCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'IsPostBack' -Detail "Added TODO for $todoCount complex IsPostBack guard(s)"
+        Write-ManualItem -File $RelPath -Category 'IsPostBack' -Detail "$todoCount IsPostBack guard(s) with else clauses need manual review"
+    }
+
+    return $Content
+}
+
+function Convert-PageLifecycleMethods {
+    <#
+    .SYNOPSIS
+        Transforms Web Forms page lifecycle methods to Blazor equivalents (GAP-05).
+    .DESCRIPTION
+        Converts:
+          Page_Load(object sender, EventArgs e) → protected override async Task OnInitializedAsync()
+          Page_Init(object sender, EventArgs e) → protected override void OnInitialized()
+          Page_PreRender(object sender, EventArgs e) → protected override async Task OnAfterRenderAsync(bool firstRender)
+    #>
+    param(
+        [string]$Content,
+        [string]$RelPath
+    )
+
+    $convertCount = 0
+
+    # --- Page_Load → OnInitializedAsync ---
+    # Matches any access modifier combination + void + Page_Load (case-insensitive method name)
+    $pageLoadRegex = [regex]'(?m)([ \t]*)(?:(?:protected|private|public|internal)\s+)?(?:(?:virtual|override|new|static|sealed|abstract)\s+)*void\s+(?i:Page_Load)\s*\(\s*object\s+\w+\s*,\s*EventArgs\s+\w+\s*\)'
+
+    if ($pageLoadRegex.IsMatch($Content)) {
+        $match = $pageLoadRegex.Match($Content)
+        $indent = $match.Groups[1].Value
+        $matchStart = $match.Index
+        $matchEnd = $matchStart + $match.Length
+
+        $newSig = "${indent}protected override async Task OnInitializedAsync()"
+        $Content = $Content.Substring(0, $matchStart) + $newSig + $Content.Substring($matchEnd)
+
+        # Find opening brace after the new signature
+        $sigEnd = $matchStart + $newSig.Length
+        $bracePos = $sigEnd
+        while ($bracePos -lt $Content.Length -and $Content[$bracePos] -match '\s') { $bracePos++ }
+
+        if ($bracePos -lt $Content.Length -and $Content[$bracePos] -eq '{') {
+            $injection = "`n${indent}    // TODO: Review lifecycle conversion — verify async behavior`n${indent}    await base.OnInitializedAsync();`n"
+            $Content = $Content.Substring(0, $bracePos + 1) + $injection + $Content.Substring($bracePos + 1)
+        }
+
+        $convertCount++
+        Write-TransformLog -File $RelPath -Transform 'LifecycleConvert' -Detail "Page_Load → OnInitializedAsync"
+    }
+
+    # --- Page_Init → OnInitialized ---
+    $pageInitRegex = [regex]'(?m)([ \t]*)(?:(?:protected|private|public|internal)\s+)?(?:(?:virtual|override|new|static|sealed|abstract)\s+)*void\s+(?i:Page_Init)\s*\(\s*object\s+\w+\s*,\s*EventArgs\s+\w+\s*\)'
+
+    if ($pageInitRegex.IsMatch($Content)) {
+        $match = $pageInitRegex.Match($Content)
+        $indent = $match.Groups[1].Value
+        $matchStart = $match.Index
+        $matchEnd = $matchStart + $match.Length
+
+        $newSig = "${indent}protected override void OnInitialized()"
+        $Content = $Content.Substring(0, $matchStart) + $newSig + $Content.Substring($matchEnd)
+
+        # Find opening brace and inject TODO comment
+        $sigEnd = $matchStart + $newSig.Length
+        $bracePos = $sigEnd
+        while ($bracePos -lt $Content.Length -and $Content[$bracePos] -match '\s') { $bracePos++ }
+
+        if ($bracePos -lt $Content.Length -and $Content[$bracePos] -eq '{') {
+            $injection = "`n${indent}    // TODO: Review lifecycle conversion — verify async behavior`n"
+            $Content = $Content.Substring(0, $bracePos + 1) + $injection + $Content.Substring($bracePos + 1)
+        }
+
+        $convertCount++
+        Write-TransformLog -File $RelPath -Transform 'LifecycleConvert' -Detail "Page_Init → OnInitialized"
+    }
+
+    # --- Page_PreRender → OnAfterRenderAsync ---
+    $preRenderRegex = [regex]'(?m)([ \t]*)(?:(?:protected|private|public|internal)\s+)?(?:(?:virtual|override|new|static|sealed|abstract)\s+)*void\s+(?i:Page_PreRender)\s*\(\s*object\s+\w+\s*,\s*EventArgs\s+\w+\s*\)'
+
+    if ($preRenderRegex.IsMatch($Content)) {
+        $match = $preRenderRegex.Match($Content)
+        $indent = $match.Groups[1].Value
+        $matchStart = $match.Index
+        $matchEnd = $matchStart + $match.Length
+
+        $newSig = "${indent}protected override async Task OnAfterRenderAsync(bool firstRender)"
+        $Content = $Content.Substring(0, $matchStart) + $newSig + $Content.Substring($matchEnd)
+
+        # Find opening brace
+        $sigEnd = $matchStart + $newSig.Length
+        $braceStart = $sigEnd
+        while ($braceStart -lt $Content.Length -and $Content[$braceStart] -match '\s') { $braceStart++ }
+
+        if ($braceStart -lt $Content.Length -and $Content[$braceStart] -eq '{') {
+            # Brace-count to find matching close brace
+            $depth = 1
+            $pos = $braceStart + 1
+            while ($pos -lt $Content.Length -and $depth -gt 0) {
+                if ($Content[$pos] -eq '{') { $depth++ }
+                elseif ($Content[$pos] -eq '}') { $depth-- }
+                $pos++
+            }
+
+            if ($depth -eq 0) {
+                $braceEnd = $pos - 1
+                $body = $Content.Substring($braceStart + 1, $braceEnd - $braceStart - 1)
+                $bodyIndent = "${indent}    "
+
+                # Build wrapped body with firstRender guard
+                $newBody = "`n${bodyIndent}// TODO: Review lifecycle conversion — verify async behavior"
+                $newBody += "`n${bodyIndent}if (firstRender)"
+                $newBody += "`n${bodyIndent}{"
+
+                # Re-indent original body lines by one level
+                $bodyLines = $body -split "`n"
+                foreach ($line in $bodyLines) {
+                    $trimmed = $line.TrimEnd()
+                    if ($trimmed.Length -gt 0) {
+                        $newBody += "`n    $trimmed"
+                    }
+                }
+
+                $newBody += "`n${bodyIndent}}"
+                $newBody += "`n${indent}"
+
+                $Content = $Content.Substring(0, $braceStart + 1) + $newBody + $Content.Substring($braceEnd)
+            }
+        }
+
+        $convertCount++
+        Write-TransformLog -File $RelPath -Transform 'LifecycleConvert' -Detail "Page_PreRender → OnAfterRenderAsync with firstRender guard"
+    }
+
+    if ($convertCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'LifecycleConvert' -Detail "Converted $convertCount page lifecycle method(s) to Blazor equivalents"
+    }
+
+    return $Content
+}
+
+function Convert-EventHandlerSignatures {
+    <#
+    .SYNOPSIS
+        Transforms Web Forms event handler signatures to Blazor-compatible signatures (GAP-07).
+    .DESCRIPTION
+        Rules:
+          - If EventArgs type is EXACTLY 'EventArgs' → strip both params: Handler()
+          - If EventArgs type is a specialized subclass (e.g., GridViewCommandEventArgs) →
+            strip 'object sender', keep the specialized EventArgs: Handler(GridViewCommandEventArgs e)
+          - Access modifiers are preserved as-is
+          - async is NOT added unless already present
+    #>
+    param(
+        [string]$Content,
+        [string]$RelPath
+    )
+
+    $stripCount = 0
+    $keepCount = 0
+
+    # Match methods with (object sender, *EventArgs param) signature.
+    # Group 1: everything before the parens (modifiers + return type + method name)
+    # Group 2: the EventArgs type name (must end with 'EventArgs')
+    # Group 3: the EventArgs parameter name
+    $handlerRegex = [regex]'((?:(?:protected|private|public|internal)\s+)?(?:(?:static|virtual|override|new|sealed|abstract|async)\s+)*(?:void|Task(?:<[^>]+>)?)\s+\w+)\s*\(\s*object\s+\w+\s*,\s*(\w*EventArgs)\s+(\w+)\s*\)'
+
+    $maxIterations = 200
+    $iterations = 0
+
+    while ($handlerRegex.IsMatch($Content) -and $iterations -lt $maxIterations) {
+        $iterations++
+        $match = $handlerRegex.Match($Content)
+        $prefix = $match.Groups[1].Value
+        $eventArgsType = $match.Groups[2].Value
+        $eventArgsParam = $match.Groups[3].Value
+
+        if ($eventArgsType -eq 'EventArgs') {
+            # Standard EventArgs — strip both params entirely
+            $replacement = "${prefix}()"
+            $Content = $Content.Substring(0, $match.Index) + $replacement + $Content.Substring($match.Index + $match.Length)
+            $stripCount++
+        }
+        else {
+            # Specialized EventArgs — strip sender, keep the EventArgs param
+            $replacement = "${prefix}($eventArgsType $eventArgsParam)"
+            $Content = $Content.Substring(0, $match.Index) + $replacement + $Content.Substring($match.Index + $match.Length)
+            $keepCount++
+        }
+    }
+
+    if ($stripCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'EventHandler' -Detail "Stripped sender+EventArgs from $stripCount standard event handler(s)"
+    }
+    if ($keepCount -gt 0) {
+        Write-TransformLog -File $RelPath -Transform 'EventHandler' -Detail "Stripped sender, kept specialized EventArgs in $keepCount event handler(s)"
+    }
+
+    return $Content
+}
+
 function Copy-CodeBehind {
     param(
         [string]$SourceFile,
@@ -1804,11 +2537,15 @@ function Copy-CodeBehind {
 //   - Page_PreRender → OnAfterRenderAsync
 //   - IsPostBack checks → remove or convert to state logic
 //   - ViewState usage → component [Parameter] or private fields
-//   - Session/Cache access → inject IHttpContextAccessor or use DI
-//   - Response.Redirect → NavigationManager.NavigateTo
+//   - Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
+//   - Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
+//   - Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
+//   - Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
+//   - ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
+//   - ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
 //   - Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
 //   - Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   - ScriptManager code-behind references → remove (Blazor handles updates)
+//   - ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
 //   - UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
 //   - User controls → Blazor component references
 // =============================================================================
@@ -1817,7 +2554,63 @@ function Copy-CodeBehind {
 
         $annotatedContent = $todoHeader + $content
 
-        # Strip System.Web.* usings — these are Web Forms namespaces with no Blazor equivalent
+        # --- GAP-09: Selective using retention ---
+        # Before stripping System.Web.* usings, preserve specific ones that have BWFC shims.
+        # Convert retained usings to their BWFC-compatible equivalents.
+        $retainedUsingCount = 0
+
+        # Keep using System.Configuration; — BWFC provides ConfigurationManager shim
+        # (No transformation needed — the shim lives in the BlazorWebFormsComponents namespace
+        # which is already in GlobalUsings.cs via the .targets file)
+        $sysConfigRegex = [regex]'using\s+System\.Configuration;\s*\r?\n?'
+        $sysConfigMatches = $sysConfigRegex.Matches($annotatedContent)
+        if ($sysConfigMatches.Count -gt 0) {
+            # Replace with a comment — ConfigurationManager is available via BWFC namespace
+            $annotatedContent = $sysConfigRegex.Replace($annotatedContent, "// using System.Configuration; // BWFC: ConfigurationManager shim available via BlazorWebFormsComponents namespace`n")
+            $retainedUsingCount += $sysConfigMatches.Count
+            Write-TransformLog -File $RelPath -Transform 'UsingRetention' -Detail "Retained System.Configuration reference (BWFC ConfigurationManager shim)"
+        }
+
+        # Keep using System.Web.Optimization; when BundleConfig patterns exist
+        $webOptRegex = [regex]'using\s+System\.Web\.Optimization;\s*\r?\n?'
+        $webOptMatches = $webOptRegex.Matches($annotatedContent)
+        if ($webOptMatches.Count -gt 0) {
+            $annotatedContent = $webOptRegex.Replace($annotatedContent, "// using System.Web.Optimization; // BWFC: BundleConfig stubs available via BlazorWebFormsComponents namespace`n")
+            $retainedUsingCount += $webOptMatches.Count
+            Write-TransformLog -File $RelPath -Transform 'UsingRetention' -Detail "Retained System.Web.Optimization reference (BWFC BundleConfig stubs)"
+        }
+
+        # Keep using System.Web.Routing; when RouteConfig patterns exist
+        $webRoutingRegex = [regex]'using\s+System\.Web\.Routing;\s*\r?\n?'
+        $webRoutingMatches = $webRoutingRegex.Matches($annotatedContent)
+        if ($webRoutingMatches.Count -gt 0) {
+            $annotatedContent = $webRoutingRegex.Replace($annotatedContent, "// using System.Web.Routing; // BWFC: RouteConfig stubs available via BlazorWebFormsComponents namespace`n")
+            $retainedUsingCount += $webRoutingMatches.Count
+            Write-TransformLog -File $RelPath -Transform 'UsingRetention' -Detail "Retained System.Web.Routing reference (BWFC RouteConfig stubs)"
+        }
+
+        if ($retainedUsingCount -gt 0) {
+            Write-TransformLog -File $RelPath -Transform 'UsingRetention' -Detail "Selectively retained $retainedUsingCount using(s) with BWFC shim equivalents"
+        }
+
+        # Strip System.Web.UI.* usings — Web Forms UI namespaces with no Blazor equivalent
+        $webUIUsingsRegex = [regex]'using\s+System\.Web\.UI(\.\w+)*;\s*\r?\n?'
+        $webUIUsingMatches = $webUIUsingsRegex.Matches($annotatedContent)
+        if ($webUIUsingMatches.Count -gt 0) {
+            $annotatedContent = $webUIUsingsRegex.Replace($annotatedContent, '')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($webUIUsingMatches.Count) System.Web.UI.* using(s)"
+        }
+
+        # Strip System.Web.Security — no Blazor equivalent
+        $webSecurityRegex = [regex]'using\s+System\.Web\.Security;\s*\r?\n?'
+        $webSecurityMatches = $webSecurityRegex.Matches($annotatedContent)
+        if ($webSecurityMatches.Count -gt 0) {
+            $annotatedContent = $webSecurityRegex.Replace($annotatedContent, '')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($webSecurityMatches.Count) System.Web.Security using(s)"
+        }
+
+        # Strip remaining System.Web.* usings that weren't selectively retained above
+        # (System.Web.Optimization and System.Web.Routing were already handled)
         $webUsingsRegex = [regex]'using\s+System\.Web(\.\w+)*;\s*\r?\n?'
         $webUsingMatches = $webUsingsRegex.Matches($annotatedContent)
         if ($webUsingMatches.Count -gt 0) {
@@ -1825,25 +2618,62 @@ function Copy-CodeBehind {
             Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($webUsingMatches.Count) System.Web.* using(s)"
         }
 
-        # RF-12: Convert [QueryString] and [RouteData] parameter attributes
-        $qsRegex = [regex]'\[QueryString\("([^"]+)"\)\]'
-        $qsMatches = $qsRegex.Matches($annotatedContent)
-        if ($qsMatches.Count -gt 0) {
-            $annotatedContent = $qsRegex.Replace($annotatedContent, '[SupplyParameterFromQuery(Name = "$1")]')
-            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Converted $($qsMatches.Count) [QueryString] to [SupplyParameterFromQuery]"
+        # Strip Microsoft.AspNet.* usings — OWIN Identity namespaces; replaced by GlobalUsings + shims
+        $aspnetUsingsRegex = [regex]'using\s+Microsoft\.AspNet(\.\w+)*;\s*\r?\n?'
+        $aspnetUsingMatches = $aspnetUsingsRegex.Matches($annotatedContent)
+        if ($aspnetUsingMatches.Count -gt 0) {
+            $annotatedContent = $aspnetUsingsRegex.Replace($annotatedContent, '')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($aspnetUsingMatches.Count) Microsoft.AspNet.* using(s)"
         }
 
-        # [RouteData] is a Web Forms model-binding attribute for method parameters.
-        # It has no inline Blazor equivalent — [Parameter] targets properties, not
-        # method parameters, so placing it here would cause CS0592.  Strip the
-        # attribute and leave a TODO for Layer 2 to promote the value to a
-        # [Parameter] property on the component class.
-        $rdRegex = [regex]'([ \t]*)\[RouteData\]\s*'
+        # Strip Microsoft.Owin.* usings — OWIN middleware namespaces; no Blazor equivalent
+        $owinUsingsRegex = [regex]'using\s+Microsoft\.Owin(\.\w+)*;\s*\r?\n?'
+        $owinUsingMatches = $owinUsingsRegex.Matches($annotatedContent)
+        if ($owinUsingMatches.Count -gt 0) {
+            $annotatedContent = $owinUsingsRegex.Replace($annotatedContent, '')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($owinUsingMatches.Count) Microsoft.Owin.* using(s)"
+        }
+
+        # Strip Owin usings — bare OWIN namespace
+        $bareOwinRegex = [regex]'using\s+Owin;\s*\r?\n?'
+        $bareOwinMatches = $bareOwinRegex.Matches($annotatedContent)
+        if ($bareOwinMatches.Count -gt 0) {
+            $annotatedContent = $bareOwinRegex.Replace($annotatedContent, '')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($bareOwinMatches.Count) Owin using(s)"
+        }
+
+        # Strip Web Forms base class declarations from code-behind classes.
+        # The .razor file already has @inherits WebFormsPageBase, so the code-behind
+        # partial class must NOT also declare a base class (CS0263).
+        # Handle both FQN (System.Web.UI.Page) and unqualified (Page) forms.
+        $baseClassPatterns = @(
+            'System\.Web\.UI\.Page',
+            'System\.Web\.UI\.MasterPage',
+            'System\.Web\.UI\.UserControl',
+            '(?<!\w)Page(?!\w)',
+            '(?<!\w)MasterPage(?!\w)',
+            '(?<!\w)UserControl(?!\w)'
+        )
+        $baseClassRegex = [regex]('(partial\s+class\s+\w+)\s*:\s*(' + ($baseClassPatterns -join '|') + ')')
+        $baseClassMatches = $baseClassRegex.Matches($annotatedContent)
+        if ($baseClassMatches.Count -gt 0) {
+            $annotatedContent = $baseClassRegex.Replace($annotatedContent, '$1')
+            Write-TransformLog -File $RelPath -Transform 'CodeBehind' -Detail "Stripped $($baseClassMatches.Count) Web Forms base class declaration(s) — .razor @inherits handles inheritance"
+        }
+
+        # RF-12: [QueryString] and [RouteData] parameter attributes
+        # BWFC provides [QueryString] and [RouteData] attributes that target
+        # AttributeTargets.Parameter, so these compile as-is on method params.
+        # Leave them in place — L2 promotes them to component properties.
+        $qsRegex = [regex]'\[QueryString\('
+        $qsMatches = $qsRegex.Matches($annotatedContent)
+        if ($qsMatches.Count -gt 0) {
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Preserved $($qsMatches.Count) [QueryString] attribute(s) — BWFC shim compiles; L2 promotes to [SupplyParameterFromQuery] property"
+        }
+        $rdRegex = [regex]'\[RouteData\]'
         $rdMatches = $rdRegex.Matches($annotatedContent)
         if ($rdMatches.Count -gt 0) {
-            $rdReplacement = '${1}/* TODO: RouteData parameter — add a [Parameter] property to the component class and remove from method signature */' + "`n" + '${1}'
-            $annotatedContent = $rdRegex.Replace($annotatedContent, $rdReplacement)
-            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Stripped $($rdMatches.Count) [RouteData] attribute(s) — needs [Parameter] property in L2"
+            Write-TransformLog -File $RelPath -Transform 'ParameterAttr' -Detail "Preserved $($rdMatches.Count) [RouteData] attribute(s) — BWFC shim compiles; L2 promotes to [Parameter] property"
         }
 
         # --- Response.Redirect → NavigationManager.NavigateTo conversion ---
@@ -1967,6 +2797,56 @@ function Copy-CodeBehind {
             Write-TransformLog -File $RelPath -Transform 'ViewStateDetect' -Detail "Detected $($vsMatches.Count) ViewState[`"key`"] usage(s) — keys: $($vsKeys -join ', ')"
             Write-ManualItem -File $RelPath -Category 'ViewState' -Detail "ViewState keys used: $($vsKeys -join ', ') — convert to private fields (see generated suggestions in code-behind)"
         }
+
+        # --- GAP-06: IsPostBack guard unwrapping ---
+        $annotatedContent = Remove-IsPostBackGuards -Content $annotatedContent -RelPath $RelPath
+
+        # --- GAP-20: .aspx URL cleanup in code-behind string literals ---
+        # Replace "~/SomePage.aspx" → "/SomePage" and "~/SomePage.aspx?param=val" → "/SomePage?param=val"
+        # Also handle relative .aspx references without ~/
+        $aspxUrlCount = 0
+
+        # Pattern 1: "~/SomePage.aspx?query" → "/SomePage?query" (with query string)
+        $aspxTildeQsRegex = [regex]'"~/([^"]*?)\.aspx\?([^"]*)"'
+        $aspxTildeQsMatches = $aspxTildeQsRegex.Matches($annotatedContent)
+        if ($aspxTildeQsMatches.Count -gt 0) {
+            $annotatedContent = $aspxTildeQsRegex.Replace($annotatedContent, '"/$1?$2"')
+            $aspxUrlCount += $aspxTildeQsMatches.Count
+        }
+
+        # Pattern 2: "~/SomePage.aspx" → "/SomePage" (no query string)
+        $aspxTildeRegex = [regex]'"~/([^"]*?)\.aspx"'
+        $aspxTildeMatches = $aspxTildeRegex.Matches($annotatedContent)
+        if ($aspxTildeMatches.Count -gt 0) {
+            $annotatedContent = $aspxTildeRegex.Replace($annotatedContent, '"/$1"')
+            $aspxUrlCount += $aspxTildeMatches.Count
+        }
+
+        # Pattern 3: Relative .aspx references in NavigateTo/Redirect calls: "SomePage.aspx?q" → "/SomePage?q"
+        $aspxRelQsRegex = [regex]'(NavigationManager\.NavigateTo\(\s*")([^"~/][^"]*?)\.aspx\?([^"]*)"'
+        $aspxRelQsMatches = $aspxRelQsRegex.Matches($annotatedContent)
+        if ($aspxRelQsMatches.Count -gt 0) {
+            $annotatedContent = $aspxRelQsRegex.Replace($annotatedContent, '$1/$2?$3"')
+            $aspxUrlCount += $aspxRelQsMatches.Count
+        }
+
+        # Pattern 4: Relative .aspx references in NavigateTo/Redirect calls: "SomePage.aspx" → "/SomePage"
+        $aspxRelRegex = [regex]'(NavigationManager\.NavigateTo\(\s*")([^"~/][^"]*?)\.aspx"'
+        $aspxRelMatches = $aspxRelRegex.Matches($annotatedContent)
+        if ($aspxRelMatches.Count -gt 0) {
+            $annotatedContent = $aspxRelRegex.Replace($annotatedContent, '$1/$2"')
+            $aspxUrlCount += $aspxRelMatches.Count
+        }
+
+        if ($aspxUrlCount -gt 0) {
+            Write-TransformLog -File $RelPath -Transform 'AspxUrlCleanup' -Detail "Cleaned $aspxUrlCount .aspx URL reference(s) in string literals"
+        }
+
+        # --- GAP-05: Page lifecycle method conversion ---
+        $annotatedContent = Convert-PageLifecycleMethods -Content $annotatedContent -RelPath $RelPath
+
+        # --- GAP-07: Event handler signature conversion ---
+        $annotatedContent = Convert-EventHandlerSignatures -Content $annotatedContent -RelPath $RelPath
 
         $outputDir = Split-Path $OutputFile -Parent
         if (-not (Test-Path $outputDir)) {
@@ -2312,6 +3192,16 @@ if (-not $SkipProjectScaffold) {
     Write-Host ''
 }
 
+# GAP-12: Web.config → appsettings.json (after scaffold, before code-behind copy)
+Write-Host 'Extracting Web.config settings...' -ForegroundColor Green
+if (-not $WhatIfPreference) {
+    Convert-WebConfigToAppSettings -SourcePath $Path -OutputRoot $Output
+}
+else {
+    Write-Host '[WhatIf] Would extract appSettings and connectionStrings from Web.config'
+}
+Write-Host ''
+
 # Discover and transform Web Forms files
 Write-Host 'Discovering Web Forms files...' -ForegroundColor Green
 $sourceFiles = Get-ChildItem -Path $Path -Recurse -File | Where-Object {
@@ -2360,6 +3250,14 @@ if ($staticCount -gt 0) {
 # Fix 1b: Auto-detect CSS files and inject <link> tags into App.razor
 if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
     Invoke-CssAutoDetection -OutputRoot $Output -SourcePath $Path
+}
+
+# NuGet Static Asset Extraction: Extract CSS/JS/fonts from NuGet packages to wwwroot/lib/
+if (-not $WhatIfPreference -and -not $SkipProjectScaffold) {
+    $nugetAssetScript = Join-Path $PSScriptRoot 'Migrate-NugetStaticAssets.ps1'
+    if (Test-Path $nugetAssetScript) {
+        & $nugetAssetScript -SourcePath $Path -OutputPath $Output
+    }
 }
 
 # Fix 1 (Run 11): Auto-detect JS files in Scripts/ and inject <script> tags into App.razor
@@ -2443,6 +3341,10 @@ if (Test-Path $modelsDir -PathType Container) {
                     # RF-04: Transform DbContext for EF Core
                     $csContent = $csContent -replace 'using System\.Data\.Entity;', 'using Microsoft.EntityFrameworkCore; // TODO: Verify EF Core using directive'
                     $csContent = $csContent -replace 'using System\.Data\.Entity\.ModelConfiguration\.Conventions;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using System\.Web(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using Microsoft\.AspNet(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using Microsoft\.Owin(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using Owin;\s*\r?\n?', ''
 
                     # Extract class name
                     $ctxClassName = $null
@@ -2476,9 +3378,13 @@ if (Test-Path $modelsDir -PathType Container) {
                     Write-ManualItem -File $relPath -Category 'DbContext' -Detail 'DbContext auto-transformed — verify EF Core configuration'
                 }
                 else {
-                    # RF-03: Standard model file — strip EF6 usings and add header
+                    # RF-03: Standard model file — strip legacy usings and add header
                     $csContent = $csContent -replace 'using System\.Data\.Entity;\s*\r?\n?', ''
                     $csContent = $csContent -replace 'using System\.Data\.Entity\.ModelConfiguration\.Conventions;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using System\.Web(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using Microsoft\.AspNet(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using Microsoft\.Owin(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using Owin;\s*\r?\n?', ''
                     $csContent = "// TODO: Review — auto-copied from Web Forms source`n`n" + $csContent
                 }
 
@@ -2517,6 +3423,9 @@ foreach ($dirName in $bllDirNames) {
                     }
                     $csContent = Get-Content -Path $bf.FullName -Raw -Encoding UTF8
                     $csContent = $csContent -replace 'using System\.Web(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using Microsoft\.AspNet(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using Microsoft\.Owin(\.\w+)*;\s*\r?\n?', ''
+                    $csContent = $csContent -replace 'using Owin;\s*\r?\n?', ''
                     $csContent = "// TODO: Review — auto-copied business logic from Web Forms source`n`n" + $csContent
                     Set-Content -Path $destFile -Value $csContent -Encoding UTF8
                     Write-TransformLog -File "$dirName/$relBllPath" -Transform 'BLLCopy' -Detail "Copied business logic file → $destFile"
@@ -2527,6 +3436,27 @@ foreach ($dirName in $bllDirNames) {
                 }
             }
             Write-Host ''
+        }
+    }
+}
+
+#endregion
+
+#region --- App_Start Directory Copy (GAP-22) ---
+
+$appStartCopied = 0
+if (-not $WhatIfPreference) {
+    $appStartCopied = Copy-AppStart -SourcePath $Path -OutputRoot $Output
+    if ($appStartCopied -gt 0) {
+        Write-Host ''
+    }
+}
+else {
+    $appStartDir = Join-Path $Path 'App_Start'
+    if (Test-Path $appStartDir -PathType Container) {
+        $appStartFiles = @(Get-ChildItem -Path $appStartDir -Filter '*.cs' -File)
+        if ($appStartFiles.Count -gt 0) {
+            Write-Host "[WhatIf] Would copy $($appStartFiles.Count) App_Start file(s)" -ForegroundColor Yellow
         }
     }
 }
@@ -2552,6 +3482,25 @@ if ($script:RedirectHandlers.Count -gt 0 -and -not $WhatIfPreference) {
 
 #endregion
 
+#region --- Post-Processing: Conditional AJAX Toolkit Import ---
+
+# Only add @using BlazorAjaxToolkitComponents to _Imports.razor if AJAX controls were detected
+if (-not $WhatIfPreference -and -not $SkipProjectScaffold -and $script:HasAjaxToolkitControls) {
+    $importsPath = Join-Path $Output "_Imports.razor"
+    if (Test-Path $importsPath) {
+        $importsContent = Get-Content -Path $importsPath -Raw
+        $ajaxLine = "@using BlazorAjaxToolkitComponents"
+        if ($importsContent -notmatch 'BlazorAjaxToolkitComponents') {
+            # Insert after BlazorWebFormsComponents.LoginControls
+            $importsContent = $importsContent -replace '(@using BlazorWebFormsComponents\.LoginControls)', "`$1`n$ajaxLine"
+            Set-Content -Path $importsPath -Value $importsContent -Encoding UTF8
+            Write-TransformLog -File '_Imports.razor' -Transform 'AjaxToolkit' -Detail 'Added @using BlazorAjaxToolkitComponents (AJAX Toolkit controls detected)'
+        }
+    }
+}
+
+#endregion
+
 #region --- Summary ---
 
 Write-Host '============================================================' -ForegroundColor Cyan
@@ -2562,6 +3511,7 @@ Write-Host "  Transforms applied:    $($script:TransformsApplied)"
 Write-Host "  Static files copied:   $staticCount"
 Write-Host "  Model files copied:    $modelsCopied"
 Write-Host "  BLL files copied:      $bllCopied"
+Write-Host "  App_Start files copied: $appStartCopied"
 Write-Host "  Items needing review:  $($script:ManualItems.Count)"
 Write-Host ''
 

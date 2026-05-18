@@ -1,0 +1,153 @@
+@using Shouldly
+
+@code {
+	[Fact]
+	public void GridView_EditMode_BoundField_RendersRowScopedName()
+	{
+		var data = new List<NamingTestProduct>
+		{
+			new NamingTestProduct { Name = "Widget", Price = 9.99m },
+			new NamingTestProduct { Name = "Gadget", Price = 19.99m }
+		};
+
+		// Edit row 0 — BoundField should get name="CartGrid$ctl02$Name"
+		var cut = Render(@<GridView ItemType="NamingTestProduct" ID="CartGrid"
+						DataSource="data" AutoGenerateColumns="false" EditIndex="0"
+						RowEditing="@((GridViewEditEventArgs e) => { })"
+						RowUpdating="@((GridViewUpdateEventArgs e) => { })"
+						RowCancelingEdit="@((GridViewCancelEditEventArgs e) => { })">
+			<Columns>
+				<BoundField ItemType="NamingTestProduct" DataField="Name" HeaderText="Name" />
+				<BoundField ItemType="NamingTestProduct" DataField="Price" HeaderText="Price" />
+			</Columns>
+		</GridView>);
+
+		// Row 0 is in edit mode, so it should have <input> elements
+		var rows = cut.FindAll("tbody tr");
+		var editInputs = rows[0].QuerySelectorAll("input[type='text']");
+
+		editInputs.Length.ShouldBe(2);
+
+		// First input should be for "Name" with row-scoped naming: CartGrid$ctl02$Name
+		editInputs[0].GetAttribute("name").ShouldBe("CartGrid$ctl02$Name");
+
+		// Second input should be for "Price": CartGrid$ctl02$Price
+		editInputs[1].GetAttribute("name").ShouldBe("CartGrid$ctl02$Price");
+	}
+
+	[Fact]
+	public void GridView_EditMode_SecondRow_UsesCtl03()
+	{
+		var data = new List<NamingTestProduct>
+		{
+			new NamingTestProduct { Name = "Widget", Price = 9.99m },
+			new NamingTestProduct { Name = "Gadget", Price = 19.99m }
+		};
+
+		// Edit row 1 — should use ctl03
+		var cut = Render(@<GridView ItemType="NamingTestProduct" ID="MyGrid"
+						DataSource="data" AutoGenerateColumns="false" EditIndex="1"
+						RowEditing="@((GridViewEditEventArgs e) => { })"
+						RowUpdating="@((GridViewUpdateEventArgs e) => { })"
+						RowCancelingEdit="@((GridViewCancelEditEventArgs e) => { })">
+			<Columns>
+				<BoundField ItemType="NamingTestProduct" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var rows = cut.FindAll("tbody tr");
+		var editInputs = rows[1].QuerySelectorAll("input[type='text']");
+
+		editInputs.Length.ShouldBe(1);
+		editInputs[0].GetAttribute("name").ShouldBe("MyGrid$ctl03$Name");
+	}
+
+	[Fact]
+	public void GridView_TemplateField_TextBox_RendersRowScopedName()
+	{
+		var data = new List<NamingTestProduct>
+		{
+			new NamingTestProduct { Name = "Widget", Price = 9.99m },
+			new NamingTestProduct { Name = "Gadget", Price = 19.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="NamingTestProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="NamingTestProduct" HeaderText="Qty">
+					<ItemTemplate>
+						<TextBox ID="PurchaseQuantity" Text="1" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var inputs = cut.FindAll("input[type='text']");
+		inputs.Count.ShouldBe(2);
+
+		// Row 0 = ctl02, Row 1 = ctl03
+		inputs[0].GetAttribute("name").ShouldBe("CartList$ctl02$PurchaseQuantity");
+		inputs[1].GetAttribute("name").ShouldBe("CartList$ctl03$PurchaseQuantity");
+	}
+
+	[Fact]
+	public void GridView_TemplateField_CheckBox_RendersRowScopedName()
+	{
+		var data = new List<NamingTestProduct>
+		{
+			new NamingTestProduct { Name = "Widget", Price = 9.99m },
+			new NamingTestProduct { Name = "Gadget", Price = 19.99m },
+			new NamingTestProduct { Name = "Doohickey", Price = 29.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="NamingTestProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="NamingTestProduct" HeaderText="Remove">
+					<ItemTemplate>
+						<CheckBox ID="RemoveItem" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var checkboxes = cut.FindAll("input[type='checkbox']");
+		checkboxes.Count.ShouldBe(3);
+
+		checkboxes[0].GetAttribute("name").ShouldBe("CartList$ctl02$RemoveItem");
+		checkboxes[1].GetAttribute("name").ShouldBe("CartList$ctl03$RemoveItem");
+		checkboxes[2].GetAttribute("name").ShouldBe("CartList$ctl04$RemoveItem");
+	}
+
+	[Fact]
+	public void GridView_WithoutID_StillGeneratesCtlNames()
+	{
+		var data = new List<NamingTestProduct>
+		{
+			new NamingTestProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="NamingTestProduct"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="NamingTestProduct" HeaderText="Qty">
+					<ItemTemplate>
+						<TextBox ID="Qty" Text="1" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var inputs = cut.FindAll("input[type='text']");
+		inputs.Count.ShouldBe(1);
+
+		// No grid ID, so naming context is just ctl02
+		inputs[0].GetAttribute("name").ShouldBe("ctl02$Qty");
+	}
+
+	public class NamingTestProduct
+	{
+		public string Name { get; set; }
+		public decimal Price { get; set; }
+	}
+}

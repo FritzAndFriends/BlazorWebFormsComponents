@@ -1,15 +1,8 @@
 namespace WingtipToys.Account;
 
-// TODO: Requires ASP.NET Core Identity migration — 2FA sign-in needs SignInManager/UserManager
-public partial class TwoFactorAuthenticationSignIn
+public partial class TwoFactorAuthenticationSignIn : BlazorWebFormsComponents.WebFormsPageBase
 {
-    private void ProviderSubmit_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
-    {
-        // TODO: Implement with SignInManager
-    }
-
-    private void CodeSubmit_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
-    {
-        // TODO: Implement with SignInManager
-    }
+    // TODO: Migrate from Account/TwoFactorAuthenticationSignIn.aspx
+    // Original features: ASP.NET Identity or membership APIs
+    // Quarantine reason: Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.
 }

@@ -30,8 +30,8 @@ Once installed, diagnostics appear automatically in Visual Studio's Error List a
 | Rule ID | Severity | Name | What It Detects |
 |---------|----------|------|-----------------|
 | [BWFC001](#bwfc001-missing-parameter-attribute) | ⚠️ Warning | Missing `[Parameter]` Attribute | Public properties on WebControl subclasses without `[Parameter]` |
-| [BWFC002](#bwfc002-viewstate-usage) | ⚠️ Warning | ViewState Usage | `ViewState["key"]` access patterns |
-| [BWFC003](#bwfc003-ispostback-usage) | ⚠️ Warning | IsPostBack Usage | `IsPostBack` or `Page.IsPostBack` checks |
+| [BWFC002](#bwfc002-viewstate-usage) | ℹ️ Info | ViewState Usage | `ViewState["key"]` access patterns |
+| [BWFC003](#bwfc003-ispostback-usage) | ℹ️ Info | IsPostBack Usage | `IsPostBack` or `Page.IsPostBack` checks |
 | [BWFC004](#bwfc004-responseredirect-usage) | ⚠️ Warning | Response.Redirect Usage | `Response.Redirect()` calls |
 | [BWFC005](#bwfc005-session-state-usage) | ⚠️ Warning | Session State Usage | `Session["key"]` and `HttpContext.Current` access |
 | [BWFC010](#bwfc010-required-attribute-missing) | ℹ️ Info | Required Attribute Missing | BWFC components instantiated without critical properties |
@@ -39,6 +39,7 @@ Once installed, diagnostics appear automatically in Visual Studio's Error List a
 | [BWFC012](#bwfc012-runatserver-leftover) | ⚠️ Warning | runat="server" Leftover | String literals containing `runat="server"` |
 | [BWFC013](#bwfc013-response-object-usage) | ⚠️ Warning | Response Object Usage | `Response.Write()`, `Response.WriteFile()`, `Response.Clear()`, `Response.Flush()`, `Response.End()` |
 | [BWFC014](#bwfc014-request-object-usage) | ⚠️ Warning | Request Object Usage | `Request.Form[]`, `Request.Cookies[]`, `Request.Headers[]`, `Request.Files`, `Request.QueryString[]`, `Request.ServerVariables[]` |
+| [BWFC025](#bwfc025-non-serializable-viewstate-type) | ⚠️ Warning | Non-Serializable ViewState Type | `ViewState["key"]` assignments with non-JSON-serializable types |
 
 ---
 
@@ -90,16 +91,16 @@ Adds `[Parameter]` to the property and inserts `using Microsoft.AspNetCore.Compo
 
 ## BWFC002: ViewState Usage
 
-**Severity:** ⚠️ Warning  
+**Severity:** ℹ️ Info  
 **Category:** Usage
 
 ### What It Detects
 
-`ViewState["key"]` and `this.ViewState["key"]` element-access patterns in code-behind. Blazor has no ViewState mechanism — it uses in-memory component state instead.
+`ViewState["key"]` and `this.ViewState["key"]` element-access patterns in code-behind. This diagnostic is now informational because the BWFC `ViewStateDictionary` shim provides working ViewState support during migration. The analyzer still highlights these patterns to encourage eventual adoption of native Blazor state management.
 
 ### Why It Matters
 
-ViewState was the persistence mechanism for Web Forms page lifecycle. In Blazor, components live in memory on the server (Blazor Server) or in the browser (Blazor WebAssembly). State is naturally preserved across re-renders as regular C# fields and properties — no serialization needed. Any leftover `ViewState` access will either fail at compile time or use the BWFC compatibility shim, which is meant as a stepping stone, not a long-term solution.
+ViewState is now supported as a working migration shim via `ViewStateDictionary` — your `ViewState["key"]` code will compile and run correctly in Blazor. However, native Blazor patterns (component fields, `[Parameter]` properties, cascading values) are preferred for new code because they are type-safe, avoid serialization overhead, and are idiomatic Blazor.
 
 ### Example
 
@@ -142,20 +143,27 @@ private string SortDirection { get; set; } = "ASC";
 !!! note "See Also"
     The [ViewState utility documentation](../UtilityFeatures/ViewState.md) explains the BWFC compatibility shim and the recommended path to component state.
 
+!!! info "Severity Reduced (Phase 4)"
+    This analyzer was reduced from Warning to Info because the BWFC `ViewStateDictionary` shim now provides working ViewState support. The code fix still suggests migrating to native Blazor patterns, which remains the recommended long-term approach.
+
+<!-- TODO: Add Visual Studio screenshot showing BWFC002 Info squiggle on ViewState["key"] usage -->
+<!-- Screenshot should show: the green info squiggle under ViewState["SortDirection"], the lightbulb, and the tooltip message -->
+![BWFC002 Info squiggle in Visual Studio](../images/analyzers/bwfc002-info-squiggle.png){ .analyzer-screenshot }
+
 ---
 
 ## BWFC003: IsPostBack Usage
 
-**Severity:** ⚠️ Warning  
+**Severity:** ℹ️ Info  
 **Category:** Usage
 
 ### What It Detects
 
-References to `IsPostBack` and `Page.IsPostBack` in code-behind. Blazor does not use the postback model — it uses component lifecycle methods instead.
+References to `IsPostBack` and `Page.IsPostBack` in code-behind. This diagnostic is now informational because BWFC provides mode-adaptive `IsPostBack` support that works correctly during migration.
 
 ### Why It Matters
 
-In Web Forms, `IsPostBack` distinguished between the initial page load and subsequent postbacks. In Blazor, this distinction maps to lifecycle methods:
+`IsPostBack` is now supported as a working migration shim — in SSR mode it checks `HttpMethods.IsPost()`, and in Interactive mode it tracks initialization state. Your existing `if (!IsPostBack)` guards will work correctly. However, the idiomatic Blazor approach is to use lifecycle methods directly:
 
 | Web Forms Pattern | Blazor Equivalent |
 |-------------------|-------------------|
@@ -198,6 +206,13 @@ protected override void OnInitialized()
     BindGrid();
 }
 ```
+
+!!! info "Severity Reduced (Phase 4)"
+    This analyzer was reduced from Warning to Info because BWFC now provides mode-adaptive `IsPostBack` support (SSR checks HTTP POST method, Interactive tracks initialization state). The code fix still suggests lifecycle methods, which is the idiomatic Blazor approach.
+
+<!-- TODO: Add Visual Studio screenshot showing BWFC003 Info squiggle on IsPostBack usage -->
+<!-- Screenshot should show: the green info squiggle under IsPostBack, the lightbulb, and the tooltip message -->
+![BWFC003 Info squiggle in Visual Studio](../images/analyzers/bwfc003-info-squiggle.png){ .analyzer-screenshot }
 
 ---
 
@@ -709,6 +724,79 @@ Use the `InputFile` component:
 
 ---
 
+## BWFC025: Non-Serializable ViewState Type
+
+**Severity:** ⚠️ Warning  
+**Category:** Usage
+
+### What It Detects
+
+Assignments to `ViewState["key"]` or `ViewState.Set<T>()` where the value type is unlikely to be JSON-serializable. The analyzer flags:
+
+| Type Pattern | Why It's Flagged |
+|---|---|
+| `IDisposable` implementations | Streams, DB connections, HttpClient — not safe to serialize |
+| Delegates and event handlers | Cannot be serialized to JSON |
+| `System.Data.DataSet` / `DataTable` | Common Web Forms pattern, but complex object graphs fail with System.Text.Json |
+| `System.Web.*` types | ASP.NET classic types not available in .NET 8+ |
+| `System.IO.Stream*` types | OS handles cannot be serialized |
+| `System.Net.*` types | Network objects cannot be serialized |
+
+### Why It Matters
+
+In SSR mode, BWFC serializes `ViewStateDictionary` contents to JSON using `System.Text.Json` and embeds them in a hidden form field. Types that lack a parameterless constructor, have non-public properties, or represent OS handles will fail at runtime with a `JsonException`.
+
+In Interactive Server mode, ViewState is kept in memory and serialization is skipped — so the same code may work interactively but fail in SSR. This analyzer catches the problem at compile time.
+
+### Example
+
+=== "Before (triggers BWFC025)"
+    ```csharp
+    protected override void OnInitialized()
+    {
+        // ⚠️ MemoryStream implements IDisposable — not JSON-serializable
+        ViewState["ReportData"] = new MemoryStream();
+
+        // ⚠️ DataTable has complex internal structure — fails with System.Text.Json
+        ViewState["Results"] = new DataTable();
+    }
+    ```
+
+=== "After (fixed)"
+    ```csharp
+    protected override void OnInitialized()
+    {
+        // ✅ Store the byte array, not the stream
+        ViewState.Set<byte[]>("ReportData", GenerateReport());
+
+        // ✅ Convert to a serializable collection
+        ViewState.Set<List<Dictionary<string, object>>>("Results",
+            ConvertDataTableToList(dataTable));
+    }
+    ```
+
+### No Code Fix
+
+This analyzer does not have an automatic code fix because the correct replacement depends on your specific data structure. Common strategies:
+
+- **Streams** → Store `byte[]` or `string` (base64)
+- **DataTable** → Convert to `List<T>` of POCOs
+- **Complex objects** → Create a DTO with public properties and a parameterless constructor
+- **Delegates** → Don't store in ViewState; use component fields instead
+
+!!! tip "Check Serialization"
+    You can verify a type serializes correctly by testing:
+    ```csharp
+    var json = System.Text.Json.JsonSerializer.Serialize(myValue);
+    var roundTrip = System.Text.Json.JsonSerializer.Deserialize<MyType>(json);
+    ```
+
+<!-- TODO: Add Visual Studio screenshot showing BWFC025 Warning squiggle on ViewState assignment with DataTable -->
+<!-- Screenshot should show: the yellow warning squiggle under the assignment, tooltip showing "ViewState assignment stores 'System.Data.DataTable' which may not be JSON-serializable" -->
+![BWFC025 Warning squiggle in Visual Studio](../images/analyzers/bwfc025-warning-squiggle.png){ .analyzer-screenshot }
+
+---
+
 ## Using Analyzers in CI/CD
 
 The analyzers integrate seamlessly with `dotnet build` and CI/CD pipelines. You can configure severity levels per rule and fail the build on violations.
@@ -720,18 +808,19 @@ The analyzers integrate seamlessly with `dotnet build` and CI/CD pipelines. You 
 
 # Mandatory rules: fail the build
 dotnet_diagnostic.BWFC001.severity = error
-dotnet_diagnostic.BWFC003.severity = error
 dotnet_diagnostic.BWFC004.severity = error
 
 # Important patterns: treat as warnings
-dotnet_diagnostic.BWFC002.severity = warning
 dotnet_diagnostic.BWFC005.severity = warning
 dotnet_diagnostic.BWFC011.severity = warning
 dotnet_diagnostic.BWFC012.severity = warning
 dotnet_diagnostic.BWFC013.severity = warning
 dotnet_diagnostic.BWFC014.severity = warning
+dotnet_diagnostic.BWFC025.severity = warning
 
 # Informational patterns: visible but don't block build
+dotnet_diagnostic.BWFC002.severity = suggestion
+dotnet_diagnostic.BWFC003.severity = suggestion
 dotnet_diagnostic.BWFC010.severity = suggestion
 ```
 
@@ -770,10 +859,10 @@ These patterns prevent your components from working at all:
    - Components silently ignore bound values → visual regression
    - Usually quick fixes (add one attribute per property)
 
-2. **BWFC003** — `IsPostBack` checks
-   - Affects page initialization and event handling
-   - Core logic may depend on this check
-   - Need to refactor to `OnInitialized` / event handlers
+2. **BWFC003** — `IsPostBack` checks (ℹ️ now Info)
+   - IsPostBack works via the BWFC mode-adaptive shim during migration
+   - Refactor to `OnInitialized` / event handlers when ready to adopt native patterns
+   - Severity reduced from Warning to Info — IsPostBack is a working migration shim
 
 3. **BWFC004** — `Response.Redirect()` calls
    - All navigation breaks → user can't move between pages
@@ -787,9 +876,10 @@ These patterns prevent your components from working at all:
 
 These affect how data flows through your app:
 
-5. **BWFC002** — `ViewState` usage
-   - Replace with component fields/properties
-   - May require refactoring persistence logic
+5. **BWFC002** — `ViewState` usage (ℹ️ now Info)
+   - ViewState works via the BWFC shim during migration
+   - Replace with component fields/properties when ready to adopt native patterns
+   - Severity reduced from Warning to Info — ViewStateDictionary is a working migration shim
 
 6. **BWFC005** — `Session` and `HttpContext` access
    - Replace with scoped services, protected storage, etc.
@@ -799,19 +889,23 @@ These affect how data flows through your app:
    - Replace with route parameters, `@bind`, `InputFile`, etc.
    - Usually straightforward per-instance fixes
 
+8. **BWFC025** — Non-serializable ViewState types (⚠️ Warning)
+   - Catches types that will fail JSON serialization in SSR mode
+   - Fix before deploying to SSR — these cause runtime exceptions
+
 ### Phase 3: Output & Response Patterns (Fix Last)
 
 These are less common and more specialized:
 
-8. **BWFC013** — `Response.Write()`, `Response.WriteFile()`, etc.
+9. **BWFC013** — `Response.Write()`, `Response.WriteFile()`, etc.
    - Less common in modern applications
    - Usually isolated to reporting/export features
 
-9. **BWFC012** — `runat="server"` in strings
-   - Pure string cleanup, no logic impact
-   - Can be done last as a polish pass
+10. **BWFC012** — `runat="server"` in strings
+    - Pure string cleanup, no logic impact
+    - Can be done last as a polish pass
 
-10. **BWFC010** — Missing required attributes
+11. **BWFC010** — Missing required attributes
     - Usually caught by testing; low risk
     - Fix as you discover missing data
 

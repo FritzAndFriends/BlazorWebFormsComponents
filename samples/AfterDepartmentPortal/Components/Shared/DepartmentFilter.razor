@@ -1,0 +1,18 @@
+@* Migrated from: DepartmentPortal/Controls/DepartmentFilter.ascx
+   Original: DropDownList of departments for filtering lists.
+   Bound to PortalDataProvider.GetDepartments(). Fires SelectedIndexChanged event. *@
+
+<div class="mb-3">
+    <label class="form-label">Filter by Department</label>
+    <select class="form-select">
+        <option value="">All Departments</option>
+        @foreach (var dept in PortalDataProvider.GetDepartments())
+        {
+            <option value="@dept.Id">@dept.Name</option>
+        }
+    </select>
+</div>
+
+@code {
+    [Parameter] public EventCallback<int?> OnDepartmentChanged { get; set; }
+}

@@ -126,7 +126,7 @@ namespace BlazorWebFormsComponents.Diagnostics
 		};
 
 		private Dictionary<string, TrackedComponent> _trackedComponents;
-		private Dictionary<string, Type> _discoveredTypes;
+		private readonly Dictionary<string, Type> _discoveredTypes;
 
 		/// <summary>
 		/// Creates a new ComponentHealthService that performs live reflection and file scanning.
@@ -248,23 +248,14 @@ namespace BlazorWebFormsComponents.Diagnostics
 				var declaredProps = currentType.GetProperties(
 					BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
 
-				foreach (var prop in declaredProps)
+				// [Obsolete] properties are still counted — they represent
+				// migration-compatible implementations (Pattern B+).
+				foreach (var prop in declaredProps
+					.Where(p => HasParameterAttribute(p))
+					.Where(p => !HasCascadingParameterAttribute(p))
+					.Where(p => !ExcludedPropertyNames.Contains(p.Name))
+					.Where(p => !IsRenderFragmentType(p.PropertyType)))
 				{
-					if (!HasParameterAttribute(prop))
-						continue;
-
-					// [Obsolete] properties are still counted — they represent
-					// migration-compatible implementations (Pattern B+).
-
-					if (HasCascadingParameterAttribute(prop))
-						continue;
-
-					if (ExcludedPropertyNames.Contains(prop.Name))
-						continue;
-
-					if (IsRenderFragmentType(prop.PropertyType))
-						continue;
-
 					if (IsEventCallbackType(prop.PropertyType))
 					{
 						events.Add(prop.Name);

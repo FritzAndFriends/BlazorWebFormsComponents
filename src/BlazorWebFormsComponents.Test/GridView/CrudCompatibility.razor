@@ -1,0 +1,94 @@
+@using Shouldly
+@using System.Collections.Generic
+@using System.Linq
+
+@code {
+	[Fact]
+	public void GridView_CommandField_RendersButtonsInConfiguredColumnPositions()
+	{
+		var data = new List<CrudStudent>
+		{
+			new() { ID = 1, Name = "Alice", Email = "alice@example.com" }
+		};
+
+		var cut = Render(@<GridView ItemType="CrudStudent" DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<CommandField ItemType="CrudStudent" HeaderText="Delete Student" ShowDeleteButton="true" ButtonType="Button" />
+				<BoundField ItemType="CrudStudent" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+				<CommandField ItemType="CrudStudent" HeaderText="Update Student" ShowEditButton="true" ButtonType="Button" />
+			</Columns>
+		</GridView>);
+
+		var cells = cut.FindAll("tbody tr td");
+		cells.Count.ShouldBe(3);
+		cells[0].TextContent.ShouldContain("Delete");
+		cells[1].TextContent.Trim().ShouldBe("1");
+		cells[2].TextContent.ShouldContain("Edit");
+	}
+
+	[Fact]
+	public void GridView_UpdateRow_PopulatesKeysAndNewValues()
+	{
+		GridViewUpdateEventArgs? capturedArgs = null;
+		var data = new List<CrudStudent>
+		{
+			new() { ID = 1, Name = "Alice", Email = "alice@example.com" }
+		};
+
+		var cut = Render(@<GridView ItemType="CrudStudent" ID="grv" DataSource="data" AutoGenerateColumns="false" DataKeyNames="ID" EditIndex="0"
+						RowUpdating="@((GridViewUpdateEventArgs e) => capturedArgs = e)"
+						RowCancelingEdit="@((GridViewCancelEditEventArgs e) => { })">
+			<Columns>
+				<CommandField ItemType="CrudStudent" ShowEditButton="true" />
+				<BoundField ItemType="CrudStudent" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+				<BoundField ItemType="CrudStudent" DataField="Name" HeaderText="Student Name" />
+				<BoundField ItemType="CrudStudent" DataField="Email" HeaderText="Email" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CrudStudent>>().Instance;
+		var row = gridView.Rows[0];
+		row.FormRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["Name"] = "Alice Updated",
+			["Email"] = "updated@example.com"
+		};
+
+		cut.FindAll("tbody tr td a").First(a => a.TextContent == "Update").Click();
+
+		capturedArgs.ShouldNotBeNull();
+		capturedArgs.Keys["ID"].ShouldBe(1);
+		capturedArgs.NewValues["Name"].ShouldBe("Alice Updated");
+		capturedArgs.NewValues["Email"].ShouldBe("updated@example.com");
+		capturedArgs.OldValues["Name"].ShouldBe("Alice");
+	}
+
+	[Fact]
+	public void GridViewRow_Cells_Text_PreservesCommandFieldOffsets()
+	{
+		var data = new List<CrudStudent>
+		{
+			new() { ID = 7, Name = "Bob", Email = "bob@example.com" }
+		};
+
+		var cut = Render(@<GridView ItemType="CrudStudent" DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<CommandField ItemType="CrudStudent" ShowDeleteButton="true" />
+				<BoundField ItemType="CrudStudent" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+				<BoundField ItemType="CrudStudent" DataField="Name" HeaderText="Student Name" />
+			</Columns>
+		</GridView>);
+
+		var row = cut.FindComponent<GridView<CrudStudent>>().Instance.Rows[0];
+		row.Cells[0].Text.ShouldBe(string.Empty);
+		row.Cells[1].Text.ShouldBe("7");
+		row.Cells[2].Text.ShouldBe("Bob");
+	}
+
+	private class CrudStudent
+	{
+		public int ID { get; set; }
+		public string Name { get; set; } = string.Empty;
+		public string Email { get; set; } = string.Empty;
+	}
+}

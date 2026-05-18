@@ -64,6 +64,6 @@ public class ResponseShim
 		if (url.StartsWith("~/")) url = url[1..]; // ~/path → /path
 		if (url.EndsWith(".aspx", StringComparison.OrdinalIgnoreCase))
 			url = url[..^5]; // /path.aspx → /path
-		_nav.NavigateTo(url, forceLoad: false);
+		_nav.NavigateTo(url, forceLoad: true);
 	}
 }

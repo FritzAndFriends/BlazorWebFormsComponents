@@ -6,6 +6,31 @@ confidence: "medium"
 source: "earned"
 ---
 
+## ⛔ MANDATORY RULES — Read Before Any Migration Work
+
+### Data control migration is non-negotiable
+
+- **NEVER replace `<asp:ListView>`, `<asp:FormView>`, `<asp:GridView>`, `<asp:DataList>`, or `<asp:Repeater>` with manual HTML, `<table>` markup, or `@foreach` loops.**
+- **ALWAYS migrate them to the BWFC component of the same name:** `<ListView>`, `<FormView>`, `<GridView>`, `<DataList>`, and `<Repeater>`.
+- These components already exist in the **BlazorWebFormsComponents** library and are the **correct migration target**.
+- If generated BWFC markup does not compile, **fix the markup so the BWFC component works** — **do not replace the component** with hand-written HTML.
+
+1. **ALL migrated pages inherit WebFormsPageBase** via `@inherits BlazorWebFormsComponents.WebFormsPageBase` in `_Imports.razor`. This gives every page: Session, Response, Request, Server, Cache, ClientScript, ViewState, IsPostBack.
+
+2. **PRESERVE the original Web Forms API calls.** If the Web Forms code says `Session["CartId"]`, the Blazor code says `Session["CartId"]`. If it says `Response.Redirect("ShoppingCart.aspx")`, the Blazor code says `Response.Redirect("ShoppingCart")`. The shims handle the translation.
+
+3. **NEVER inject raw ASP.NET Core services** when a shim exists:
+   - ❌ `[Inject] IHttpContextAccessor` → ✅ Use `Request`, `Response`, `Session` properties
+   - ❌ `[Inject] NavigationManager` (for redirects) → ✅ Use `Response.Redirect()`
+   - ❌ `[Inject] IMemoryCache` → ✅ Use `Cache` property
+   - ❌ `HttpContext.Session["key"]` → ✅ Use `Session["key"]`
+
+4. **NEVER create Minimal API endpoints** to replace Web Forms page actions. If it was a page in Web Forms, it's a page in Blazor.
+
+5. **NEVER use cookies to replace Session.** If the original code used Session, use SessionShim.
+
+6. **`AddBlazorWebFormsComponents()`** in Program.cs registers ALL shims automatically.
+
 ## Context
 
 When migrating an ASP.NET Web Forms application to Blazor using BlazorWebFormsComponents, these standards define the canonical target architecture, tooling choices, and migration patterns. Established through five WingtipToys migration benchmark runs and codified as a directive by Jeffrey T. Fritz.
@@ -26,7 +51,7 @@ Apply these standards to:
 | Project template | `dotnet new blazor --interactivity Server` |
 | Render mode | Global Server Interactive (see [Render Mode Placement](#render-mode-placement) below) |
 | Base class | `WebFormsPageBase` for pages (`@inherits` in `_Imports.razor`); `ComponentBase` for non-page components |
-| Layout | `MainLayout.razor` with `@inherits LayoutComponentBase` and `@Body` |
+| Layout | Native `MainLayout.razor` with `@Body` for single-slot pages; BWFC `<MasterPage>` shell + `<ChildComponents>` for migrated master/content pages |
 
 ### Render Mode Placement
 
@@ -75,14 +100,24 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 | `Title` | Delegates to `IPageService.Title` — `Page.Title = "X"` works unchanged |
 | `MetaDescription` | Delegates to `IPageService.MetaDescription` |
 | `MetaKeywords` | Delegates to `IPageService.MetaKeywords` |
-| `IsPostBack` | Always returns `false` — `if (!IsPostBack)` always enters block |
+| `IsPostBack` | SSR GET → `false`, SSR POST → `true`, Interactive first render → `false`, subsequent → `true` |
 | `Page` | Returns `this` — enables `Page.Title = "X"` dot syntax |
+| `Request` | `RequestShim` — `Request.QueryString`, `Request.Cookies`, `Request.Url`, `Request.Form` |
+| `Response` | `ResponseShim` — `Response.Redirect()` (auto-strips `~/` and `.aspx`), `Response.Cookies` |
+| `Server` | `ServerShim` — `Server.MapPath()`, `Server.HtmlEncode()`, `Server.UrlEncode()` |
+| `Session` | `SessionShim` — `Session["key"]` indexer with `ISession` sync + in-memory fallback |
+| `Cache` | `CacheShim` — `Cache["key"]` indexer, `Cache.Insert()` with expiration, `Cache.Remove()` |
+| `ViewState` | `ViewStateDictionary` — per-component `ViewState["key"]` indexer |
+| `ClientScript` | `ClientScriptShim` — `RegisterStartupScript()`, `RegisterClientScriptBlock()`, `GetPostBackEventReference()` |
+| `PostBack` event | `EventHandler<PostBackEventArgs>` — raised when `__doPostBack()` fires from JavaScript |
+| `ResolveUrl()` | Strips `~/` prefix and `.aspx` extensions |
+| `GetRouteUrl()` | Route URL generation via `LinkGenerator` |
+| `IsHttpContextAvailable` | Guards code that requires HTTP-level features (cookies, headers) |
 
 **What is NOT provided (forces proper Blazor migration):**
 
-- `Page.Request` — use `IHttpContextAccessor` or `NavigationManager`
-- `Page.Response` — use `NavigationManager` for redirects
-- `Page.Session` — use scoped DI services
+- `Page.Application` — use singleton DI services
+- `Page.Trace` — use `ILogger<T>`
 
 **When to still use `@inject IPageService`:** Non-page components (e.g., a shared header or sidebar) that need access to page metadata should inject `IPageService` directly. `WebFormsPageBase` only applies to routable pages.
 
@@ -104,6 +139,8 @@ This gives every page global server interactivity. Do **not** place `@rendermode
 - `SignInManager` / `UserManager` APIs change — full subsystem replacement
 
 ### Event Handler Strategy
+
+> **Phase 2 signature cleanup:** Standard `EventArgs` parameters are stripped (they carry no data). Specialized EventArgs types (`CommandEventArgs`, `GridViewEditEventArgs`, etc.) are preserved and mapped to their BWFC equivalents. See `bwfc-migration` skill CODE-TRANSFORMS.md for the full decision table.
 
 BWFC components already expose EventCallback parameters with **matching Web Forms names**:
 
@@ -143,12 +180,40 @@ The script should preserve the attribute and annotate the signature change neede
 
 > **⚠️ DO NOT convert SelectMethod to Items= binding.** When the original Web Forms markup uses `SelectMethod`, the migrated Blazor markup MUST preserve `SelectMethod` as a delegate reference. Converting to `Items=` loses the native BWFC data-binding pattern and defeats the purpose of drop-in replacement. The ONLY acceptable alternative is when the original Web Forms markup used `DataSource` (not `SelectMethod`), in which case `Items=` is correct.
 
-### Session State → Scoped Services
+### Session State — SessionShim Is the Solution
 
-- Replace `Session["key"]` with a scoped DI service
-- Use `IHttpContextAccessor` for cookie-based persistence when needed
-- Register in `Program.cs` with `builder.Services.AddScoped<TService>()`
-- Example: `Session["CartId"]` → `CartStateService` with cookie-based cart ID
+- **SessionShim is the PRIMARY solution for migrating Session state.** It's auto-registered by `AddBlazorWebFormsComponents()` — `Session["key"]` code-behind works unchanged via `WebFormsPageBase.Session`. Backed by ASP.NET Core `ISession` in SSR mode; falls back to in-memory `ConcurrentDictionary` in interactive mode.
+- **API surface:** `Session["key"]` indexer (get/set), `Session.Get<T>(key)`, `Session.Remove(key)`, `Session.Clear()`, `Session.ContainsKey(key)`, `Session.Count`
+- **When to upgrade:** Only replace `Session["key"]` with a scoped DI service when you need state persistence across browser sessions (e.g., server restarts, distributed servers, or cross-device access). For most migrations, SessionShim is sufficient.
+- **If upgrading to scoped services:** Use `IHttpContextAccessor` for cookie-based persistence when needed. Register in `Program.cs` with `builder.Services.AddScoped<TService>()`. Example: `Session["CartId"]` → `CartStateService` with cookie-based cart ID.
+
+**Example: SessionShim in action**
+
+```csharp
+// Web Forms
+protected void AddToCart_Click(object sender, EventArgs e)
+{
+    var cartId = (string)Session["CartId"];
+    if (string.IsNullOrEmpty(cartId))
+    {
+        cartId = Guid.NewGuid().ToString();
+        Session["CartId"] = cartId;
+    }
+    // ... use cartId
+}
+
+// Blazor with SessionShim — IDENTICAL API
+private async Task AddToCart_Click(MouseEventArgs e)
+{
+    var cartId = (string)Session["CartId"];
+    if (string.IsNullOrEmpty(cartId))
+    {
+        cartId = Guid.NewGuid().ToString();
+        Session["CartId"] = cartId;
+    }
+    // ... use cartId
+}
+```
 
 ### Blazor Enhanced Navigation
 
@@ -205,6 +270,77 @@ This is a BWFC-specific behavior that mirrors Web Forms' `TextBox` `TextChanged`
 - Image paths update: `~/Images/` → `/Images/`
 - Font paths: same pattern
 
+### Compile-Compatibility Shims
+
+BWFC ships shims that let migrated business logic and `App_Start` files compile without modification. These are part of the "Just Make It Compile" strategy — eliminate build errors first, then address runtime behavior.
+
+**These are DROP-IN replacements.** The goal is to preserve the original Web Forms API calls with minimal changes.
+
+| Shim | Namespace | What It Provides |
+|---|---|---|
+| **ConfigurationManager** | `BlazorWebFormsComponents` | `AppSettings["key"]` → reads from `IConfiguration`. `ConnectionStrings["name"]` → reads from `IConfiguration.GetConnectionString()`. |
+| **BundleTable / Bundle / ScriptBundle / StyleBundle** | `System.Web.Optimization` | No-op stubs. `BundleTable.Bundles.Add(...)` compiles and does nothing. `App_Start/BundleConfig.cs` compiles as-is. |
+| **RouteTable / RouteCollection** | `System.Web.Routing` | No-op stubs. `RouteTable.Routes.MapPageRoute(...)` compiles and does nothing. `App_Start/RouteConfig.cs` compiles as-is. |
+| **SessionShim** | `BlazorWebFormsComponents` | `Session["key"]` indexer, `.Get<T>()`, `.Remove()`, `.Clear()`. Backed by `ISession` + in-memory fallback. Auto-registered. |
+| **CacheShim** | `BlazorWebFormsComponents` | `Cache["key"]` indexer, `Cache.Insert()` with absolute/sliding expiration, `Cache.Get<T>()`, `Cache.Remove()`. Wraps `IMemoryCache`. Auto-registered. |
+| **ServerShim** | `BlazorWebFormsComponents` | `Server.MapPath()`, `Server.HtmlEncode()`, `Server.HtmlDecode()`, `Server.UrlEncode()`, `Server.UrlDecode()`. Wraps `IWebHostEnvironment` + `WebUtility`. Auto-registered. |
+| **RequestShim** | `BlazorWebFormsComponents` | `Request.QueryString`, `Request.Cookies`, `Request.Url`, `Request.Form`. Falls back to `NavigationManager` for QueryString/Url when HttpContext unavailable. |
+| **ResponseShim** | `BlazorWebFormsComponents` | `Response.Redirect()` (auto-strips `~/` and `.aspx`), `Response.Cookies`. Wraps `NavigationManager` + `HttpContext`. |
+| **FormShim** | `BlazorWebFormsComponents` | `Request.Form["key"]`, `.GetValues()`, `.AllKeys`, `.Count`, `.ContainsKey()`. Wraps `IFormCollection` or JS interop data. Populated by `<WebFormsForm>`. |
+| **ClientScriptShim** | `BlazorWebFormsComponents` | `RegisterStartupScript()`, `RegisterClientScriptBlock()`, `RegisterClientScriptInclude()`, `GetPostBackEventReference()`, `GetCallbackEventReference()`. Queues scripts, flushes via `IJSRuntime`. Auto-registered. |
+| **ScriptManagerShim** | `BlazorWebFormsComponents` | `ScriptManager.GetCurrent(page)` pattern, delegates all `RegisterXxx` calls to `ClientScriptShim`. Auto-registered. |
+
+**Example: Before/After with Shims**
+
+```csharp
+// ===== Before (Web Forms) =====
+protected void Page_Load(object sender, EventArgs e)
+{
+    string rawId = Request.QueryString["ProductID"];
+    if (int.TryParse(rawId, out int productId))
+    {
+        var cart = new ShoppingCartActions();
+        cart.AddToCart(productId);
+    }
+    Response.Redirect("ShoppingCart.aspx");
+}
+
+// ===== After (Blazor with Shims) — NOTICE: Nearly identical =====
+protected override async Task OnInitializedAsync()
+{
+    string rawId = Request.QueryString["ProductID"];  // RequestShim
+    if (int.TryParse(rawId, out int productId))
+    {
+        await CartService.AddToCartAsync(productId);
+    }
+    Response.Redirect("ShoppingCart");  // ResponseShim — .aspx stripped automatically
+}
+```
+
+**Key observation:** The API calls (`Request.QueryString`, `Response.Redirect`) are **identical**. Only the lifecycle method (`Page_Load` → `OnInitializedAsync`) and service call pattern changed. This is the power of shims — migrate incrementally without rewriting everything.
+
+**ConfigurationManager setup:**
+
+```csharp
+var app = builder.Build();
+app.UseConfigurationManagerShim();   // Binds to IConfiguration
+```
+
+**appsettings.json mapping:** Map `Web.config` `<appSettings>` keys under an `"AppSettings"` section and `<connectionStrings>` under `"ConnectionStrings"`:
+
+```json
+{
+  "AppSettings": {
+    "SiteName": "My Store"
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=...;Database=...;"
+  }
+}
+```
+
+> **BundleConfig/RouteConfig are no-ops.** They exist only to prevent compile errors. In Blazor, use `<link>` / `<script>` tags in `App.razor` for assets and `@page` directives for routing.
+
 ### Generated Code — Variable Declaration Styles
 
 > **CRITICAL:** All local variable declarations in generated Blazor code MUST use `var` (implicit typing), not explicit types. This is enforced by `.editorconfig` as **IDE0007 error**.
@@ -225,14 +361,23 @@ This applies to **both L1-generated scaffolding and L2 Copilot-generated code**.
 
 ### Page Lifecycle Mapping
 
-| Web Forms | Blazor | Notes |
-|---|---|---|
-| `Page_Load` | `OnInitializedAsync` | One-time init |
-| `Page_PreInit` | `OnInitializedAsync` (early) | Theme setup |
-| `Page_PreRender` | `OnAfterRenderAsync` | Post-render logic |
-| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase` | Always enters block; `if (IsPostBack)` without `!` is dead code — flag for review |
-| `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
-| `Response.Redirect` | `NavigationManager.NavigateTo()` | Inject `NavigationManager` |
+| Web Forms | Blazor | Phase | Notes |
+|---|---|---|---|
+| `Page_Load` | `OnInitializedAsync` | Phase 1: compiles as-is; **Phase 2: transform** | One-time init |
+| `Page_Init` | `OnInitialized` | Phase 1: compiles as-is; **Phase 2: transform** | Sync initialization |
+| `Page_PreInit` | `OnInitializedAsync` (early) | Phase 2 | Theme setup |
+| `Page_PreRender` | `OnAfterRenderAsync(bool firstRender)` | Phase 1: compiles as-is; **Phase 2: transform** | Guard with `if (firstRender)` to avoid render loops |
+| `IsPostBack` check | `if (!IsPostBack)` works AS-IS via `WebFormsPageBase`; L1 script auto-unwraps simple guards | Phase 1 | SSR: checks HTTP method (GET→false, POST→true). Interactive: first render→false, subsequent→true. `if (IsPostBack)` without `!` runs in POST/subsequent renders — review for correctness. |
+| `Page.Title` | `Page.Title = "X"` works AS-IS via `WebFormsPageBase` | Phase 1 | `WebFormsPageBase` delegates to `IPageService`. `<BlazorWebFormsComponents.Page />` in layout renders `<PageTitle>` and `<meta>` tags. |
+| `Response.Redirect` | `Response.Redirect("~/Page.aspx")` works AS-IS via `ResponseShim` | Phase 1 | Auto-strips `~/` prefix and `.aspx` extension. Uses `NavigationManager.NavigateTo()` internally. |
+| `Request.Form` | `Request.Form["key"]` works AS-IS via `FormShim` | Phase 1 | Use `<WebFormsForm OnSubmit="SetRequestFormData">` to populate in interactive mode. SSR mode uses native `IFormCollection`. |
+| `Request.QueryString` | `Request.QueryString["key"]` works AS-IS via `RequestShim` | Phase 1 | Always parses from `NavigationManager.Uri` — correct in both SSR and interactive modes. |
+| `Session["key"]` | `Session["key"]` works AS-IS via `SessionShim` | Phase 1 | In-memory fallback in interactive mode; syncs with `ISession` when available. |
+| `Cache["key"]` | `Cache["key"]` works AS-IS via `CacheShim` | Phase 1 | `Cache.Insert()` supports absolute and sliding expiration. Wraps `IMemoryCache`. |
+| `Server.MapPath` | `Server.MapPath("~/path")` works AS-IS via `ServerShim` | Phase 1 | `~/` maps to wwwroot. Other paths relative to ContentRootPath. |
+| `Page.ClientScript` | `ClientScript.RegisterStartupScript(...)` works AS-IS via `ClientScriptShim` | Phase 1 | Queues scripts, flushes via `IJSRuntime` in `OnAfterRenderAsync`. Also supports `GetPostBackEventReference()`. |
+
+> **Phase 2 lifecycle transforms:** After Phase 1 produces compilable code with original `Page_Load`/`Page_Init`/`Page_PreRender` signatures, Phase 2 converts these to proper Blazor lifecycle overrides. See `bwfc-migration` skill for full before/after examples.
 
 ### Layer 1 (Script) vs Layer 2 (Copilot-Assisted) Boundary
 
@@ -253,6 +398,9 @@ Script handles:
 - Scaffold generation (csproj, Program.cs, etc.)
 - SelectMethod/GetRouteUrl flagging
 - Register directive cleanup
+- **IsPostBack guard unwrapping** — simple `if (!IsPostBack) { ... }` guards are auto-unwrapped (body extracted, `if` removed). Complex guards with `else` clauses get TODO comments for manual review.
+- **`.aspx` URL cleanup** — string literals like `"~/Page.aspx?id=5"` are rewritten to `"/Page?id=5"` in code-behind files (tilde-prefixed and relative patterns).
+- **`using` retention for BWFC shims** — `System.Configuration`, `System.Web.Optimization`, and `System.Web.Routing` usings are preserved (as comments with guidance) because BWFC provides compile-compatible shims.
 
 **Layer 2 — Copilot-Assisted** (NOT manual — guided by the `bwfc-migration` skill):
 - EF6 → EF Core (models, DbContext, seed)
@@ -372,4 +520,124 @@ public partial class ProductList : WebFormsPageBase { }
 
 // ALSO RIGHT — for non-page components
 public partial class MyComponent : ComponentBase { }
+```
+
+### ❌ Creating Minimal API Endpoints to Replace Page Actions
+
+```csharp
+// WRONG — turning a Web Forms page into an API endpoint
+app.MapPost("/AddToCart", async (HttpContext context, int productId) =>
+{
+    // ... cart logic
+    return Results.Redirect("/ShoppingCart");
+});
+
+// RIGHT — keep it as a Blazor page with shims
+@page "/AddToCart"
+@inherits WebFormsPageBase
+
+@code {
+    [Parameter] [SupplyParameterFromQuery] public int ProductID { get; set; }
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await CartService.AddToCartAsync(ProductID);
+        Response.Redirect("ShoppingCart");  // Shim handles navigation
+    }
+}
+```
+
+### ❌ Injecting Raw ASP.NET Core Services When Shims Exist
+
+```csharp
+// WRONG — bypassing shims with raw services
+[Inject] private IHttpContextAccessor HttpContextAccessor { get; set; }
+[Inject] private NavigationManager NavManager { get; set; }
+[Inject] private IMemoryCache MemoryCache { get; set; }
+
+protected override void OnInitialized()
+{
+    var session = HttpContextAccessor.HttpContext.Session;
+    var cartId = session.GetString("CartId");
+    
+    MemoryCache.Set("key", value);
+    
+    NavManager.NavigateTo("/ShoppingCart");
+}
+
+// RIGHT — use shims from WebFormsPageBase
+@inherits WebFormsPageBase
+
+protected override void OnInitialized()
+{
+    var cartId = Session["CartId"];  // SessionShim
+    
+    Cache["key"] = value;  // CacheShim
+    
+    Response.Redirect("ShoppingCart");  // ResponseShim
+}
+```
+
+### ❌ Using Cookies to Replace Session
+
+```csharp
+// WRONG — replacing Session with cookies manually
+[Inject] private IHttpContextAccessor HttpContextAccessor { get; set; }
+
+protected override void OnInitialized()
+{
+    var cartId = HttpContextAccessor.HttpContext.Request.Cookies["CartId"];
+    if (string.IsNullOrEmpty(cartId))
+    {
+        cartId = Guid.NewGuid().ToString();
+        HttpContextAccessor.HttpContext.Response.Cookies.Append("CartId", cartId);
+    }
+}
+
+// RIGHT — use SessionShim
+@inherits WebFormsPageBase
+
+protected override void OnInitialized()
+{
+    var cartId = Session["CartId"];
+    if (string.IsNullOrEmpty(cartId))
+    {
+        cartId = Guid.NewGuid().ToString();
+        Session["CartId"] = cartId;
+    }
+}
+```
+
+### ❌ Using [ExcludeFromInteractiveRouting] to Work Around Interactive Mode
+
+```razor
+@* WRONG — fighting the Router instead of using shims *@
+@attribute [ExcludeFromInteractiveRouting]
+@page "/AddToCart"
+
+@* RIGHT — embrace interactive mode with shims *@
+@page "/AddToCart"
+@inherits WebFormsPageBase
+```
+
+### ❌ Adding onclick JavaScript Hacks to Bypass Blazor Routing
+
+```razor
+@* WRONG — using JavaScript to work around routing *@
+<a href="/ShoppingCart" onclick="window.location.href='/ShoppingCart'; return false;">
+    View Cart
+</a>
+
+@* RIGHT — use standard Blazor navigation or shims *@
+<a href="/ShoppingCart">View Cart</a>
+
+@* OR if you need programmatic redirect *@
+<Button Text="View Cart" OnClick="GoToCart" />
+
+@code {
+    private void GoToCart(MouseEventArgs e)
+    {
+        Response.Redirect("ShoppingCart");  // ResponseShim
+    }
+}
 ```

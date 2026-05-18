@@ -15,7 +15,7 @@ namespace BlazorWebFormsComponents
 	/// Displays a single record from a data source in a table layout with one row per field.
 	/// </summary>
 	/// <typeparam name="ItemType">The type of the data items.</typeparam>
-	public partial class DetailsView<ItemType> : DataBoundComponent<ItemType>, IDetailsViewStyleContainer, IPagerSettingsContainer
+	public partial class DetailsView<ItemType> : DataBoundComponent<ItemType>, IColumnCollection<ItemType>, IDetailsViewStyleContainer, IPagerSettingsContainer
 	{
 		#region Properties
 
@@ -408,6 +408,11 @@ namespace BlazorWebFormsComponents
 		private readonly List<DetailsViewField> _fieldDefinitions = new();
 
 		/// <summary>
+		/// Gets the explicit column definitions supplied as child fields.
+		/// </summary>
+		public List<IColumn<ItemType>> ColumnList { get; set; } = new();
+
+		/// <summary>
 		/// Adds a field definition to the DetailsView.
 		/// </summary>
 		internal void AddField(DetailsViewField field)
@@ -422,6 +427,24 @@ namespace BlazorWebFormsComponents
 		internal void RemoveField(DetailsViewField field)
 		{
 			_fieldDefinitions.Remove(field);
+			StateHasChanged();
+		}
+
+		/// <summary>
+		/// Adds an explicit column definition to the DetailsView.
+		/// </summary>
+		public void AddColumn(IColumn<ItemType> column)
+		{
+			ColumnList.Add(column);
+			StateHasChanged();
+		}
+
+		/// <summary>
+		/// Removes an explicit column definition from the DetailsView.
+		/// </summary>
+		public void RemoveColumn(IColumn<ItemType> column)
+		{
+			ColumnList.Remove(column);
 			StateHasChanged();
 		}
 
@@ -561,6 +584,11 @@ namespace BlazorWebFormsComponents
 				return _fieldDefinitions;
 			}
 
+			if (ColumnList.Any())
+			{
+				return ColumnList.Select(column => new DetailsViewColumnField<ItemType>(column)).Cast<DetailsViewField>().ToList();
+			}
+
 			if (!AutoGenerateRows)
 			{
 				return new List<DetailsViewField>();
@@ -692,6 +720,46 @@ namespace BlazorWebFormsComponents
 		}
 
 		#endregion
+
+		/// <summary>
+		/// Applies theme skin properties to this control and its sub-styles.
+		/// </summary>
+		protected override void ApplyThemeSkin(Theming.ControlSkin skin, Theming.ThemeMode mode)
+		{
+			base.ApplyThemeSkin(skin, mode);
+
+			if (skin.SubStyles == null) return;
+
+			if (skin.SubStyles.TryGetValue("HeaderStyle", out var headerStyle))
+				HeaderStyle = ApplySubStyle(HeaderStyle, headerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("RowStyle", out var rowStyle))
+				RowStyle = ApplySubStyle(RowStyle, rowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("AlternatingRowStyle", out var altRowStyle))
+				AlternatingRowStyle = ApplySubStyle(AlternatingRowStyle, altRowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("FooterStyle", out var footerStyle))
+				FooterStyle = ApplySubStyle(FooterStyle, footerStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("CommandRowStyle", out var commandRowStyle))
+				CommandRowStyle = ApplySubStyle(CommandRowStyle, commandRowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("EditRowStyle", out var editRowStyle))
+				EditRowStyle = ApplySubStyle(EditRowStyle, editRowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("InsertRowStyle", out var insertRowStyle))
+				InsertRowStyle = ApplySubStyle(InsertRowStyle, insertRowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("FieldHeaderStyle", out var fieldHeaderStyle))
+				FieldHeaderStyle = ApplySubStyle(FieldHeaderStyle, fieldHeaderStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("EmptyDataRowStyle", out var emptyDataRowStyle))
+				EmptyDataRowStyle = ApplySubStyle(EmptyDataRowStyle, emptyDataRowStyle, mode);
+
+			if (skin.SubStyles.TryGetValue("PagerStyle", out var pagerStyle))
+				PagerStyle = ApplySubStyle(PagerStyle, pagerStyle, mode);
+		}
 	}
 
 	/// <summary>
@@ -718,6 +786,32 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// Represents an auto-generated field that reads a property value using reflection.
 	/// </summary>
+	internal class DetailsViewColumnField<ItemType> : DetailsViewField
+	{
+		private readonly IColumn<ItemType> _column;
+
+		public DetailsViewColumnField(IColumn<ItemType> column)
+		{
+			_column = column;
+			HeaderText = column.HeaderText;
+		}
+
+		public override RenderFragment GetValue(object dataItem, DetailsViewMode mode)
+		{
+			if (dataItem is not ItemType item)
+			{
+				return builder => { };
+			}
+
+			return mode switch
+			{
+				DetailsViewMode.Edit => _column.RenderEdit(item),
+				DetailsViewMode.Insert => _column.RenderEdit(item),
+				_ => _column.Render(item)
+			};
+		}
+	}
+
 	internal class DetailsViewAutoField : DetailsViewField
 	{
 		private readonly PropertyInfo _property;

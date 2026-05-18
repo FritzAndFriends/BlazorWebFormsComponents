@@ -28,42 +28,44 @@ Original Microsoft documentation:
 - Command-based navigation via `BubbleEvent` (use `ActiveViewIndex` binding instead)
 - `EnableTheming` / `SkinID` — theming not supported in Blazor
 
-## Web Forms Declarative Syntax
+## Syntax Comparison
 
-```html
-<asp:MultiView ID="MultiView1" ActiveViewIndex="0" runat="server">
-    <asp:View ID="View1" runat="server">
-        <p>This is View 1</p>
-    </asp:View>
-    <asp:View ID="View2" runat="server">
-        <p>This is View 2</p>
-    </asp:View>
-</asp:MultiView>
-```
+=== "Web Forms"
 
-## Blazor Syntax
+    ```html
+    <asp:MultiView ID="MultiView1" ActiveViewIndex="0" runat="server">
+        <asp:View ID="View1" runat="server">
+            <p>This is View 1</p>
+        </asp:View>
+        <asp:View ID="View2" runat="server">
+            <p>This is View 2</p>
+        </asp:View>
+    </asp:MultiView>
+    ```
 
-```razor
-<MultiView ActiveViewIndex="@activeIndex" OnActiveViewChanged="ViewChanged">
-    <View>
-        <p>This is View 1</p>
-        <Button Text="Next" OnClick="() => activeIndex = 1" />
-    </View>
-    <View>
-        <p>This is View 2</p>
-        <Button Text="Previous" OnClick="() => activeIndex = 0" />
-    </View>
-</MultiView>
+=== "Blazor"
 
-@code {
-    private int activeIndex = 0;
+    ```razor
+    <MultiView ActiveViewIndex="@activeIndex" OnActiveViewChanged="ViewChanged">
+        <View>
+            <p>This is View 1</p>
+            <Button Text="Next" OnClick="() => activeIndex = 1" />
+        </View>
+        <View>
+            <p>This is View 2</p>
+            <Button Text="Previous" OnClick="() => activeIndex = 0" />
+        </View>
+    </MultiView>
 
-    private void ViewChanged(EventArgs e)
-    {
-        // Handle view change
+    @code {
+        private int activeIndex = 0;
+
+        private void ViewChanged(EventArgs e)
+        {
+            // Handle view change
+        }
     }
-}
-```
+    ```
 
 ## HTML Output
 
@@ -121,4 +123,5 @@ MultiView and View render **no wrapper HTML elements**. Only the active View's c
 
 ## See Also
 
-- [Panel](../EditorControls/Panel.md) — Another container component
+- [Panel](../EditorControls/Panel.md) — Div-based container
+- [View](View.md) — Individual view within a MultiView

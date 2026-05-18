@@ -15,15 +15,15 @@ How to decide who handles what.
 | Integration testing | Colossus | Playwright integration tests, sample page verification, end-to-end testing |
 | Code review | Forge | Review PRs, check quality, verify Web Forms compatibility |
 | Copilot skills & prompts | Psylocke | Write/tune SKILL.md files, copilot-instructions templates, prompt engineering, skill effectiveness testing |
-| Migration tooling & scripts | Bishop | Migration scripts (bwfc-migrate.ps1), pipeline tooling, methodology, checklists, control coverage, toolkit packaging |
-| Session logging | Scribe | Automatic — never needs routing |
+| Migration tooling & scripts | Bishop | Migration scripts (`bwfc-migrate.ps1`), pipeline tooling, methodology, checklists, control coverage, toolkit packaging |
+| Session logging | Scribe | Automatic  never needs routing |
 
 ## Rules
 
-1. **Eager by default** — spawn all agents who could usefully start work, including anticipatory downstream work.
+1. **Eager by default**  spawn all agents who could usefully start work, including anticipatory downstream work.
 2. **Scribe always runs** after substantial work, always as `mode: "background"`. Never blocks.
-3. **Quick facts → coordinator answers directly.** Don't spawn an agent for "what port does the server run on?"
+3. **Quick facts  coordinator answers directly.** Don't spawn an agent for "what port does the server run on?"
 4. **When two agents could handle it**, pick the one whose domain is the primary concern.
-5. **"Team, ..." → fan-out.** Spawn all relevant agents in parallel as `mode: "background"`.
+5. **"Team, ..."  fan-out.** Spawn all relevant agents in parallel as `mode: "background"`.
 6. **Anticipate downstream work.** If a component is being built, spawn Rogue for tests, Beast for docs, and Jubilee for samples simultaneously.
 7. **Forge reviews all component work.** Before any component PR merges, Forge must review for Web Forms completeness.

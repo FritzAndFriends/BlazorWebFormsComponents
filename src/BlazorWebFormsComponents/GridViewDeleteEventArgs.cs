@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 
 namespace BlazorWebFormsComponents
 {
@@ -6,6 +7,7 @@ namespace BlazorWebFormsComponents
 	{
 		public int RowIndex { get; }
 		public bool Cancel { get; set; }
+		public IOrderedDictionary Keys { get; set; } = new OrderedDictionary();
 
 		public GridViewDeleteEventArgs(int rowIndex)
 		{

@@ -42,7 +42,11 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.tabbed:
       alternate_style: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
@@ -54,6 +58,7 @@ plugins:
       glob:
         - "_overrides/*"
         - "Dockerfile"
+        - "migration-tests/*"
   - git-revision-date-localized:
       type: iso_datetime
   - macros
@@ -64,6 +69,13 @@ plugins:
 nav:
   - Home: README.md
   - Component Health Dashboard: dashboard.md
+  - Themes and Skins: themes-and-skins.md
+  - CLI Tool:
+    - Overview: cli/index.md
+    - Semantic Pattern Catalog: cli/semantic-pattern-catalog.md
+    - Transform Reference: cli/transforms.md
+    - TODO Categories: cli/todo-conventions.md
+    - Report Format: cli/report.md
   - Editor Controls:
     - AdRotator: EditorControls/AdRotator.md
     - BulletedList: EditorControls/BulletedList.md
@@ -139,19 +151,31 @@ nav:
     - Overview: AjaxToolkit/index.md
     - Migration Guide: AjaxToolkit/migration-guide.md
     - Accordion: AjaxToolkit/Accordion.md
+    - AlwaysVisibleControlExtender: AjaxToolkit/AlwaysVisibleControlExtender.md
     - AutoCompleteExtender: AjaxToolkit/AutoCompleteExtender.md
+    - BalloonPopupExtender: AjaxToolkit/BalloonPopupExtender.md
     - CalendarExtender: AjaxToolkit/CalendarExtender.md
     - CollapsiblePanelExtender: AjaxToolkit/CollapsiblePanelExtender.md
     - ConfirmButtonExtender: AjaxToolkit/ConfirmButtonExtender.md
+    - DragPanelExtender: AjaxToolkit/DragPanelExtender.md
+    - DropShadowExtender: AjaxToolkit/DropShadowExtender.md
     - FilteredTextBoxExtender: AjaxToolkit/FilteredTextBoxExtender.md
     - HoverMenuExtender: AjaxToolkit/HoverMenuExtender.md
+    - ListSearchExtender: AjaxToolkit/ListSearchExtender.md
     - MaskedEditExtender: AjaxToolkit/MaskedEditExtender.md
     - ModalPopupExtender: AjaxToolkit/ModalPopupExtender.md
     - NumericUpDownExtender: AjaxToolkit/NumericUpDownExtender.md
+    - PasswordStrength: AjaxToolkit/PasswordStrength.md
     - PopupControlExtender: AjaxToolkit/PopupControlExtender.md
+    - ResizableControlExtender: AjaxToolkit/ResizableControlExtender.md
+    - RoundedCornersExtender: AjaxToolkit/RoundedCornersExtender.md
     - SliderExtender: AjaxToolkit/SliderExtender.md
+    - SlideShowExtender: AjaxToolkit/SlideShowExtender.md
     - TabContainer: AjaxToolkit/TabContainer.md
+    - TextBoxWatermarkExtender: AjaxToolkit/TextBoxWatermarkExtender.md
     - ToggleButtonExtender: AjaxToolkit/ToggleButtonExtender.md
+    - UpdatePanelAnimationExtender: AjaxToolkit/UpdatePanelAnimationExtender.md
+    - ValidatorCalloutExtender: AjaxToolkit/ValidatorCalloutExtender.md
   - Utility Features:
     - Databinder: UtilityFeatures/Databinder.md
     - EnumParameter: UtilityFeatures/EnumParameter.md
@@ -161,25 +185,56 @@ nav:
     - NamingContainer: UtilityFeatures/NamingContainer.md
     - Page System: UtilityFeatures/PageService.md
     - Response.Redirect: UtilityFeatures/ResponseRedirect.md
+    - Request: UtilityFeatures/RequestShim.md
+    - Server & Path Resolution: UtilityFeatures/ServerShim.md
+    - Cache: UtilityFeatures/CacheShim.md
     - Service Registration: UtilityFeatures/ServiceRegistration.md
     - Styling Components: UtilityFeatures/StylingComponents.md
     - ViewState: UtilityFeatures/ViewState.md
+    - ViewState and PostBack Shim: UtilityFeatures/ViewStateAndPostBack.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
+    - WebFormsForm: UtilityFeatures/WebFormsForm.md
   - Migration:
-      - Getting started: Migration/readme.md
-      - Known Fidelity Divergences: MigrationGuides/KnownFidelityDivergences.md
-      - Automated Migration Guide: Migration/AutomatedMigration.md
-      - Roslyn Analyzers: Migration/Analyzers.md
-      - Deprecation Guidance: Migration/DeprecationGuidance.md
-      - Migration Strategies: Migration/Strategies.md
-      - Custom Controls: Migration/Custom-Controls.md
-      - Deferred Controls: Migration/DeferredControls.md
-      - Master Pages: Migration/MasterPages.md
-      - .NET Standard to the Rescue: Migration/NET-Standard.md
-      - Themes and Skins: Migration/ThemesAndSkins.md
-      - User Controls: Migration/User-Controls.md
-      - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
-      - Web Forms Application Migration Readiness: Migration/migration_readiness.md
-  - Migration Tests:
-      - Overview: migration-tests/README.md
-      - WingtipToys 2026-03-04: migration-tests/wingtiptoys-2026-03-04/report.md
+      - Getting Started: Migration/readme.md
+      - Quick Start Guide: Migration/QuickStart.md
+      - Three-Layer Methodology: Migration/Methodology.md
+      - Control Coverage: Migration/ControlCoverage.md
+      - Strangler Fig Pattern: Migration/StranglerFigPattern.md
+      - Phase 1 - Compilation Shims:
+          - ConfigurationManager: Migration/Phase1-ConfigurationManager.md
+          - App_Start Stubs: Migration/Phase1-AppStartStubs.md
+      - Phase 2 - Runtime Shims:
+          - Session State: Migration/Phase2-SessionShim.md
+          - Page Lifecycle: Migration/Phase2-LifecycleTransforms.md
+          - Event Handler Signatures: Migration/Phase2-EventHandlerSignatures.md
+      - Assess:
+          - Migration Readiness Assessment: Migration/migration_readiness.md
+          - Deprecation Guidance: Migration/DeprecationGuidance.md
+          - Known Fidelity Divergences: MigrationGuides/KnownFidelityDivergences.md
+      - Plan:
+          - Migration Strategies: Migration/Strategies.md
+          - .NET Standard to the Rescue: Migration/NET-Standard.md
+          - Automated Migration Guide: Migration/AutomatedMigration.md
+          - Automated Migration with Copilot: Migration/AutomatedMigrationWithCopilot.md
+          - Roslyn Analyzers: Migration/Analyzers.md
+      - Guides:
+          - ClientScript Migration: Migration/ClientScriptMigrationGuide.md
+      - Implement:
+          - Master Pages: Migration/MasterPages.md
+          - User Controls: Migration/User-Controls.md
+          - Custom Controls: Migration/Custom-Controls.md
+          - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
+          - FindControl Migration: Migration/FindControl-Migration.md
+          - Deferred Controls: Migration/DeferredControls.md
+          - Themes and Skins: Migration/ThemesAndSkins.md
+          - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
+      - Copilot Skills (AI-Assisted):
+          - Overview: Migration/CopilotSkills/Overview.md
+          - Core Migration: Migration/CopilotSkills/CoreMigration.md
+          - Identity & Auth: Migration/CopilotSkills/IdentityMigration.md
+          - Data & Architecture: Migration/CopilotSkills/DataMigration.md
+      - Migration Checklist Template: Migration/ChecklistTemplate.md
+  - Analyzers:
+      - BWFC022: Analyzers/BWFC022.md
+      - BWFC023: Analyzers/BWFC023.md
+      - BWFC024: Analyzers/BWFC024.md
