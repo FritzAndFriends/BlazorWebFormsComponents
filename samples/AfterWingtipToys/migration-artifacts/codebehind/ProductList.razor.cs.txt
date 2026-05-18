@@ -1,3 +1,4 @@
+// TODO(bwfc-query-details): GetProducts now binds through component query properties and a SelectMethod wrapper in the generated .razor file.
 // =============================================================================
 // TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
 //
@@ -22,10 +23,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
-using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
-  public partial class ProductList : WebFormsPageBase
+  public partial class ProductList
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -36,14 +36,9 @@ namespace WingtipToys
     // For non-page classes, inject RequestShim via DI.
 
     private ListView<Product> productList = default!;
-    [Parameter] public string? categoryName { get; set; }
-
     // --- ConfigurationManager Migration ---
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
-    [Inject]
-    protected ProductContext _productContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -57,7 +52,7 @@ namespace WingtipToys
                         [QueryString("id")] int? categoryId,
                         [RouteData] string categoryName)
     {
-      var _db = _productContext; // Injected via DI
+      var _db = new WingtipToys.Models.ProductContext();
       IQueryable<Product> query = _db.Products;
 
       if (categoryId.HasValue && categoryId > 0)
@@ -73,16 +68,5 @@ namespace WingtipToys
       }
       return query;
     }
-  
-    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
-
-    private global::System.Linq.IQueryable<Product> GetProductsQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
-    {
-        totalRowCount = 0;
-        // TODO(bwfc-query-details): Wrapper delegates to the code-behind GetProducts method.
-        var query = GetProducts(CategoryId, categoryName);
-        if (query != null) totalRowCount = query.Count();
-        return query ?? global::System.Linq.Enumerable.Empty<Product>().AsQueryable();
-    }
-}
+  }
 }

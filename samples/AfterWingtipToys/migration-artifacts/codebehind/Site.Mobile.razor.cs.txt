@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace WingtipToys
 {
-    public partial class Site_Mobile : WebFormsPageBase
+    public partial class Site_Mobile
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -47,11 +47,5 @@ namespace WingtipToys
 
 
         }
-    
-    [Parameter]
-    public RenderFragment? ChildContent { get; set; }
-
-    [Parameter]
-    public RenderFragment? ChildComponents { get; set; }
-}
+    }
 }

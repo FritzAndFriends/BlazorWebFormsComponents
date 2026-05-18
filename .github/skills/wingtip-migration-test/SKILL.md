@@ -79,47 +79,8 @@ pwsh src\WingtipToys.AcceptanceTests\bin\Debug\net10.0\playwright.ps1 install
 1. **Determine the next run number**  
    Scan `dev-docs\migration-tests\wingtiptoys\run*` folders and use the next numeric value after the current maximum. Preserve zero padding: `run26`, `run27`, etc.
 
-2. **Initialize the timing ledger**  
-   Create a SQL table and record the run start time **before** any other work:
-
-   ```sql
-   CREATE TABLE IF NOT EXISTS run_timing (
-     phase TEXT PRIMARY KEY,
-     started_at TEXT,
-     finished_at TEXT,
-     notes TEXT
-   );
-   DELETE FROM run_timing;   -- clean slate for this run
-   INSERT INTO run_timing (phase, started_at) VALUES
-     ('total',        strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
-   ```
-
-   At the **start** of each subsequent phase, insert its row:
-   ```sql
-   INSERT INTO run_timing (phase, started_at) VALUES
-     ('phase_name', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
-   ```
-
-   At the **end** of each phase, update its row:
-   ```sql
-   UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
-     WHERE phase = 'phase_name';
-   ```
-
-   Phase names to track (must match these keys exactly):
-
-   | Phase key | Corresponds to |
-   |-----------|---------------|
-   | `total` | Entire run (Phase 0 start → Phase 6 end) |
-   | `preparation` | Phase 0: folder cleanup, report folder creation |
-   | `l1_migration` | Phase 1: `bwfc-migrate.ps1` execution |
-   | `build_repair` | Phase 2: compile-error fixes |
-   | `startup_triage` | Phase 3: DI/config/DB root-cause fixes |
-   | `acceptance_tests` | Phase 4: Playwright test runs + targeted repairs |
-   | `screenshots` | Phase 5: screenshot capture |
-   | `report` | Phase 6: report generation |
-
-   > **Why SQL?** Timestamps persist across tool calls and can be queried at report time to auto-populate the timing table. No manual bookkeeping required.
+2. **Record the start timestamp**  
+   Start total wall-clock timing **before** clearing the output folder.
 
 3. **Clear the output folder contents**  
    Delete everything under `samples\AfterWingtipToys\` while keeping the folder itself.
@@ -127,21 +88,7 @@ pwsh src\WingtipToys.AcceptanceTests\bin\Debug\net10.0\playwright.ps1 install
 4. **Create the report folder early**  
    Create `dev-docs\migration-tests\wingtiptoys\runNN\` and an `images\` subfolder so logs and screenshots have a known destination from the start.
 
-5. **Mark Phase 0 complete**
-   ```sql
-   INSERT INTO run_timing (phase, started_at, finished_at) VALUES
-     ('preparation',
-      (SELECT started_at FROM run_timing WHERE phase = 'total'),
-      strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
-   ```
-
 ### Phase 1: Layer 1 - Migration Toolkit Run
-
-**Start timing:**
-```sql
-INSERT INTO run_timing (phase, started_at) VALUES
-  ('l1_migration', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
-```
 
 Run the toolkit wrapper, not the CLI directly:
 
@@ -159,21 +106,9 @@ Record:
 - Whether the toolkit resolved the nested `samples\WingtipToys\WingtipToys\` app root automatically
 - Whether `.razor` output, scaffold files, and static assets were produced in the expected places
 
-**End timing:**
-```sql
-UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
-  WHERE phase = 'l1_migration';
-```
+### Phase 2: Layer 2/3 - Skill-Guided Repair
 
-### Phase 2: Build Repair (Compile Errors Only)
-
-**Start timing:**
-```sql
-INSERT INTO run_timing (phase, started_at) VALUES
-  ('build_repair', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
-```
-
-Load the migration toolkit skills from `migration-toolkit\skills\` for reference during repair:
+Load and apply the migration toolkit skills from `migration-toolkit\skills\`:
 
 | Skill | Responsibility |
 |-------|---------------|
@@ -182,153 +117,65 @@ Load the migration toolkit skills from `migration-toolkit\skills\` for reference
 | `bwfc-data-migration` | EF/data-layer modernization, service registration, data access fixes |
 | `bwfc-identity-migration` | Authentication and account-page migration |
 
-Repair the generated app **in place**. Do not replace it with a simplified rewrite.
+Repair the generated app **in place**. Do not replace it with a simplified rewrite or a fresh unrelated sample.
 
-**Benchmark constraints:**
+Important benchmark constraint:
+
 - Every repair must be derived from the **current run's freshly generated output**, the raw Web Forms source, BWFC/toolkit rules, and normal debugging/build feedback.
 - Do **not** import repaired files from previous runs, from git history, or from other saved artifacts.
-- **NEVER replace generated BWFC data controls (`ListView`, `FormView`, `GridView`, `DataList`, `Repeater`) with manual HTML.**
 
-Fix **only compile errors** in this phase. Do not rewrite page logic, add features, or restructure files — only make the project build.
+Focus on:
+
+- Keeping the generated project shape in `samples\AfterWingtipToys\`
+- Preserving Web Forms semantics through BWFC shims where available
+- **NEVER replace generated BWFC data controls (`ListView`, `FormView`, `GridView`, `DataList`, `Repeater`) with manual HTML. Fix the generated markup to work with the BWFC component instead.**
+- Fixing build errors iteratively until the app runs cleanly enough for acceptance validation
+- Treating the migration toolkit as the thing under test; manual fixes should be documented as toolkit gaps
+
+### Phase 3: Build Validation
+
+Run:
 
 ```powershell
 dotnet build samples\AfterWingtipToys\WingtipToys.csproj
 ```
 
-**Repair rules:**
-- Fix one error category at a time (missing usings, missing types, syntax errors)
-- Add minimal stubs for missing types (empty class body, not full implementations)
-- Do NOT rewrite code-behind files that already exist — the CLI generated them for a reason
-- Do NOT replace BWFC data controls with manual HTML
-- Rebuild after each batch of fixes to verify progress
-
 Record:
-- Initial error count
-- Error categories
-- Number of rebuild iterations
+
 - Final build status
+- Error and warning counts
+- Major error categories encountered before the final green build
 
-**End timing:**
-```sql
-UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
-  WHERE phase = 'build_repair';
-```
+### Phase 4: Run the Migrated App
 
-### Phase 3: Startup Triage (Root Cause Before Symptoms)
+Start the migrated app and wait until it is responsive.
 
-**Start timing:**
-```sql
-INSERT INTO run_timing (phase, started_at) VALUES
-  ('startup_triage', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
-```
-
-> **CRITICAL: This phase prevents wasted L2 repair work.**
-> Most page-level failures are caused by 1-2 startup issues (missing DB tables, bad connection string, missing DI registration). Fixing the root cause often makes 10+ "broken" pages work instantly. **Never skip this phase.**
-
-#### Step 1: Start the app
+Recommended default:
 
 ```powershell
 dotnet run --project samples\AfterWingtipToys\WingtipToys.csproj
 ```
 
-Watch the console output. If the app crashes at startup, the error message tells you what to fix.
+Use the app's configured launch settings when possible. If you must override the base URL, keep it consistent with the acceptance tests and report it explicitly.
 
-#### Step 2: Smoke test the home page
+### Phase 5: Acceptance Tests
 
-```powershell
-curl -k -s -o NUL -w "%{http_code}" https://localhost:5001/
-```
-
-| Result | Action |
-|--------|--------|
-| **200** | App is running. Proceed to Phase 4. |
-| **500** | Read console logs. Fix the root cause (DB init, config, DI). Do NOT touch page files yet. |
-| **Connection refused** | App crashed at startup. Read console output. Fix and restart. |
-
-#### Step 3: If 500 — diagnose before rewriting
-
-Common root causes and their fixes:
-
-| Console Error Pattern | Root Cause | Fix |
-|----------------------|------------|-----|
-| `Invalid object name 'TableName'` | Tables don't exist | Add `Database.EnsureCreated()` in Program.cs |
-| `Cannot attach the file` / `AttachDbFilename` | Bad connection string | Change to `Initial Catalog=DbName` |
-| `Unable to resolve service for type` | Missing DI registration | Add `builder.Services.AddDbContext<T>()` or similar |
-| `No such table` (SQLite) | Tables don't exist | Add `Database.EnsureCreated()` |
-| `Authentication scheme not registered` | Missing auth config | Add `AddAuthentication()` / `AddDefaultIdentity()` |
-
-**After each root-cause fix:**
-1. Restart the app
-2. Re-run the smoke test
-3. Only proceed to page-level fixes once the home page returns 200
-
-#### Step 4: Verify multiple routes before page repair
-
-Once `/` returns 200, spot-check 3-4 other key routes:
-
-```powershell
-curl -k -s -o NUL -w "%{http_code}" https://localhost:5001/ProductList
-curl -k -s -o NUL -w "%{http_code}" https://localhost:5001/About
-curl -k -s -o NUL -w "%{http_code}" https://localhost:5001/Account/Login
-```
-
-If these all return 200, most pages are working. Skip to acceptance tests (Phase 4). If specific pages return 500, check their console errors — these are genuine page-level issues to fix.
-
-**End timing:**
-```sql
-UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
-  WHERE phase = 'startup_triage';
-```
-
-### Phase 4: Acceptance Tests and Targeted Repair
-
-**Start timing:**
-```sql
-INSERT INTO run_timing (phase, started_at) VALUES
-  ('acceptance_tests', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
-```
-
-Run the Playwright suite against the running app:
+Run the existing Playwright suite against the migrated app:
 
 ```powershell
 $env:WINGTIPTOYS_BASE_URL = "https://localhost:5001"
 dotnet test src\WingtipToys.AcceptanceTests\WingtipToys.AcceptanceTests.csproj --verbosity normal
 ```
 
-**For each failing test:**
-
-1. **Read the failure message** — what did the test expect vs what it got?
-2. **Inspect the specific page** — `curl` or browser check. Is it a 500? Missing content? Wrong layout?
-3. **Check if the CLI already generated the file correctly** — `cat` the .razor and .razor.cs. If the code looks reasonable, the problem may be data/config, not the file itself.
-4. **Make the minimum fix** — don't rewrite the whole file. Fix the specific issue.
-
-**NEVER do this:**
-- See 18 test failures and rewrite 18 files
-- Replace a CLI-generated code-behind with a from-scratch rewrite
-- Add features that weren't in the original Web Forms app
-
 Record:
 
 - Total / passed / failed / skipped counts
-- Per-failure root cause (startup issue? missing content? broken template? missing route?)
-- Which fixes were root-cause (config/startup) vs page-specific
+- Any test retries or targeted fixes needed
 - Final pass condition
 
-If the suite does not pass after targeted repairs, the run is **not** successful. Write a failed run report that explains the blocker. Do not keep rewriting files hoping something sticks.
+If the suite does not pass, the run is **not** successful. Continue repair work or write a failed run report that clearly explains the blocker.
 
-**End timing:**
-```sql
-UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
-  WHERE phase = 'acceptance_tests';
-```
-
-### Phase 5: Screenshot Capture
-
-**Start timing:**
-```sql
-INSERT INTO run_timing (phase, started_at) VALUES
-  ('screenshots', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
-```
+### Phase 6: Screenshot Capture
 
 Capture proof screenshots from the working migrated app and save them under `runNN\images\`.
 
@@ -343,41 +190,9 @@ Recommended minimum set:
 
 Use additional screenshots when they clarify a major success or known defect.
 
-**End timing:**
-```sql
-UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
-  WHERE phase = 'screenshots';
-```
-
-### Phase 6: Report Generation
-
-**Start timing:**
-```sql
-INSERT INTO run_timing (phase, started_at) VALUES
-  ('report', strftime('%Y-%m-%dT%H:%M:%S','now','localtime'));
-```
+### Phase 7: Report Generation
 
 Create `dev-docs\migration-tests\wingtiptoys\runNN\report.md` from `REPORT-TEMPLATE.md`.
-
-#### Populate timing from the ledger
-
-Query the `run_timing` table to fill the report's Timing section:
-
-```sql
-SELECT
-  phase,
-  started_at,
-  finished_at,
-  CASE
-    WHEN finished_at IS NOT NULL AND started_at IS NOT NULL
-    THEN CAST((julianday(finished_at) - julianday(started_at)) * 1440 AS INTEGER) || ' min'
-    ELSE 'not recorded'
-  END AS duration
-FROM run_timing
-ORDER BY rowid;
-```
-
-Copy the query output directly into the Timing table in the report. If a phase was not timed (agent was working across multiple turns without explicit checkpoints), note it as "~estimate" and explain in the Notes column.
 
 The report must include:
 
@@ -398,16 +213,6 @@ Optional supporting artifacts:
 - `raw-data.md`
 - captured command output snippets
 
-**End timing (report + total):**
-```sql
-UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
-  WHERE phase = 'report';
-UPDATE run_timing SET finished_at = strftime('%Y-%m-%dT%H:%M:%S','now','localtime')
-  WHERE phase = 'total';
-```
-
-After closing the timing ledger, re-run the duration query above and update the report's Timing table with the final values. The **Total** row in the report must show the actual elapsed time from run start to report completion.
-
 ## Critical Rules
 
 | Rule | Detail |
@@ -417,9 +222,6 @@ After closing the timing ledger, re-run the duration query above and update the 
 | **Work from scratch** | Every run must begin from the raw source plus fresh toolkit output only; no prior migrated content may be reused |
 | **No git/history restores** | Never use `git restore`, `git checkout`, `git show`, or copied historical file contents to repair the benchmark run |
 | **Repair in place** | Do not swap in a smaller clean app or rewrite the site from scratch |
-| **Triage before rewriting** | Always diagnose startup crashes and root causes BEFORE touching page files. A single missing `EnsureCreated()` can cause 18 test failures — fix the root cause, not the symptoms |
-| **Inspect CLI output first** | Before rewriting any file, READ what the CLI generated. If the code looks correct, the problem is likely config/startup, not the file |
-| **Never replace BWFC controls** | Do not replace generated `ListView`, `FormView`, `GridView`, `DataList`, or `Repeater` with manual HTML |
 | **Acceptance tests are the gate** | The run is only successful when `src/WingtipToys.AcceptanceTests/` passes |
 | **Report every run** | Successful or failed runs both get a numbered report folder |
 | **Embed screenshots** | The main report must show images inline with Markdown links |

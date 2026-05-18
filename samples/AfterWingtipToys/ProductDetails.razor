@@ -1,28 +1,38 @@
 @page "/ProductDetails"
 @page "/Product/{productName}"
 <PageTitle>Product Details</PageTitle>
-
-    <FormView id="productDetail" @ref="productDetail" ItemType="Product" SelectMethod="GetProductQueryDetails_SelectMethod" RenderOuterTable="false">
-        <ItemTemplate Context="Item">
-            <div>
-                <h1>@Item.ProductName</h1>
-            </div>
-            <br />
-            <table>
-                <tr>
-                    <td>
-                        <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName"/>
-                    </td>
-                    <td>&nbsp;</td>  
-                    <td style="vertical-align: top; text-align:left;">
-                        <b>Description:</b><br />@Item.Description
-                        <br />
-                        <span><b>Price:</b>&nbsp;@(String.Format("{0:c}", Item.UnitPrice))</span>
-                        <br />
-                        <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
-                        <br />
-                    </td>
-                </tr>
-            </table>
-        </ItemTemplate>
-    </FormView>
+<Site>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <FormView ItemType="Product" DataItem="@Product" RenderOuterTable="false">
+                <ItemTemplate Context="Item">
+                    <div>
+                        <h1>@Item.ProductName</h1>
+                    </div>
+                    <br />
+                    <table>
+                        <tr>
+                            <td>
+                                <img src="/Catalog/Images/@Item.ImagePath" style="border:solid; height:300px" alt="@Item.ProductName" />
+                            </td>
+                            <td>&nbsp;</td>
+                            <td style="vertical-align: top; text-align:left;">
+                                <b>Description:</b><br />@Item.Description
+                                <br />
+                                <span><b>Price:</b>&nbsp;@Item.UnitPrice?.ToString("C")</span>
+                                <br />
+                                <span><b>Product Number:</b>&nbsp;@Item.ProductID</span>
+                                <br />
+                                <br />
+                                <a href="/AddToCart?productId=@Item.ProductID" class="btn btn-primary">Add To Cart</a>
+                            </td>
+                        </tr>
+                    </table>
+                </ItemTemplate>
+                <EmptyDataTemplate>
+                    <p>We couldn't find that product.</p>
+                </EmptyDataTemplate>
+            </FormView>
+        </Content>
+    </ChildComponents>
+</Site>

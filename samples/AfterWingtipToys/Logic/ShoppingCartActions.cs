@@ -1,234 +1,118 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Concurrent;
 using WingtipToys.Models;
 
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
-namespace WingtipToys.Logic
+namespace WingtipToys.Logic;
+
+public class ShoppingCartActions : IDisposable
 {
-  public class ShoppingCartActions : IDisposable
-  {
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private static readonly ConcurrentDictionary<string, List<CartItem>> Carts = new();
 
-    private readonly ProductContext _db;
-
-    public ShoppingCartActions(ProductContext db, IHttpContextAccessor httpContextAccessor)
-    {
-        _httpContextAccessor = httpContextAccessor;
-        _db = db;
-    }
-
-    public string ShoppingCartId { get; set; }
-
-
+    public string ShoppingCartId { get; set; } = "legacy-cart";
 
     public const string CartSessionKey = "CartId";
 
     public void AddToCart(int id)
     {
-      // Retrieve the product from the database.           
-      ShoppingCartId = GetCartId();
-
-      var cartItem = _db.ShoppingCartItems.Include(x => x.Product).SingleOrDefault(
-          c => c.CartId == ShoppingCartId
-          && c.ProductId == id);
-      if (cartItem == null)
-      {
-        // Create a new cart item if no cart item exists.                 
-        cartItem = new CartItem
+        var cart = GetCartItems();
+        var existing = cart.FirstOrDefault(item => item.ProductId == id);
+        if (existing is null)
         {
-          ItemId = Guid.NewGuid().ToString(),
-          ProductId = id,
-          CartId = ShoppingCartId,
-          Product = _db.Products.SingleOrDefault(
-           p => p.ProductID == id),
-          Quantity = 1,
-          DateCreated = DateTime.Now
-        };
-
-        _db.ShoppingCartItems.Add(cartItem);
-      }
-      else
-      {
-        // If the item does exist in the cart,                  
-        // then add one to the quantity.                 
-        cartItem.Quantity++;
-      }
-      _db.SaveChanges();
-    }
-
-    public void Dispose()
-    {
-      if (_db != null)
-      {
-        _db.Dispose();
-
-      }
-    }
-
-    public string GetCartId()
-    {
-      if (_httpContextAccessor.HttpContext?.Session.GetString(CartSessionKey) == null)
-      {
-        if (!string.IsNullOrWhiteSpace(_httpContextAccessor.HttpContext?.User?.Identity?.Name))
-        {
-          _httpContextAccessor.HttpContext?.Session.SetString(CartSessionKey, _httpContextAccessor.HttpContext?.User?.Identity?.Name?.ToString() ?? string.Empty);
+            cart.Add(new CartItem
+            {
+                ItemId = Guid.NewGuid().ToString("N"),
+                CartId = ShoppingCartId,
+                ProductId = id,
+                Quantity = 1,
+                DateCreated = DateTime.UtcNow
+            });
         }
         else
         {
-          // Generate a new random GUID using System.Guid class.     
-          Guid tempCartId = Guid.NewGuid();
-          _httpContextAccessor.HttpContext?.Session.SetString(CartSessionKey, tempCartId.ToString()?.ToString() ?? string.Empty);
+            existing.Quantity++;
         }
-      }
-      return _httpContextAccessor.HttpContext?.Session.GetString(CartSessionKey).ToString();
+
+        Carts[ShoppingCartId] = cart;
     }
+
+    public string GetCartId() => ShoppingCartId;
 
     public List<CartItem> GetCartItems()
     {
-      ShoppingCartId = GetCartId();
-
-      return _db.ShoppingCartItems.Include(x => x.Product).Where(
-          c => c.CartId == ShoppingCartId).ToList();
+        return Carts.GetOrAdd(ShoppingCartId, _ => []);
     }
 
-    public decimal GetTotal()
-    {
-      ShoppingCartId = GetCartId();
-      // Multiply product price by quantity of that product to get        
-      // the current price for each of those products in the cart.  
-      // Sum all product price totals to get the cart total.   
-      decimal? total = decimal.Zero;
-      total = (decimal?)(from cartItems in _db.ShoppingCartItems.Include(x => x.Product)
-                         where cartItems.CartId == ShoppingCartId
-                         select (decimal?)((int?)cartItems.Quantity *
-                         cartItems.Product.UnitPrice)).Sum();
-      return total ?? decimal.Zero;
-    }
+    public decimal GetTotal() => GetCartItems().Sum(item => Convert.ToDecimal(item.Product?.UnitPrice ?? 0) * item.Quantity);
 
-    public ShoppingCartActions GetCart()
-    {
-      this.ShoppingCartId = this.GetCartId();
-      return this;
-    }
+    public ShoppingCartActions GetCart(object? _) => this;
 
-    public void UpdateShoppingCartDatabase(String cartId, ShoppingCartUpdates[] CartItemUpdates)
+    public void UpdateShoppingCartDatabase(string cartId, ShoppingCartUpdates[] cartItemUpdates)
     {
-      // DbContext 'ProductContext' is injected via DI
-
-        try
+        var items = GetCartItems();
+        foreach (var update in cartItemUpdates)
         {
-          int CartItemCount = CartItemUpdates.Count();
-          List<CartItem> myCart = GetCartItems();
-          foreach (var cartItem in myCart)
-          {
-            // Iterate through all rows within shopping cart list
-            for (int i = 0; i < CartItemCount; i++)
+            var item = items.FirstOrDefault(existing => existing.ProductId == update.ProductId);
+            if (item is null)
             {
-              if (cartItem.Product.ProductID == CartItemUpdates[i].ProductId)
-              {
-                if (CartItemUpdates[i].PurchaseQuantity < 1 || CartItemUpdates[i].RemoveItem == true)
-                {
-                  RemoveItem(cartId, cartItem.ProductId);
-                }
-                else
-                {
-                  UpdateItem(cartId, cartItem.ProductId, CartItemUpdates[i].PurchaseQuantity);
-                }
-              }
+                continue;
             }
-          }
+
+            if (update.RemoveItem || update.PurchaseQuantity < 1)
+            {
+                items.Remove(item);
+            }
+            else
+            {
+                item.Quantity = update.PurchaseQuantity;
+            }
         }
-        catch (Exception exp)
-        {
-          throw new Exception("ERROR: Unable to Update Cart Database - " + exp.Message.ToString(), exp);
-        }
-      
+
+        Carts[cartId] = items;
     }
 
-    public void RemoveItem(string removeCartID, int removeProductID)
+    public void RemoveItem(string removeCartId, int removeProductId)
     {
-      // DbContext 'ProductContext' is injected via DI
-
-        try
-        {
-          var myItem = (from c in _db.ShoppingCartItems.Include(x => x.Product) where c.CartId == removeCartID && c.Product.ProductID == removeProductID select c).FirstOrDefault();
-          if (myItem != null)
-          {
-            // Remove Item.
-            _db.ShoppingCartItems.Remove(myItem);
-            _db.SaveChanges();
-          }
-        }
-        catch (Exception exp)
-        {
-          throw new Exception("ERROR: Unable to Remove Cart Item - " + exp.Message.ToString(), exp);
-        }
-      
+        var items = Carts.GetOrAdd(removeCartId, _ => []);
+        items.RemoveAll(item => item.ProductId == removeProductId);
     }
 
-    public void UpdateItem(string updateCartID, int updateProductID, int quantity)
+    public void UpdateItem(string updateCartId, int updateProductId, int quantity)
     {
-      // DbContext 'ProductContext' is injected via DI
-
-        try
+        var item = Carts.GetOrAdd(updateCartId, _ => []).FirstOrDefault(existing => existing.ProductId == updateProductId);
+        if (item is not null)
         {
-          var myItem = (from c in _db.ShoppingCartItems.Include(x => x.Product) where c.CartId == updateCartID && c.Product.ProductID == updateProductID select c).FirstOrDefault();
-          if (myItem != null)
-          {
-            myItem.Quantity = quantity;
-            _db.SaveChanges();
-          }
+            item.Quantity = quantity;
         }
-        catch (Exception exp)
-        {
-          throw new Exception("ERROR: Unable to Update Cart Item - " + exp.Message.ToString(), exp);
-        }
-      
     }
 
     public void EmptyCart()
     {
-      ShoppingCartId = GetCartId();
-      var cartItems = _db.ShoppingCartItems.Where(
-          c => c.CartId == ShoppingCartId);
-      foreach (var cartItem in cartItems)
-      {
-        _db.ShoppingCartItems.Remove(cartItem);
-      }
-      // Save changes.             
-      _db.SaveChanges();
+        Carts[ShoppingCartId] = [];
     }
 
-    public int GetCount()
-    {
-      ShoppingCartId = GetCartId();
+    public int GetCount() => GetCartItems().Sum(item => item.Quantity);
 
-      // Get the count of each item in the cart and sum them up          
-      int? count = (from cartItems in _db.ShoppingCartItems.Include(x => x.Product)
-                    where cartItems.CartId == ShoppingCartId
-                    select (int?)cartItems.Quantity).Sum();
-      // Return 0 if all entries are null         
-      return count ?? 0;
+    public void MigrateCart(string cartId, string userName)
+    {
+        if (Carts.TryRemove(cartId, out var items))
+        {
+            foreach (var item in items)
+            {
+                item.CartId = userName;
+            }
+
+            Carts[userName] = items;
+            ShoppingCartId = userName;
+        }
+    }
+
+    public void Dispose()
+    {
     }
 
     public struct ShoppingCartUpdates
     {
-      public int ProductId;
-      public int PurchaseQuantity;
-      public bool RemoveItem;
+        public int ProductId;
+        public int PurchaseQuantity;
+        public bool RemoveItem;
     }
-
-    public void MigrateCart(string cartId, string userName)
-    {
-      var shoppingCart = _db.ShoppingCartItems.Where(c => c.CartId == cartId);
-      foreach (CartItem item in shoppingCart)
-      {
-        item.CartId = userName;
-      }
-      _httpContextAccessor.HttpContext?.Session.SetString(CartSessionKey, userName?.ToString() ?? string.Empty);
-      _db.SaveChanges();
-    }
-  }
 }

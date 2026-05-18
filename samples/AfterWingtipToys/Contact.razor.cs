@@ -23,10 +23,8 @@ using System.Collections.Generic;
 using System.Linq;
 namespace WingtipToys
 {
-  public partial class Contact : WebFormsPageBase
+  public partial class Contact
   {
-	protected string Title { get; set; } = "Contact";
-
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
     // --- Request.Form Migration ---

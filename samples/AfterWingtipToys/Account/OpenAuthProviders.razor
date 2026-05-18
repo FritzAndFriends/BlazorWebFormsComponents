@@ -1,20 +1,3 @@
 <div id="socialLoginList">
-    <h4>Use another service to log in.</h4>
-    <hr />
-    <ListView id="providerDetails" @ref="providerDetails" ItemType="String"
-        SelectMethod="GetProviderNames">
-        <ItemTemplate Context="Item">
-            <p>
-                <button type="submit" class="btn btn-default" name="provider" value="@Item"
-                    title="Log in using your @Item account.">
-                    @Item
-                </button>
-            </p>
-        </ItemTemplate>
-        <EmptyDataTemplate>
-            <div>
-                <p>There are no external authentication services configured. See <a href="http://go.microsoft.com/fwlink/?LinkId=252803">this article</a> for details on setting up this ASP.NET application to support logging in via external services.</p>
-            </div>
-        </EmptyDataTemplate>
-    </ListView>
+    <h4>External login providers are not configured for this migrated sample.</h4>
 </div>

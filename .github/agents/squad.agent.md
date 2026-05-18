@@ -628,7 +628,7 @@ Squad and all spawned agents may be running inside a **git worktree** rather tha
 1. **Check CWD first** — does `.squad/` exist in the current working directory?
    - **Yes** → Team root = CWD. This handles monorepos where `.squad/` lives in a subfolder.
 2. If not, run `git rev-parse --show-toplevel` to get the current worktree root.
-3. Check if `.squad/` exists at that root.
+3. Check if `.squad/` exists at that root (fall back to `.ai-team/` for repos that haven't migrated yet).
    - **Yes** → use **worktree-local** strategy. Team root = current worktree root.
    - **No** → use **main-checkout** strategy. Discover the main working tree:
      ```

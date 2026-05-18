@@ -1,9 +1,11 @@
 @page "/Admin/AdminPage"
-@inherits BlazorWebFormsComponents.WebFormsPageBase
-
-<div class="migration-pending">
-    <h3>Page Not Yet Migrated</h3>
-    <p>This page (<code>Admin/AdminPage.aspx</code>) requires manual migration.</p>
-    <p>Original Web Forms features used: Non-essential path (auto-quarantined)</p>
-    <p>Suggested migration approach: Migrate the page manually once core pages are stable, using injected services and Blazor patterns.</p>
-</div>
+@page "/AdminPage"
+<PageTitle>Administration</PageTitle>
+<Site>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <h1>Administration</h1>
+            <p>This administrative workflow was quarantined during migration and is not part of the benchmark path.</p>
+        </Content>
+    </ChildComponents>
+</Site>

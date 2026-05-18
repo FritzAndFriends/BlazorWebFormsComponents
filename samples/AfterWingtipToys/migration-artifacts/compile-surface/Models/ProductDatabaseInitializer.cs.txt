@@ -3,7 +3,7 @@
 // TODO: Move or rewrite only the relevant pieces into Program.cs, services, middleware, or application code.
 
 using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+using System.Data.Entity;
 
 namespace WingtipToys.Models
 {

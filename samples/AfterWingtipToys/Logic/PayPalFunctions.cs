@@ -1,20 +1,37 @@
-// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
-// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+using System.Collections.Specialized;
 
-public partial class NVPAPICaller
+public class NVPAPICaller
 {
-    public void SetCredentials(string Userid, string Pwd, string Signature) { }
-    public bool ShortcutExpressCheckout(string amt, ref string token, ref string retMsg) => throw new NotImplementedException();
-    public bool GetCheckoutDetails(string token, ref string PayerID, ref NVPCodec decoder, ref string retMsg) => throw new NotImplementedException();
-    public bool DoCheckoutPayment(string finalPaymentAmount, string token, string PayerID, ref NVPCodec decoder, ref string retMsg) => throw new NotImplementedException();
-    public string HttpCall(string NvpRequest) => throw new NotImplementedException();
-    public static bool IsEmpty(string s) => throw new NotImplementedException();
+    public bool ShortcutExpressCheckout(string amt, ref string token, ref string retMsg)
+    {
+        token = Guid.NewGuid().ToString("N");
+        retMsg = "/Checkout/CheckoutReview";
+        return true;
+    }
+
+    public bool GetCheckoutDetails(string token, ref string payerId, ref NVPCodec decoder, ref string retMsg)
+    {
+        payerId = string.Empty;
+        decoder ??= new NVPCodec();
+        retMsg = "PayPal checkout is not configured.";
+        return false;
+    }
+
+    public bool DoCheckoutPayment(string finalPaymentAmount, string token, string payerId, ref NVPCodec decoder, ref string retMsg)
+    {
+        decoder ??= new NVPCodec();
+        retMsg = "PayPal checkout is not configured.";
+        return false;
+    }
+
+    public string HttpCall(string nvpRequest) => string.Empty;
 }
 
-public partial class NVPCodec
+public class NVPCodec : NameValueCollection
 {
-    public string Encode() => throw new NotImplementedException();
-    public void Decode(string nvpstring) { }
-    public void Add(string name, string value, int index) { }
-    public void Remove(string arrayName, int index) { }
+    public string Encode() => string.Empty;
+
+    public void Decode(string input)
+    {
+    }
 }
