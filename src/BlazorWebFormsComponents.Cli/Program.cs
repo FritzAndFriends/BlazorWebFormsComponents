@@ -74,6 +74,7 @@ class Program
         services.AddSingleton<IMarkupTransform, EnhancedNavAnnotationTransform>();
         services.AddSingleton<IMarkupTransform, GetRouteUrlMarkupTransform>();
         services.AddSingleton<IMarkupTransform, HtmlBoilerplateStripTransform>();
+        services.AddSingleton<IMarkupTransform, PageFormWrapperTransform>();
         services.AddSingleton<IMarkupTransform, SsrFormContractTransform>();
         services.AddSingleton<IMarkupTransform, MarkupCleanupTransform>();
         services.AddSingleton<IMarkupTransform, LabelFieldBindTransform>();

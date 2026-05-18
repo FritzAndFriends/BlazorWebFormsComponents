@@ -230,6 +230,7 @@ public static class TestHelpers
             new EnhancedNavAnnotationTransform(),
             new GetRouteUrlMarkupTransform(),
             new HtmlBoilerplateStripTransform(),
+            new PageFormWrapperTransform(),
             new SsrFormContractTransform(),
             new MarkupCleanupTransform(),
             new LabelFieldBindTransform(),

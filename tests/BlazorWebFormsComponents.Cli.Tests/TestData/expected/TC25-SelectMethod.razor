@@ -1,4 +1,6 @@
 @page "/TC25-SelectMethod"
+<WebFormsForm @formname="TC25SelectMethodForm">
+    <AntiforgeryToken />
 <PageTitle>Products</PageTitle>
 <ListView id="ProductList"
     ItemType="Product"
@@ -19,3 +21,5 @@
         <span><%# Item.Description %></span>
     </ItemTemplate>
 </FormView>
+
+</WebFormsForm>

@@ -1,4 +1,6 @@
 @page "/TC24-LoginView"
+<WebFormsForm @formname="TC24LoginViewForm">
+    <AntiforgeryToken />
 <PageTitle>Login Test</PageTitle>
 <AuthorizeView>
     <NotAuthorized>
@@ -9,3 +11,5 @@
     </Authorized>
     @* TODO(bwfc-identity): Convert RoleGroups to policy-based AuthorizeView *@
 </AuthorizeView>
+
+</WebFormsForm>

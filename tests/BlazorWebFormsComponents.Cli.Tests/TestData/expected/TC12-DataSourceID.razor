@@ -1,5 +1,9 @@
 @page "/TC12-DataSourceID"
+<WebFormsForm @formname="TC12DataSourceIDForm">
+    <AntiforgeryToken />
 <PageTitle>Test</PageTitle>
 <GridView ItemType="object" id="gvProducts" Items="@SqlDS1Data">
 </GridView>
 @* TODO(bwfc-datasource): Implement ISqlDS1DataService to replace SqlDataSource *@
+
+</WebFormsForm>

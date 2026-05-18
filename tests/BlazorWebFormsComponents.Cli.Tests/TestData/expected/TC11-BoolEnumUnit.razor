@@ -1,6 +1,10 @@
 @page "/TC11-BoolEnumUnit"
+<WebFormsForm @formname="TC11BoolEnumUnitForm">
+    <AntiforgeryToken />
 <PageTitle>Test</PageTitle>
 <Button Visible="true" Text="Submit" />
 <TextBox Visible="false" TextMode="@TextBoxMode.Password" />
 <GridView ItemType="object" GridLines="@GridLines.Both" Width="100" />
 <Panel HorizontalAlign="@HorizontalAlign.Center" Height="200" />
+
+</WebFormsForm>
