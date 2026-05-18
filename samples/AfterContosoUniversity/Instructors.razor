@@ -1,22 +1,32 @@
 @page "/Instructors"
-@inherits BlazorWebFormsComponents.WebFormsPageBase
-<PageTitle>Contoso University - Instructors</PageTitle>
+<WebFormsForm @formname="InstructorsForm">
+    <AntiforgeryToken />
+<PageTitle></PageTitle>
 
-<link href="CSS/Instructors_CSS.css" rel="stylesheet" />
+    <link href="CSS/Instructors_CSS.css" rel="stylesheet" />
+    <script src="JQuery/JQuery_Instructors.js"></script>
 
-<div id="grv">
-    <h1 id="hdr">Our Instructors</h1>
-    <GridView ItemType="ContosoUniversity.Models.Instructor" 
-        @ref="grvInstructors"
-        DataSource="instructorData"
-        CssClass="grv" BorderWidth="2"
-        AutoGenerateColumns="false"
-        EmptyDataText="There are no records to display">
-        <Columns>
-            <BoundField ItemType="ContosoUniversity.Models.Instructor" DataField="InstructorID" HeaderText="Instructor ID" />
-            <BoundField ItemType="ContosoUniversity.Models.Instructor" DataField="FirstName" HeaderText="First Name" />
-            <BoundField ItemType="ContosoUniversity.Models.Instructor" DataField="LastName" HeaderText="Last Name" />
-            <BoundField ItemType="ContosoUniversity.Models.Instructor" DataField="Email" HeaderText="Email" />
-        </Columns>
-    </GridView>
-</div>
+
+   <ScriptManager></ScriptManager>
+    <UpdatePanel>
+        
+            <div id="grv">
+                <h1 id="hdr">Our Instructors</h1>
+                <GridView ItemType="object" @ref="grvInstructors" AutoGenerateColumns="false"
+                    CssClass="grv" BorderWidth="2"                 
+                    AllowSorting="true" OnSorting="@grvInstructors_Sorting" 
+                    EmptyDataText = "There are no records to display" 
+                    DataSource="@_grvInstructors_DataSource">
+                    <Columns>
+                        <BoundField ItemType="object" DataField="InstructorID" HeaderText="Instructor ID" SortExpression="InstructorID" />
+                        <BoundField ItemType="object" DataField="FirstName" HeaderText="First Name"  SortExpression="FirstName"/>
+                        <BoundField ItemType="object" DataField="LastName" HeaderText="Last Name"  SortExpression="LastName"/>
+                        <BoundField ItemType="object" DataField="Email" HeaderText="Email"  />
+                    </Columns>
+                </GridView>
+            </div>
+        
+        </UpdatePanel>
+
+
+</WebFormsForm>

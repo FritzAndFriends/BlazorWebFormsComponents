@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ContosoUniversity.Models;
-
-namespace ContosoUniversity.BLL
+namespace ContosoUniversity.Models
 {
     public class Enrollmet_Logic
     {
@@ -14,7 +12,6 @@ namespace ContosoUniversity.BLL
         _contosoUniversityEntities = contosoUniversityEntities;
     }
 
-        #region Get Enrollments List
         public Dictionary<string, int> Get_Enrollment_ByDate()
         {
             var enrollments = from enrl in _contosoUniversityEntities.Enrollments
@@ -31,6 +28,5 @@ namespace ContosoUniversity.BLL
             return entries;
 
         }
-        #endregion
     }
 }

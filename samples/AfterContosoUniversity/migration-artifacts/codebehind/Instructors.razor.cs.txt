@@ -43,11 +43,8 @@ namespace ContosoUniversity
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
-    private GridView<object> grvInstructors = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-     
+    private GridView<object> grvInstructors = default!;     
+    private object _grvInstructors_DataSource = null!;
         private Instructors_Logic instructorsLogic;
             
         protected override async Task OnInitializedAsync()
@@ -56,7 +53,7 @@ namespace ContosoUniversity
             await base.OnInitializedAsync();
          
             instructorsLogic = new Instructors_Logic();              
-            this.grvInstructors?.DataSource = instructorsLogic.getInstructors();
+            _grvInstructors_DataSource = instructorsLogic.getInstructors();
 
                         // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
             ViewState["SortDirection"] = "desc";
@@ -87,7 +84,7 @@ namespace ContosoUniversity
             // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
             if (firstRender)
             {
-                this.            }
+            }
         }     
     }
 }

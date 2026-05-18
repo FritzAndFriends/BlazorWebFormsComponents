@@ -1,4 +1,6 @@
 @page "/About"
+<WebFormsForm @formname="AboutForm">
+    <AntiforgeryToken />
 <PageTitle></PageTitle>
 
      <link href="CSS/CSS_About.css" rel="stylesheet" />
@@ -9,8 +11,7 @@
         <h1> Students Body Statistics </h1>
     </div>
      <div id="grv">
-        <GridView ItemType="object" CssClass="grid" 
-            id="EnrollmentsStat" @ref="EnrollmentsStat" SelectMethod="EnrollmentsStat_GetData" 
+        <GridView ItemType="object" CssClass="grid" @ref="EnrollmentsStat" SelectMethod="EnrollmentsStat_GetData" 
             AutoGenerateColumns="false" EmptyDataText="There are no records to display"
              CellPadding="4" ForeColor='@("#333333")' GridLines="@GridLines.None">
             <Columns>
@@ -41,3 +42,5 @@
 </GridView>
     </div>
 
+
+</WebFormsForm>

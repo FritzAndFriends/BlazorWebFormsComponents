@@ -22,7 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ContosoUniversity.Models;
-using ContosoUniversity.Bll;
+using ContosoUniversity.BLL;
 
 
 namespace ContosoUniversity
@@ -38,10 +38,6 @@ namespace ContosoUniversity
     // For non-page classes, inject RequestShim via DI.
 
     private GridView<object> EnrollmentsStat = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         protected override async Task OnInitializedAsync()
         {
             // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior

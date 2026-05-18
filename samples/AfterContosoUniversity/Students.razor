@@ -1,39 +1,129 @@
 @page "/Students"
-@inherits BlazorWebFormsComponents.WebFormsPageBase
-<PageTitle>Contoso University - Students</PageTitle>
+<form method="post" @formname="StudentsForm">
+    <AntiforgeryToken />
+<PageTitle></PageTitle>
 
-<link href="CSS/Students_CSS.css" rel="stylesheet" />
+    <link href="CSS/Students_CSS.css" rel="stylesheet" />
+    <script src="JQuery/JQuery_Students.js"></script>
 
-<div id="grvStudentsData">
-    <GridView ItemType="object"
-        @ref="grv"
-        DataSource="studentData"
-        CssClass="grv"
-        AutoGenerateColumns="false"
-        EmptyDataText="There are no records to display"
-        BackColor='@("White")' BorderColor='@("#3366CC")' BorderWidth="1"
-        CellPadding="4" Height="336" Width="416">
-        <Columns>
-            <BoundField ItemType="object" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
-            <BoundField ItemType="object" DataField="FullName" HeaderText="Student Name" />
-            <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
-            <BoundField ItemType="object" DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
-            <BoundField ItemType="object" DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
-        </Columns>
-        <ChildComponents>
-            <FooterStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' />
-            <HeaderStyle BackColor='@("#003399")' Font-Bold="true" ForeColor='@("#CCCCFF")' />
-            <PagerStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' HorizontalAlign="@HorizontalAlign.Left" />
-            <RowStyle BackColor='@("White")' ForeColor='@("#003399")' />
-            <SelectedRowStyle BackColor='@("#009999")' Font-Bold="true" ForeColor='@("#CCFF99")' />
-        </ChildComponents>
-    </GridView>
-</div>
-<div id="addStud">
-    <h1 id="addStudent">Add Student</h1>
-    <p><em>Student enrollment form coming soon.</em></p>
-</div>
-<div id="ajax">
-    <h1 id="searchStud">Search Student</h1>
-    <p><em>Student search coming soon.</em></p>
-</div>
+
+
+    <ScriptManager @ref="ScriptManager2"></ScriptManager>       
+    <UpdatePanel>
+        
+            <div id="grvStudentsData">
+                <GridView ItemType="object" @ref="grv"
+                    CssClass="grv"
+                    AutoGenerateColumns="false"
+                    EmptyDataText="There are no records to display"
+                    SelectMethod="grv_GetData" UpdateMethod="grv_UpdateItem"
+                    DeleteMethod="grv_DeleteItem" DataKeyNames="ID" OnRowUpdating="@grv_RowUpdating"
+                    BackColor='@("White")' BorderColor='@("#3366CC")' BorderStyle="@BorderStyle.None" BorderWidth="1"
+                    CellPadding="4" Height="336" Width="416">
+                    <Columns>
+                        <TemplateField HeaderText="Delete Student" ItemType="object">
+                            <ItemTemplate Context="item">
+                                <button type="submit" name="__delete" value="@(((dynamic)item).ID)">Delete</button>
+                            </ItemTemplate>
+                        </TemplateField>
+                        <BoundField ItemType="object" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+                        <BoundField ItemType="object" DataField="FullName" HeaderText="Student Name" />
+                        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
+                        <BoundField ItemType="object" DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
+                        <BoundField ItemType="object" DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
+                        <CommandField ButtonType="Button" HeaderText="Update Student Peronal Data" ShowEditButton="true" />
+                    </Columns>
+                
+                    <ChildComponents>
+                        <FooterStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' />
+                        <HeaderStyle BackColor='@("#003399")' Font-Bold="true" ForeColor='@("#CCCCFF")' />
+                        <PagerStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' HorizontalAlign="@HorizontalAlign.Left" />
+                        <RowStyle BackColor='@("White")' ForeColor='@("#003399")' />
+                        <SelectedRowStyle BackColor='@("#009999")' Font-Bold="true" ForeColor='@("#CCFF99")' />
+                        <SortedAscendingCellStyle BackColor='@("#EDF6F6")' />
+                        <SortedAscendingHeaderStyle BackColor='@("#0D4AC4")' />
+                        <SortedDescendingCellStyle BackColor='@("#D6DFDF")' />
+                        <SortedDescendingHeaderStyle BackColor='@("#002876")' />
+                    </ChildComponents>
+</GridView>
+            </div>
+            <div id="addStud">
+                <h1 id="addStudent">Add Student</h1>
+                <Table @ref="tabAddStud"
+                    CssClass="tabAddStud" BorderColor='@("#0033CC")' Font-Bold="true" Font-Italic="false" ForeColor='@("White")'>
+                    <TableRow>
+                        <TableCell>First Name</TableCell>
+                        <TableCell>
+                            <TextBox ID="txtFirstName" @ref="txtFirstName" placeholder="Type Your First Name..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Last Name</TableCell><TableCell>
+                            <TextBox ID="txtLastName" @ref="txtLastName" placeholder="Type Your Last Name..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Birth Date</TableCell><TableCell>
+                            <TextBox ID="txtBirthDate" @ref="txtBirthDate" placeholder="dd.mm.year" />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Email</TableCell><TableCell>
+                            <TextBox ID="txtEmail" @ref="txtEmail" placeholder="Email is Optional..." />
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>Course Name</TableCell><TableCell>
+                            <DropDownList ItemType="object" ID="dropListCourses" @ref="dropListCourses" StaticItems="_courseItems">
+                            </DropDownList>
+                        </TableCell>
+                    </TableRow>
+                    <TableRow>
+                        <TableCell>               
+                        </TableCell><TableCell>
+                            <input type="submit" id="btnInsert" class="insert" name="__action" value="New Enrollment" />
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                     <Button @ref="btnClear" Text="Clear" OnClick="@btnClear_Click" />
+                        </TableCell>
+                    </TableRow>
+                </Table>
+            </div>
+            <div id="ajax">
+                <h1 id="searchStud">Search Student</h1>
+                <TextBox CssClass="txtSearch" @ref="txtSearch" placeholder="Type Student Name..." />
+                <AutoCompleteExtender
+                    @ref="AutoCompleteExtender1"
+                    TargetControlID="txtSearch"
+                    ServiceMethod="GetCompletionList"
+                    MinimumPrefixLength="1"
+                    CompletionInterval="100"
+                    CompletionSetCount="20"
+                    ShowOnlyCurrentWordInCompletionListItem="true">
+                </AutoCompleteExtender>
+                <Button @ref="btnSearch" Text="Show Student Info" OnClick="@btnSearch_Click" CssClass="btnInfo" />
+                <DetailsView ItemType="object" @ref="studentData"
+                    Width="125"
+                    Height="50"
+                    AutoGenerateRows="false"
+                    CssClass="detailsView" BorderColor='@("Black")' ForeColor='@("Black")'
+                    DataSource="@_studentData_DataSource">
+                    <Fields>
+                        <BoundField ItemType="object"
+                            DataField="FirstName"
+                            HeaderText="First Name" />
+                        <BoundField ItemType="object" DataField="LastName" HeaderText="Last Name" />
+                        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
+                        <BoundField ItemType="object" DataField="BirthDate" HeaderText="Birth Date" />
+                        <BoundField ItemType="object" DataField="StudentID" HeaderText="id" />
+                    </Fields>
+                
+                    <ChildComponents>
+                        <RowStyle BackColor='@("White")' />
+                    </ChildComponents>
+</DetailsView>
+            </div>
+        
+    </UpdatePanel>         
+     
+
+</form>
