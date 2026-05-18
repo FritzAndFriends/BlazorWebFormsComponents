@@ -1,30 +1,25 @@
 ---
 name: bwfc-data-migration
-description: "Migrate Web Forms data access and application architecture to Blazor Server. Covers EF6 to EF Core, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json, and HTTP handlers to middleware. WHEN: \"migrate EF6\", \"session state to services\", \"Global.asax to Program.cs\", \"Web.config to appsettings\", \"data access migration\"."
+description: "**WORKFLOW SKILL** — Migrate Web Forms data access and architecture to Blazor Server. Covers EF6→EF Core with IDbContextFactory, Session→SessionShim, Global.asax→Program.cs, Web.config→appsettings.json, DataSource controls→service injection. WHEN: \"migrate EF6\", \"session state to services\", \"Global.asax to Program.cs\", \"data access migration\", \"SelectMethod to delegate\". INVOKES: dotnet CLI for EF migrations. FOR SINGLE OPERATIONS: use bwfc-migration for markup, bwfc-identity-migration for auth."
 ---
 
 # Web Forms Data Access & Architecture Migration
 
-This skill covers migrating Web Forms data access patterns and application architecture to Blazor Server. These are the **Layer 3 architecture decisions** that require project-specific judgment.
+## Overview
 
-**Related skills:**
-- `/bwfc-migration` — Core markup migration (controls, expressions, layouts)
-- `/bwfc-identity-migration` — Authentication and authorization migration
+Covers data access and architecture migration — the **Layer 2/3 decisions** requiring project-specific judgment.
 
----
+**Related:** `/bwfc-migration` (markup), `/bwfc-identity-migration` (auth)
 
 ## When to Use This Skill
 
-Use this skill when you need to:
-- Convert `SelectMethod` string to `SelectHandler` delegate, replace `DataSource` controls with service injection
-- Migrate Entity Framework 6 to EF Core
+- Convert `SelectMethod` string → `SelectHandler` delegate, replace `DataSource` controls with service injection
+- Migrate Entity Framework 6 → EF Core
 - Convert `Session`/`ViewState`/`Application` state to Blazor patterns
-- Migrate `Global.asax` to `Program.cs`
-- Convert `Web.config` to `appsettings.json`
+- Migrate `Global.asax` → `Program.cs`, `Web.config` → `appsettings.json`
 - Replace HTTP Handlers/Modules with middleware
-- Wire up third-party integrations
 
----
+## Critical Rules
 
 ## Session State Migration
 
@@ -588,3 +583,8 @@ Session["UserId"] = userId; // From WebFormsPageBase or injected SessionShim
 ---
 
 
+| Error Signature | Recipe File |
+|---|---|
+| `CS1503: SelectMethod ... 'string' to 'SelectHandler'` | `../bwfc-migration/recipes/selectmethod-string-binding.md` |
+| `CS7036: no argument ... 'options' of 'XxxContext'` | `../bwfc-migration/recipes/new-dbcontext-to-di.md` |
+| `CS0246: 'IDatabaseInitializer'` | `../bwfc-migration/recipes/database-seed-initializer.md` |

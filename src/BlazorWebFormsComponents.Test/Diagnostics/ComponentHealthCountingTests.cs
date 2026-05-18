@@ -192,7 +192,7 @@ public class ComponentHealthCountingTests
 		// Must not be inflated by RenderFragment templates (12+) or base class props
 		props.ShouldBeGreaterThan(10,
 			$"Too few GridView properties. Got: {string.Join(", ", propNames)}");
-		props.ShouldBeLessThanOrEqualTo(30,
+		props.ShouldBeLessThanOrEqualTo(35,
 			$"GridView properties inflated. Got: {string.Join(", ", propNames)}");
 
 		// Events: sort, page, select, row operations (including On* variants)

@@ -1,0 +1,440 @@
+@using Shouldly
+@using System.Collections.Generic
+@using System.Collections.Specialized
+
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	// --- GridViewRowCollection typed indexer ---
+
+	[Fact]
+	public void Rows_Indexer_ReturnsGridViewRow_WithoutCast()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		gridView.Rows.Count.ShouldBe(1);
+
+		// The key test: Rows[0] returns GridViewRow<T> directly, no cast needed
+		GridViewRow<CompatProduct> row = gridView.Rows[0];
+		row.ShouldNotBeNull();
+		row.DataItem.ShouldNotBeNull();
+		((CompatProduct)row.DataItem).Name.ShouldBe("Widget");
+	}
+
+	[Fact]
+	public void Rows_Indexer_MultipleRows_AllReturnGridViewRow()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m },
+			new CompatProduct { Name = "Gadget", Price = 19.99m },
+			new CompatProduct { Name = "Doohickey", Price = 4.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		gridView.Rows.Count.ShouldBe(3);
+
+		for (var i = 0; i < gridView.Rows.Count; i++)
+		{
+			GridViewRow<CompatProduct> row = gridView.Rows[i];
+			row.ShouldNotBeNull();
+		}
+	}
+
+	// --- Implicit operator: GridViewRow<T> -> GridViewRow (non-generic) ---
+
+	[Fact]
+	public void ImplicitOperator_GridViewRowGeneric_ConvertsToNonGeneric()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		var typedRow = gridView.Rows[0];
+
+		// Implicit conversion: pass GridViewRow<T> to method accepting GridViewRow
+		GridViewRow nonGenericRow = typedRow;
+		nonGenericRow.ShouldNotBeNull();
+		nonGenericRow.RowIndex.ShouldBe(typedRow.RowIndex);
+		nonGenericRow.DataItemIndex.ShouldBe(typedRow.DataItemIndex);
+		nonGenericRow.DataItem.ShouldBe(typedRow.DataItem);
+	}
+
+	[Fact]
+	public void ImplicitOperator_HelperMethod_AcceptsGridViewRow()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+
+		// This is the exact pattern from WingtipToys ShoppingCart:
+		// Pass Rows[i] to a method that accepts non-generic GridViewRow
+		var name = GetProductName(gridView.Rows[0]);
+		name.ShouldBe("Widget");
+	}
+
+	// Helper mimicking the Web Forms pattern: GetValues(GridViewRow row)
+	private static string GetProductName(GridViewRow row)
+	{
+		return ((CompatProduct)row.DataItem)?.Name;
+	}
+
+	// --- RowState property ---
+
+	[Fact]
+	public void RowState_Normal_ReturnsNormal()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		var row = gridView.Rows[0];
+
+		row.RowState.ShouldBe(DataControlRowState.Normal);
+	}
+
+	[Fact]
+	public void RowState_AlternateRow_HasAlternateFlag()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m },
+			new CompatProduct { Name = "Gadget", Price = 19.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+
+		// Row 0 is Normal
+		gridView.Rows[0].RowState.ShouldBe(DataControlRowState.Normal);
+
+		// Row 1 (odd index) should have Alternate flag
+		(gridView.Rows[1].RowState & DataControlRowState.Alternate).ShouldBe(DataControlRowState.Alternate);
+	}
+
+	// --- Cells property ---
+
+	[Fact]
+	public void Cells_BoundField_ReturnsCellWithContainingField()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Product Name" />
+				<BoundField ItemType="CompatProduct" DataField="Price" HeaderText="Unit Price" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		var row = gridView.Rows[0];
+
+		row.Cells.ShouldNotBeNull();
+		row.Cells.Count.ShouldBe(2);
+
+		row.Cells[0].ContainingField.ShouldNotBeNull();
+		row.Cells[0].ContainingField.HeaderText.ShouldBe("Product Name");
+
+		row.Cells[1].ContainingField.ShouldNotBeNull();
+		row.Cells[1].ContainingField.HeaderText.ShouldBe("Unit Price");
+	}
+
+	[Fact]
+	public void Cells_TemplateField_ReturnsCellWithTemplateField()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="CompatProduct" HeaderText="Custom">
+					<ItemTemplate>
+						<span>@context.Name</span>
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		var row = gridView.Rows[0];
+
+		row.Cells.Count.ShouldBe(1);
+		row.Cells[0].ContainingField.HeaderText.ShouldBe("Custom");
+	}
+
+	// --- ExtractValuesFromCell ---
+
+	[Fact]
+	public void ExtractValuesFromCell_BoundField_PopulatesDictionary()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Product Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		var row = gridView.Rows[0];
+
+		var values = new OrderedDictionary();
+		var cell = row.Cells[0];
+
+		cell.ContainingField.ExtractValuesFromCell(
+			values, cell, DataControlRowState.Normal, includeReadOnly: true);
+
+		values["Name"].ShouldBe("Widget");
+	}
+
+	[Fact]
+	public void ExtractValuesFromCell_BoundField_SkipsReadOnlyWhenNotIncluded()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Product Name" ReadOnly="true" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		var row = gridView.Rows[0];
+
+		var values = new OrderedDictionary();
+		var cell = row.Cells[0];
+
+		cell.ContainingField.ExtractValuesFromCell(
+			values, cell, DataControlRowState.Normal, includeReadOnly: false);
+
+		values.Count.ShouldBe(0);
+	}
+
+	// --- Non-generic GridViewRow shim delegation ---
+
+	[Fact]
+	public void NonGenericGridViewRow_FindControl_DelegatesToGeneric()
+	{
+		var formRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["PurchaseQuantity"] = "5"
+		};
+
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="CompatProduct" HeaderText="Qty">
+					<ItemTemplate>
+						<TextBox ID="PurchaseQuantity" Text="1" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		var typedRow = gridView.Rows[0];
+		typedRow.FormRowData = formRowData;
+
+		// Convert to non-generic
+		GridViewRow nonGenericRow = typedRow;
+
+		// FindControl should still work through delegation
+		var control = nonGenericRow.FindControl("PurchaseQuantity");
+		control.ShouldNotBeNull();
+		control.ShouldBeOfType<TextBox>();
+		((TextBox)control).Text.ShouldBe("5");
+	}
+
+	[Fact]
+	public void NonGenericGridViewRow_Cells_DelegatesFromGeneric()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Product Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		GridViewRow nonGenericRow = gridView.Rows[0];
+
+		nonGenericRow.Cells.ShouldNotBeNull();
+		nonGenericRow.Cells.Count.ShouldBe(1);
+		nonGenericRow.Cells[0].ContainingField.HeaderText.ShouldBe("Product Name");
+	}
+
+	[Fact]
+	public void NonGenericGridViewRow_RowState_DelegatesFromGeneric()
+	{
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="TestGrid"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<BoundField ItemType="CompatProduct" DataField="Name" HeaderText="Name" />
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		GridViewRow nonGenericRow = gridView.Rows[0];
+
+		nonGenericRow.RowState.ShouldBe(DataControlRowState.Normal);
+	}
+
+	// --- End-to-end: Exact WingtipToys ShoppingCart pattern ---
+
+	[Fact]
+	public void EndToEnd_WingtipToys_UpdateCartItems_Pattern()
+	{
+		// This test validates the EXACT code pattern from WingtipToys ShoppingCart.aspx.cs:
+		//   for (int i = 0; i < CartList.Rows.Count; i++)
+		//   {
+		//       ... = GetValues(CartList.Rows[i]);
+		//   }
+		//   private ShoppingCartUpdates GetValues(GridViewRow row)
+		//   {
+		//       TextBox quantityTextBox = row.FindControl("PurchaseQuantity") as TextBox;
+		//       ...
+		//   }
+
+		var formRowData0 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["PurchaseQuantity"] = "3"
+		};
+		var formRowData1 = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["PurchaseQuantity"] = "7"
+		};
+
+		var data = new List<CompatProduct>
+		{
+			new CompatProduct { Name = "Widget", Price = 9.99m },
+			new CompatProduct { Name = "Gadget", Price = 19.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="CompatProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="CompatProduct" HeaderText="Qty">
+					<ItemTemplate>
+						<TextBox ID="PurchaseQuantity" Text="1" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<CompatProduct>>().Instance;
+		gridView.Rows[0].FormRowData = formRowData0;
+		gridView.Rows[1].FormRowData = formRowData1;
+
+		// Simulate the exact WingtipToys loop pattern
+		var quantities = new List<int>();
+		for (var i = 0; i < gridView.Rows.Count; i++)
+		{
+			var qty = GetQuantity(gridView.Rows[i]);
+			quantities.Add(qty);
+		}
+
+		quantities[0].ShouldBe(3);
+		quantities[1].ShouldBe(7);
+	}
+
+	// Mimics the WingtipToys GetValues pattern:
+	// private ShoppingCartUpdates GetValues(GridViewRow row)
+	private static int GetQuantity(GridViewRow row)
+	{
+		var quantityTextBox = row.FindControl("PurchaseQuantity") as TextBox;
+		if (quantityTextBox != null)
+		{
+			return Convert.ToInt32(quantityTextBox.Text);
+		}
+		return 0;
+	}
+
+	public class CompatProduct
+	{
+		public string Name { get; set; }
+		public decimal Price { get; set; }
+	}
+}

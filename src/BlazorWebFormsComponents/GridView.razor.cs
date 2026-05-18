@@ -4,6 +4,7 @@ using BlazorWebFormsComponents.Interfaces;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -332,12 +333,34 @@ namespace BlazorWebFormsComponents
 		public List<IColumn<ItemType>> ColumnList{ get; set; } = new List<IColumn<ItemType>>();
 
 		/// <summary>
-		/// The Rows of the GridView
+		/// The Rows of the GridView. Returns a <see cref="GridViewRowCollection{T}"/>
+		/// whose indexer yields <see cref="GridViewRow{T}"/> directly, enabling the
+		/// Web Forms <c>CartList.Rows[i].FindControl("X")</c> pattern without a cast.
 		/// </summary>
-		public List<IRow<ItemType>> Rows { get => RowList; set => RowList = value; }
+		public GridViewRowCollection<ItemType> Rows { get => _rows; set => _rows = value; }
 
 		///<inheritdoc/>
-		public List<IRow<ItemType>> RowList { get; set; } = new List<IRow<ItemType>>();
+		List<IRow<ItemType>> IRowCollection<ItemType>.RowList
+		{
+			get => _rows;
+			set
+			{
+				if (value is GridViewRowCollection<ItemType> gvrc)
+					_rows = gvrc;
+				else
+				{
+					_rows = new GridViewRowCollection<ItemType>();
+					_rows.AddRange(value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// The backing row collection.
+		/// </summary>
+		public GridViewRowCollection<ItemType> RowList { get => _rows; set => _rows = value; }
+
+		private GridViewRowCollection<ItemType> _rows = new GridViewRowCollection<ItemType>();
 
 		#region Templates
 		/// <summary>
@@ -566,10 +589,17 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal async Task UpdateRow(int rowIndex)
 		{
-			var args = new GridViewUpdateEventArgs(rowIndex) { Sender = this };
+			var args = BuildUpdateArgs(rowIndex);
 			var rowUpdatingHandler = RowUpdating.HasDelegate ? RowUpdating : OnRowUpdating;
 			await rowUpdatingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
+
+			var keyValues = args.Keys.Values.Cast<object>().ToArray();
+			if (!string.IsNullOrEmpty(UpdateMethod))
+			{
+				await InvokeUpdateMethodAsync(keyValues);
+			}
+
 			EditIndex = -1;
 
 			var rowUpdatedHandler = RowUpdated.HasDelegate ? RowUpdated : OnRowUpdated;
@@ -583,13 +613,94 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		internal async Task DeleteRow(int rowIndex)
 		{
-			var args = new GridViewDeleteEventArgs(rowIndex) { Sender = this };
+			var args = BuildDeleteArgs(rowIndex);
 			var rowDeletingHandler = RowDeleting.HasDelegate ? RowDeleting : OnRowDeleting;
 			await rowDeletingHandler.InvokeAsync(args);
 			if (args.Cancel) return;
 
+			var keyValues = args.Keys.Values.Cast<object>().ToArray();
+			if (!string.IsNullOrEmpty(DeleteMethod))
+			{
+				await InvokeDeleteMethodAsync(keyValues);
+			}
+
 			var rowDeletedHandler = RowDeleted.HasDelegate ? RowDeleted : OnRowDeleted;
 			if (rowDeletedHandler.HasDelegate) await rowDeletedHandler.InvokeAsync(args);
+		}
+
+		private GridViewUpdateEventArgs BuildUpdateArgs(int rowIndex)
+		{
+			var row = rowIndex >= 0 && rowIndex < Rows.Count ? Rows[rowIndex] : null;
+			var dataItem = row == null ? null : (object)row.DataItem;
+			return new GridViewUpdateEventArgs(rowIndex)
+			{
+				Sender = this,
+				Keys = BuildKeyDictionary(dataItem),
+				NewValues = BuildPostedValues(row),
+				OldValues = BuildCurrentValues(row)
+			};
+		}
+
+		private GridViewDeleteEventArgs BuildDeleteArgs(int rowIndex)
+		{
+			var row = rowIndex >= 0 && rowIndex < Rows.Count ? Rows[rowIndex] : null;
+			var dataItem = row == null ? null : (object)row.DataItem;
+			return new GridViewDeleteEventArgs(rowIndex)
+			{
+				Sender = this,
+				Keys = BuildKeyDictionary(dataItem)
+			};
+		}
+
+		private OrderedDictionary BuildKeyDictionary(object item)
+		{
+			var dictionary = new OrderedDictionary();
+			if (item == null || string.IsNullOrWhiteSpace(DataKeyNames))
+				return dictionary;
+
+			foreach (var keyName in DataKeyNames.Split(',').Select(k => k.Trim()).Where(k => k.Length > 0))
+			{
+				dictionary[keyName] = DataBinder.GetPropertyValue(item, keyName);
+			}
+
+			return dictionary;
+		}
+
+		private OrderedDictionary BuildCurrentValues(GridViewRow<ItemType> row)
+		{
+			var dictionary = new OrderedDictionary();
+			if (row == null)
+				return dictionary;
+
+			foreach (var boundField in ColumnList.OfType<BoundField<ItemType>>())
+			{
+				dictionary[boundField.DataField] = DataBinder.GetPropertyValue(row.DataItem, boundField.DataField);
+			}
+
+			return dictionary;
+		}
+
+		private OrderedDictionary BuildPostedValues(GridViewRow<ItemType> row)
+		{
+			var dictionary = new OrderedDictionary();
+			if (row == null)
+				return dictionary;
+
+			foreach (var boundField in ColumnList.OfType<BoundField<ItemType>>())
+			{
+				if (boundField.ReadOnly)
+					continue;
+
+				if (row.FormRowData != null && row.FormRowData.TryGetValue(boundField.DataField, out var postedValue))
+				{
+					dictionary[boundField.DataField] = postedValue;
+					continue;
+				}
+
+				dictionary[boundField.DataField] = DataBinder.GetPropertyValue(row.DataItem, boundField.DataField);
+			}
+
+			return dictionary;
 		}
 
 		/// <summary>
@@ -623,7 +734,7 @@ namespace BlazorWebFormsComponents
 		/// <summary>
 		/// Gets whether the auto-generated command column should be displayed.
 		/// </summary>
-		internal bool ShowCommandColumn => AutoGenerateSelectButton || AutoGenerateDeleteButton || RowEditing.HasDelegate || OnRowEditing.HasDelegate || RowUpdating.HasDelegate || OnRowUpdating.HasDelegate || RowDeleting.HasDelegate || OnRowDeleting.HasDelegate || RowCancelingEdit.HasDelegate || OnRowCancelingEdit.HasDelegate;
+		internal bool ShowCommandColumn => AutoGenerateSelectButton || AutoGenerateDeleteButton || RowEditing.HasDelegate || OnRowEditing.HasDelegate || RowUpdating.HasDelegate || OnRowUpdating.HasDelegate || RowDeleting.HasDelegate || OnRowDeleting.HasDelegate || RowCancelingEdit.HasDelegate || OnRowCancelingEdit.HasDelegate || !string.IsNullOrEmpty(UpdateMethod) || !string.IsNullOrEmpty(DeleteMethod);
 
 		/// <summary>
 		/// Gets the total column count including the auto-generated command column.

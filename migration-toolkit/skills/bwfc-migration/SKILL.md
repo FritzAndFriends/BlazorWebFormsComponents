@@ -17,9 +17,7 @@ This skill orchestrates the full migration from ASP.NET Web Forms to Blazor Serv
 
 The CLI tool emits structured `// TODO(bwfc-*)` comments and a JSON migration report. L2 reads that report and applies contextual transforms per TODO category.
 
-**Related skills:**
-- `/bwfc-identity-migration` — ASP.NET Identity/Membership → Blazor Identity
-- `/bwfc-data-migration` — EF6 → EF Core, DataSource → services, architecture decisions
+Three-layer migration architecture:
 
 ---
 
@@ -32,7 +30,7 @@ The CLI tool emits structured `// TODO(bwfc-*)` comments and a JSON migration re
   ```
 - **BlazorWebFormsComponents NuGet package** (added automatically by the tool's scaffolding)
 
----
+## Critical Rules
 
 ## 🚨 CRITICAL: USE THE SHIMS — PRIMARY MIGRATION STRATEGY 🚨
 
@@ -1142,3 +1140,18 @@ L1 removes these. Use `@ref` if programmatic access is needed.
 
 ---
 
+| Error Signature | Recipe File |
+|---|---|
+| `CS7036: no argument ... 'options' of 'XxxContext'` | `recipes/new-dbcontext-to-di.md` |
+| `CS0103` on `@ref` fields, no `.razor.cs` | `recipes/missing-code-behind.md` |
+| `CS1061: 'GridView<T>' ... 'Rows'/'FindControl'` | `recipes/gridview-row-findcontrol.md` |
+| `CS1061: ... 'InnerText'` | `recipes/innertext-to-markup.md` |
+| `CS1503: SelectMethod ... 'string' to 'SelectHandler'` | `recipes/selectmethod-string-binding.md` |
+| CSS/layout visual regression | `recipes/layout-css-body-class.md` |
+| `CS1061: 'RequestShim' ... 'IsLocal'` | `recipes/request-shim-gaps.md` |
+| `CS0103` on OAuth fields | `recipes/oauth-page-stubs.md` |
+| `CS0246: 'IDatabaseInitializer'` | `recipes/database-seed-initializer.md` |
+| `Session.SetString(key, = null)` garbled syntax | `recipes/session-transform-garbling.md` |
+| Circular DI: class injects itself | `recipes/circular-self-injection.md` |
+| `CS1503`/`CS0123`: EventCallback signature | `recipes/eventcallback-signature-mismatch.md` |
+| `CS0542`: nested class same name as outer | `recipes/nested-class-collision.md` |

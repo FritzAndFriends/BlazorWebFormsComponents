@@ -1,0 +1,44 @@
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+namespace ContosoUniversity;
+public partial class Students
+{
+    private AutoCompleteExtender AutoCompleteExtender1 = default!;
+    private Button btnClear = default!;
+    private Button btnInsert = default!;
+    private Button btnSearch = default!;
+    private DropDownList<object> dropListCourses = default!;
+    private GridView<object> grv = default!;
+    private ScriptManager ScriptManager2 = default!;
+    private DetailsView<object> studentData = default!;
+    private Table tabAddStud = default!;
+    private TextBox txtBirthDate = default!;
+    private TextBox txtEmail = default!;
+    private TextBox txtFirstName = default!;
+    private TextBox txtLastName = default!;
+    private TextBox txtSearch = default!;
+    public IQueryable<Object> grv_GetData() => throw new NotImplementedException();
+    public void grv_DeleteItem(int id) { }
+    public void grv_UpdateItem(int id) { }
+
+
+    protected void btnClear_Click()
+    {
+        // TODO: migrate from Web Forms code-behind
+    }
+
+    protected void btnInsert_Click()
+    {
+        // TODO: migrate from Web Forms code-behind
+    }
+
+    protected void btnSearch_Click()
+    {
+        // TODO: migrate from Web Forms code-behind
+    }
+
+    protected void grv_RowUpdating()
+    {
+        // TODO: migrate from Web Forms code-behind
+    }
+}

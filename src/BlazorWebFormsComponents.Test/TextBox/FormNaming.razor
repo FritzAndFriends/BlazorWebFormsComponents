@@ -1,0 +1,68 @@
+@using Shouldly
+
+@code {
+	[Fact]
+	public void TextBox_WithID_RendersNameAttribute()
+	{
+		var cut = Render(@<TextBox ID="PurchaseQuantity" Text="1" />);
+
+		var input = cut.Find("input");
+		input.GetAttribute("name").ShouldBe("PurchaseQuantity");
+	}
+
+	[Fact]
+	public void TextBox_WithoutID_DoesNotRenderNameAttribute()
+	{
+		var cut = Render(@<TextBox Text="Hello" />);
+
+		var input = cut.Find("input");
+		input.HasAttribute("name").ShouldBeFalse();
+	}
+
+	[Fact]
+	public void TextBox_InsideNamingContext_RendersRowScopedName()
+	{
+		// Simulate a naming context as if inside GridView row 0 (ctl02)
+		var context = new FormNamingContext("CartList$ctl02", 0);
+
+		var cut = Render(
+			@<CascadingValue Value="context" Name="FormNamingContext">
+				<TextBox ID="PurchaseQuantity" Text="1" />
+			</CascadingValue>
+		);
+
+		var input = cut.Find("input");
+		input.GetAttribute("name").ShouldBe("CartList$ctl02$PurchaseQuantity");
+	}
+
+	[Fact]
+	public void TextBox_InsideNamingContext_Row2_RendersCorrectCtlId()
+	{
+		// Row index 2 → ctl04 (header=ctl01, row0=ctl02, row1=ctl03, row2=ctl04)
+		var context = new FormNamingContext("MyGrid$ctl04", 2);
+
+		var cut = Render(
+			@<CascadingValue Value="context" Name="FormNamingContext">
+				<TextBox ID="Quantity" Text="5" />
+			</CascadingValue>
+		);
+
+		var input = cut.Find("input");
+		input.GetAttribute("name").ShouldBe("MyGrid$ctl04$Quantity");
+	}
+
+	[Fact]
+	public void TextBox_MultiLine_InsideNamingContext_RendersRowScopedName()
+	{
+		var context = new FormNamingContext("Grid1$ctl02", 0);
+
+		var cut = Render(
+			@<CascadingValue Value="context" Name="FormNamingContext">
+				<TextBox ID="Notes" Text="Hello" TextMode="BlazorWebFormsComponents.Enums.TextBoxMode.MultiLine" />
+			</CascadingValue>
+		);
+
+		var textarea = cut.Find("textarea");
+		textarea.GetAttribute("name").ShouldBe("Grid1$ctl02$Notes");
+	}
+}

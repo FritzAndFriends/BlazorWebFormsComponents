@@ -1,77 +1,52 @@
 ---
 name: bwfc-identity-migration
-description: "Migrate ASP.NET Web Forms Identity and Membership authentication to Blazor Server Identity. Covers OWIN to ASP.NET Core middleware, login page migration, BWFC login controls, role-based authorization, and cookie auth under Interactive Server mode. WHEN: \"migrate identity\", \"login page migration\", \"OWIN to core\", \"cookie auth blazor\", \"LoginView migration\"."
+description: "**WORKFLOW SKILL** — Migrate ASP.NET Web Forms Identity and Membership authentication to Blazor Server Identity. Covers OWIN→Core middleware, login/register/logout minimal API endpoints, BWFC login controls, cookie auth under Interactive Server, and role-based authorization. WHEN: \"migrate identity\", \"login page migration\", \"OWIN to core\", \"cookie auth blazor\", \"LoginView migration\". INVOKES: dotnet CLI for identity scaffolding. FOR SINGLE OPERATIONS: use bwfc-migration for markup, bwfc-data-migration for EF."
 ---
 
 # Web Forms Identity → Blazor Identity Migration
 
-This skill covers migrating ASP.NET Web Forms authentication (Identity, Membership, FormsAuthentication) to Blazor Server using ASP.NET Core Identity.
-
-**Related skills:**
-- `/bwfc-migration` — Core markup migration (controls, expressions, layouts)
-- `/bwfc-data-migration` — EF6 → EF Core, data access, architecture decisions
-
----
-
 ## Overview
-
-Web Forms authentication typically uses one of three systems. The migration path depends on which one:
 
 | Web Forms Auth System | Era | Blazor Migration Path |
 |----------------------|-----|----------------------|
 | ASP.NET Identity (OWIN) | 2013+ | ASP.NET Core Identity (closest match) |
-| ASP.NET Membership | 2005-2013 | ASP.NET Core Identity (schema migration required) |
-| FormsAuthentication | 2002-2005 | ASP.NET Core Identity or cookie auth |
+| ASP.NET Membership | 2005-2013 | Core Identity (schema migration required) |
+| FormsAuthentication | 2002-2005 | Core Identity or cookie auth |
 
----
+**Related:** `/bwfc-migration` (markup), `/bwfc-data-migration` (EF/architecture)
 
-## ⚠️ Cookie Auth Under Interactive Server Mode
+## Critical Rules
 
-> **CRITICAL:** When using `<Routes @rendermode="InteractiveServer" />` (global interactive server mode), `HttpContext` is **NULL** during WebSocket circuits. This means cookie-based authentication operations — login, register, logout — **cannot** be performed via Blazor component event handlers (e.g., `@onclick`). They will silently fail: no exception is thrown, but no cookie is set.
+1. **Cookie auth requires HTTP endpoints** — login/register/logout MUST use `<form method="post">` + minimal API endpoints. Component event handlers (`@onclick`) silently fail for cookie operations in interactive mode.
+2. **NEVER replace LoginView with AuthorizeView** — BWFC `LoginView` uses `AuthenticationStateProvider` natively with same template names (`AnonymousTemplate`, `LoggedInTemplate`).
+3. **DisableAntiforgery required** — Blazor forms don't include antiforgery tokens. All auth endpoints must call `.DisableAntiforgery()`.
+4. **Session-based auth data works** — `Session["key"]` via `WebFormsPageBase.Session` / `SessionShim`. Don't inject `IHttpContextAccessor`.
 
-**Why this happens:** After the initial HTTP request, Blazor Server communicates over a WebSocket (SignalR circuit). There is no HTTP response to attach a `Set-Cookie` header to. `SignInAsync()` called inside a component event handler has no `HttpContext.Response` to write the cookie.
+## Quick Reference
 
-**Required pattern:** Use standard HTML `<form method="post">` elements that submit to **minimal API endpoints** via full HTTP POST requests. The endpoint performs the auth operation and redirects back to a Blazor page.
+### BWFC Login Controls (drop-in replacements)
 
-```razor
-@* Login.razor — form posts to a minimal API endpoint, NOT a Blazor event handler *@
-<form method="post" action="/Account/LoginHandler">
-    <div>
-        <label>Email</label>
-        <input type="email" name="email" required />
-    </div>
-    <div>
-        <label>Password</label>
-        <input type="password" name="password" required />
-    </div>
-    <button type="submit">Log in</button>
-</form>
-```
+`<Login />`, `<LoginName />`, `<LoginStatus />`, `<LoginView>`, `<CreateUserWizard />`, `<ChangePassword />`, `<PasswordRecovery />`
+
+### Auth Endpoint Pattern
 
 ```csharp
-// Program.cs — minimal API endpoint handles the actual SignInAsync()
-app.MapPost("/Account/LoginHandler", async (HttpContext context, SignInManager<IdentityUser> signInManager) =>
+// Program.cs — login via HTTP POST (required for cookie auth)
+app.MapPost("/Account/LoginHandler", async (HttpContext ctx, SignInManager<IdentityUser> sm) =>
 {
-    var form = await context.Request.ReadFormAsync();
-    var email = form["email"].ToString();
-    var password = form["password"].ToString();
-    var result = await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: false);
-    return result.Succeeded
-        ? Results.Redirect("/")
-        : Results.Redirect("/Account/Login?error=Invalid+login+attempt");
+    var form = await ctx.Request.ReadFormAsync();
+    var result = await sm.PasswordSignInAsync(form["email"]!, form["password"]!, false, false);
+    return result.Succeeded ? Results.Redirect("/") : Results.Redirect("/Account/Login?error=failed");
 }).DisableAntiforgery();
 ```
 
-**Key points:**
-- The `<form>` submits a standard HTTP POST — this is a full page navigation, not a Blazor event
-- The minimal API endpoint has a real `HttpContext` with a real HTTP response → cookies work
-- After the operation, the endpoint redirects back to a Blazor page
-- This pattern applies to **all** cookie-writing operations: login, register, logout, external auth callbacks
-- This is **NOT optional** — without it, auth silently fails
+## Companion Documents
 
-> **Important:** The endpoint MUST call `.DisableAntiforgery()` because Blazor's HTML rendering does not include antiforgery tokens in `<form>` elements. See [DisableAntiforgery Requirement](#disableantiforgery-requirement) below.
+| Document | Content |
+|----------|---------|
+| **[IDENTITY-PATTERNS.md](IDENTITY-PATTERNS.md)** | Cookie auth details, identity config steps, BWFC login controls, authorization patterns, endpoint templates, OWIN mapping, gotchas |
 
----
+## L2 Break-Fix Playbook
 
 ## Step 1: Add Identity Packages
 

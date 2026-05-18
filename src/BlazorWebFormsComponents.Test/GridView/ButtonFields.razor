@@ -5,7 +5,7 @@
 	[Fact]
 	public void GridView_ButtonField_RendersButtonsCorrectly()
 	{
-		var cut = Render(@<GridView SelectMethod="GetWidgets"
+		var cut = Render(@<GridView Items="@(Widget.SimpleWidgetList)"
 							AutoGenerateColumns="false"
 							ItemType="SharedSampleObjects.Models.Widget">
 			<Columns>
@@ -44,7 +44,7 @@
 	[Fact]
 	public void GridView_ButtonField_HandlesCommandCorrectly()
 	{
-		var cut = Render(@<GridView SelectMethod="GetWidgets"
+		var cut = Render(@<GridView Items="@(Widget.SimpleWidgetList)"
 							AutoGenerateColumns="false"
 							OnRowCommand="RowCommand"
 							ItemType="SharedSampleObjects.Models.Widget">
@@ -82,3 +82,4 @@
 	}
 
 }
+

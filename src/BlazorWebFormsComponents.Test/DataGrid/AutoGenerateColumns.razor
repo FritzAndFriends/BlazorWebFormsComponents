@@ -5,7 +5,7 @@
 	{
 		var cut = Render(@<DataGrid ItemType="Widget"
 							AutoGenerateColumns="true"
-							SelectMethod="GetWidgets" />);
+							Items="@(Widget.SimpleWidgetList)" />);
 
 		// Should auto-generate columns for bindable properties
 		var tableHeaders = cut.FindAll("th");
@@ -24,3 +24,4 @@
 		return Widget.SimpleWidgetList.AsQueryable();
 	}
 }
+

@@ -9,7 +9,7 @@
 		var cut = Render(@<GridView ItemType="Widget"
 							CssClass="my-grid-class"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 			</Columns>
@@ -132,7 +132,7 @@
 		var cut = Render(@<GridView ItemType="Widget"
 							BackColor="Yellow"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 			</Columns>
@@ -148,7 +148,7 @@
 		var cut = Render(@<GridView ItemType="Widget"
 							ForeColor="Red"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 			</Columns>
@@ -164,7 +164,7 @@
 		var cut = Render(@<GridView ItemType="Widget"
 							Width="Unit.Pixel(500)"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 			</Columns>
@@ -180,7 +180,7 @@
 		var cut = Render(@<GridView ItemType="Widget"
 							Height="Unit.Pixel(300)"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 			</Columns>
@@ -199,7 +199,7 @@
 							ForeColor="Navy"
 							Width="Unit.Pixel(600)"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 			</Columns>
@@ -288,3 +288,4 @@
 		return Widget.SimpleWidgetList.AsQueryable();
 	}
 }
+

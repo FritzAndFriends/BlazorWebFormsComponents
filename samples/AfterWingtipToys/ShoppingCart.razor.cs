@@ -2,10 +2,11 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using WingtipToys.Logic;
 using WingtipToys.Models;
-
-namespace WingtipToys;
-
-public partial class ShoppingCart
+using WingtipToys.Logic;
+using System.Collections.Specialized;
+using System.Collections;
+using Microsoft.AspNetCore.Components;
+namespace WingtipToys
 {
     [Inject] private CartStore CartStore { get; set; } = default!;
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
@@ -85,4 +86,19 @@ public partial class ShoppingCart
 
         return cartId;
     }
+
+    protected void CheckoutBtn_Click(EventArgs e)
+    {
+      // DbContext 'ShoppingCartActions' is injected via DI
+
+        Session["payment_amt"] = _shoppingCartActions.GetTotal();
+      
+      Response.Redirect("Checkout/CheckoutStart.aspx");
+    }
+  
+
+    private object? _LabelTotalText_Text; // TODO: migrate from Web Forms code-behind
+
+    private object? _lblTotal_Text; // TODO: migrate from Web Forms code-behind
+}
 }

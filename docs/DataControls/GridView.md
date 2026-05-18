@@ -3,9 +3,10 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 ## Features supported in Blazor
 
 - Readonly grid
-- Bound, Button, Hyperlink, and Template columns
+- Bound, Button, Hyperlink, Template, and Command columns
 - **Paging** - `AllowPaging`, `PageSize`, `PageIndex`, `PageIndexChanged` event
 - **Sorting** - `AllowSorting`, `SortExpression`, `SortDirection`, `Sorting`/`Sorted` events
+- **CRUD model binding** - `SelectMethod`, `UpdateMethod`, `DeleteMethod`, `DataKeyNames`, and `GridViewUpdateEventArgs.Keys` / `NewValues`
 - **Row Editing** - `EditIndex`, `RowEditing`, `RowUpdating`, `RowDeleting`, `RowCancelingEdit` events
 - **Selection** - `SelectedIndex`, `SelectedRow`, `SelectedValue`, `AutoGenerateSelectButton`, `SelectedIndexChanging`/`SelectedIndexChanged` events
 - **Style Sub-Components** - `RowStyle`, `AlternatingRowStyle`, `HeaderStyle`, `FooterStyle`, `SelectedRowStyle`, `EditRowStyle`, `EmptyDataRowStyle`, `PagerStyle`
@@ -16,10 +17,11 @@ The GridView component is meant to emulate the asp:GridView control in markup an
 
 - The `RowCommand.CommandSource` object will be populated with the `ButtonField` object
 - **Context attribute** - When using `<TemplateField>`, add `Context="Item"` to access the current row item as `@Item` instead of Blazor's default `@context`
-- **ItemType cascading** - The `ItemType` parameter is automatically cascaded from the GridView to child columns. You only need to specify it once on the GridView, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField) will automatically infer the type. For backward compatibility, you can still explicitly specify `ItemType` on individual columns if desired.
+- **ItemType cascading** - The `ItemType` parameter is automatically cascaded from the GridView to child columns. You only need to specify it once on the GridView, and all child columns (BoundField, TemplateField, HyperLinkField, ButtonField, CommandField) will automatically infer the type. For backward compatibility, you can still explicitly specify `ItemType` on individual columns if desired.
+- **CRUD model binding** - `UpdateMethod` and `DeleteMethod` now participate in the built-in GridView command flow. When a row update fires, `GridViewUpdateEventArgs.Keys`, `OldValues`, and `NewValues` are populated for `BoundField` columns, while `DataKeyNames` values are forwarded to string-based `UpdateMethod` / `DeleteMethod` handlers.
 - **Paging** - When `AllowPaging="true"`, the GridView automatically paginates the data source using `Skip()`/`Take()`. A numeric pager is rendered below the grid. The `PageIndexChanged` event fires with a `PageChangedEventArgs` containing `NewPageIndex`, `OldPageIndex`, `TotalPages`, `StartRowIndex`, and `Cancel`.
 - **Sorting** - When `AllowSorting="true"`, column headers become clickable. You must handle the `Sorting` event to apply the sort to your data source. The `Sorted` event fires after the sort completes. Both events use `GridViewSortEventArgs` with `SortExpression`, `SortDirection`, and `Cancel` properties.
-- **Row Editing** - Set `EditIndex` to the zero-based row index to put a row in edit mode (`-1` means no row is being edited). An auto-generated command column appears when at least one editing event callback is registered.
+- **Row Editing** - Set `EditIndex` to the zero-based row index to put a row in edit mode (`-1` means no row is being edited). Use `<CommandField ShowEditButton="true" />` and `<CommandField ShowDeleteButton="true" />` to preserve Web Forms command-column positions while still using BWFC row events and CRUD methods.
 - **Selection** - Set `SelectedIndex` to highlight a row. `SelectedRow` returns the data item for the selected row, and `SelectedValue` returns the `DataKeyNames` value. When `AutoGenerateSelectButton="true"`, a "Select" link column is added automatically. The `SelectedIndexChanging` event fires before the selection changes (cancellable), and `SelectedIndexChanged` fires after.
 - **Style Sub-Components** - Use `<RowStyle>`, `<AlternatingRowStyle>`, `<HeaderStyle>`, `<FooterStyle>`, `<SelectedRowStyle>`, `<EditRowStyle>`, `<EmptyDataRowStyle>`, and `<PagerStyle>` child components to configure `TableItemStyle` properties (CssClass, BackColor, ForeColor, etc.) for each section of the grid.
 - **Display Properties** - `ShowHeader` and `ShowFooter` toggle header/footer rows. `Caption` and `CaptionAlign` add a `<caption>` element. `GridLines` controls table borders. `UseAccessibleHeader` renders `<th>` with `scope="col"`. `CellPadding` and `CellSpacing` set table spacing. `ShowHeaderWhenEmpty` shows column headers even when the data source is empty. `EmptyDataTemplate` renders custom content when there are no data rows.
@@ -757,6 +759,95 @@ Currently, not every syntax element of Web Forms GridView is supported. In the m
 
 | Property | Type | Default | Description |
 |----------|------|---------|-------------|
+
+## GridViewRow Compatibility
+
+BWFC provides full Web Forms `GridViewRow` compatibility so that migrated code-behind files compile and work with zero changes. This means patterns like `CartList.Rows[i].FindControl("PurchaseQuantity")` and `GetValues(GridViewRow row)` work exactly as they did in Web Forms.
+
+### Rows Typed Indexer
+
+`GridView<T>.Rows` returns a `GridViewRowCollection<T>` whose indexer returns `GridViewRow<T>` (not `IRow<T>`):
+
+```csharp
+// This "just works" — Rows[i] returns GridViewRow<T>
+for (int i = 0; i < CartList.Rows.Count; i++)
+{
+    GridViewRow<CartItem> row = CartList.Rows[i];
+    // ...
+}
+```
+
+### Implicit Conversion to Non-Generic GridViewRow
+
+`GridViewRow<T>` defines an implicit operator to the non-generic `GridViewRow` class, so method signatures like `GetValues(GridViewRow row)` accept `GridViewRow<T>` instances automatically:
+
+```csharp
+// Web Forms pattern — compiles unchanged in BWFC
+private ShoppingCartUpdates GetValues(GridViewRow row)
+{
+    TextBox quantityTextBox = (TextBox)row.FindControl("PurchaseQuantity");
+    // ...
+}
+
+// Called with the typed row — implicit conversion handles it
+var updates = GetValues(CartList.Rows[i]);
+```
+
+### FindControl on GridViewRow
+
+Both `GridViewRow<T>` and the non-generic `GridViewRow` support `FindControl(string id)`. In SSR mode, `FindControl` returns proxy `TextBox` and `CheckBox` instances populated from form POST data, matching the Web Forms pattern where controls inside `TemplateField` are accessed by ID.
+
+### RowState
+
+`GridViewRow<T>.RowState` returns a `DataControlRowState` flags enum, matching the Web Forms API:
+
+- `DataControlRowState.Normal` — even-indexed rows
+- `DataControlRowState.Alternate` — odd-indexed rows
+- `DataControlRowState.Edit` — row in edit mode
+- `DataControlRowState.Selected` — selected row
+
+### Cells and ExtractValuesFromCell
+
+`GridViewRow<T>.Cells` returns a `DataControlFieldCellCollection` wrapping the row's columns. Each `DataControlFieldCell` exposes a `ContainingField` with an `ExtractValuesFromCell` method that populates an `IOrderedDictionary` with the cell's value:
+
+```csharp
+// Web Forms pattern — works unchanged
+var dict = new OrderedDictionary();
+row.Cells[0].ContainingField.ExtractValuesFromCell(dict, row, DataControlRowState.Normal, true);
+string productName = (string)dict["ProductName"];
+```
+
+### End-to-End WingtipToys Pattern
+
+The canonical WingtipToys `UpdateCartItems()` pattern compiles and runs with zero code changes:
+
+```csharp
+public struct ShoppingCartUpdates
+{
+    public int ProductId;
+    public int PurchaseQuantity;
+    public bool RemoveItem;
+}
+
+private ShoppingCartUpdates GetValues(GridViewRow row)
+{
+    var updates = new ShoppingCartUpdates();
+    updates.PurchaseQuantity = int.Parse(
+        ((TextBox)row.FindControl("PurchaseQuantity")).Text);
+    updates.RemoveItem =
+        ((CheckBox)row.FindControl("chkRemove")).Checked;
+    return updates;
+}
+
+protected void UpdateCartItems()
+{
+    for (int i = 0; i < CartList.Rows.Count; i++)
+    {
+        var updates = GetValues(CartList.Rows[i]); // implicit operator
+        // process updates...
+    }
+}
+```
 | `SelectedIndex` | `int` | `-1` | Zero-based index of the selected row. `-1` = no selection. |
 | `SelectedRow` | `ItemType` | `default` | Read-only. Returns the data item for the selected row. |
 | `SelectedValue` | `object` | `null` | Read-only. Returns the `DataKeyNames` value of the selected row. |

@@ -4,7 +4,7 @@
 	[Fact]
 	public void ListView_SelectMethod_RendersItemsFromMethod()
 	{
-		var cut = Render(@<ListView SelectMethod="GetWidgets"
+		var cut = Render(@<ListView SelectMethodDelegate="GetWidgets"
 						ItemType="Widget"
 						Context="Item">
 			<ItemTemplate><span>@Item.Name</span></ItemTemplate>

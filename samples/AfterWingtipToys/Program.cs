@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using WingtipToys.Logic;
 using WingtipToys.Models;
 
+using WingtipToys.Logic;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorComponents();

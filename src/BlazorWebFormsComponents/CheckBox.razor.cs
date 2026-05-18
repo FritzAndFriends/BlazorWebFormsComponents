@@ -19,6 +19,35 @@ namespace BlazorWebFormsComponents
 		[CascadingParameter(Name = "ValidationGroupCoordinator")]
 		protected ValidationGroupCoordinator Coordinator { get; set; }
 
+		/// <summary>
+		/// The form naming context cascaded from a parent data row (e.g., GridViewRow).
+		/// When present, the control's HTML name attribute uses the Web Forms-compatible
+		/// UniqueID format (e.g., "GridView1$ctl02$RemoveItem").
+		/// </summary>
+		[CascadingParameter(Name = "FormNamingContext")]
+		protected FormNamingContext FormNamingContext { get; set; }
+
+		/// <summary>
+		/// Gets the form field name for this CheckBox, following Web Forms UniqueID conventions.
+		/// </summary>
+		internal string FormName
+		{
+			get
+			{
+				if (FormNamingContext != null && !string.IsNullOrEmpty(ID))
+					return FormNamingContext.GetChildUniqueID(ID);
+				return UniqueID;
+			}
+		}
+
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+			// Register this control's type with the naming context so FindControl
+			// can create a correctly-typed proxy from form POST data.
+			FormNamingContext?.RegisterControl(ID, typeof(CheckBox));
+		}
+
 		[Parameter]
 		public bool Checked { get; set; }
 

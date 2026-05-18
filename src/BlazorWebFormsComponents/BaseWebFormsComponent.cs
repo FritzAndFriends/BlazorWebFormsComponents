@@ -67,9 +67,17 @@ namespace BlazorWebFormsComponents
 
 		/// <summary>
 		/// Gets the client-side ID of the control, including parent naming containers.
-		/// Returns null if no ID is set.
+		/// Uses underscore (_) as separator. Returns null if no ID is set.
 		/// </summary>
 		public string ClientID => ComponentIdGenerator.GetClientID(this);
+
+		/// <summary>
+		/// Gets the unique ID of the control for form submission, including parent naming containers.
+		/// Uses dollar sign ($) as separator, matching ASP.NET Web Forms UniqueID behavior.
+		/// This value is used as the HTML <c>name</c> attribute for form controls.
+		/// Returns null if no ID is set.
+		/// </summary>
+		public string UniqueID => ComponentIdGenerator.GetUniqueID(this);
 
 		/// <summary>
 		/// While ViewState is supported by this library, this parameter does nothing

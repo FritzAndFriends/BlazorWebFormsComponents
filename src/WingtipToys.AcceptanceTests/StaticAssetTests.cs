@@ -193,11 +193,11 @@ public class StaticAssetTests
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // Check for a main content area with non-zero dimensions.
-        // WingtipToys uses jumbotron, carousel, or a main container.
-        var mainContent = page.Locator(".jumbotron, .carousel, [role='main'], main, .container").First;
+        // WingtipToys uses a div.container.body-content wrapper around @Body.
+        var mainContent = page.Locator("[role='main'], main.body-content, div.container.body-content, .jumbotron, .carousel").First;
         var count = await mainContent.CountAsync();
         Assert.True(count > 0,
-            "Homepage should have a main content area (.jumbotron, .carousel, [role='main'], main, or .container)");
+            "Homepage should have a main content area ([role='main'], main.body-content, div.container.body-content, .jumbotron, or .carousel)");
 
         var box = await mainContent.BoundingBoxAsync();
         Assert.NotNull(box);
@@ -254,13 +254,13 @@ public class StaticAssetTests
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
         // Navigate to first product's detail page
-        var firstProduct = page.Locator("a[href*='ProductDetails']").First;
+        var firstProduct = page.Locator("a[href*='/Product/']").First;
         var linkCount = await firstProduct.CountAsync();
         Assert.True(linkCount > 0, "Product list should have at least one product link");
 
         await firstProduct.ClickAsync();
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        Assert.Contains("ProductDetails", page.Url, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("/Product/", page.Url, StringComparison.OrdinalIgnoreCase);
 
         // Verify the product detail image loads
         var detailImage = page.Locator("img").First;

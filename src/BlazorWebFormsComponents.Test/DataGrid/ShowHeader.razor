@@ -6,7 +6,7 @@
 		var cut = Render(@<DataGrid ItemType="Widget"
 							AutoGenerateColumns="false"
 							ShowHeader="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
@@ -28,3 +28,4 @@
 		return Widget.SimpleWidgetList.AsQueryable();
 	}
 }
+

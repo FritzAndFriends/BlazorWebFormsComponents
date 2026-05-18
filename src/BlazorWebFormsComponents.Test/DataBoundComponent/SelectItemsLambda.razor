@@ -39,7 +39,7 @@
 		var cut = Render(
 			@<GridView ItemType="Widget" AutoGenerateColumns="false"
 				SelectItems="@((int maxRows, int startRowIndex, string sortBy) => { _selectItemsCallCount++; return itemsData.AsEnumerable(); })"
-				SelectMethod="GetWidgets">
+				SelectMethodDelegate="GetWidgets">
 				<Columns>
 					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 				</Columns>

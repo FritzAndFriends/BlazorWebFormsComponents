@@ -124,6 +124,59 @@ namespace BlazorWebFormsComponents
 		}
 
 		/// <summary>
+		/// Generates a UniqueID for a component — the form submission name.
+		/// Uses '$' as separator (matching Web Forms UniqueID behavior).
+		/// ClientID uses '_' for HTML id attributes; UniqueID uses '$' for form name attributes.
+		/// </summary>
+		/// <param name="component">The component to generate a UniqueID for</param>
+		/// <returns>The generated unique ID, or null if component is null or has no ID set</returns>
+		public static string GetUniqueID(BaseWebFormsComponent component)
+		{
+			if (component == null || string.IsNullOrEmpty(component.ID))
+				return null;
+
+			// Check for a cascaded FormNamingContext first — this provides
+			// row-level naming from GridViewRow or other naming containers
+			// that can't participate in the Blazor component parent chain.
+			// The context prefix already includes the grid's UniqueID and ctl{nn}.
+			// We just append the component's own ID.
+			// Note: FormNamingContext is set on the component by the cascading parameter handler.
+
+			var parts = new List<string>();
+			var current = component;
+			while (current != null)
+			{
+				if (!string.IsNullOrEmpty(current.ID))
+				{
+					parts.Insert(0, current.ID);
+				}
+				if (current is NamingContainer nc && nc.UseCtl00Prefix)
+				{
+					parts.Insert(0, "ctl00");
+				}
+				current = current.Parent;
+			}
+
+			return string.Join("$", parts);
+		}
+
+		/// <summary>
+		/// Generates a UniqueID for a component within a naming context (e.g., inside a GridView row).
+		/// The naming context prefix is prepended to the component's own ID.
+		/// </summary>
+		/// <param name="namingContextPrefix">The prefix from the naming container (e.g., "GridView1$ctl02")</param>
+		/// <param name="componentId">The component's own ID</param>
+		/// <returns>The full unique ID (e.g., "GridView1$ctl02$PurchaseQuantity")</returns>
+		public static string GetUniqueIDWithContext(string namingContextPrefix, string componentId)
+		{
+			if (string.IsNullOrEmpty(componentId))
+				return null;
+			if (string.IsNullOrEmpty(namingContextPrefix))
+				return componentId;
+			return $"{namingContextPrefix}${componentId}";
+		}
+
+		/// <summary>
 		/// Generates a client-side ID for a child element within a component.
 		/// </summary>
 		/// <param name="component">The parent component</param>

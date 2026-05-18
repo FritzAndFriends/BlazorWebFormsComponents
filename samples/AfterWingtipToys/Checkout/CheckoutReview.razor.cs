@@ -1,6 +1,6 @@
 namespace WingtipToys.Checkout;
 
-public partial class CheckoutReview
+public partial class CheckoutReview : BlazorWebFormsComponents.WebFormsPageBase
 {
     protected override Task OnInitializedAsync()
     {

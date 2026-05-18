@@ -3,7 +3,11 @@ using System.Linq;
 
 namespace WingtipToys.Models;
 
-public static class ProductDatabaseInitializer
+/// <summary>
+/// Stub for quarantined class. Provides compile compatibility for dependent code.
+/// Replace with a proper implementation during Layer 2 migration.
+/// </summary>
+public class ProductDatabaseInitializer
 {
     public static void SeedIfNeeded(ProductContext context)
     {

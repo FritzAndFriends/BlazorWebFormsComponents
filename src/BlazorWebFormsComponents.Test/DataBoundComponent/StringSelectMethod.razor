@@ -1,0 +1,123 @@
+@using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.DataBinding
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Rendering
+
+@code {
+
+	// ─── String-based SelectMethod resolution via WebFormsPageBase cascade ──
+
+	private static readonly string PageCascadeName = WebFormsPageBase.CascadingParameterName;
+
+	[Fact]
+	public void StringSelectMethod_ResolvesMethodOnHostingPage()
+	{
+		// Simulate a WebFormsPageBase cascading itself to a child data-bound component.
+		// The ListView should resolve "GetWidgets" by name on the hosting page via reflection.
+		var fakePage = new FakeWebFormsPage();
+
+		var cut = Render(
+			@<CascadingValue Name="@PageCascadeName" Value="@fakePage">
+				<ListView ItemType="Widget" SelectMethod="GetWidgets" Context="Item">
+					<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+				</ListView>
+			</CascadingValue>
+		);
+
+		cut.FindAll("span").Count.ShouldBe(Widget.SimpleWidgetList.Length);
+	}
+
+	[Fact]
+	public void StringSelectMethod_ThrowsWhenNoHostingPage()
+	{
+		// When no WebFormsPageBase cascade exists, string-based SelectMethod
+		// should throw a clear error telling the developer what to do.
+		var ex = Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(
+				@<ListView ItemType="Widget" SelectMethod="GetWidgets" Context="Item">
+					<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+				</ListView>
+			);
+		});
+
+		ex.Message.ShouldContain("WebFormsPageBase");
+		ex.Message.ShouldContain("GetWidgets");
+	}
+
+	[Fact]
+	public void StringSelectMethod_WorksWithGridView()
+	{
+		var fakePage = new FakeWebFormsPage();
+
+		var cut = Render(
+			@<CascadingValue Name="@PageCascadeName" Value="@fakePage">
+				<GridView ItemType="Widget" AutoGenerateColumns="false" SelectMethod="GetWidgets">
+					<Columns>
+						<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
+					</Columns>
+				</GridView>
+			</CascadingValue>
+		);
+
+		cut.FindAll("tbody tr").Count.ShouldBe(Widget.SimpleWidgetList.Length);
+	}
+
+	[Fact]
+	public void StringSelectMethod_WorksWithZeroParamMethod()
+	{
+		// Web Forms methods are typically zero-param: IQueryable<T> GetProducts()
+		// The resolver should handle this without requiring pagination params.
+		var fakePage = new FakeWebFormsPage();
+
+		var cut = Render(
+			@<CascadingValue Name="@PageCascadeName" Value="@fakePage">
+				<ListView ItemType="Widget" SelectMethod="GetWidgetsSimple" Context="Item">
+					<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+				</ListView>
+			</CascadingValue>
+		);
+
+		cut.FindAll("span").Count.ShouldBe(Widget.SimpleWidgetList.Length);
+	}
+
+	[Fact]
+	public void StringSelectMethod_ThrowsWhenMethodNotFound()
+	{
+		var fakePage = new FakeWebFormsPage();
+
+		var ex = Should.Throw<InvalidOperationException>(() =>
+		{
+			Render(
+				@<CascadingValue Name="@PageCascadeName" Value="@fakePage">
+					<ListView ItemType="Widget" SelectMethod="NonExistentMethod" Context="Item">
+						<ItemTemplate><span>@Item.Name</span></ItemTemplate>
+					</ListView>
+				</CascadingValue>
+			);
+		});
+
+		ex.Message.ShouldContain("NonExistentMethod");
+		ex.Message.ShouldContain("FakeWebFormsPage");
+	}
+
+	/// <summary>
+	/// Minimal fake that simulates a migrated Web Forms code-behind
+	/// inheriting from WebFormsPageBase with data methods.
+	/// </summary>
+	private class FakeWebFormsPage : WebFormsPageBase
+	{
+		// 4-param pagination signature (legacy)
+		public IQueryable<Widget> GetWidgets(int maxRows, int startRowIndex, string sortBy, out int totalRowCount)
+		{
+			totalRowCount = Widget.SimpleWidgetList.Length;
+			return Widget.SimpleWidgetList.AsQueryable();
+		}
+
+		// Zero-param signature (most common Web Forms pattern)
+		public IQueryable<Widget> GetWidgetsSimple()
+		{
+			return Widget.SimpleWidgetList.AsQueryable();
+		}
+	}
+}
