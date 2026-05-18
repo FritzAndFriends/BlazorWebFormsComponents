@@ -135,6 +135,8 @@ class Program
         services.AddSingleton<IRuntimeSignalDetector, IdentityRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, GlobalAsaxRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, WebConfigRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, AjaxToolkitRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, SqlClientRuntimeSignalDetector>();
         services.AddSingleton<RuntimeDetector>();
         services.AddSingleton<ProgramCsEmitter>();
         services.AddSingleton<MasterPageToLayoutConverter>();

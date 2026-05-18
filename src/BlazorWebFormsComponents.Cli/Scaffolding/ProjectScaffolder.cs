@@ -62,7 +62,7 @@ public class ProjectScaffolder
         result.Files["imports"] = new ScaffoldFile
         {
             RelativePath = "_Imports.razor",
-            Content = GenerateImportsRazor(projectName, hasModels)
+            Content = GenerateImportsRazor(projectName, hasModels, runtimeProfile.NeedsAjaxToolkit)
         };
 
         result.Files["app"] = new ScaffoldFile
@@ -130,6 +130,14 @@ public class ProjectScaffolder
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Identity.UI\" Version=\"10.0.0\" />";
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore\" Version=\"10.0.0\" />";
         }
+        if (runtimeProfile.NeedsSqlClient)
+        {
+            additionalPackages += "\n    <PackageReference Include=\"System.Data.SqlClient\" Version=\"4.9.0\" />";
+        }
+
+        var ajaxToolkitReference = runtimeProfile.NeedsAjaxToolkit
+            ? "\n" + ResolveAjaxToolkitReference(outputRoot)
+            : "";
 
         var bwfcReference = ResolveBwfcReference(outputRoot);
         var bwfcTargetsImport = ResolveBwfcTargetsImport(outputRoot);
@@ -145,7 +153,7 @@ public class ProjectScaffolder
   </PropertyGroup>
 
   <ItemGroup>
-{bwfcReference}{additionalPackages}
+{bwfcReference}{ajaxToolkitReference}{additionalPackages}
   </ItemGroup>
 {bwfcTargetsImport}
 </Project>
@@ -206,11 +214,37 @@ public class ProjectScaffolder
     }
 
 
-    private static string GenerateImportsRazor(string projectName, bool hasModels)
+    private static string ResolveAjaxToolkitReference(string outputRoot)
+    {
+        var outputFullPath = Path.GetFullPath(outputRoot);
+        var current = new DirectoryInfo(outputFullPath);
+
+        while (current is not null)
+        {
+            var candidate = Path.Combine(current.FullName, "src", "BlazorAjaxToolkitComponents", "BlazorAjaxToolkitComponents.csproj");
+            if (File.Exists(candidate))
+            {
+                var relativePath = Path.GetRelativePath(outputFullPath, candidate)
+                    .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                return $@"    <ProjectReference Include=""{relativePath}"" />";
+            }
+
+            current = current.Parent;
+        }
+
+        return @"    <PackageReference Include=""Fritz.BlazorAjaxToolkitComponents"" Version=""*"" />";
+    }
+
+
+    private static string GenerateImportsRazor(string projectName, bool hasModels, bool needsAjaxToolkit)
     {
         var modelsUsing = hasModels
             ? $@"
 @using global::{projectName}.Models"
+            : string.Empty;
+
+        var ajaxToolkitUsing = needsAjaxToolkit
+            ? "\n@using BlazorAjaxToolkitComponents"
             : string.Empty;
 
         return $@"@namespace {projectName}
@@ -224,7 +258,7 @@ public class ProjectScaffolder
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.Enums
 @using BlazorWebFormsComponents.LoginControls
-@using BlazorWebFormsComponents.Validations
+@using BlazorWebFormsComponents.Validations{ajaxToolkitUsing}
 @using global::{projectName}{modelsUsing}
 @inherits BlazorWebFormsComponents.WebFormsPageBase
 ";

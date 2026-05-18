@@ -19,6 +19,13 @@ public class ComponentRefCodeBehindTransform : ICodeBehindTransform
         @"partial\s+class\s+\w+[^{]*\{",
         RegexOptions.Compiled);
 
+    // Known AJAX Toolkit component types that live in BlazorAjaxToolkitComponents namespace
+    private static readonly HashSet<string> AjaxToolkitTypes = new(StringComparer.Ordinal)
+    {
+        "AutoCompleteExtender", "CalendarExtender", "CollapsiblePanelExtender",
+        "ModalPopupExtender", "TabContainer", "TabPanel", "Accordion", "AccordionPane",
+    };
+
     public string Apply(string content, FileMetadata metadata)
     {
         if (metadata.ComponentRefs.Count == 0)
@@ -31,6 +38,7 @@ public class ComponentRefCodeBehindTransform : ICodeBehindTransform
 
         // Generate field declarations
         var fields = new List<string>();
+        var needsAjaxToolkitUsing = false;
         foreach (var (controlId, fieldType) in metadata.ComponentRefs.OrderBy(kv => kv.Key))
         {
             // Skip if a field with this name already exists in the code-behind
@@ -41,11 +49,40 @@ public class ComponentRefCodeBehindTransform : ICodeBehindTransform
                     continue;
             }
 
+            if (AjaxToolkitTypes.Contains(fieldType))
+                needsAjaxToolkitUsing = true;
+
             fields.Add($"    private {fieldType} {controlId} = default!;");
         }
 
         if (fields.Count == 0)
             return content;
+
+        // Add using directive for AJAX Toolkit types if needed
+        if (needsAjaxToolkitUsing && !content.Contains("using BlazorAjaxToolkitComponents"))
+        {
+            // Find the last top-level using directive (ends with semicolon on same line, before namespace/class)
+            var lines = content.Split('\n');
+            var lastUsingLineIndex = -1;
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var trimmed = lines[i].TrimStart();
+                if (trimmed.StartsWith("using ") && trimmed.TrimEnd().EndsWith(";") && !trimmed.Contains("("))
+                    lastUsingLineIndex = i;
+                if (trimmed.StartsWith("namespace ") || trimmed.StartsWith("public ") || trimmed.StartsWith("internal "))
+                    break;
+            }
+            if (lastUsingLineIndex >= 0)
+            {
+                var linesList = new List<string>(lines);
+                linesList.Insert(lastUsingLineIndex + 1, "using BlazorAjaxToolkitComponents;");
+                content = string.Join("\n", linesList);
+            }
+            // Re-match since content changed
+            match = ClassOpenRegex.Match(content);
+            if (!match.Success)
+                return content;
+        }
 
         var fieldBlock = "\n" + string.Join("\n", fields);
 

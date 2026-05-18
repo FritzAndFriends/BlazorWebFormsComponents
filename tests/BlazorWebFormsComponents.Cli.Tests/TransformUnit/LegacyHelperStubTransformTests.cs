@@ -218,23 +218,23 @@ public class LegacyHelperStubTransformTests
     public void ProtectedHelperMethods_ArePreservedInStub()
     {
         var content = """
-            using System.Configuration;
+            using System.Web.Security;
 
             namespace TestApp;
 
-            public class ConfigHelper
+            public class SecurityHelper
             {
                 protected void LoadSetting(object sender, EventArgs e)
                 {
-                    var mode = ConfigurationManager.AppSettings["Mode"];
+                    var role = Roles.GetRolesForUser("admin");
                 }
             }
             """;
 
         var metadata = new FileMetadata
         {
-            SourceFilePath = @"D:\input\ConfigHelper.cs",
-            OutputFilePath = @"D:\output\ConfigHelper.cs",
+            SourceFilePath = @"D:\input\SecurityHelper.cs",
+            OutputFilePath = @"D:\output\SecurityHelper.cs",
             FileType = FileType.CodeFile,
             OriginalContent = content,
         };

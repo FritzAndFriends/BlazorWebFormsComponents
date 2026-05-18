@@ -31,16 +31,12 @@ namespace MyApp
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         protected void Grid_RowCommand(GridViewCommandEventArgs e)
         {
             // Handle row command
         }
 
-        protected void Grid_PageIndexChanging(GridViewPageEventArgs e)
+        protected void Grid_PageIndexChanging(PageChangedEventArgs e)
         {
             // Handle paging
         }

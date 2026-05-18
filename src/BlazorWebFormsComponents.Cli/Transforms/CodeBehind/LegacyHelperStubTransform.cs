@@ -13,7 +13,7 @@ namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 public class LegacyHelperStubTransform : ICodeBehindTransform
 {
     private static readonly Regex LegacyNamespaceRegex = new(
-        @"\busing\s+(Microsoft\.AspNet\.Identity|Microsoft\.AspNet\.Identity\.EntityFramework|Microsoft\.AspNet\.Identity\.Owin|System\.Web\.Security|System\.Web\.Providers|System\.Web\.Configuration|System\.Web\.Profile|WebMatrix\.WebData|System\.Configuration)\b",
+        @"\busing\s+(Microsoft\.AspNet\.Identity|Microsoft\.AspNet\.Identity\.EntityFramework|Microsoft\.AspNet\.Identity\.Owin|System\.Web\.Security|System\.Web\.Providers|System\.Web\.Configuration|System\.Web\.Profile|WebMatrix\.WebData)\b",
         RegexOptions.Compiled);
 
     // Matches System.Web usage for heavy APIs that HttpContextAccessorTransform cannot handle

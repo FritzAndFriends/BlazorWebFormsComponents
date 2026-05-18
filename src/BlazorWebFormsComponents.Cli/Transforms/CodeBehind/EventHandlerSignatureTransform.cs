@@ -7,6 +7,7 @@ namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 /// Transforms Web Forms event handler signatures to Blazor-compatible signatures:
 ///   - Strip the 'object sender' parameter, keep EventArgs param
 ///   - Normalize ImageClickEventArgs → EventArgs (BWFC components use EventCallback&lt;EventArgs&gt;)
+///   - Map GridViewPageEventArgs → PageChangedEventArgs (BWFC paging event type)
 /// </summary>
 public class EventHandlerSignatureTransform : ICodeBehindTransform
 {
@@ -27,6 +28,15 @@ public class EventHandlerSignatureTransform : ICodeBehindTransform
         "ImageClickEventArgs",
     };
 
+    // Web Forms EventArgs types that map to specific BWFC event types.
+    private static readonly Dictionary<string, string> EventArgsMappings = new(StringComparer.Ordinal)
+    {
+        ["GridViewPageEventArgs"] = "PageChangedEventArgs",
+        ["DetailsViewPageEventArgs"] = "PageChangedEventArgs",
+        ["FormViewPageEventArgs"] = "PageChangedEventArgs",
+        ["ListViewPageEventArgs"] = "PageChangedEventArgs",
+    };
+
     private const int MaxIterations = 200;
 
     public string Apply(string content, FileMetadata metadata)
@@ -44,6 +54,8 @@ public class EventHandlerSignatureTransform : ICodeBehindTransform
             // Normalize Web Forms-only EventArgs types to standard EventArgs
             if (NormalizedToEventArgs.Contains(eventArgsType))
                 eventArgsType = "EventArgs";
+            else if (EventArgsMappings.TryGetValue(eventArgsType, out var mappedType))
+                eventArgsType = mappedType;
 
             // Always keep the EventArgs param — BWFC components use EventCallback<EventArgs>
             var replacement = $"{prefix}({eventArgsType} {eventArgsParam})";

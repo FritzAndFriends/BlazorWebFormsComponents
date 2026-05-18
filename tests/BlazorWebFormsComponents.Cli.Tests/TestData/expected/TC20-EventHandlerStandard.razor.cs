@@ -32,10 +32,6 @@ namespace MyApp
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         protected void Button_Click(EventArgs e)
         {
             // Handle button click

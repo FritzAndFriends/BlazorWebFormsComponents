@@ -41,27 +41,38 @@ public class ConfigurationManagerTransform : ICodeBehindTransform
 
     public string Apply(string content, FileMetadata metadata)
     {
-        var hasConfigManager = ConfigManagerRegex.IsMatch(content);
+        // Strip comments before detecting ConfigurationManager to avoid matching TODO guidance text
+        var codeOnly = Regex.Replace(content, @"//.*$", "", RegexOptions.Multiline);
+        var hasConfigManager = ConfigManagerRegex.IsMatch(codeOnly);
 
-        // Strip System.Configuration using — BWFC provides the shim
+        // Strip System.Configuration using — BWFC provides the shim.
+        // If the code uses ConfigurationManager, add a using alias to disambiguate from
+        // Microsoft.Extensions.Configuration.ConfigurationManager (available via global usings in .NET 10).
         if (SystemConfigUsingRegex.IsMatch(content))
         {
-            content = SystemConfigUsingRegex.Replace(content,
-                "// using System.Configuration; // BWFC provides ConfigurationManager shim\n");
+            var replacement = hasConfigManager
+                ? "using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;\n"
+                : "";
+            content = SystemConfigUsingRegex.Replace(content, replacement);
+        }
+        else if (hasConfigManager && !content.Contains("using ConfigurationManager ="))
+        {
+            // No System.Configuration using but ConfigurationManager is used — add alias at top
+            content = "using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;\n" + content;
         }
 
         if (!hasConfigManager) return content;
 
-        // Collect keys for guidance
+        // Collect keys for guidance (from code only, not comments)
         var appSettingsKeys = new List<string>();
-        foreach (Match m in AppSettingsRegex.Matches(content))
+        foreach (Match m in AppSettingsRegex.Matches(codeOnly))
         {
             var key = m.Groups[1].Value;
             if (!appSettingsKeys.Contains(key)) appSettingsKeys.Add(key);
         }
 
         var connStringNames = new List<string>();
-        foreach (Match m in ConnStringsRegex.Matches(content))
+        foreach (Match m in ConnStringsRegex.Matches(codeOnly))
         {
             var name = m.Groups[1].Value;
             if (!connStringNames.Contains(name)) connStringNames.Add(name);

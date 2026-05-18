@@ -36,10 +36,6 @@ namespace MyApp
     // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
     // For non-page classes, inject ResponseShim via DI.
 
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         protected override async Task OnInitializedAsync()
         {
             // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior

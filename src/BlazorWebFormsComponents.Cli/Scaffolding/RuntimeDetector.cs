@@ -40,6 +40,8 @@ public class RuntimeProfile
     public bool NeedsSession { get; set; }
     public bool NeedsIdentity { get; set; }
     public bool NeedsEntityFramework { get; set; }
+    public bool NeedsAjaxToolkit { get; set; }
+    public bool NeedsSqlClient { get; set; }
     public string? DbContextClassName { get; set; }
     public string? DbContextNamespace { get; set; }
     public List<string> ConnectionStringNames { get; set; } = [];

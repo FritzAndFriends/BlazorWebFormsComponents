@@ -167,7 +167,9 @@ public static class TestHelpers
             new SessionRuntimeSignalDetector(),
             new IdentityRuntimeSignalDetector(),
             new GlobalAsaxRuntimeSignalDetector(),
-            new WebConfigRuntimeSignalDetector()
+            new WebConfigRuntimeSignalDetector(),
+            new AjaxToolkitRuntimeSignalDetector(),
+            new SqlClientRuntimeSignalDetector()
         ]);
 
     public static ProjectScaffolder CreateDefaultScaffolder() =>

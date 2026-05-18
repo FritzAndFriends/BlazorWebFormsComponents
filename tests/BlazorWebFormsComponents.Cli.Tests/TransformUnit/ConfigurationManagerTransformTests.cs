@@ -35,9 +35,8 @@ namespace MyApp
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        Assert.Contains("// using System.Configuration;", result);
-        Assert.Contains("BWFC provides ConfigurationManager shim", result);
-        Assert.DoesNotContain("\nusing System.Configuration;\n", result);
+        Assert.DoesNotContain("using System.Configuration;", result);
+        Assert.DoesNotContain("System.Configuration", result);
     }
 
     [Fact]
