@@ -77,7 +77,7 @@ internal static class SelectMethodResolver
 	public static async Task InvokeActionMethodAsync(object target, string methodName, params object[] args)
 	{
 		var method = FindMethod(target, methodName, args.Length);
-		var result = method.Invoke(target, args.Length > 0 ? args : null);
+		var result = method.Invoke(method.IsStatic ? null : target, args.Length > 0 ? args : null);
 
 		if (result is Task task)
 		{
@@ -90,45 +90,97 @@ internal static class SelectMethodResolver
 	/// </summary>
 	public static bool HasMethod(object target, string methodName)
 	{
-		return target?.GetType().GetMethod(methodName,
-			BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) != null;
+		if (target == null || string.IsNullOrWhiteSpace(methodName))
+		{
+			return false;
+		}
+
+		return TryFindQualifiedStaticMethod(methodName) != null ||
+			FindMethodOnType(target.GetType(), methodName,
+				BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance) != null;
 	}
 
 	private static MethodInfo FindMethod(object target, string methodName, int? expectedParamCount = null)
 	{
 		var type = target.GetType();
+		var method = TryFindQualifiedStaticMethod(methodName, expectedParamCount);
 
 		// Try public instance methods first, then non-public (protected methods in code-behind)
-		var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
-		MethodInfo method = null;
-
-		if (expectedParamCount.HasValue)
-		{
-			// Find method with the expected parameter count
-			var candidates = type.GetMethods(flags)
-				.Where(m => m.Name == methodName && m.GetParameters().Length == expectedParamCount.Value)
-				.ToArray();
-			method = candidates.FirstOrDefault();
-		}
-
-		// Fall back to parameterless method first (most common Web Forms pattern)
-		method ??= type.GetMethods(flags)
-			.Where(m => m.Name == methodName && m.GetParameters().Length == 0)
-			.FirstOrDefault();
-
-		// Then try any method with that name
-		method ??= type.GetMethod(methodName, flags);
+		method ??= FindMethodOnType(type, methodName,
+			BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, expectedParamCount);
 
 		if (method == null)
 		{
+			var additionalContext = methodName.Contains('.', StringComparison.Ordinal)
+				? " or as a static method on the named type"
+				: string.Empty;
+
 			throw new InvalidOperationException(
 				$"SelectMethod/InsertMethod/UpdateMethod/DeleteMethod resolution failed: " +
-				$"No method named '{methodName}' was found on type '{type.Name}'. " +
+				$"No method named '{methodName}' was found on type '{type.Name}'{additionalContext}. " +
 				$"Ensure the method exists on the page class that hosts this data-bound component. " +
 				$"The page must inherit from WebFormsPageBase to enable string-based method resolution.");
 		}
 
 		return method;
+	}
+
+	private static MethodInfo FindMethodOnType(Type type, string methodName, BindingFlags flags, int? expectedParamCount = null)
+	{
+		MethodInfo method = null;
+
+		if (expectedParamCount.HasValue)
+		{
+			method = type.GetMethods(flags)
+				.FirstOrDefault(m => m.Name == methodName && m.GetParameters().Length == expectedParamCount.Value);
+		}
+
+		method ??= type.GetMethods(flags)
+			.FirstOrDefault(m => m.Name == methodName && m.GetParameters().Length == 0);
+
+		method ??= type.GetMethod(methodName, flags);
+		return method;
+	}
+
+	private static MethodInfo TryFindQualifiedStaticMethod(string methodName, int? expectedParamCount = null)
+	{
+		var lastDotIndex = methodName.LastIndexOf('.');
+		if (lastDotIndex <= 0 || lastDotIndex == methodName.Length - 1)
+		{
+			return null;
+		}
+
+		var typeName = methodName[..lastDotIndex];
+		var actualMethodName = methodName[(lastDotIndex + 1)..];
+		var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
+
+		foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			foreach (var candidateType in GetLoadableTypes(assembly)
+				.Where(t => string.Equals(t.Name, typeName, StringComparison.Ordinal)
+					|| string.Equals(t.FullName, typeName, StringComparison.Ordinal)))
+			{
+				var method = FindMethodOnType(candidateType, actualMethodName, flags, expectedParamCount);
+				if (method != null)
+				{
+					return method;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	private static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+	{
+		try
+		{
+			return assembly.GetTypes();
+		}
+		catch (ReflectionTypeLoadException ex)
+		{
+			return ex.Types.Where(t => t != null)!;
+		}
 	}
 
 	private static object InvokeMethod(object target, MethodInfo method)
@@ -137,7 +189,7 @@ internal static class SelectMethodResolver
 
 		if (parameters.Length == 0)
 		{
-			return method.Invoke(target, null);
+			return method.Invoke(method.IsStatic ? null : target, null);
 		}
 
 		// Build default arguments for optional/defaulted parameters
@@ -175,7 +227,7 @@ internal static class SelectMethodResolver
 			}
 		}
 
-		return method.Invoke(target, args);
+		return method.Invoke(method.IsStatic ? null : target, args);
 	}
 
 	private static IEnumerable<T> CastResult<T>(object result, string methodName, Type targetType)
