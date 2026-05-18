@@ -21,7 +21,7 @@
 using System;
 namespace MyApp
 {
-    public partial class TC21_EventHandlerSpecialized
+    public partial class TC21_EventHandlerSpecialized : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 

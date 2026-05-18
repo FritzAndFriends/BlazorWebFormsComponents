@@ -17,15 +17,18 @@ public class ProjectScaffolder
     private readonly DatabaseProviderDetector _dbDetector;
     private readonly RuntimeDetector _runtimeDetector;
     private readonly ProgramCsEmitter _programCsEmitter;
+    private readonly MasterPageToLayoutConverter _masterPageConverter;
 
     public ProjectScaffolder(
         DatabaseProviderDetector dbDetector,
         RuntimeDetector runtimeDetector,
-        ProgramCsEmitter programCsEmitter)
+        ProgramCsEmitter programCsEmitter,
+        MasterPageToLayoutConverter masterPageConverter)
     {
         _dbDetector = dbDetector;
         _runtimeDetector = runtimeDetector;
         _programCsEmitter = programCsEmitter;
+        _masterPageConverter = masterPageConverter;
     }
 
     public ScaffoldResult Scaffold(string sourcePath, string outputRoot, string projectName)
@@ -77,7 +80,7 @@ public class ProjectScaffolder
         result.Files["layout"] = new ScaffoldFile
         {
             RelativePath = Path.Combine("Components", "Layout", "MainLayout.razor"),
-            Content = GenerateMainLayoutRazor()
+            Content = GenerateMainLayoutRazor(sourcePath)
         };
 
         result.Files["launchSettings"] = new ScaffoldFile
@@ -85,6 +88,21 @@ public class ProjectScaffolder
             RelativePath = Path.Combine("Properties", "launchSettings.json"),
             Content = GenerateLaunchSettings(projectName)
         };
+
+        if (runtimeProfile.NeedsIdentity)
+        {
+            result.Files["applicationUser"] = new ScaffoldFile
+            {
+                RelativePath = Path.Combine("Models", "ApplicationUser.cs"),
+                Content = GenerateApplicationUser(projectName)
+            };
+
+            result.Files["applicationDbContext"] = new ScaffoldFile
+            {
+                RelativePath = Path.Combine("Models", "ApplicationDbContext.cs"),
+                Content = GenerateApplicationDbContext(projectName)
+            };
+        }
 
         return result;
     }
@@ -114,6 +132,7 @@ public class ProjectScaffolder
         }
 
         var bwfcReference = ResolveBwfcReference(outputRoot);
+        var bwfcTargetsImport = ResolveBwfcTargetsImport(outputRoot);
 
         var csproj = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
 
@@ -128,7 +147,7 @@ public class ProjectScaffolder
   <ItemGroup>
 {bwfcReference}{additionalPackages}
   </ItemGroup>
-
+{bwfcTargetsImport}
 </Project>
 ";
 
@@ -157,6 +176,33 @@ public class ProjectScaffolder
         }
 
         return @"    <PackageReference Include=""Fritz.BlazorWebFormsComponents"" Version=""*"" />";
+    }
+
+    private static string ResolveBwfcTargetsImport(string outputRoot)
+    {
+        var outputFullPath = Path.GetFullPath(outputRoot);
+        var current = new DirectoryInfo(outputFullPath);
+
+        while (current is not null)
+        {
+            var candidate = Path.Combine(current.FullName, "src", "BlazorWebFormsComponents", "BlazorWebFormsComponents.csproj");
+            if (File.Exists(candidate))
+            {
+                var targetsDir = Path.GetDirectoryName(candidate)!;
+                var targetsFile = Path.Combine(targetsDir, "build", "Fritz.BlazorWebFormsComponents.targets");
+                if (File.Exists(targetsFile))
+                {
+                    var targetsRelative = Path.GetRelativePath(outputFullPath, targetsFile)
+                        .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                    return $@"
+  <Import Project=""{targetsRelative}"" />
+";
+                }
+                return "";
+            }
+            current = current.Parent;
+        }
+        return "";
     }
 
 
@@ -197,8 +243,10 @@ public class ProjectScaffolder
 </head>
 
 @* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
-<body>
+<body data-enhance-nav=""false"">
     <Routes />
+    <script src=""_framework/blazor.web.js""></script>
+    <script src=""_content/Fritz.BlazorWebFormsComponents/js/Basepage.js""></script>
 </body>
 
 </html>
@@ -216,8 +264,19 @@ public class ProjectScaffolder
 ";
     }
 
-    private static string GenerateMainLayoutRazor()
+    private string GenerateMainLayoutRazor(string sourcePath)
     {
+        // Try to convert the original Site.Master into a proper layout
+        var masterPath = MasterPageToLayoutConverter.FindMasterPage(sourcePath);
+        if (masterPath != null)
+        {
+            var masterContent = File.ReadAllText(masterPath);
+            var converted = _masterPageConverter.Convert(masterContent);
+            if (converted != null)
+                return converted;
+        }
+
+        // Fallback: minimal layout
         return @"@inherits LayoutComponentBase
 
 <main>
@@ -243,6 +302,40 @@ public class ProjectScaffolder
   }
 }
 """;
+    }
+
+    private static string GenerateApplicationUser(string projectName)
+    {
+        return $@"using Microsoft.AspNetCore.Identity;
+
+namespace {projectName}.Models;
+
+/// <summary>
+/// Stub generated by BWFC migration CLI.
+/// Add custom user properties as needed for your application.
+/// </summary>
+public class ApplicationUser : IdentityUser
+{{
+}}
+";
+    }
+
+    private static string GenerateApplicationDbContext(string projectName)
+    {
+        return $@"using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace {projectName}.Models;
+
+/// <summary>
+/// Stub generated by BWFC migration CLI.
+/// Add DbSet properties for your application entities.
+/// </summary>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : IdentityDbContext<ApplicationUser>(options)
+{{
+}}
+";
     }
 }
 

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Pipeline;
 
 namespace BlazorWebFormsComponents.Cli.SemanticPatterns;
 
@@ -11,7 +12,7 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
 {
     private const string Marker = "TODO(bwfc-query-details)";
     private static readonly Regex SelectMethodRegex = new(
-        @"SelectMethod=""(?<method>[A-Za-z_][A-Za-z0-9_]*)""",
+        @"SelectMethod\s*=\s*""(?<method>[A-Za-z_][A-Za-z0-9_]*)""",
         RegexOptions.Compiled);
     private static readonly Regex QueryStringParameterRegex = new(
         @"\[QueryString(?:\(\s*""(?<binding>[^""]+)""\s*\))?\]\s*(?<type>[^,\r\n]+?)\s+(?<name>[A-Za-z_][A-Za-z0-9_]*)",
@@ -59,8 +60,13 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
                 : match.Value,
             1);
 
-        var codeBlock = BuildCodeBlock(candidate, wrapperMethodName);
-        rewrittenMarkup = $"{rewrittenMarkup.TrimEnd()}\n\n{codeBlock}\n";
+        // Inject query parameters and wrapper method into code-behind (not @code block)
+        var codeBehind = context.CodeBehind;
+        var codeMembers = BuildCodeBehindMembers(candidate, wrapperMethodName);
+        if (!string.IsNullOrEmpty(codeBehind))
+        {
+            codeBehind = CodeBehindInjector.InjectMembers(codeBehind, codeMembers);
+        }
 
         var relativePath = SemanticPatternUtilities.RelativeMarkupPath(context);
         context.Report.AddManualItem(
@@ -70,7 +76,6 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
             $"{candidate.Method.Name} was normalized to a query-bound SelectMethod wrapper — port the original query into an injected service or DbContext.",
             "medium");
 
-        var codeBehind = context.CodeBehind;
         if (!string.IsNullOrEmpty(codeBehind) && !codeBehind.Contains(Marker, StringComparison.Ordinal))
         {
             codeBehind = $"// {Marker}: {candidate.Method.Name} now binds through component query properties and a SelectMethod wrapper in the generated .razor file.{Environment.NewLine}{codeBehind}";
@@ -148,12 +153,15 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
         foreach (Match match in RouteDataParameterRegex.Matches(parameters))
         {
             var name = match.Groups["name"].Value;
+            // Route data parameters preserve original casing because the RouteParameterWiringTransform
+            // generates [Parameter] properties with the exact route template name (e.g., categoryName).
+            // Using ToPropertyName would PascalCase it (CategoryName), mismatching the existing property.
             boundParameters.Add(new BoundParameter(
                 "route",
                 match.Groups["type"].Value.Trim(),
                 name,
                 name,
-                SemanticPatternUtilities.ToPropertyName(name)));
+                name));
         }
 
         return boundParameters;
@@ -173,10 +181,9 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
             : null;
     }
 
-    private static string BuildCodeBlock(QueryDetailsCandidate candidate, string wrapperMethodName)
+    private static string BuildCodeBehindMembers(QueryDetailsCandidate candidate, string wrapperMethodName)
     {
         var builder = new StringBuilder();
-        builder.AppendLine("@code {");
 
         foreach (var parameter in candidate.BoundParameters)
         {
@@ -198,14 +205,17 @@ public sealed class QueryDetailsSemanticPattern : ISemanticPattern
         builder.AppendLine("    {");
         builder.AppendLine("        totalRowCount = 0;");
         builder.AppendLine(
-            $"        // {Marker}: {candidate.ControlType} now binds through component properties instead of Web Forms method-parameter binding.");
+            $"        // {Marker}: Wrapper delegates to the code-behind {candidate.Method.Name} method.");
+
+        // Build argument list mapping component properties to the original method parameters
+        var args = string.Join(", ", candidate.BoundParameters.Select(static p => p.PropertyName));
         builder.AppendLine(
-            $"        // Manual boundary: port {candidate.Method.Name} from the migration-artifacts code-behind file into an injected service or DbContext-backed query.");
+            $"        var query = {candidate.Method.Name}({args});");
         builder.AppendLine(
-            $"        // Bound inputs: {string.Join(", ", candidate.BoundParameters.Select(static p => $"{p.BindingName} → {p.PropertyName} ({p.Kind})"))}.");
-        builder.AppendLine($"        return new global::System.Linq.EnumerableQuery<{candidate.ItemType}>(global::System.Array.Empty<{candidate.ItemType}>());");
-        builder.AppendLine("    }");
-        builder.Append('}');
+            $"        if (query != null) totalRowCount = query.Count();");
+        builder.AppendLine(
+            $"        return query ?? global::System.Linq.Enumerable.Empty<{candidate.ItemType}>().AsQueryable();");
+        builder.Append("    }");
         return builder.ToString();
     }
 

@@ -30,7 +30,7 @@ public class EntityFrameworkTransform : ICodeBehindTransform
         if (!content.Contains("using Microsoft.EntityFrameworkCore"))
         {
             // Insert after the last existing using directive, or at the top
-            var lastUsing = Regex.Match(content, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
+            var lastUsing = Regex.Match(content, @"^using\s+[^;(\n]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
             if (lastUsing.Success)
             {
                 var insertPos = lastUsing.Index + lastUsing.Length;

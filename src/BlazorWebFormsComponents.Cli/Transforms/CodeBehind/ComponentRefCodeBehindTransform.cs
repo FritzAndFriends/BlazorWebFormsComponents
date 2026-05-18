@@ -13,9 +13,10 @@ public class ComponentRefCodeBehindTransform : ICodeBehindTransform
     public string Name => "ComponentRefField";
     public int Order => 220; // After ClassNameAlignTransform (210)
 
-    // Match "partial class ClassName" followed by optional whitespace and "{"
+    // Match "partial class ClassName" followed by optional base class/interface list and "{"
+    // [^{]* handles ": WebFormsPageBase", ": Base, IInterface", newlines, etc.
     private static readonly Regex ClassOpenRegex = new(
-        @"partial\s+class\s+\w+\s*\{",
+        @"partial\s+class\s+\w+[^{]*\{",
         RegexOptions.Compiled);
 
     public string Apply(string content, FileMetadata metadata)

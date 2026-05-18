@@ -20,14 +20,15 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 500 | ExpressionTransform | Markup | Markup | Convert `<%: %>`, `<%= %>`, and inline data expressions to Razor |
 | 510 | ServerCodeBlockTransform | Markup | Markup | Convert `<% ... %>` statement blocks to Razor control flow |
 | 510 | LoginViewTransform | Markup | Markup | Convert `<asp:LoginView>` → `<AuthorizeView>` |
-| 520 | SelectMethodTransform | Markup | Markup | Flag SelectMethod/InsertMethod/etc. |
+| 520 | SelectMethodTransform | Markup | Markup | Preserve SelectMethod / InsertMethod / UpdateMethod / DeleteMethod model-binding attributes |
+| 550 | WebMethodAnnotationTransform | Code-Behind | Code-Behind | Flag legacy static WebMethod endpoints and normalize `Page_PreRenderComplete` for lifecycle conversion |
 | 600 | AjaxToolkitPrefixTransform | Markup | Markup | Remove `ajaxToolkit:` prefixes |
 | 610 | AspPrefixTransform | Markup | Markup | Remove `asp:` prefixes from controls |
 | 615 | DataBindingAttributeTransform | Markup | Markup | Convert `<%# ... %>` and `<%= ... %>` attribute values to `@(...)` |
 | 615 | ValidatorGenericTypeTransform | Markup | Markup | Add explicit `Type="string"` / `InputType="string"` defaults for generic BWFC validators |
 | 620 | TemplateFieldChildComponentsTransform | Markup | Markup | Wrap TemplateField style children in `<ChildComponents>` |
 | 700 | AttributeStripTransform | Markup | Markup | Remove `runat="server"`, preserve BWFC `ItemType`, add generic fallbacks |
-| 705 | GridViewColumnItemTypeTransform | Markup | Markup | Propagate typed `GridView ItemType` values to `BoundField` / `TemplateField` child columns |
+| 705 | GridViewColumnItemTypeTransform | Markup | Markup | Propagate typed `GridView ItemType` values to `BoundField` / `TemplateField` / `ButtonField` / `CommandField` child columns |
 | 710 | EventWiringTransform | Markup | Markup | Convert `OnClick="X"` → `OnClick="@X"` |
 | 720 | UrlReferenceTransform | Markup | Markup | Convert `~/` paths to `/` |
 | 750 | ComponentRefMarkupTransform | Markup | Markup | Convert control IDs to `@ref`-compatible component references |
@@ -50,6 +51,8 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 50 | UrlCleanupTransform | Code-Behind | Code-Behind | Clean URL literals in code |
 | 104 | HttpUtilityRewriteTransform | Code-Behind | Code-Behind | Rewrite `HttpUtility.*` calls to `WebUtility.*` and add `using System.Net;` |
 | 106 | EfContextConstructorTransform | Code-Behind | Code-Behind | Rewrite EF6 `base("name")` DbContext constructors to EF Core `DbContextOptions<TContext>` constructors |
+| 107 | DbContextInstantiationTransform | Code-Behind | Code-Behind | Replace inline `new XxxContext()` usage with injected DbContext references |
+| 108 | SelectMethodMaterializeTransform | Code-Behind | Code-Behind | Materialize IQueryable SelectMethod results before methods exit after `CreateDbContext()` usage |
 | 850 | CompileSurfaceStubTransform | Code-Behind | Code-Behind | Quarantine identity/payment/mobile/admin/compile-blocked pages with build-safe stubs while preserving transformed originals in `migration-artifacts\codebehind\` and tracking them in `migration-artifacts\quarantine-manifest.json` |
 | 900 | MarkupReferencedMemberStubTransform | Code-Behind | Code-Behind | Add fallback fields, render-method stubs, and event handlers for markup references still missing from emitted partial classes |
 
@@ -1021,7 +1024,41 @@ string imageUrl = "/images/logo.png";
 
 ---
 
-### 32. CompileSurfaceStubTransform (Order: 850)
+### 32. SelectMethodMaterializeTransform (Order: 108)
+
+**Materializes `IQueryable` SelectMethod results before the scoped DbContext goes out of scope.**
+
+**Before:**
+```csharp
+public IQueryable<Product> GetProducts(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+{
+    using var db = DbFactory.CreateDbContext();
+    var query = db.Products.OrderBy(p => p.ProductName);
+    totalRowCount = query.Count();
+    return query;
+}
+```
+
+**After:**
+```csharp
+public IQueryable<Product> GetProducts(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+{
+    var db = DbFactory.CreateDbContext();
+    var query = db.Products.OrderBy(p => p.ProductName);
+    totalRowCount = query.Count();
+    return query.ToList().AsQueryable();
+}
+```
+
+**Details:**
+- Only applies to methods whose signature returns `IQueryable<...>`
+- Removes `using` from `using var db = ...CreateDbContext()` so the query can be materialized before the method exits
+- Rewrites simple `return query;` patterns to `return query.ToList().AsQueryable();`
+- Leaves non-`IQueryable` methods untouched
+
+---
+
+### 33. CompileSurfaceStubTransform (Order: 850)
 
 **Quarantines non-migratable pages behind build-safe placeholders.**
 
@@ -1035,7 +1072,7 @@ string imageUrl = "/images/logo.png";
 
 ---
 
-### 33. MarkupReferencedMemberStubTransform (Order: 900)
+### 34. MarkupReferencedMemberStubTransform (Order: 900)
 
 **Adds compile-safe fallback members for identifiers that remain referenced from markup.**
 

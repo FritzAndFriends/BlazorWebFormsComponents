@@ -44,6 +44,33 @@ public class RuntimeProfile
     public string? DbContextNamespace { get; set; }
     public List<string> ConnectionStringNames { get; set; } = [];
     public List<string> ApplicationStartPatterns { get; set; } = [];
+    public List<string> AdditionalDbContextNames { get; set; } = [];
+
+    /// <summary>
+    /// Identity role names detected from RoleManager/RoleStore patterns (e.g., "canEdit").
+    /// </summary>
+    public List<string> DetectedRoleNames { get; set; } = [];
+
+    /// <summary>
+    /// Seed user credentials detected from UserManager.Create patterns.
+    /// Each entry: (email, password, roleName).
+    /// </summary>
+    public List<(string Email, string Password, string RoleName)> DetectedSeedUsers { get; set; } = [];
+
+    /// <summary>
+    /// Login path detected from Web.config &lt;forms loginUrl="..."&gt; or defaults to /Account/Login.
+    /// </summary>
+    public string? AuthLoginPath { get; set; }
+
+    /// <summary>
+    /// Custom error redirect from Web.config &lt;customErrors defaultRedirect="..."&gt;.
+    /// </summary>
+    public string? CustomErrorRedirect { get; set; }
+
+    /// <summary>
+    /// Authentication mode from Web.config &lt;authentication mode="..."&gt; (Forms, Windows, None).
+    /// </summary>
+    public string? AuthenticationMode { get; set; }
 
     public string? ResolvedDbContextTypeName =>
         string.IsNullOrWhiteSpace(DbContextClassName)

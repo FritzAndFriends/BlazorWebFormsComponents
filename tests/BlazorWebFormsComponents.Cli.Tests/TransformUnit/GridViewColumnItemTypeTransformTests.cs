@@ -73,7 +73,7 @@ public class GridViewColumnItemTypeTransformTests
         Assert.Contains("<GridView id=\"CartList\" AutoGenerateColumns=\"false\" ItemType=\"CartItem\">", result);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", result);
         Assert.Contains("<ItemTemplate Context=\"Item\">", result);
-        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", result);
+        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity.ToString()\"></TextBox>", result);
         Assert.Equal(1, CountOccurrences(result, "<TemplateField"));
         Assert.DoesNotContain("<BoundField", result);
     }
@@ -182,6 +182,38 @@ public class GridViewColumnItemTypeTransformTests
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Remove Item\">", result);
         Assert.Equal(2, CountOccurrences(result, "<TemplateField"));
         Assert.DoesNotContain("<BoundField", result);
+    }
+
+    [Fact]
+    public void UsesParentGridViewItemTypeForCommandField()
+    {
+        var input = """
+            <GridView ItemType="StudentRow" AutoGenerateColumns="false">
+                <Columns>
+                    <CommandField ButtonType="Button" ShowDeleteButton="true" />
+                </Columns>
+            </GridView>
+            """;
+
+        var result = _transform.Apply(input, TestMetadata);
+
+        Assert.Contains("<CommandField ItemType=\"StudentRow\" ButtonType=\"Button\" ShowDeleteButton=\"true\" />", result);
+    }
+
+    [Fact]
+    public void PipelinePreservesBoundFieldReadOnlyAndCommandField()
+    {
+        var result = TransformMarkup("""
+            <asp:GridView ID="grv" runat="server" AutoGenerateColumns="False" ItemType="ContosoUniversity.Models.StudentRow">
+                <Columns>
+                    <asp:CommandField HeaderText="Delete Student" ShowDeleteButton="True" ButtonType="Button" />
+                    <asp:BoundField DataField="ID" HeaderText="Student ID" ReadOnly="True" />
+                </Columns>
+            </asp:GridView>
+            """);
+
+        Assert.Contains("<CommandField ItemType=\"StudentRow\" HeaderText=\"Delete Student\" ShowDeleteButton=\"true\" ButtonType=\"Button\" />", result);
+        Assert.Contains("<BoundField ItemType=\"StudentRow\" DataField=\"ID\" HeaderText=\"Student ID\" ReadOnly=\"true\" />", result);
     }
 
     private static string TransformMarkup(string input)

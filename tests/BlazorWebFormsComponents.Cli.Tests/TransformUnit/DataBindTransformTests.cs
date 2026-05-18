@@ -32,6 +32,18 @@ public class DataBindTransformTests
     }
 
     [Fact]
+    public void RecordsThisPrefixedDataSourceAssignment_InMetadata()
+    {
+        var input = @"this.gvStudents.DataSource = GetStudents();";
+        var metadata = TestMetadata(input);
+
+        _transform.Apply(input, metadata);
+
+        Assert.True(metadata.DataBindMap.ContainsKey("gvStudents"));
+        Assert.Equal("GetStudents()", metadata.DataBindMap["gvStudents"]);
+    }
+
+    [Fact]
     public void RemovesDataBindCall()
     {
         var input = @"gvStudents.DataSource = GetStudents();
@@ -40,6 +52,21 @@ var x = 42;";
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.DoesNotContain("DataBind()", result);
+        Assert.Contains("var x = 42;", result);
+    }
+
+    [Fact]
+    public void RemovesThisPrefixedDataBindCall_WithoutLeavingDanglingThis()
+    {
+        var input = """
+            this.gvStudents.DataBind();
+            var x = 42;
+            """;
+
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.DoesNotContain("DataBind()", result);
+        Assert.DoesNotContain("this.", result);
         Assert.Contains("var x = 42;", result);
     }
 
@@ -79,6 +106,15 @@ ddlDepts.DataBind();";
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Contains("gvStudents.DataSource = GetStudents();", result);
+    }
+
+    [Fact]
+    public void PreservesThisPrefixedDataSourceAssignment_LineInOutput()
+    {
+        var input = @"this.gvStudents.DataSource = GetStudents();";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("this.gvStudents.DataSource = GetStudents();", result);
     }
 
     // --- InjectItemsAttributes static method ---

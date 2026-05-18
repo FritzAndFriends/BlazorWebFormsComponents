@@ -876,5 +876,59 @@ namespace BlazorWebFormsComponents
 				EmptyDataRowStyle = ApplySubStyle(EmptyDataRowStyle, emptyDataRowStyle, mode);
 		}
 
+		#region Form Data Parsing for FindControl Shim
+
+		/// <summary>
+		/// Parsed form data cache, keyed by row index → control name → value.
+		/// Lazily populated on first access from HttpContext.Request.Form.
+		/// </summary>
+		private Dictionary<int, Dictionary<string, string>> _parsedFormData;
+		private bool _formDataParsed;
+
+		/// <summary>
+		/// Gets the parsed form data for a specific row, to be passed to GridViewRow
+		/// as the FormRowData parameter. Returns null if no form data is available.
+		/// </summary>
+		private IDictionary<string, string> GetFormRowData(int rowIndex)
+		{
+			EnsureFormDataParsed();
+
+			if (_parsedFormData != null && _parsedFormData.TryGetValue(rowIndex, out var rowData))
+				return rowData;
+
+			return null;
+		}
+
+		/// <summary>
+		/// Lazily parses the form data for this GridView from Request.Form.
+		/// Uses GridFormDataParser to extract row-level values.
+		/// </summary>
+		private void EnsureFormDataParsed()
+		{
+			if (_formDataParsed) return;
+			_formDataParsed = true;
+
+			var request = HttpContextAccessor?.HttpContext?.Request;
+			if (request == null || !request.HasFormContentType) return;
+
+			var formCollection = request.Form;
+			if (formCollection == null) return;
+
+			var gridId = UniqueID ?? ID;
+			if (string.IsNullOrEmpty(gridId)) return;
+
+			// Convert IFormCollection to IDictionary<string, StringValues>
+			var formDict = new Dictionary<string, Microsoft.Extensions.Primitives.StringValues>(
+				StringComparer.OrdinalIgnoreCase);
+			foreach (var key in formCollection.Keys)
+			{
+				formDict[key] = formCollection[key];
+			}
+
+			_parsedFormData = GridFormDataParser.Parse(formDict, gridId);
+		}
+
+		#endregion
+
 	}
 }

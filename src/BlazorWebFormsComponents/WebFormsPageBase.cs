@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -20,9 +22,38 @@ namespace BlazorWebFormsComponents;
 /// Response.Cookies, Request.Cookies, Request.QueryString, Request.Url,
 /// ViewState, GetRouteUrl, ClientScript, and PostBack compatibility so that
 /// Web Forms code-behind patterns survive migration with minimal changes.
+///
+/// <para>Cascades itself as a <see cref="CascadingValue{TValue}"/> named
+/// "WebFormsPage" so that data-bound components (ListView, GridView, etc.)
+/// can resolve string-based SelectMethod/InsertMethod/UpdateMethod/DeleteMethod
+/// names via reflection, exactly as ASP.NET Web Forms does.</para>
 /// </summary>
 public abstract class WebFormsPageBase : ComponentBase, IAsyncDisposable
 {
+internal const string CascadingParameterName = "WebFormsPage";
+
+private static readonly FieldInfo _renderFragmentField =
+	typeof(ComponentBase).GetField("_renderFragment", BindingFlags.NonPublic | BindingFlags.Instance);
+
+private readonly RenderFragment _baseRenderFragment;
+
+protected WebFormsPageBase()
+{
+	// Wrap the default render output in a CascadingValue so child data-bound
+	// components can locate this page instance for SelectMethod resolution.
+	_baseRenderFragment = (RenderFragment)_renderFragmentField.GetValue(this);
+	_renderFragmentField.SetValue(this, (RenderFragment)PageCascadingBuildRenderTree);
+
+	void PageCascadingBuildRenderTree(RenderTreeBuilder builder)
+	{
+		builder.OpenComponent(0, typeof(CascadingValue<WebFormsPageBase>));
+		builder.AddAttribute(1, nameof(CascadingValue<object>.Name), CascadingParameterName);
+		builder.AddAttribute(2, nameof(CascadingValue<object>.Value), this);
+		builder.AddAttribute(3, nameof(CascadingValue<object>.ChildContent), _baseRenderFragment);
+		builder.AddAttribute(4, nameof(CascadingValue<object>.IsFixed), true);
+		builder.CloseComponent();
+	}
+}
 [Inject] private IServiceProvider ServiceProvider { get; set; } = null!;
 
 private SessionShim? _sessionShim;

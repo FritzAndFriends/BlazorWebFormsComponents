@@ -22,7 +22,7 @@ using System;
 
 namespace MyApp
 {
-    public partial class TC20_EventHandlerStandard
+    public partial class TC20_EventHandlerStandard : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -36,12 +36,12 @@ namespace MyApp
     // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
     // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
-        protected void Button_Click()
+        protected void Button_Click(EventArgs e)
         {
             // Handle button click
         }
 
-        protected void LinkButton_Click()
+        protected void LinkButton_Click(EventArgs e)
         {
             // Handle link click
         }

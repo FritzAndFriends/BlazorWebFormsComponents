@@ -35,7 +35,7 @@ public partial class GlobalAsaxRuntimeSignalDetector : IRuntimeSignalDetector
         }
     }
 
-    [GeneratedRegex(@"(?<pattern>RouteConfig\.RegisterRoutes|BundleConfig\.RegisterBundles|FilterConfig\.RegisterGlobalFilters|AuthConfig\.RegisterOpenAuth|Startup\.ConfigureAuth)", RegexOptions.Multiline)]
+    [GeneratedRegex(@"(?<pattern>RouteConfig\.RegisterRoutes|BundleConfig\.RegisterBundles|FilterConfig\.RegisterGlobalFilters|AuthConfig\.RegisterOpenAuth|Startup\.ConfigureAuth|Database\.SetInitializer|Application_Error)", RegexOptions.Multiline)]
     private static partial Regex ApplicationStartRegex();
 
     [GeneratedRegex(@"\b(AuthConfig\.RegisterOpenAuth|Startup\.ConfigureAuth|ConfigureAuth\s*\()", RegexOptions.Multiline)]

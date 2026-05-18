@@ -137,6 +137,44 @@ public class RequestShim
 	}
 
 	/// <summary>
+	/// Gets a value indicating whether the current request originated from the local machine.
+	/// Falls back to the current navigation URI when <see cref="HttpContext"/> is unavailable.
+	/// </summary>
+	public bool IsLocal
+	{
+		get
+		{
+			if (_httpContext?.Connection.RemoteIpAddress is IPAddress remoteIp)
+			{
+				if (IPAddress.IsLoopback(remoteIp))
+					return true;
+
+				var localIp = _httpContext.Connection.LocalIpAddress;
+				if (localIp is not null && AreEquivalentAddresses(remoteIp, localIp))
+					return true;
+
+				return false;
+			}
+
+			return Url.IsLoopback;
+		}
+	}
+
+	private static bool AreEquivalentAddresses(IPAddress left, IPAddress right)
+	{
+		if (left.Equals(right))
+			return true;
+
+		if (left.IsIPv4MappedToIPv6)
+			left = left.MapToIPv4();
+
+		if (right.IsIPv4MappedToIPv6)
+			right = right.MapToIPv4();
+
+		return left.Equals(right);
+	}
+
+	/// <summary>
 	/// Updates the cached <see cref="FormShim"/> with form data captured via
 	/// JS interop. Called by <see cref="WebFormsForm"/> during interactive
 	/// mode form submissions.

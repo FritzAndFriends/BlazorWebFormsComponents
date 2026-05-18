@@ -23,7 +23,7 @@ public class CompiledCodeBehindStubPipelineTests
         var transformedCodeBehind = pipeline.TransformCodeBehind(codeBehind, metadata);
 
         Assert.Contains("OnClick=\"@SubmitOrder\"", transformedMarkup);
-        Assert.Contains("protected void SubmitOrder(object? sender, EventArgs e)", transformedCodeBehind);
+        Assert.Contains("protected void SubmitOrder()", transformedCodeBehind);
         Assert.Contains("protected object? FormatTotal()", transformedCodeBehind);
         Assert.Contains("private object? _orderTotal;", transformedCodeBehind);
     }

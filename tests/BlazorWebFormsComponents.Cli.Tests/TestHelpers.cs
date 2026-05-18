@@ -166,11 +166,12 @@ public static class TestHelpers
             new EntityFrameworkRuntimeSignalDetector(),
             new SessionRuntimeSignalDetector(),
             new IdentityRuntimeSignalDetector(),
-            new GlobalAsaxRuntimeSignalDetector()
+            new GlobalAsaxRuntimeSignalDetector(),
+            new WebConfigRuntimeSignalDetector()
         ]);
 
     public static ProjectScaffolder CreateDefaultScaffolder() =>
-        new(new DatabaseProviderDetector(), CreateDefaultRuntimeDetector(), new ProgramCsEmitter());
+        new(new DatabaseProviderDetector(), CreateDefaultRuntimeDetector(), new ProgramCsEmitter(), new MasterPageToLayoutConverter());
 
     /// <summary>
     /// Creates a fully configured MigrationPipeline with all markup and code-behind
@@ -198,6 +199,7 @@ public static class TestHelpers
             // Order 490-500: Expressions
             new DisplayExpressionTransform(),
             new ExpressionTransform(),
+            new ColorAttributeTransform(),
             // Order 510: Statement block conversion (before LoginViewTransform)
             new ServerCodeBlockTransform(),
             // Order 510-520: Semantic controls
@@ -209,6 +211,7 @@ public static class TestHelpers
             new DataBindingAttributeTransform(),
             new ValidatorGenericTypeTransform(),
             new TemplateFieldChildComponentsTransform(),
+            new DataControlChildComponentsTransform(),
             // Order 700-750: Attributes & refs
             new AttributeStripTransform(),
             new GridViewColumnItemTypeTransform(),
@@ -218,39 +221,67 @@ public static class TestHelpers
             // Order 800-820: Normalize & templates
             new TemplatePlaceholderTransform(),
             new TemplateContextTransform(),
+            new TemplateToStringTransform(),
             new AttributeNormalizeTransform(),
             new DataSourceIdTransform(),
+            new EnhancedNavAnnotationTransform(),
+            new GetRouteUrlMarkupTransform(),
+            new HtmlBoilerplateStripTransform(),
+            new SsrFormContractTransform(),
+            new MarkupCleanupTransform(),
+            new LabelFieldBindTransform(),
         };
 
         var codeBehindTransforms = new List<ICodeBehindTransform>
         {
             new TodoHeaderTransform(),
+            new NestedClassCollisionTransform(),
             new UsingStripTransform(),
             new IdentityUsingTransform(),
             new HttpUtilityRewriteTransform(),
             new EntityFrameworkTransform(),
             new EfContextConstructorTransform(),
+            new DbContextInstantiationTransform(),
+            new HttpContextAccessorTransform(),
+            new SelectMethodMaterializeTransform(),
+            new EagerLoadNavigationTransform(),
+            new HttpExceptionTransform(),
             new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),
             new ClassNameAlignTransform(),
             new NamespaceAlignTransform(),
             new MethodNameCollisionTransform(),
+            new SelfInstantiationTransform(),
             new ComponentRefCodeBehindTransform(),
+            new ComponentRefNullSafetyTransform(),
+            new LabelFieldBindCodeBehindTransform(),
             new ResponseRedirectTransform(),
             new RequestFormTransform(),
+            new QueryStringTypeAnnotationTransform(),
             new ServerShimTransform(),
             new GetRouteUrlTransform(),
             new CartSessionKeyTransform(),
             new SessionDetectTransform(),
+            new SessionGetStringNullSafetyTransform(),
             new ViewStateDetectTransform(),
             new IsPostBackTransform(),
+            new WebMethodAnnotationTransform(),
             new PageLifecycleTransform(),
             new EventHandlerSignatureTransform(),
+            new InnerTextRewriteTransform(),
             new DataBindTransform(),
             new ClientScriptTransform(),
             new UrlCleanupTransform(),
             new CompileSurfaceStubTransform(quarantineDetector),
+            new LegacyHelperStubTransform(),
+            new RouteParameterWiringTransform(),
+            new RouteDataParameterPromotionTransform(),
+            new DuplicateRouteParameterTransform(),
+            new TitlePropertyCodeBehindTransform(),
             new MarkupReferencedMemberStubTransform(),
+            new TypeMismatchFixTransform(),
+            new IdentityCodeBehindQuarantineTransform(),
+            new DisposeReadonlyFieldTransform(),
         };
 
         return new MigrationPipeline(markupTransforms, codeBehindTransforms, CreateDefaultSemanticPatterns());

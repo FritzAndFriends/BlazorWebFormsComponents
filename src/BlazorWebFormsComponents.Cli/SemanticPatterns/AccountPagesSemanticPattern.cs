@@ -80,11 +80,15 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
         var pageTitle = ToTitle(fileName);
         var formMarkup = BuildNormalizedAccountMarkup(context.Markup, fileName, pageTitle);
         var rewritten = ReplacePrimaryContent(context.Markup, formMarkup);
-        rewritten = EnsureAccountQueryParameters(rewritten, fileName);
+        rewritten = EnsurePageDirective(rewritten, context.Metadata);
+
+        // Inject query parameters into code-behind instead of @code block
+        var codeBehind = context.CodeBehind;
+        codeBehind = EnsureAccountQueryParameters(rewritten, codeBehind, fileName);
 
         return new SemanticPatternResult(
             rewritten,
-            context.CodeBehind,
+            codeBehind,
             $"Replaced validator-heavy {pageTitle} markup with an SSR-safe account form stub and auth TODOs.");
     }
 
@@ -358,48 +362,61 @@ public sealed class AccountPagesSemanticPattern : ISemanticPattern
                 m => m.Groups["value"].Value,
                 StringComparer.OrdinalIgnoreCase);
 
-    private static string EnsureAccountQueryParameters(string markup, string fileName)
+    /// <summary>
+    /// Ensures the output markup has an @page directive and PageTitle.
+    /// If the semantic pattern replaced the Content block (which drops @page),
+    /// we re-derive the route from the file metadata.
+    /// </summary>
+    private static string EnsurePageDirective(string markup, FileMetadata metadata)
+    {
+        if (Regex.IsMatch(markup, @"^@page\s", RegexOptions.Multiline))
+            return markup;
+
+        var fileName = Path.GetFileNameWithoutExtension(metadata.SourceFilePath);
+        var relativePath = string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(metadata.SourceRootPath))
+        {
+            relativePath = Path.GetRelativePath(metadata.SourceRootPath, metadata.SourceFilePath)
+                .Replace(Path.DirectorySeparatorChar, '/')
+                .Replace(Path.AltDirectorySeparatorChar, '/');
+            if (relativePath.EndsWith(".aspx", StringComparison.OrdinalIgnoreCase))
+                relativePath = relativePath[..^".aspx".Length];
+            if (relativePath.StartsWith("./"))
+                relativePath = relativePath[2..];
+        }
+
+        var route = string.IsNullOrEmpty(relativePath) || !relativePath.Contains('/')
+            ? $"/{fileName}"
+            : $"/{relativePath}";
+
+        return $"@page \"{route}\"\n{markup}";
+    }
+
+    private static string? EnsureAccountQueryParameters(string markup, string? codeBehind, string fileName)
     {
         var parameterLines = new List<string>();
-        AddParameterIfMissing(markup, parameterLines, "Error", "error", "string?");
+        // Check both markup and code-behind for existing parameters
+        var searchContent = $"{markup}\n{codeBehind}";
+        AddParameterIfMissing(searchContent, parameterLines, "Error", "error", "string?");
 
         if (fileName.Equals("Login", StringComparison.OrdinalIgnoreCase))
         {
-            AddParameterIfMissing(markup, parameterLines, "Registered", "registered", "int?");
-            AddParameterIfMissing(markup, parameterLines, "ReturnUrl", "returnUrl", "string?");
+            AddParameterIfMissing(searchContent, parameterLines, "Registered", "registered", "int?");
+            AddParameterIfMissing(searchContent, parameterLines, "ReturnUrl", "returnUrl", "string?");
         }
         else if (fileName.Equals("Register", StringComparison.OrdinalIgnoreCase))
         {
-            AddParameterIfMissing(markup, parameterLines, "ReturnUrl", "returnUrl", "string?");
+            AddParameterIfMissing(searchContent, parameterLines, "ReturnUrl", "returnUrl", "string?");
         }
 
-        if (parameterLines.Count == 0)
+        if (parameterLines.Count == 0 || string.IsNullOrEmpty(codeBehind))
         {
-            return markup;
+            return codeBehind;
         }
 
-        var parameterBlock = string.Join(Environment.NewLine + Environment.NewLine, parameterLines);
-        var codeIndex = markup.LastIndexOf("@code", StringComparison.Ordinal);
-        if (codeIndex < 0)
-        {
-            return $"{markup.TrimEnd()}{Environment.NewLine}{Environment.NewLine}@code {{{Environment.NewLine}{parameterBlock}{Environment.NewLine}}}";
-        }
-
-        var openBraceIndex = markup.IndexOf('{', codeIndex);
-        var closeBraceIndex = markup.LastIndexOf('}');
-        if (openBraceIndex < 0 || closeBraceIndex <= openBraceIndex)
-        {
-            return $"{markup.TrimEnd()}{Environment.NewLine}{Environment.NewLine}@code {{{Environment.NewLine}{parameterBlock}{Environment.NewLine}}}";
-        }
-
-        var body = markup.Substring(openBraceIndex + 1, closeBraceIndex - openBraceIndex - 1).Trim('\r', '\n');
-        var rewrittenBody = string.IsNullOrWhiteSpace(body)
-            ? parameterBlock
-            : $"{body}{Environment.NewLine}{Environment.NewLine}{parameterBlock}";
-
-        return markup[..codeIndex]
-               + $"@code {{{Environment.NewLine}{rewrittenBody}{Environment.NewLine}}}"
-               + markup[(closeBraceIndex + 1)..];
+        var parameterBlock = string.Join("\n", parameterLines);
+        return CodeBehindInjector.InjectMembers(codeBehind, parameterBlock);
     }
 
     private static void AddParameterIfMissing(string markup, ICollection<string> parameterLines, string propertyName, string queryName, string type)

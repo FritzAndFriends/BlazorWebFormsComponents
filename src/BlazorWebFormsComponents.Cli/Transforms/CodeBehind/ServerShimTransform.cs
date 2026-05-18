@@ -1,30 +1,27 @@
+using System.IO;
 using System.Text.RegularExpressions;
 using BlazorWebFormsComponents.Cli.Pipeline;
 
 namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 
-/// <summary>
-/// Detects Server.* patterns and emits migration guidance for the BWFC
-/// ServerShim. On WebFormsPageBase, Server.MapPath/encoding helpers and the
-/// compatibility methods Transfer/GetLastError/ClearError compile against the
-/// ServerShim — no code change needed.
-/// </summary>
 public class ServerShimTransform : ICodeBehindTransform
 {
-    public string Name => "ServerShim";
-    public int Order => 330;
-
-    // Server.MapPath("~/path") or Server.MapPath(expr)
     private static readonly Regex ServerMapPathRegex = new(
         @"\bServer\.MapPath\s*\(",
         RegexOptions.Compiled);
 
-    // Server.HtmlEncode, Server.HtmlDecode, Server.UrlEncode, Server.UrlDecode
+    private static readonly Regex NonPageMapPathCallRegex = new(
+        @"\b(?:HttpContext\.Current\.)?Server\.MapPath\s*\((?<arg>[^)]+)\)",
+        RegexOptions.Compiled);
+
+    private static readonly Regex LocalStringAssignmentRegex = new(
+        "(?:string|var)\\s+(?<name>[A-Za-z_]\\w*)\\s*=\\s*(?<value>@\"(?:\"\"|[^\"])*\"|\"(?:\\\\.|[^\"])*\")\\s*;",
+        RegexOptions.Compiled);
+
     private static readonly Regex ServerEncodeRegex = new(
         @"\bServer\.(HtmlEncode|HtmlDecode|UrlEncode|UrlDecode)\s*\(",
         RegexOptions.Compiled);
 
-    // HttpServerUtility references (sometimes stored as a variable)
     private static readonly Regex HttpServerUtilityRegex = new(
         @"\bHttpServerUtility\b",
         RegexOptions.Compiled);
@@ -45,10 +42,34 @@ public class ServerShimTransform : ICodeBehindTransform
         @"((?:public|internal|private)\s+(?:partial\s+)?class\s+\w+[^{]*\{)",
         RegexOptions.Compiled);
 
+    private static readonly Regex PageBaseRegex = new(
+        @":\s*(?:WebFormsPageBase|ComponentBase|LayoutComponentBase|BaseWebFormsComponent)\b",
+        RegexOptions.Compiled);
+
+    private static readonly Regex SystemIoUsingRegex = new(
+        @"^using\s+System\.IO;\s*$",
+        RegexOptions.Compiled | RegexOptions.Multiline);
+
+    private static readonly Regex SystemWebUsingRegex = new(
+        @"^using\s+System\.Web;\s*\r?\n",
+        RegexOptions.Compiled | RegexOptions.Multiline);
+
+    private static readonly Regex LastUsingRegex = new(
+        @"^using\s+[^;]+;\s*$",
+        RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.RightToLeft);
+
     private const string GuidanceMarker = "// --- Server Utility Migration ---";
+
+    public string Name => "ServerShim";
+    public int Order => 330;
 
     public string Apply(string content, FileMetadata metadata)
     {
+        if (ShouldRewriteMapPathCalls(content, metadata))
+        {
+            content = RewriteNonPageMapPathCalls(content);
+        }
+
         var hasMapPath = ServerMapPathRegex.IsMatch(content);
         var hasEncode = ServerEncodeRegex.IsMatch(content);
         var hasUtility = HttpServerUtilityRegex.IsMatch(content);
@@ -56,10 +77,10 @@ public class ServerShimTransform : ICodeBehindTransform
         var hasGetLastError = ServerGetLastErrorRegex.IsMatch(content);
         var hasClearError = ServerClearErrorRegex.IsMatch(content);
 
-        if (!hasMapPath && !hasEncode && !hasUtility && !hasTransfer && !hasGetLastError && !hasClearError) return content;
+        if (!hasMapPath && !hasEncode && !hasUtility && !hasTransfer && !hasGetLastError && !hasClearError)
+            return content;
 
-        // Build guidance
-        if (!content.Contains(GuidanceMarker) && ClassOpenRegex.IsMatch(content))
+        if (!content.Contains(GuidanceMarker, StringComparison.Ordinal) && ClassOpenRegex.IsMatch(content))
         {
             var methods = new List<string>();
             if (hasMapPath) methods.Add("MapPath");
@@ -87,5 +108,99 @@ public class ServerShimTransform : ICodeBehindTransform
         }
 
         return content;
+    }
+
+    private static bool ShouldRewriteMapPathCalls(string content, FileMetadata metadata)
+    {
+        if (metadata.FileType != FileType.CodeFile)
+            return false;
+
+        return !PageBaseRegex.IsMatch(content);
+    }
+
+    private static string RewriteNonPageMapPathCalls(string content)
+    {
+        var localStringLiterals = LocalStringAssignmentRegex.Matches(content)
+            .Cast<Match>()
+            .GroupBy(match => match.Groups["name"].Value, StringComparer.Ordinal)
+            .ToDictionary(
+                group => group.Key,
+                group => UnwrapStringLiteral(group.Last().Groups["value"].Value),
+                StringComparer.Ordinal);
+
+        var replaced = NonPageMapPathCallRegex.Replace(content, match =>
+        {
+            var argument = match.Groups["arg"].Value.Trim();
+            if (argument.Contains("AppContext.BaseDirectory", StringComparison.Ordinal))
+                return match.Value;
+
+            var relativePath = TryResolveRelativePath(argument, localStringLiterals);
+            return relativePath is null ? match.Value : BuildPathCombine(relativePath);
+        });
+
+        if (string.Equals(replaced, content, StringComparison.Ordinal))
+            return content;
+
+        replaced = EnsureUsing(replaced, "using System.IO;", SystemIoUsingRegex);
+
+        if (!ContainsLegacySystemWebUsage(replaced))
+            replaced = SystemWebUsingRegex.Replace(replaced, string.Empty);
+
+        return replaced;
+    }
+
+    private static string? TryResolveRelativePath(string argument, IReadOnlyDictionary<string, string> localStringLiterals)
+    {
+        if (argument.StartsWith("@\"", StringComparison.Ordinal) || argument.StartsWith("\"", StringComparison.Ordinal))
+            return UnwrapStringLiteral(argument);
+
+        return localStringLiterals.TryGetValue(argument, out var path) ? path : null;
+    }
+
+    private static string UnwrapStringLiteral(string literal)
+    {
+        if (literal.StartsWith("@\"", StringComparison.Ordinal) && literal.EndsWith("\"", StringComparison.Ordinal))
+            return literal[2..^1].Replace("\"\"", "\"");
+
+        if (literal.StartsWith("\"", StringComparison.Ordinal) && literal.EndsWith("\"", StringComparison.Ordinal))
+            return Regex.Unescape(literal[1..^1]);
+
+        return literal;
+    }
+
+    private static string BuildPathCombine(string path)
+    {
+        var normalized = path.Trim().TrimStart('~').TrimStart('/', '\\').Replace('\\', '/');
+        var segments = normalized
+            .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Select(segment => $"\"{segment}\"")
+            .ToList();
+
+        if (segments.Count == 0)
+            return "AppContext.BaseDirectory";
+
+        return $"Path.Combine(AppContext.BaseDirectory, {string.Join(", ", segments)})";
+    }
+
+    private static bool ContainsLegacySystemWebUsage(string content)
+    {
+        return content.Contains("HttpContext.Current", StringComparison.Ordinal)
+            || content.Contains("HttpServerUtility", StringComparison.Ordinal)
+            || content.Contains("Server.MapPath", StringComparison.Ordinal);
+    }
+
+    private static string EnsureUsing(string content, string usingStatement, Regex usingRegex)
+    {
+        if (usingRegex.IsMatch(content))
+            return content;
+
+        var lastUsing = LastUsingRegex.Match(content);
+        if (lastUsing.Success)
+        {
+            var insertAt = lastUsing.Index + lastUsing.Length;
+            return content[..insertAt] + Environment.NewLine + usingStatement + content[insertAt..];
+        }
+
+        return usingStatement + Environment.NewLine + content;
     }
 }

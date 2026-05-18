@@ -1,8 +1,7 @@
 @page "/TC30-DataDrivenPage"
 <PageTitle>Product Catalog</PageTitle>
 @using ContosoStore.Models
-<Site>
-<Content ContentPlaceHolderID="MainContent">
+
     <h1>Product Catalog</h1>
     @* Product search and filter controls *@
     <div class="search-bar">
@@ -27,10 +26,3 @@
             </div>
         </ItemTemplate>
     </Repeater>
-</Content>
-</Site>
-
-@code {
-    // TODO(bwfc-datasource): Replace dsProductsData with real data from injected service
-    private IEnumerable<object> dsProductsData { get; set; } = Array.Empty<object>();
-}

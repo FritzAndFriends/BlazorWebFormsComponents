@@ -18,7 +18,10 @@ public class TemplateFieldChildComponentsTransform : IMarkupTransform
     private static readonly string[] StyleElementNames =
     [
         "ItemStyle", "HeaderStyle", "FooterStyle",
-        "ControlStyle", "EditItemStyle", "AlternatingItemStyle"
+        "ControlStyle", "EditItemStyle", "AlternatingItemStyle",
+        "RowStyle", "AlternatingRowStyle", "SelectedRowStyle",
+        "PagerStyle", "EmptyDataRowStyle",
+        "EditRowStyle", "InsertRowStyle"
     ];
 
     // Matches a TemplateField block — non-greedy so adjacent siblings are handled correctly.

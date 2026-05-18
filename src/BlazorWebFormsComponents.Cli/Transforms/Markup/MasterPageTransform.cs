@@ -188,10 +188,14 @@ public class MasterPageTransform : IMarkupTransform
         }
 
         sb.AppendLine();
-        sb.AppendLine("@code {");
-        sb.AppendLine("    [Parameter]");
-        sb.AppendLine("    public RenderFragment? ChildContent { get; set; }");
-        sb.AppendLine("}");
+
+        // Inject ChildContent parameter into code-behind instead of @code block
+        if (metadata.CodeBehindContent != null)
+        {
+            metadata.CodeBehindContent = CodeBehindInjector.InjectMembers(
+                metadata.CodeBehindContent,
+                "    [Parameter]\n    public RenderFragment? ChildContent { get; set; }");
+        }
 
         return sb.ToString();
     }

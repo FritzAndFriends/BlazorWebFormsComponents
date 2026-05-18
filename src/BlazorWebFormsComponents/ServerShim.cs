@@ -77,4 +77,14 @@ public class ServerShim
 
         _navigationManager.NavigateTo(path);
     }
+
+    /// <summary>
+    /// Compatibility implementation for <c>Server.Transfer(path, preserveForm)</c>.
+    /// The <paramref name="preserveForm"/> parameter is accepted for compile compatibility
+    /// but has no effect in Blazor — form state is not preserved across navigations.
+    /// </summary>
+    public void Transfer(string path, bool preserveForm)
+    {
+        Transfer(path);
+    }
 }

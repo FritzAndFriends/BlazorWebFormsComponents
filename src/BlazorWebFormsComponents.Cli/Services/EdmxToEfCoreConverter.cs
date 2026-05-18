@@ -32,6 +32,8 @@ public sealed class EdmxToEfCoreConverter
 
     public async Task<HashSet<string>> ConvertAsync(string sourcePath, string outputPath, string projectName, bool dryRun, MigrationReport report)
     {
+        var normalizedSourcePath = Path.GetFullPath(sourcePath);
+        var normalizedOutputPath = Path.GetFullPath(outputPath);
         var excludedSourceFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var edmxFiles = Directory.EnumerateFiles(sourcePath, "*.edmx", SearchOption.AllDirectories)
             .Where(file => Path.GetDirectoryName(file)?.EndsWith("Models", StringComparison.OrdinalIgnoreCase) == true)
@@ -48,9 +50,10 @@ public sealed class EdmxToEfCoreConverter
 
         foreach (var edmxFile in edmxFiles)
         {
-            var relativeDir = Path.GetDirectoryName(Path.GetRelativePath(sourcePath, edmxFile)) ?? string.Empty;
-            var targetDirectory = Path.Combine(outputPath, relativeDir);
-            var result = await ConvertAsync(new EdmxConversionOptions(edmxFile, targetDirectory, $"{projectName}.Models"));
+            var normalizedEdmxPath = Path.GetFullPath(edmxFile);
+            var relativeDir = Path.GetDirectoryName(Path.GetRelativePath(normalizedSourcePath, normalizedEdmxPath)) ?? string.Empty;
+            var targetDirectory = Path.Combine(normalizedOutputPath, relativeDir);
+            var result = await ConvertAsync(new EdmxConversionOptions(normalizedEdmxPath, targetDirectory, $"{projectName}.Models"));
 
             if (!result.Success)
             {
@@ -58,12 +61,45 @@ public sealed class EdmxToEfCoreConverter
                 continue;
             }
 
-            var stem = Path.GetFileNameWithoutExtension(edmxFile);
-            excludedSourceFiles.Add(Path.Combine(Path.GetDirectoryName(edmxFile)!, $"{stem}.cs"));
-            report.AddManualItem(Path.GetRelativePath(sourcePath, edmxFile), 0, "EDMX", "EDMX converted to EF Core entities and DbContext — verify generated relationships and configuration.");
+            var stem = Path.GetFileNameWithoutExtension(normalizedEdmxPath);
+            var sourceModelsDirectory = Path.GetDirectoryName(normalizedEdmxPath)!;
+            var excludedForModel = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                Path.Combine(sourceModelsDirectory, $"{stem}.cs"),
+                Path.Combine(sourceModelsDirectory, $"{stem}.Context.cs"),
+                Path.Combine(sourceModelsDirectory, $"{stem}.Designer.cs")
+            };
+
+            foreach (var generatedFile in result.GeneratedFiles)
+            {
+                var sourceCounterpart = Path.Combine(sourceModelsDirectory, Path.GetFileName(generatedFile));
+                if (File.Exists(sourceCounterpart))
+                    excludedForModel.Add(Path.GetFullPath(sourceCounterpart));
+            }
+
+            foreach (var excludedFile in excludedForModel)
+            {
+                excludedSourceFiles.Add(Path.GetFullPath(excludedFile));
+                DeleteStaleExcludedOutput(targetDirectory, excludedFile, result.GeneratedFiles);
+            }
+
+            report.AddManualItem(Path.GetRelativePath(normalizedSourcePath, normalizedEdmxPath), 0, "EDMX", "EDMX converted to EF Core entities and DbContext — verify generated relationships and configuration.");
         }
 
         return excludedSourceFiles;
+    }
+
+    private static void DeleteStaleExcludedOutput(string targetDirectory, string excludedSourceFile, IReadOnlyList<string> generatedFiles)
+    {
+        var outputCandidate = Path.Combine(targetDirectory, Path.GetFileName(excludedSourceFile));
+        if (!File.Exists(outputCandidate))
+            return;
+
+        var generatedNames = new HashSet<string>(generatedFiles.Select(Path.GetFileName), StringComparer.OrdinalIgnoreCase);
+        if (generatedNames.Contains(Path.GetFileName(outputCandidate)))
+            return;
+
+        File.Delete(outputCandidate);
     }
 
     public async Task<EdmxConversionResult> ConvertAsync(EdmxConversionOptions options, CancellationToken cancellationToken = default)
@@ -423,7 +459,19 @@ public sealed class EdmxToEfCoreConverter
         var lines = new List<string>();
 
         var keyProperties = entity.Properties.Where(property => property.IsKey).Select(property => property.Name).ToList();
-        if (keyProperties.Count > 1)
+        if (keyProperties.Count == 1)
+        {
+            // Emit explicit HasKey() when the single PK name does not follow EF Core conventions
+            // (i.e., not "Id" and not "{EntityName}Id" case-insensitively).
+            // EF Core discovers conventional keys automatically; non-conventional names need
+            // an explicit HasKey() call even when [Key] data annotation is also present.
+            var keyName = keyProperties[0];
+            var isConventional = string.Equals(keyName, "Id", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(keyName, $"{entity.Name}Id", StringComparison.OrdinalIgnoreCase);
+            if (!isConventional)
+                lines.Add($"entity.HasKey(e => e.{keyName});");
+        }
+        else if (keyProperties.Count > 1)
         {
             lines.Add($"entity.HasKey(e => new {{ {string.Join(", ", keyProperties.Select(name => $"e.{name}"))} }});");
         }

@@ -19,6 +19,101 @@ public class ServerShimTransformTests
         OriginalContent = content
     };
 
+    private static FileMetadata TestCodeFileMetadata(string content, string sourceFilePath = "Logic\\ExceptionUtility.cs") => new()
+    {
+        SourceFilePath = sourceFilePath,
+        OutputFilePath = sourceFilePath,
+        FileType = FileType.CodeFile,
+        OriginalContent = content
+    };
+
+    [Fact]
+    public void RewritesServerMapPathLiteralInCodeFile()
+    {
+        var input = @"using System;
+using System.Web;
+
+namespace MyApp.Logic;
+
+public class ExceptionUtility
+{
+    public string BuildPath()
+    {
+        return Server.MapPath(""~/App_Data/ErrorLog.txt"");
+    }
+}";
+
+        var result = _transform.Apply(input, TestCodeFileMetadata(input));
+
+        Assert.Contains("using System.IO;", result);
+        Assert.DoesNotContain("using System.Web;", result);
+        Assert.Contains("Path.Combine(AppContext.BaseDirectory, \"App_Data\", \"ErrorLog.txt\")", result);
+        Assert.DoesNotContain("TODO(bwfc-server)", result);
+    }
+
+    [Fact]
+    public void RewritesHttpContextCurrentServerMapPathInCodeFile()
+    {
+        var input = @"using System.Web;
+
+namespace MyApp.Logic;
+
+public class ExceptionUtility
+{
+    public string BuildPath()
+    {
+        return HttpContext.Current.Server.MapPath(""~/Logs/Error/ErrorLog.txt"");
+    }
+}";
+
+        var result = _transform.Apply(input, TestCodeFileMetadata(input));
+
+        Assert.Contains("Path.Combine(AppContext.BaseDirectory, \"Logs\", \"Error\", \"ErrorLog.txt\")", result);
+        Assert.DoesNotContain("HttpContext.Current.Server.MapPath", result);
+    }
+
+    [Fact]
+    public void RewritesMapPathVariableWhenBoundToLiteralPath()
+    {
+        var input = @"using System.Web;
+
+namespace MyApp.Logic;
+
+public class ExceptionUtility
+{
+    public string BuildPath()
+    {
+        string logFile = ""App_Data/ErrorLog.txt"";
+        logFile = HttpContext.Current.Server.MapPath(logFile);
+        return logFile;
+    }
+}";
+
+        var result = _transform.Apply(input, TestCodeFileMetadata(input));
+
+        Assert.Contains("logFile = Path.Combine(AppContext.BaseDirectory, \"App_Data\", \"ErrorLog.txt\");", result);
+    }
+
+    [Fact]
+    public void AlreadyUsesAppContextBaseDirectory_NoChange()
+    {
+        var input = @"using System.IO;
+
+namespace MyApp.Logic;
+
+public class ExceptionUtility
+{
+    public string BuildPath()
+    {
+        return Path.Combine(AppContext.BaseDirectory, ""App_Data"", ""ErrorLog.txt"");
+    }
+}";
+
+        var result = _transform.Apply(input, TestCodeFileMetadata(input));
+
+        Assert.Equal(input, result);
+    }
+
     [Fact]
     public void DetectsMapPath_AddsGuidance()
     {

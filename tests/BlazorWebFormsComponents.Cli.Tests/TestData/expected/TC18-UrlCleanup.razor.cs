@@ -22,7 +22,7 @@ using System;
 
 namespace MyApp
 {
-    public partial class TC18_UrlCleanup
+    public partial class TC18_UrlCleanup : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -51,7 +51,7 @@ namespace MyApp
             var path = "~/Images/logo.png";
         }
 
-        protected void Button_Click()
+        protected void Button_Click(EventArgs e)
         {
             Response.Redirect("/Checkout", false);
         }

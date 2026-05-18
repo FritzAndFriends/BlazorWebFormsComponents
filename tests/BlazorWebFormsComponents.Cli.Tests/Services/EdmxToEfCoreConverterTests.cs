@@ -83,6 +83,88 @@ public sealed class EdmxToEfCoreConverterTests : IDisposable
         Assert.Contains(createInvalidFile ? "Unable to read EDMX XML" : "EDMX file not found", result.ErrorMessage!, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public async Task ConvertAsync_Batch_ExcludesT4GeneratedSourceFiles()
+    {
+        // Verifies that after EDMX conversion, both the T4 companion files and any
+        // source files that share names with generated EF Core outputs are excluded,
+        // and stale legacy output artifacts are removed on rerun.
+        var sourceRoot = CreateDirectory("batch-excl");
+        var modelsDir = CreateDirectory("batch-excl", "Models");
+        _ = CreateFile("batch-excl", Path.Combine("Models", "Model1.edmx"), SampleEdmx);
+        var outputPath = CreateDirectory("batch-excl", "out");
+        var outputModelsDir = CreateDirectory("batch-excl", "out", "Models");
+
+        // Create the T4-generated companion files that should be excluded
+        var t4Context = Path.Combine(modelsDir, "Model1.Context.cs");
+        var t4Entities = Path.Combine(modelsDir, "Model1.cs");
+        var t4Designer = Path.Combine(modelsDir, "Model1.Designer.cs");
+        File.WriteAllText(t4Context, "// T4 context");
+        File.WriteAllText(t4Entities, "// T4 entities");
+        File.WriteAllText(t4Designer, "// T4 designer");
+
+        // Create source entity files that would otherwise overwrite the generated EF Core output.
+        var customerSource = Path.Combine(modelsDir, "Customer.cs");
+        var orderSource = Path.Combine(modelsDir, "Order.cs");
+        File.WriteAllText(customerSource, "// EF6 customer");
+        File.WriteAllText(orderSource, "// EF6 order");
+
+        // Seed stale legacy output to verify reruns clean it up.
+        var staleOutputContext = Path.Combine(outputModelsDir, "Model1.Context.cs");
+        File.WriteAllText(staleOutputContext, "// stale output");
+
+        var converter = new EdmxToEfCoreConverter();
+        var report = new BlazorWebFormsComponents.Cli.Pipeline.MigrationReport();
+        var excluded = await converter.ConvertAsync(sourceRoot, outputPath, "StoreProject", dryRun: false, report);
+
+        Assert.Contains(t4Context, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains(t4Entities, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains(t4Designer, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains(customerSource, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.Contains(orderSource, excluded, StringComparer.OrdinalIgnoreCase);
+        Assert.False(File.Exists(staleOutputContext));
+    }
+
+    [Fact]
+    public async Task ConvertAsync_NonConventionalSingleKey_EmitsHasKeyInOnModelCreating()
+    {
+        // Reproduces the ContosoUniversity pattern: entity named "Cours" with key "CourseID".
+        // EF Core convention looks for "Id" or "{TypeName}Id" (i.e., "CoursId"), so "CourseID"
+        // is non-conventional and needs an explicit HasKey() call.
+        var sourceFile = CreateFile("nonconventional-key", "School.edmx", NonConventionalKeyEdmx);
+        var outputPath = CreateDirectory("nonconventional-key", "generated");
+
+        var converter = new EdmxToEfCoreConverter();
+        var result = await converter.ConvertAsync(new EdmxConversionOptions(sourceFile, outputPath, "School.Models"));
+
+        Assert.True(result.Success);
+        var dbContextCode = await File.ReadAllTextAsync(Path.Combine(outputPath, "SchoolContext.cs"));
+
+        // Cours entity key "CourseID" is non-conventional → must have HasKey()
+        Assert.Contains("entity.HasKey(e => e.CourseID)", dbContextCode);
+
+        // Student entity key "StudentID" matches convention "{TypeName}Id" → no HasKey() needed
+        Assert.DoesNotContain("entity.HasKey(e => e.StudentID)", dbContextCode);
+    }
+
+    [Fact]
+    public async Task ConvertAsync_ConventionalIdKey_DoesNotEmitHasKey()
+    {
+        // Entities using plain "Id" as the PK should NOT get a HasKey() call —
+        // EF Core discovers them by convention and the [Key] attribute is sufficient.
+        var sourceFile = CreateFile("conventional-key", "Store.edmx", SampleEdmx);
+        var outputPath = CreateDirectory("conventional-key", "generated");
+
+        var converter = new EdmxToEfCoreConverter();
+        var result = await converter.ConvertAsync(new EdmxConversionOptions(sourceFile, outputPath, "Contoso.Models"));
+
+        Assert.True(result.Success);
+        var dbContextCode = await File.ReadAllTextAsync(Path.Combine(outputPath, "StoreContext.cs"));
+
+        // All entities in SampleEdmx use "Id" — no HasKey() calls should appear for single keys
+        Assert.DoesNotContain("entity.HasKey(e => e.Id)", dbContextCode);
+    }
+
     private string CreateDirectory(params string[] segments)
     {
         var path = Path.Combine([_testRoot, .. segments]);
@@ -97,6 +179,45 @@ public sealed class EdmxToEfCoreConverterTests : IDisposable
         File.WriteAllText(filePath, content);
         return filePath;
     }
+
+    // EDMX fixture with non-conventional single keys:
+    //   Cours entity uses CourseID (non-conventional — entity is "Cours", not "Course")
+    //   Student entity uses StudentID (conventional — matches "StudentId" case-insensitively)
+    private const string NonConventionalKeyEdmx = """
+        <?xml version="1.0" encoding="utf-8"?>
+        <edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+          <edmx:Runtime>
+            <edmx:ConceptualModels>
+              <Schema Namespace="SchoolModel" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+                <EntityType Name="Cours">
+                  <Key>
+                    <PropertyRef Name="CourseID" />
+                  </Key>
+                  <Property Name="CourseID" Type="Int32" Nullable="false" />
+                  <Property Name="Title" Type="String" Nullable="false" MaxLength="50" />
+                </EntityType>
+                <EntityType Name="Student">
+                  <Key>
+                    <PropertyRef Name="StudentID" />
+                  </Key>
+                  <Property Name="StudentID" Type="Int32" Nullable="false" />
+                  <Property Name="LastName" Type="String" Nullable="false" MaxLength="50" />
+                </EntityType>
+                <EntityContainer Name="SchoolContext">
+                  <EntitySet Name="Courses" EntityType="SchoolModel.Cours" />
+                  <EntitySet Name="Students" EntityType="SchoolModel.Student" />
+                </EntityContainer>
+              </Schema>
+            </edmx:ConceptualModels>
+            <edmx:Mappings>
+              <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+                <EntityContainerMapping StorageEntityContainer="SchoolModelStoreContainer" CdmEntityContainer="SchoolContext">
+                </EntityContainerMapping>
+              </Mapping>
+            </edmx:Mappings>
+          </edmx:Runtime>
+        </edmx:Edmx>
+        """;
 
     private const string SampleEdmx = """
         <?xml version="1.0" encoding="utf-8"?>

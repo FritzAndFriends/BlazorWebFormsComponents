@@ -4,9 +4,10 @@ using BlazorWebFormsComponents.Cli.Pipeline;
 namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 
 /// <summary>
-/// Converts &lt;asp:Content&gt; wrappers to BWFC &lt;Content ContentPlaceHolderID="X"&gt; components
-/// and wraps all Content elements in the master-page component (e.g. &lt;Site&gt;...&lt;/Site&gt;).
-/// Reads MasterPageFile from metadata.OriginalContent (before PageDirectiveTransform stripped it).
+/// Removes &lt;asp:Content&gt; wrappers, keeping only their inner content.
+/// The Blazor layout system (DefaultLayout in Routes.razor) replaces
+/// the Web Forms MasterPage/ContentPlaceHolder pattern, so no component
+/// wrapper is needed.
 /// </summary>
 public class ContentWrapperTransform : IMarkupTransform
 {
@@ -22,44 +23,16 @@ public class ContentWrapperTransform : IMarkupTransform
         @"</asp:Content>",
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-    private static readonly Regex MasterPageFileRegex = new(
-        @"MasterPageFile\s*=\s*""([^""]*)""",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
     public string Apply(string content, FileMetadata metadata)
     {
         if (metadata.FileType == FileType.Master)
             return content;
 
-        // Convert <asp:Content ... ContentPlaceHolderID="X" ...> → <Content ContentPlaceHolderID="X">
-        content = ContentOpenRegex.Replace(content, m =>
-            $"<Content ContentPlaceHolderID=\"{m.Groups[1].Value}\">");
+        // Strip <asp:Content ...> open tags — the content IS the page body
+        content = ContentOpenRegex.Replace(content, string.Empty);
 
-        // Convert </asp:Content> → </Content>
-        content = ContentCloseRegex.Replace(content, "</Content>");
-
-        // Determine master page component name from original content (before directive was stripped)
-        var masterMatch = MasterPageFileRegex.Match(metadata.OriginalContent);
-        if (!masterMatch.Success)
-            return content;
-
-        var masterFile = masterMatch.Groups[1].Value;
-        var componentName = Path.GetFileNameWithoutExtension(masterFile);
-
-        // Wrap all Content elements inside the master component
-        var firstContentIndex = content.IndexOf("<Content ContentPlaceHolderID=", StringComparison.OrdinalIgnoreCase);
-        var lastContentCloseIndex = content.LastIndexOf("</Content>", StringComparison.OrdinalIgnoreCase);
-
-        if (firstContentIndex < 0 || lastContentCloseIndex < 0)
-            return content;
-
-        var endOfLastClose = lastContentCloseIndex + "</Content>".Length;
-
-        content = content.Substring(0, firstContentIndex)
-                  + $"<{componentName}>\n"
-                  + content.Substring(firstContentIndex, endOfLastClose - firstContentIndex)
-                  + $"\n</{componentName}>"
-                  + content.Substring(endOfLastClose);
+        // Strip </asp:Content> close tags
+        content = ContentCloseRegex.Replace(content, string.Empty);
 
         return content;
     }

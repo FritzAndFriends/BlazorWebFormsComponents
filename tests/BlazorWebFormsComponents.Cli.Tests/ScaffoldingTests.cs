@@ -86,7 +86,7 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("AddBlazorWebFormsComponents()", program);
         Assert.Contains("AddRazorComponents()", program);
         Assert.DoesNotContain("AddInteractiveServerComponents()", program);
-        Assert.Contains("Generated for .NET 10 Blazor static SSR", program);
+        Assert.DoesNotContain("AddInteractiveServerRenderMode()", program);
         Assert.Contains("using BlazorWebFormsComponents;", program);
     }
 
@@ -95,7 +95,7 @@ public class ScaffoldingTests : IDisposable
     {
         var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
 
-        Assert.Contains("app.UseStaticFiles();", result.Files["program"].Content);
+        Assert.Contains("app.MapStaticAssets();", result.Files["program"].Content);
     }
 
     [Fact]
@@ -103,7 +103,6 @@ public class ScaffoldingTests : IDisposable
     {
         var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
 
-        Assert.Contains("builder.Services.AddAntiforgery();", result.Files["program"].Content);
         Assert.Contains("app.UseAntiforgery();", result.Files["program"].Content);
     }
 
@@ -163,7 +162,8 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("<Routes />", appRazor);
         Assert.Contains("<HeadOutlet />", appRazor);
         Assert.Contains("<!DOCTYPE html>", appRazor);
-        Assert.DoesNotContain("blazor.web.js", appRazor);
+        Assert.Contains("_framework/blazor.web.js", appRazor);
+        Assert.Contains("_content/Fritz.BlazorWebFormsComponents/js/Basepage.js", appRazor);
         Assert.Contains("Generated for .NET 10 static SSR migration output", appRazor);
     }
 
@@ -314,12 +314,20 @@ public class ScaffoldingTests : IDisposable
         var program = result.Files["program"].Content;
 
         Assert.True(result.RuntimeProfile.NeedsIdentity);
-        Assert.Contains("AddDefaultIdentity<IdentityUser>", program);
+        Assert.Contains("AddDefaultIdentity<ApplicationUser>", program);
+        Assert.Contains("using TestApp.Models;", program);
         Assert.Contains("ConfigureApplicationCookie", program);
         Assert.Contains("options.LoginPath = \"/Account/Login\";", program);
         Assert.Contains("options.LogoutPath = \"/Account/Logout\";", program);
         Assert.Contains("app.UseAuthentication();", program);
         Assert.Contains("app.UseAuthorization();", program);
+
+        // Identity stub files should be generated
+        Assert.True(result.Files.ContainsKey("applicationUser"));
+        Assert.Contains("class ApplicationUser : IdentityUser", result.Files["applicationUser"].Content);
+        Assert.True(result.Files.ContainsKey("applicationDbContext"));
+        Assert.Contains("class ApplicationDbContext", result.Files["applicationDbContext"].Content);
+        Assert.Contains("IdentityDbContext<ApplicationUser>", result.Files["applicationDbContext"].Content);
     }
 
     [Fact]
@@ -359,7 +367,7 @@ public class ScaffoldingTests : IDisposable
         Assert.False(result.RuntimeProfile.NeedsIdentity);
         Assert.DoesNotContain("AddDbContext<", program);
         Assert.DoesNotContain("AddSession(options =>", program);
-        Assert.DoesNotContain("AddDefaultIdentity<IdentityUser>", program);
+        Assert.DoesNotContain("AddDefaultIdentity<", program);
     }
 
     [Fact]
@@ -374,7 +382,7 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("routes", result.Files.Keys);
         Assert.Contains("layout", result.Files.Keys);
         Assert.Contains("launchSettings", result.Files.Keys);
-        Assert.Equal(7, result.Files.Count);
+        Assert.Equal(7, result.Files.Count); // No identity stubs when identity not detected
     }
 
     // ───────────────────────────────────────────────────────────────

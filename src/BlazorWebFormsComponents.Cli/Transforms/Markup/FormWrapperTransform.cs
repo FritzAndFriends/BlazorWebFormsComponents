@@ -4,7 +4,9 @@ using BlazorWebFormsComponents.Cli.Pipeline;
 namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 
 /// <summary>
-/// Converts &lt;form runat="server"&gt; to &lt;div&gt;, preserving id attribute for CSS.
+/// Converts &lt;form runat="server"&gt; to &lt;WebFormsForm&gt;, preserving the
+/// id attribute for CSS compatibility. WebFormsForm handles both SSR POST and
+/// interactive mode, enabling Request.Form["key"] access via FormShim.
 /// </summary>
 public class FormWrapperTransform : IMarkupTransform
 {
@@ -29,11 +31,11 @@ public class FormWrapperTransform : IMarkupTransform
         var idMatch = IdRegex.Match(fullAttrs);
         var idAttr = idMatch.Success ? $" id=\"{idMatch.Groups[1].Value}\"" : "";
 
-        // Replace opening <form> with <div>
-        content = FormOpenRegex.Replace(content, $"<div{idAttr}>", 1);
+        // Replace opening <form> with <WebFormsForm>
+        content = FormOpenRegex.Replace(content, $"<WebFormsForm{idAttr}>", 1);
 
-        // Replace corresponding </form> with </div>
-        content = FormCloseRegex.Replace(content, "</div>", 1);
+        // Replace corresponding </form> with </WebFormsForm>
+        content = FormCloseRegex.Replace(content, "</WebFormsForm>", 1);
 
         return content;
     }

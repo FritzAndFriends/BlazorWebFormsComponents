@@ -1,5 +1,6 @@
 @page "/TC05-FormWrapper"
 <PageTitle>Test</PageTitle>
-<div id="form1">
+<WebFormsForm id="form1" @formname="TC05FormWrapperForm">
+    <AntiforgeryToken />
     <Button Text="Submit" />
-</div>
+</WebFormsForm>

@@ -700,7 +700,7 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		/// <param name="controlId">The ID of the control to find.</param>
 		/// <returns>The matching control, or null if not found.</returns>
-		public BaseWebFormsComponent FindControl(string controlId)
+		public virtual BaseWebFormsComponent FindControl(string controlId)
 		{
 			if (string.IsNullOrEmpty(controlId)) return null;
 

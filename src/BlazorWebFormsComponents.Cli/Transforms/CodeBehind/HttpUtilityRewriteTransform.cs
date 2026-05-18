@@ -66,7 +66,7 @@ public class HttpUtilityRewriteTransform : ICodeBehindTransform
         if (content.Contains(usingLine, StringComparison.Ordinal))
             return content;
 
-        var lastUsing = Regex.Match(content, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
+        var lastUsing = Regex.Match(content, @"^using\s+[^;(\n]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
         if (lastUsing.Success)
         {
             var insertAt = lastUsing.Index + lastUsing.Length;

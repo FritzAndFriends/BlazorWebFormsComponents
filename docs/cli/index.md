@@ -21,7 +21,8 @@ This tool **reduces manual migration effort** by:
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
 - Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
 - Scaffolding a new .NET 10 Blazor SSR project structure with shims, services, and relaxed code-style build enforcement for copied legacy files
-- Detecting common runtime needs from the source app (DbContext classes, session usage, Account pages, and Global.asax startup hooks) and wiring matching `Program.cs` services/middleware automatically, including static-file serving and antiforgery middleware for SSR form posts
+- Detecting common runtime needs from the source app (DbContext classes, session usage, Account pages, and Global.asax startup hooks) and wiring matching `Program.cs` services/middleware automatically, including static-file serving, antiforgery middleware for SSR form posts, and generated account login/register/logout endpoints when Identity is detected
+- Modernizing legacy `AttachDbFilename=|DataDirectory|\*.mdf` connection strings to use `Initial Catalog=...` so migrated apps do not depend on missing local MDF files at runtime
 
 The tool processes `.aspx`, `.ascx`, and `.master` files in a fixed sequence, then applies a bounded semantic pattern catalog so each higher-level rewrite builds on a normalized page shape.
 
@@ -93,7 +94,7 @@ webforms-to-blazor migrate \
 **Output:**
 - Converted `.razor` files
 - Quarantined manual code-behind and risky legacy source artifacts under `migration-artifacts\`, including a `quarantine-manifest.json` inventory for deferred page migration work
-- Generated `Program.cs` with shim registration for static SSR on .NET 10 plus detected runtime wiring for EF Core, session state, identity, and legacy `Application_Start` review notes
+- Generated `Program.cs` with shim registration for static SSR on .NET 10 plus detected runtime wiring for EF Core, session state, identity, generated account auth endpoints, and legacy `Application_Start` review notes
 - Migration report (`migration-report.json`)
 
 ### `convert` — File-Level Transformation
@@ -117,8 +118,8 @@ webforms-to-blazor convert \
 The tool applies an ordered transform pipeline and then a semantic pattern catalog:
 
 1. **Directives** (5) — Page, Master, Control, Register, Import directives
-2. **Markup** (21) — Controls, expressions, master-page script cleanup, display-expression cleanup, templates, validator typing, typed GridView columns, data binding
-3. **Code-Behind** (27) — Using statements, cart session-key stabilization, HttpUtility/EF modernization, base classes, lifecycle, event handlers, compile-surface stubs, markup-driven safety stubs
+2. **Markup** (21) — Controls, expressions, master-page script cleanup, display-expression cleanup, templates, validator typing, typed GridView columns (including `CommandField`), and CRUD model-binding attributes
+3. **Code-Behind** (29) — Using statements, cart session-key stabilization, HttpUtility/EF modernization, IQueryable SelectMethod materialization, WebMethod TODO annotation, base classes, lifecycle, event handlers, compile-surface stubs, markup-driven safety stubs
 
 See **[Transform Reference](transforms.md)** for the flat transform list and **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** for the bounded semantic pass that runs afterward.
 

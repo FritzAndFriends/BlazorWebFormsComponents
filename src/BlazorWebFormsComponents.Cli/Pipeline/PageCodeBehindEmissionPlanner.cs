@@ -21,8 +21,10 @@ internal static partial class PageCodeBehindEmissionPlanner
         (new Regex(@"\bGetOwinContext\s*\(", RegexOptions.Compiled), "OWIN authentication access still requires app-level migration."),
         (new Regex(@"\bFormsAuthentication\b", RegexOptions.Compiled), "FormsAuthentication usage is not page-codebehind safe."),
         (new Regex(@"\bPage\.PreLoad\b|\bPreLoad\s*\+=", RegexOptions.Compiled), "PreLoad event wiring still needs lifecycle normalization."),
-        (new Regex(@"\bDataControlFieldCell\b|\bGridViewRow\b|\bRows\b|\bFindControl\s*\(", RegexOptions.Compiled), "Row-oriented server control traversal still needs semantic migration."),
-        (new Regex(@"\bInnerText\b", RegexOptions.Compiled), "HTML server-element members still require explicit runtime shims."),
+        // NOTE: GridViewRow, Rows, FindControl, DataControlFieldCell are supported by BWFC shims —
+        // do NOT block code-behind emission for these patterns.
+        // NOTE: InnerText is a minor L2 fix (replace with markup binding) —
+        // do NOT block code-behind emission for this pattern.
         (new Regex(@"\bAttributes\s*\[", RegexOptions.Compiled), "HTML attribute mutation still requires server-element shims.")
     ];
 

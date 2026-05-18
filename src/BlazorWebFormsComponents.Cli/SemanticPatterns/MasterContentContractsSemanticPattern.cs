@@ -37,10 +37,10 @@ public sealed class MasterContentContractsSemanticPattern : ISemanticPattern
         if (context.Metadata.FileType == FileType.Master)
         {
             var rewritten = SemanticPatternMarkupHelpers.EnsureChildComponentsRenderSlot(context.Markup);
-            rewritten = SemanticPatternMarkupHelpers.EnsureChildComponentsParameter(rewritten);
+            var codeBehind = SemanticPatternMarkupHelpers.EnsureChildComponentsParameter(rewritten, context.CodeBehind);
             return new SemanticPatternResult(
                 rewritten,
-                context.CodeBehind,
+                codeBehind,
                 "Added ChildComponents wiring to the generated master shell.");
         }
 

@@ -219,6 +219,66 @@ public class ComponentRefCodeBehindTransformTests
         Assert.Contains("private ListView<Product> lvProducts = default!;", result);
     }
 
+    [Fact]
+    public void InjectsFieldWhenClassHasBaseClass()
+    {
+        // Real-world case: BaseClassStripTransform rewrites the class to have ": WebFormsPageBase"
+        // before ComponentRefCodeBehindTransform runs. The ClassOpenRegex must still match.
+        var input = """
+            namespace WingtipToys.Components
+            {
+                public partial class ShoppingCart : WebFormsPageBase
+                {
+                    protected void Page_Load() { }
+                }
+            }
+            """;
+        var metadata = CreateMetadata(new() { ["CartList"] = "GridView<object>", ["UpdateBtn"] = "Button" });
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("private GridView<object> CartList = default!;", result);
+        Assert.Contains("private Button UpdateBtn = default!;", result);
+    }
+
+    [Fact]
+    public void InjectsFieldWhenClassHasBaseClassAndInterface()
+    {
+        var input = """
+            namespace TestApp
+            {
+                public partial class MyPage : WebFormsPageBase, IDisposable
+                {
+                    protected void Page_Load() { }
+                }
+            }
+            """;
+        var metadata = CreateMetadata(new() { ["lblStatus"] = "Label" });
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("private Label lblStatus = default!;", result);
+    }
+
+    [Fact]
+    public void InjectsFieldWhenClassOpenBraceIsOnNextLine()
+    {
+        var input = """
+            namespace TestApp
+            {
+                public partial class TestPage : WebFormsPageBase
+                {
+                    protected void Page_Load() { }
+                }
+            }
+            """;
+        var metadata = CreateMetadata(new() { ["txtSearch"] = "TextBox" });
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("private TextBox txtSearch = default!;", result);
+    }
+
     private static int CountOccurrences(string text, string pattern)
     {
         var count = 0;

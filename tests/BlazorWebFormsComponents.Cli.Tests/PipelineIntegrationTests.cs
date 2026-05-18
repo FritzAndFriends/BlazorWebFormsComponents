@@ -258,6 +258,44 @@ public class PipelineIntegrationTests : IDisposable
     }
 
     [Fact]
+    public async Task Pipeline_RegistersBllClassesInProgramCs()
+    {
+        var (inputDir, outputDir) = CreateRepoScopedProjectDir("bll-di");
+        Directory.CreateDirectory(Path.Combine(inputDir, "BLL"));
+
+        File.WriteAllText(Path.Combine(inputDir, "Default.aspx"), """
+            <%@ Page Language="C#" AutoEventWireup="true" %>
+            <asp:Label ID="Label1" runat="server" Text="Hello" />
+            """);
+
+        File.WriteAllText(Path.Combine(inputDir, "BLL", "StudentsListLogic.cs"), """
+            namespace TestApp.BLL;
+
+            public class StudentsListLogic
+            {
+                public int CountStudents() => 42;
+            }
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false, SkipScaffold = false },
+            SourceFiles = sourceFiles
+        };
+
+        await pipeline.ExecuteAsync(context);
+
+        var programCs = File.ReadAllText(Path.Combine(outputDir, "Program.cs"));
+        Assert.Contains("using input.BLL;", programCs);
+        Assert.Contains("builder.Services.AddScoped<StudentsListLogic>();", programCs);
+    }
+
+    [Fact]
     public async Task Pipeline_EmitsShimCompatiblePageCodeBehindIntoCompileSurface()
     {
         var (inputDir, outputDir) = CreateTempProjectDir(includeCodeBehind: true);
@@ -328,11 +366,14 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Empty(report.Errors);
         Assert.Contains("<BoundField ItemType=\"CartItem\" DataField=\"ProductID\" HeaderText=\"ID\" />", defaultRazor);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Quantity\">", defaultRazor);
-        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity\"></TextBox>", defaultRazor);
+        // Controls inside templates should NOT have @ref (they're per-row instances)
+        Assert.Contains("<TextBox id=\"PurchaseQuantity\" Width=\"40\" Text=\"@Item.Quantity.ToString()\"></TextBox>", defaultRazor);
+        Assert.DoesNotContain("@ref=\"PurchaseQuantity\"", defaultRazor);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Item Total\">", defaultRazor);
         Assert.Contains("@(String.Format(\"{0:c}\", ((Convert.ToDouble(Item.Quantity)) * Convert.ToDouble(Item.Product.UnitPrice))))", defaultRazor);
         Assert.Contains("<TemplateField ItemType=\"CartItem\" HeaderText=\"Remove Item\">", defaultRazor);
         Assert.Contains("<CheckBox id=\"Remove\"></CheckBox>", defaultRazor);
+        Assert.DoesNotContain("@ref=\"Remove\"", defaultRazor);
         Assert.Equal(3, defaultRazor.Split("<TemplateField", StringSplitOptions.None).Length - 1);
     }
 
@@ -355,8 +396,8 @@ public class PipelineIntegrationTests : IDisposable
                 {
                     protected void Page_Load(object sender, EventArgs e)
                     {
-                        var row = CartList.Rows[0];
-                        var remove = row.FindControl("Remove");
+                        var ctx = System.Web.HttpContext.Current;
+                        var user = ctx.User.Identity.Name;
                     }
                 }
             }
@@ -385,13 +426,15 @@ public class PipelineIntegrationTests : IDisposable
         Assert.True(File.Exists(markupPath));
         Assert.True(File.Exists(codeBehindPath));
         Assert.True(File.Exists(artifactPath));
-        Assert.True(File.Exists(manifestPath));
-        Assert.Contains("Page Not Yet Migrated", File.ReadAllText(markupPath));
-        Assert.Contains("public partial class LegacyShell : BlazorWebFormsComponents.WebFormsPageBase", File.ReadAllText(codeBehindPath));
-
-        using var manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(manifestPath));
-        var quarantinedPages = manifest.RootElement.GetProperty("pages");
-        Assert.Contains(quarantinedPages.EnumerateArray(), page => page.GetProperty("originalFilePath").GetString() == "LegacyShell.aspx");
+        // With compile-surface blockers no longer acting as a strong quarantine signal for
+        // non-quarantinable paths, LegacyShell gets best-effort output instead of a stub.
+        // The manifest is only written when pages are actually quarantined.
+        Assert.False(File.Exists(manifestPath), "Manifest should not be written when no pages are quarantined.");
+        // The markup should be the actual transformed page, not a stub
+        Assert.DoesNotContain("Page Not Yet Migrated", File.ReadAllText(markupPath));
+        // The code-behind is emitted to the compile surface with the transformed content
+        var codeBehindContent = File.ReadAllText(codeBehindPath);
+        Assert.Contains("LegacyShell", codeBehindContent);
     }
 
     [Fact]
@@ -489,9 +532,10 @@ public class PipelineIntegrationTests : IDisposable
         var report = await pipeline.ExecuteAsync(context);
 
         var markup = File.ReadAllText(Path.Combine(outputDir, "ProductDetails.razor"));
+        var codeBehind = File.ReadAllText(Path.Combine(outputDir, "ProductDetails.razor.cs"));
         Assert.Contains("SelectMethod=\"GetProductQueryDetails_SelectMethod\"", markup);
-        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", markup);
-        Assert.Contains("SupplyParameterFromQuery(Name = \"ProductID\")", markup);
+        Assert.Contains("private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)", codeBehind);
+        Assert.Contains("SupplyParameterFromQuery(Name = \"ProductID\")", codeBehind);
         Assert.True(report.SemanticPatternsApplied >= 1, $"Expected at least one semantic rewrite, got {report.SemanticPatternsApplied}");
         Assert.Contains(report.ManualItems, item => item.Category == "bwfc-query-details");
     }
@@ -575,14 +619,17 @@ public class PipelineIntegrationTests : IDisposable
 
         var report = await pipeline.ExecuteAsync(context);
 
-        var masterMarkup = File.ReadAllText(Path.Combine(outputDir, "Site.razor"));
+        // Master page files are now written as artifacts only
+        var masterArtifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "Site.razor.txt");
+        Assert.True(File.Exists(masterArtifactPath), "Master page should be preserved as artifact");
+        Assert.False(File.Exists(Path.Combine(outputDir, "Site.razor")), "Master page should NOT be written to compile surface");
         var defaultMarkup = File.ReadAllText(Path.Combine(outputDir, "Default.razor"));
 
-        Assert.Contains("@ChildComponents", masterMarkup);
-        Assert.Contains("public RenderFragment? ChildComponents { get; set; }", masterMarkup);
-        Assert.Contains("<ChildComponents>", defaultMarkup);
+        Assert.DoesNotContain("<ChildComponents>", defaultMarkup);
         Assert.DoesNotContain("<ChildContent>", defaultMarkup);
-        Assert.True(report.SemanticPatternsApplied >= 3, $"Expected master/content semantic rewrites to run, got {report.SemanticPatternsApplied}");
+        Assert.DoesNotContain("<Site>", defaultMarkup);
+        Assert.DoesNotContain("<Content ", defaultMarkup);
+        Assert.True(report.ManualItems.Any(m => m.Category == "bwfc-master-page"), "Master page should appear in manual items as artifact");
     }
 
     [Fact]
@@ -627,12 +674,13 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Contains("action=\"/Account/LoginHandler\"", loginMarkup);
         Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", loginMarkup);
         Assert.Contains("class=\"form-horizontal\"", loginMarkup);
-        Assert.Contains("@formname=\"bwfc-form-1\"", loginMarkup);
+        Assert.Contains("@formname=\"LoginForm\"", loginMarkup);
         Assert.Contains("<AntiforgeryToken />", loginMarkup);
         Assert.Contains("type=\"email\"", loginMarkup);
         Assert.Contains("type=\"password\"", loginMarkup);
         Assert.Contains("Register as a new user", loginMarkup);
-        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", loginMarkup);
+        var loginCodeBehind = File.ReadAllText(Path.Combine(outputDir, "Account", "Login.razor.cs"));
+        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", loginCodeBehind);
         Assert.DoesNotContain("<RequiredFieldValidator", loginMarkup);
         Assert.True(report.SemanticPatternsApplied >= 1, "Expected the account semantic pattern to run for Account/Login.aspx");
     }
@@ -1032,8 +1080,17 @@ public class PipelineIntegrationTests : IDisposable
 
         var report = await pipeline.ExecuteAsync(context);
 
-        Assert.False(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
-        Assert.False(File.Exists(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
+        // Quarantined files now have compile-safe stubs at the original location
+        Assert.True(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
+        var startupStub = File.ReadAllText(Path.Combine(outputDir, "Startup.Auth.cs"));
+        Assert.Contains("Compile-safe stub for quarantined file", startupStub);
+        Assert.Contains("public class Startup", startupStub);
+
+        Assert.True(File.Exists(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
+        var efStub = File.ReadAllText(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs"));
+        Assert.Contains("Compile-safe stub for quarantined file", efStub);
+        Assert.Contains("public class CatalogDatabaseInitializer", efStub);
+
         Assert.True(File.Exists(Path.Combine(outputDir, "Models", "Product.cs")));
 
         var startupArtifact = Path.Combine(outputDir, "migration-artifacts", "compile-surface", "Startup.Auth.cs.txt");
@@ -1178,9 +1235,13 @@ public class PipelineIntegrationTests : IDisposable
         var report = await pipeline.ExecuteAsync(context);
         Assert.Empty(report.Errors);
 
-        Assert.False(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
-        Assert.False(File.Exists(Path.Combine(outputDir, "IdentityConfig.cs")));
-        Assert.False(File.Exists(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
+        // Quarantined files now have compile-safe stubs at the original location
+        Assert.True(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
+        Assert.Contains("Compile-safe stub", File.ReadAllText(Path.Combine(outputDir, "Startup.Auth.cs")));
+        Assert.True(File.Exists(Path.Combine(outputDir, "IdentityConfig.cs")));
+        Assert.Contains("Compile-safe stub", File.ReadAllText(Path.Combine(outputDir, "IdentityConfig.cs")));
+        Assert.True(File.Exists(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
+        Assert.Contains("Compile-safe stub", File.ReadAllText(Path.Combine(outputDir, "CatalogDatabaseInitializer.cs")));
 
         var layoutDir = Path.Combine(outputDir, "Layout");
         Directory.CreateDirectory(layoutDir);
@@ -1327,19 +1388,20 @@ public class PipelineIntegrationTests : IDisposable
 
         await pipeline.ExecuteAsync(context);
 
-        var siteMarkup = File.ReadAllText(Path.Combine(outputDir, "Site.razor"));
+        // Master pages are now written as artifacts, not to compile surface
+        var siteArtifactPath = Path.Combine(outputDir, "migration-artifacts", "codebehind", "Site.razor.txt");
+        Assert.True(File.Exists(siteArtifactPath), "Master page should be preserved as artifact");
         var loginMarkup = File.ReadAllText(Path.Combine(outputDir, "Account", "Login.razor"));
         var registerMarkup = File.ReadAllText(Path.Combine(outputDir, "Account", "Register.razor"));
         var actionMarkup = File.ReadAllText(Path.Combine(outputDir, "AddToCart.razor"));
         var program = File.ReadAllText(Path.Combine(outputDir, "Program.cs"));
 
-        Assert.Contains("@ChildComponents", siteMarkup);
-        Assert.Contains("ContentPlaceHolder", siteMarkup);
-        Assert.Contains("MainContent", siteMarkup);
+        Assert.DoesNotContain("Site.razor", Directory.GetFiles(outputDir, "*.razor").Select(Path.GetFileName));
         Assert.Contains("method=\"post\"", loginMarkup);
         Assert.Contains("action=\"/Account/LoginHandler\"", loginMarkup);
         Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", loginMarkup);
-        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", loginMarkup);
+        var loginCodeBehind = File.ReadAllText(Path.Combine(outputDir, "Account", "Login.razor.cs"));
+        Assert.Contains("SupplyParameterFromQuery(Name = \"returnUrl\")", loginCodeBehind);
         Assert.Contains("method=\"post\"", registerMarkup);
         Assert.Contains("action=\"/Account/RegisterHandler\"", registerMarkup);
         Assert.Contains("name=\"ReturnUrl\" value=\"@ReturnUrl\"", registerMarkup);
@@ -1354,8 +1416,54 @@ public class PipelineIntegrationTests : IDisposable
         Assert.Contains("CreateAsync(user, password)", program);
         Assert.Contains("app.MapPost(\"/__bwfc/actions/AddToCart\"", program);
         Assert.Contains("DisableAntiforgery()", program);
-        Assert.False(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
+        Assert.True(File.Exists(Path.Combine(outputDir, "Startup.Auth.cs")));
+        Assert.Contains("Compile-safe stub", File.ReadAllText(Path.Combine(outputDir, "Startup.Auth.cs")));
         Assert.True(File.Exists(Path.Combine(outputDir, "migration-artifacts", "compile-surface", "Startup.Auth.cs.txt")));
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_CountsAppliedTransforms_AndStripsLegacySystemWebReferences()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir(includeWebConfig: true, includeCodeBehind: true);
+
+        File.WriteAllText(Path.Combine(inputDir, "Default.aspx.cs"), """
+            using System;
+            using System.Collections.Generic;
+            using System.Web.UI;
+            
+            namespace TestApp
+            {
+                public partial class _Default : Page
+                {
+                    [System.Web.Services.WebMethod]
+                    [System.Web.Script.Services.ScriptMethod]
+                    public static List<string> GetCompletionList(string prefixText, int count)
+                    {
+                        return new List<string>();
+                    }
+                }
+            }
+            """);
+
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+        var pipeline = CreateFullPipeline();
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            SourceFiles = sourceFiles,
+            Options = new MigrationOptions { Verbose = false }
+        };
+
+        var report = await pipeline.ExecuteAsync(context);
+
+        Assert.True(report.TransformsApplied > 0, $"Expected transforms to be counted, got {report.TransformsApplied}");
+
+        var codeBehind = File.ReadAllText(Path.Combine(outputDir, "Default.razor.cs"));
+        Assert.DoesNotContain("using System.Web", codeBehind);
+        Assert.DoesNotContain("System.Web.Services", codeBehind);
+        Assert.DoesNotContain("System.Web.Script.Services", codeBehind);
     }
 
     // ───────────────────────────────────────────────────────────────
