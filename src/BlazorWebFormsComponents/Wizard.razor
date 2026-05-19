@@ -1,0 +1,99 @@
+@inherits BaseStyledComponent
+
+@if (Visible)
+{
+	<CascadingValue Value="this" IsFixed="true">
+		@WizardSteps
+	</CascadingValue>
+
+	@if (_steps.Count > 0)
+	{
+		<table cellspacing="0" cellpadding="0" id="@ID" class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)" style="border-collapse:collapse;@Style">
+			<tbody>
+				<tr>
+					@if (DisplaySideBar && !IsCompleteStep)
+					{
+						<td style="@GetSideBarStyleString()" class="@GetSideBarStyleClass()">
+							@if (SideBarTemplate != null)
+							{
+								@SideBarTemplate
+							}
+							else
+							{
+								@for (int i = 0; i < _steps.Count; i++)
+								{
+									var index = i;
+									var step = _steps[i];
+									var isActive = i == ActiveStepIndex;
+									var canNavigate = step.AllowReturn || i >= ActiveStepIndex;
+
+									@if (canNavigate && !isActive)
+									{
+										<a href="#" @onclick:preventDefault @onclick="() => HandleSideBarNavigation(index)">@(step.Title ?? $"Step {index + 1}")</a>
+									}
+									else
+									{
+										<span style="@(isActive ? "font-weight:bold;" : "")">@(step.Title ?? $"Step {index + 1}")</span>
+									}
+									<br />
+								}
+							}
+						</td>
+					}
+					<td>
+						<table cellspacing="0" cellpadding="0" style="width:100%;height:100%;">
+							<tbody>
+								@if (!string.IsNullOrEmpty(HeaderText) || HeaderTemplate != null)
+								{
+									<tr>
+										<td style="@GetHeaderStyleString()" class="@GetHeaderStyleClass()">
+											@if (HeaderTemplate != null)
+											{
+												@HeaderTemplate
+											}
+											else
+											{
+												@HeaderText
+											}
+										</td>
+									</tr>
+								}
+								<tr>
+									<td style="@GetStepStyleString()" class="@GetStepStyleClass()">
+										@if (ActiveStepIndex >= 0 && ActiveStepIndex < _steps.Count)
+										{
+											@_steps[ActiveStepIndex].ChildContent
+										}
+									</td>
+								</tr>
+								@if (!IsCompleteStep)
+								{
+									<tr>
+										<td align="right" style="@GetNavigationStyleString()" class="@GetNavigationStyleClass()">
+											@if (ShowPreviousButton)
+											{
+												<input type="button" value="@PreviousButtonText" @onclick="HandlePreviousClick" style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+											}
+											@if (ShowNextButton)
+											{
+												<input type="button" value="@NextButtonText" @onclick="HandleNextClick" style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+											}
+											@if (ShowFinishButton)
+											{
+												<input type="button" value="@FinishButtonText" @onclick="HandleFinishClick" style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+											}
+											@if (DisplayCancelButton)
+											{
+												<input type="button" value="@CancelButtonText" @onclick="HandleCancelClick" />
+											}
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	}
+}

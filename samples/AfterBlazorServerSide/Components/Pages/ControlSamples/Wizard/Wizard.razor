@@ -1,0 +1,67 @@
+@page "/ControlSamples/Wizard"
+@using BlazorWebFormsComponents.Enums
+
+<h1>Wizard Control Sample</h1>
+
+<p>The Wizard control provides multi-step navigation, displaying one step at a time with Previous/Next/Finish buttons.</p>
+
+<h2>Basic Wizard</h2>
+
+<Wizard ActiveStepIndex="@_activeStep" ActiveStepIndexChanged="(i) => _activeStep = i"
+		HeaderText="Registration Wizard"
+		DisplaySideBar="true"
+		OnFinishButtonClick="HandleFinish">
+	<WizardSteps>
+		<WizardStep Title="Personal Info">
+			<h3>Step 1: Personal Information</h3>
+			<p>Enter your name and email address.</p>
+			<div>
+				<label>Name:</label><br />
+				<input type="text" @bind="_name" />
+			</div>
+			<div>
+				<label>Email:</label><br />
+				<input type="text" @bind="_email" />
+			</div>
+		</WizardStep>
+		<WizardStep Title="Preferences">
+			<h3>Step 2: Preferences</h3>
+			<p>Choose your preferences.</p>
+			<div>
+				<label>
+					<input type="checkbox" @bind="_newsletter" /> Subscribe to newsletter
+				</label>
+			</div>
+		</WizardStep>
+		<WizardStep Title="Review" StepType="WizardStepType.Finish">
+			<h3>Step 3: Review</h3>
+			<p><strong>Name:</strong> @_name</p>
+			<p><strong>Email:</strong> @_email</p>
+			<p><strong>Newsletter:</strong> @(_newsletter ? "Yes" : "No")</p>
+		</WizardStep>
+		<WizardStep Title="Complete" StepType="WizardStepType.Complete">
+			<h3>Registration Complete!</h3>
+			<p>Thank you, @_name. Your registration has been submitted.</p>
+		</WizardStep>
+	</WizardSteps>
+</Wizard>
+
+@if (_finished)
+{
+	<div class="alert alert-success mt-3">
+		<strong>Finish event fired!</strong> The wizard completed successfully.
+	</div>
+}
+
+@code {
+	private int _activeStep;
+	private string _name = "";
+	private string _email = "";
+	private bool _newsletter;
+	private bool _finished;
+
+	private void HandleFinish(WizardNavigationEventArgs args)
+	{
+		_finished = true;
+	}
+}
