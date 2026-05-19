@@ -1,73 +1,50 @@
 @page "/Courses"
-<WebFormsForm @formname="CoursesForm">
+@page "/Courses.aspx"
+<form method="post" @formname="CoursesForm">
     <AntiforgeryToken />
-<PageTitle></PageTitle>
- 
+<PageTitle>Courses</PageTitle>
+
     <link href="CSS/CSS_Courses.css" rel="stylesheet" />
     <script src="JQuery/JQuery_Courses.js"></script>
- 
- 
-     <ScriptManager></ScriptManager>
+
+    <ScriptManager></ScriptManager>
     <UpdatePanel>
-        
-            <div id="dropList">
-                <h1 id="hdrCourse">Select Course</h1>
-                <DropDownList ItemType="object" ID="dropDepartments" @ref="drpDepartments" StaticItems="_departmentItems"></DropDownList>
-                <Button ID="btnSearchCourse" @ref="btnSearchCourse" Text="Search Courses" OnClick="@btnSearchCourse_Click"></Button>
-                <br />
-                <br />
-                <GridView ItemType="object" ID="grvCourses" @ref="grvCourses" AllowPaging="true" DataKeyNames="CourseID"
-                    PageSize="1" AutoGenerateColumns="false"
-                    OnPageIndexChanging="@grvCourses_PageIndexChanging"
-                    EmptyDataText = "Chose Department To Display Courses">
-                    <Columns>
-                        <BoundField ItemType="object" DataField="CourseID" HeaderText="ID" />
-                        <BoundField ItemType="object" DataField="CourseName" HeaderText="Course Name" />
-                        <BoundField ItemType="object" DataField="StudentsMax" HeaderText="Max Capacity" />
-                    </Columns>
-                </GridView>
-            </div>
-            <div id="autoComplete">
-                <h1 id="crsByName">Courses By Name</h1>
-                <TextBox ID="txtCourse" @ref="txtCourse" Placeholder="Search Course..."></TextBox>
-                <Button ID="search" @ref="search" Text="Search" OnClick="@search_Click"></Button>
-                <br />
-                <br />
-                <AutoCompleteExtender
-                    @ref="AutoCompleteExtender1"
-                    TargetControlID="txtCourse"
-                    ServiceMethod="GetList"
-                    MinimumPrefixLength="1"
-                    CompletionInterval="100"
-                    EnableCaching="true"
-                    CompletionSetCount="20"
-                    ShowOnlyCurrentWordInCompletionListItem="true">
-                </AutoCompleteExtender>
-                <DetailsView ItemType="object" ID="dtlCourses" @ref="dtlCourses" Width="125" Height="50" CssClass="details">
-                </DetailsView>
-                 
-    </div></UpdatePanel>
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-</WebFormsForm>
+        <div id="dropList">
+            <h1 id="hdrCourse">Select Course</h1>
+            <DropDownList ItemType="object" id="drpDepartments" @ref="drpDepartments" StaticItems="@DepartmentStaticItems"></DropDownList>
+            <input type="submit" id="btnSearchCourse" name="__action" value="Search Courses" />
+            <br />
+            <br />
+            <GridView ItemType="object" id="grvCourses" @ref="grvCourses" AllowPaging="true" DataKeyNames="CourseID"
+                      PageSize="1" AutoGenerateColumns="false"
+                      OnPageIndexChanging="@grvCourses_PageIndexChanging"
+                      EmptyDataText="Chose Department To Display Courses"
+                      DataSource="@_coursesDataSource">
+                <Columns>
+                    <BoundField ItemType="object" DataField="CourseID" HeaderText="ID" />
+                    <BoundField ItemType="object" DataField="CourseName" HeaderText="Course Name" />
+                    <BoundField ItemType="object" DataField="StudentsMax" HeaderText="Max Capacity" />
+                </Columns>
+            </GridView>
+        </div>
+        <div id="autoComplete">
+            <h1 id="crsByName">Courses By Name</h1>
+            <TextBox id="txtCourse" @ref="txtCourse" placeholder="Search Course..."></TextBox>
+            <input type="submit" id="search" name="__action" value="Search" />
+            <br />
+            <br />
+            <AutoCompleteExtender @ref="AutoCompleteExtender1"
+                                  TargetControlID="txtCourse"
+                                  ServiceMethod="GetList"
+                                  MinimumPrefixLength="1"
+                                  CompletionInterval="100"
+                                  EnableCaching="true"
+                                  CompletionSetCount="20"
+                                  ShowOnlyCurrentWordInCompletionListItem="true">
+            </AutoCompleteExtender>
+            <DetailsView ItemType="object" id="dtlCourses" @ref="dtlCourses" Width="125" Height="50" CssClass="details"
+                         DataSource="@_courseDetailsDataSource">
+            </DetailsView>
+        </div>
+    </UpdatePanel>
+</form>

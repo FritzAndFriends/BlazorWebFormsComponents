@@ -20,8 +20,8 @@
 // =============================================================================
 using System;
 using System.Linq;
-using WingtipToys.Logic;
 using WingtipToys.Models;
+using WingtipToys.Logic;
 
 using BlazorWebFormsComponents.Identity;
 using IdentityResult = BlazorWebFormsComponents.Identity.IdentityResult;

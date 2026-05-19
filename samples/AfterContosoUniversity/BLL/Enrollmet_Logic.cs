@@ -7,12 +7,12 @@ namespace ContosoUniversity.BLL
 {
     public class Enrollmet_Logic
     {
-    private readonly ContosoUniversityEntities _contosoUniversityEntities;
+        private readonly ContosoUniversityEntities _contosoUniversityEntities;
 
-    public Enrollmet_Logic(ContosoUniversityEntities contosoUniversityEntities)
-    {
-        _contosoUniversityEntities = contosoUniversityEntities;
-    }
+        public Enrollmet_Logic(ContosoUniversityEntities contosoUniversityEntities)
+        {
+            _contosoUniversityEntities = contosoUniversityEntities;
+        }
 
         #region Get Enrollments List
         public Dictionary<string, int> Get_Enrollment_ByDate()
@@ -27,7 +27,6 @@ namespace ContosoUniversity.BLL
             }
 
             return entries;
-
         }
         #endregion
     }

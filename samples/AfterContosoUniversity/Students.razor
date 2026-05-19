@@ -1,130 +1,123 @@
 @page "/Students"
+@page "/Students.aspx"
 <form method="post" @formname="StudentsForm">
     <AntiforgeryToken />
-<PageTitle></PageTitle>
- 
+<PageTitle>Students</PageTitle>
+
     <link href="CSS/Students_CSS.css" rel="stylesheet" />
     <script src="JQuery/JQuery_Students.js"></script>
- 
- 
- 
-    <ScriptManager ID="ScriptManager2" @ref="ScriptManager2"></ScriptManager>       
+
+    <ScriptManager id="ScriptManager2" @ref="ScriptManager2"></ScriptManager>
     <UpdatePanel>
-        
-            <div id="grvStudentsData">
-                <GridView Items="_gridData" TItem="object" ID="grv" @ref="grv"
-                    CssClass="grv"
-                    AutoGenerateColumns="false"
-                    EmptyDataText="There are no records to display"
-                    DataKeyNames="ID" OnRowUpdating="@grv_RowUpdating"
-                    BackColor='@("White")' BorderColor='@("#3366CC")' BorderStyle="@BorderStyle.None" BorderWidth="1"
-                    CellPadding="4" Height="336" Width="416">
-                    <Columns>
-                        <TemplateField HeaderText="Delete Student">
-                            <ItemTemplate Context="item">
-                                <button type="submit" name="__delete" value="@(((dynamic)item).ID)">Delete</button>
-                            </ItemTemplate>
-                        </TemplateField>
-                        <BoundField ItemType="object" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
-                        <BoundField ItemType="object" DataField="FullName" HeaderText="Student Name" />
-                        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
-                        <BoundField ItemType="object" DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
-                        <BoundField ItemType="object" DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
-                        <CommandField ButtonType="Button" HeaderText="Update Student Peronal Data" ShowEditButton="true" />
-                    </Columns>
-                
-                    <ChildComponents>
-                        <FooterStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' />
-                        <HeaderStyle BackColor='@("#003399")' Font-Bold="true" ForeColor='@("#CCCCFF")' />
-                        <PagerStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' HorizontalAlign="@HorizontalAlign.Left" />
-                        <RowStyle BackColor='@("White")' ForeColor='@("#003399")' />
-                        <SelectedRowStyle BackColor='@("#009999")' Font-Bold="true" ForeColor='@("#CCFF99")' />
-                        <SortedAscendingCellStyle BackColor='@("#EDF6F6")' />
-                        <SortedAscendingHeaderStyle BackColor='@("#0D4AC4")' />
-                        <SortedDescendingCellStyle BackColor='@("#D6DFDF")' />
-                        <SortedDescendingHeaderStyle BackColor='@("#002876")' />
-                    </ChildComponents>
-</GridView>
-            </div>
-            <div id="addStud">
-                <h1 id="addStudent">Add Student</h1>
-                <Table ID="tabAddStud"
-                    CssClass="tabAddStud" BorderColor='@("#0033CC")' Font-Bold="true" Font-Italic="false" ForeColor='@("White")'>
-                    <TableRow>
-                        <TableCell>First Name</TableCell>
-                        <TableCell>
-                            <TextBox ID="txtFirstName" Text="@PostedFirstName" Placeholder="Type Your First Name..." />
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>Last Name</TableCell><TableCell>
-                            <TextBox ID="txtLastName" Text="@PostedLastName" Placeholder="Type Your Last Name..." />
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>Birth Date</TableCell><TableCell>
-                            <TextBox ID="txtBirthDate" Text="@PostedBirthDate" Placeholder="dd.mm.year" />
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>Email</TableCell><TableCell>
-                            <TextBox ID="txtEmail" Text="@PostedEmail" Placeholder="Email is Optional..." />
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>Course Name</TableCell><TableCell>
-                            <DropDownList ItemType="object" ID="dropListCourses" @ref="dropListCourses" StaticItems="_courseItems" SelectedValue="@PostedCourse">
-                            </DropDownList>
-                        </TableCell>
-                    </TableRow>
-                    <TableRow>
-                        <TableCell>               
-                        </TableCell><TableCell>
-                            <input type="submit" id="btnInsert" class="insert" name="__action" value="New Enrollment" />
-                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                     <input type="submit" id="btnClear" name="__action" value="Clear" />
-                        </TableCell>
-                    </TableRow>
-                </Table>
-            </div>
-            <div id="ajax">
-                <h1 id="searchStud">Search Student</h1>
-                <TextBox CssClass="txtSearch" ID="txtSearch" @ref="txtSearch" Placeholder="Type Student Name..." />
-                <AutoCompleteExtender
-                    @ref="AutoCompleteExtender1"
-                    TargetControlID="txtSearch"
-                    ServiceMethod="GetCompletionList"
-                    MinimumPrefixLength="1"
-                    CompletionInterval="100"
-                    EnableCaching="true"
-                    CompletionSetCount="20"
-                    ShowOnlyCurrentWordInCompletionListItem="true">
-                </AutoCompleteExtender>
-                <input type="submit" id="btnSearch" name="__action" value="Show Student Info" class="btnInfo" />
-                <DetailsView ItemType="object"
-                    ID="studentData" @ref="studentData"
-                    Width="125"
-                    Height="50"
-                    AutoGenerateRows="false"
-                    CssClass="detailsView" BorderColor='@("Black")' ForeColor='@("Black")'
-                    DataSource="@_studentData_DataSource">
-                    <Fields>
-                        <BoundField ItemType="object"
-                            DataField="FirstName"
-                            HeaderText="First Name" />
-                        <BoundField ItemType="object" DataField="LastName" HeaderText="Last Name" />
-                        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
-                        <BoundField ItemType="object" DataField="BirthDate" HeaderText="Birth Date" />
-                        <BoundField ItemType="object" DataField="StudentID" HeaderText="id" />
-                    </Fields>
-                
-                    <ChildComponents>
-                        <RowStyle BackColor='@("White")' />
-                    </ChildComponents>
-</DetailsView>
-            </div>
-        
-    </UpdatePanel>         
-     
- 
+        <div id="grvStudentsData">
+            <GridView Items="_gridData" TItem="object" id="grv" @ref="grv"
+                      CssClass="grv"
+                      AutoGenerateColumns="false"
+                      EmptyDataText="There are no records to display"
+                      UpdateMethod="grv_UpdateItem"
+                      DeleteMethod="grv_DeleteItem" DataKeyNames="ID" OnRowUpdating="@grv_RowUpdating"
+                      BackColor='@("White")' BorderColor='@("#3366CC")' BorderStyle="@BorderStyle.None" BorderWidth="1"
+                      CellPadding="4" Height="336" Width="416">
+                <Columns>
+                    <TemplateField HeaderText="Delete Student">
+                        <ItemTemplate Context="context">
+                            <button type="submit" name="__delete" value='@(context.GetType().GetProperty("ID")?.GetValue(context))' class="btn btn-danger btn-sm">Delete</button>
+                        </ItemTemplate>
+                    </TemplateField>
+                    <BoundField ItemType="object" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+                    <BoundField ItemType="object" DataField="FullName" HeaderText="Student Name" />
+                    <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
+                    <BoundField ItemType="object" DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
+                    <BoundField ItemType="object" DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
+                    <CommandField ButtonType="Button" HeaderText="Update Student Peronal Data" ShowEditButton="true" />
+                </Columns>
+
+                <ChildComponents>
+                    <FooterStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' />
+                    <HeaderStyle BackColor='@("#003399")' Font-Bold="true" ForeColor='@("#CCCCFF")' />
+                    <PagerStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' HorizontalAlign="@HorizontalAlign.Left" />
+                    <RowStyle BackColor='@("White")' ForeColor='@("#003399")' />
+                    <SelectedRowStyle BackColor='@("#009999")' Font-Bold="true" ForeColor='@("#CCFF99")' />
+                    <SortedAscendingCellStyle BackColor='@("#EDF6F6")' />
+                    <SortedAscendingHeaderStyle BackColor='@("#0D4AC4")' />
+                    <SortedDescendingCellStyle BackColor='@("#D6DFDF")' />
+                    <SortedDescendingHeaderStyle BackColor='@("#002876")' />
+                </ChildComponents>
+            </GridView>
+        </div>
+        <div id="addStud">
+            <h1 id="addStudent">Add Student</h1>
+            <Table id="tabAddStud" @ref="tabAddStud"
+                   CssClass="tabAddStud" BorderColor='@("#0033CC")' Font-Bold="true" Font-Italic="false" ForeColor='@("White")'>
+                <TableRow>
+                    <TableCell>First Name</TableCell>
+                    <TableCell>
+                        <TextBox id="txtFirstName" @ref="txtFirstName" placeholder="Type Your First Name..." />
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell>Last Name</TableCell><TableCell>
+                        <TextBox id="txtLastName" @ref="txtLastName" placeholder="Type Your Last Name..." />
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell>Birth Date</TableCell><TableCell>
+                        <TextBox id="txtBirthDate" @ref="txtBirthDate" placeholder="dd.mm.year" />
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell>Email</TableCell><TableCell>
+                        <TextBox id="txtEmail" @ref="txtEmail" placeholder="Email is Optional..." />
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell>Course Name</TableCell><TableCell>
+                        <DropDownList ItemType="object" id="dropListCourses" @ref="dropListCourses" StaticItems="@CourseStaticItems">
+                        </DropDownList>
+                    </TableCell>
+                </TableRow>
+                <TableRow>
+                    <TableCell>
+                    </TableCell><TableCell>
+                        <input type="submit" id="btnInsert" class="insert" name="__action" value="New Enrollment" />
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="submit" id="btnClear" name="__action" value="Clear" />
+                    </TableCell>
+                </TableRow>
+            </Table>
+        </div>
+        <div id="ajax">
+            <h1 id="searchStud">Search Student</h1>
+            <TextBox CssClass="txtSearch" id="txtSearch" @ref="txtSearch" placeholder="Type Student Name..." />
+            <AutoCompleteExtender @ref="AutoCompleteExtender1"
+                                  TargetControlID="txtSearch"
+                                  ServiceMethod="GetCompletionList"
+                                  MinimumPrefixLength="1"
+                                  CompletionInterval="100"
+                                  EnableCaching="true"
+                                  CompletionSetCount="20"
+                                  ShowOnlyCurrentWordInCompletionListItem="true">
+            </AutoCompleteExtender>
+            <input type="submit" id="btnSearch" name="__action" value="Show Student Info" class="btnInfo" />
+            <DetailsView ItemType="object"
+                         id="studentData" @ref="studentData"
+                         Width="125"
+                         Height="50"
+                         AutoGenerateRows="false"
+                         CssClass="detailsView" BorderColor='@("Black")' ForeColor='@("Black")'
+                         DataSource="@_studentData_DataSource">
+                <Fields>
+                    <BoundField ItemType="object" DataField="FirstName" HeaderText="First Name" />
+                    <BoundField ItemType="object" DataField="LastName" HeaderText="Last Name" />
+                    <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
+                    <BoundField ItemType="object" DataField="BirthDate" HeaderText="Birth Date" />
+                    <BoundField ItemType="object" DataField="StudentID" HeaderText="id" />
+                </Fields>
+
+                <ChildComponents>
+                    <RowStyle BackColor='@("White")' />
+                </ChildComponents>
+            </DetailsView>
+        </div>
+    </UpdatePanel>
 </form>

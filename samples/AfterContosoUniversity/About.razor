@@ -1,18 +1,18 @@
 @page "/About"
+@page "/About.aspx"
 <WebFormsForm @formname="AboutForm">
     <AntiforgeryToken />
-<PageTitle></PageTitle>
+<PageTitle>About</PageTitle>
 
      <link href="CSS/CSS_About.css" rel="stylesheet" />
      <script src="JQuery/JQuery_About.js"></script>
-
 
     <div id="header">
         <h1> Students Body Statistics </h1>
     </div>
      <div id="grv">
         <GridView Items="_enrollmentData" TItem="KeyValuePair<string, int>" CssClass="grid" 
-            ID="EnrollmentsStat" @ref="EnrollmentsStat"
+            id="EnrollmentsStat" @ref="EnrollmentsStat"
             AutoGenerateColumns="false" EmptyDataText="There are no records to display"
              CellPadding="4" ForeColor='@("#333333")' GridLines="@GridLines.None">
             <Columns>
@@ -40,8 +40,6 @@
                 <SortedDescendingCellStyle BackColor='@("#E9EBEF")' />
                 <SortedDescendingHeaderStyle BackColor='@("#4870BE")' />
             </ChildComponents>
-</GridView>
+        </GridView>
     </div>
-
-
 </WebFormsForm>

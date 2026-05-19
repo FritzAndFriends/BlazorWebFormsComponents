@@ -1,12 +1,12 @@
 @page "/"
 @page "/Home"
+@page "/Home.aspx"
 <WebFormsForm @formname="HomeForm">
     <AntiforgeryToken />
-<PageTitle>Home - Contoso University</PageTitle>
+<PageTitle>Home</PageTitle>
 
     <link href="CSS/Home_CSS.css" rel="stylesheet" />     
     <script src="JQuery/JQuery_Home.js"></script>
-
 
     <div id="welcomeHeader">
         <h1>Welcome To Contoso University<span id="com">.com</span></h1>
@@ -15,6 +15,4 @@
     <footer>
         @(DateTime.Now.Year)  - Contoso University&copy;
     </footer>
-
-
 </WebFormsForm>

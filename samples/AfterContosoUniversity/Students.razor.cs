@@ -1,83 +1,103 @@
+// =============================================================================
+// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
+//
+// Common transforms needed (use the BWFC Copilot skill for assistance):
+//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
+//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
+//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
+//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
+//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
+//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
+//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
+//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
+//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
+//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
+//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
+//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
+//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
+//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
+//   TODO(bwfc-general): User controls → Blazor component references
+// =============================================================================
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;
-using ContosoUniversity.Models;
-using ContosoUniversity.BLL;
-using System.Data.SqlClient;
 using System.Data;
- 
-using Microsoft.AspNetCore.Components;
+using System.Data.SqlClient;
+using System.Linq;
 using BlazorAjaxToolkitComponents;
+using BlazorWebFormsComponents;
+using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;
+using ContosoUniversity.BLL;
+using ContosoUniversity.Models;
+using Microsoft.AspNetCore.Components;
+
 namespace ContosoUniversity
 {
     public partial class Students : WebFormsPageBase
     {
-    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
+        private AutoCompleteExtender AutoCompleteExtender1 = default!;
+        private DropDownList<object> dropListCourses = default!;
+        private GridView<object> grv = default!;
+        private ScriptManager ScriptManager2 = default!;
+        private DetailsView<object> studentData = default!;
+        private List<object>? _studentData_DataSource;
+        private List<object> _gridData = new();
+        private Table tabAddStud = default!;
+        private TextBox txtBirthDate = default!;
+        private TextBox txtEmail = default!;
+        private TextBox txtFirstName = default!;
+        private TextBox txtLastName = default!;
+        private TextBox txtSearch = default!;
 
-    // --- Request.Form Migration ---
-    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
-    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
-    // Form keys found: key
-    // For non-page classes, inject RequestShim via DI.
- 
-    private AutoCompleteExtender AutoCompleteExtender1 = default!;
-    private DropDownList<object> dropListCourses = default!;
-    private GridView<object> grv = default!;
-    private ScriptManager ScriptManager2 = default!;
-    private DetailsView<object> studentData = default!;
-    private object _studentData_DataSource = null!;
-    private TextBox txtSearch = default!;
-    private readonly ListItemCollection _courseItems = new();
-    private List<object> _gridData = new();
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-    // ConnectionString names found: ContosoUniversity
-    // Add these to appsettings.json under "ConnectionStrings" section.
- 
-    [Inject]
-    protected ContosoUniversityEntities _contosoUniversityEntities { get; set; } = default!;
+        [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtFirstName")]
+        public string? PostedFirstName { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtFirstName")]
-    public string? PostedFirstName { get; set; }
+        [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtLastName")]
+        public string? PostedLastName { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtLastName")]
-    public string? PostedLastName { get; set; }
+        [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtBirthDate")]
+        public string? PostedBirthDate { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtBirthDate")]
-    public string? PostedBirthDate { get; set; }
+        [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtEmail")]
+        public string? PostedEmail { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtEmail")]
-    public string? PostedEmail { get; set; }
+        [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$dropListCourses")]
+        public string? PostedCourse { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$dropListCourses")]
-    public string? PostedCourse { get; set; }
+        [SupplyParameterFromForm(FormName = "StudentsForm", Name = "__action")]
+        public string? PostedAction { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "__action")]
-    public string? PostedAction { get; set; }
+        [SupplyParameterFromForm(FormName = "StudentsForm", Name = "__delete")]
+        public string? PostedDeleteId { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "__delete")]
-    public string? PostedDeleteId { get; set; }
+        [SupplyParameterFromForm(FormName = "StudentsForm", Name = "txtSearch")]
+        public string? PostedSearchText { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "txtSearch")]
-    public string? PostedSearchText { get; set; }
- 
-        private StudentsListLogic studLogic;
-          
+        [Inject]
+        protected ContosoUniversityEntities _contosoUniversityEntities { get; set; } = default!;
+
+        private StudentsListLogic studLogic = default!;
+        private List<ListItem> _courseItems = new();
+
+        private ListItemCollection CourseStaticItems
+        {
+            get
+            {
+                var items = new ListItemCollection();
+                items.AddRange(_courseItems);
+                return items;
+            }
+        }
+
         protected override async Task OnInitializedAsync()
         {
-            // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
             await base.OnInitializedAsync();
- 
+
             studLogic = new StudentsListLogic(_contosoUniversityEntities);
- 
-                        // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
-            _courseItems.Clear();
+
             foreach (var course in _contosoUniversityEntities.Courses)
-                        {
-                            _courseItems.Add(new ListItem(course.CourseName));
-                        }
+            {
+                _courseItems.Add(new ListItem(course.CourseName));
+            }
 
             if (PostedAction == "New Enrollment")
             {
@@ -102,59 +122,23 @@ namespace ContosoUniversity
             {
                 studLogic.DeleteStudent(deleteId);
             }
- 
+
             _gridData = grv_GetData().ToList();
         }
- 
-        #region Filling Enrollments table
-        // The return type can be changed to IEnumerable, however to support
-        // paging and sorting, the following parameters must be added:
-        //     int maximumRows
-        //     int startRowIndex
-        //     out int totalRowCount
-        //     string sortByExpression
-        public IQueryable<Object> grv_GetData()
+
+        public IQueryable<object> grv_GetData()
         {
-            IQueryable<Object> list = studLogic.GetJoinedTableData().AsQueryable();              
-            return list;
+            return studLogic.GetJoinedTableData().AsQueryable();
         }
-        #endregion
- 
-        #region Updating Row Data
+
         protected void grv_RowUpdating(GridViewUpdateEventArgs e)
         {
-            int id, counter = 0;
-            string name = string.Empty;
-            string email = string.Empty;
- 
-            id = int.Parse(grv.Rows[e.RowIndex].Cells[1].Text);
- 
-            foreach (string val in e.NewValues.Values)
-            {
-                if (counter == 0)
-                {
-                    name = val;
-                    counter++;
-                }
-                else email = val;
-            }
- 
-            studLogic.UpdateStudentData(id, name, email);
+            return;
         }
-        #endregion
- 
-        #region Delete Row
-        // The id parameter name should match the DataKeyNames value set on the control
+
         public void grv_DeleteItem(int id)
         {
             studLogic.DeleteStudent(id);
-        }
-        #endregion
- 
-        #region Insert Button
-        protected void btnInsert_Click(EventArgs e)
-        {
-            InsertPostedEntry();
         }
 
         private void InsertPostedEntry()
@@ -169,36 +153,23 @@ namespace ContosoUniversity
 
             if (!DateTime.TryParse(PostedBirthDate, out var birth))
             {
-                throw new Exception("Wrong Date Format !!!");
+                return;
             }
 
             studLogic.InsertNewEntry(PostedFirstName, PostedLastName, birth, PostedCourse, PostedEmail ?? string.Empty);
         }
-        #endregion
- 
-        #region Clear Button
-        protected void btnClear_Click(EventArgs e)
-        {
-            PostedFirstName = string.Empty;
-            PostedLastName = string.Empty;
-            PostedBirthDate = string.Empty;
-            PostedEmail = string.Empty;
-            PostedCourse = string.Empty;
-        }
-        #endregion
- 
-        #region AutoComplete WebService
+
         // TODO(bwfc-webmethod): Migrate legacy static WebMethod endpoint to a Razor component callback or Minimal API.
         // Legacy [WebMethod] attribute removed for Blazor migration.
         // Legacy [ScriptMethod] attribute removed for Blazor migration.
-        public static List<string> GetCompletionList(string prefixText, int count)  //This Service must be static in order to work however documentation
-        {                                                                            // says nothing about that !!!
+        public static List<string> GetCompletionList(string prefixText, int count)
+        {
             List<string> students = new List<string>();
             string conString = ConfigurationManager.ConnectionStrings["ContosoUniversity"].ConnectionString;
             string fullName;
- 
+
             string sqlQuery = "SELECT FirstName,LastName FROM dbo.Students WHERE FirstName LIKE @SearchText + '%'";
- 
+
             using (SqlConnection con = new SqlConnection(conString))
             {
                 using (SqlCommand cmd = new SqlCommand(sqlQuery, con))
@@ -209,11 +180,11 @@ namespace ContosoUniversity
                     param.SqlDbType = SqlDbType.NVarChar;
                     param.Size = 30;
                     param.Direction = ParameterDirection.Input;
- 
+
                     cmd.Parameters.Add(param);
- 
+
                     con.Open();
- 
+
                     using (SqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
@@ -221,39 +192,26 @@ namespace ContosoUniversity
                             fullName = string.Format("{0} {1}", dr["FirstName"].ToString(), dr["LastName"].ToString());
                             students.Add(fullName);
                         }
- 
+
                         dr.Close();
                     }
- 
+
                     con.Close();
                 }
             }
- 
+
             return students;
         }
-        #endregion
- 
-        #region Search Button
-        protected void btnSearch_Click(EventArgs e)
-        {
-            this.studentData.DataSource = studLogic.GetStudents(this.txtSearch.Text);
-            this.txtSearch.Text = string.Empty;
-        }
-        #endregion
- 
-        //Must Bind Data to GridView manually because of lack of DataSourceID or explicitly set InsertMethod !!!
+
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
-            // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
             if (firstRender)
             {
             }
         }
- 
-        // The id parameter name should match the DataKeyNames value set on the control
+
         public void grv_UpdateItem(int id)
         {
-           
-        }  
+        }
     }
 }

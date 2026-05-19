@@ -19,8 +19,8 @@
 //   TODO(bwfc-general): User controls → Blazor component references
 // =============================================================================
 using System;
-using WingtipToys.Logic;
 using WingtipToys.Models;
+using WingtipToys.Logic;
 
 using BlazorWebFormsComponents.Identity;
 
