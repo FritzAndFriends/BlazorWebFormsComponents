@@ -1,144 +1,101 @@
-// =============================================================================
-// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
-//
-// Common transforms needed (use the BWFC Copilot skill for assistance):
-//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
-//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
-//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
-//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
-//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
-//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
-//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
-//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
-//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
-//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
-//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
-//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
-//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
-//   TODO(bwfc-general): User controls → Blazor component references
-// =============================================================================
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
 using BlazorAjaxToolkitComponents;
-using BlazorWebFormsComponents;
 using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;
 using ContosoUniversity.BLL;
 using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Components;
 
-namespace ContosoUniversity
+namespace ContosoUniversity;
+
+public partial class Courses : WebFormsPageBase
 {
-    public partial class Courses : WebFormsPageBase
+    private AutoCompleteExtender AutoCompleteExtender1 = default!;
+    private Button btnSearchCourse = default!;
+    private DropDownList<Department> drpDepartments = default!;
+    private DetailsView<Cours> dtlCourses = default!;
+    private GridView<Cours> grvCourses = default!;
+    private Button search = default!;
+    private TextBox txtCourse = default!;
+
+    private List<Department> _departments = [];
+    private List<Cours> _courses = [];
+    private IEnumerable<Cours> _courseDetails = Array.Empty<Cours>();
+    private string _selectedDepartment = string.Empty;
+
+    [Inject]
+    protected Courses_Logic coursLogic { get; set; } = default!;
+
+    [Inject]
+    protected ContosoUniversityEntities _contosoUniversityEntities { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
     {
-        private AutoCompleteExtender AutoCompleteExtender1 = default!;
-        private DropDownList<object> drpDepartments = default!;
-        private DetailsView<object> dtlCourses = default!;
-        private GridView<object> grvCourses = default!;
-        private TextBox txtCourse = default!;
-        private List<object>? _coursesDataSource;
-        private List<object>? _courseDetailsDataSource;
+        await base.OnInitializedAsync();
 
-        [SupplyParameterFromForm(FormName = "CoursesForm", Name = "drpDepartments")]
-        public string? PostedDepartment { get; set; }
+        _departments = _contosoUniversityEntities.Departments
+            .OrderBy(department => department.DepartmentName)
+            .ToList();
 
-        [SupplyParameterFromForm(FormName = "CoursesForm", Name = "txtCourse")]
-        public string? PostedCourseName { get; set; }
-
-        [SupplyParameterFromForm(FormName = "CoursesForm", Name = "__action")]
-        public string? PostedAction { get; set; }
-
-        [Inject]
-        protected ContosoUniversityEntities _contosoUniversityEntities { get; set; } = default!;
-
-        private Courses_Logic coursLogic = default!;
-        private List<ListItem> _departmentItems = new();
-
-        private ListItemCollection DepartmentStaticItems
+        if (string.IsNullOrEmpty(_selectedDepartment) && _departments.Count > 0)
         {
-            get
+            _selectedDepartment = _departments[0].DepartmentName;
+        }
+    }
+
+    public static List<string> GetList(string prefixText, int count)
+    {
+        List<string> name = [];
+
+        const string query = "select CourseName from dbo.[Courses] where CourseName like @SearchText + '%'";
+        string connectionStr = ConfigurationManager.ConnectionStrings["ContosoUniversity"].ConnectionString;
+
+        using (SqlConnection con = new(connectionStr))
+        using (SqlCommand cmd = new(query, con))
+        {
+            SqlParameter param = new()
             {
-                var items = new ListItemCollection();
-                items.AddRange(_departmentItems);
-                return items;
+                Direction = ParameterDirection.Input,
+                DbType = DbType.String,
+                ParameterName = "@SearchText",
+                Value = prefixText
+            };
+
+            cmd.Parameters.Add(param);
+            con.Open();
+
+            using SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                name.Add(dr["CourseName"].ToString() ?? string.Empty);
             }
         }
 
-        protected override async Task OnInitializedAsync()
-        {
-            await base.OnInitializedAsync();
+        return name;
+    }
 
-            coursLogic = new Courses_Logic(_contosoUniversityEntities);
+    protected void btnSearchCourse_Click(EventArgs e)
+    {
+        _courses = string.IsNullOrWhiteSpace(_selectedDepartment)
+            ? []
+            : coursLogic.GetCourses(_selectedDepartment);
+    }
 
-            foreach (var dep in _contosoUniversityEntities.Departments)
-            {
-                _departmentItems.Add(new ListItem(dep.DepartmentName));
-            }
+    protected void search_Click(EventArgs e)
+    {
+        _courseDetails = coursLogic.GetCourse(txtCourse.Text);
+        txtCourse.Text = string.Empty;
+    }
 
-            if (PostedAction == "Search Courses" && !string.IsNullOrWhiteSpace(PostedDepartment))
-            {
-                _coursesDataSource = coursLogic.GetCourses(PostedDepartment).Cast<object>().ToList();
-            }
-            else if (PostedAction == "Search" && !string.IsNullOrWhiteSpace(PostedCourseName))
-            {
-                _courseDetailsDataSource = coursLogic.GetCourse(PostedCourseName).Cast<object>().ToList();
-            }
-        }
+    protected void grvCourses_PageIndexChanging(PageChangedEventArgs e)
+    {
+        grvCourses.PageIndex = e.NewPageIndex;
+        btnSearchCourse_Click(EventArgs.Empty);
+    }
 
-        public static List<string> GetList(string prefixText, int count)
-        {
-            List<string> name = new List<string>();
-
-            string query = "select CourseName from dbo.[Courses] where CourseName like @SearchText + '%'";
-            string connectionStr = ConfigurationManager.ConnectionStrings["ContosoUniversity"].ConnectionString;
-
-            using (SqlConnection con = new SqlConnection(connectionStr))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    SqlParameter param = new SqlParameter();
-                    param.Direction = ParameterDirection.Input;
-                    param.DbType = DbType.String;
-                    param.ParameterName = "@SearchText";
-                    param.Value = prefixText;
-
-                    cmd.Parameters.Add(param);
-
-                    con.Open();
-
-                    using (SqlDataReader dr = cmd.ExecuteReader())
-                    {
-                        while (dr.Read())
-                        {
-                            name.Add(dr["CourseName"].ToString());
-                        }
-
-                        dr.Close();
-                    }
-                }
-
-                con.Close();
-            }
-            return name;
-        }
-
-        protected void grvCourses_PageIndexChanging(PageChangedEventArgs e)
-        {
-            this.grvCourses.PageIndex = e.NewPageIndex;
-            if (!string.IsNullOrWhiteSpace(PostedDepartment))
-            {
-                _coursesDataSource = coursLogic.GetCourses(PostedDepartment).Cast<object>().ToList();
-            }
-        }
-
-        protected override async Task OnAfterRenderAsync(bool firstRender)
-        {
-            if (firstRender)
-            {
-            }
-        }
+    private Task OnSelectedDepartmentChanged(string value)
+    {
+        _selectedDepartment = value;
+        return Task.CompletedTask;
     }
 }

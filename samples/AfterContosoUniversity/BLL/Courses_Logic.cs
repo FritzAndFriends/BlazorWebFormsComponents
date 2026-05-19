@@ -1,40 +1,50 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Data;
+using System.Data.SqlClient;
+using BlazorAjaxToolkitComponents;
+using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;
 using ContosoUniversity.Models;
-
 using Microsoft.EntityFrameworkCore;
-namespace ContosoUniversity.BLL
+
+namespace ContosoUniversity.BLL;
+
+public class Courses_Logic
 {
-    public class Courses_Logic
+    private readonly ContosoUniversityEntities _contosoUniversityEntities;
+
+    public Courses_Logic(ContosoUniversityEntities contosoUniversityEntities)
     {
-        private readonly ContosoUniversityEntities _contosoUniversityEntities;
+        _contosoUniversityEntities = contosoUniversityEntities;
+    }
 
-        public Courses_Logic(ContosoUniversityEntities contosoUniversityEntities)
+    public List<Cours> GetCourses(string department)
+    {
+        if (string.IsNullOrWhiteSpace(department))
         {
-            _contosoUniversityEntities = contosoUniversityEntities;
+            return [];
         }
 
-        #region Get Courses By Department
-        public List<Cours> GetCourses(string department)
+        return _contosoUniversityEntities.Courses
+            .AsNoTracking()
+            .Include(course => course.Department)
+            .Where(course => course.Department != null && course.Department.DepartmentName == department)
+            .OrderBy(course => course.CourseID)
+            .ToList();
+    }
+
+    public List<Cours> GetCourse(string courseName)
+    {
+        if (string.IsNullOrWhiteSpace(courseName))
         {
-            var courses = (from cours in _contosoUniversityEntities.Courses.Include(x => x.Department)
-                           where cours.Department.DepartmentName == department
-                           select cours).ToList<Cours>();
-
-            return courses;
+            return [];
         }
-        #endregion
 
-        #region Get Course By CourseName
-        public List<Cours> GetCourse(string courseName)
-        {
-            var course = (from crs in _contosoUniversityEntities.Courses.Include(x => x.Department)
-                          where crs.CourseName.Contains(courseName)
-                          select crs).ToList<Cours>();
+        courseName = courseName.Trim();
 
-            return course;
-        }
-        #endregion
+        return _contosoUniversityEntities.Courses
+            .AsNoTracking()
+            .Include(course => course.Department)
+            .Where(course => course.CourseName.Contains(courseName))
+            .OrderBy(course => course.CourseName)
+            .ToList();
     }
 }

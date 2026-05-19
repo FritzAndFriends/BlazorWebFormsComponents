@@ -1,33 +1,26 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using ContosoUniversity.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace ContosoUniversity.BLL
+namespace ContosoUniversity.BLL;
+
+public class Enrollmet_Logic
 {
-    public class Enrollmet_Logic
+    private readonly ContosoUniversityEntities _contosoUniversityEntities;
+
+    public Enrollmet_Logic(ContosoUniversityEntities contosoUniversityEntities)
     {
-        private readonly ContosoUniversityEntities _contosoUniversityEntities;
+        _contosoUniversityEntities = contosoUniversityEntities;
+    }
 
-        public Enrollmet_Logic(ContosoUniversityEntities contosoUniversityEntities)
-        {
-            _contosoUniversityEntities = contosoUniversityEntities;
-        }
+    public Dictionary<string, int> Get_Enrollment_ByDate()
+    {
+        var enrollments = _contosoUniversityEntities.Enrollments
+            .AsNoTracking()
+            .ToList();
 
-        #region Get Enrollments List
-        public Dictionary<string, int> Get_Enrollment_ByDate()
-        {
-            var allEnrollments = _contosoUniversityEntities.Enrollments.ToList();
-
-            Dictionary<string, int> entries = new Dictionary<string, int>();
-
-            foreach (var group in allEnrollments.GroupBy(e => e.Date.ToShortDateString()))
-            {
-                entries[group.Key] = group.Count();
-            }
-
-            return entries;
-        }
-        #endregion
+        return enrollments
+            .GroupBy(enrollment => enrollment.Date.Date)
+            .OrderBy(group => group.Key)
+            .ToDictionary(group => group.Key.ToShortDateString(), group => group.Count());
     }
 }

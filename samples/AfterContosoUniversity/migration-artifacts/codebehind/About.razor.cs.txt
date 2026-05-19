@@ -25,6 +25,7 @@ using ContosoUniversity.Models;
 using ContosoUniversity.BLL;
 
 
+using Microsoft.AspNetCore.Components;
 namespace ContosoUniversity
 {
     public partial class About : WebFormsPageBase
@@ -38,6 +39,9 @@ namespace ContosoUniversity
     // For non-page classes, inject RequestShim via DI.
 
     private GridView<object> EnrollmentsStat = default!;
+    [Inject]
+    protected Enrollmet_Logic _enrollmet_Logic { get; set; } = default!;
+
         protected override async Task OnInitializedAsync()
         {
             // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
@@ -54,7 +58,7 @@ namespace ContosoUniversity
         //     string sortByExpression
         public Dictionary<string, int> EnrollmentsStat_GetData()
         {
-            return new Enrollmet_Logic().Get_Enrollment_ByDate();
+            return _enrollmet_Logic.Get_Enrollment_ByDate();
         }
     }
 }

@@ -1,7 +1,9 @@
 @page "/Instructors"
+@page "/Instructors.aspx"
+@rendermode InteractiveServer
 <WebFormsForm @formname="InstructorsForm">
     <AntiforgeryToken />
-<PageTitle></PageTitle>
+<PageTitle>Instructors</PageTitle>
 
     <link href="CSS/Instructors_CSS.css" rel="stylesheet" />
     <script src="JQuery/JQuery_Instructors.js"></script>
@@ -12,16 +14,16 @@
         
             <div id="grv">
                 <h1 id="hdr">Our Instructors</h1>
-                <GridView ItemType="object" id="grvInstructors" @ref="grvInstructors" AutoGenerateColumns="false"
+                <GridView ItemType="Instructor" id="grvInstructors" @ref="grvInstructors" AutoGenerateColumns="false"
                     CssClass="grv" BorderWidth="2"                 
                     AllowSorting="true" OnSorting="@grvInstructors_Sorting" 
                     EmptyDataText = "There are no records to display" 
-                    DataSource="@_grvInstructors_DataSource">
+                    Items="@_instructors">
                     <Columns>
-                        <BoundField ItemType="object" DataField="InstructorID" HeaderText="Instructor ID" SortExpression="InstructorID" />
-                        <BoundField ItemType="object" DataField="FirstName" HeaderText="First Name"  SortExpression="FirstName"/>
-                        <BoundField ItemType="object" DataField="LastName" HeaderText="Last Name"  SortExpression="LastName"/>
-                        <BoundField ItemType="object" DataField="Email" HeaderText="Email"  />
+                        <BoundField ItemType="Instructor" DataField="InstructorID" HeaderText="Instructor ID" SortExpression="InstructorID" />
+                        <BoundField ItemType="Instructor" DataField="FirstName" HeaderText="First Name"  SortExpression="FirstName"/>
+                        <BoundField ItemType="Instructor" DataField="LastName" HeaderText="Last Name"  SortExpression="LastName"/>
+                        <BoundField ItemType="Instructor" DataField="Email" HeaderText="Email"  />
                     </Columns>
                 </GridView>
             </div>

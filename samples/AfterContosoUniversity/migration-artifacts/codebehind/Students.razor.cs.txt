@@ -63,22 +63,21 @@ namespace ContosoUniversity
     // Add these to appsettings.json under "ConnectionStrings" section.
 
     [Inject]
+    protected StudentsListLogic studLogic { get; set; } = default!;
+
+    [Inject]
     protected ContosoUniversityEntities _contosoUniversityEntities { get; set; } = default!;
 
-        private StudentsListLogic studLogic;
-          
-        protected override async Task OnInitializedAsync()
+protected override async Task OnInitializedAsync()
         {
-            // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
-            await base.OnInitializedAsync();
+    // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
+    await base.OnInitializedAsync();
 
-            studLogic = new StudentsListLogic();
-
-                        // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
-            foreach (var course in _contosoUniversityEntities.Courses)
-                        {
-                            this.dropListCourses?.Items.Add(course.CourseName);
-                        }
+// BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
+foreach (var course in _contosoUniversityEntities.Courses)
+            {
+                this.dropListCourses?.Items.Add(course.CourseName);
+            }
 
             _studentData_DataSource = null;
             this.studentData?.DataBind();    

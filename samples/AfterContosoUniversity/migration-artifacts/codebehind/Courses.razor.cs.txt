@@ -55,22 +55,21 @@ namespace ContosoUniversity
     // Add these to appsettings.json under "ConnectionStrings" section.
 
     [Inject]
+    protected Courses_Logic coursLogic { get; set; } = default!;
+
+    [Inject]
     protected ContosoUniversityEntities _contosoUniversityEntities { get; set; } = default!;
 
-        private Courses_Logic coursLogic;
-
-        protected override async Task OnInitializedAsync()
+protected override async Task OnInitializedAsync()
         {
-            // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
-            await base.OnInitializedAsync();
+    // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
+    await base.OnInitializedAsync();
 
-            coursLogic = new Courses_Logic();
-
-                        // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
-            foreach (var dep in _contosoUniversityEntities.Departments)
-                        {
-                            this.drpDepartments?.Items.Add(dep.DepartmentName);
-                        }      
+// BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
+foreach (var dep in _contosoUniversityEntities.Departments)
+            {
+                this.drpDepartments?.Items.Add(dep.DepartmentName);
+            }      
         }
 
         #region AutoComplete WebService

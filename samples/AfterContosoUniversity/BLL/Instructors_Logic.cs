@@ -1,21 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Data;
-using System.Data.SqlClient;
-using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;
 using ContosoUniversity.Models;
+using Microsoft.EntityFrameworkCore;
 
-namespace ContosoUniversity.BLL
+namespace ContosoUniversity.BLL;
+
+public class Instructors_Logic
 {
-    public class Instructors_Logic
-    {
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-    // ConnectionString names found: ContosoUniversity
-    // Add these to appsettings.json under "ConnectionStrings" section.
-
     private readonly ContosoUniversityEntities _contosoUniversityEntities;
 
     public Instructors_Logic(ContosoUniversityEntities contosoUniversityEntities)
@@ -23,55 +12,32 @@ namespace ContosoUniversity.BLL
         _contosoUniversityEntities = contosoUniversityEntities;
     }
 
-        #region Get Instructors List
-        public List<Instructor> getInstructors()
+    public List<Instructor> getInstructors()
+    {
+        return _contosoUniversityEntities.Instructors
+            .AsNoTracking()
+            .OrderBy(instructor => instructor.InstructorID)
+            .ToList();
+    }
+
+    public List<Instructor> GetSortedInstrucors(string expression, string direction)
+    {
+        bool ascending = string.Equals(direction, "asc", StringComparison.OrdinalIgnoreCase);
+        IQueryable<Instructor> query = _contosoUniversityEntities.Instructors.AsNoTracking();
+
+        query = expression switch
         {
-            var instructors = (from instructor in _contosoUniversityEntities.Instructors
-                               select instructor).ToList<Instructor>();
+            nameof(Instructor.FirstName) => ascending
+                ? query.OrderBy(instructor => instructor.FirstName)
+                : query.OrderByDescending(instructor => instructor.FirstName),
+            nameof(Instructor.LastName) => ascending
+                ? query.OrderBy(instructor => instructor.LastName)
+                : query.OrderByDescending(instructor => instructor.LastName),
+            _ => ascending
+                ? query.OrderBy(instructor => instructor.InstructorID)
+                : query.OrderByDescending(instructor => instructor.InstructorID)
+        };
 
-            return instructors;
-        }
-        #endregion
-
-        #region Get Sorted Instructors List
-        public List<Instructor> GetSortedInstrucors(string expression,string direction)
-        {           
-            List<Instructor> list = new List<Instructor>();
-            string query = "select * from dbo.[Instructors]";
-            string connectionStr = ConfigurationManager.ConnectionStrings["ContosoUniversity"].ConnectionString;
-
-            if (!String.IsNullOrEmpty(expression))
-            {
-                query += " order by " + expression + " " + direction;
-            }
-
-            using (SqlConnection con = new SqlConnection(connectionStr))
-            {
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    con.Open();
-
-                    using (SqlDataReader dr = cmd.ExecuteReader())
-                    {
-                        while (dr.Read())
-                        {
-                            Instructor instr = new Instructor();
-
-                            instr.InstructorID = Convert.ToInt32(dr["InstructorID"]);
-                            instr.FirstName = dr["FirstName"].ToString();
-                            instr.LastName = dr["LastName"].ToString();
-                            instr.BirthDate = DateTime.Parse(dr["BirthDate"].ToString());
-                            instr.Email = dr["Email"].ToString();
-
-                            list.Add(instr);
-                        }
-                        dr.Close();
-                    }                   
-                }
-                con.Close();
-            }
-            return list;
-        }
-        #endregion
+        return query.ToList();
     }
 }

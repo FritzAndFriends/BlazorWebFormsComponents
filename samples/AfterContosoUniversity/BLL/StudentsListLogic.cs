@@ -1,199 +1,153 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using ContosoUniversity.Models;
-using ContosoUniversity;
 using Microsoft.EntityFrameworkCore;
-namespace ContosoUniversity.BLL
+
+namespace ContosoUniversity.BLL;
+
+public class StudentsListLogic
 {
-    public class StudentsListLogic
+    private readonly ContosoUniversityEntities contextObj;
+
+    public StudentsListLogic(ContosoUniversityEntities contextObjParam)
     {
-        private readonly ContosoUniversityEntities contextObj;
+        contextObj = contextObjParam;
+    }
 
-        public StudentsListLogic(ContosoUniversityEntities contextObjParam)
-        {
-            contextObj = contextObjParam;
-        }
-
-        #region GettingJoinedTables
-        public List<Object> GetJoinedTableData()
-        {
-
-            List<Object> newTab = new List<object>();
-
-            var joinedTab = contextObj.Students.Join(contextObj.Enrollments, stud => stud.StudentID, enr => enr.StudentID, (stud, enr) => enr); //Joining two tables by StudentID
-
-            var groupedTab = from tab in joinedTab
-                             group tab by new { tab.Date, tab.Student.LastName, tab.Student.FirstName, tab.Student.Email, tab.Student.StudentID } into grpTab
-                             select new { ID = grpTab.Key.StudentID, Date = grpTab.Key.Date, FirstName = grpTab.Key.FirstName, LastName = grpTab.Key.LastName, Email = grpTab.Key.Email, Count = grpTab.Select(cache => cache).Count() };
-
-            foreach (var entry in groupedTab)
+    public List<object> GetJoinedTableData()
+    {
+        return contextObj.Students
+            .AsNoTracking()
+            .GroupJoin(
+                contextObj.Enrollments.AsNoTracking(),
+                student => student.StudentID,
+                enrollment => enrollment.StudentID,
+                (student, enrollments) => new { student, enrollments })
+            .OrderBy(entry => entry.student.LastName)
+            .ThenBy(entry => entry.student.FirstName)
+            .AsEnumerable()
+            .Select(entry =>
             {
-                newTab.Add(new    //Creating new anonymous object in order to change the date for ShortDateString
+                var latestEnrollment = entry.enrollments.OrderByDescending(enrollment => enrollment.Date).FirstOrDefault();
+
+                return (object)new
                 {
-                    ID = entry.ID,
-                    Date = entry.Date.ToShortDateString(),
-                    FullName = string.Format("{0} {1}", entry.FirstName, entry.LastName),
-                    Email = entry.Email,
-                    Count = entry.Count,
+                    ID = entry.student.StudentID,
+                    Date = latestEnrollment?.Date.ToShortDateString() ?? string.Empty,
+                    FullName = $"{entry.student.FirstName} {entry.student.LastName}",
+                    Email = entry.student.Email,
+                    Count = entry.enrollments.Count()
+                };
+            })
+            .ToList();
+    }
 
-                });
-            }
+    public void UpdateStudentData(int id, string? name, string? email = null)
+    {
+        Student student = contextObj.Students.First(stud => stud.StudentID == id);
 
-            return newTab;
-        }
-        #endregion
-
-        #region UpdateStudentData
-        public void UpdateStudentData(int id, string name, string email = null)
+        if (!string.IsNullOrWhiteSpace(name))
         {
+            string[] arr = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
-
-            Student student = contextObj.Students.First(stud => stud.StudentID == id);
-
-            if (name != null)
+            if (arr.Length > 0)
             {
-                string[] arr = name.Split(' ');
-
-                if (arr.Length > 1)
-                {
-                    student.FirstName = arr[0];
-                    student.LastName = arr[1];
-                    student.Email = email;
-
-                    contextObj.SaveChanges();
-                }
-            }
-        }
-        #endregion
-
-        #region Delete Students
-        public void DeleteStudent(int id)
-        {
-
-            contextObj.Students.Remove(contextObj.Students.First(stud => stud.StudentID == id));
-            contextObj.SaveChanges();
-        }
-        #endregion
-
-        #region Inserting new entry to Student and Enrollment Table
-        public void InsertNewEntry(string firstName, string lastName, DateTime birthDate, string course, string email = "Has not specified")
-        {
-            int courseId, studentId = 0;
-
-            Student newStudent = new Student();
-            Enrollment newEnrollment = new Enrollment();
-
-
-
-            var student = contextObj.Students
-                .FirstOrDefault(stud => stud.FirstName == firstName && stud.LastName == lastName && stud.BirthDate == birthDate && stud.Email == email);
-
-            //In case student doesn't exist
-            if (student as Student == null)
-            {
-                AddingNewStudent(firstName, lastName, birthDate, email);
-
-                //Getting the lastly added student ID
-                foreach (var stud in contextObj.Students)
-                {
-                    studentId = stud.StudentID;
-                }
-                //Finding Course ID
-                courseId = contextObj.Courses
-                    .FirstOrDefault(crs => crs.CourseName == course)
-                    .CourseID;
-
-                AddingNewEnrollment(studentId, courseId);
-            }
-
-            //In case Student allready exist
-            else
-            {
-                studentId = (student as Student).StudentID;
-
-                //Finding Course ID
-                courseId = contextObj.Courses
-                    .FirstOrDefault(crs => crs.CourseName == course)
-                    .CourseID;
-
-                AddingNewEnrollment(studentId, courseId);
+                student.FirstName = arr[0];
+                student.LastName = arr.Length > 1 ? string.Join(' ', arr.Skip(1)) : student.LastName;
             }
         }
 
-        private void AddingNewStudent(string firstName, string lastName, DateTime birthDate, string email = "Has not specified")
+        student.Email = email ?? string.Empty;
+        contextObj.SaveChanges();
+    }
+
+    public void DeleteStudent(int id)
+    {
+        contextObj.Students.Remove(contextObj.Students.First(stud => stud.StudentID == id));
+        contextObj.SaveChanges();
+    }
+
+    public void InsertNewEntry(string firstName, string lastName, DateTime birthDate, string course, string email = "Has not specified")
+    {
+        int courseId;
+        int studentId;
+
+        Student? student = contextObj.Students.FirstOrDefault(stud =>
+            stud.FirstName == firstName &&
+            stud.LastName == lastName &&
+            stud.BirthDate == birthDate &&
+            stud.Email == email);
+
+        if (student is null)
         {
-            Student newStudent = new Student();
-
-
-            //Adding new Student                     
-            newStudent.FirstName = firstName;
-            newStudent.LastName = lastName;
-            newStudent.BirthDate = birthDate;
-            newStudent.Email = email;
-
-            contextObj.Students.Add(newStudent);
-            contextObj.SaveChanges();
+            student = AddingNewStudent(firstName, lastName, birthDate, email);
         }
 
-        private void AddingNewEnrollment(int studentId, int courseId)
+        studentId = student.StudentID;
+        courseId = contextObj.Courses.First(crs => crs.CourseName == course).CourseID;
+
+        AddingNewEnrollment(studentId, courseId);
+    }
+
+    private Student AddingNewStudent(string firstName, string lastName, DateTime birthDate, string email = "Has not specified")
+    {
+        Student newStudent = new()
         {
-            Enrollment newEnrollment = new Enrollment();
+            FirstName = firstName,
+            LastName = lastName,
+            BirthDate = birthDate,
+            Email = email
+        };
 
+        contextObj.Students.Add(newStudent);
+        contextObj.SaveChanges();
+        return newStudent;
+    }
 
-            //Adding new entry to Enrollment
-            newEnrollment.CourseID = courseId;
-            newEnrollment.Date = DateTime.Now;
-            newEnrollment.StudentID = studentId;
+    private void AddingNewEnrollment(int studentId, int courseId)
+    {
+        Enrollment newEnrollment = new()
+        {
+            CourseID = courseId,
+            Date = DateTime.Now,
+            StudentID = studentId
+        };
 
-            contextObj.Enrollments.Add(newEnrollment);
-            contextObj.SaveChanges();
+        contextObj.Enrollments.Add(newEnrollment);
+        contextObj.SaveChanges();
+    }
 
+    public List<object> GetStudents(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return [];
         }
 
-        #endregion
+        string[] parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        IQueryable<Student> query = contextObj.Students.AsNoTracking();
 
-        #region Getting Student Info
-        public List<object> GetStudents(string name)
+        if (parts.Length == 1)
         {
-            List<object> studentsInfo = new List<object>();
+            string term = parts[0];
+            query = query.Where(stud => stud.FirstName.Contains(term) || stud.LastName.Contains(term));
+        }
+        else
+        {
+            string firstName = parts[0];
+            string lastName = string.Join(' ', parts.Skip(1));
+            query = query.Where(stud => stud.FirstName.Contains(firstName) && stud.LastName.Contains(lastName));
+        }
 
-            if (!String.IsNullOrEmpty(name))
+        return query
+            .OrderBy(stud => stud.LastName)
+            .ThenBy(stud => stud.FirstName)
+            .Select(stud => (object)new
             {
-                string[] arr = name.Split(' ');
-                List<Student> students;
-
-                if (arr.Length > 1)
-                {
-                    var firstName = arr[0];
-                    var lastName = arr[1];
-                    students = (from stud in contextObj.Students
-                                where stud.FirstName == firstName && stud.LastName == lastName
-                                select stud).ToList<Student>();
-                }
-                else
-                {
-                    var searchTerm = arr[0];
-                    students = (from stud in contextObj.Students
-                                where stud.FirstName.Contains(searchTerm) || stud.LastName.Contains(searchTerm)
-                                select stud).ToList<Student>();
-                }
-
-                foreach (Student stud in students)
-                {
-                    var student = new
-                    {
-                        FirstName = stud.FirstName,
-                        LastName = stud.LastName,
-                        Email = stud.Email,
-                        BirthDate = stud.BirthDate.ToShortDateString(),
-                        StudentID = stud.StudentID
-                    };
-                    studentsInfo.Add(student);
-                }
-            }
-            return studentsInfo;
-        }
-        #endregion
+                FirstName = stud.FirstName,
+                LastName = stud.LastName,
+                Email = stud.Email,
+                BirthDate = stud.BirthDate.ToShortDateString(),
+                StudentID = stud.StudentID
+            })
+            .ToList();
     }
 }

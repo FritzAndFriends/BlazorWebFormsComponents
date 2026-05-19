@@ -1,5 +1,6 @@
 @page "/About"
 @page "/About.aspx"
+@rendermode InteractiveServer
 <WebFormsForm @formname="AboutForm">
     <AntiforgeryToken />
 <PageTitle>About</PageTitle>
@@ -7,18 +8,19 @@
      <link href="CSS/CSS_About.css" rel="stylesheet" />
      <script src="JQuery/JQuery_About.js"></script>
 
+
     <div id="header">
         <h1> Students Body Statistics </h1>
     </div>
      <div id="grv">
-        <GridView Items="_enrollmentData" TItem="KeyValuePair<string, int>" CssClass="grid" 
-            id="EnrollmentsStat" @ref="EnrollmentsStat"
+        <GridView ItemType="object" CssClass="grid" 
+            id="EnrollmentsStat" @ref="EnrollmentsStat" Items="@_enrollmentStats"
             AutoGenerateColumns="false" EmptyDataText="There are no records to display"
              CellPadding="4" ForeColor='@("#333333")' GridLines="@GridLines.None">
             <Columns>
-                <BoundField ItemType="KeyValuePair<string, int>" DataField="Key" HeaderText="Enrollment Date" ReadOnly="true">
+                <BoundField ItemType="object" DataField="Key" HeaderText="Enrollment Date" ReadOnly="true">
                 </BoundField>
-                <BoundField ItemType="KeyValuePair<string, int>" DataField="Value" HeaderText="Students" ReadOnly="true">
+                <BoundField ItemType="object" DataField="Value" HeaderText="Students" ReadOnly="true">
                 </BoundField>
             </Columns>
         
@@ -40,6 +42,8 @@
                 <SortedDescendingCellStyle BackColor='@("#E9EBEF")' />
                 <SortedDescendingHeaderStyle BackColor='@("#4870BE")' />
             </ChildComponents>
-        </GridView>
+</GridView>
     </div>
+
+
 </WebFormsForm>
