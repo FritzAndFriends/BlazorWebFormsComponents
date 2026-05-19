@@ -62,7 +62,7 @@ public class ProjectScaffolder
         result.Files["imports"] = new ScaffoldFile
         {
             RelativePath = "_Imports.razor",
-            Content = GenerateImportsRazor(projectName, hasModels, runtimeProfile.NeedsAjaxToolkit)
+            Content = GenerateImportsRazor(projectName, hasModels, runtimeProfile.NeedsAjaxToolkit, sourcePath)
         };
 
         result.Files["app"] = new ScaffoldFile
@@ -238,10 +238,51 @@ public class ProjectScaffolder
 
     private static string GenerateImportsRazor(string projectName, bool hasModels, bool needsAjaxToolkit)
     {
+        return GenerateImportsRazor(projectName, hasModels, needsAjaxToolkit, null);
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex NamespaceExtractRegex = new(
+        @"^\s*namespace\s+(?<ns>[A-Za-z_][\w.]*)",
+        System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.Multiline);
+
+    internal static string GenerateImportsRazor(string projectName, bool hasModels, bool needsAjaxToolkit, string? sourcePath)
+    {
         var modelsUsing = hasModels
             ? $@"
 @using global::{projectName}.Models"
             : string.Empty;
+
+        // Detect additional sub-namespaces from known folders (Logic, BLL, Services, etc.)
+        var additionalNamespaces = new HashSet<string>(StringComparer.Ordinal);
+        if (!string.IsNullOrEmpty(sourcePath))
+        {
+            var subDirs = new[] { "Logic", "BLL", "Services", "Helpers", "Utils" };
+            foreach (var dir in subDirs)
+            {
+                var dirPath = Path.Combine(sourcePath, dir);
+                if (!Directory.Exists(dirPath)) continue;
+
+                // Read namespace from first .cs file in the directory
+                var firstFile = Directory.EnumerateFiles(dirPath, "*.cs").FirstOrDefault();
+                if (firstFile != null)
+                {
+                    var fileContent = File.ReadAllText(firstFile);
+                    var nsMatch = NamespaceExtractRegex.Match(fileContent);
+                    if (nsMatch.Success)
+                    {
+                        var ns = nsMatch.Groups["ns"].Value;
+                        // Only add if it's a child of the project namespace and not already Models
+                        if (ns.StartsWith(projectName, StringComparison.Ordinal) &&
+                            !ns.Equals($"{projectName}.Models", StringComparison.Ordinal))
+                        {
+                            additionalNamespaces.Add(ns);
+                        }
+                    }
+                }
+            }
+        }
+
+        var additionalUsings = string.Join("", additionalNamespaces.Select(ns => $"\n@using global::{ns}"));
 
         var ajaxToolkitUsing = needsAjaxToolkit
             ? "\n@using BlazorAjaxToolkitComponents"
@@ -259,7 +300,7 @@ public class ProjectScaffolder
 @using BlazorWebFormsComponents.Enums
 @using BlazorWebFormsComponents.LoginControls
 @using BlazorWebFormsComponents.Validations{ajaxToolkitUsing}
-@using global::{projectName}{modelsUsing}
+@using global::{projectName}{modelsUsing}{additionalUsings}
 @inherits BlazorWebFormsComponents.WebFormsPageBase
 ";
     }

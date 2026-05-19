@@ -1,9 +1,7 @@
 @page "/Courses"
-@page "/Courses.aspx"
-@rendermode InteractiveServer
 <WebFormsForm @formname="CoursesForm">
     <AntiforgeryToken />
-<PageTitle>Courses</PageTitle>
+<PageTitle></PageTitle>
 
     <link href="CSS/CSS_Courses.css" rel="stylesheet" />
     <script src="JQuery/JQuery_Courses.js"></script>
@@ -14,23 +12,18 @@
         
             <div id="dropList">
                 <h1 id="hdrCourse">Select Course</h1>
-                <DropDownList ItemType="Department" id="drpDepartments" @ref="drpDepartments"
-                              Items="@_departments"
-                              DataTextField="DepartmentName"
-                              DataValueField="DepartmentName"
-                              SelectedValue="@_selectedDepartment"
-                              SelectedValueChanged="@OnSelectedDepartmentChanged"></DropDownList>
+                <DropDownList ItemType="object" id="drpDepartments" @ref="drpDepartments"></DropDownList>
                 <Button id="btnSearchCourse" @ref="btnSearchCourse" Text="Search Courses" OnClick="@btnSearchCourse_Click"></Button>
                 <br />
                 <br />
-                <GridView ItemType="Cours" id="grvCourses" @ref="grvCourses" AllowPaging="true" DataKeyNames="CourseID"
-                    PageSize="1" AutoGenerateColumns="false" Items="@_courses"
+                <GridView ItemType="object" id="grvCourses" @ref="grvCourses" AllowPaging="true" DataKeyNames="CourseID"
+                    PageSize="1" AutoGenerateColumns="false"
                     OnPageIndexChanging="@grvCourses_PageIndexChanging"
                     EmptyDataText = "Chose Department To Display Courses">
                     <Columns>
-                        <BoundField ItemType="Cours" DataField="CourseID" HeaderText="ID" />
-                        <BoundField ItemType="Cours" DataField="CourseName" HeaderText="Course Name" />
-                        <BoundField ItemType="Cours" DataField="StudentsMax" HeaderText="Max Capacity" />
+                        <BoundField ItemType="object" DataField="CourseID" HeaderText="ID" />
+                        <BoundField ItemType="object" DataField="CourseName" HeaderText="Course Name" />
+                        <BoundField ItemType="object" DataField="StudentsMax" HeaderText="Max Capacity" />
                     </Columns>
                 </GridView>
             </div>
@@ -41,7 +34,7 @@
                 <br />
                 <br />
                 <AutoCompleteExtender
-                    @ref="AutoCompleteExtender1"
+                    id="AutoCompleteExtender1" @ref="AutoCompleteExtender1"
                     TargetControlID="txtCourse"
                     ServiceMethod="GetList"
                     MinimumPrefixLength="1"
@@ -50,8 +43,7 @@
                     CompletionSetCount="20"
                     ShowOnlyCurrentWordInCompletionListItem="true">
                 </AutoCompleteExtender>
-                <DetailsView ItemType="Cours" id="dtlCourses" @ref="dtlCourses" Width="125" Height="50" CssClass="details"
-                             DataSource="@_courseDetails">
+                <DetailsView ItemType="object" id="dtlCourses" @ref="dtlCourses" Width="125" Height="50" CssClass="details">
                 </DetailsView>
                  
     </div></UpdatePanel>

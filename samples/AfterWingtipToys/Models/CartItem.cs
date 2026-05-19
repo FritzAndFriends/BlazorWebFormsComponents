@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
+using WingtipToys.Logic;
 namespace WingtipToys.Models
 {
   public class CartItem

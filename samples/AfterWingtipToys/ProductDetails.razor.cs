@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
+using WingtipToys.Logic;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {

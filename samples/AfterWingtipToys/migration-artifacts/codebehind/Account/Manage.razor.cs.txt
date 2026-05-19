@@ -24,6 +24,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WingtipToys.Models;
 
+using WingtipToys.Logic;
 using BlazorWebFormsComponents.Identity;
 using IdentityResult = BlazorWebFormsComponents.Identity.IdentityResult;
 

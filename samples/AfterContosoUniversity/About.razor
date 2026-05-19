@@ -1,9 +1,7 @@
 @page "/About"
-@page "/About.aspx"
-@rendermode InteractiveServer
 <WebFormsForm @formname="AboutForm">
     <AntiforgeryToken />
-<PageTitle>About</PageTitle>
+<PageTitle></PageTitle>
 
      <link href="CSS/CSS_About.css" rel="stylesheet" />
      <script src="JQuery/JQuery_About.js"></script>
@@ -14,7 +12,7 @@
     </div>
      <div id="grv">
         <GridView ItemType="object" CssClass="grid" 
-            id="EnrollmentsStat" @ref="EnrollmentsStat" Items="@_enrollmentStats"
+            id="EnrollmentsStat" @ref="EnrollmentsStat" SelectMethod="EnrollmentsStat_GetData" 
             AutoGenerateColumns="false" EmptyDataText="There are no records to display"
              CellPadding="4" ForeColor='@("#333333")' GridLines="@GridLines.None">
             <Columns>

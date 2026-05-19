@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using WingtipToys.Logic;
 namespace WingtipToys.Account
 {
     public partial class OpenAuthProviders

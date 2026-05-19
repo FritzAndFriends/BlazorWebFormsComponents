@@ -1,47 +1,67 @@
-using System.Data;
-using System.Data.SqlClient;
-using BlazorAjaxToolkitComponents;
+// =============================================================================
+// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
+//
+// Common transforms needed (use the BWFC Copilot skill for assistance):
+//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
+//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
+//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
+//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
+//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
+//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
+//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
+//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
+//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
+//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
+//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
+//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
+//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
+//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
+//   TODO(bwfc-general): User controls → Blazor component references
+// =============================================================================
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;
-using ContosoUniversity.BLL;
 using ContosoUniversity.Models;
+using ContosoUniversity.BLL;
+using System.Data.SqlClient;
+using System.Data;
+
+using ContosoUniversity.BLL;
 using Microsoft.AspNetCore.Components;
-
-namespace ContosoUniversity;
-
-public partial class Students : WebFormsPageBase
+using BlazorAjaxToolkitComponents;
+namespace ContosoUniversity
 {
-    [SupplyParameterFromQuery(Name = "editId")]
-    public int? EditId { get; set; }
+    public partial class Students : WebFormsPageBase
+    {
+    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
-    [SupplyParameterFromQuery(Name = "deleteId")]
-    public int? DeleteId { get; set; }
-
-    [SupplyParameterFromQuery(Name = "saveEdit")]
-    public bool? SaveEdit { get; set; }
-
-    [SupplyParameterFromQuery(Name = "editedName")]
-    public string? EditedName { get; set; }
-
-    [SupplyParameterFromQuery(Name = "editedEmail")]
-    public string? EditedEmail { get; set; }
+    // --- Request.Form Migration ---
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
+    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
+    // Form keys found: key
+    // For non-page classes, inject RequestShim via DI.
 
     private AutoCompleteExtender AutoCompleteExtender1 = default!;
+    private Button btnClear = default!;
+    private Button btnInsert = default!;
+    private Button btnSearch = default!;
+    private DropDownList<object> dropListCourses = default!;
+    private GridView<object> grv = default!;
     private ScriptManager ScriptManager2 = default!;
+    private DetailsView<object> studentData = default!;
+    private object _studentData_DataSource = null!;
     private Table tabAddStud = default!;
-
-    private List<Cours> _availableCourses = [];
-    private List<StudentGridRow> _studentGridData = [];
-    private int? _editingStudentId;
-    private string _editFullName = string.Empty;
-    private string _editEmail = string.Empty;
-    private string _selectedCourseName = string.Empty;
-    private string _firstName = string.Empty;
-    private string _lastName = string.Empty;
-    private string _birthDateText = string.Empty;
-    private string _email = string.Empty;
-    private string _searchText = string.Empty;
-    private List<StudentSearchRow> _studentSearchResults = [];
-    private string? _lastHandledQueryAction;
+    private TextBox txtBirthDate = default!;
+    private TextBox txtEmail = default!;
+    private TextBox txtFirstName = default!;
+    private TextBox txtLastName = default!;
+    private TextBox txtSearch = default!;
+    // --- ConfigurationManager Migration ---
+    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
+    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+    // ConnectionString names found: ContosoUniversity
+    // Add these to appsettings.json under "ConnectionStrings" section.
 
     [Inject]
     protected StudentsListLogic studLogic { get; set; } = default!;
@@ -49,310 +69,169 @@ public partial class Students : WebFormsPageBase
     [Inject]
     protected ContosoUniversityEntities _contosoUniversityEntities { get; set; } = default!;
 
-    [Inject]
-    protected NavigationManager NavigationManager { get; set; } = default!;
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        LoadPageData();
-        HandleQueryActions();
-        ApplyEditStateFromQuery();
-    }
-
-    protected override void OnParametersSet()
-    {
-        base.OnParametersSet();
-        LoadPageData();
-        HandleQueryActions();
-        ApplyEditStateFromQuery();
-    }
-
-    public IQueryable<StudentGridRow> grv_GetData() => _studentGridData.AsQueryable();
-
-    public void grv_DeleteItem(int id)
-    {
-        studLogic.DeleteStudent(id);
-        _editingStudentId = null;
-        RefreshStudentGrid();
-        _studentSearchResults = [];
-    }
-
-    protected void btnInsert_Click(EventArgs e)
-    {
-        if (!DateTime.TryParse(_birthDateText, out var birth))
+protected override async Task OnInitializedAsync()
         {
-            throw new Exception("Wrong Date Format !!!");
+    // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
+    await base.OnInitializedAsync();
+
+// BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
+dropListCourses.DataSource = _contosoUniversityEntities.Courses.Select(course => new ListItem(course.CourseName)).ToList();
+
+            _studentData_DataSource = null;
+            this.studentData?.DataBind();    
         }
 
-        var selectedCourse = _selectedCourseName;
-
-        if (string.IsNullOrWhiteSpace(selectedCourse))
+        #region Filling Enrollments table
+        // The return type can be changed to IEnumerable, however to support
+        // paging and sorting, the following parameters must be added:
+        //     int maximumRows
+        //     int startRowIndex
+        //     out int totalRowCount
+        //     string sortByExpression
+        public IQueryable<Object> grv_GetData()
         {
-            selectedCourse = _availableCourses.FirstOrDefault()?.CourseName;
+            IQueryable<Object> list = studLogic.GetJoinedTableData().AsQueryable();              
+            return list;
         }
+        #endregion
 
-        if (string.IsNullOrWhiteSpace(selectedCourse))
+        #region Updating Row Data
+        protected void grv_RowUpdating(GridViewUpdateEventArgs e)
         {
-            return;
-        }
+            int id, counter = 0;
+            string name = string.Empty;
+            string email = string.Empty;
 
-        studLogic.InsertNewEntry(
-            _firstName,
-            _lastName,
-            birth,
-            selectedCourse,
-            _email);
+            id = int.Parse(grv.Rows[e.RowIndex].Cells[1].Text);
 
-        RefreshStudentGrid();
-        btnClear_Click(EventArgs.Empty);
-    }
-
-    protected void btnClear_Click(EventArgs e)
-    {
-        _firstName = string.Empty;
-        _lastName = string.Empty;
-        _birthDateText = string.Empty;
-        _email = string.Empty;
-        _selectedCourseName = _availableCourses.FirstOrDefault()?.CourseName ?? string.Empty;
-    }
-
-    public static List<string> GetCompletionList(string prefixText, int count)
-    {
-        List<string> students = [];
-        string conString = ConfigurationManager.ConnectionStrings["ContosoUniversity"].ConnectionString;
-        const string sqlQuery = "SELECT FirstName,LastName FROM dbo.Students WHERE FirstName LIKE @SearchText + '%'";
-
-        using (SqlConnection con = new(conString))
-        using (SqlCommand cmd = new(sqlQuery, con))
-        {
-            SqlParameter param = new()
+            foreach (string val in e.NewValues.Values)
             {
-                ParameterName = "@SearchText",
-                Value = prefixText,
-                SqlDbType = SqlDbType.NVarChar,
-                Size = 30,
-                Direction = ParameterDirection.Input
-            };
+                if (counter == 0)
+                {
+                    name = val;
+                    counter++;
+                }
+                else email = val;
+            }
 
-            cmd.Parameters.Add(param);
-            con.Open();
+            studLogic.UpdateStudentData(id, name, email);
+        }
+        #endregion
 
-            using SqlDataReader dr = cmd.ExecuteReader();
-            while (dr.Read())
+        #region Delete Row
+        // The id parameter name should match the DataKeyNames value set on the control
+        public void grv_DeleteItem(int id)
+        {
+            studLogic.DeleteStudent(id);
+        }
+        #endregion
+
+        #region Insert Button
+        protected void btnInsert_Click(EventArgs e)
+        {
+            DateTime birth;
+
+            try
             {
-                students.Add($"{dr["FirstName"]} {dr["LastName"]}");
+                birth = DateTime.Parse(txtBirthDate.Text);
+            }
+            catch
+            {
+                throw new Exception("Wrong Date Format !!!");
+            }
+
+            studLogic.InsertNewEntry(txtFirstName.Text,txtLastName.Text,birth,dropListCourses.SelectedItem.ToString(),txtEmail.Text);
+           
+        }
+        #endregion
+
+        #region Clear Button
+        protected void btnClear_Click(EventArgs e)
+        {
+            this.txtFirstName.Text = string.Empty;
+
+            // TODO(bwfc-control-tree): Blazor does not support programmatic control-tree access. Rewrite using bound properties.
+            // foreach (TableRow row in this.tabAddStud.Rows)
+            // {
+                // if (row.Cells[1].Controls[0] is TextBox)
+                // {
+                    // (row.Cells[1].Controls[0] as TextBox).Text = string.Empty;
+                // }
+                // else if (row.Cells[1].Controls[0] is DropDownList)
+                // {
+                    // (row.Cells[1].Controls[0] as DropDownList).ClearSelection();
+                // }              
+            // }
+        }
+        #endregion
+
+        #region AutoComplete WebService
+        // TODO(bwfc-webmethod): Migrate legacy static WebMethod endpoint to a Razor component callback or Minimal API.
+        // Legacy [WebMethod] attribute removed for Blazor migration.
+        // Legacy [ScriptMethod] attribute removed for Blazor migration.
+        public static List<string> GetCompletionList(string prefixText, int count)  //This Service must be static in order to work however documentation
+        {                                                                            // says nothing about that !!!
+            List<string> students = new List<string>();
+            string conString = ConfigurationManager.ConnectionStrings["ContosoUniversity"].ConnectionString;
+            string fullName;
+
+            string sqlQuery = "SELECT FirstName,LastName FROM dbo.Students WHERE FirstName LIKE @SearchText + '%'";
+
+            using (SqlConnection con = new SqlConnection(conString))
+            {
+                using (SqlCommand cmd = new SqlCommand(sqlQuery, con))
+                {
+                    SqlParameter param = new SqlParameter();
+                    param.ParameterName = "@SearchText";
+                    param.Value = prefixText;
+                    param.SqlDbType = SqlDbType.NVarChar;
+                    param.Size = 30;
+                    param.Direction = ParameterDirection.Input;
+
+                    cmd.Parameters.Add(param);
+
+                    con.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            fullName = string.Format("{0} {1}", dr["FirstName"].ToString(), dr["LastName"].ToString());
+                            students.Add(fullName);
+                        }
+
+                        dr.Close();
+                    }
+
+                    con.Close();
+                }
+            }
+
+            return students;
+        }
+        #endregion
+
+        #region Search Button
+        protected void btnSearch_Click(EventArgs e)
+        {
+            this.studentData.DataSource = studLogic.GetStudents(this.txtSearch.Text);
+            this.txtSearch.Text = string.Empty;
+        }
+        #endregion
+
+        //Must Bind Data to GridView manually because of lack of DataSourceID or explicitly set InsertMethod !!!
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
+            if (firstRender)
+            {
             }
         }
 
-        return students;
-    }
-
-    protected void btnSearch_Click(EventArgs e)
-    {
-        _studentSearchResults = studLogic.GetStudents(_searchText)
-            .Select(item => new StudentSearchRow
-            {
-                FirstName = item.GetType().GetProperty("FirstName")?.GetValue(item)?.ToString() ?? string.Empty,
-                LastName = item.GetType().GetProperty("LastName")?.GetValue(item)?.ToString() ?? string.Empty,
-                Email = item.GetType().GetProperty("Email")?.GetValue(item)?.ToString() ?? string.Empty,
-                BirthDate = item.GetType().GetProperty("BirthDate")?.GetValue(item)?.ToString() ?? string.Empty,
-                StudentID = Convert.ToInt32(item.GetType().GetProperty("StudentID")?.GetValue(item) ?? 0)
-            })
-            .ToList();
-        _searchText = string.Empty;
-    }
-
-    public void grv_UpdateItem(int id)
-    {
-        RefreshStudentGrid();
-    }
-
-    private void BeginEdit(StudentGridRow student)
-    {
-        NavigationManager.NavigateTo($"/Students?editId={student.ID}", forceLoad: false);
-    }
-
-    private void CancelEdit()
-    {
-        _editingStudentId = null;
-        _editFullName = string.Empty;
-        _editEmail = string.Empty;
-    }
-
-    private Task OnEditFullNameChanged(ChangeEventArgs e)
-    {
-        _editFullName = e.Value?.ToString() ?? string.Empty;
-        return Task.CompletedTask;
-    }
-
-    private Task OnEditEmailChanged(ChangeEventArgs e)
-    {
-        _editEmail = e.Value?.ToString() ?? string.Empty;
-        return Task.CompletedTask;
-    }
-
-    private Task SaveEditAsync()
-    {
-        if (_editingStudentId is int id)
+        // The id parameter name should match the DataKeyNames value set on the control
+        public void grv_UpdateItem(int id)
         {
-            studLogic.UpdateStudentData(id, _editFullName, _editEmail);
-            RefreshStudentGrid();
-        }
-
-        CancelEdit();
-        NavigationManager.NavigateTo("/Students", forceLoad: false);
-        return Task.CompletedTask;
-    }
-
-    private Task DeleteStudentAsync(int id)
-    {
-        grv_DeleteItem(id);
-        return Task.CompletedTask;
-    }
-
-    private void HandleQueryActions()
-    {
-        var actionSignature = $"edit:{EditId};delete:{DeleteId};save:{SaveEdit};name:{EditedName};email:{EditedEmail}";
-        if (_lastHandledQueryAction == actionSignature)
-        {
-            return;
-        }
-
-        _lastHandledQueryAction = actionSignature;
-
-        if (DeleteId is int deleteId)
-        {
-            grv_DeleteItem(deleteId);
-            return;
-        }
-
-        if (SaveEdit == true && EditId is int editId)
-        {
-            studLogic.UpdateStudentData(editId, EditedName, EditedEmail);
-            RefreshStudentGrid();
-            CancelEdit();
-        }
-    }
-
-    private void ApplyEditStateFromQuery()
-    {
-        if (DeleteId is not null || SaveEdit == true)
-        {
-            CancelEdit();
-            return;
-        }
-
-        if (EditId is not int editId)
-        {
-            CancelEdit();
-            return;
-        }
-
-        var student = _studentGridData.FirstOrDefault(item => item.ID == editId);
-        if (student is null)
-        {
-            CancelEdit();
-            return;
-        }
-
-        _editingStudentId = student.ID;
-        _editFullName = student.FullName;
-        _editEmail = student.Email;
-    }
-
-    private void LoadPageData()
-    {
-        _availableCourses = _contosoUniversityEntities.Courses
-            .OrderBy(course => course.CourseName)
-            .ToList();
-
-        if (string.IsNullOrWhiteSpace(_selectedCourseName) && _availableCourses.Count > 0)
-        {
-            _selectedCourseName = _availableCourses[0].CourseName;
-        }
-
-        _studentSearchResults = [];
-        RefreshStudentGrid();
-    }
-
-    private void RefreshStudentGrid()
-    {
-        _studentGridData = studLogic.GetJoinedTableData()
-            .Select(item => new StudentGridRow
-            {
-                ID = Convert.ToInt32(item.GetType().GetProperty("ID")?.GetValue(item) ?? 0),
-                FullName = item.GetType().GetProperty("FullName")?.GetValue(item)?.ToString() ?? string.Empty,
-                Email = item.GetType().GetProperty("Email")?.GetValue(item)?.ToString() ?? string.Empty,
-                Date = item.GetType().GetProperty("Date")?.GetValue(item)?.ToString() ?? string.Empty,
-                Count = Convert.ToInt32(item.GetType().GetProperty("Count")?.GetValue(item) ?? 0)
-            })
-            .ToList();
-    }
-
-    private Task OnSelectedCourseChanged(string value)
-    {
-        _selectedCourseName = value;
-        return Task.CompletedTask;
-    }
-
-    private Task OnSelectedCourseInput(ChangeEventArgs e) => OnSelectedCourseChanged(e.Value?.ToString() ?? string.Empty);
-
-    private Task OnFirstNameChanged(string value)
-    {
-        _firstName = value;
-        return Task.CompletedTask;
-    }
-
-    private Task OnFirstNameInput(ChangeEventArgs e) => OnFirstNameChanged(e.Value?.ToString() ?? string.Empty);
-
-    private Task OnLastNameChanged(string value)
-    {
-        _lastName = value;
-        return Task.CompletedTask;
-    }
-
-    private Task OnLastNameInput(ChangeEventArgs e) => OnLastNameChanged(e.Value?.ToString() ?? string.Empty);
-
-    private Task OnBirthDateChanged(string value)
-    {
-        _birthDateText = value;
-        return Task.CompletedTask;
-    }
-
-    private Task OnBirthDateInput(ChangeEventArgs e) => OnBirthDateChanged(e.Value?.ToString() ?? string.Empty);
-
-    private Task OnEmailChanged(string value)
-    {
-        _email = value;
-        return Task.CompletedTask;
-    }
-
-    private Task OnEmailInput(ChangeEventArgs e) => OnEmailChanged(e.Value?.ToString() ?? string.Empty);
-
-    private Task OnSearchTextChanged(string value)
-    {
-        _searchText = value;
-        return Task.CompletedTask;
-    }
-
-    private Task OnSearchTextInput(ChangeEventArgs e) => OnSearchTextChanged(e.Value?.ToString() ?? string.Empty);
-
-    public sealed class StudentGridRow
-    {
-        public int ID { get; set; }
-        public string FullName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string Date { get; set; } = string.Empty;
-        public int Count { get; set; }
-    }
-
-    public sealed class StudentSearchRow
-    {
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
-        public string BirthDate { get; set; } = string.Empty;
-        public int StudentID { get; set; }
+           
+        }  
     }
 }

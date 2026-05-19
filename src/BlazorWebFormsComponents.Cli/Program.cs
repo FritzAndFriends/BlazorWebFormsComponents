@@ -84,6 +84,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
         services.AddSingleton<ICodeBehindTransform, NestedClassCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, UsingStripTransform>();
+        services.AddSingleton<ICodeBehindTransform, ProjectNamespaceUsingTransform>();
         services.AddSingleton<ICodeBehindTransform, IdentityUsingTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpUtilityRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
@@ -116,6 +117,8 @@ class Program
         services.AddSingleton<ICodeBehindTransform, WebMethodAnnotationTransform>();
         services.AddSingleton<ICodeBehindTransform, PageLifecycleTransform>();
         services.AddSingleton<ICodeBehindTransform, EventHandlerSignatureTransform>();
+        services.AddSingleton<ICodeBehindTransform, DeadControlTreeCodeTransform>();
+        services.AddSingleton<ICodeBehindTransform, ItemsAddToDataSourceTransform>();
         services.AddSingleton<ICodeBehindTransform, InnerTextRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, DataBindTransform>();
         services.AddSingleton<ICodeBehindTransform, DataSourceParameterBindingTransform>();

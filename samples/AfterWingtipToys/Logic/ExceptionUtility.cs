@@ -9,9 +9,12 @@ namespace WingtipToys.Logic
   // Create our own utility for exceptions
   public sealed class ExceptionUtility
   {
-    private static IHttpContextAccessor _httpContextAccessor;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public ExceptionUtility(IHttpContextAccessor httpContextAccessor) { _httpContextAccessor = httpContextAccessor; }
+    public ExceptionUtility(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
 
     // All methods are static, so this can be private
     private ExceptionUtility()
@@ -22,7 +25,8 @@ namespace WingtipToys.Logic
     {
       // Include logic for logging exceptions
       // Get the absolute path to the log file
-      string logFile = System.IO.Path.Combine(AppContext.BaseDirectory, "App_Data", "ErrorLog.txt");
+      string logFile = "App_Data/ErrorLog.txt";
+      logFile = _httpContextAccessor.HttpContext?.Path.Combine(AppContext.BaseDirectory, "App_Data", "ErrorLog.txt");
 
       // Open the log file for append and write the log
       StreamWriter sw = new StreamWriter(logFile, true);

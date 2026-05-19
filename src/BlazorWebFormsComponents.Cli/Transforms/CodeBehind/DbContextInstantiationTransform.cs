@@ -83,8 +83,16 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
             // or: Namespace.XxxContext _db = new Namespace.XxxContext();
             var fqnPattern = $@"(?:[\w.]+\.)?{Regex.Escape(contextType)}";
             var fieldDeclRegex = new Regex(
-                $@"(?<indent>[ \t]*)(?:private\s+)?{fqnPattern}\s+\w+\s*=\s*new\s+{fqnPattern}\s*\(\s*\)\s*;",
+                $@"(?<indent>[ \t]*)(?:private\s+)?{fqnPattern}\s+(?<var>\w+)\s*=\s*new\s+{fqnPattern}\s*\(\s*\)\s*;",
                 RegexOptions.Compiled);
+            // Collect variable names that differ from the injected field name before removing declarations
+            var removedVarNames = new HashSet<string>(StringComparer.Ordinal);
+            foreach (Match dm in fieldDeclRegex.Matches(content))
+            {
+                var removedVar = dm.Groups["var"].Value;
+                if (!string.Equals(removedVar, fieldName, StringComparison.Ordinal))
+                    removedVarNames.Add(removedVar);
+            }
             content = fieldDeclRegex.Replace(content, "");
 
             // Replace using declarations: using (XxxContext x = new XxxContext()) { ... }
@@ -150,6 +158,12 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
                 $@"new\s+{fqnPattern}\s*\(\s*\)",
                 RegexOptions.Compiled);
             content = remainingNewRegex.Replace(content, fieldName);
+
+            // Replace references to removed variable names with the injected field name
+            foreach (var removedVar in removedVarNames)
+            {
+                content = Regex.Replace(content, $@"\b{Regex.Escape(removedVar)}\b", fieldName);
+            }
 
             // Add injection for the context
             if (!content.Contains($"{contextType} {fieldName}", StringComparison.Ordinal))

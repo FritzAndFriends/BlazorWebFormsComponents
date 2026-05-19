@@ -66,10 +66,7 @@ protected override async Task OnInitializedAsync()
     await base.OnInitializedAsync();
 
 // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
-foreach (var dep in _contosoUniversityEntities.Departments)
-            {
-                this.drpDepartments?.Items.Add(dep.DepartmentName);
-            }      
+drpDepartments.DataSource = _contosoUniversityEntities.Departments.Select(dep => new ListItem(dep.DepartmentName)).ToList();      
         }
 
         #region AutoComplete WebService
@@ -132,7 +129,7 @@ foreach (var dep in _contosoUniversityEntities.Departments)
         protected void grvCourses_PageIndexChanging(PageChangedEventArgs e)
         {
             this.grvCourses.PageIndex = e.NewPageIndex;
-            btnSearchCourse_Click(null, null);
+            btnSearchCourse_Click(null);
         }
       
         protected override async Task OnAfterRenderAsync(bool firstRender)

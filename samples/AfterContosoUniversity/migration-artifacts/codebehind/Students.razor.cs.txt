@@ -27,6 +27,7 @@ using ContosoUniversity.BLL;
 using System.Data.SqlClient;
 using System.Data;
 
+using ContosoUniversity.BLL;
 using Microsoft.AspNetCore.Components;
 using BlazorAjaxToolkitComponents;
 namespace ContosoUniversity
@@ -74,10 +75,7 @@ protected override async Task OnInitializedAsync()
     await base.OnInitializedAsync();
 
 // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
-foreach (var course in _contosoUniversityEntities.Courses)
-            {
-                this.dropListCourses?.Items.Add(course.CourseName);
-            }
+dropListCourses.DataSource = _contosoUniversityEntities.Courses.Select(course => new ListItem(course.CourseName)).ToList();
 
             _studentData_DataSource = null;
             this.studentData?.DataBind();    
@@ -152,17 +150,18 @@ foreach (var course in _contosoUniversityEntities.Courses)
         {
             this.txtFirstName.Text = string.Empty;
 
-            foreach (TableRow row in this.tabAddStud.Rows)
-            {
-                if (row.Cells[1].Controls[0] is TextBox)
-                {
-                    (row.Cells[1].Controls[0] as TextBox).Text = string.Empty;
-                }
-                else if (row.Cells[1].Controls[0] is DropDownList)
-                {
-                    (row.Cells[1].Controls[0] as DropDownList).ClearSelection();
-                }              
-            }
+            // TODO(bwfc-control-tree): Blazor does not support programmatic control-tree access. Rewrite using bound properties.
+            // foreach (TableRow row in this.tabAddStud.Rows)
+            // {
+                // if (row.Cells[1].Controls[0] is TextBox)
+                // {
+                    // (row.Cells[1].Controls[0] as TextBox).Text = string.Empty;
+                // }
+                // else if (row.Cells[1].Controls[0] is DropDownList)
+                // {
+                    // (row.Cells[1].Controls[0] as DropDownList).ClearSelection();
+                // }              
+            // }
         }
         #endregion
 
