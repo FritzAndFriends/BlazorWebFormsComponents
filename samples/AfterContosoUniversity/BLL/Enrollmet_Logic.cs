@@ -25,7 +25,11 @@ namespace ContosoUniversity.BLL
 
             foreach (var entry in enrollments)
             {
-                entries.Add(entry.Date.ToShortDateString(), entry.Count);
+                var key = entry.Date.ToShortDateString();
+                if (entries.ContainsKey(key))
+                    entries[key] += entry.Count;
+                else
+                    entries.Add(key, entry.Count);
             }
 
             return entries;

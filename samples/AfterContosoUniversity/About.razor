@@ -11,13 +11,14 @@
         <h1> Students Body Statistics </h1>
     </div>
      <div id="grv">
-        <GridView ItemType="object" CssClass="grid" @ref="EnrollmentsStat" SelectMethod="EnrollmentsStat_GetData" 
+        <GridView Items="_enrollmentData" TItem="KeyValuePair<string, int>" CssClass="grid" 
+            ID="EnrollmentsStat" @ref="EnrollmentsStat"
             AutoGenerateColumns="false" EmptyDataText="There are no records to display"
              CellPadding="4" ForeColor='@("#333333")' GridLines="@GridLines.None">
             <Columns>
-                <BoundField ItemType="object" DataField="Key" HeaderText="Enrollment Date" ReadOnly="true">
+                <BoundField ItemType="KeyValuePair<string, int>" DataField="Key" HeaderText="Enrollment Date" ReadOnly="true">
                 </BoundField>
-                <BoundField ItemType="object" DataField="Value" HeaderText="Students" ReadOnly="true">
+                <BoundField ItemType="KeyValuePair<string, int>" DataField="Value" HeaderText="Students" ReadOnly="true">
                 </BoundField>
             </Columns>
         

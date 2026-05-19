@@ -12,7 +12,7 @@
         
             <div id="grv">
                 <h1 id="hdr">Our Instructors</h1>
-                <GridView ItemType="object" @ref="grvInstructors" AutoGenerateColumns="false"
+                <GridView ItemType="object" ID="grvInstructors" @ref="grvInstructors" AutoGenerateColumns="false"
                     CssClass="grv" BorderWidth="2"                 
                     AllowSorting="true" OnSorting="@grvInstructors_Sorting" 
                     EmptyDataText = "There are no records to display" 
