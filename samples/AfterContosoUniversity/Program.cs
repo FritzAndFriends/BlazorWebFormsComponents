@@ -30,14 +30,25 @@ using (var scope = app.Services.CreateScope())
     db.Database.EnsureCreated();
 
     // Seed data if empty
-    if (!db.Students.Any())
+    if (!db.Enrollments.Any())
     {
+        // Clean slate if students exist without enrollments
+        if (db.Students.Any() && !db.Enrollments.Any())
+        {
+            db.Students.RemoveRange(db.Students);
+            db.Courses.RemoveRange(db.Courses);
+            db.Departments.RemoveRange(db.Departments);
+            db.Instructors.RemoveRange(db.Instructors);
+            db.SaveChanges();
+        }
+
         var instructor = new Instructor { FirstName = "John", LastName = "Smith", BirthDate = new DateTime(1970, 5, 1), Email = "john.smith@contoso.edu" };
         db.Instructors.Add(instructor);
         db.SaveChanges();
 
         var department = new Department { DepartmentName = "Computer Science", BuildingNumber = 1, ManagingInstructorID = instructor.InstructorID };
-        db.Departments.Add(department);
+        var department2 = new Department { DepartmentName = "Mathematics", BuildingNumber = 2, ManagingInstructorID = instructor.InstructorID };
+        db.Departments.AddRange(department, department2);
         db.SaveChanges();
 
         var course1 = new Cours { CourseName = "C# Programming", StudentsMax = 30, DepartmentID = department.DepartmentID, InstructorID = instructor.InstructorID };

@@ -149,43 +149,45 @@ namespace ContosoUniversity.BLL
         #endregion
  
         #region Getting Student Info
-        public List<object> GetStudents (string name)
-        {           
-           
-            string[] arr;
+        public List<object> GetStudents(string name)
+        {
             List<object> studentsInfo = new List<object>();
- 
+
             if (!String.IsNullOrEmpty(name))
             {
-                arr = name.Split(' ');
+                string[] arr = name.Split(' ');
+                List<Student> students;
+
                 if (arr.Length > 1)
                 {
                     var firstName = arr[0];
                     var lastName = arr[1];
- 
- 
-                   var students = (from stud in contextObj.Students
-                                   where stud.FirstName == firstName && stud.LastName == lastName
-                                   select stud).ToList<Student>();
- 
-                    if (students != null)
+                    students = (from stud in contextObj.Students
+                                where stud.FirstName == firstName && stud.LastName == lastName
+                                select stud).ToList<Student>();
+                }
+                else
+                {
+                    var searchTerm = arr[0];
+                    students = (from stud in contextObj.Students
+                                where stud.FirstName.Contains(searchTerm) || stud.LastName.Contains(searchTerm)
+                                select stud).ToList<Student>();
+                }
+
+                foreach (Student stud in students)
+                {
+                    var student = new
                     {
-                        foreach (Student stud in students)
-                        {
-                            var student = new  //Creating new anonymous object in order to change the date for ShortDateString
-                            {
-                                FirstName = stud.FirstName,
-                                LastName = stud.LastName,
-                                Email = stud.Email,
-                                BirthDate = stud.BirthDate.ToShortDateString(),
-                                StudentID = stud.StudentID
-                            };
-                            studentsInfo.Add(student);
-                        }
-                    }                          
+                        FirstName = stud.FirstName,
+                        LastName = stud.LastName,
+                        Email = stud.Email,
+                        BirthDate = stud.BirthDate.ToShortDateString(),
+                        StudentID = stud.StudentID
+                    };
+                    studentsInfo.Add(student);
                 }
             }
-            return studentsInfo;   
+            return studentsInfo;
         }
         #endregion
     }

@@ -17,19 +17,13 @@ namespace ContosoUniversity.BLL
         #region Get Enrollments List
         public Dictionary<string, int> Get_Enrollment_ByDate()
         {
-            var enrollments = from enrl in _contosoUniversityEntities.Enrollments
-                              group enrl by enrl.Date into d
-                              select new { Date = d.Key, Count = d.Select(enrl => enrl.EnrollmentID).Count() };
+            var allEnrollments = _contosoUniversityEntities.Enrollments.ToList();
 
             Dictionary<string, int> entries = new Dictionary<string, int>();
 
-            foreach (var entry in enrollments)
+            foreach (var group in allEnrollments.GroupBy(e => e.Date.ToShortDateString()))
             {
-                var key = entry.Date.ToShortDateString();
-                if (entries.ContainsKey(key))
-                    entries[key] += entry.Count;
-                else
-                    entries.Add(key, entry.Count);
+                entries[group.Key] = group.Count();
             }
 
             return entries;

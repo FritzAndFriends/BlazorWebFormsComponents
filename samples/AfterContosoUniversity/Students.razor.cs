@@ -22,7 +22,6 @@ namespace ContosoUniversity
     // For non-page classes, inject RequestShim via DI.
  
     private AutoCompleteExtender AutoCompleteExtender1 = default!;
-    private Button btnSearch = default!;
     private DropDownList<object> dropListCourses = default!;
     private GridView<object> grv = default!;
     private ScriptManager ScriptManager2 = default!;
@@ -40,19 +39,19 @@ namespace ContosoUniversity
     [Inject]
     protected ContosoUniversityEntities _contosoUniversityEntities { get; set; } = default!;
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "txtFirstName")]
+    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtFirstName")]
     public string? PostedFirstName { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "txtLastName")]
+    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtLastName")]
     public string? PostedLastName { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "txtBirthDate")]
+    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtBirthDate")]
     public string? PostedBirthDate { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "txtEmail")]
+    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$txtEmail")]
     public string? PostedEmail { get; set; }
 
-    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "dropListCourses")]
+    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "tabAddStud$dropListCourses")]
     public string? PostedCourse { get; set; }
 
     [SupplyParameterFromForm(FormName = "StudentsForm", Name = "__action")]
@@ -60,6 +59,9 @@ namespace ContosoUniversity
 
     [SupplyParameterFromForm(FormName = "StudentsForm", Name = "__delete")]
     public string? PostedDeleteId { get; set; }
+
+    [SupplyParameterFromForm(FormName = "StudentsForm", Name = "txtSearch")]
+    public string? PostedSearchText { get; set; }
  
         private StudentsListLogic studLogic;
           
@@ -89,13 +91,19 @@ namespace ContosoUniversity
                 PostedEmail = string.Empty;
                 PostedCourse = string.Empty;
             }
+            else if (PostedAction == "Show Student Info")
+            {
+                if (!string.IsNullOrWhiteSpace(PostedSearchText))
+                {
+                    _studentData_DataSource = studLogic.GetStudents(PostedSearchText);
+                }
+            }
             else if (int.TryParse(PostedDeleteId, out var deleteId))
             {
                 studLogic.DeleteStudent(deleteId);
             }
  
             _gridData = grv_GetData().ToList();
-            _studentData_DataSource = null;
         }
  
         #region Filling Enrollments table
