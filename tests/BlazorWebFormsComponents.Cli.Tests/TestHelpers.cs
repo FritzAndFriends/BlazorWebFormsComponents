@@ -232,6 +232,7 @@ public static class TestHelpers
             new HtmlBoilerplateStripTransform(),
             new PageFormWrapperTransform(),
             new SsrFormContractTransform(),
+            new ButtonToSubmitTransform(),
             new MarkupCleanupTransform(),
             new LabelFieldBindTransform(),
         };
@@ -246,6 +247,7 @@ public static class TestHelpers
             new EntityFrameworkTransform(),
             new EfContextConstructorTransform(),
             new DbContextInstantiationTransform(),
+            new ServiceConstructorWiringTransform(),
             new HttpContextAccessorTransform(),
             new SelectMethodMaterializeTransform(),
             new EagerLoadNavigationTransform(),

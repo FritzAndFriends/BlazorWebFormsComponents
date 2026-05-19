@@ -76,6 +76,7 @@ class Program
         services.AddSingleton<IMarkupTransform, HtmlBoilerplateStripTransform>();
         services.AddSingleton<IMarkupTransform, PageFormWrapperTransform>();
         services.AddSingleton<IMarkupTransform, SsrFormContractTransform>();
+        services.AddSingleton<IMarkupTransform, ButtonToSubmitTransform>();
         services.AddSingleton<IMarkupTransform, MarkupCleanupTransform>();
         services.AddSingleton<IMarkupTransform, LabelFieldBindTransform>();
 
@@ -88,6 +89,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
         services.AddSingleton<ICodeBehindTransform, EfContextConstructorTransform>();
         services.AddSingleton<ICodeBehindTransform, DbContextInstantiationTransform>();
+        services.AddSingleton<ICodeBehindTransform, ServiceConstructorWiringTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpContextAccessorTransform>();
         services.AddSingleton<ICodeBehindTransform, SelectMethodMaterializeTransform>();
         services.AddSingleton<ICodeBehindTransform, EagerLoadNavigationTransform>();
