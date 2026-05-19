@@ -1,12 +1,9 @@
 @page "/Checkout/CheckoutReview"
-@page "/CheckoutReview"
-<PageTitle>Order Review</PageTitle>
-<Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-            <h1>Order Review</h1>
-            <p>PayPal checkout is not configured for this migrated benchmark app.</p>
-            <p><a href="/ShoppingCart">Return to your cart</a></p>
-        </Content>
-    </ChildComponents>
-</Site>
+@inherits BlazorWebFormsComponents.WebFormsPageBase
+
+<div class="migration-pending">
+    <h3>Page Not Yet Migrated</h3>
+    <p>This page (<code>Checkout/CheckoutReview.aspx</code>) requires manual migration.</p>
+    <p>Original Web Forms features used: Non-essential path (auto-quarantined)</p>
+    <p>Suggested migration approach: Migrate the page manually once core pages are stable, using injected services and Blazor patterns.</p>
+</div>

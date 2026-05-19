@@ -33,10 +33,6 @@ namespace WingtipToys.Checkout
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
 
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
     protected override async Task OnInitializedAsync()
     {
         // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior

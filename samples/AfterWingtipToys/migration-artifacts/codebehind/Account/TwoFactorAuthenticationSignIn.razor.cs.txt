@@ -28,7 +28,7 @@ using BlazorWebFormsComponents.Identity;
 
 namespace WingtipToys.Account
 {
-    public partial class TwoFactorAuthenticationSignIn
+    public partial class TwoFactorAuthenticationSignIn : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -49,15 +49,12 @@ namespace WingtipToys.Account
     private PlaceHolder ErrorMessage = default!;
     private Literal FailureText = default!;
     private DropDownList<object> Providers = default!;
+    private object _Providers_DataSource = null!;
     private Button ProviderSubmit = default!;
     private CheckBox RememberBrowser = default!;
     private HiddenField SelectedProvider = default!;
     private PlaceHolder sendcode = default!;
     private PlaceHolder verifycode = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         private ApplicationSignInManager signinManager;
         private ApplicationUserManager manager;
 
@@ -78,10 +75,11 @@ namespace WingtipToys.Account
                 Response.Redirect("/Account/Error", true);
             }
             var userFactors = manager.GetValidTwoFactorProviders(userId);
-            Providers.DataSource = userFactors.Select(x => x).ToList();
-                    }
+            _Providers_DataSource = userFactors.Select(x => x).ToList();
+            Providers?.DataBind();            
+        }
 
-        protected void CodeSubmit_Click()
+        protected void CodeSubmit_Click(EventArgs e)
         {
             bool rememberMe = false;
             bool.TryParse(Request.QueryString["RememberMe"], out rememberMe);
@@ -103,7 +101,7 @@ namespace WingtipToys.Account
             }
         }
 
-        protected void ProviderSubmit_Click()
+        protected void ProviderSubmit_Click(EventArgs e)
         {
             if (!signinManager.SendTwoFactorCode(Providers.SelectedValue))
             {

@@ -23,7 +23,7 @@ using System.Collections.Generic;
 using System.Linq;
 namespace WingtipToys.Checkout
 {
-  public partial class CheckoutError
+  public partial class CheckoutError : WebFormsPageBase
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -32,10 +32,6 @@ namespace WingtipToys.Checkout
     // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
-
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
     protected override async Task OnInitializedAsync()
     {

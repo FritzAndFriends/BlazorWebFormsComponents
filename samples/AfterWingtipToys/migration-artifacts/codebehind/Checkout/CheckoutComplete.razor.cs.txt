@@ -33,9 +33,10 @@ using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
 
+using Microsoft.AspNetCore.Components;
 namespace WingtipToys.Checkout
 {
-  public partial class CheckoutComplete
+  public partial class CheckoutComplete : WebFormsPageBase
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -50,10 +51,11 @@ namespace WingtipToys.Checkout
     // For non-page classes, inject ResponseShim via DI.
 
     private Button Continue = default!;
-    private Label TransactionId = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+    [Inject]
+    protected ShoppingCartActions _shoppingCartActions { get; set; } = default!;
+
+    [Inject]
+    protected ProductContext _db { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -85,10 +87,10 @@ namespace WingtipToys.Checkout
           {
             // Retrieve PayPal confirmation value.
             string PaymentConfirmation = decoder["PAYMENTINFO_0_TRANSACTIONID"].ToString();
-            TransactionId.Text = PaymentConfirmation;
+            _TransactionId_Text = PaymentConfirmation;
 
 
-            ProductContext _db = new ProductContext();
+
             // Get the current order id.
             int currentOrderId = -1;
             if (Session["currentOrderId"] != string.Empty)
@@ -107,11 +109,10 @@ namespace WingtipToys.Checkout
             }
 
             // Clear shopping cart.
-            using (WingtipToys.Logic.ShoppingCartActions usersShoppingCart =
-                new WingtipToys.Logic.ShoppingCartActions())
-            {
-              usersShoppingCart.EmptyCart();
-            }
+            // DbContext 'ShoppingCartActions' is injected via DI
+
+              _shoppingCartActions.EmptyCart();
+
 
             // Clear order id.
             Session["currentOrderId"] = string.Empty;
@@ -122,7 +123,7 @@ namespace WingtipToys.Checkout
           }
     }
 
-    protected void Continue_Click()
+    protected void Continue_Click(EventArgs e)
     {
       Response.Redirect("~/Default.aspx");
     }

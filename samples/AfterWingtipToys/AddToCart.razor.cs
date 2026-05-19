@@ -42,12 +42,8 @@ namespace WingtipToys
     // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
     // For non-page classes, inject ResponseShim via DI.
 
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
     [Inject]
-    protected ShoppingCartActions _shoppingCartActions { get; set; } = default!;
+    protected ShoppingCartActions usersShoppingCart { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -60,7 +56,7 @@ namespace WingtipToys
       {
         // DbContext 'ShoppingCartActions' is injected via DI
 
-          _shoppingCartActions.AddToCart(Convert.ToInt16(rawId));
+          usersShoppingCart.AddToCart(Convert.ToInt16(rawId));
         
 
       }

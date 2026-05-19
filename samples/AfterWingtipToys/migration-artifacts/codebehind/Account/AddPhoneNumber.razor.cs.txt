@@ -29,7 +29,7 @@ using BlazorWebFormsComponents.Identity;
 using System.Net;
 namespace WingtipToys.Account
 {
-    public partial class AddPhoneNumber
+    public partial class AddPhoneNumber : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -45,11 +45,7 @@ namespace WingtipToys.Account
 
     private Literal ErrorMessage = default!;
     private TextBox PhoneNumber = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
-        protected void PhoneNumber_Click()
+        protected void PhoneNumber_Click(EventArgs e)
         {
             var manager = Context.GetOwinContext().GetUserManager<ApplicationUserManager>();
             var code = manager.GenerateChangePhoneNumberToken(User.Identity.GetUserId(), PhoneNumber.Text);

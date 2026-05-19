@@ -29,41 +29,57 @@ namespace WingtipToys
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
-    [Parameter, SupplyParameterFromQuery(Name = "productId")]
-    public int? ProductId { get; set; }
+    // --- Request.Form Migration ---
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
+    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
+    // Form keys found: key
+    // For non-page classes, inject RequestShim via DI.
 
-    [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
-    public int? ProductIdLegacy { get; set; }
+    private FormView<Product> productDetail = default!;
+    [Parameter] public string? productName { get; set; }
 
-    [Parameter, SupplyParameterFromQuery(Name = "productName")]
-    public string? ProductName { get; set; }
+    [Inject]
+    protected ProductContext _productContext { get; set; } = default!;
 
-    private Product? Product { get; set; }
-
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
-        await base.OnParametersSetAsync();
-        Title = "Product Details";
+        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
+        await base.OnInitializedAsync();
 
-        var requestedId = ProductId ?? ProductIdLegacy;
 
-        await using var db = await DbFactory.CreateDbContextAsync();
-        if (requestedId is > 0)
-        {
-            Product = await db.Products.Include(product => product.Category)
-                .FirstOrDefaultAsync(product => product.ProductID == requestedId.Value);
-        }
-        else if (!string.IsNullOrWhiteSpace(ProductName))
-        {
-            Product = await db.Products.Include(product => product.Category)
-                .FirstOrDefaultAsync(product => product.ProductName == ProductName);
-        }
-        else
-        {
-            Product = await db.Products.Include(product => product.Category)
-                .OrderBy(product => product.ProductID)
-                .FirstOrDefaultAsync();
-        }
+    }
+
+    public IQueryable<Product> GetProduct(
+                        [QueryString("ProductID")] int? productId,
+                        [RouteData] string productName)
+    {
+      var _db = _productContext; // Injected via DI
+      IQueryable<Product> query = _db.Products;
+      if (productId.HasValue && productId > 0)
+      {
+        query = query.Where(p => p.ProductID == productId);
+      }
+      else if (!String.IsNullOrEmpty(productName))
+      {
+        query = query.Where(p =>
+                  String.Compare(p.ProductName, productName) == 0);
+      }
+      else
+      {
+        query = null;
+      }
+      return query;
+    }
+  
+    [Parameter, SupplyParameterFromQuery(Name = "ProductID")] public int? ProductId { get; set; }
+
+    private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        totalRowCount = 0;
+        // TODO(bwfc-query-details): Wrapper delegates to the code-behind GetProduct method.
+        var query = GetProduct(ProductId, productName);
+        if (query != null) totalRowCount = query.Count();
+        return query ?? global::System.Linq.Enumerable.Empty<Product>().AsQueryable();
     }
 }
 }

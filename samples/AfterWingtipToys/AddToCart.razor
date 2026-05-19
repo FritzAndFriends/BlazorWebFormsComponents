@@ -1,1 +1,26 @@
-@* /AddToCart is handled by the minimal API endpoint in Program.cs. *@
+@page "/AddToCart"
+
+
+<PageTitle>AddToCart</PageTitle>
+
+<div class="alert alert-warning" role="status">
+    <h1>AddToCart</h1>
+    <p>This migrated page preserves the original action-on-navigation contract by posting to a generated HTTP endpoint as soon as the shell renders.</p>
+    <p>TODO(bwfc-action-pages): move the original side effect into the generated endpoint or a scoped service before removing this helper page.</p>
+    <p>Detected query string inputs: ProductID.</p>
+    <p>Detected side effect: <code>AddToCart</code>.</p>
+    <p>Expected redirect target: <a href="/ShoppingCart">/ShoppingCart</a>.</p>
+</div>
+
+<form id="bwfc-action-pages-form" method="post" action="/__bwfc/actions/AddToCart" @formname="AddToCartForm">
+    <AntiforgeryToken />
+    <input type="hidden" name="ProductID" value="@ProductID" />
+    <noscript>
+        <p>This page normally continues automatically. JavaScript is disabled, so use the button below.</p>
+        <button type="submit" class="btn btn-primary">Continue AddToCart</button>
+    </noscript>
+</form>
+
+<script>
+document.getElementById('bwfc-action-pages-form')?.submit();
+</script>
