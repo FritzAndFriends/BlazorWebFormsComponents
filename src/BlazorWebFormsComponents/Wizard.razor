@@ -8,7 +8,8 @@
 
 	@if (_steps.Count > 0)
 	{
-		<table cellspacing="0" cellpadding="0" id="@ID" class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)" style="border-collapse:collapse;@Style">
+		<input type="hidden" name="__wizard_step" value="@ActiveStepIndex" />
+		<table cellspacing="0" cellpadding="0" border="0" id="@ID" class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)" style="border-collapse:collapse;@Style">
 			<tbody>
 				<tr>
 					@if (DisplaySideBar && !IsCompleteStep)
@@ -40,8 +41,8 @@
 							}
 						</td>
 					}
-					<td>
-						<table cellspacing="0" cellpadding="0" style="width:100%;height:100%;">
+					<td style="height:100%;">
+						<table cellspacing="0" cellpadding="0" border="0" style="width:100%;height:100%;">
 							<tbody>
 								@if (!string.IsNullOrEmpty(HeaderText) || HeaderTemplate != null)
 								{
@@ -58,7 +59,7 @@
 										</td>
 									</tr>
 								}
-								<tr>
+								<tr style="height:100%;">
 									<td style="@GetStepStyleString()" class="@GetStepStyleClass()">
 										@if (ActiveStepIndex >= 0 && ActiveStepIndex < _steps.Count)
 										{
@@ -70,22 +71,34 @@
 								{
 									<tr>
 										<td align="right" style="@GetNavigationStyleString()" class="@GetNavigationStyleClass()">
-											@if (ShowPreviousButton)
-											{
-												<input type="button" value="@PreviousButtonText" @onclick="HandlePreviousClick" style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
-											}
-											@if (ShowNextButton)
-											{
-												<input type="button" value="@NextButtonText" @onclick="HandleNextClick" style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
-											}
-											@if (ShowFinishButton)
-											{
-												<input type="button" value="@FinishButtonText" @onclick="HandleFinishClick" style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
-											}
-											@if (DisplayCancelButton)
-											{
-												<input type="button" value="@CancelButtonText" @onclick="HandleCancelClick" />
-											}
+											<table cellspacing="5" cellpadding="5" border="0">
+												<tr>
+													@if (ShowPreviousButton)
+													{
+														<td align="right">
+															<input type="submit" name="__wizard_action" value="@PreviousButtonText" @onclick="HandlePreviousClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+														</td>
+													}
+													@if (ShowNextButton)
+													{
+														<td align="right">
+															<input type="submit" name="__wizard_action" value="@NextButtonText" @onclick="HandleNextClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+														</td>
+													}
+													@if (ShowFinishButton)
+													{
+														<td align="right">
+															<input type="submit" name="__wizard_action" value="@FinishButtonText" @onclick="HandleFinishClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+														</td>
+													}
+													@if (DisplayCancelButton)
+													{
+														<td align="right">
+															<input type="submit" name="__wizard_action" value="@CancelButtonText" @onclick="HandleCancelClick" @onclick:preventDefault />
+														</td>
+													}
+												</tr>
+											</table>
 										</td>
 									</tr>
 								}

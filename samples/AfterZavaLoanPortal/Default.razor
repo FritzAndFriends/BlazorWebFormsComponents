@@ -1,0 +1,149 @@
+@page "/"
+<form method="post" @formname="DefaultForm">
+    <AntiforgeryToken />
+<PageTitle>Loan Application Wizard</PageTitle>
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+            <td style="padding: 12px;">
+                <UpdatePanel id="updLoanWizard" @ref="updLoanWizard">
+                    
+                        <table width="100%" cellpadding="4" cellspacing="0" style="border: 1px solid #8ea7c2; background: #f7f9fc;">
+                            <tr>
+                                <td style="font-size: 16px; font-weight: bold; background: #d1d9e5; color: #1f3f68;">New Loan Application</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <Wizard
+                                        id="wizLoanApplication" @ref="wizLoanApplication"
+                                        DisplaySideBar="false"
+                                        Width="100"
+                                        OnActiveStepChanged="wizLoanApplication_ActiveStepChanged"
+                                        OnNextButtonClick="wizLoanApplication_NextButtonClick"
+                                        OnFinishButtonClick="wizLoanApplication_FinishButtonClick">
+                                        <WizardSteps>
+                                            <WizardStep id="s1" @ref="s1" Title="Personal Info">
+                                                <table>
+                                                    <tr>
+                                                        <td>Customer ID:</td>
+                                                        <td>
+                                                            <TextBox id="txtCustomerId" @ref="txtCustomerId" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>First Name:</td>
+                                                        <td>
+                                                            <TextBox id="txtFirstName" @ref="txtFirstName" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Last Name:</td>
+                                                        <td>
+                                                            <TextBox id="txtLastName" @ref="txtLastName" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Email:</td>
+                                                        <td>
+                                                            <TextBox id="txtEmail" @ref="txtEmail" Width="260" />
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </WizardStep>
+                                            <WizardStep id="s2" @ref="s2" Title="Employment">
+                                                <table>
+                                                    <tr>
+                                                        <td>Employer:</td>
+                                                        <td>
+                                                            <TextBox id="txtEmployer" @ref="txtEmployer" Width="220" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Job Title:</td>
+                                                        <td>
+                                                            <TextBox id="txtJobTitle" @ref="txtJobTitle" Width="220" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Years:</td>
+                                                        <td>
+                                                            <TextBox id="txtYearsEmployed" @ref="txtYearsEmployed" Width="80" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Income:</td>
+                                                        <td>
+                                                            <TextBox id="txtAnnualIncome" @ref="txtAnnualIncome" Width="120" />
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </WizardStep>
+                                            <WizardStep id="s3" @ref="s3" Title="Loan Details">
+                                                <table>
+                                                    <tr>
+                                                        <td>Loan Product:</td>
+                                                        <td>
+                                                            <DropDownList ItemType="object" id="ddlLoanProduct" @ref="ddlLoanProduct" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Amount:</td>
+                                                        <td>
+                                                            <TextBox id="txtRequestedAmount" @ref="txtRequestedAmount" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Term Months:</td>
+                                                        <td>
+                                                            <TextBox id="txtTermMonths" @ref="txtTermMonths" />
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Purpose:</td>
+                                                        <td>
+                                                            <TextBox id="txtPurpose" @ref="txtPurpose" TextMode="@TextBoxMode.MultiLine" Rows="3" Width="280" />
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </WizardStep>
+                                            <WizardStep id="s4" @ref="s4" Title="Review">
+                                                <span>@_lblReviewSummary_Text</span>
+                                            </WizardStep>
+                                            <WizardStep id="s5" @ref="s5" Title="Submit">
+                                                <Label id="lblSubmitStepMessage" @ref="lblSubmitStepMessage" Text="Click Finish to submit." />
+                                            </WizardStep>
+                                        </WizardSteps>
+                                    </Wizard>
+                                    <br />
+                                    <span>@_lblSubmissionStatus_Text</span>
+                                </td>
+                            </tr>
+                        </table>
+                        <br />
+                        <table width="100%" cellpadding="4" cellspacing="0" style="border: 1px solid #8ea7c2; background: #f7f9fc;">
+                            <tr>
+                                <td style="font-size: 16px; font-weight: bold; background: #d1d9e5; color: #1f3f68;">Loan Application History</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <GridView ItemType="object"
+                                        id="gvLoanHistory" @ref="gvLoanHistory"
+                                        Width="100"
+                                        AutoGenerateColumns="false"
+                                        DataKeyNames="ApplicationID"
+                                        OnRowCommand="@gvLoanHistory_RowCommand">
+                                        <Columns>
+                                            <ButtonField ItemType="object" Text="Review" CommandName="ReviewApplication" />
+                                        </Columns>
+                                    </GridView>
+                                </td>
+                            </tr>
+                        </table>
+                    
+                </UpdatePanel>
+            </td>
+        </tr>
+    </table>
+
+
+</form>

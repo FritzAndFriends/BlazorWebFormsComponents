@@ -1,5 +1,6 @@
 using BlazorWebFormsComponents.Enums;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -8,6 +9,108 @@ namespace BlazorWebFormsComponents
 {
 	public partial class Wizard : BaseStyledComponent
 	{
+
+		#region SSR Form Navigation
+
+		private const string WizardActionFieldName = "__wizard_action";
+		private const string WizardStepFieldName = "__wizard_step";
+		private bool _formProcessed;
+
+		protected override async Task OnInitializedAsync()
+		{
+			await base.OnInitializedAsync();
+
+			// In SSR mode, restore step index from form hidden field on postback
+			if (CurrentRenderMode == WebFormsRenderMode.StaticSSR)
+			{
+				var httpContext = HttpContextAccessor?.HttpContext;
+				if (httpContext != null && HttpMethods.IsPost(httpContext.Request.Method)
+					&& httpContext.Request.HasFormContentType)
+				{
+					var form = await httpContext.Request.ReadFormAsync();
+
+					// Restore the step index from hidden field
+					if (int.TryParse(form[WizardStepFieldName], out var savedStep))
+					{
+						ActiveStepIndex = savedStep;
+					}
+
+					// Determine navigation action from button click
+					var action = form[WizardActionFieldName].ToString();
+					if (!string.IsNullOrEmpty(action))
+					{
+						_pendingAction = action;
+					}
+				}
+			}
+		}
+
+		private string _pendingAction;
+
+		/// <summary>
+		/// Called after steps have registered to process any pending SSR navigation action.
+		/// </summary>
+		internal void ProcessPendingNavigation()
+		{
+			if (_formProcessed || string.IsNullOrEmpty(_pendingAction)) return;
+			// Wait until we have enough steps registered to navigate
+			// (navigation target must be within known step bounds)
+			var action = _pendingAction;
+
+			if (action == StartNextButtonText || action == StepNextButtonText)
+			{
+				var nextIndex = ActiveStepIndex + 1;
+				if (nextIndex >= _steps.Count) return; // Not enough steps registered yet
+				_formProcessed = true;
+				_pendingAction = null;
+				ActiveStepIndex = nextIndex;
+			}
+			else if (action == StepPreviousButtonText || action == FinishPreviousButtonText)
+			{
+				_formProcessed = true;
+				_pendingAction = null;
+				var prevIndex = ActiveStepIndex - 1;
+				while (prevIndex >= 0 && !_steps[prevIndex].AllowReturn)
+				{
+					prevIndex--;
+				}
+				if (prevIndex >= 0)
+				{
+					ActiveStepIndex = prevIndex;
+				}
+			}
+			else if (action == FinishButtonText || action == FinishCompleteButtonText)
+			{
+				var nextIndex = ActiveStepIndex + 1;
+				if (nextIndex >= _steps.Count) return; // Not enough steps registered yet
+				_formProcessed = true;
+				_pendingAction = null;
+				if (!string.IsNullOrEmpty(FinishDestinationPageUrl))
+				{
+					NavigationManager.NavigateTo(FinishDestinationPageUrl);
+				}
+				else if (GetEffectiveStepType(nextIndex) == WizardStepType.Complete)
+				{
+					ActiveStepIndex = nextIndex;
+				}
+			}
+			else if (action == CancelButtonText)
+			{
+				_formProcessed = true;
+				_pendingAction = null;
+				if (!string.IsNullOrEmpty(CancelDestinationPageUrl))
+				{
+					NavigationManager.NavigateTo(CancelDestinationPageUrl);
+				}
+			}
+			else
+			{
+				_formProcessed = true;
+				_pendingAction = null;
+			}
+		}
+
+		#endregion
 
 		#region Steps
 
@@ -20,6 +123,7 @@ namespace BlazorWebFormsComponents
 			if (!_steps.Contains(step))
 			{
 				_steps.Add(step);
+				ProcessPendingNavigation();
 				StateHasChanged();
 			}
 		}

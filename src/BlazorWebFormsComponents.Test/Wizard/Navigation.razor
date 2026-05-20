@@ -133,7 +133,7 @@
 		);
 
 		cut.Markup.ShouldContain("All Done!");
-		cut.FindAll("input[type='button']").Count.ShouldBe(0);
+		cut.FindAll("input[type='submit']").Count.ShouldBe(0);
 	}
 
 	[Fact]
@@ -266,7 +266,7 @@
 		cut.Find("input[value='Finish']").Click();
 
 		cut.Markup.ShouldContain("Complete!");
-		cut.FindAll("input[type='button']").Count.ShouldBe(0);
+		cut.FindAll("input[type='submit']").Count.ShouldBe(0);
 	}
 
 	[Fact]
