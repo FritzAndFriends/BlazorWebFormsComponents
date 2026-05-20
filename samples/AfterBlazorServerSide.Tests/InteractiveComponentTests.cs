@@ -567,7 +567,7 @@ public class InteractiveComponentTests
             var inputs = await page.Locator("input[type='text'], input[type='password'], input[type='email']").AllAsync();
             Assert.NotEmpty(inputs);
 
-            var buttons = await page.Locator("button, input[type='submit']").AllAsync();
+            var buttons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(buttons);
 
             // Assert no console errors
@@ -990,7 +990,7 @@ public class InteractiveComponentTests
             Assert.NotEmpty(confirmPassword);
 
             // Verify submit button exists
-            var submitButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            var submitButtons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(submitButtons);
 
             // Assert no console errors
@@ -1041,7 +1041,7 @@ public class InteractiveComponentTests
             Assert.NotEmpty(passwordInputs);
 
             // Verify submit/create button exists
-            var submitButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            var submitButtons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(submitButtons);
 
             // Assert no console errors
@@ -1318,7 +1318,7 @@ public class InteractiveComponentTests
             Assert.NotEmpty(textInputs);
 
             // Assert — Submit button is present
-            var submitButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            var submitButtons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(submitButtons);
 
             // Assert no console errors
@@ -3150,7 +3150,7 @@ public class InteractiveComponentTests
             });
 
             // Verify themed buttons are present with inline styles applied by ThemeProvider
-            var themedButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            var themedButtons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(themedButtons);
 
             // Verify the page has demo containers with themed content
@@ -3203,7 +3203,7 @@ public class InteractiveComponentTests
                 "Expected Theme panel text in the ThemeMode section");
 
             // Buttons should exist in the section (both panels have themed buttons)
-            var buttonsInSection = section7Container.First.Locator("button, input[type='submit']");
+            var buttonsInSection = section7Container.First.Locator("button, input[type='button'], input[type='submit']");
             Assert.True(await buttonsInSection.CountAsync() >= 2, "Expected at least 2 buttons in the ThemeMode section (one per panel)");
 
             Assert.Empty(consoleErrors);
@@ -3347,8 +3347,8 @@ public class InteractiveComponentTests
             var initialCount = await blockSection.Locator("strong").First.TextContentAsync();
             Assert.Equal("0", initialCount);
 
-            // Act - Click the button (BWFC Button renders as <input type="submit">)
-            var blockButton = blockSection.Locator("input[type='submit']").First;
+            // Act - Click the button (BWFC Button renders as <input type="button"> by default)
+            var blockButton = blockSection.Locator("input[type='button'], input[type='submit']").First;
             await blockButton.ClickAsync();
 
             // Wait for Blazor to update
@@ -3408,8 +3408,8 @@ public class InteractiveComponentTests
             var initialText = await contentSection.Locator("p").Filter(new() { HasTextString = "ContentTemplate click count:" }).First.TextContentAsync();
             Assert.Contains("0", initialText);
 
-            // Act - Click the ContentTemplate button (BWFC Button renders as <input type="submit">)
-            var contentTemplateButton = contentSection.Locator("input[type='submit']").First;
+            // Act - Click the ContentTemplate button (BWFC Button renders as <input type="button"> by default)
+            var contentTemplateButton = contentSection.Locator("input[type='button'], input[type='submit']").First;
             await contentTemplateButton.ClickAsync();
 
             // Wait for Blazor to update
@@ -3470,8 +3470,8 @@ public class InteractiveComponentTests
             Assert.NotNull(initialTime);
             Assert.NotEmpty(initialTime);
 
-            // Act - Click the Refresh button (BWFC Button renders as <input type="submit">)
-            var refreshButton = inlineSection.Locator("input[type='submit']").First;
+            // Act - Click the Refresh button (BWFC Button renders as <input type="button"> by default)
+            var refreshButton = inlineSection.Locator("input[type='button'], input[type='submit']").First;
             await refreshButton.ClickAsync();
 
             // Wait for Blazor to update
@@ -3508,8 +3508,8 @@ public class InteractiveComponentTests
             var section = page.Locator("[data-audit-control='BaseProperties-1']");
             await section.WaitForAsync(new LocatorWaitForOptions { Timeout = 5000 });
 
-            // BWFC Button renders as <input type="submit">
-            var buttonAccessKey = await section.Locator("input[type='submit']").First.GetAttributeAsync("accesskey");
+            // BWFC Button renders as <input type="button"> by default
+            var buttonAccessKey = await section.Locator("input[type='button'], input[type='submit']").First.GetAttributeAsync("accesskey");
             Assert.NotNull(buttonAccessKey);
             Assert.NotEmpty(buttonAccessKey);
 
