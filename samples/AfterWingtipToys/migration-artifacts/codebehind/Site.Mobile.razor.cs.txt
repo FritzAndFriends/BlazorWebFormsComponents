@@ -21,9 +21,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WingtipToys.Logic;
 namespace WingtipToys
 {
-    public partial class Site_Mobile
+    public partial class Site_Mobile : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -36,10 +37,6 @@ namespace WingtipToys
     private ContentPlaceHolder FeaturedContent = default!;
     private ContentPlaceHolder HeadContent = default!;
     private ContentPlaceHolder MainContent = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         protected override async Task OnInitializedAsync()
         {
             // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
@@ -47,5 +44,11 @@ namespace WingtipToys
 
 
         }
-    }
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildComponents { get; set; }
+}
 }

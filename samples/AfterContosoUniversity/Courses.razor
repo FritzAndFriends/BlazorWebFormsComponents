@@ -1,21 +1,74 @@
 @page "/Courses"
-@inherits BlazorWebFormsComponents.WebFormsPageBase
-<PageTitle>Contoso University - Courses</PageTitle>
+<WebFormsForm @formname="CoursesForm">
+    <AntiforgeryToken />
+<PageTitle></PageTitle>
 
-<link href="CSS/CSS_Courses.css" rel="stylesheet" />
+    <link href="CSS/CSS_Courses.css" rel="stylesheet" />
+    <script src="JQuery/JQuery_Courses.js"></script>
 
-<div id="dropList">
-    <h1 id="hdrCourse">Select Course</h1>
-    <DropDownList ItemType="string" @ref="drpDepartments" DataSource="departments" />
-    <br /><br />
-    <GridView ItemType="ContosoUniversity.Models.Cours"
-        @ref="grvCourses"
-        AutoGenerateColumns="false"
-        EmptyDataText="Choose Department To Display Courses">
-        <Columns>
-            <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="CourseID" HeaderText="ID" />
-            <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="CourseName" HeaderText="Course Name" />
-            <BoundField ItemType="ContosoUniversity.Models.Cours" DataField="Credits" HeaderText="Credits" />
-        </Columns>
-    </GridView>
-</div>
+
+     <ScriptManager></ScriptManager>
+    <UpdatePanel>
+        
+            <div id="dropList">
+                <h1 id="hdrCourse">Select Course</h1>
+                <DropDownList ItemType="object" id="drpDepartments" @ref="drpDepartments"></DropDownList>
+                <Button id="btnSearchCourse" @ref="btnSearchCourse" Text="Search Courses" OnClick="@btnSearchCourse_Click"></Button>
+                <br />
+                <br />
+                <GridView ItemType="object" id="grvCourses" @ref="grvCourses" AllowPaging="true" DataKeyNames="CourseID"
+                    PageSize="1" AutoGenerateColumns="false"
+                    OnPageIndexChanging="@grvCourses_PageIndexChanging"
+                    EmptyDataText = "Chose Department To Display Courses">
+                    <Columns>
+                        <BoundField ItemType="object" DataField="CourseID" HeaderText="ID" />
+                        <BoundField ItemType="object" DataField="CourseName" HeaderText="Course Name" />
+                        <BoundField ItemType="object" DataField="StudentsMax" HeaderText="Max Capacity" />
+                    </Columns>
+                </GridView>
+            </div>
+            <div id="autoComplete">
+                <h1 id="crsByName">Courses By Name</h1>
+                <TextBox id="txtCourse" @ref="txtCourse" placeholder="Search Course..."></TextBox>
+                <Button id="search" @ref="search" Text="Search" OnClick="@search_Click"></Button>
+                <br />
+                <br />
+                <AutoCompleteExtender
+                    id="AutoCompleteExtender1" @ref="AutoCompleteExtender1"
+                    TargetControlID="txtCourse"
+                    ServiceMethod="GetList"
+                    MinimumPrefixLength="1"
+                    CompletionInterval="100"
+                    EnableCaching="true"
+                    CompletionSetCount="20"
+                    ShowOnlyCurrentWordInCompletionListItem="true">
+                </AutoCompleteExtender>
+                <DetailsView ItemType="object" id="dtlCourses" @ref="dtlCourses" Width="125" Height="50" CssClass="details">
+                </DetailsView>
+                 
+    </div></UpdatePanel>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</WebFormsForm>

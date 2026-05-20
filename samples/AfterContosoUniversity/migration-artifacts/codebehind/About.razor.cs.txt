@@ -22,9 +22,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ContosoUniversity.Models;
-using ContosoUniversity.Bll;
+using ContosoUniversity.BLL;
 
 
+using ContosoUniversity.BLL;
+using Microsoft.AspNetCore.Components;
 namespace ContosoUniversity
 {
     public partial class About : WebFormsPageBase
@@ -38,9 +40,8 @@ namespace ContosoUniversity
     // For non-page classes, inject RequestShim via DI.
 
     private GridView<object> EnrollmentsStat = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+    [Inject]
+    protected Enrollmet_Logic _enrollmet_Logic { get; set; } = default!;
 
         protected override async Task OnInitializedAsync()
         {
@@ -58,7 +59,7 @@ namespace ContosoUniversity
         //     string sortByExpression
         public Dictionary<string, int> EnrollmentsStat_GetData()
         {
-            return new Enrollmet_Logic().Get_Enrollment_ByDate();
+            return _enrollmet_Logic.Get_Enrollment_ByDate();
         }
     }
 }

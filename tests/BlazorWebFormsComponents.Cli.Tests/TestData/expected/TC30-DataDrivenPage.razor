@@ -1,4 +1,6 @@
 @page "/TC30-DataDrivenPage"
+<WebFormsForm @formname="TC30DataDrivenPageForm">
+    <AntiforgeryToken />
 <PageTitle>Product Catalog</PageTitle>
 @using ContosoStore.Models
 
@@ -26,3 +28,6 @@
             </div>
         </ItemTemplate>
     </Repeater>
+
+
+</WebFormsForm>

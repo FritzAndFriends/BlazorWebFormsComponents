@@ -138,6 +138,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [Menu](docs/NavigationControls/Menu.md)
     - [SiteMapPath](docs/NavigationControls/SiteMapPath.md)
     - [TreeView](docs/NavigationControls/TreeView.md)
+    - [Wizard](docs/NavigationControls/Wizard.md)
   - Login Controls
     - [ChangePassword](docs/LoginControls/ChangePassword.md)
     - [CreateUserWizard](docs/LoginControls/CreateUserWizard.md)

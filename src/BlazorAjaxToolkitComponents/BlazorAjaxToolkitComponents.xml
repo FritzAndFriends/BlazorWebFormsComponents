@@ -217,6 +217,11 @@
             Characters that delimit separate completion entries within the same text box.
             </summary>
         </member>
+        <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.EnableCaching">
+            <summary>
+            Whether to cache completion results on the client. Default is true.
+            </summary>
+        </member>
         <member name="P:BlazorAjaxToolkitComponents.AutoCompleteExtender.FirstRowSelected">
             <summary>
             Whether to automatically select the first item in the completion list.

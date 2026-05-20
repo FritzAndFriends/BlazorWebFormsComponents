@@ -118,6 +118,8 @@ public static class ComponentCatalog
         new("TreeView", "Navigation", "/ControlSamples/TreeView", "Hierarchical tree navigation control",
             new[] { "Accessibility", "ArrowsImages", "BulletImages", "BulletsNoExpand", "ExpandCollapse", "ImageAndConfig", "Images", "Selection", "ShowLines", "SiteMapDataSource", "XmlDataSource" },
             new[] { "tree", "hierarchy", "expand", "collapse" }),
+        new("Wizard", "Navigation", "/ControlSamples/Wizard", "Multi-step wizard control for guided navigation",
+            Keywords: new[] { "wizard", "steps", "multi-step", "navigation" }),
 
         // Login Controls
         new("ChangePassword", "Login", "/ControlSamples/ChangePassword", "Form for changing user password",

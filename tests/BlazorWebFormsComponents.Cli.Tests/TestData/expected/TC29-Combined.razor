@@ -1,4 +1,6 @@
 @page "/TC29-Combined"
+<WebFormsForm @formname="TC29CombinedForm">
+    <AntiforgeryToken />
 <PageTitle>Combined Test</PageTitle>
 @using System.Collections.Generic
 
@@ -10,3 +12,6 @@
     </GridView>
     <Button id="SaveButton" Text="Save" OnClick="@SaveButton_Click" CssClass="btn" />
     <HyperLink id="HelpLink" NavigateUrl="/Help.aspx" Text="Help" />
+
+
+</WebFormsForm>

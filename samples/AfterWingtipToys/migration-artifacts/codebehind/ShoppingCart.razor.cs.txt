@@ -35,12 +35,14 @@ using WingtipToys.Models;
 using WingtipToys.Logic;
 using System.Collections.Specialized;
 using System.Collections;
+using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
-  public partial class ShoppingCart
+  public partial class ShoppingCart : WebFormsPageBase
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
+    private string ShoppingCartTitle = ""; // TODO: HTML server control field — render via @ShoppingCartTitle or bind in markup
     // --- Request.Form Migration ---
     // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
     // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
@@ -53,50 +55,45 @@ namespace WingtipToys
 
     private GridView<CartItem> CartList = default!;
     private ImageButton CheckoutImageBtn = default!;
-    private Label LabelTotalText = default!;
-    private Label lblTotal = default!;
-    private TextBox PurchaseQuantity = default!;
-    private CheckBox Remove = default!;
     private Button UpdateBtn = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+    [Inject]
+    protected ShoppingCartActions usersShoppingCart { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
         // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
         await base.OnInitializedAsync();
 
-      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-      {
+      // DbContext 'ShoppingCartActions' is injected via DI
+
         decimal cartTotal = 0;
         cartTotal = usersShoppingCart.GetTotal();
         if (cartTotal > 0)
         {
           // Display Total.
-          lblTotal.Text = String.Format("{0:c}", cartTotal);
+          _lblTotal_Text = String.Format("{0:c}", cartTotal);
         }
         else
         {
-          LabelTotalText.Text = "";
-          lblTotal.Text = "";
-          ShoppingCartTitle.InnerText = "Shopping Cart is Empty";
-          UpdateBtn.Visible = false;
-          CheckoutImageBtn.Visible = false;
+          _LabelTotalText_Text = "";
+          _lblTotal_Text = "";
+          ShoppingCartTitle = "Shopping Cart is Empty";
+          UpdateBtn?.Visible = false;
+          CheckoutImageBtn?.Visible = false;
         }
-      }
+      
     }
 
     public List<CartItem> GetShoppingCartItems()
     {
-      ShoppingCartActions actions = new ShoppingCartActions();
-      return actions.GetCartItems();
+
+      return usersShoppingCart.GetCartItems();
     }
 
     public List<CartItem> UpdateCartItems()
     {
-      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-      {
+      // DbContext 'ShoppingCartActions' is injected via DI
+
         String cartId = usersShoppingCart.GetCartId();
 
         ShoppingCartActions.ShoppingCartUpdates[] cartUpdates = new ShoppingCartActions.ShoppingCartUpdates[CartList.Rows.Count];
@@ -115,9 +112,9 @@ namespace WingtipToys
           cartUpdates[i].PurchaseQuantity = Convert.ToInt16(quantityTextBox.Text.ToString());
         }
         usersShoppingCart.UpdateShoppingCartDatabase(cartId, cartUpdates);
-                lblTotal.Text = String.Format("{0:c}", usersShoppingCart.GetTotal());
+        _lblTotal_Text = String.Format("{0:c}", usersShoppingCart.GetTotal());
         return usersShoppingCart.GetCartItems();
-      }
+      
     }
 
     public static IOrderedDictionary GetValues(GridViewRow row)
@@ -134,18 +131,23 @@ namespace WingtipToys
       return values;
     }
 
-    protected void UpdateBtn_Click()
+    protected void UpdateBtn_Click(EventArgs e)
     {
       UpdateCartItems();
     }
 
-    protected void CheckoutBtn_Click(ImageClickEventArgs e)
+    protected void CheckoutBtn_Click(EventArgs e)
     {
-      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-      {
+      // DbContext 'ShoppingCartActions' is injected via DI
+
         Session["payment_amt"] = usersShoppingCart.GetTotal();
-      }
+      
       Response.Redirect("Checkout/CheckoutStart.aspx");
     }
-  }
+  
+
+    private object? _LabelTotalText_Text; // TODO: migrate from Web Forms code-behind
+
+    private object? _lblTotal_Text; // TODO: migrate from Web Forms code-behind
+}
 }

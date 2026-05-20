@@ -167,7 +167,10 @@ public static class TestHelpers
             new SessionRuntimeSignalDetector(),
             new IdentityRuntimeSignalDetector(),
             new GlobalAsaxRuntimeSignalDetector(),
-            new WebConfigRuntimeSignalDetector()
+            new WebConfigRuntimeSignalDetector(),
+            new AjaxToolkitRuntimeSignalDetector(),
+            new SqlClientRuntimeSignalDetector(),
+            new DefaultPageRuntimeSignalDetector()
         ]);
 
     public static ProjectScaffolder CreateDefaultScaffolder() =>
@@ -227,7 +230,9 @@ public static class TestHelpers
             new EnhancedNavAnnotationTransform(),
             new GetRouteUrlMarkupTransform(),
             new HtmlBoilerplateStripTransform(),
+            new PageFormWrapperTransform(),
             new SsrFormContractTransform(),
+            new ButtonToSubmitTransform(),
             new MarkupCleanupTransform(),
             new LabelFieldBindTransform(),
         };
@@ -237,11 +242,13 @@ public static class TestHelpers
             new TodoHeaderTransform(),
             new NestedClassCollisionTransform(),
             new UsingStripTransform(),
+            new ProjectNamespaceUsingTransform(),
             new IdentityUsingTransform(),
             new HttpUtilityRewriteTransform(),
             new EntityFrameworkTransform(),
             new EfContextConstructorTransform(),
             new DbContextInstantiationTransform(),
+            new ServiceConstructorWiringTransform(),
             new HttpContextAccessorTransform(),
             new SelectMethodMaterializeTransform(),
             new EagerLoadNavigationTransform(),
@@ -268,8 +275,12 @@ public static class TestHelpers
             new WebMethodAnnotationTransform(),
             new PageLifecycleTransform(),
             new EventHandlerSignatureTransform(),
+            new DeadControlTreeCodeTransform(),
+            new ItemsAddToDataSourceTransform(),
             new InnerTextRewriteTransform(),
             new DataBindTransform(),
+            new DataSourceParameterBindingTransform(),
+            new StaticItemsParameterBindingTransform(),
             new ClientScriptTransform(),
             new UrlCleanupTransform(),
             new CompileSurfaceStubTransform(quarantineDetector),

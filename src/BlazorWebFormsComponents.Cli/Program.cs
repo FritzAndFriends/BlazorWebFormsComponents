@@ -74,7 +74,9 @@ class Program
         services.AddSingleton<IMarkupTransform, EnhancedNavAnnotationTransform>();
         services.AddSingleton<IMarkupTransform, GetRouteUrlMarkupTransform>();
         services.AddSingleton<IMarkupTransform, HtmlBoilerplateStripTransform>();
+        services.AddSingleton<IMarkupTransform, PageFormWrapperTransform>();
         services.AddSingleton<IMarkupTransform, SsrFormContractTransform>();
+        services.AddSingleton<IMarkupTransform, ButtonToSubmitTransform>();
         services.AddSingleton<IMarkupTransform, MarkupCleanupTransform>();
         services.AddSingleton<IMarkupTransform, LabelFieldBindTransform>();
 
@@ -82,11 +84,13 @@ class Program
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
         services.AddSingleton<ICodeBehindTransform, NestedClassCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, UsingStripTransform>();
+        services.AddSingleton<ICodeBehindTransform, ProjectNamespaceUsingTransform>();
         services.AddSingleton<ICodeBehindTransform, IdentityUsingTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpUtilityRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
         services.AddSingleton<ICodeBehindTransform, EfContextConstructorTransform>();
         services.AddSingleton<ICodeBehindTransform, DbContextInstantiationTransform>();
+        services.AddSingleton<ICodeBehindTransform, ServiceConstructorWiringTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpContextAccessorTransform>();
         services.AddSingleton<ICodeBehindTransform, SelectMethodMaterializeTransform>();
         services.AddSingleton<ICodeBehindTransform, EagerLoadNavigationTransform>();
@@ -113,8 +117,12 @@ class Program
         services.AddSingleton<ICodeBehindTransform, WebMethodAnnotationTransform>();
         services.AddSingleton<ICodeBehindTransform, PageLifecycleTransform>();
         services.AddSingleton<ICodeBehindTransform, EventHandlerSignatureTransform>();
+        services.AddSingleton<ICodeBehindTransform, DeadControlTreeCodeTransform>();
+        services.AddSingleton<ICodeBehindTransform, ItemsAddToDataSourceTransform>();
         services.AddSingleton<ICodeBehindTransform, InnerTextRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, DataBindTransform>();
+        services.AddSingleton<ICodeBehindTransform, DataSourceParameterBindingTransform>();
+        services.AddSingleton<ICodeBehindTransform, StaticItemsParameterBindingTransform>();
         services.AddSingleton<ICodeBehindTransform, ClientScriptTransform>();
         services.AddSingleton<ICodeBehindTransform, UrlCleanupTransform>();
         services.AddSingleton<PageQuarantineDetector>();
@@ -135,6 +143,9 @@ class Program
         services.AddSingleton<IRuntimeSignalDetector, IdentityRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, GlobalAsaxRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, WebConfigRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, AjaxToolkitRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, SqlClientRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, DefaultPageRuntimeSignalDetector>();
         services.AddSingleton<RuntimeDetector>();
         services.AddSingleton<ProgramCsEmitter>();
         services.AddSingleton<MasterPageToLayoutConverter>();

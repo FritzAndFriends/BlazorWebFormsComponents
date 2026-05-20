@@ -21,10 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WingtipToys.Logic;
 namespace WingtipToys
 {
-  public partial class Contact
+  public partial class Contact : WebFormsPageBase
   {
+	protected string Title { get; set; } = "Contact";
+
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
     // --- Request.Form Migration ---
@@ -32,10 +35,6 @@ namespace WingtipToys
     // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
-
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
     protected override async Task OnInitializedAsync()
     {

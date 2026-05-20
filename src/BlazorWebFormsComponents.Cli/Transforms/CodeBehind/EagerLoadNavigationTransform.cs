@@ -75,7 +75,8 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
         "CartId", "ProductId", "ProductID", "CategoryId", "CategoryID",
         "OrderId", "OrderID", "ItemId", "ItemID", "UserId", "UserID",
         "Quantity", "UnitPrice", "DateCreated", "ToString", "Count",
-        "Length", "Value", "Name", "Text", "Id", "ID"
+        "Length", "Value", "Name", "Text", "Id", "ID",
+        "Key", "First", "Last", "Date", "Email", "FirstName", "LastName"
     };
 
     public string Apply(string content, FileMetadata metadata)
@@ -162,7 +163,32 @@ public class EagerLoadNavigationTransform : ICodeBehindTransform
                 var dbExpr = match.Groups["dbExpr"].Value;
                 if (match.Value.Contains(".Include(", StringComparison.Ordinal))
                     return match.Value;
-                return match.Value.Replace(dbExpr, dbExpr + includeChain);
+
+                // Filter out nav properties that match the DbSet name to avoid self-referencing
+                var tableName = dbExpr.Split('.').Last();
+                var filteredNavProps = navProps
+                    .Where(p => !tableName.StartsWith(p, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+                if (filteredNavProps.Count == 0)
+                    return match.Value;
+
+                // Scope includes to only nav props actually accessed in this query expression.
+                // Find the containing statement (up to the next semicolon after the match).
+                var stmtStart = match.Index;
+                var stmtEnd = modified.IndexOf(';', match.Index + match.Length);
+                if (stmtEnd < 0) stmtEnd = modified.Length;
+                var stmtText = modified[stmtStart..stmtEnd];
+
+                // Only include nav props that appear as ".NavProp." in this statement
+                var queryNavProps = filteredNavProps
+                    .Where(p => stmtText.Contains($".{p}.", StringComparison.Ordinal) ||
+                                stmtText.Contains($".{p} ", StringComparison.Ordinal))
+                    .ToList();
+                if (queryNavProps.Count == 0)
+                    return match.Value;
+
+                var filteredChain = string.Join("", queryNavProps.Select(p => $".Include(x => x.{p})"));
+                return match.Value.Replace(dbExpr, dbExpr + filteredChain);
             });
         }
 

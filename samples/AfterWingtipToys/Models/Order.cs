@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.ComponentModel;
 
+using WingtipToys.Logic;
 namespace WingtipToys.Models
 {
   public class Order

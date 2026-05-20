@@ -103,7 +103,9 @@ public class PageDirectiveTransform : IMarkupTransform
     private static string BuildFileNameRoute(string fileName)
     {
         var route = "/" + fileName;
-        var isHomePage = route is "/Default" or "/default" or "/Index" or "/index";
+        var isHomePage = route.Equals("/Default", StringComparison.OrdinalIgnoreCase)
+                      || route.Equals("/Index", StringComparison.OrdinalIgnoreCase)
+                      || route.Equals("/Home", StringComparison.OrdinalIgnoreCase);
         return isHomePage ? "/" : route;
     }
 }

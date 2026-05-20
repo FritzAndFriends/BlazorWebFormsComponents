@@ -2,23 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ContosoUniversity.Models;
-using Microsoft.EntityFrameworkCore;
 
+using Microsoft.EntityFrameworkCore;
 namespace ContosoUniversity.BLL
 {
     public class Courses_Logic
     {
-        private readonly ContosoUniversityEntities _context;
+    private readonly ContosoUniversityEntities _contosoUniversityEntities;
 
-        public Courses_Logic(ContosoUniversityEntities context)
-        {
-            _context = context;
-        }
+    public Courses_Logic(ContosoUniversityEntities contosoUniversityEntities)
+    {
+        _contosoUniversityEntities = contosoUniversityEntities;
+    }
 
         #region Get Courses By Department
         public List<Cours> GetCourses(string department)
         {
-            var courses = (from cours in _context.Courses.Include(c => c.Department)
+            var courses = (from cours in _contosoUniversityEntities.Courses.Include(x => x.Department)
                            where cours.Department.DepartmentName == department
                            select cours).ToList<Cours>();
 
@@ -29,7 +29,7 @@ namespace ContosoUniversity.BLL
         #region Get Course By CourseName
         public List<Cours> GetCourse(string courseName)                   
         {
-            var course = (from crs in _context.Courses
+            var course = (from crs in _contosoUniversityEntities.Courses
                           where crs.CourseName == courseName
                           select crs).ToList<Cours>();
 

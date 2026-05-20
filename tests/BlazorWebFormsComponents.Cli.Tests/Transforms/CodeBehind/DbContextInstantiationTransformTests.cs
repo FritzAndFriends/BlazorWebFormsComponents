@@ -96,8 +96,8 @@ public class Students_Logic
         result.ShouldContain("private readonly ContosoUniversityEntities");
         // Inline new() calls should be replaced with the injected field reference
         result.ShouldNotContain("new ContosoUniversityEntities()");
-        // The injected field name should follow the _camelCase convention
-        result.ShouldContain("_contosoUniversityEntities");
+        // The injected field name preserves the original variable name used in source
+        result.ShouldContain("contextObj");
     }
 
     [Fact]

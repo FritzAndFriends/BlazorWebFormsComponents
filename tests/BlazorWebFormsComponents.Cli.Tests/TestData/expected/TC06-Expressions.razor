@@ -1,6 +1,10 @@
 @page "/TC06-Expressions"
+<WebFormsForm @formname="TC06ExpressionsForm">
+    <AntiforgeryToken />
 <PageTitle>Test</PageTitle>
 <span>@context.Name</span>
 <span>@Item.Price</span>
 <span>@(DateTime.Now)</span>
 <span>@(someVar)</span>
+
+</WebFormsForm>

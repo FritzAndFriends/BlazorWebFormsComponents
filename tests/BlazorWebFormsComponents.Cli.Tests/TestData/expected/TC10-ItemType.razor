@@ -1,6 +1,10 @@
 @page "/TC10-ItemType"
+<WebFormsForm @formname="TC10ItemTypeForm">
+    <AntiforgeryToken />
 <PageTitle>Test</PageTitle>
 <GridView ItemType="object" id="gvProducts">
 </GridView>
 <Repeater id="rptItems" ItemType="Product">
 </Repeater>
+
+</WebFormsForm>

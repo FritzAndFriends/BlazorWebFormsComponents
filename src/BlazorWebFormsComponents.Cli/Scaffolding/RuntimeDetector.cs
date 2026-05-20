@@ -40,6 +40,8 @@ public class RuntimeProfile
     public bool NeedsSession { get; set; }
     public bool NeedsIdentity { get; set; }
     public bool NeedsEntityFramework { get; set; }
+    public bool NeedsAjaxToolkit { get; set; }
+    public bool NeedsSqlClient { get; set; }
     public string? DbContextClassName { get; set; }
     public string? DbContextNamespace { get; set; }
     public List<string> ConnectionStringNames { get; set; } = [];
@@ -66,6 +68,12 @@ public class RuntimeProfile
     /// Custom error redirect from Web.config &lt;customErrors defaultRedirect="..."&gt;.
     /// </summary>
     public string? CustomErrorRedirect { get; set; }
+
+    /// <summary>
+    /// Default page name detected from Default.aspx or Web.config defaultDocument.
+    /// Used to generate a root "/" redirect in Program.cs.
+    /// </summary>
+    public string? DefaultPageRoute { get; set; }
 
     /// <summary>
     /// Authentication mode from Web.config &lt;authentication mode="..."&gt; (Forms, Windows, None).

@@ -1,0 +1,350 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+
+	[Fact]
+	public void Wizard_RendersActiveStep()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Step 1 Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>Step 2 Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Markup.ShouldContain("Step 1 Content");
+		cut.Markup.ShouldNotContain("Step 2 Content");
+	}
+
+	[Fact]
+	public void Wizard_NextButton_AdvancesStep()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Step 1 Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>Step 2 Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 3" StepType="WizardStepType.Finish">
+						<p>Step 3 Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		// Click Next
+		var nextButton = cut.Find("input[value='Next']");
+		nextButton.Click();
+
+		cut.Markup.ShouldContain("Step 2 Content");
+		cut.Markup.ShouldNotContain("Step 1 Content");
+	}
+
+	[Fact]
+	public void Wizard_PreviousButton_GoesBack()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Step 1 Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>Step 2 Content</p>
+					</WizardStep>
+					<WizardStep Title="Finish" StepType="WizardStepType.Finish">
+						<p>Finish Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		// Click Previous
+		var prevButton = cut.Find("input[value='Previous']");
+		prevButton.Click();
+
+		cut.Markup.ShouldContain("Step 1 Content");
+	}
+
+	[Fact]
+	public void Wizard_StartStep_ShowsOnlyNextButton()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>Content 2</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("input[value='Next']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_FinishStep_ShowsFinishAndPreviousButtons()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2" StepType="WizardStepType.Finish">
+						<p>Finish Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("input[value='Finish']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Next']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_CompleteStep_HidesNavigation()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Complete" StepType="WizardStepType.Complete">
+						<p>All Done!</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Markup.ShouldContain("All Done!");
+		cut.FindAll("input[type='button']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_DisplaySideBar_ShowsStepTitles()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplaySideBar="true">
+				<WizardSteps>
+					<WizardStep Title="First">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Second">
+						<p>Content 2</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Markup.ShouldContain("First");
+		cut.Markup.ShouldContain("Second");
+	}
+
+	[Fact]
+	public void Wizard_DisplaySideBarFalse_HidesSidebar()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplaySideBar="false">
+				<WizardSteps>
+					<WizardStep Title="First">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Second">
+						<p>Content 2</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		// Sidebar links/spans should not appear — only the content td and nav
+		cut.FindAll("a").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_AllowReturnFalse_SkipsStepOnPrevious()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="2">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>First Step Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2" AllowReturn="false">
+						<p>Second Step Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 3" StepType="WizardStepType.Finish">
+						<p>Third Step Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		// Click Previous — should skip Step 2 (AllowReturn=false) and go to Step 1
+		cut.Find("input[value='Previous']").Click();
+
+		cut.Markup.ShouldContain("First Step Content");
+		cut.Markup.ShouldNotContain("Second Step Content");
+	}
+
+	[Fact]
+	public void Wizard_OnNextButtonClick_Fires()
+	{
+		var eventFired = false;
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" OnNextButtonClick="(args) => { eventFired = true; }">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>Content 2</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Find("input[value='Next']").Click();
+		eventFired.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Wizard_OnFinishButtonClick_Fires()
+	{
+		var eventFired = false;
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1" OnFinishButtonClick="(args) => { eventFired = true; }">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2" StepType="WizardStepType.Finish">
+						<p>Finish</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Find("input[value='Finish']").Click();
+		eventFired.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void Wizard_FinishButton_NavigatesToCompleteStep()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2" StepType="WizardStepType.Finish">
+						<p>Almost Done</p>
+					</WizardStep>
+					<WizardStep Title="Done" StepType="WizardStepType.Complete">
+						<p>Complete!</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Find("input[value='Finish']").Click();
+
+		cut.Markup.ShouldContain("Complete!");
+		cut.FindAll("input[type='button']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_CancelButton_DisplaysWhenEnabled()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplayCancelButton="true">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>Content 2</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("input[value='Cancel']").Count.ShouldBe(1);
+	}
+
+	[Fact]
+	public void Wizard_HeaderText_Rendered()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" HeaderText="My Wizard">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Markup.ShouldContain("My Wizard");
+	}
+
+	[Fact]
+	public void Wizard_SideBarNavigation_ChangesStep()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplaySideBar="true">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Step 1 Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>Step 2 Content</p>
+					</WizardStep>
+					<WizardStep Title="Finish" StepType="WizardStepType.Finish">
+						<p>Finish Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		// Click the "Step 2" link in the sidebar
+		var sideBarLinks = cut.FindAll("a");
+		var step2Link = sideBarLinks.First(a => a.TextContent.Contains("Step 2"));
+		step2Link.Click();
+
+		cut.Markup.ShouldContain("Step 2 Content");
+	}
+
+	[Fact]
+	public void Wizard_VisibleFalse_RendersNothing()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" Visible="false">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+}

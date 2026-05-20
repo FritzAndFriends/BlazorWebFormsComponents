@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ContosoUniversity.BLL;
 namespace ContosoUniversity
 {
     public partial class Site : WebFormsPageBase
@@ -35,10 +36,6 @@ namespace ContosoUniversity
 
     private ContentPlaceHolder ContentPlaceHolder1 = default!;
     private ContentPlaceHolder head = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         protected override async Task OnInitializedAsync()
         {
             // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior

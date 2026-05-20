@@ -57,7 +57,7 @@
 		);
 
 		// Act - Click the Email validation button
-		var buttons = cut.FindAll("input[type=submit]");
+		var buttons = cut.FindAll("input[type=button]");
 		buttons[0].Click(); // First button - Validate Email
 
 		// Assert - Only email validator should have been triggered
@@ -90,7 +90,7 @@
 		);
 
 		// Act - Click the button without ValidationGroup
-		var button = cut.Find("input[type=submit]");
+		var button = cut.Find("input[type=button]");
 		button.Click();
 
 		// Assert - The button click handler should have been invoked
@@ -119,7 +119,7 @@
 		);
 
 		// Act - Click button without ValidationGroup
-		var button = cut.Find("input[type=submit]");
+		var button = cut.Find("input[type=button]");
 		button.Click();
 
 		// Assert - Button click handler is still called, but validator with EmailGroup should NOT validate
@@ -152,11 +152,11 @@
 		);
 
 		// Act - Click button for Group1
-		var button = cut.Find("input[type=submit]");
+		var button = cut.Find("input[type=button]");
 		button.Click();
 
-		// Assert - Verify button type is correct (CausesValidation=true makes it submit type)
-		button.GetAttribute("type").ShouldBe("submit");
+		// Assert - Verify button type is correct (default is now button type)
+		button.GetAttribute("type").ShouldBe("button");
 		
 		// Note: Full validation behavior testing would require inspecting EditContext state
 		// The key is that ValidateGroup("Group1") was called, which only affects Group1 validators

@@ -1,0 +1,373 @@
+@page "/ControlSamples/Wizard"
+@using BlazorWebFormsComponents.Enums
+
+<PageTitle>Wizard Sample</PageTitle>
+
+<h2>Wizard Component Samples</h2>
+
+<p>The Wizard control provides multi-step navigation through a series of steps, displaying one step at a time with navigation buttons (Previous, Next, Finish, Cancel). In Web Forms this was <code>&lt;asp:Wizard&gt;</code>.</p>
+
+<hr />
+
+<!-- Basic Wizard — the most common migration scenario -->
+<h3>Basic Wizard</h3>
+<p>A simple 3-step registration wizard with a sidebar showing all steps.</p>
+
+<div data-audit-control="Wizard-1">
+	<Wizard ActiveStepIndex="@_basicStep" ActiveStepIndexChanged="(i) => _basicStep = i"
+			HeaderText="Registration Wizard"
+			DisplaySideBar="true"
+			OnFinishButtonClick="HandleBasicFinish">
+		<WizardSteps>
+			<WizardStep Title="Personal Info">
+				<h3>Step 1: Personal Information</h3>
+				<p>Enter your name and email address.</p>
+				<div class="mb-3">
+					<label class="form-label">Name:</label>
+					<input type="text" class="form-control" @bind="_basicName" />
+				</div>
+				<div class="mb-3">
+					<label class="form-label">Email:</label>
+					<input type="text" class="form-control" @bind="_basicEmail" />
+				</div>
+			</WizardStep>
+			<WizardStep Title="Preferences">
+				<h3>Step 2: Preferences</h3>
+				<p>Choose your preferences.</p>
+				<div class="mb-3 form-check">
+					<input type="checkbox" class="form-check-input" @bind="_basicNewsletter" id="basicNewsletter" />
+					<label class="form-check-label" for="basicNewsletter">Subscribe to newsletter</label>
+				</div>
+			</WizardStep>
+			<WizardStep Title="Review" StepType="WizardStepType.Finish">
+				<h3>Step 3: Review</h3>
+				<p><strong>Name:</strong> @_basicName</p>
+				<p><strong>Email:</strong> @_basicEmail</p>
+				<p><strong>Newsletter:</strong> @(_basicNewsletter ? "Yes" : "No")</p>
+			</WizardStep>
+			<WizardStep Title="Complete" StepType="WizardStepType.Complete">
+				<h3>Registration Complete!</h3>
+				<p>Thank you, @_basicName. Your registration has been submitted.</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+@if (_basicFinished)
+{
+	<div class="alert alert-success mt-3">
+		<strong>Finish event fired!</strong> The wizard completed successfully.
+	</div>
+}
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard ActiveStepIndex="@@step" ActiveStepIndexChanged="(i) => step = i"
+        HeaderText="Registration Wizard"
+        DisplaySideBar="true"&gt;
+  &lt;WizardSteps&gt;
+    &lt;WizardStep Title="Step 1"&gt;...&lt;/WizardStep&gt;
+    &lt;WizardStep Title="Step 2"&gt;...&lt;/WizardStep&gt;
+    &lt;WizardStep Title="Finish" StepType="WizardStepType.Finish"&gt;...&lt;/WizardStep&gt;
+  &lt;/WizardSteps&gt;
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
+<!-- Wizard without Sidebar -->
+<h3>Wizard without Sidebar</h3>
+<p>Hides the sidebar navigation panel by setting <code>DisplaySideBar="false"</code>. Users must use Previous/Next buttons to navigate through steps.</p>
+
+<div data-audit-control="Wizard-2">
+	<Wizard ActiveStepIndex="@_noSidebarStep" ActiveStepIndexChanged="(i) => _noSidebarStep = i"
+			HeaderText="Survey Wizard"
+			DisplaySideBar="false">
+		<WizardSteps>
+			<WizardStep Title="Question 1">
+				<h3>Question 1: How satisfied are you?</h3>
+				<div class="mb-3">
+					<label class="form-label">
+						<input type="radio" name="satisfaction" value="very" @onchange="@((ChangeEventArgs e) => _satisfaction = (string)e.Value)" /> Very Satisfied
+					</label>
+					<label class="form-label">
+						<input type="radio" name="satisfaction" value="somewhat" @onchange="@((ChangeEventArgs e) => _satisfaction = (string)e.Value)" /> Somewhat Satisfied
+					</label>
+					<label class="form-label">
+						<input type="radio" name="satisfaction" value="not" @onchange="@((ChangeEventArgs e) => _satisfaction = (string)e.Value)" /> Not Satisfied
+					</label>
+				</div>
+			</WizardStep>
+			<WizardStep Title="Question 2">
+				<h3>Question 2: Would you recommend us?</h3>
+				<div class="mb-3 form-check">
+					<input type="checkbox" class="form-check-input" @bind="_recommend" id="recommend" />
+					<label class="form-check-label" for="recommend">Yes, I would recommend</label>
+				</div>
+			</WizardStep>
+			<WizardStep Title="Summary" StepType="WizardStepType.Finish">
+				<h3>Thank You!</h3>
+				<p>Your feedback has been recorded. Thank you for taking the survey!</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard DisplaySideBar="false"&gt;
+  &lt;WizardSteps&gt;
+    ...
+  &lt;/WizardSteps&gt;
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
+<!-- Wizard with AllowReturn Restriction -->
+<h3>Wizard with AllowReturn Restriction</h3>
+<p>The first step sets <code>AllowReturn="false"</code>, preventing users from navigating back to it once they proceed. The Previous button is disabled when trying to return to that step.</p>
+
+<div data-audit-control="Wizard-3">
+	<Wizard ActiveStepIndex="@_restrictStep" ActiveStepIndexChanged="(i) => _restrictStep = i"
+			HeaderText="Multi-page Form"
+			DisplaySideBar="true">
+		<WizardSteps>
+			<WizardStep Title="Terms" AllowReturn="false">
+				<h3>Step 1: Read Terms (No Return)</h3>
+				<div class="alert alert-info">
+					<p>You must read and accept the terms to continue. Once you proceed, you cannot go back to this step.</p>
+					<textarea class="form-control" rows="4" readonly>
+These are the terms and conditions. By proceeding, you agree to our terms.
+You acknowledge that this is a binding agreement.
+				</textarea>
+				</div>
+				<div class="mb-3 form-check">
+					<input type="checkbox" class="form-check-input" @bind="_termsAccepted" id="terms" />
+					<label class="form-check-label" for="terms">I accept the terms and conditions</label>
+				</div>
+			</WizardStep>
+			<WizardStep Title="Details">
+				<h3>Step 2: Enter Details</h3>
+				<div class="mb-3">
+					<label class="form-label">Your Details:</label>
+					<textarea class="form-control" @bind="_restrictDetails" rows="4"></textarea>
+				</div>
+			</WizardStep>
+			<WizardStep Title="Confirm" StepType="WizardStepType.Finish">
+				<h3>Step 3: Confirm Submission</h3>
+				<p>Please review your information before submitting.</p>
+				<p><strong>Terms Accepted:</strong> @(_termsAccepted ? "Yes" : "No")</p>
+				<p><strong>Details:</strong></p>
+				<p>@_restrictDetails</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;WizardStep Title="Terms" AllowReturn="false"&gt;
+  &lt;p&gt;Once you proceed past this step, you cannot go back.&lt;/p&gt;
+&lt;/WizardStep&gt;
+&lt;WizardStep Title="Details"&gt;
+  ...
+&lt;/WizardStep&gt;</code></pre>
+
+<hr />
+
+<!-- Wizard with Cancel Button -->
+<h3>Wizard with Cancel Button</h3>
+<p>Set <code>DisplayCancelButton="true"</code> to show a Cancel button. Handle the <code>OnCancelButtonClick</code> event to perform cleanup or navigation.</p>
+
+<div data-audit-control="Wizard-4">
+	<Wizard ActiveStepIndex="@_cancelStep" ActiveStepIndexChanged="(i) => _cancelStep = i"
+			HeaderText="Wizard with Cancel"
+			DisplaySideBar="true"
+			DisplayCancelButton="true"
+			OnCancelButtonClick="HandleCancelClick">
+		<WizardSteps>
+			<WizardStep Title="Step 1">
+				<h3>Step 1: Enter Data</h3>
+				<div class="mb-3">
+					<label class="form-label">Field 1:</label>
+					<input type="text" class="form-control" @bind="_cancelField1" />
+				</div>
+			</WizardStep>
+			<WizardStep Title="Step 2">
+				<h3>Step 2: Review</h3>
+				<p><strong>Field 1:</strong> @_cancelField1</p>
+			</WizardStep>
+			<WizardStep Title="Done" StepType="WizardStepType.Finish">
+				<h3>Finished</h3>
+				<p>The wizard is complete.</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+@if (_cancelClicked)
+{
+	<div class="alert alert-warning mt-3">
+		<strong>Cancel button clicked!</strong> The wizard was cancelled by the user.
+	</div>
+}
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard DisplayCancelButton="true"
+        OnCancelButtonClick="HandleCancel"&gt;
+  ...
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
+<!-- Custom Button Text -->
+<h3>Custom Button Text</h3>
+<p>Customize the text on navigation buttons using the <code>*ButtonText</code> properties like <code>StartNextButtonText</code>, <code>StepPreviousButtonText</code>, <code>FinishButtonText</code>, etc.</p>
+
+<div data-audit-control="Wizard-5">
+	<Wizard ActiveStepIndex="@_customStep" ActiveStepIndexChanged="(i) => _customStep = i"
+			HeaderText="Custom Button Labels"
+			DisplaySideBar="true"
+			StartNextButtonText="Begin ➜"
+			StepNextButtonText="Continue ➜"
+			StepPreviousButtonText="⬅ Back"
+			FinishButtonText="Submit Order"
+			FinishPreviousButtonText="⬅ Back"
+			DisplayCancelButton="true"
+			CancelButtonText="Cancel Order">
+		<WizardSteps>
+			<WizardStep Title="Product">
+				<h3>Step 1: Select Product</h3>
+				<div class="mb-3">
+					<label class="form-label">Choose a product:</label>
+					<select class="form-select" @bind="_selectedProduct">
+						<option value="">-- Select --</option>
+						<option value="product-a">Product A</option>
+						<option value="product-b">Product B</option>
+						<option value="product-c">Product C</option>
+					</select>
+				</div>
+			</WizardStep>
+			<WizardStep Title="Shipping">
+				<h3>Step 2: Shipping Address</h3>
+				<div class="mb-3">
+					<label class="form-label">Address:</label>
+					<input type="text" class="form-control" @bind="_shippingAddress" />
+				</div>
+			</WizardStep>
+			<WizardStep Title="Payment" StepType="WizardStepType.Finish">
+				<h3>Step 3: Confirm Order</h3>
+				<p><strong>Product:</strong> @_selectedProduct</p>
+				<p><strong>Shipping:</strong> @_shippingAddress</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard StartNextButtonText="Begin ➜"
+        StepNextButtonText="Continue ➜"
+        StepPreviousButtonText="⬅ Back"
+        FinishButtonText="Submit Order"
+        CancelButtonText="Cancel Order"&gt;
+  ...
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
+<!-- Wizard with HeaderTemplate -->
+<h3>Wizard with HeaderTemplate</h3>
+<p>Use the <code>HeaderTemplate</code> to customize the header section with custom content instead of plain text.</p>
+
+<div data-audit-control="Wizard-6">
+	<Wizard ActiveStepIndex="@_headerStep" ActiveStepIndexChanged="(i) => _headerStep = i"
+			DisplaySideBar="true">
+		<HeaderTemplate>
+			<div style="padding: 15px; background-color: #f0f0f0; border-bottom: 2px solid #0066cc;">
+				<h4 style="margin: 0; color: #0066cc;">Checkout Process</h4>
+				<small>Step @(_headerStep + 1) of 3</small>
+			</div>
+		</HeaderTemplate>
+		<WizardSteps>
+			<WizardStep Title="Cart">
+				<h3>Step 1: Review Cart</h3>
+				<table class="table">
+					<tr>
+						<td>Item 1</td>
+						<td>$29.99</td>
+					</tr>
+					<tr>
+						<td>Item 2</td>
+						<td>$15.00</td>
+					</tr>
+				</table>
+				<p><strong>Total: $44.99</strong></p>
+			</WizardStep>
+			<WizardStep Title="Shipping">
+				<h3>Step 2: Shipping</h3>
+				<p>Standard Shipping: 5-7 business days</p>
+				<p>Cost: $5.00</p>
+			</WizardStep>
+			<WizardStep Title="Payment" StepType="WizardStepType.Finish">
+				<h3>Step 3: Payment</h3>
+				<p>Order Total: $49.99</p>
+				<p>Thank you for your order!</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard&gt;
+  &lt;HeaderTemplate&gt;
+    &lt;div style="padding: 15px; background-color: #f0f0f0;"&gt;
+      &lt;h4&gt;Custom Header Content&lt;/h4&gt;
+    &lt;/div&gt;
+  &lt;/HeaderTemplate&gt;
+  &lt;WizardSteps&gt;
+    ...
+  &lt;/WizardSteps&gt;
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
+<h3>Source Code</h3>
+<p>Complete code-behind implementation for all wizard demonstrations:</p>
+
+@code {
+	// Basic Wizard
+	private int _basicStep;
+	private string _basicName = "";
+	private string _basicEmail = "";
+	private bool _basicNewsletter;
+	private bool _basicFinished;
+
+	// No Sidebar Wizard
+	private int _noSidebarStep;
+	private string _satisfaction = "";
+	private bool _recommend;
+
+	// AllowReturn Restriction
+	private int _restrictStep;
+	private bool _termsAccepted;
+	private string _restrictDetails = "";
+
+	// Cancel Button
+	private int _cancelStep;
+	private string _cancelField1 = "";
+	private bool _cancelClicked;
+
+	// Custom Button Text
+	private int _customStep;
+	private string _selectedProduct = "";
+	private string _shippingAddress = "";
+
+	// HeaderTemplate
+	private int _headerStep;
+
+	private void HandleBasicFinish(WizardNavigationEventArgs args)
+	{
+		_basicFinished = true;
+	}
+
+	private void HandleCancelClick(EventArgs args)
+	{
+		_cancelClicked = true;
+	}
+}

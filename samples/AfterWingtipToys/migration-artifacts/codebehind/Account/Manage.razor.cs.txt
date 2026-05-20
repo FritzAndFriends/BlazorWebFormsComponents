@@ -24,12 +24,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using WingtipToys.Models;
 
+using WingtipToys.Logic;
 using BlazorWebFormsComponents.Identity;
 using IdentityResult = BlazorWebFormsComponents.Identity.IdentityResult;
 
 namespace WingtipToys.Account
 {
-    public partial class Manage
+    public partial class Manage : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -45,12 +46,7 @@ namespace WingtipToys.Account
 
     private HyperLink ChangePassword = default!;
     private HyperLink CreatePassword = default!;
-    private Label PhoneNumber = default!;
     private PlaceHolder successMessage = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         protected string SuccessMessage
         {
             get;
@@ -77,7 +73,7 @@ namespace WingtipToys.Account
             HasPhoneNumber = String.IsNullOrEmpty(manager.GetPhoneNumber(User.Identity.GetUserId()));
 
             // Enable this after setting up two-factor authentientication
-            //PhoneNumber.Text = manager.GetPhoneNumber(User.Identity.GetUserId()) ?? String.Empty;
+            //_PhoneNumber_Text = manager.GetPhoneNumber(User.Identity.GetUserId()) ?? String.Empty;
 
             TwoFactorEnabled = manager.GetTwoFactorEnabled(User.Identity.GetUserId());
 
@@ -98,7 +94,7 @@ namespace WingtipToys.Account
                         }
 
                         // Render success message
-                        var message = Request.QueryString["m"];
+                        string? message = Request.QueryString["m"];
                         if (message != null)
                         {
                             // Strip the query string from action
@@ -125,7 +121,7 @@ namespace WingtipToys.Account
         }
 
         // Remove phonenumber from user
-        protected void RemovePhone_Click()
+        protected void RemovePhone_Click(EventArgs e)
         {
             var manager = Context.GetOwinContext().GetUserManager<ApplicationUserManager>();
             var result = manager.SetPhoneNumber(User.Identity.GetUserId(), null);
@@ -142,7 +138,7 @@ namespace WingtipToys.Account
         }
 
         // DisableTwoFactorAuthentication
-        protected void TwoFactorDisable_Click()
+        protected void TwoFactorDisable_Click(EventArgs e)
         {
             var manager = Context.GetOwinContext().GetUserManager<ApplicationUserManager>();
             manager.SetTwoFactorEnabled(User.Identity.GetUserId(), false);
@@ -151,7 +147,7 @@ namespace WingtipToys.Account
         }
 
         //EnableTwoFactorAuthentication 
-        protected void TwoFactorEnable_Click()
+        protected void TwoFactorEnable_Click(EventArgs e)
         {
             var manager = Context.GetOwinContext().GetUserManager<ApplicationUserManager>();
             manager.SetTwoFactorEnabled(User.Identity.GetUserId(), true);

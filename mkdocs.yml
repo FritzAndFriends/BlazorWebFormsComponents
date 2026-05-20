@@ -132,6 +132,7 @@ nav:
     - Menu: NavigationControls/Menu.md
     - SiteMapPath: NavigationControls/SiteMapPath.md
     - TreeView: NavigationControls/TreeView.md
+    - Wizard: NavigationControls/Wizard.md
   - Login Controls:
     - ChangePassword: LoginControls/ChangePassword.md
     - CreateUserWizard: LoginControls/CreateUserWizard.md
