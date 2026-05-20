@@ -6,13 +6,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <BwfcMigrationMode>true</BwfcMigrationMode>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <NerdbankGitVersioningEnabled>false</NerdbankGitVersioningEnabled>
+    <BuildInParallel>false</BuildInParallel>
+    <UseSharedCompilation>false</UseSharedCompilation>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
+    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="0.20.0-preview.*" />
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
-
-  <Import Project="..\..\src\BlazorWebFormsComponents\build\Fritz.BlazorWebFormsComponents.targets" />
 
 </Project>

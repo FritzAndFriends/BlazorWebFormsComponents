@@ -131,6 +131,7 @@
                                         Width="100"
                                         AutoGenerateColumns="false"
                                         DataKeyNames="ApplicationID"
+                                        EmptyDataText="No loan applications have been submitted yet."
                                         OnRowCommand="@gvLoanHistory_RowCommand">
                                         <Columns>
                                             <ButtonField ItemType="object" Text="Review" CommandName="ReviewApplication" />
