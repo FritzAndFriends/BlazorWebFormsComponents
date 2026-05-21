@@ -100,7 +100,7 @@
 			</Wizard>
 		);
 
-		cut.FindAll("a").First(a => a.TextContent.Contains("Step 2")).Click();
+		cut.FindAll("button[type='submit']").First(a => a.TextContent.Contains("Step 2")).Click();
 
 		receivedArgs.ShouldNotBeNull();
 		receivedArgs.CurrentStepIndex.ShouldBe(0);

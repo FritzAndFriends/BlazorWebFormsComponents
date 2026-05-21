@@ -1060,7 +1060,7 @@ public class InteractiveComponentTests
             var wizard = page.Locator("[data-audit-control='Wizard-1']");
             await wizard.Locator("h3:has-text('Step 1: Personal Information')").WaitForAsync(new() { Timeout = 5000 });
 
-            await wizard.Locator("a:has-text('Review')").ClickAsync();
+            await wizard.Locator("button:has-text('Review')").ClickAsync();
 
             var reviewHeading = wizard.Locator("h3:has-text('Step 3: Review')");
             await reviewHeading.WaitForAsync(new() { Timeout = 5000 });
@@ -1306,7 +1306,8 @@ public class InteractiveComponentTests
     {
         var forwardButton = await FindForwardNavigationButtonAsync(wizard);
         await forwardButton.ClickAsync();
-        await page.WaitForTimeoutAsync(300);
+        // Wait for the page to settle after form POST (SSR) or state update
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
     }
 
     private static async Task<ILocator> FindForwardNavigationButtonAsync(ILocator wizard)

@@ -41,7 +41,7 @@
 			</Wizard>
 		);
 
-		cut.FindAll("a").Count.ShouldBe(10);
+		cut.FindAll("td[role='navigation'] button[type='submit']").Count.ShouldBe(10);
 		cut.FindAll("span").Count.ShouldBe(1);
 		cut.Markup.ShouldContain("Step 11");
 	}
@@ -62,7 +62,7 @@
 			</Wizard>
 		);
 
-		cut.FindAll("a").Single().TextContent.ShouldBe("Step 1");
+		cut.FindAll("td[role='navigation'] button[type='submit']").Single().TextContent.ShouldBe("Step 1");
 	}
 
 	[Fact]
@@ -81,7 +81,7 @@
 			</Wizard>
 		);
 
-		cut.FindAll("a").Single().TextContent.ShouldBeEmpty();
+		cut.FindAll("td[role='navigation'] button[type='submit']").Single().TextContent.ShouldBeEmpty();
 	}
 
 	[Fact]
@@ -97,8 +97,8 @@
 			</Wizard>
 		);
 
-		// Initially 3 steps — sidebar shows 2 links (non-active) + 1 span (active step A)
-		cut.FindAll("td[role='navigation'] a").Count.ShouldBe(2);
+		// Initially 3 steps — sidebar shows 2 buttons (non-active) + 1 span (active step A)
+		cut.FindAll("td[role='navigation'] button[type='submit']").Count.ShouldBe(2);
 
 		// Verify navigation buttons exist (multi-step wizard)
 		cut.FindAll("input[type='submit']").Count.ShouldBeGreaterThan(0);

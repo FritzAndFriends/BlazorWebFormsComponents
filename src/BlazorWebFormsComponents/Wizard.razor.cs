@@ -18,34 +18,14 @@ namespace BlazorWebFormsComponents
 		private bool _formProcessed;
 		private int _previousActiveStepIndex = -1;
 		private readonly List<int> _navigationHistory = new();
+		private string _formName;
 
 		protected override async Task OnInitializedAsync()
 		{
 			await base.OnInitializedAsync();
 
-			// In SSR mode, restore step index from form hidden field on postback
-			if (CurrentRenderMode == WebFormsRenderMode.StaticSSR)
-			{
-				var httpContext = HttpContextAccessor?.HttpContext;
-				if (httpContext != null && HttpMethods.IsPost(httpContext.Request.Method)
-					&& httpContext.Request.HasFormContentType)
-				{
-					var form = await httpContext.Request.ReadFormAsync();
-
-					// Restore the step index from hidden field
-					if (int.TryParse(form[WizardStepFieldName], out var savedStep))
-					{
-						ActiveStepIndex = savedStep;
-					}
-
-					// Determine navigation action from button click
-					var action = form[WizardActionFieldName].ToString();
-					if (!string.IsNullOrEmpty(action))
-					{
-						_pendingAction = action;
-					}
-				}
-			}
+			// Generate a unique form name per wizard instance
+			_formName = $"__wizard_{GetHashCode():x}";
 		}
 
 		protected override async Task OnParametersSetAsync()
@@ -60,6 +40,56 @@ namespace BlazorWebFormsComponents
 			_previousActiveStepIndex = ActiveStepIndex;
 		}
 
+		/// <summary>
+		/// Handles the form submission from navigation buttons (SSR-compatible).
+		/// </summary>
+		private async Task HandleFormSubmit()
+		{
+			var httpContext = HttpContextAccessor?.HttpContext;
+			if (httpContext == null || !HttpMethods.IsPost(httpContext.Request.Method)
+				|| !httpContext.Request.HasFormContentType)
+			{
+				return;
+			}
+
+			var form = await httpContext.Request.ReadFormAsync();
+
+			// Restore step index from hidden field (SSR doesn't preserve state)
+			if (int.TryParse(form[WizardStepFieldName], out var savedStep))
+			{
+				SetActiveStepIndexInternal(savedStep);
+			}
+
+			var action = form[WizardActionFieldName].ToString();
+
+			if (string.IsNullOrEmpty(action)) return;
+
+			// Handle sidebar navigation (format: __sidebar_N)
+			if (action.StartsWith("__sidebar_") && int.TryParse(action.AsSpan("__sidebar_".Length), out var sidebarIndex))
+			{
+				await HandleSideBarNavigation(sidebarIndex);
+				return;
+			}
+
+			// Handle standard navigation actions
+			if (action == StartNextButtonText || action == StepNextButtonText)
+			{
+				await HandleNextClick();
+			}
+			else if (action == StepPreviousButtonText || action == FinishPreviousButtonText)
+			{
+				await HandlePreviousClick();
+			}
+			else if (action == FinishButtonText || action == FinishCompleteButtonText || action == CalculatedFinishButtonText)
+			{
+				await HandleFinishClick();
+			}
+			else if (action == CancelButtonText)
+			{
+				await HandleCancelClick();
+			}
+		}
+
 		private string _pendingAction;
 
 		/// <summary>
@@ -68,14 +98,12 @@ namespace BlazorWebFormsComponents
 		internal void ProcessPendingNavigation()
 		{
 			if (_formProcessed || string.IsNullOrEmpty(_pendingAction)) return;
-			// Wait until we have enough steps registered to navigate
-			// (navigation target must be within known step bounds)
 			var action = _pendingAction;
 
 			if (action == StartNextButtonText || action == StepNextButtonText)
 			{
 				var nextIndex = ActiveStepIndex + 1;
-				if (nextIndex >= _steps.Count) return; // Not enough steps registered yet
+				if (nextIndex >= _steps.Count) return;
 				_formProcessed = true;
 				_pendingAction = null;
 				SetActiveStepIndexInternal(nextIndex);
@@ -97,7 +125,7 @@ namespace BlazorWebFormsComponents
 			else if (action == FinishButtonText || action == FinishCompleteButtonText)
 			{
 				var nextIndex = ActiveStepIndex + 1;
-				if (nextIndex >= _steps.Count) return; // Not enough steps registered yet
+				if (nextIndex >= _steps.Count) return;
 				_formProcessed = true;
 				_pendingAction = null;
 				if (!string.IsNullOrEmpty(FinishDestinationPageUrl))
@@ -116,6 +144,15 @@ namespace BlazorWebFormsComponents
 				if (!string.IsNullOrEmpty(CancelDestinationPageUrl))
 				{
 					NavigationManager.NavigateTo(CancelDestinationPageUrl);
+				}
+			}
+			else if (action.StartsWith("__sidebar_") && int.TryParse(action.AsSpan("__sidebar_".Length), out var sidebarIndex))
+			{
+				_formProcessed = true;
+				_pendingAction = null;
+				if (sidebarIndex >= 0 && sidebarIndex < _steps.Count)
+				{
+					SetActiveStepIndexInternal(sidebarIndex);
 				}
 			}
 			else

@@ -323,8 +323,8 @@
 			</Wizard>
 		);
 
-		// Click the "Step 2" link in the sidebar
-		var sideBarLinks = cut.FindAll("a");
+		// Click the "Step 2" button in the sidebar
+		var sideBarLinks = cut.FindAll("td[role='navigation'] button[type='submit']");
 		var step2Link = sideBarLinks.First(a => a.TextContent.Contains("Step 2"));
 		step2Link.Click();
 
@@ -446,10 +446,10 @@
 		);
 
 		cut.Find("#custom-sidebar").TextContent.ShouldBe("Custom Sidebar Content");
-		// The default sidebar links should not render (no <a> with step titles as visible text)
-		var sidebarLinks = cut.FindAll("a");
-		sidebarLinks.ShouldNotContain(a => a.TextContent == "Alpha Step");
-		sidebarLinks.ShouldNotContain(a => a.TextContent == "Beta Step");
+		// The default sidebar buttons should not render
+		var sidebarButtons = cut.FindAll("td[role='navigation'] button[type='submit']");
+		sidebarButtons.ShouldNotContain(b => b.TextContent == "Alpha Step");
+		sidebarButtons.ShouldNotContain(b => b.TextContent == "Beta Step");
 	}
 
 	[Fact]

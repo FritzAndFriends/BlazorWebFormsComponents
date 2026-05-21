@@ -8,116 +8,119 @@
 
 	@if (_steps.Count > 0)
 	{
-		<input type="hidden" name="__wizard_step" value="@ActiveStepIndex" />
-		<table cellspacing="0" cellpadding="0" border="0" id="@ID" class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)" style="border-collapse:collapse;@Style">
-			<tbody>
-				<tr>
-					@if (DisplaySideBar && !IsCompleteStep)
-					{
-						<td style="@GetSideBarStyleString()" class="@GetSideBarStyleClass()" role="navigation" aria-label="Wizard sidebar">
-							@if (SideBarTemplate != null)
-							{
-								@SideBarTemplate
-							}
-							else
-							{
-								<table cellspacing="0" border="0" style="border-collapse:collapse;">
-									@for (int i = 0; i < _steps.Count; i++)
+		<form method="post" @formname="@_formName" @onsubmit="HandleFormSubmit">
+			<Microsoft.AspNetCore.Components.Forms.AntiforgeryToken />
+			<input type="hidden" name="@WizardStepFieldName" value="@ActiveStepIndex" />
+			<table cellspacing="0" cellpadding="0" border="0" id="@ID" class="@(string.IsNullOrEmpty(CssClass) ? null : CssClass)" style="border-collapse:collapse;@Style">
+				<tbody>
+					<tr>
+						@if (DisplaySideBar && !IsCompleteStep)
+						{
+							<td style="@GetSideBarStyleString()" class="@GetSideBarStyleClass()" role="navigation" aria-label="Wizard sidebar">
+								@if (SideBarTemplate != null)
+								{
+									@SideBarTemplate
+								}
+								else
+								{
+									<table cellspacing="0" border="0" style="border-collapse:collapse;">
+										@for (int i = 0; i < _steps.Count; i++)
+										{
+											var index = i;
+											var step = _steps[i];
+											var isActive = i == ActiveStepIndex;
+											var canNavigate = step.AllowReturn || i >= ActiveStepIndex;
+											<tr>
+												<td style="@(isActive ? "font-weight:bold;" : "")">
+													@if (canNavigate && !isActive)
+													{
+															<button type="submit" name="@WizardActionFieldName" value="__sidebar_@index" @onclick="() => HandleSideBarNavigation(index)" @onclick:preventDefault style="background:none;border:none;color:blue;cursor:pointer;padding:0;text-decoration:underline;font:inherit;">@(step.Title ?? $"Step {index + 1}")</button>
+													}
+													else
+													{
+														<span>@(step.Title ?? $"Step {index + 1}")</span>
+													}
+												</td>
+											</tr>
+										}
+									</table>
+								}
+							</td>
+						}
+						<td style="height:100%;" role="tabpanel" aria-label="@(_steps[ActiveStepIndex].Title ?? "Wizard step")">
+							<table cellspacing="0" cellpadding="0" border="0" style="width:100%;height:100%;">
+								<tbody>
+									@if (!string.IsNullOrEmpty(HeaderText) || HeaderTemplate != null)
 									{
-										var index = i;
-										var step = _steps[i];
-										var isActive = i == ActiveStepIndex;
-										var canNavigate = step.AllowReturn || i >= ActiveStepIndex;
 										<tr>
-											<td style="@(isActive ? "font-weight:bold;" : "")">
-												@if (canNavigate && !isActive)
+											<td style="@GetHeaderStyleString()" class="@GetHeaderStyleClass()">
+												@if (HeaderTemplate != null)
 												{
-													<a href="#" @onclick:preventDefault @onclick="() => HandleSideBarNavigation(index)">@(step.Title ?? $"Step {index + 1}")</a>
+													@HeaderTemplate
 												}
 												else
 												{
-													<span>@(step.Title ?? $"Step {index + 1}")</span>
+													@HeaderText
 												}
 											</td>
 										</tr>
 									}
-								</table>
-							}
+									<tr style="height:100%;">
+										<td style="@GetStepStyleString()" class="@GetStepStyleClass()">
+											@if (ActiveStepIndex >= 0 && ActiveStepIndex < _steps.Count)
+											{
+												@_steps[ActiveStepIndex].ChildContent
+											}
+										</td>
+									</tr>
+									@if (!IsCompleteStep && HasNavigationTarget)
+									{
+										<tr>
+											<td align="right" style="@GetNavigationStyleString()" class="@GetNavigationStyleClass()" role="navigation" aria-label="Wizard navigation">
+												@if (CurrentNavigationTemplate != null)
+												{
+													@CurrentNavigationTemplate
+												}
+												else
+												{
+													<table cellspacing="5" cellpadding="5" border="0">
+														<tr>
+															@if (ShowPreviousButton)
+															{
+																<td align="right">
+																	<input type="submit" name="@WizardActionFieldName" value="@PreviousButtonText" @onclick="HandlePreviousClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+																</td>
+															}
+															@if (ShowNextButton)
+															{
+																<td align="right">
+																	<input type="submit" name="@WizardActionFieldName" value="@NextButtonText" @onclick="HandleNextClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+																</td>
+															}
+															@if (ShowFinishButton)
+															{
+																<td align="right">
+																	<input type="submit" name="@WizardActionFieldName" value="@CalculatedFinishButtonText" @onclick="HandleFinishClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+																</td>
+															}
+															@if (DisplayCancelButton)
+															{
+																<td align="right">
+																	<input type="submit" name="@WizardActionFieldName" value="@CancelButtonText" @onclick="HandleCancelClick" @onclick:preventDefault />
+																</td>
+															}
+														</tr>
+													</table>
+												}
+											</td>
+										</tr>
+									}
+								</tbody>
+							</table>
 						</td>
-					}
-					<td style="height:100%;" role="tabpanel" aria-label="@(_steps[ActiveStepIndex].Title ?? "Wizard step")">
-						<table cellspacing="0" cellpadding="0" border="0" style="width:100%;height:100%;">
-							<tbody>
-								@if (!string.IsNullOrEmpty(HeaderText) || HeaderTemplate != null)
-								{
-									<tr>
-										<td style="@GetHeaderStyleString()" class="@GetHeaderStyleClass()">
-											@if (HeaderTemplate != null)
-											{
-												@HeaderTemplate
-											}
-											else
-											{
-												@HeaderText
-											}
-										</td>
-									</tr>
-								}
-								<tr style="height:100%;">
-									<td style="@GetStepStyleString()" class="@GetStepStyleClass()">
-										@if (ActiveStepIndex >= 0 && ActiveStepIndex < _steps.Count)
-										{
-											@_steps[ActiveStepIndex].ChildContent
-										}
-									</td>
-								</tr>
-								@if (!IsCompleteStep && HasNavigationTarget)
-								{
-									<tr>
-										<td align="right" style="@GetNavigationStyleString()" class="@GetNavigationStyleClass()" role="navigation" aria-label="Wizard navigation">
-											@if (CurrentNavigationTemplate != null)
-											{
-												@CurrentNavigationTemplate
-											}
-											else
-											{
-												<table cellspacing="5" cellpadding="5" border="0">
-													<tr>
-														@if (ShowPreviousButton)
-														{
-															<td align="right">
-																<input type="submit" name="__wizard_action" value="@PreviousButtonText" @onclick="HandlePreviousClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
-															</td>
-														}
-														@if (ShowNextButton)
-														{
-															<td align="right">
-																<input type="submit" name="__wizard_action" value="@NextButtonText" @onclick="HandleNextClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
-															</td>
-														}
-														@if (ShowFinishButton)
-														{
-															<td align="right">
-																<input type="submit" name="__wizard_action" value="@CalculatedFinishButtonText" @onclick="HandleFinishClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
-															</td>
-														}
-														@if (DisplayCancelButton)
-														{
-															<td align="right">
-																<input type="submit" name="__wizard_action" value="@CancelButtonText" @onclick="HandleCancelClick" @onclick:preventDefault />
-															</td>
-														}
-													</tr>
-												</table>
-											}
-										</td>
-									</tr>
-								}
-							</tbody>
-						</table>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+					</tr>
+				</tbody>
+			</table>
+		</form>
 	}
 }
