@@ -1,403 +1,405 @@
-# Decisions
 
-> Shared team decisions. All agents read this. Only Scribe writes here (by merging from inbox).
 
-<!-- Decisions are appended below by the Scribe after merging from .squad/decisions/inbox/ -->
 
-# Decision: Master Page Migration Documentation Update
+# Decision: Executive Summary Update Pattern
 
-**Date:** 2026-04-27
+**Date:** 2026-05-17T21:45:23-04:00
 **Author:** Beast (Technical Writer)
-**Status:** Completed
+**Status:** Established
 
 ## Decision
 
-Updated `docs/Migration/MasterPages.md` to emphasize the **improved automated migration path** using the `webforms-to-blazor` CLI tool as the primary recommendation, with manual migration and BWFC components as fallback options.
+When updating the executive summary with new benchmark run data:
 
-## Key Changes Made
+1. **Count transforms from source, not docs.** Always grep `AddSingleton<I(Markup|CodeBehind)Transform` in `src/BlazorWebFormsComponents.Cli/Program.cs` for authoritative counts. The copilot-instructions count lags implementation.
 
-### 1. Reordered Migration Strategies
-- **Strategy 1 (New):** CLI Tool (Automated) — Recommended ⭐
-- **Strategy 2:** Manual to Blazor Layouts — Alternative
-- **Strategy 3:** Gradual via BWFC Components — Stepping stone
+2. **Verify screenshot paths before linking.** Check which image files actually exist in the run folder before referencing them. Run 90 had `01–06` images but no `07-cart-with-item.png` — the cart screenshot was `04-shopping-cart.png` instead.
 
-### 2. Added CLI Tool Section
-- Comprehensive table showing L1 transforms (what the CLI outputs)
-- Before/after code examples for complete master page migration
-- Exact output structure (MainLayout.razor, App.razor updates)
-- Installation and usage instructions
+3. **Regenerate charts from generate-charts.py, not by editing SVGs.** The Python file is the single source of truth for chart data. Update it with new data points and rerun — do not hand-edit the SVG output.
 
-### 3. Added CSS Link Migration Guidance
-- Explains why CSS must move from layouts to App.razor
-- Path rewriting rules table (tilde to root-relative)
-- Examples of automatic path transformations
-- Critical note: Blazor layouts don't control HTML structure
+4. **The dual-benchmark chart format is the canonical multi-app visual.** Two panels: (1) pipeline phases by app (L1/L2/other stacked bars) and (2) acceptance test stability over recent runs for both apps side by side. Use this for any future multi-benchmark executive summary updates.
 
-### 4. Updated BWFC Components Context
-- Marked as "gradual migration stepping stone only"
-- Clarified that BWFC components are **not for new development**
-- Added warning admonition
-- Positioned after automated path
+5. **Headline framing should reflect what improved most.** When build repair time drops more dramatically than total wall clock (e.g. 3:03 → 1:01 in Run 90), lead with error count reduction and repair time, not just total duration. The total wall clock includes report-writing overhead that does not reflect automation progress.
 
-### 5. Enhanced Best Practices
-- Separate guidance for CLI users vs manual migration
-- Head content best practices (global vs page-specific)
-- "From Web Forms thinking" guidance — anti-patterns vs patterns
-- Emphasized CLI tool as the starting point
+## Why
 
-### 6. Updated Conclusion
-- Emphasizes automation is now fully reliable
-- Clear recommendation: CLI tool first
-- Explains when to use BWFC components (migration aid only)
-- Links to related documentation
+This update cycle (Run 90 + CU Run 30) revealed that transform counts in copilot-instructions.md and the exec summary were significantly out of date (24→37 markup, 27→48 code-behind), screenshots were app/run-specific rather than stable, and the single-app headline no longer captured the dual-benchmark story. Encoding these rules prevents the same staleness in future updates.
 
-## Rationale
+## Scope
 
-The original documentation was comprehensive but buried the most important information (the CLI tool) in a secondary position. The improvements:
+Applies to all future executive summary updates in `dev-docs/migration-tests/EXECUTIVE-SUMMARY.md`.
 
-1. **Front-load automation** — Most teams will use the CLI tool; they should see it first
-2. **Clarify BWFC role** — BWFC components are for gradual manual migration, not primary path
-3. **Document tooling output** — Developers need to know what the CLI generates
-4. **Explain path rewriting** — CSS link migration is a common pain point
-5. **Provide clear guidance** — "Use the CLI tool" is simpler than "here are three paths"
 
-## Documentation Links Updated
+# Bishop decision inbox — CLI code-behind fixes
 
-- Added link to `/cli/index.md` (CLI Tool Documentation)
-- Added link to `/cli/transforms.md` (Transform Reference)
-- Cross-links to Three-Layer Methodology
-
-## Navigation Impact
-
-No navigation changes required — MasterPages.md remains at:
-```
-Migration:
-  Implement:
-    Master Pages: Migration/MasterPages.md
-```
-
-This is the correct location for this type of guidance.
-
-## Future Considerations
-
-- If BWFC adds more master page features (e.g., nested master pages), update the BWFC Components section
-- If CLI tool adds new transforms, update the automation table
-- Monitor for CSS path rewriting edge cases (e.g., CDN URLs, blob storage paths)
-
-## Testing
-
-Documentation has been reviewed for:
-- ✅ Accuracy (matches CLI tool behavior and BWFC API)
-- ✅ Clarity (examples are clear and follow the Beast documentation template)
-- ✅ Completeness (covers all three migration paths, limitations, and best practices)
-- ✅ Cross-links (links to related migration guides and component docs)
-
-# Decision: Master-Page Migration Strategy
-
-**Date:** 2026-04-27  
-**Author:** Bishop (Migration Tooling Dev)  
-**Status:** Accepted
-
-## Context
-
-The CLI migrator was converting all `<asp:ContentPlaceHolder>` elements to Razor `@Body` and adding
-`@inherits LayoutComponentBase`, producing a shallow single-slot Blazor layout. This discarded named
-placeholder relationships, and the generated layout still contained the full HTML document scaffold
-(`<!DOCTYPE html>`, `<html>`, `<head>`, `<body>`, etc.) which broke downstream Blazor rendering.
-# Bishop decision inbox — G3/G4 fixes
-
-- **Date:** 2026-05-08T10:42:43-04:00
+- **Date:** 2026-05-17T10:01:20-04:00
 - **Owner:** Bishop
 
 ## Decision
-For benchmark-facing identity scaffolds, the CLI should emit one consistent auth contract end to end:
-- account semantic rewrites post to `/Account/LoginHandler` and `/Account/RegisterHandler`
-- generated `Program.cs` configures application cookie `LoginPath` and `LogoutPath`
-- redirect handler stubs use ASP.NET Core Identity (`SignInManager<IdentityUser>` / `UserManager<IdentityUser>`) and preserve `ReturnUrl` when it is local
-
-For validator typing, `RequiredFieldValidator` should infer its generic `Type` from the validated control when possible (notably `TextBox` -> `string`) and only fall back to `object` when no control hint exists.
+1. `LegacyHelperStubTransform` must skip page, master, and user-control code-behinds by `FileMetadata.FileType` first, not by `SourceFilePath` suffix checks alone.
+2. Keep extension-based fallback checks on both source and output paths, including `.razor.cs`, as belt-and-suspenders protection for renamed code-behind files.
+3. When helper stubs are generated, preserve protected method signatures instead of dropping them from the extracted API surface.
+4. `DataBindTransform` must consume optional `this.` prefixes for both `DataSource` assignments and `DataBind()` removal, and the `DataBind()` regex must own the whole line so it cannot leave a dangling `this.` token behind.
 
 ## Why
-Run 42 showed that mismatched auth contracts caused the only first-pass failure, while blanket validator defaults created avoidable generic warnings. Encoding both decisions in the CLI keeps Layer 1 output runnable without forcing manual post-processing.
+`FileMetadata.SourceFilePath` points at the markup file for page migrations, so suffix-only detection silently treated real page code-behinds as standalone helpers whenever they referenced `System.Configuration` or other legacy namespaces. That replaced Contoso page logic with empty stubs and stripped event-handler bodies out of generated `.razor.cs` files.
+
+The companion `DataBindTransform` bug was smaller but still a true pipeline failure: removing only `grv.DataBind();` from `this.grv.DataBind();` leaves invalid C#. These are Layer 1 correctness bugs, so the pipeline has to absorb them before L2 ever sees the output.
+
+## Validation
+- Added focused regression tests for `LegacyHelperStubTransform` skip behavior and protected helper methods.
+- Added focused regression tests for `DataBindTransform` handling of `this.`-prefixed `DataSource` and `DataBind()` statements.
+- Full CLI test suite passed: 818/818.
+- Fresh isolated Contoso migration confirmed `Instructors.razor.cs` no longer has a dangling `this.` in `OnAfterRenderAsync`, and `Students.razor.cs` / `Courses.razor.cs` preserved real page code instead of API stubs.
 
 
-# Bishop G6/G7 Fixes
+# Bishop decision inbox — Contoso CRUD transforms\n\n- **Date:** 2026-05-17T00:00:00-04:00\n- **Owner:** Bishop\n\n## Decision\nFor Web Forms data controls that already use model binding, the CLI should preserve `SelectMethod`, `InsertMethod`, `UpdateMethod`, and `DeleteMethod` attributes in migrated BWFC markup instead of rewriting them into new delegate-style handler names or TODO comments.\n\nThe GridView migration path should also emit BWFC `CommandField` columns and preserve `BoundField ReadOnly` so generated CRUD pages stay structurally close to their Web Forms source.\n\n## Why\nBWFC already supports string-based CRUD method resolution at runtime through `DataBoundComponent<T>` and `SelectMethodResolver`, so attribute preservation is the lowest-risk, highest-fidelity migration behavior. Rewriting these attributes adds manual repair noise without improving the runnable output.\n\nContosoUniversity `Students.aspx` is the benchmark proof point: preserving CRUD attributes plus `CommandField`/`ReadOnly` keeps the generated GridView close to the original page and removes several avoidable Layer 2 edits.\n\n## Verification\n- `dotnet test tests\\BlazorWebFormsComponents.Cli.Tests --nologo`\n- `dotnet test src\\BlazorWebFormsComponents.Test --nologo --filter GridView`\n- `dotnet run --project src\\BlazorWebFormsComponents.Cli -- migrate -i samples\\ContosoUniversity\\ContosoUniversity -o samples\\AfterContosoUniversity --overwrite`\n
 
-Date: 2026-05-08T11:37:18.862-04:00
-Branch: feature/wingtip-next-features-review
-PR: #545
+# Bishop — CU Benchmark Quality Fixes (Run 41, commit 31f927d0)
 
-## Decisions
+## Decision: Compile-surface is not a strong quarantine signal for non-quarantinable paths
 
-1. `PageDirectiveTransform` now emits a source-relative primary `@page` route for nested `.aspx` pages and keeps the filename-only alias as a secondary route when the two differ. Root-level pages still emit a single route, and `Default.aspx`/`Index.aspx` continue to resolve to `/`.
-2. `PageQuarantineDetector` now bypasses quarantine for redirect-only action pages when their markup is inert and their code-behind uses `Response.Redirect`, unless identity or payment signals are also present.
-3. CLI docs were updated to describe nested route aliasing and the redirect-only quarantine exemption because both behaviors change generated migration output in operator-visible ways.
-# Decision: ComponentRefCodeBehindTransform ClassOpenRegex Fix
+**Context:** Pages with compile-surface issues (e.g., `HttpContext.Current`, unresolved SelectMethod parameters) were being quarantined even when they contained no payment, identity, or admin-path signals. This caused core university data pages (Students, Courses, Instructors) to be silently stubbed.
 
-**Date:** 2026-05-15T09:55:50-04:00  
-**Author:** Bishop  
-**Status:** Implemented
+**Decision:** Remove "Unresolved compile-surface blockers" from `HasStrongSingleSignal()`. Pages with only compile issues on non-quarantinable paths now receive best-effort output: the transformed code-behind is emitted to the compile surface AND saved as an artifact for L2 review. Only pages on clearly quarantinable paths (Admin/*, Account/*, Checkout/*, Mobile) are quarantined for compile issues alone (via `IsClearlyQuarantinablePath`).
 
-## Problem
+**Rationale:** A page that compiles but needs L2 fixes is more useful than a silent stub. The quarantine mechanism should be reserved for genuinely dangerous emissions (identity, payment, admin with heavy data sources).
 
-`ComponentRefCodeBehindTransform` (Order 220) was silently skipping ALL field injection because its `ClassOpenRegex` (`partial\s+class\s+\w+\s*\{`) failed to match class declarations that include a base class.
+---
 
-`BaseClassStripTransform` (Order 200) runs **before** our transform and rewrites:
-```
-public partial class ShoppingCart : System.Web.UI.Page
-```
-to:
-```
-public partial class ShoppingCart : WebFormsPageBase
-```
+## Decision: IsEssentialPage() must exclude clearly quarantinable paths
 
-The regex `\s*\{` requires only whitespace before `{` — it cannot match `: WebFormsPageBase\n    {`. Result: every `@ref` field was never injected, producing 15+ CS0103 errors per page in Run 80.
+**Context:** Adding "Report", "Dashboard", "Overview" etc. to `IsEssentialPage()` caused `Admin/Reports.aspx` to be treated as essential (bypassing all checks). `IsEssentialPage()` always returns `None` immediately — it bypasses even quarantinable-path signals.
+
+**Decision:** Add a `IsClearlyQuarantinablePath()` guard at the top of `IsEssentialPage()`. Pages in Admin/*, Account/*, Checkout/*, or Mobile paths are never essential regardless of filename keywords. This ensures the essential-page protection applies only to core application pages outside the known-risky path categories.
+
+---
+
+## Decision: EDMX HasKey() required for non-conventional primary key names
+
+**Context:** EF Core discovers primary keys named `Id` or `{TypeName}Id` automatically. EDMX entities often have PKs like `CourseID` where the entity name is `Cours` (truncated by EDMX). `CoursID` (expected by EF Core convention) ≠ `CourseID` → EF Core cannot discover the key automatically.
+
+**Decision:** `BuildEntityModelConfiguration()` now emits `entity.HasKey(e => e.{KeyName})` in `OnModelCreating` when the single PK name does not match the EF Core convention. The `[Key]` data annotation is already emitted per property; `HasKey()` is belt-and-suspenders coverage for non-conventional names. Conventional key names (exact `Id` or `{EntityName}Id` case-insensitive match) continue to omit `HasKey()` to keep the generated context clean.
+
+---
+
+## Decision: BLL DI injection already implemented — verify with tests
+
+**Context:** Concern that BLL files with `new ContosoUniversityEntities()` would not get constructor injection when copied through the pipeline.
+
+**Finding:** `SourceFileCopier` already includes `"DbContextInstantiation"` in its transform allow-list (line 64) and `DbContextInstantiationTransform` correctly handles non-page code files via the constructor injection path. No source change was needed; an end-to-end test was added to prevent regression.
+
+
+# Bishop — ContosoUniversity Run 25 Timing Note
+
+- **Date:** 2026-05-16
+- **CLI fix commit under test:** `d591d8d2`
+- **Execution HEAD:** `04972b26`
+- **Result:** `37/40` acceptance tests
+
+## Timings
+
+| Phase | Started | Finished | Duration |
+|-------|---------|----------|----------|
+| L1 Migration | 15:38:51.685 | 15:39:10.728 | 19.04s |
+| L2 Initial Build Repair | 15:39:30.287 | 15:44:42.581 | 5m 12.29s |
+| First Acceptance Run | 15:47:16.200 | 15:51:32.626 | 4m 16.43s |
+| Acceptance-Driven Repair Loop | 15:51:32.626 | 16:01:29.701 | 9m 57.08s |
+| Final Acceptance Run | 16:01:29.701 | 16:02:49.058 | 1m 19.36s |
+| Screenshots | 16:03:36 | 16:03:39 | ~3s |
+| **Total to screenshots** | **15:38:51.685** | **16:03:39** | **24m 47s** |
+
+## Key Outcome
+
+The `d591d8d2` fix set improved the compile surface (no `Model1.Context.cs` duplicate blocker, fewer BLL namespace misses, no InnerText stub cleanup), but the benchmark still missed Jeffrey's <5 minute target because the CLI quarantined `Students`, `Courses`, and `Instructors`, forcing manual L2 page reconstruction.
+
+## Remaining Red Flags
+
+1. Quarantine still catches benchmark-critical pages.
+2. Students inline edit remains unstable in the acceptance flow.
+3. Instructors sort links still fail two acceptance scenarios.
+
+
+# Bishop decision inbox — ContosoUniversity Run 27
+
+- **Date:** 2026-05-17T08:13:43-04:00
+- **Owner:** Bishop
+
+## Decision
+For Contoso-style migrated CRUD pages running in interactive mode:
+
+1. Keep BWFC data controls (`GridView`, `DetailsView`, `DropDownList`) on the page instead of replacing them with raw HTML.
+2. Materialize typed page DTOs for benchmark-facing grids/details views rather than binding `object`/anonymous projections directly.
+3. Treat interactive GridView edit capture as an open framework gap: current `RowUpdating.NewValues` behavior still does not reliably surface browser-edited values under interactive mode.
+
+## Why
+Run 27 reached 40/40 acceptance tests only after the Students page was rebuilt around typed models and simplified BWFC usage. The original `object`-typed DetailsView/GridView composition triggered a prerender-time `BaseColumn<T>` null reference, and the remaining edit-path behavior showed that Request/Form-oriented GridView update plumbing is not yet fully interactive-aware.
+
+## Follow-up
+- Product/runtime: add a proper interactive GridView edit-value capture path.
+- CLI: prefer typed page DTO generation for complex benchmark pages instead of anonymous-object projections.
+- Benchmark guidance: keep BWFC controls, but simplify child-style wrappers and unsupported extender markup during L2 repair.
+
+
+# Bishop — ContosoUniversity Run 28
+
+**Date:** 2026-05-17T12:29:20-04:00  
+**Owner:** Bishop
 
 ## Decision
 
-Change `ClassOpenRegex` from:
-```csharp
-@"partial\s+class\s+\w+\s*\{"
-```
-to:
-```csharp
-@"partial\s+class\s+\w+[^{]*\{"
-```
+Treat Run 28 as evidence that recent CLI work improved **raw L1 page code-behind preservation**, but not yet end-to-end benchmark quality.
 
-`[^{]*` matches any characters (including `: WebFormsPageBase`, `, IDisposable`, newlines, spaces) up to the first `{`.
+### Established findings
+1. `Students.razor.cs`, `Courses.razor.cs`, and `Instructors.razor.cs` now retain meaningful method bodies in raw L1 output instead of collapsing into stub-only pages.
+2. The remaining benchmark blocker is concentrated in **Students interactive CRUD behavior** (`Add`, `Clear`, `Delete`) rather than broad page generation; the final run built cleanly and finished 37/40 acceptance tests with only those three failures remaining.
+3. BWFC `DetailsView` field child content is still unsafe during prerender because `DetailsView<ItemType>` cascades itself as `ColumnCollection` without implementing `IColumnCollection<ItemType>`, which can null-ref `BaseColumn<T>.OnInitialized()`.
 
-## Rationale
+## Why
 
-- Surgical one-character-class change with no side effects.
-- `[^{]*` is the idiomatic pattern for "skip anything before the next `{`" in class-declaration regexes.
-- Pattern generalizes to future transforms that need to locate the class body opening brace.
+Run 28 answered the primary benchmark question: recent CLI fixes did improve raw L1 quality for the three audited Contoso pages. However, the benchmark still regressed versus Run 27 because Students interactive form/grid actions are not deterministic enough under Playwright, so the next investment should target BWFC/runtime interaction fidelity instead of more generic L1 page-body preservation work alone.
 
-## Rule Established
+## Recommended follow-up
 
-> Any code-behind transform that locates the class body opening brace via regex **must** use `[^{]*\{` (not `\s*\{`) to account for base classes and interface lists injected by earlier transforms.
-
-## Verification
-
-- 35/35 `ComponentRef` tests pass (8 pre-existing + 3 new regression cases covering `: WebFormsPageBase`, `: Base, IInterface`, and brace-on-next-line variants).
-- CLI build clean.
+1. Investigate BWFC TextBox/Button/GridView interaction timing so Playwright fill/click flows reliably round-trip values before CRUD handlers execute.
+2. Fix `DetailsView` field cascading/runtime contracts rather than relying on page-level auto-generated-row workarounds.
+3. Keep tracking CLI page-body preservation improvements separately from final benchmark pass rate so L1 gains are not hidden by downstream runtime gaps.
 
 
-# Decision: Lock GridView TemplateField Preservation with Dual-Layer Regression Tests
+# Bishop — ContosoUniversity Run 29 Decision
 
-**Date:** 2026-05-08T13:02:09-04:00
-**Author:** Bishop
+**Date:** 2026-05-17T17:58:23-04:00  
+**Owner:** Bishop
+
+## Decision
+For Contoso-class benchmark pages that keep BWFC data controls under static SSR, the durable postback contract is:
+
+1. preserve the BWFC `GridView` / `DetailsView` surface,
+2. use typed page DTOs instead of `ItemType="object"` projections for complex rows/details,
+3. wire benchmark forms as standard SSR `<form method="post">` blocks with **both** `<AntiforgeryToken />` and `@formname`, and
+4. inject preserved BLL classes through DI rather than instantiating them inline.
+
+## Why
+Run 29 returned to 40/40 acceptance tests and cut total benchmark time to ~14 minutes. The decisive repair after the first 35/40 pass was not a data-layer rewrite — it was restoring the SSR form contract so Playwright-driven add/search/clear flows could post successfully.
+
+Typed DTOs (`StudentGridRow`, `StudentSearchResult`) also reconfirmed the earlier Run 27 lesson: benchmark stability improves when BWFC data controls bind concrete models instead of anonymous/object projections. Combined with DI-wired preserved BLL services, this keeps L2 focused on behavior rather than cleanup.
+
+## Follow-up
+- Push the SSR form contract left into the CLI/semantic pipeline where possible.
+- Keep preserving typed DTO patterns for benchmark-facing data pages.
+- Treat unsupported AJAX extenders as candidates for earlier downgrade/removal in L1.
+
+
+# Bishop — ContosoUniversity Run 30 Decision
+
+**Date:** 2026-05-17T19:57:00-04:00  
+**Owner:** Bishop  
+**Status:** Proposed for merge into shared decisions
+
+## Decision
+
+For the ContosoUniversity benchmark, treat the following as the current migration reality:
+
+1. **Benchmark quality is green at 40/40, but Layer 1 is not materially better than Run 29.**
+   - Raw L1 still starts from 5 build errors.
+   - The new SSR form contract transform does not improve Contoso unless the pipeline first emits real `<form>` wrappers on the benchmark pages.
+
+2. **The three new transforms had limited CU-specific impact.**
+   - **SSR form contract transform:** no measurable raw-L1 effect on Contoso because generated benchmark pages still contained zero form wrappers before L2.
+   - **Identity code-behind quarantine:** effectively no-op on this fixture because the benchmark path has no Account/OWIN page set.
+   - **Helper-class transforms:** no visible benchmark gain; Contoso still required manual DI/service cleanup and page-level SSR form rewiring.
+
+3. **The stable Contoso repair pattern remains:**
+   - keep BWFC data controls,
+   - repair preserved BLL classes in place,
+   - add typed page DTOs where object-typed grids/details are unstable,
+   - use explicit SSR forms (`method="post"` + `<AntiforgeryToken />` + `@formname`) for Courses/Students postback flows,
+   - never switch the app to interactive server render mode.
+
+4. **Operational rule:** invoke `migration-toolkit\scripts\bwfc-migrate.ps1` with `pwsh`, not Windows PowerShell, until the wrapper script is made parser-safe across both shells.
+
+## Why
+
+Run 30 matched Run 29’s final quality outcome (40/40) but did not reduce the raw compile surface or total benchmark time. The remaining path to the sub-5-minute CU target is not more L2 heroics; it is pushing actual benchmark-form emission and preserved-runtime cleanup further left into Layer 1 while keeping the proven L2 stabilization recipe as the fallback.
+
+
+# Decision: Helper-class transforms for MapPath and self-instantiation
+
+**Date:** 2026-05-17T19:20:41-04:00  
+**Author:** Bishop  
 **Status:** Proposed
 
 ## Decision
-Add TemplateField preservation regression coverage at both layers of the CLI test surface:
 
-Rewrite `MasterPageTransform` and `ContentWrapperTransform` to target the BWFC built-in
-`MasterPage` / `ContentPlaceHolder` / `Content` component system instead of Blazor's layout system.
+Teach the CLI helper-file path to fix two recurring non-page migration gaps automatically:
 
-### MasterPageTransform (Order=250, .master → .razor)
-
-- Strip HTML document scaffold (DOCTYPE, html, head, body tags).
-- Extract `<head>` contents: CSS `<link rel="stylesheet">` elements are removed and collected into a
-  `@* TODO(bwfc-master-page): CSS <link> refs from <head> — move to App.razor: ... *@` comment.
-  Non-CSS head content (title, meta, Razor comments) is placed in `<MasterPage><Head>`.
-- Convert each `<asp:ContentPlaceHolder ID="X">` to `<ContentPlaceHolder ID="X">` preserving
-  default content (not discarded).
-- Wrap body content in `<MasterPage><Head>...</Head><ChildContent>...</ChildContent></MasterPage>`.
-- Preserve leading `@using` directives outside the `<MasterPage>` wrapper.
-- Remove `@inherits LayoutComponentBase` (BWFC MasterPage uses `@layout EmptyLayout` internally).
-
-### ContentWrapperTransform (Order=300, content .aspx → .razor)
-
-- Convert `<asp:Content ... ContentPlaceHolderID="X" ...>` → `<Content ContentPlaceHolderID="X">`,
-  preserving the named relationship.
-- Convert `</asp:Content>` → `</Content>`.
-- Read `MasterPageFile="..."` from `metadata.OriginalContent` (before PageDirectiveTransform strips
-  the `<%@ Page %>` directive) and derive the component name via
-  `Path.GetFileNameWithoutExtension(masterFile)` (e.g. `~/Site.Master` → `Site`).
-- Wrap all Content elements in `<ComponentName>...</ComponentName>`.
-
-## Key Constraints
-
-- CSS `<link>` elements from `<head>` go to **App.razor**, not to the layout or the MasterPage
-  `<Head>` parameter. The transform flags them with a TODO comment.
-- The `@inherits LayoutComponentBase` approach is **not used**; BWFC's `MasterPage` component
-  handles layout internally via `@layout EmptyLayout`.
-- Default content inside `<asp:ContentPlaceHolder>` blocks is **preserved** (not discarded), since
-  BWFC renders default content when no matching `<Content>` is provided at runtime.
-
-## prescan Rule Added
-
-`BWFC021` added to `bwfc-migrate.ps1` prescan patterns to flag files using ContentPlaceHolder /
-MasterPageFile relationships.
-
-## Files Changed
-
-- `src/BlazorWebFormsComponents.Cli/Transforms/Markup/MasterPageTransform.cs`
-- `src/BlazorWebFormsComponents.Cli/Transforms/Markup/ContentWrapperTransform.cs`
-- `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/MasterPageTransformTests.cs`
-- `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/ContentWrapperTransformTests.cs`
-- `tests/BlazorWebFormsComponents.Cli.Tests/TestData/expected/TC23-MasterPage.razor`
-- `tests/BlazorWebFormsComponents.Cli.Tests/TestData/expected/TC09-ContentWrappers.razor`
-- `tests/BlazorWebFormsComponents.Cli.Tests/TestData/expected/TC28-MasterPageLayout.razor`
-- `migration-toolkit/scripts/bwfc-migrate.ps1` (BWFC021 prescan pattern)
-
-### 2026-04-28: First-pass semantic pattern runtime contract
-**By:** Bishop
-**What:** Added two production semantic catalog entries for the CLI: `pattern-query-details` rewrites query-bound `SelectMethod` pages to query-property + `SelectItems` scaffolds, and `pattern-action-pages` rewrites blank action/redirect pages to SSR handler scaffolds with explicit redirect targets and TODO boundaries. Also changed CLI DI wiring to construct `MigrationPipeline` through an explicit factory because the new semantic-pattern registrations made the public lightweight constructor ambiguous for container activation.
-**Why:** The new isolated semantic runtime now handles two recurring Wingtip-style page shapes without expanding the Layer 1 transform list. The factory registration keeps the test-only lightweight constructor available while making production activation deterministic.
-
-### 2026-04-27: .squad is the canonical runtime folder again
-
-**Date:** 2026-04-27
-**By:** Bishop
-**Status:** Implemented
-
-## Decision
-
-Runtime coordination artifacts now live canonically under .squad/. Coordinators, workflows, and agents should resolve team, routing, decisions, logs, and agent runtime files from .squad/ first.
-
-## Rationale
-
-The live runtime had drifted into .ai-team/, while repository automation already preferred .squad/ with .ai-team/ as a fallback. Restoring .squad/ as the primary runtime folder keeps workflow resolution predictable without deleting legacy .ai-team/ artifacts.
-
-## Migration Notes
-
-- Copied current runtime content from .ai-team/ into .squad/
-- Restored expected .squad/team.md, .squad/routing.md, and .squad/agents/* files
-- Rebased migrated path references from .ai-team/ to .squad/
-- Preserved existing .squad/casting/* state and left .ai-team/ intact as a compatibility mirror during transition
-
-### MasterPage Bridge — Playwright Integration Test Coverage
-
-**Date:** 2026-04-27T17:05:17.9322370-04:00
-**By:** Colossus (Integration Test Engineer)
-**Requested by:** Jeffrey T. Fritz
-**Status:** IMPLEMENTED
-
----
-
-## Context
-
-Forge's `forge-masterpage-bridge.md` contract fixes the `MasterPage` cascading gap (Content → ContentPlaceHolder slot-filling was non-functional because `MasterPage.razor` never emitted `<CascadingValue Value="this">`). After that fix, the sample pages at `/ControlSamples/Content` and `/ControlSamples/ContentPlaceHolder` host live demos of the slot-filling mechanism.
-
----
-
-## Coverage Audit Before This Task
-
-| Route | Smoke | Interaction |
-|---|---|---|
-| `/control-samples/masterpage` | ✅ `OtherControl_Loads_WithoutErrors` | — (static info page, no interaction needed) |
-| `/ControlSamples/Content` | ✅ `UtilityFeature_Loads_WithoutErrors` | ⚠️ Only `Content_Renders_MasterPageDemoElements` (heading/body length only) |
-| `/ControlSamples/ContentPlaceHolder` | ✅ `UtilityFeature_Loads_WithoutErrors` | ⚠️ Only `ContentPlaceHolder_Renders_DemoContent` (heading/body length only) |
-
----
-
-## Tests Added
-
-All four tests added to the `#region Content / ContentPlaceHolder / View Tests` block in
-`samples/AfterBlazorServerSide.Tests/InteractiveComponentTests.cs`.
-
-### 1. `Content_SlotFilling_InjectsContentAndPreservesDefault`
-- Scopes to `[data-audit-control="Content-1"]`
-- Asserts "Custom Header:" text is present (Content component injected into DemoHeader placeholder)
-- Asserts "Default body" text is present (DemoBody placeholder default is untouched)
-- **Why:** Proves the P0 cascading fix is working end-to-end in the browser.
-
-### 2. `Content_DynamicButton_UpdatesMessageInPlaceholder`
-- Scopes to `[data-audit-control="Content-3"]`
-- Records initial `<strong>` text (initial message)
-- Clicks "Change Message" button
-- Asserts the `<strong>` text changed and contains "Updated at"
-- **Why:** Verifies interactive Blazor re-render still updates content inside a `Content` child render fragment after the cascade fix.
-
-### 3. `ContentPlaceHolder_ContentReplacement_ReplacesTargetedRegionOnly`
-- Scopes to `[data-audit-control="ContentPlaceHolder-2"]`
-- Asserts "Region A was" is present (Region A was replaced)
-- Asserts "default Region B content" is present (Region B's default shows — no override)
-- **Why:** Explicitly validates the two-region replacement contract central to the migration bridge.
-
-### 4. `ContentPlaceHolder_ToggleOverride_SwitchesBetweenDefaultAndOverride`
-- Scopes to `[data-audit-control="ContentPlaceHolder-3"]`
-- Asserts "Default content" visible before toggle
-- Clicks "Apply Override" → asserts "Override active!" appears
-- Clicks "Remove Override" → asserts "Default content" returns
-- **Why:** Full round-trip test of the slot-filling mechanism under dynamic Blazor re-renders.
-
----
-
-## Decisions / Conventions
-
-- Used `DOMContentLoaded` (not `NetworkIdle`) for InteractiveServer pages, consistent with established team convention for async-bound components.
-- Scoped all locators to `[data-audit-control="*"]` containers to avoid false matches from `<pre><code>` blocks that contain identical text snippets.
-- `Filter(HasTextString)` pattern not needed here because `data-audit-control` scoping is sufficient.
-- No changes to sample page files — all work confined to the test project.
-
-# Decision: MasterPage Migration Bridge Strengthening
-
-**By:** Cyclops  
-**Date:** 2026-04-27  
-**Status:** Implemented
-
-## What
-
-Substantially strengthened the `MasterPage` / `Content` / `ContentPlaceHolder` component trio so that migrated Web Forms master-page structures are practical and predictable. Key changes:
-
-1. **New `MasterPageContext` class** (`MasterPageContext.cs`) — a lightweight, disposable shared-state object that coordinates named slot communication. ContentPlaceHolder controls subscribe to their named slot; Content controls push fragments in; subscribers are notified immediately when their slot content changes. Change-reference detection prevents redundant re-renders.
-
-2. **`MasterPage.razor` cascade** — the component now wraps `ChildContent` in a nested `CascadingValue<MasterPageContext>` (alongside the existing `CascadingValue<BaseWebFormsComponent>` from the base class), so all descendants receive the context with no extra setup required in user markup.
-
-3. **`MasterPage.razor.cs` additions:**
-   - `Context` property exposes the `MasterPageContext` instance.
-   - `ContentSections` (backward-compat) is now a read-only view backed by `Context` — existing tests that access `MasterPage.ContentSections.ContainsKey(...)` continue to work.
-   - `OnAfterRenderAsync(firstRender)` triggers a second `StateHasChanged()` as belt-and-suspenders for any edge case where Content registered after ContentPlaceHolder had already passed its `OnInitialized` phase.
-   - `MasterPageLayoutBase` — new abstract class inheriting `LayoutComponentBase` (not `BaseWebFormsComponent`) that uses the same `_renderFragment` reflection pattern as `BaseWebFormsComponent` to wrap the entire layout output in `CascadingValue<MasterPageContext>`. Migrated master pages that adopt `@inherits MasterPageLayoutBase` (and use `@Body` for child page content) gain full ContentPlaceHolder / Content slot relationships in the Blazor layout scenario.
-
-4. **`ContentPlaceHolder.razor.cs`** — now implements `IDisposable`, subscribes to `MasterPageContext` in `OnInitialized`, and reads content in `OnParametersSet` on every re-render. The subscription callback calls `InvokeAsync(StateHasChanged)` so it is always marshalled to the Blazor sync context.
-
-5. **`Content.razor.cs`** — registers its fragment via `MasterPageContext.SetContent` in `OnParametersSet` (not just `OnInitializedAsync`), enabling dynamic content updates. Also pushes through the `ParentMasterPage.Context` path for the component-model pattern.
+1. Extend `ServerShimTransform` so `FileType.CodeFile` inputs rewrite resolvable `Server.MapPath(...)` and `HttpContext.Current.Server.MapPath(...)` calls to `Path.Combine(AppContext.BaseDirectory, ...)`.
+2. Tighten `SelfInstantiationTransform` so it only rewrites self-construction in DI-managed classes, then collapse `new CurrentClass()` helper patterns to `this` and unwrap `using` blocks that would otherwise dispose the current service instance.
+3. Add both transforms to `SourceFileCopier` so copied `Logic/` and `BLL/` helper classes receive the same helper-gap repairs as page code-behind.
 
 ## Why
 
-The previous implementation had two critical flaws:
+WingtipToys and ContosoUniversity both still needed manual Layer 2 cleanup in helper classes after otherwise successful CLI runs. The recurring pain points were path resolution in utilities like `ExceptionUtility` and DI-managed helpers like `ShoppingCartActions` constructing themselves again instead of reusing the current scoped instance.
 
-- No explicit `CascadingValue<MasterPage>` (only the base-class `CascadingValue<BaseWebFormsComponent>` existed), making the CascadingParameter match order-dependent on a Blazor runtime implementation detail.
-- Content registered in `OnInitializedAsync` was only consumed once by ContentPlaceHolder's `OnInitializedAsync`. In a Blazor **layout** scenario the layout template renders before `@Body`, meaning ContentPlaceHolder always initialised before Content — so placeholders always showed their default content even when a matching Content was present.
+Fixing these in the CLI removes two benchmark-repeatable manual edits and keeps the migration contract aligned with generated DI registration. The additional copier coverage matters because page-only transforms do not reach standalone `.cs` files.
 
-The subscription-based `MasterPageContext` pattern eliminates the ordering constraint entirely.
+## Verification
 
-## What Remains
+- Added focused transform tests for literal/nested `MapPath`, `HttpContext.Current.Server.MapPath`, literal-backed variable paths, DI-only self-instantiation rewrites, and no-op cases.
+- Added `SourceFileCopier` tests proving helper-file rewrites run on copied `Logic/` classes.
+- `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo` passes.
 
-- `MasterPageLayoutBase` is provided but the **migration toolkit's `MasterPageTransform`** still converts all `<asp:ContentPlaceHolder>` to `@Body`. A future toolkit update should emit `@inherits MasterPageLayoutBase` + preserve `<ContentPlaceHolder ID="...">` controls instead of flattening to `@Body`. This is a toolkit scope change, not a library scope change.
-- CSS link handling is intentionally left outside the layout path (per team decision).
-- Nested master pages (master page using another master page) are out of scope; use nested Blazor layouts.
 
-# 2026-04-28 — Semantic pattern normalization defaults
+# Bishop — Identity Code-Behind Quarantine
 
-- Added two isolated CLI semantic patterns:
-  - `pattern-account-pages`
-  - `pattern-master-content-contracts`
-- Decision: account-form pages should normalize to compile-safe SSR `<form method="post">` stubs with explicit `TODO(bwfc-identity)` markers instead of preserving validator-heavy Web Forms control trees.
-- Decision: generated master/content pairs should use explicit `ChildContent` + `ChildComponents` contracts so named `<Content>` regions stay separate from body content while still flowing through the BWFC master-page bridge.
-- Follow-up wiring, if/when coordinator wants these live in the pipeline:
-  - register both patterns alongside existing semantic registrations in `src/BlazorWebFormsComponents.Cli/Program.cs`
-  - add both patterns to `TestHelpers.CreateDefaultSemanticPatterns()` in `tests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs`
+- **Date:** 2026-05-17T19:20:41-04:00
+- **Owner:** Bishop
+
+## Decision
+Add a late code-behind transform, `IdentityCodeBehindQuarantineTransform`, that targets legacy account page/control code-behind carrying OWIN-era identity signals after the rest of the CLI pipeline has already run.
+
+The transform should:
+- run after other code-behind cleanup/fixup passes
+- preserve the partial class, inheritance, fields, properties, and `[Inject]` members
+- strip `Microsoft.Owin*`, `Microsoft.AspNet.Identity*`, and `Owin` using directives
+- replace legacy method bodies with compile-safe stubs when files still contain signals such as `GetOwinContext()`, `IdentityHelper`, `ApplicationUserManager`, or `SignInStatus`
+
+## Why
+`PageQuarantineDetector` intentionally keeps happy-path auth pages like `Account/Login.aspx` and `Account/Register.aspx` on the runnable path because the semantic rewrite plus `ProgramCsEmitter`/redirect-handler annotations already emit SSR form handlers for them. Preserving the old OWIN code-behind after that point only reintroduces non-.NET-10 APIs into the compile surface and creates repetitive Layer 2 cleanup.
+
+A dedicated late quarantine transform gives the benchmark path the thin stub shell it actually needs without over-quarantining the page markup or losing query-parameter models and injected services added by earlier transforms.
+
+## Files
+- `src/BlazorWebFormsComponents.Cli/Transforms/CodeBehind/IdentityCodeBehindQuarantineTransform.cs`
+- `src/BlazorWebFormsComponents.Cli/Program.cs`
+- `tests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs`
+- `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/IdentityCodeBehindQuarantineTransformTests.cs`
+
+
+# Bishop L1 quality fixes
+
+- **Date:** 2026-05-17T13:32:41-04:00
+- **Owner:** Bishop
+
+## Decision
+For EDMX-backed migrations, the CLI must treat the converter output as the single source of truth for model artifacts on each run.
+
+That means:
+1. normalize excluded source-file paths to full paths before `SourceFileCopier` compares them,
+2. exclude any source files whose filenames collide with the EF Core files generated from the EDMX, and
+3. delete stale excluded output artifacts (for example `Model1.Context.cs`) when rerunning into an existing `After*` folder.
+
+For malformed legacy markup, the late cleanup pass must auto-close unbalanced child tags before a parent/container closes so emitted `.razor` stays syntactically valid even when the source `.aspx` was lax.
+
+## Why
+ContosoUniversity Run 28/29 style reruns can look "fixed" in logs while still leaving duplicate EF artifacts or broken Razor in the output tree because the pipeline never cleaned up stale files or balanced malformed containers. Treating generated EDMX output as authoritative and rebalancing markup in the final cleanup pass makes Layer 1 output much more benchmark-runnable without hand edits.
+
+
+# Bishop SSR form contract transform
+
+- **Date:** 2026-05-17T19:20:41-04:00
+- **Owner:** Bishop
+
+## Decision
+The CLI should enforce the Blazor static SSR form contract in one late markup pass shared by both normal markup transforms and semantic-pattern output.
+
+That pass must:
+1. detect `<form method="post">`, `<EditForm>`, and `<WebFormsForm>` blocks,
+2. add a deterministic filename-derived form name when one is missing (`@formname` for HTML/WebFormsForm, `FormName` for `EditForm`), and
+3. inject `<AntiforgeryToken />` as the first child element when it is absent.
+
+## Why
+WingtipToys and ContosoUniversity were both paying the same Layer 2 tax on every rerun: forms looked correct in generated `.razor` files but were still missing the SSR postback contract required by Blazor. Centralizing the rule in the CLI removes that mechanical repair step, keeps semantic rewrites and standard transforms aligned, and makes generated form names stable enough to reason about in tests and benchmark diffs.
+
+
+# Bishop Run 89 — WingtipToys benchmark decision
+
+- **Date:** 2026-05-17T17:43:16-04:00
+- **Owner:** Bishop
+- **Requested by:** Jeffrey T. Fritz
+- **Benchmark:** WingtipToys Run 89
+
+## Decision
+
+Run 89 confirms that the current WingtipToys benchmark output still meets the acceptance bar (`26/26` tests), but identity/account preservation is now the main source of Layer 2 regression time.
+
+The CLI currently emits two conflicting migration shapes for login/register flows:
+
+1. simplified SSR form markup plus Core Identity POST handlers in `Program.cs`, and
+2. preserved OWIN-era code-behind files that still reference `GetOwinContext`, `IdentityHelper`, `ModelState`, `User`, and other Web Forms / OWIN-only APIs.
+
+For benchmark-facing account pages, once the semantic rewrite chooses the POST-handler contract, the CLI should also replace the corresponding code-behind with a thin query-parameter model (or quarantine it) instead of preserving uncompilable OWIN logic.
+
+## Why
+
+Run 89 passed end to end, but build repair regressed from `1:03` in Run 88 to `3:03` in Run 89 even though the initial visible error count improved from 3 to 2. Most of that extra time went into stubbing `Account\Login`, `Account\Register`, `Account\OpenAuthProviders`, and `Account\RegisterExternalLogin` back to the already-generated Core Identity handler flow.
+
+This is benchmark-significant because the acceptance suite only needs the simplified login/register experience, and the scaffold already has the correct handler endpoints. Preserving stale OWIN code-behind after choosing that migration contract creates avoidable compile churn without improving fidelity.
+
+## Follow-up
+
+1. Add a CLI semantic/post-processing rule that swaps OWIN-era account code-behind for thin query-parameter models whenever the page markup has already been rewritten to POST handler forms.
+2. Keep tracking the older Wingtip gaps (`Server.MapPath` in static helpers, self-instantiation cleanup, stale DI variable names) until they are eliminated from fresh output.
+
+
+# Bishop Run 90 — WingtipToys benchmark decision
+
+- **Date:** 2026-05-17T19:31:21-04:00
+- **Owner:** Bishop
+- **Requested by:** Jeffrey T. Fritz
+- **Benchmark:** WingtipToys Run 90
+
+## Decision
+
+Run 90 confirms that the WingtipToys benchmark remains green at `26/26` acceptance tests, and that the new identity quarantine transform delivered the biggest measurable improvement: Layer 2 build repair dropped from `3:03` in Run 89 to `1:01` in Run 90 because the benchmark no longer required manual OWIN account-page stubbing.
+
+The SSR form contract transform also proved its value on benchmark-critical forms (`Login`, `Register`, `AddToCart`) by auto-emitting `<AntiforgeryToken />` plus stable `@formname` values, but its coverage is not yet complete because the logout form in `Components\Layout\MainLayout.razor` still lacks `@formname`.
+
+The helper transform work is mixed: `ShoppingCartActions.GetCart()` is now correctly self-instantiation-safe in fresh output, but the `Server.MapPath` rewrite in `Logic\ExceptionUtility` still emitted malformed code and required a manual cleanup.
+
+## Why
+
+Run 90 answers the final benchmark question in human terms: the pipeline is now closer to benchmark-runnable immediately after Layer 1, even though the first visible build error count stayed flat at 2. The repair work is narrower and more mechanical than Run 89 — namespace cleanup, one stale identifier, and one malformed helper rewrite — instead of whole-page identity surgery.
+
+That makes the remaining work much clearer for merge readiness: preserve the current identity quarantine behavior, extend SSR form-name coverage to shell/logout forms, and harden helper-class transforms so they cannot emit invalid `Path.Combine`/instance-member mashups.
+
+## Follow-up
+
+1. Extend the SSR form-contract pass so non-page forms such as the logout form in `MainLayout.razor` also receive deterministic `@formname` values.
+2. Harden helper-class `Server.MapPath` rewrites with compile-safe output validation, especially for static helper methods.
+3. Add a cleanup pass for preserved DI identifiers/usings so stubbed account pages and shopping-cart pages do not retain stale references like missing `using WingtipToys.Logic;` or `actions`.
+
+
+### 2026-05-16T15:38:27: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** We're building a toolset that works for EVERYONE — not just our sample apps. Every improvement should benefit all users of the migration toolkit, not be tailored to WingtipToys or ContosoUniversity specifics.
+**Why:** User request — captured for team memory. This is a core design principle for the CLI and BWFC components.
+
+
+# Cyclops decision inbox: DetailsView BoundField support
+
+- **Date:** 2026-05-17
+- **Owner:** Cyclops
+
+## Decision
+`DetailsView<ItemType>` should implement `IColumnCollection<ItemType>` and adapt explicit child `IColumn<ItemType>` definitions into the existing `DetailsViewField` rendering pipeline, instead of inventing a separate BoundField-only path.
+
+## Why
+`BoundField<ItemType>` already depends on a cascading `ColumnCollection` parent and already knows how to render read-only and edit-mode content. Reusing that contract keeps `DetailsView` aligned with `GridView`, fixes prerender null references, preserves explicit field ordering, and keeps auto-generated rows as the fallback when no explicit fields are defined.
+
+## Files
+- `src/BlazorWebFormsComponents/DetailsView.razor`
+- `src/BlazorWebFormsComponents/DetailsView.razor.cs`
+- `src/BlazorWebFormsComponents/BaseColumn.cs`
+- `src/BlazorWebFormsComponents.Test/DetailsView/BoundFields.razor`
+
 
 ### MasterPage Migration Bridge — Implementation Contract
 
-**Date:** 2026-04-27T17:05:17-04:00
-**By:** Forge (Lead Architect / Web Forms Reviewer)
+**Date:** 2026-04-27
+**By:** Forge (Lead Architect)
 **Requested by:** Jeffrey T. Fritz
-**Status:** APPROVED — ready for implementation
-
----
-
-## TL;DR for Implementers
-
-**The core bug:** `MasterPage.razor` does not cascade itself, so `<Content>` never receives a parent reference and slot-filling is completely broken.
-
-**The core fix:** Wrap `@ChildContent` in `<CascadingValue Value="this">` in `MasterPage.razor`.
-
-**The tooling gap:** CLI and PS toolkit emit `@Body` for ALL ContentPlaceHolders and strip ALL Content wrappers. They should preserve secondary ContentPlaceHolders as `<ContentPlaceHolder>` and secondary Content as `<Content>` so the bridge components can work.
+**Status:** PROPOSED
 
 ---
 
@@ -559,599 +561,132 @@ Run 27 confirms the #1 toolkit gap: master-page conversion does not produce a us
 6. Next WingtipToys benchmark run (Run 28+) shows reduced Layer 2 repair time for layout.
 7. Sample page renders the bridge components live, not just as code snippets.
 
----
 
-## Acceptance Bar (Human Terms)
+### Wizard Web Forms Fidelity Contract — Review Follow-up
 
-**This batch is DONE when:**
-
-1. **Content slot-filling works end-to-end:** A developer can place `<Content ContentPlaceHolderID="X">` inside a `<MasterPage>`, and that content replaces the default content of `<ContentPlaceHolder ID="X">`. This is currently broken — the component never receives the parent reference.
-
-2. **Migration toolkit emits bridge components:** Running `bwfc-migrate.ps1` on a Web Forms project with a `.master` file produces a layout that uses `<ContentPlaceHolder ID="...">` for secondary placeholders (not just `@Body`), and child pages use `<Content ContentPlaceHolderID="...">` for non-primary content regions (not stripped entirely).
-
-3. **No wrapper elements:** Neither `MasterPage`, `ContentPlaceHolder`, nor `Content` should emit any wrapper `<div>`, `<span>`, or structural HTML. They are transparent pass-through components matching Web Forms behavior.
-
-4. **Test coverage exists:** At least 4 new tests verify Content→ContentPlaceHolder slot-filling (matched, unmatched, multiple slots, mixed default/override scenarios).
-
-5. **Docs describe the bridge pattern:** The MasterPages.md migration doc explains the two-phase approach: automated bridge component emission, then optional manual modernization to native Blazor patterns.
-
-6. **Benchmark improvement:** Run 28+ should show measurably less manual repair time for layout conversion compared to Run 27's 14+ minutes.
-
-## 2026-04-28 — Semantic pattern catalog guardrails
-
-**By:** Forge  
-**Scope:** `pattern-query-details`, `pattern-action-pages`, `pattern-account-pages`, `pattern-master-content-contracts`
-
-### Decision
-
-1. **Run master/content contract normalization semantically after existing transforms.**
-   - Mechanical transforms should keep doing tag conversion first.
-   - The semantic pass should then normalize generated master shells and child pages onto the BWFC-tested contract:
-     - master shell markup in `ChildContent`
-     - migrated `<Content ContentPlaceHolderID="...">...</Content>` registrars in `ChildComponents`
-     - exact placeholder IDs preserved, including head slots
-
-2. **Do not over-promise account/auth rewrites.**
-   - Account pages may be recognized semantically, but working auth flows are **manual/TODO boundaries** unless the output is explicitly wired through HTTP endpoints/handlers.
-   - Cookie issuance, logout, external provider challenge, 2FA, password reset tokens, and login-management mutations are not safe “automatic rewrite” targets from markup shape alone.
-
-3. **Keep query/detail and action-page patterns narrow.**
-   - `pattern-query-details` is for read-only query/route driven pages with pure `SelectMethod` filtering.
-   - `pattern-action-pages` is for non-visual, redirecting action pages with deterministic query inputs and no auth/form/postback semantics.
-
-### Minimum valid master/content output contract
-
-**Generated master component**
-
-```razor
-<MasterPage>
-    <Head>
-        ...master head content, including any named head placeholders...
-    </Head>
-    <ChildContent>
-        ...master chrome...
-        <ContentPlaceHolder ID="MainContent" />
-        ...other named placeholders...
-    </ChildContent>
-    <ChildComponents>
-        @ChildComponents
-    </ChildComponents>
-</MasterPage>
-
-@code {
-    [Parameter] public RenderFragment? ChildComponents { get; set; }
-}
-```
-
-**Generated child page**
-
-```razor
-<Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-            ...
-        </Content>
-        <Content ContentPlaceHolderID="HeadContent">
-            ...
-        </Content>
-    </ChildComponents>
-</Site>
-```
-
-### Rejections
-
-- **Reject** any implementation that rewrites multi-placeholder master pages to `@Body`/single-slot Blazor layouts.  
-  **Safer alternative:** preserve `ContentPlaceHolderID` names and normalize to `ChildContent` + `ChildComponents`.
-
-- **Reject** any implementation that converts account pages into apparently-working Blazor `OnClick` auth handlers without HTTP endpoint semantics.  
-  **Safer alternative:** emit the page shell plus explicit auth TODO/endpoint contract and preserve `ReturnUrl` / status query parameters.
-
-- **Reject** any implementation that turns redirect-only action pages into informational pages.  
-  **Safer alternative:** keep action-on-navigation behavior or leave an explicit manual handler TODO.
-
-- **Reject** any implementation that discards route/query precedence on detail pages.  
-  **Safer alternative:** preserve the original parameter names and precedence or stop at a TODO.
-
-### Why
-
-The current isolated semantic subsystem is the right place for these four patterns because they are cross-file, contract-level rewrites, not local syntax edits. But Web Forms fidelity matters more than “helpful looking” output: named master sections, auth/account behavior, and query/action routes are exactly where a misleading rewrite creates the worst migration debt.
-
-### 2026-04-27: MasterPage sample updated — practical bridge demos added
-
-**By:** Jubilee
-**Date:** 2026-04-27
-
-**What:**
-- `MasterPage/Index.razor` updated with two live `@rendermode InteractiveServer` demos:
-  1. **Practical Migration Bridge demo** — a realistic `Site.Master`-style layout (header / main /
-     sidebar / footer) using named `ContentPlaceHolder` slots (`MainContent`, `Sidebar`, `Footer`).
-     `Content` components fill `MainContent` and `Sidebar`; `Footer` keeps its master-page default.
-     This matches how a real migrated `.aspx` / `.master` pair looks in production.
-  2. **Head parameter demo** — shows `<Head>` injecting metadata into `<HeadContent>`, with
-     a migration tip mapping `<head runat="server">` / `HeadContent` placeholder to the
-     Blazor equivalent.
-- Removed the code-only "Bridge Components (Temporary Migration Aid)" card; live demos replace it.
-- `ComponentList.razor` updated — `Content`, `ContentPlaceHolder`, and `MasterPage` added to the
-  **Migration Helpers** section (alphabetical insertion) so they appear in the component catalog page.
-
-**Why:**
-- The previous page presented the bridge as a code snippet curiosity with a "temporary aid" warning.
-  Per team direction, demos should show *practical migration-bridge usage*, not idealized
-  pure-layout-only usage, and must be realistic for migrated Web Forms pages with named placeholders.
-- `Content` and `ContentPlaceHolder` had no entry point from the component list; adding them to
-  Migration Helpers surfaces them alongside the other bridge utilities.
-
-**Boundaries respected:**
-- No component implementation changed.
-- No documentation (MkDocs) files changed — this is a sample-only update.
-- No test files changed.
-
-# QA Decision Record: MasterPage Migration Test Coverage
-**Date:** 2026-04-27  
-**Author:** Rogue (QA Analyst)  
-**Scope:** MasterPage, Content, ContentPlaceHolder components + CLI transforms
+**Date:** 2026-05-20T21:07:06.347-04:00
+**By:** Forge (Lead / Web Forms Reviewer)
+**Requested by:** Jeffrey T. Fritz
+**Status:** PROPOSED
 
 ---
+
+## Decision
+
+Treat the current `Wizard` component as a partial Web Forms match, not a parity-complete implementation.
+
+Before the team claims Wizard fidelity, the component should:
+- render the default header and navigation rows on the outer table structure rather than only inside the nested content table,
+- render sidebar navigation with a Web Forms-compatible list/table/button structure instead of flat links and `<br />` separators,
+- wire `StartNavigationTemplate`, `StepNavigationTemplate`, and `FinishNavigationTemplate` into the actual navigation area,
+- apply `SideBarButtonStyle` to sidebar navigation elements, and
+- either implement or remove the misleading `FinishCompleteButtonText` contract from docs/code.
+
+---
+
+## Why
+
+The current component gets the big moving parts right: step registration, event flow, `AllowReturn`, SSR hidden-field restoration, and the full `WizardStepType` enum are present. But the rendered DOM is still materially different from the default ASP.NET Web Forms Wizard output, especially in the sidebar and overall table layout.
+
+That means existing CSS or JavaScript written against the original Web Forms Wizard structure will not reliably carry forward, which violates this repository's core HTML fidelity charter.
+
+---
+
+## Verification
+
+- Review `src/BlazorWebFormsComponents/Wizard.razor` against default Web Forms Wizard layout expectations.
+- Review `src/BlazorWebFormsComponents/Wizard.razor.cs` for declared vs. actually rendered parameters/templates.
+- Run `dotnet test src\BlazorWebFormsComponents.Test --filter Wizard --nologo` after any Wizard parity changes.
+- Add markup-focused tests that assert sidebar and navigation DOM shape, not only step switching behavior.
+
+
+# Psylocke Decision Inbox: L2 Recipes for Preserved Code-Behind
+
+- **Date:** 2026-05-17
+- **Owner:** Psylocke
+
+## Decision
+
+Layer 2 migration guidance should treat preserved code-behind from L1 as repairable source, not disposable scaffolding.
+
+The standard repair sequence is:
+1. Remove leftover `System.Web.*` references first.
+2. Keep `WebFormsPageBase` shims (`Request`, `Response`, `Session`, `Server`, `Cache`, `ViewState`, `ClientScript`, `IsPostBack`).
+3. Map `Page_Load` / `Page_Init` / `Page_PreRender` to Blazor lifecycle methods without renaming business methods.
+4. Convert `(object sender, EventArgs e)` handlers to parameterless or BWFC `EventCallback` signatures.
+5. Replace `DataBind()` with BWFC `SelectHandler<ItemType>` or `<WebFormsForm>` postback-style CRUD wiring.
+6. Register preserved BLL classes in DI as scoped services and keep original database providers (LocalDB stays SQL Server, never SQLite).
+
+## Why
+
+CU Run 28 showed that once CLI output preserves real code-behind, L2 speed depends on having explicit repair recipes for preserved Web Forms patterns. Without them, agents fall back to expensive rewrites, drift namespaces, overuse render modes, and replace working service logic.
+
+## Impact
+
+- L2 agents get a deterministic triage path for preserved `.razor.cs` files.
+- CRUD pages stay on BWFC controls with `ItemType` + `SelectHandler<ItemType>` instead of manual HTML or unsupported render-mode shortcuts.
+- BLL/service wiring becomes a consistent DI repair pattern across migrations.
+
+
+# Decision: Wizard QA should separate folder coverage from broad test filters
+
+**Date:** 2026-05-20T21:07:06.347-04:00
+**Author:** Rogue
+**Status:** Proposed
+
+## Decision
+When reporting Wizard component QA coverage, treat the component folder (`src\BlazorWebFormsComponents.Test\Wizard\`) as the authoritative scope for counting Wizard tests, and treat `dotnet test --filter "Wizard"` as a broader validation run that may include other Wizard-named components such as `CreateUserWizard`.
+
+## Why
+The requested Wizard-filtered run passed 26 tests across target frameworks, but the Wizard folder itself currently contains a single `.razor` file with 16 `[Fact]` tests. Using the bare filter alone overstates Wizard component coverage and can hide gaps in the actual `Wizard` test surface.
+
+## Impact
+- QA reports stay accurate when component names overlap.
+- Future audits should list folder files first, then report filtered-run status separately.
+- If exact component-only execution is needed, use more specific filters or folder-based counts alongside the run command.
+
+
+# Rogue decision inbox — WingtipToys Run 88 benchmark
+
+- **Date:** 2026-05-16T15:45:04-04:00
+- **Owner:** Rogue
+- **Requested by:** Jeffrey T. Fritz
+- **Benchmark target:** CLI fix set `d591d8d2`
 
 ## Summary
 
-Added 18 new tests (7 bUnit + 5 ContentWrapperTransform rewrites + 6 MasterPageTransform additions) and fixed one critical runtime defect in `MasterPage.razor`.
-
----
-
-## Critical Defect Found and Fixed
-
-**File:** `src/BlazorWebFormsComponents/MasterPage.razor`  
-**Defect:** `Content` and `ContentPlaceHolder` both declare `[CascadingParameter] private MasterPage ParentMasterPage`, but `MasterPage.razor` was not providing a `CascadingValue<MasterPage>`. The `BaseWebFormsComponent` constructor only cascades `this` as `CascadingValue<BaseWebFormsComponent>` (with Name="ParentComponent"), which does **not** satisfy a type-based match for `MasterPage`. The result was that `ParentMasterPage` was always `null`, making content injection silently fail.
-
-**Fix:** Wrapped `@ChildContent` in `<CascadingValue Value="this">` in `MasterPage.razor`. This is the same named-cascading-parent pattern used by all other BWFC container components (Calendar, DataGrid, Menu, TreeView, etc.).
-
-**Impact:** Without this fix, `Content` controls in child pages could never inject content into `ContentPlaceHolder` regions. The component API existed but the wiring was broken at runtime.
-
----
-
-## New Test Files
-
-### `src/BlazorWebFormsComponents.Test/MasterPage/ContentRelationshipTests.razor` (7 tests)
-
-Covers the Content → ContentPlaceHolder injection contract:
-- Content with matching ID replaces placeholder default content ✅  
-- Content with non-matching ID leaves placeholder showing its default ✅  
-- Content with empty ContentPlaceHolderID has no side effects ✅  
-- Two Content controls inject into two distinct placeholders simultaneously ✅  
-- ContentPlaceHolder rendered outside any MasterPage shows default content (no crash) ✅  
-- Multiple ContentPlaceHolders in one MasterPage register without errors ✅  
-- After render, MasterPage.ContentSections contains the registered key ✅  
-
----
-
-## Updated Test Files
-
-### `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/ContentWrapperTransformTests.cs`
-
-Previous state: 3 stub tests that only asserted on the input string, never calling `ContentWrapperTransform.Apply()`. These passed trivially and provided zero coverage of the transform.
-
-Replaced with 9 real tests using the live transform:
-- Strips open `<asp:Content>` tag, preserves inner HTML  
-- Strips close `</asp:Content>` tag  
-- Full round-trip: inner content fully preserved  
-- Multiple Content blocks stripped in one pass  
-- Applies to Page files  
-- Applies to Master files (no file-type guard)  
-- Passthrough when no Content tags present  
-- `Order` is 300  
-- `Name` is "ContentWrapper"
-
-### `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/MasterPageTransformTests.cs`
-
-Added 5 edge-case tests:
-- Multiple ContentPlaceHolder controls each become `@Body` (documents current behavior)  
-- `Name` property is "MasterPage"  
-- `runat="server"` stripped from `<head>` when `runat` appears as first attribute  
-- `runat="server"` stripped from `<form>` that also has an `action` attribute  
-- Block ContentPlaceHolder with multi-line default content replaced in full  
-
----
-
-## Test Counts (after this session)
-
-| Suite | Before | After |
-|-------|--------|-------|
-| bUnit MasterPage (net8/9/10) | 16 | 23 |
-| MasterPageTransformTests | 11 | 16 |
-| ContentWrapperTransformTests | 3 (stubs) | 9 (real) |
-| **Full bUnit suite** | 2,874 | **2,881** |
-| **CLI transform suite** | 15 | 26 |
-
-All green. No regressions.
-
----
-
-## Decisions
-
-1. **Content injection requires explicit CascadingValue<MasterPage>** — BaseWebFormsComponent's generic cascade is insufficient for type-based cascading parameter matching. Any BWFC component that wishes to be found by type (without a Name) must provide its own explicit `<CascadingValue Value="this">` in its `.razor` file. Prefer Named cascades (e.g., `Name="ParentMasterPage"`) for clarity, but the anonymous type-based cascade added here is consistent with how Blazor's `EditContext` is cascaded.
-
-2. **ContentWrapperTransform stub tests removed** — The three placeholder tests in `ContentWrapperTransformTests.cs` that asserted on the input string (not the transform output) were misleading. Real tests call `Apply()`. This pattern must not be used in future TDD stubs — use `[Fact(Skip = "...")]` instead so it's visible as pending.
-
-# Decision: Compile-Surface Quarantine for Non-Migratable Pages
-
-**Date:** 2026-05-07T13:58:11-04:00  
-**Author:** Bishop (Migration Tooling Dev)  
-**Requested by:** Jeffrey T. Fritz  
-**Status:** Proposed
-
-## Context
-
-Run 40 showed that the CLI still emitted dozens of non-benchmark pages whose generated markup or code-behind could not compile inside the migrated Blazor runtime. These pages were not the benchmark path, but they still blocked every end-to-end build until a human manually stubbed them.
-
-## Decision
-
-Add an explicit compile-surface quarantine step to the CLI page pipeline.
-
-### What the quarantine step does
-
-- Detects risky pages by feature bucket before or after transforms run:
-  - ASP.NET Identity / membership APIs
-  - payment or checkout integrations
-  - mobile-only pages and shells
-  - admin CRUD pages with 3+ legacy data-source bindings
-  - unresolved compile-surface blockers still flagged by the emission planner after transforms complete
-- Replaces quarantined `.razor` output with a build-safe placeholder that still routes and clearly explains the manual migration boundary.
-- Emits a minimal `.razor.cs` stub inheriting `BlazorWebFormsComponents.WebFormsPageBase` so the generated app still compiles.
-- Preserves transformed original code-behind under `migration-artifacts/codebehind/` when code-behind exists.
-- Writes `migration-artifacts/quarantine-manifest.json` with source-relative path, detected unsupported features, quarantine reason, and suggested migration approach.
-
-## Rationale
-
-The CLI should prefer a clean, buildable migrated surface over emitting broken pages that are known to require manual work. A manifest-backed quarantine step also makes deferred work explicit and scriptable for later L2/L3 repair passes.
-
-## Implementation Notes
-
-- `CompileSurfaceStubTransform` now delegates to shared quarantine detection so early high-confidence cases are stubbed consistently.
-- `MigrationPipeline` performs a late quarantine pass after semantic patterns, allowing normalized login/action pages to remain compile-safe when possible.
-- The late pass uses existing compile-surface emission-plan failures as another quarantine signal instead of silently dropping page code-behind from the build.
-
-## Validation
-
-- `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`
-
-## Follow-up
-
-- Consider feeding the manifest into migration-toolkit benchmark repair workflows so quarantined pages can be auto-prioritized for targeted L2 prompts.
-
-
-# Decision: Run 41 quarantine, static-file, and antiforgery hardening
-
-**Date:** 2026-05-07T15:38:16-04:00  
-**Author:** Bishop  
-**Requested by:** Jeffrey T. Fritz  
-**Status:** Proposed
-
-## Decision
-
-1. Add an essential-page allowlist to `PageQuarantineDetector` so benchmark-critical product, catalog, cart, shopping, home, about, and contact paths are not quarantined for incidental heuristic signals.
-2. Raise heuristic quarantine sensitivity so a single weak signal does not quarantine ordinary pages unless the path is clearly non-essential (`Account/`, `Admin/`, `Checkout/`, mobile shells) or the blocker is strong enough to break the compile surface.
-3. Generate `Program.cs` with `app.UseStaticFiles();` and `app.UseAntiforgery();` for all scaffolded SSR apps.
-4. Post-process semantic-pattern form output so generated `<form>`/`<EditForm>` markup receives `<AntiforgeryToken />` and a deterministic form name automatically.
-
-## Rationale
-
-Run 41 proved the CLI was over-quarantining core Wingtip pages, under-configuring the SSR scaffold for copied static assets, and leaving generated POST forms without the Blazor antiforgery contract. The chosen fix keeps benchmark paths runnable, preserves quarantine for true out-of-scope areas, and hardens generated SSR forms without duplicating form logic inside every semantic pattern.
-
-## Files
-
-- `src\BlazorWebFormsComponents.Cli\Pipeline\PageQuarantineDetector.cs`
-- `src\BlazorWebFormsComponents.Cli\Scaffolding\ProgramCsEmitter.cs`
-- `src\BlazorWebFormsComponents.Cli\SemanticPatterns\SemanticPatternCatalog.cs`
-- `src\BlazorWebFormsComponents.Cli\Transforms\Markup\FormAntiforgeryPostProcessor.cs`
-- `tests\BlazorWebFormsComponents.Cli.Tests\TransformUnit\PageQuarantineDetectorTests.cs`
-- `tests\BlazorWebFormsComponents.Cli.Tests\ScaffoldingTests.cs`
-- `tests\BlazorWebFormsComponents.Cli.Tests\SemanticPatternCatalogTests.cs`
-- `tests\BlazorWebFormsComponents.Cli.Tests\SemanticPatternConcreteTests.cs`
-- `tests\BlazorWebFormsComponents.Cli.Tests\PipelineIntegrationTests.cs`
-- `docs\cli\index.md`
-- `docs\cli\transforms.md`
-
-## Validation
-
-- `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`
-
-
-# Decision: Run 41 benchmark follow-up items
-
-**Date:** 2026-05-07T15:15:19-04:00  
-**Author:** Bishop (Migration Tooling Dev)  
-**Requested by:** Jeffrey T. Fritz  
-**Status:** Proposed
-
-## Context
-
-WingtipToys benchmark Run 41 finished green (25/25 acceptance tests), but only after manual repair of three fresh-output regressions that the cumulative fixes were supposed to reduce: benchmark-path pages were still quarantined, static assets served as zero-length responses under the generated runtime, and SSR cart postbacks still needed manual antiforgery/form-name wiring.
-
-## Decision
-
-Treat Run 41 as a successful benchmark with three prioritized follow-up items for the CLI/runtime scaffold:
-
-1. **Do not quarantine benchmark-critical commerce pages by default.**
-   - Preserve or explicitly allowlist pages like `ProductList`, `ProductDetails`, `AddToCart`, and `ShoppingCart` on Wingtip-style fixtures.
-   - Keep quarantine focused on non-benchmark account/admin/checkout/mobile/payment surfaces.
-
-2. **Prefer classic static-file middleware for migrated sample scaffolds that rely on `wwwroot` asset trees.**
-   - The Run 41 scaffold returned 200 with `Content-Length: 0` for `/Images/logo.jpg` and `/Catalog/Images/...` until `app.UseStaticFiles()` replaced `app.MapStaticAssets()`.
-   - Fresh benchmark runtimes should default to whichever path reliably serves legacy copied assets without additional repair.
-
-3. **Emit a complete SSR form-post contract for pages that use `Request.Form`.**
-   - Middleware: `app.UseAntiforgery()`
-   - Markup: `<AntiforgeryToken />`
-   - Form identity: explicit `@formname`
-   - Without all three, the shopping-cart update path either 400s or fails Playwright postback flows.
-
-## Evidence from Run 41
-
-- Final build: `samples\AfterWingtipToys\WingtipToys.csproj` succeeded with 31 warnings / 0 errors.
-- Final acceptance: `src\WingtipToys.AcceptanceTests` passed 25/25 against `https://localhost:5001`.
-- Quarantine evidence: `samples\AfterWingtipToys\migration-artifacts\quarantine-manifest.json`
-- Report: `dev-docs\migration-tests\wingtiptoys\run41\report.md`
-
-## Rationale
-
-Run 41 proved the benchmark can still end green while preserving BWFC controls, but the repair loop is paying for avoidable scaffolding mistakes instead of true migration complexity. Tightening quarantine scope, static asset serving, and SSR form-post emission should reduce future Wingtip repair time materially without weakening compile safety.
-
-
-# Decision: Stable cart session key for CLI transforms
-
-**Date:** 2026-05-07T13:58:11-04:00  
-**Author:** Rogue (QA Analyst)  
-**Requested by:** Jeffrey T. Fritz  
-**Status:** Proposed
-
-## Context
-
-Run 40 exposed a migration gap in benchmark cart flows: generated code that used `Session.Id` directly for cart lookups was not stable enough under Blazor SSR. Cart and basket code paths need an explicit session-backed identifier that survives the benchmark flow more reliably than the raw session ID.
-
-## Decision
-
-Add a dedicated CLI code-behind transform named `CartSessionKeyTransform` that:
-
-- targets cart/basket-oriented statements still using `Session.Id` or `HttpContext.Session.Id`
-- injects a single `GetOrCreateCartKey()` helper into the generated partial class
-- stores the stable value in `Session["cart-key"]`
-- rewrites matching cart service calls and cart ID assignments to use that helper
-- leaves unrelated `Session.Id` usage untouched to avoid over-matching
-
-## QA Notes
-
-- Added focused transform-unit coverage for cart assignment rewrites, cart service call rewrites, non-cart preservation, helper idempotence, and default-pipeline registration.
-- Updated CLI docs so the transform catalog and overview mention the new cart session-key stabilization step.
-- Full CLI test execution is currently blocked by unrelated workspace changes in `src\BlazorWebFormsComponents.Cli\Pipeline\PageQuarantineDetector.cs`, which fail the CLI build before the new tests can run.
-
-## Files Affected
-
-- `src/BlazorWebFormsComponents.Cli/Transforms/CodeBehind/CartSessionKeyTransform.cs`
-- `src/BlazorWebFormsComponents.Cli/Program.cs`
-- `tests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs`
-- `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/CartSessionKeyTransformTests.cs`
-- `docs/cli/index.md`
-- `docs/cli/transforms.md`
-
-
-
-# Bishop decision inbox — G3/G4 fixes
-
-- **Date:** 2026-05-08T10:42:43-04:00
-- **Owner:** Bishop
-
-## Decision
-For benchmark-facing identity scaffolds, the CLI should emit one consistent auth contract end to end:
-- account semantic rewrites post to `/Account/LoginHandler` and `/Account/RegisterHandler`
-- generated `Program.cs` configures application cookie `LoginPath` and `LogoutPath`
-- redirect handler stubs use ASP.NET Core Identity (`SignInManager<IdentityUser>` / `UserManager<IdentityUser>`) and preserve `ReturnUrl` when it is local
-
-For validator typing, `RequiredFieldValidator` should infer its generic `Type` from the validated control when possible (notably `TextBox` -> `string`) and only fall back to `object` when no control hint exists.
-
-## Why
-Run 42 showed that mismatched auth contracts caused the only first-pass failure, while blanket validator defaults created avoidable generic warnings. Encoding both decisions in the CLI keeps Layer 1 output runnable without forcing manual post-processing.
-
-
-# Bishop G6/G7 Fixes
-
-Date: 2026-05-08T11:37:18.862-04:00
-Branch: feature/wingtip-next-features-review
-PR: #545
-
-## Decisions
-
-1. `PageDirectiveTransform` now emits a source-relative primary `@page` route for nested `.aspx` pages and keeps the filename-only alias as a secondary route when the two differ. Root-level pages still emit a single route, and `Default.aspx`/`Index.aspx` continue to resolve to `/`.
-2. `PageQuarantineDetector` now bypasses quarantine for redirect-only action pages when their markup is inert and their code-behind uses `Response.Redirect`, unless identity or payment signals are also present.
-3. CLI docs were updated to describe nested route aliasing and the redirect-only quarantine exemption because both behaviors change generated migration output in operator-visible ways.
-1. `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/GridViewColumnItemTypeTransformTests.cs`
-2. `tests/BlazorWebFormsComponents.Cli.Tests/PipelineIntegrationTests.cs`
-
-The tests must prove that `TemplateField` columns survive alongside `BoundField` siblings and when they are the only GridView columns, while preserving nested `TextBox`, `CheckBox`, and inline display-expression content.
-
-## Rationale
-TemplateField loss is a high-severity migration failure because it silently drops editable inputs, calculated output, and row-selection controls. The current pipeline behavior depends on multiple ordered markup transforms working together, so a single focused unit test is not enough; we need both transform-level and end-to-end file-migration assertions to keep future ordering changes from regressing Wingtip-style GridViews.
-
-## Files
-- `tests/BlazorWebFormsComponents.Cli.Tests/TransformUnit/GridViewColumnItemTypeTransformTests.cs`
-- `tests/BlazorWebFormsComponents.Cli.Tests/PipelineIntegrationTests.cs`
-
-
-# Decision: ComponentRefCodeBehindTransform Test Coverage Complete
-
-**Date:** 2026-05-15
-**Author:** Rogue (QA Analyst)
-**Status:** Informational — no action required from team
-
-## Finding
-
-The `ComponentRefCodeBehindTransformTests.cs` test file was already fully populated
-with 10 well-structured tests covering all required scenarios. All 10 tests pass
-against the current transform implementation.
-
-## Test Coverage Map
-
-| Scenario | Test Method | Status |
-|---|---|---|
-| Basic field generation (Label) | `InjectsFieldForLabel` | ✅ Pass |
-| Basic field generation (generic) | `InjectsFieldForGenericGridView` | ✅ Pass |
-| Multiple refs | `InjectsMultipleFields` | ✅ Pass |
-| Field inserted before methods | `InsertsAfterClassOpeningBrace` | ✅ Pass |
-| Empty ComponentRefs → unchanged | `SkipsWhenNoComponentRefs` | ✅ Pass |
-| No class found → passthrough | `SkipsWhenNoClassFound` | ✅ Pass |
-| No duplicate declarations | `SkipsExistingFieldDeclaration` | ✅ Pass |
-| Alphabetical ordering | `FieldsAreSortedAlphabetically` | ✅ Pass |
-| Generic ListView type | `WorksWithGenericListViewType` | ✅ Pass |
-| Order property | `OrderIs220` | ✅ Pass |
-
-## Field Declaration Contract
-
-The transform emits fields in the form:
-```csharp
-private {Type} {controlId} = default!;
-```
-
-The `= default!;` null-forgiving initializer is mandatory — Blazor `@ref` targets
-must be non-nullable fields but are assigned by the framework at render time.
-
-## Recommendation
-
-No further test work needed for this transform. Bishop's implementation is solid.
-The duplicate-detection regex (`(?:private|protected|public|internal)\s+\w+.*\b{id}\s*[;=]`)
-correctly handles the case where an existing declaration is present.
-
-
-# 2026-05-16: Route Parameter Collision Dedupe
-
-**Date:** 2026-05-15T11:43:54.133-04:00  
-**Author:** Bishop  
-**Status:** Established
-
-## Decision
-
-When the migration pipeline leaves multiple `[Parameter]` properties whose names match the same `@page` route token case-insensitively, keep the property whose casing exactly matches the route token if one exists, and remove the other duplicates.
-
-## Why
-
-Blazor treats parameter names case-insensitively, so pairs like `categoryName` and `CategoryName` trigger a runtime duplicate-parameter failure even though they look distinct in generated code. Preferring the exact route-token casing preserves route binding semantics while removing the extra wrapper-generated property.
-
-## Scope
-
-Apply this rule in CLI post-processing for page code-behind after route-parameter promotion, using the paired `.razor` file to discover route tokens.
-
-
-# 2026-05-16: DepartmentPortal Migration Blocker Issues Filed
-
-**Date:** 2026-05-16T15:22:00-04:00  
-**Author:** Bishop  
-**Status:** Informational — issues filed, no code changes
-
-## Summary
-
-Three GitHub issues were created in `fritzandfriends/BlazorWebFormsComponents` to track DepartmentPortal migration blockers identified by Forge's gap analysis.
-
-| Issue | # | Labels | Priority |
-|-------|---|--------|----------|
-| CLI: Add code-only server control scaffolder for DepartmentPortal-style controls | [#549](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/549) | enhancement, migration-toolkit | Tier 1 / P1 |
-| CLI: Parse namespace-level tag prefix registrations from Web.config | [#550](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/550) | enhancement, migration-toolkit | Tier 1 / P2 |
-| Review analyzers for step-by-step YARP-based incremental migration workflow | [#551](https://github.com/FritzAndFriends/BlazorWebFormsComponents/issues/551) | enhancement, analyzers, future | Future |
-
-## New Labels Provisioned
-
-Three labels were created to support these and future issues:
-
-- **`migration-toolkit`** — CLI migration pipeline and toolkit enhancements
-- **`analyzers`** — Roslyn analyzer work
-- **`future`** — Scheduled for future implementation, not immediate
-
-## Design Decisions
-
-### Issue #549 — CodeOnlyControlScaffolder
-
-Base class mapping established for the scaffolder:
-
-| Web Forms Base | BWFC Base Class |
-|---------------|-----------------|
-| `WebControl` | `BaseStyledComponent` |
-| `CompositeControl` | `BaseWebFormsComponent` |
-| `DataBoundControl` | `DataBoundComponent<T>` |
-| `Control` | `BaseWebFormsComponent` |
-
-This scaffolder must run **before markup transforms** in the pipeline so that `LocalTagNamespaceResolutionTransform` has the emitted stub inventory available during markup resolution.
-
-### Issue #550 — LocalTagNamespaceResolutionTransform
-
-This transform is the markup-side companion to Issue #549. Dependency order: CodeOnlyControlScaffolder runs first (scaffold phase), LocalTagNamespaceResolutionTransform uses the output during markup phase. Both must be registered in `Program.cs` DI and `TestHelpers.CreateDefaultPipeline()` per project conventions.
-
-### Issue #551 — YARP Analyzer Review
-
-Scoped as a spike/review — no implementation expected immediately. Output should be documented in `docs/Analyzers/` or as issue comments. Assigned `future` label to signal post-DepartmentPortal scheduling.
-
-
-# 2026-05-16: Automated Migration with Copilot Doc Placement and Pattern
-
-**Date:** 2026-05-16T15:22:00-04:00  
-**Author:** Beast (Technical Writer)  
-**Status:** Established — nav and doc pattern locked
-
-## Decision
-
-`docs/Migration/AutomatedMigrationWithCopilot.md` is placed under the **Plan** subsection of the Migration nav, alongside the existing "Automated Migration Guide" (the older four-step pipeline doc).
-
-```yaml
-- Plan:
-    - Automated Migration Guide: Migration/AutomatedMigration.md
-    - Automated Migration with Copilot: Migration/AutomatedMigrationWithCopilot.md
-```
-
-## Rationale
-
-The existing Migration docs divide into theory (Methodology.md), quick path (QuickStart.md), older pipeline (AutomatedMigration.md), and strategy (Strategies.md). A Copilot-specific guide belongs in Plan because it describes *how to plan and execute* a full automated migration — not a specific implementation pattern like MasterPages.md.
-
-The new guide is differentiated from existing docs by:
-
-1. Being anchored to a specific proven benchmark (WingtipToys, 26/26 acceptance tests)
-2. Covering the Copilot-specific workflow (prompt patterns, skill file references)
-3. Including the prescan → migrate → build → L2 Copilot repair → run → acceptance test → iterate loop
-4. Surfacing benchmark numbers (WingtipToys 26/26, ContosoUniversity 37/40)
-
-## Pattern Established
-
-New migration guides at this level of detail should:
-
-- Be anchored to at least one proven benchmark app with acceptance test results
-- Include a complete end-to-end walkthrough (not just concepts)
-- Close with a tips section covering the most common mistakes
-- Link to existing docs for theory and component references rather than duplicating them
-
-
-# 2026-05-16: User Directive — ContosoUniversity Benchmark Target
-
-**Date:** 2026-05-16T13:10:29-04:00  
-**Author:** Jeffrey T. Fritz  
-**Status:** Guidance captured
-
-## What
-
-ContosoUniversity is much simpler than WingtipToys and should be migrated in less than 5 minutes. This is the benchmark target.
-
-## Why
-
-User request — captured for team memory.
-
-
-# 2026-05-16: User Directive — DepartmentPortal Migration Strategy
-
-**Date:** 2026-05-16T15:22:00-04:00  
-**Author:** Jeffrey T. Fritz  
-**Status:** Guidance captured
-
-## What
-
-Code-only server controls (P1) should migrate using existing shim control classes — we need a migration class in the CLI, not new components. Namespace tag prefix (P2) is confirmed as a real gap. Both should be parked as GitHub issues. Also: generate a migration document about steps to migrate automatically with Copilot, and schedule future work to review analyzers for step-by-step slower migration with YARP.
-
-## Why
-
-User request — captured for team memory. This strategy unlocks DepartmentPortal migration without new component implementations.
-
+Run 88 remained green at **26/26 acceptance tests passed** from a freshly cleared `samples\AfterWingtipToys` output. The measurable Wingtip improvement from the fix set is that the prior `ShoppingCartTitle` compile error is gone, reducing fresh Layer 1 build errors from **4 to 3** and matching that reduction in manual Layer 2 fixes (**4 → 3**).
+
+## Timing
+
+| Phase | Started | Finished | Duration |
+|---|---|---|---|
+| Preparation | 15:38:48 | 15:38:57 | 0:09 |
+| L1 migration | 15:39:04 | 15:39:23 | 0:19 |
+| Build repair | 15:39:34 | 15:40:37 | 1:03 |
+| Startup triage | 15:40:37 | 15:41:09 | 0:32 |
+| Acceptance tests | 15:41:09 | 15:42:05 | 0:56 |
+| Screenshots | 15:42:05 | 15:43:01 | 0:56 |
+| Report | 15:43:26 | 15:45:04 | 1:38 |
+| **Total** | **15:38:35** | **15:45:04** | **6:29** |
+
+## Comparison to Run 87
+
+- Acceptance tests: **26/26 → 26/26** (no regression)
+- L1 build errors: **4 → 3**
+- L2 manual fixes: **4 → 3**
+- Build repair time: **~90s → 63s**
+- Total wall-clock: **~5 min → 6m29s** (overall slower, but the compile-fix critical path improved)
+
+## Remaining Manual Fixes
+
+1. `ShoppingCart.razor.cs` still needs `actions.GetCartItems()` renamed to `_shoppingCartActions.GetCartItems()`.
+2. `Logic\ExceptionUtility.cs` still needs a manual non-page `Server.MapPath` replacement.
+3. `Logic\ShoppingCartActions.cs` still needs `GetCart()` rewritten to avoid `new ShoppingCartActions()`.
+
+## Interpretation
+
+- **Validated:** InnerText server control property stubs.
+- **Not directly exercised by WingtipToys:** `Entities`/`DataContext` suffix handling, EDMX T4 artifact exclusion, and BLL namespace alignment.
+- **Recommendation:** Keep Run 88 as proof that the InnerText fix reduced Wingtip Layer 2 work, then validate the other three fixes against a benchmark that includes EDMX/BLL/DataContext-heavy inputs.
 
