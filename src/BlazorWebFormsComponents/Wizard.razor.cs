@@ -280,12 +280,13 @@ namespace BlazorWebFormsComponents
 			return WizardStepType.Step;
 		}
 
+		private WizardStepType CurrentStepType => GetEffectiveStepType(ActiveStepIndex);
+
 		private bool ShowPreviousButton
 		{
 			get
 			{
-				var stepType = GetEffectiveStepType(ActiveStepIndex);
-				return stepType == WizardStepType.Step || stepType == WizardStepType.Finish;
+				return CurrentStepType == WizardStepType.Step || CurrentStepType == WizardStepType.Finish;
 			}
 		}
 
@@ -293,8 +294,7 @@ namespace BlazorWebFormsComponents
 		{
 			get
 			{
-				var stepType = GetEffectiveStepType(ActiveStepIndex);
-				return stepType == WizardStepType.Start || stepType == WizardStepType.Step;
+				return CurrentStepType == WizardStepType.Start || CurrentStepType == WizardStepType.Step;
 			}
 		}
 
@@ -302,8 +302,7 @@ namespace BlazorWebFormsComponents
 		{
 			get
 			{
-				var stepType = GetEffectiveStepType(ActiveStepIndex);
-				return stepType == WizardStepType.Finish;
+				return CurrentStepType == WizardStepType.Finish;
 			}
 		}
 
@@ -311,17 +310,23 @@ namespace BlazorWebFormsComponents
 		{
 			get
 			{
-				var stepType = GetEffectiveStepType(ActiveStepIndex);
-				return stepType == WizardStepType.Complete;
+				return CurrentStepType == WizardStepType.Complete;
 			}
 		}
+
+		private RenderFragment CurrentNavigationTemplate => CurrentStepType switch
+		{
+			WizardStepType.Start => StartNavigationTemplate,
+			WizardStepType.Step => StepNavigationTemplate,
+			WizardStepType.Finish => FinishNavigationTemplate,
+			_ => null
+		};
 
 		private string NextButtonText
 		{
 			get
 			{
-				var stepType = GetEffectiveStepType(ActiveStepIndex);
-				return stepType == WizardStepType.Start ? StartNextButtonText : StepNextButtonText;
+				return CurrentStepType == WizardStepType.Start ? StartNextButtonText : StepNextButtonText;
 			}
 		}
 
@@ -329,8 +334,20 @@ namespace BlazorWebFormsComponents
 		{
 			get
 			{
-				var stepType = GetEffectiveStepType(ActiveStepIndex);
-				return stepType == WizardStepType.Finish ? FinishPreviousButtonText : StepPreviousButtonText;
+				return CurrentStepType == WizardStepType.Finish ? FinishPreviousButtonText : StepPreviousButtonText;
+			}
+		}
+
+		private string CalculatedFinishButtonText
+		{
+			get
+			{
+				if (!string.IsNullOrEmpty(FinishCompleteButtonText) && !string.Equals(FinishCompleteButtonText, "Finish", StringComparison.Ordinal))
+				{
+					return FinishCompleteButtonText;
+				}
+
+				return !string.IsNullOrEmpty(FinishButtonText) ? FinishButtonText : "Finish";
 			}
 		}
 

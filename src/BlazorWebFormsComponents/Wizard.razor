@@ -71,34 +71,41 @@
 								{
 									<tr>
 										<td align="right" style="@GetNavigationStyleString()" class="@GetNavigationStyleClass()">
-											<table cellspacing="5" cellpadding="5" border="0">
-												<tr>
-													@if (ShowPreviousButton)
-													{
-														<td align="right">
-															<input type="submit" name="__wizard_action" value="@PreviousButtonText" @onclick="HandlePreviousClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
-														</td>
-													}
-													@if (ShowNextButton)
-													{
-														<td align="right">
-															<input type="submit" name="__wizard_action" value="@NextButtonText" @onclick="HandleNextClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
-														</td>
-													}
-													@if (ShowFinishButton)
-													{
-														<td align="right">
-															<input type="submit" name="__wizard_action" value="@FinishButtonText" @onclick="HandleFinishClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
-														</td>
-													}
-													@if (DisplayCancelButton)
-													{
-														<td align="right">
-															<input type="submit" name="__wizard_action" value="@CancelButtonText" @onclick="HandleCancelClick" @onclick:preventDefault />
-														</td>
-													}
-												</tr>
-											</table>
+											@if (CurrentNavigationTemplate != null)
+											{
+												@CurrentNavigationTemplate
+											}
+											else
+											{
+												<table cellspacing="5" cellpadding="5" border="0">
+													<tr>
+														@if (ShowPreviousButton)
+														{
+															<td align="right">
+																<input type="submit" name="__wizard_action" value="@PreviousButtonText" @onclick="HandlePreviousClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+															</td>
+														}
+														@if (ShowNextButton)
+														{
+															<td align="right">
+																<input type="submit" name="__wizard_action" value="@NextButtonText" @onclick="HandleNextClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+															</td>
+														}
+														@if (ShowFinishButton)
+														{
+															<td align="right">
+																<input type="submit" name="__wizard_action" value="@CalculatedFinishButtonText" @onclick="HandleFinishClick" @onclick:preventDefault style="@GetNavigationButtonStyleString()" class="@GetNavigationButtonStyleClass()" />
+															</td>
+														}
+														@if (DisplayCancelButton)
+														{
+															<td align="right">
+																<input type="submit" name="__wizard_action" value="@CancelButtonText" @onclick="HandleCancelClick" @onclick:preventDefault />
+															</td>
+														}
+													</tr>
+												</table>
+											}
 										</td>
 									</tr>
 								}

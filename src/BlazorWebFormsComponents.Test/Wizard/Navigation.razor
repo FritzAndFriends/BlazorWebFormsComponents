@@ -332,6 +332,125 @@
 	}
 
 	[Fact]
+	public void Wizard_StartNavigationTemplate_ReplacesDefaultNavigation()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0">
+				<StartNavigationTemplate>
+					<button id="custom-start-next" type="button">Begin Wizard</button>
+				</StartNavigationTemplate>
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>More Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Find("#custom-start-next").TextContent.ShouldBe("Begin Wizard");
+		cut.FindAll("input[value='Next']").Count.ShouldBe(0);
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_StepNavigationTemplate_ReplacesDefaultNavigation()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1">
+				<StepNavigationTemplate>
+					<button id="custom-step-nav" type="button">Custom Middle Nav</button>
+				</StepNavigationTemplate>
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>More Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 3" StepType="WizardStepType.Finish">
+						<p>Finish Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Find("#custom-step-nav").TextContent.ShouldBe("Custom Middle Nav");
+		cut.FindAll("input[value='Next']").Count.ShouldBe(0);
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_FinishNavigationTemplate_ReplacesDefaultNavigation()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1">
+				<FinishNavigationTemplate>
+					<button id="custom-finish-nav" type="button">Confirm Order</button>
+				</FinishNavigationTemplate>
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2" StepType="WizardStepType.Finish">
+						<p>Finish Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Find("#custom-finish-nav").TextContent.ShouldBe("Confirm Order");
+		cut.FindAll("input[value='Finish']").Count.ShouldBe(0);
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_FinishCompleteButtonText_OverridesFinishButtonLabel()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1" FinishButtonText="Submit Order" FinishCompleteButtonText="Complete Purchase">
+				<WizardSteps>
+					<WizardStep Title="Step 1">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2" StepType="WizardStepType.Finish">
+						<p>Finish Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Find("input[value='Complete Purchase']");
+		cut.FindAll("input[value='Submit Order']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_SideBarTemplate_ReplacesDefaultSidebar()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplaySideBar="true">
+				<SideBarTemplate>
+					<div id="custom-sidebar">Custom Sidebar Content</div>
+				</SideBarTemplate>
+				<WizardSteps>
+					<WizardStep Title="Alpha Step">
+						<p>Content</p>
+					</WizardStep>
+					<WizardStep Title="Beta Step">
+						<p>More Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Find("#custom-sidebar").TextContent.ShouldBe("Custom Sidebar Content");
+		cut.Markup.ShouldNotContain("Alpha Step");
+		cut.Markup.ShouldNotContain("Beta Step");
+	}
+
+	[Fact]
 	public void Wizard_VisibleFalse_RendersNothing()
 	{
 		var cut = Render(

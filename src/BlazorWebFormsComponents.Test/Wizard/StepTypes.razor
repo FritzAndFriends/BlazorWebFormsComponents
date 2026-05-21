@@ -1,0 +1,128 @@
+@using BlazorWebFormsComponents.Enums
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void Wizard_WizardStepTypeAuto_InfersTypesFromPosition()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0">
+				<WizardSteps>
+					<WizardStep Title="Start Auto">
+						<p>Start Content</p>
+					</WizardStep>
+					<WizardStep Title="Middle Auto">
+						<p>Middle Content</p>
+					</WizardStep>
+					<WizardStep Title="Last Auto">
+						<p>Last Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("input[value='Next']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(0);
+		cut.FindAll("input[value='Finish']").Count.ShouldBe(0);
+
+		cut.Find("input[value='Next']").Click();
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Next']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Finish']").Count.ShouldBe(0);
+		cut.Markup.ShouldContain("Middle Content");
+
+		cut.Find("input[value='Next']").Click();
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Finish']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Next']").Count.ShouldBe(0);
+		cut.Markup.ShouldContain("Last Content");
+	}
+
+	[Fact]
+	public void Wizard_WizardStepTypeStart_ShowsOnlyNextButton()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0">
+				<WizardSteps>
+					<WizardStep Title="Start" StepType="WizardStepType.Start">
+						<p>Start Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2" StepType="WizardStepType.Step">
+						<p>Step 2 Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("input[value='Next']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(0);
+		cut.FindAll("input[value='Finish']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_WizardStepTypeStep_ShowsPreviousAndNext()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1">
+				<WizardSteps>
+					<WizardStep Title="Start" StepType="WizardStepType.Start">
+						<p>Start Content</p>
+					</WizardStep>
+					<WizardStep Title="Middle" StepType="WizardStepType.Step">
+						<p>Middle Content</p>
+					</WizardStep>
+					<WizardStep Title="Finish" StepType="WizardStepType.Finish">
+						<p>Finish Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Next']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Finish']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_WizardStepTypeFinish_ShowsPreviousAndFinish()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1">
+				<WizardSteps>
+					<WizardStep Title="Start" StepType="WizardStepType.Start">
+						<p>Start Content</p>
+					</WizardStep>
+					<WizardStep Title="Finish" StepType="WizardStepType.Finish">
+						<p>Finish Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("input[value='Previous']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Finish']").Count.ShouldBe(1);
+		cut.FindAll("input[value='Next']").Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void Wizard_WizardStepTypeComplete_ShowsCompletionContentWithoutNavigation()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1">
+				<WizardSteps>
+					<WizardStep Title="Step 1" StepType="WizardStepType.Step">
+						<p>Step Content</p>
+					</WizardStep>
+					<WizardStep Title="Complete" StepType="WizardStepType.Complete">
+						<p>Completed Successfully</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.Markup.ShouldContain("Completed Successfully");
+		cut.FindAll("input[type='submit']").Count.ShouldBe(0);
+	}
+
+}
