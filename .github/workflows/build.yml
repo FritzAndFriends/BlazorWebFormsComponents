@@ -127,4 +127,4 @@ jobs:
             src/BlazorWebFormsComponents.Analyzers.Test/TestResults/*.trx
           check_name: Unit Tests Summary
           comment_title: "🧪 Unit Test Results"
-          comment_mode: update
+          comment_mode: always

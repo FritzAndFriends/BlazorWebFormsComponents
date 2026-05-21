@@ -106,4 +106,4 @@ jobs:
             samples/AfterBlazorServerSide.Tests/TestResults/*.trx
           check_name: Integration Tests Summary
           comment_title: "🎭 Integration Test Results"
-          comment_mode: update
+          comment_mode: always
