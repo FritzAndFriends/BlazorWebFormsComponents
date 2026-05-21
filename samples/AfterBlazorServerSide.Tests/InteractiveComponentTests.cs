@@ -1136,8 +1136,9 @@ public class InteractiveComponentTests
             var wizard = page.Locator("[data-audit-control='Wizard-7']");
             await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
 
+            // Click forward once to reach the Finish step (step 1) where FinishCompleteButtonText renders
             await ClickForwardNavigationAsync(page, wizard);
-            await ClickForwardNavigationAsync(page, wizard);
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { Timeout = 5000 });
 
             var finishButton = await FindForwardNavigationButtonAsync(wizard);
             var finishButtonLabel = await GetButtonLabelAsync(finishButton);
@@ -1222,6 +1223,8 @@ public class InteractiveComponentTests
             await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
 
             await ClickForwardNavigationAsync(page, wizard);
+            // Wait for Blazor Server to process the click and re-render at step 1
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { Timeout = 5000 });
 
             var currentStep = await wizard.Locator("input[name='__wizard_step']").GetAttributeAsync("value");
             Assert.Equal("1", currentStep);
@@ -1252,11 +1255,12 @@ public class InteractiveComponentTests
             var wizard = page.Locator("[data-audit-control='Wizard-11']");
             await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
 
+            // Click forward once to reach the Finish step (step 1) where FinishNavigationTemplate renders
             await ClickForwardNavigationAsync(page, wizard);
-            await ClickForwardNavigationAsync(page, wizard);
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { Timeout = 5000 });
 
             var currentStep = await wizard.Locator("input[name='__wizard_step']").GetAttributeAsync("value");
-            Assert.Equal("2", currentStep);
+            Assert.Equal("1", currentStep);
 
             var navigationArea = GetWizardNavigationArea(wizard);
             var customNavigationContent = navigationArea.Locator("button, nav, div, span, a, [class*='nav'], [class*='wizard'], [class*='custom'], [data-navigation-template], [data-template='navigation']");
