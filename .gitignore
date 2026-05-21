@@ -357,3 +357,4 @@ planning-docs/ASPX-MIDDLEWARE-FEASIBILITY.md
 .squad-workstream
 site/
 samples/ZavaLoanPortal
+samples/AfterZavaLoanPortal/watch.ps1
