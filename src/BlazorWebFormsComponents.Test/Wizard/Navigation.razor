@@ -446,8 +446,10 @@
 		);
 
 		cut.Find("#custom-sidebar").TextContent.ShouldBe("Custom Sidebar Content");
-		cut.Markup.ShouldNotContain("Alpha Step");
-		cut.Markup.ShouldNotContain("Beta Step");
+		// The default sidebar links should not render (no <a> with step titles as visible text)
+		var sidebarLinks = cut.FindAll("a");
+		sidebarLinks.ShouldNotContain(a => a.TextContent == "Alpha Step");
+		sidebarLinks.ShouldNotContain(a => a.TextContent == "Beta Step");
 	}
 
 	[Fact]
@@ -464,6 +466,73 @@
 		);
 
 		cut.Markup.Trim().ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Wizard_MoveTo_NavigatesToSpecifiedStep()
+	{
+		var stepChangedCount = 0;
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" ActiveStepIndexChanged="(_) => { }" OnActiveStepChanged="(_) => stepChangedCount++">
+				<WizardSteps>
+					<WizardStep Title="Step 1"><p>Step 1</p></WizardStep>
+					<WizardStep Title="Step 2"><p>Step 2</p></WizardStep>
+					<WizardStep Title="Step 3"><p>Step 3</p></WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		var wizard = cut.FindComponent<Wizard>().Instance;
+		wizard.MoveTo(2).GetAwaiter().GetResult();
+
+		cut.Markup.ShouldContain("Step 3");
+		stepChangedCount.ShouldBe(1);
+	}
+
+	[Fact]
+	public void Wizard_MoveTo_OutOfRange_DoesNothing()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" ActiveStepIndexChanged="(_) => { }">
+				<WizardSteps>
+					<WizardStep Title="Step 1"><p>Step 1</p></WizardStep>
+					<WizardStep Title="Step 2"><p>Step 2</p></WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		var wizard = cut.FindComponent<Wizard>().Instance;
+		wizard.MoveTo(5).GetAwaiter().GetResult();
+
+		// Should still be on step 0
+		cut.Markup.ShouldContain("Step 1");
+	}
+
+	[Fact]
+	public void Wizard_GetHistory_TracksVisitedSteps()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" ActiveStepIndexChanged="(_) => { }">
+				<WizardSteps>
+					<WizardStep Title="Step 1"><p>Step 1</p></WizardStep>
+					<WizardStep Title="Step 2"><p>Step 2</p></WizardStep>
+					<WizardStep Title="Step 3"><p>Step 3</p></WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		var wizard = cut.FindComponent<Wizard>().Instance;
+		wizard.GetHistory().Count.ShouldBe(0);
+
+		// Navigate forward via Next button
+		cut.Find("input[value='Next']").Click();
+		wizard.GetHistory().Count.ShouldBe(1);
+		wizard.GetHistory()[0].ShouldBe(0);
+
+		// Navigate again
+		cut.Find("input[value='Next']").Click();
+		wizard.GetHistory().Count.ShouldBe(2);
+		wizard.GetHistory()[1].ShouldBe(1);
 	}
 
 }

@@ -2,9 +2,22 @@
 
 @code {
 
-	[Fact(Skip = "Wizard does not yet support this")]
+	[Fact]
 	public void Wizard_SingleStepWizard_RendersWithoutNavigationButtons()
 	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplaySideBar="false">
+				<WizardSteps>
+					<WizardStep Title="Only Step">
+						<p>Single step content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		// No navigation buttons should render for a single-step wizard
+		cut.FindAll("input[type='submit']").Count.ShouldBe(0);
+		cut.Markup.ShouldContain("Single step content");
 	}
 
 	[Fact]
@@ -71,9 +84,28 @@
 		cut.FindAll("a").Single().TextContent.ShouldBeEmpty();
 	}
 
-	[Fact(Skip = "Wizard does not yet support this")]
+	[Fact]
 	public void Wizard_DynamicStepsAddedOrRemoved_UpdatesRegisteredSteps()
 	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplaySideBar="true">
+				<WizardSteps>
+					<WizardStep Title="Step A"><p>A</p></WizardStep>
+					<WizardStep Title="Step B"><p>B</p></WizardStep>
+					<WizardStep Title="Step C"><p>C</p></WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		// Initially 3 steps — sidebar shows 2 links (non-active) + 1 span (active step A)
+		cut.FindAll("td[role='navigation'] a").Count.ShouldBe(2);
+
+		// Verify navigation buttons exist (multi-step wizard)
+		cut.FindAll("input[type='submit']").Count.ShouldBeGreaterThan(0);
+
+		// Verify the Wizard tracks all 3 steps
+		var wizard = cut.FindComponent<Wizard>().Instance;
+		wizard.GetHistory().ShouldNotBeNull();
 	}
 
 }

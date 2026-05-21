@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
@@ -15,6 +16,8 @@ namespace BlazorWebFormsComponents
 		private const string WizardActionFieldName = "__wizard_action";
 		private const string WizardStepFieldName = "__wizard_step";
 		private bool _formProcessed;
+		private int _previousActiveStepIndex = -1;
+		private readonly List<int> _navigationHistory = new();
 
 		protected override async Task OnInitializedAsync()
 		{
@@ -45,6 +48,18 @@ namespace BlazorWebFormsComponents
 			}
 		}
 
+		protected override async Task OnParametersSetAsync()
+		{
+			await base.OnParametersSetAsync();
+
+			if (_previousActiveStepIndex >= 0 && _previousActiveStepIndex != ActiveStepIndex)
+			{
+				await OnActiveStepChanged.InvokeAsync(EventArgs.Empty);
+			}
+
+			_previousActiveStepIndex = ActiveStepIndex;
+		}
+
 		private string _pendingAction;
 
 		/// <summary>
@@ -63,7 +78,7 @@ namespace BlazorWebFormsComponents
 				if (nextIndex >= _steps.Count) return; // Not enough steps registered yet
 				_formProcessed = true;
 				_pendingAction = null;
-				ActiveStepIndex = nextIndex;
+				SetActiveStepIndexInternal(nextIndex);
 			}
 			else if (action == StepPreviousButtonText || action == FinishPreviousButtonText)
 			{
@@ -76,7 +91,7 @@ namespace BlazorWebFormsComponents
 				}
 				if (prevIndex >= 0)
 				{
-					ActiveStepIndex = prevIndex;
+					SetActiveStepIndexInternal(prevIndex);
 				}
 			}
 			else if (action == FinishButtonText || action == FinishCompleteButtonText)
@@ -91,7 +106,7 @@ namespace BlazorWebFormsComponents
 				}
 				else if (GetEffectiveStepType(nextIndex) == WizardStepType.Complete)
 				{
-					ActiveStepIndex = nextIndex;
+					SetActiveStepIndexInternal(nextIndex);
 				}
 			}
 			else if (action == CancelButtonText)
@@ -126,6 +141,32 @@ namespace BlazorWebFormsComponents
 				ProcessPendingNavigation();
 				StateHasChanged();
 			}
+		}
+
+		internal void RemoveStep(WizardStep step)
+		{
+			var removedIndex = _steps.IndexOf(step);
+			if (removedIndex < 0)
+			{
+				return;
+			}
+
+			_steps.RemoveAt(removedIndex);
+
+			if (_steps.Count == 0)
+			{
+				SetActiveStepIndexInternal(0);
+			}
+			else if (removedIndex < ActiveStepIndex)
+			{
+				SetActiveStepIndexInternal(ActiveStepIndex - 1);
+			}
+			else if (ActiveStepIndex >= _steps.Count)
+			{
+				SetActiveStepIndexInternal(_steps.Count - 1);
+			}
+
+			StateHasChanged();
 		}
 
 		#endregion
@@ -282,6 +323,9 @@ namespace BlazorWebFormsComponents
 
 		private WizardStepType CurrentStepType => GetEffectiveStepType(ActiveStepIndex);
 
+		private bool HasNavigationTarget => Enumerable.Range(0, _steps.Count)
+			.Count(index => GetEffectiveStepType(index) != WizardStepType.Complete) > 1;
+
 		private bool ShowPreviousButton
 		{
 			get
@@ -355,6 +399,33 @@ namespace BlazorWebFormsComponents
 
 		#region Navigation Methods
 
+		private void SetActiveStepIndexInternal(int stepIndex)
+		{
+			ActiveStepIndex = stepIndex;
+			_previousActiveStepIndex = stepIndex;
+		}
+
+		/// <summary>
+		/// Programmatically navigates to the specified step index.
+		/// </summary>
+		public async Task MoveTo(int stepIndex)
+		{
+			if (stepIndex < 0 || stepIndex >= _steps.Count || stepIndex == ActiveStepIndex)
+			{
+				return;
+			}
+
+			_navigationHistory.Add(ActiveStepIndex);
+			SetActiveStepIndexInternal(stepIndex);
+			await ActiveStepIndexChanged.InvokeAsync(ActiveStepIndex);
+			await OnActiveStepChanged.InvokeAsync(EventArgs.Empty);
+		}
+
+		/// <summary>
+		/// Returns the list of step indices the user has visited (navigation history).
+		/// </summary>
+		public IReadOnlyList<int> GetHistory() => _navigationHistory.AsReadOnly();
+
 		private async Task HandleNextClick()
 		{
 			var nextIndex = ActiveStepIndex + 1;
@@ -363,7 +434,8 @@ namespace BlazorWebFormsComponents
 
 			if (!args.Cancel && nextIndex < _steps.Count)
 			{
-				ActiveStepIndex = nextIndex;
+				_navigationHistory.Add(ActiveStepIndex);
+				SetActiveStepIndexInternal(nextIndex);
 				await ActiveStepIndexChanged.InvokeAsync(ActiveStepIndex);
 				await OnActiveStepChanged.InvokeAsync(EventArgs.Empty);
 			}
@@ -386,7 +458,8 @@ namespace BlazorWebFormsComponents
 
 			if (!args.Cancel)
 			{
-				ActiveStepIndex = prevIndex;
+				_navigationHistory.Add(ActiveStepIndex);
+				SetActiveStepIndexInternal(prevIndex);
 				await ActiveStepIndexChanged.InvokeAsync(ActiveStepIndex);
 				await OnActiveStepChanged.InvokeAsync(EventArgs.Empty);
 			}
@@ -406,7 +479,8 @@ namespace BlazorWebFormsComponents
 				}
 				else if (nextIndex < _steps.Count && GetEffectiveStepType(nextIndex) == WizardStepType.Complete)
 				{
-					ActiveStepIndex = nextIndex;
+					_navigationHistory.Add(ActiveStepIndex);
+					SetActiveStepIndexInternal(nextIndex);
 					await ActiveStepIndexChanged.InvokeAsync(ActiveStepIndex);
 					await OnActiveStepChanged.InvokeAsync(EventArgs.Empty);
 				}
@@ -432,7 +506,8 @@ namespace BlazorWebFormsComponents
 
 			if (!args.Cancel)
 			{
-				ActiveStepIndex = stepIndex;
+				_navigationHistory.Add(ActiveStepIndex);
+				SetActiveStepIndexInternal(stepIndex);
 				await ActiveStepIndexChanged.InvokeAsync(ActiveStepIndex);
 				await OnActiveStepChanged.InvokeAsync(EventArgs.Empty);
 			}

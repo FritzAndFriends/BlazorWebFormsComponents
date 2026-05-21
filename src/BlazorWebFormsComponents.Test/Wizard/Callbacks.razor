@@ -108,9 +108,28 @@
 		cut.Markup.ShouldContain("Step 2 Content");
 	}
 
-	[Fact(Skip = "Wizard does not yet support this")]
+	[Fact]
 	public void Wizard_ProgrammaticActiveStepIndexChange_TriggersActiveStepIndexChanged()
 	{
+		var activeStepChangedCount = 0;
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" ActiveStepIndexChanged="(_) => { }" OnActiveStepChanged="(_) => activeStepChangedCount++">
+				<WizardSteps>
+					<WizardStep Title="Step 1"><p>Step 1</p></WizardStep>
+					<WizardStep Title="Step 2"><p>Step 2</p></WizardStep>
+					<WizardStep Title="Step 3"><p>Step 3</p></WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		activeStepChangedCount.ShouldBe(0);
+
+		// Programmatically navigate via MoveTo
+		var wizard = cut.FindComponent<Wizard>().Instance;
+		wizard.MoveTo(2).GetAwaiter().GetResult();
+
+		activeStepChangedCount.ShouldBe(1);
+		cut.Markup.ShouldContain("Step 3");
 	}
 
 }
