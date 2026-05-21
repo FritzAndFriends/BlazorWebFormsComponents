@@ -1300,7 +1300,7 @@ public class InteractiveComponentTests
         });
     }
 
-    private static ILocator GetWizardNavigationArea(ILocator wizard) => wizard.Locator("td[align='right']").Last;
+    private static ILocator GetWizardNavigationArea(ILocator wizard) => wizard.Locator("td[role='navigation'][aria-label='Wizard navigation']");
 
     private static async Task ClickForwardNavigationAsync(IPage page, ILocator wizard)
     {
