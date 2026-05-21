@@ -133,3 +133,21 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 
 
 📌 Team update (2026-05-07T13:17): Bishop completed GridView/ListView template emission fixes — ItemType propagation and explicit placeholder contexts now reduce acceptance-test repair surface on data-bound pages. CLI: 603/603 tests. Next: Run 41 validation — decided by Bishop
+
+### Wizard Integration Coverage Audit (2026-05-20T21:07:06.347-04:00)
+- Wizard sample page exists at `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/Wizard/Wizard.razor` (not `Index.razor`).
+- The Wizard sample demonstrates six scenarios: basic multi-step flow, no-sidebar mode, `AllowReturn="false"`, cancel button handling, custom navigation button text, and `HeaderTemplate` rendering.
+- Sample-site navigation is driven by `samples/AfterBlazorServerSide/ComponentCatalog.cs`; Wizard is registered there under the Navigation category with route `/ControlSamples/Wizard`.
+- `samples/AfterBlazorServerSide/Components/Layout/NavMenu.razor` renders links from `ComponentCatalog`, so Wizard is available in the live side navigation even though `ComponentList.razor` also contains a separate static link.
+- `samples/AfterBlazorServerSide.Tests\ControlSampleTests.cs` has no Wizard smoke-test `InlineData`, and `samples/AfterBlazorServerSide.Tests\InteractiveComponentTests.cs` has no Wizard-specific interaction test.
+- Running `dotnet test samples/AfterBlazorServerSide.Tests --nologo --filter "Wizard"` currently exercises CreateUserWizard coverage only; after installing Playwright Chromium, the filtered run succeeded with 1 test and still did not validate `/ControlSamples/Wizard`.
+- Manual browser verification confirmed `/ControlSamples/Wizard` loads without console errors and that navigation from the site sidebar reaches the page; sample interactions on the page advanced wizard state successfully.
+
+### Wizard Playwright Coverage Added (2026-05-20T21:19:29.902-04:00)
+- Added Wizard smoke coverage by inserting `/ControlSamples/Wizard` into the Navigation control theory in `samples/AfterBlazorServerSide.Tests\ControlSampleTests.cs`.
+- Added four Wizard interaction tests in `samples/AfterBlazorServerSide.Tests\InteractiveComponentTests.cs`: next-step, previous-step, sidebar navigation, and finish-to-complete flow.
+- Wizard sample pages contain multiple instances of the component with repeated button labels, so Playwright locators should scope to `data-audit-control="Wizard-1"` for the basic sample to avoid ambiguous `Next`, `Previous`, and `Finish` matches.
+- Key verification markers for the basic Wizard sample are `Step 1: Personal Information`, `Step 2: Preferences`, `Step 3: Review`, `Registration Complete!`, and the `Finish event fired!` success alert in `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/Wizard/Wizard.razor`.
+- Compile-only validation succeeded with `dotnet build samples\AfterBlazorServerSide.Tests --nologo`; tests were not executed because the task explicitly limited validation to compilation.
+
+≡ Team update (2026-05-21T12:26): Scope Wizard Playwright locators to `data-audit-control="Wizard-N"` containers to avoid ambiguous button/sidebar text matching across six sample instances on same route. Use container-scoped locators for all interactive coverage to ensure deterministic targeting — decided by Colossus

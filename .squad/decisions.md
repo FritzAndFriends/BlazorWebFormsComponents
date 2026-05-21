@@ -690,3 +690,69 @@ Run 88 remained green at **26/26 acceptance tests passed** from a freshly cleare
 - **Not directly exercised by WingtipToys:** `Entities`/`DataContext` suffix handling, EDMX T4 artifact exclusion, and BLL namespace alignment.
 - **Recommendation:** Keep Run 88 as proof that the InnerText fix reduced Wingtip Layer 2 work, then validate the other three fixes against a benchmark that includes EDMX/BLL/DataContext-heavy inputs.
 
+
+
+# Decision: Scope Wizard Playwright Locators to a Single Sample Instance
+
+**Date:** 2026-05-20T21:19:29.902-04:00
+**Author:** Colossus
+**Status:** Proposed
+
+## Decision
+When writing Playwright coverage for `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/Wizard/Wizard.razor`, scope interactive locators to a single sample container such as `data-audit-control="Wizard-1"` instead of using page-wide `Next`, `Previous`, `Finish`, or sidebar text locators.
+
+## Why
+The Wizard sample page renders six separate Wizard demonstrations on the same route, and several of them reuse the same navigation button text and step labels. Page-wide locators would be ambiguous and flaky, while container-scoped locators consistently target the intended sample flow.
+
+## Impact
+Future Wizard integration tests should start from the `data-audit-control` wrapper and then locate headings, buttons, and sidebar links inside that container. This keeps smoke coverage broad while making interactive coverage deterministic.
+
+
+# Decision: Wizard finish button label precedence
+
+**Date:** 2026-05-20T21:19:29.902-04:00
+**Author:** Cyclops
+**Status:** Proposed
+
+## Decision
+
+For `Wizard`, step-specific navigation templates replace the default button row only for their matching effective step types (`Start`, `Step`, `Finish`).
+
+For the rendered Finish button label, a non-default `FinishCompleteButtonText` value takes precedence, while `FinishButtonText` remains the compatibility fallback when `FinishCompleteButtonText` is left at its default value.
+
+## Why
+
+`FinishCompleteButtonText` was declared but never affected rendering, while existing callers may already rely on `FinishButtonText`. This precedence makes the previously dead Web Forms-style parameter functional without breaking established BWFC usage that customized the finish label through `FinishButtonText`.
+
+## Affected files
+
+- `src/BlazorWebFormsComponents/Wizard.razor`
+- `src/BlazorWebFormsComponents/Wizard.razor.cs`
+- `src/BlazorWebFormsComponents.Test/Wizard/Navigation.razor`
+- `docs/NavigationControls/Wizard.md`
+
+
+# Rogue decision inbox — Wizard unsupported behaviors remain explicit QA gaps
+
+**Date:** 2026-05-20T21:19:29.902-04:00
+**Author:** Rogue
+**Requested by:** Jeffrey T. Fritz
+**Status:** Proposed
+
+## Decision
+
+Keep Wizard tests for unsupported behaviors explicitly skipped until the component contract is implemented for:
+- parent-driven `ActiveStepIndex` changes raising `ActiveStepIndexChanged`,
+- single-step wizards suppressing navigation buttons, and
+- dynamic step add/remove scenarios updating the registered step list.
+
+## Why
+
+The current `Wizard` implementation only raises `ActiveStepIndexChanged` during its internal click handlers, auto-classifies a single step as `Start` and still renders a Next button, and only supports add-only child-step registration through `AddStep()` with no removal path. Writing active assertions for those behaviors would produce known-failing tests instead of actionable regression coverage.
+
+## Impact
+
+- QA can keep coverage green while still documenting product gaps in executable form.
+- Future Wizard implementation work has named tests ready to unskip when the behavior lands.
+- Reports can distinguish supported parity from intentionally deferred Wizard behavior.
+
