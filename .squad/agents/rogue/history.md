@@ -115,3 +115,44 @@ Confirmed 10/10 ComponentRef tests passing. Test coverage is complete — no fur
 - L1 migration stayed at 19 seconds; build repair dropped to 63 seconds.
 - Startup smoke checks for `/`, `/ProductList`, `/About`, and `/Account/Login` all returned HTTP 200 before test execution.
 - Three of the four target fixes (`Entities`/`DataContext`, EDMX T4 exclusion, BLL namespace alignment) were not directly exercised by WingtipToys, so they still need another benchmark for validation.
+
+### 2026-05-20T21:07:06.347-04:00: Wizard bUnit coverage audit
+
+**Task:** Investigate the Wizard component's bUnit test coverage, execute the existing Wizard-filtered test run, and identify missing scenarios.
+
+**Outcome:** `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor` is currently the only Wizard-specific test file and contains 16 `[Fact]` tests. The requested `dotnet test src\BlazorWebFormsComponents.Test --nologo --filter "Wizard"` run passed 26 tests across `net8.0`, `net9.0`, and `net10.0`; the broader count indicates the filter also matches non-folder tests such as CreateUserWizard coverage, so component-folder counts should be tracked separately from filter output.
+
+**Coverage notes:**
+- Existing Wizard coverage focuses on active-step rendering, next/previous navigation, finish and complete behavior, sidebar visibility/navigation, `AllowReturn=false`, `OnNextButtonClick`, `OnFinishButtonClick`, cancel button visibility, `HeaderText`, and `Visible=false`.
+- Missing coverage includes explicit verification for all `WizardStepType` values (`Auto`, `Start`, `Step`), programmatic `ActiveStepIndex` updates and `ActiveStepIndexChanged`, `OnActiveStepChanged`, `OnPreviousButtonClick`, `OnCancelButtonClick`, `OnSideBarButtonClick`, cancel/finish destination navigation, template rendering (`HeaderTemplate`, `SideBarTemplate`, navigation templates), and edge cases such as empty, single-step, null-title, and many-step wizards.
+- `Wizard.razor.cs` declares `StartNavigationTemplate`, `StepNavigationTemplate`, and `FinishNavigationTemplate`, but `Wizard.razor` never renders them; this is a high-priority QA gap because new tests should first confirm intended behavior and may expose a product bug.
+
+**Key file paths:**
+- Tests: `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor`
+- Component: `src\BlazorWebFormsComponents\Wizard.razor` and `src\BlazorWebFormsComponents\Wizard.razor.cs`
+- Step child: `src\BlazorWebFormsComponents\WizardStep.razor` and `src\BlazorWebFormsComponents\WizardStep.razor.cs`
+- Enum/events: `src\BlazorWebFormsComponents\Enums\WizardStepType.cs`, `src\BlazorWebFormsComponents\WizardNavigationEventArgs.cs`
+
+### 2026-05-20T21:19:29.902-04:00: Wizard callback and edge-case coverage expansion
+
+**Task:** Add the missing Wizard bUnit coverage for callbacks, step-type behavior, and edge cases without modifying `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor`.
+
+**Outcome:** Added three new Wizard test files — `src\BlazorWebFormsComponents.Test\Wizard\Callbacks.razor`, `src\BlazorWebFormsComponents.Test\Wizard\StepTypes.razor`, and `src\BlazorWebFormsComponents.Test\Wizard\EdgeCases.razor` — covering callback firing, `WizardStepType` rendering behavior, many-step sidebar output, and null/empty title handling. The requested validation command `dotnet test src\BlazorWebFormsComponents.Test --nologo --filter "Wizard"` passed with 123 total tests, 117 succeeded, and 6 skipped across `net8.0`, `net9.0`, and `net10.0`.
+
+**Architecture / behavior notes:**
+- `Wizard.razor.cs` raises `OnActiveStepChanged` and `ActiveStepIndexChanged` only from internal navigation handlers (`HandleNextClick`, `HandlePreviousClick`, `HandleFinishClick`, `HandleSideBarNavigation`), not from parent-driven parameter updates.
+- `WizardStepType.Auto` resolves by position: first step becomes `Start`, last non-`Complete` step becomes `Finish`, and middle steps become `Step`.
+- Sidebar titles fall back to `Step {index + 1}` only when `Title` is `null`; an empty string renders as empty text because the component uses the null-coalescing operator rather than `string.IsNullOrEmpty`.
+- Step registration is add-only via `Wizard.AddStep()`; there is no removal path, so dynamic step removal is not currently supported.
+
+**Known gaps captured as skipped tests:**
+- Programmatic `ActiveStepIndex` parameter changes do not currently trigger `ActiveStepIndexChanged`.
+- Single-step wizards still render start-step navigation instead of suppressing navigation entirely.
+- Dynamic step add/remove updates are not supported by the current registration model.
+
+**Key file paths:**
+- New tests: `src\BlazorWebFormsComponents.Test\Wizard\Callbacks.razor`, `src\BlazorWebFormsComponents.Test\Wizard\StepTypes.razor`, `src\BlazorWebFormsComponents.Test\Wizard\EdgeCases.razor`
+- Existing baseline test: `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor`
+- Component implementation: `src\BlazorWebFormsComponents\Wizard.razor`, `src\BlazorWebFormsComponents\Wizard.razor.cs`, `src\BlazorWebFormsComponents\WizardStep.razor.cs`
+
+≡ Team update (2026-05-21T12:26): Wizard unsupported behaviors remain explicit QA gaps — keep skipped tests for parent-driven `ActiveStepIndex` changes, single-step navigation suppression, and dynamic step add/remove. Tests serve as regression markers while gaps document product deferred behaviors for future implementation — decided by Rogue (per Jeffrey T. Fritz request)

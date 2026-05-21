@@ -9,6 +9,14 @@
 
 <!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
 
+### 2026-05-20T21:19:29.902-04:00: Wizard template wiring
+
+- `src/BlazorWebFormsComponents/Wizard.razor` owns the rendered sidebar and navigation chrome; step content still comes from registered `WizardStep` children.
+- `StartNavigationTemplate`, `StepNavigationTemplate`, and `FinishNavigationTemplate` should replace the default button table only for their matching effective step types.
+- `SideBarTemplate` already acts as a full replacement for the built-in step links, so Wizard customization work should preserve that replacement behavior.
+- `FinishCompleteButtonText` now needs to participate in the rendered Finish button label, with `FinishButtonText` preserved as the fallback for existing callers.
+- Key files: `src/BlazorWebFormsComponents/Wizard.razor`, `src/BlazorWebFormsComponents/Wizard.razor.cs`, `src/BlazorWebFormsComponents.Test/Wizard/Navigation.razor`, `docs/NavigationControls/Wizard.md`.
+
 
 ### 2026-04-28: CLI Semantic Pattern Catalog Entries
 
@@ -74,3 +82,19 @@
 
 ≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
 
+
+≡ Team update (2026-05-21T12:26): Wizard finish button label precedence — FinishCompleteButtonText takes precedence over FinishButtonText for backward compatibility. Cyclops & Colossus spawned for sample templates and acceptance tests — decided by Cyclops
+
+### 2026-05-21T08:26:50.933-04:00: Wizard sample template demonstrations
+
+**Task:** Add missing Wizard feature demos to the server-side sample page for the newly wired navigation/sidebar template features.
+
+**Changes delivered:**
+- Added sample scenarios 7-11 in `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/Wizard/Wizard.razor`.
+- Demonstrated `FinishCompleteButtonText` overriding `FinishButtonText` on a finish step with a complete step following it.
+- Added minimal working demos for `SideBarTemplate`, `StartNavigationTemplate`, `StepNavigationTemplate`, and `FinishNavigationTemplate` using custom button layouts and local step state.
+- Verified the sample app still compiles with `dotnet build samples/AfterBlazorServerSide --nologo`.
+
+**Key behavior:**
+- The sample page can showcase step-specific templates by seeding each demo's `ActiveStepIndex` to the step type being demonstrated.
+- Custom navigation templates on the sample page can drive the wizard by updating the bound `ActiveStepIndex` directly, which is enough for feature demonstrations without extra component changes.

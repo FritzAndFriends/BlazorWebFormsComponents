@@ -4,7 +4,7 @@ using System;
 
 namespace BlazorWebFormsComponents
 {
-	public partial class WizardStep
+	public partial class WizardStep : IDisposable
 	{
 
 		[CascadingParameter]
@@ -26,6 +26,11 @@ namespace BlazorWebFormsComponents
 		{
 			base.OnInitialized();
 			ParentWizard?.AddStep(this);
+		}
+
+		public void Dispose()
+		{
+			ParentWizard?.RemoveStep(this);
 		}
 
 	}

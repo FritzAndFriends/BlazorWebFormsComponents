@@ -15,7 +15,7 @@ Original Microsoft documentation: [Wizard Class (System.Web.UI.WebControls)](htt
 - **Navigation Events** – `OnNextButtonClick`, `OnPreviousButtonClick`, `OnFinishButtonClick`, `OnCancelButtonClick`, `OnSideBarButtonClick`, `OnActiveStepChanged`
 - **Navigation Cancellation** – `WizardNavigationEventArgs.Cancel` property allows event handlers to prevent step transitions
 - **Destination URLs** – `FinishDestinationPageUrl` and `CancelDestinationPageUrl` for post-completion navigation
-- **Custom Templates** – `HeaderTemplate`, `SideBarTemplate`, `StartNavigationTemplate`, `StepNavigationTemplate`, `FinishNavigationTemplate`
+- **Custom Templates** – `HeaderTemplate`, `SideBarTemplate`, `StartNavigationTemplate`, `StepNavigationTemplate`, and `FinishNavigationTemplate` replace the default markup for their respective regions
 - **Styling** – `NavigationButtonStyle`, `SideBarStyle`, `SideBarButtonStyle`, `HeaderStyle`, `StepStyle`, `NavigationStyle` (all `TableItemStyle`)
 - **Base Styles** – Inherits from `BaseStyledComponent`: `BackColor`, `ForeColor`, `BorderColor`, `CssClass`, `Font`, `Height`, `Width`
 
@@ -46,7 +46,7 @@ Original Microsoft documentation: [Wizard Class (System.Web.UI.WebControls)](htt
 | `StepPreviousButtonText` | string | "Previous" | Text for Previous button on middle steps. |
 | `FinishButtonText` | string | "Finish" | Text for Finish button on the last non-Complete step. |
 | `FinishPreviousButtonText` | string | "Previous" | Text for Previous button on the last non-Complete step. |
-| `FinishCompleteButtonText` | string | "Finish" | Alias for `FinishButtonText` (rarely needed). |
+| `FinishCompleteButtonText` | string | "Finish" | Text rendered on the Finish button. A non-default value overrides `FinishButtonText`; otherwise existing `FinishButtonText` customizations continue to work. |
 | `CancelButtonText` | string | "Cancel" | Text for Cancel button (shown if `DisplayCancelButton="true"`). |
 
 ### Style Properties
@@ -303,7 +303,7 @@ step = 2;  // Jump to step 2 (bypassing validation, if needed)
 
 ### Custom Templates
 
-Replace default button layouts with custom templates:
+Replace the default sidebar or step-specific button layouts with custom templates. `SideBarTemplate` replaces the built-in step links, and each navigation template replaces the default button row for its matching step type (`Start`, `Step`, or `Finish`):
 
 ```razor
 <Wizard>

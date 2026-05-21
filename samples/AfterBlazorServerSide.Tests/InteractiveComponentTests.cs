@@ -951,6 +951,401 @@ public class InteractiveComponentTests
     }
 
     [Fact]
+    public async Task Wizard_NextButton_AdvancesToNextStep()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var wizard = page.Locator("[data-audit-control='Wizard-1']");
+            var step1Heading = wizard.Locator("h3:has-text('Step 1: Personal Information')");
+            await step1Heading.WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Next']").ClickAsync();
+
+            var step2Heading = wizard.Locator("h3:has-text('Step 2: Preferences')");
+            await step2Heading.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await step2Heading.IsVisibleAsync(), "Step 2 should be visible after clicking Next");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_PreviousButton_GoesBack()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var wizard = page.Locator("[data-audit-control='Wizard-1']");
+            await wizard.Locator("h3:has-text('Step 1: Personal Information')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Next']").ClickAsync();
+            await wizard.Locator("h3:has-text('Step 2: Preferences')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Previous']").ClickAsync();
+
+            var step1Heading = wizard.Locator("h3:has-text('Step 1: Personal Information')");
+            await step1Heading.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await step1Heading.IsVisibleAsync(), "Step 1 should be visible after clicking Previous");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_SideBar_NavigatesToStep()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var wizard = page.Locator("[data-audit-control='Wizard-1']");
+            await wizard.Locator("h3:has-text('Step 1: Personal Information')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("button:has-text('Review')").ClickAsync();
+
+            var reviewHeading = wizard.Locator("h3:has-text('Step 3: Review')");
+            await reviewHeading.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await reviewHeading.IsVisibleAsync(), "Review step should be visible after clicking the sidebar link");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_FinishButton_ShowsCompleteStep()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var wizard = page.Locator("[data-audit-control='Wizard-1']");
+            await wizard.Locator("h3:has-text('Step 1: Personal Information')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Next']").ClickAsync();
+            await wizard.Locator("h3:has-text('Step 2: Preferences')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Next']").ClickAsync();
+            await wizard.Locator("h3:has-text('Step 3: Review')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Finish']").ClickAsync();
+
+            var completeHeading = wizard.Locator("h3:has-text('Registration Complete!')");
+            await completeHeading.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await completeHeading.IsVisibleAsync(), "Complete step should be visible after clicking Finish");
+
+            var finishAlert = page.Locator("div.alert.alert-success").Filter(new() { HasTextString = "Finish event fired!" });
+            Assert.True(await finishAlert.IsVisibleAsync(), "Finish event confirmation should be visible");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_FinishCompleteButtonText_RendersCustomLabel()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-7']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            // Click forward once to reach the Finish step (step 1) where FinishCompleteButtonText renders
+            await ClickForwardNavigationAsync(page, wizard);
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 5000 });
+
+            var finishButton = await FindForwardNavigationButtonAsync(wizard);
+            var finishButtonLabel = await GetButtonLabelAsync(finishButton);
+
+            Assert.False(string.IsNullOrWhiteSpace(finishButtonLabel), "Finish button should render a label on the finish step.");
+            Assert.NotEqual("Finish", finishButtonLabel);
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_SideBarTemplate_RendersCustomSidebar()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-8']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            var sidebar = wizard.Locator("td").First;
+            await sidebar.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            var customSidebarContent = sidebar.Locator("div, section, aside, ul, ol, p, button, img, svg, [class*='sidebar'], [class*='custom'], [data-sidebar-template], [data-template='sidebar']");
+            Assert.True(await customSidebarContent.CountAsync() > 0,
+                "Sidebar template should render custom structured content instead of the default step link list.");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_StartNavigationTemplate_RendersCustomNav()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-9']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            var navigationArea = GetWizardNavigationArea(wizard);
+            await navigationArea.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            var customNavigationContent = navigationArea.Locator("button, nav, div, span, a, [class*='nav'], [class*='wizard'], [class*='custom'], [data-navigation-template], [data-template='navigation']");
+            Assert.True(await customNavigationContent.CountAsync() > 0,
+                "Start navigation template should render custom content in the navigation row.");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_StepNavigationTemplate_RendersCustomNav()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-10']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            await ClickForwardNavigationAsync(page, wizard);
+            // Wait for Blazor Server to process the click and re-render at step 1
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 5000 });
+
+            var currentStep = await wizard.Locator("input[name='__wizard_step']").GetAttributeAsync("value");
+            Assert.Equal("1", currentStep);
+
+            var navigationArea = GetWizardNavigationArea(wizard);
+            var customNavigationContent = navigationArea.Locator("button, nav, div, span, a, [class*='nav'], [class*='wizard'], [class*='custom'], [data-navigation-template], [data-template='navigation']");
+            Assert.True(await customNavigationContent.CountAsync() > 0,
+                "Step navigation template should render custom content after advancing past the start step.");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_FinishNavigationTemplate_RendersCustomNav()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-11']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            // Click forward once to reach the Finish step (step 1) where FinishNavigationTemplate renders
+            await ClickForwardNavigationAsync(page, wizard);
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 5000 });
+
+            var currentStep = await wizard.Locator("input[name='__wizard_step']").GetAttributeAsync("value");
+            Assert.Equal("1", currentStep);
+
+            var navigationArea = GetWizardNavigationArea(wizard);
+            var customNavigationContent = navigationArea.Locator("button, nav, div, span, a, [class*='nav'], [class*='wizard'], [class*='custom'], [data-navigation-template], [data-template='navigation']");
+            Assert.True(await customNavigationContent.CountAsync() > 0,
+                "Finish navigation template should render custom content on the finish step.");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    private List<string> CaptureConsoleErrors(IPage page)
+    {
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        return consoleErrors;
+    }
+
+    private async Task GotoWizardPageAsync(IPage page)
+    {
+        await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+        {
+            WaitUntil = WaitUntilState.NetworkIdle,
+            Timeout = 30000
+        });
+    }
+
+    private static ILocator GetWizardNavigationArea(ILocator wizard) => wizard.Locator("td[role='navigation'][aria-label='Wizard navigation']");
+
+    private static async Task ClickForwardNavigationAsync(IPage page, ILocator wizard)
+    {
+        var forwardButton = await FindForwardNavigationButtonAsync(wizard);
+        await forwardButton.ClickAsync();
+        // Wait for the page to settle after form POST (SSR) or state update
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    }
+
+    private static async Task<ILocator> FindForwardNavigationButtonAsync(ILocator wizard)
+    {
+        var buttons = await GetWizardNavigationArea(wizard).Locator("input[type='submit'], button").AllAsync();
+
+        foreach (var button in buttons)
+        {
+            if (!await button.IsVisibleAsync())
+            {
+                continue;
+            }
+
+            var label = await GetButtonLabelAsync(button);
+            if (string.IsNullOrWhiteSpace(label))
+            {
+                continue;
+            }
+
+            if (label.Contains("previous", StringComparison.OrdinalIgnoreCase)
+                || label.Contains("back", StringComparison.OrdinalIgnoreCase)
+                || label.Contains("cancel", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            return button;
+        }
+
+        throw new InvalidOperationException("Wizard forward navigation button was not found.");
+    }
+
+    private static async Task<string> GetButtonLabelAsync(ILocator button)
+    {
+        return ((await button.GetAttributeAsync("value")) ?? await button.TextContentAsync() ?? string.Empty).Trim();
+    }
+
+    [Fact]
     public async Task ChangePassword_FormFields_Present()
     {
         // Arrange

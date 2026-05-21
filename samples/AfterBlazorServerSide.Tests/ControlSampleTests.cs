@@ -155,6 +155,7 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/TreeView/Selection")]
     [InlineData("/ControlSamples/TreeView/ExpandCollapse")]
     [InlineData("/ControlSamples/TreeView/ImageAndConfig")]
+    [InlineData("/ControlSamples/Wizard")]
     public async Task NavigationControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
