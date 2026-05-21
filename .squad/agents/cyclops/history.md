@@ -84,3 +84,17 @@
 
 
 ≡ Team update (2026-05-21T12:26): Wizard finish button label precedence — FinishCompleteButtonText takes precedence over FinishButtonText for backward compatibility. Cyclops & Colossus spawned for sample templates and acceptance tests — decided by Cyclops
+
+### 2026-05-21T08:26:50.933-04:00: Wizard sample template demonstrations
+
+**Task:** Add missing Wizard feature demos to the server-side sample page for the newly wired navigation/sidebar template features.
+
+**Changes delivered:**
+- Added sample scenarios 7-11 in `samples/AfterBlazorServerSide/Components/Pages/ControlSamples/Wizard/Wizard.razor`.
+- Demonstrated `FinishCompleteButtonText` overriding `FinishButtonText` on a finish step with a complete step following it.
+- Added minimal working demos for `SideBarTemplate`, `StartNavigationTemplate`, `StepNavigationTemplate`, and `FinishNavigationTemplate` using custom button layouts and local step state.
+- Verified the sample app still compiles with `dotnet build samples/AfterBlazorServerSide --nologo`.
+
+**Key behavior:**
+- The sample page can showcase step-specific templates by seeding each demo's `ActiveStepIndex` to the step type being demonstrated.
+- Custom navigation templates on the sample page can drive the wizard by updating the bound `ActiveStepIndex` directly, which is enough for feature demonstrations without extra component changes.

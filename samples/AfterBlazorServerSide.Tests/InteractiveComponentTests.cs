@@ -1138,7 +1138,7 @@ public class InteractiveComponentTests
 
             // Click forward once to reach the Finish step (step 1) where FinishCompleteButtonText renders
             await ClickForwardNavigationAsync(page, wizard);
-            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { Timeout = 5000 });
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 5000 });
 
             var finishButton = await FindForwardNavigationButtonAsync(wizard);
             var finishButtonLabel = await GetButtonLabelAsync(finishButton);
@@ -1224,7 +1224,7 @@ public class InteractiveComponentTests
 
             await ClickForwardNavigationAsync(page, wizard);
             // Wait for Blazor Server to process the click and re-render at step 1
-            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { Timeout = 5000 });
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 5000 });
 
             var currentStep = await wizard.Locator("input[name='__wizard_step']").GetAttributeAsync("value");
             Assert.Equal("1", currentStep);
@@ -1257,7 +1257,7 @@ public class InteractiveComponentTests
 
             // Click forward once to reach the Finish step (step 1) where FinishNavigationTemplate renders
             await ClickForwardNavigationAsync(page, wizard);
-            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { Timeout = 5000 });
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 5000 });
 
             var currentStep = await wizard.Locator("input[name='__wizard_step']").GetAttributeAsync("value");
             Assert.Equal("1", currentStep);

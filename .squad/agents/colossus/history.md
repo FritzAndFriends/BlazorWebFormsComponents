@@ -151,3 +151,9 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 - Compile-only validation succeeded with `dotnet build samples\AfterBlazorServerSide.Tests --nologo`; tests were not executed because the task explicitly limited validation to compilation.
 
 ≡ Team update (2026-05-21T12:26): Scope Wizard Playwright locators to `data-audit-control="Wizard-N"` containers to avoid ambiguous button/sidebar text matching across six sample instances on same route. Use container-scoped locators for all interactive coverage to ensure deterministic targeting — decided by Colossus
+
+### Wizard Template Acceptance Coverage (2026-05-21T08:26:50.933-04:00)
+- Added five Wizard template-focused Playwright tests in `samples/AfterBlazorServerSide.Tests\InteractiveComponentTests.cs` for the expected `data-audit-control` wrappers `Wizard-7` through `Wizard-11`.
+- For the not-yet-landed sample demos, broad assertions are safer than exact text checks: verify custom navigation/sidebar template structure exists inside the scoped Wizard wrapper instead of hard-coding Cyclops' final demo text.
+- Added small Wizard-specific test helpers to reuse the page navigation pattern, collect console errors, and find the forward navigation control without matching `Previous`, `Back`, or `Cancel` labels.
+- Compile validation succeeded with `dotnet build samples\AfterBlazorServerSide.Tests --nologo` after the test additions.
