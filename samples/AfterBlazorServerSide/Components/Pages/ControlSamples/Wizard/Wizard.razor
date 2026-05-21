@@ -327,6 +327,224 @@ You acknowledge that this is a binding agreement.
 
 <hr />
 
+<!-- FinishCompleteButtonText -->
+<h3>FinishCompleteButtonText Override</h3>
+<p>When <code>FinishCompleteButtonText</code> is set, it takes precedence over <code>FinishButtonText</code> for the rendered Finish button label.</p>
+
+<div data-audit-control="Wizard-7">
+	<Wizard ActiveStepIndex="@_finishTextStep" ActiveStepIndexChanged="(i) => _finishTextStep = i"
+			HeaderText="Button Text Override"
+			DisplaySideBar="false"
+			FinishButtonText="Submit Enrollment"
+			FinishCompleteButtonText="Complete Enrollment">
+		<WizardSteps>
+			<WizardStep Title="Details">
+				<h3>Step 1: Student Details</h3>
+				<p>Move to the finish step to compare the configured labels.</p>
+			</WizardStep>
+			<WizardStep Title="Confirm" StepType="WizardStepType.Finish">
+				<h3>Step 2: Confirm</h3>
+				<p>The button below reads <strong>Complete Enrollment</strong>, not <strong>Submit Enrollment</strong>.</p>
+			</WizardStep>
+			<WizardStep Title="Done" StepType="WizardStepType.Complete">
+				<h3>Enrollment Complete</h3>
+				<p>The finish label override was applied.</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard FinishButtonText="Submit Enrollment"
+        FinishCompleteButtonText="Complete Enrollment"&gt;
+  &lt;WizardSteps&gt;
+    &lt;WizardStep Title="Confirm" StepType="WizardStepType.Finish" /&gt;
+  &lt;/WizardSteps&gt;
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
+<!-- SideBarTemplate -->
+<h3>Wizard with SideBarTemplate</h3>
+<p>Use <code>SideBarTemplate</code> to replace the built-in sidebar links with your own custom list layout.</p>
+
+<div data-audit-control="Wizard-8">
+	<Wizard ActiveStepIndex="@_sidebarTemplateStep" ActiveStepIndexChanged="(i) => _sidebarTemplateStep = i"
+			HeaderText="Custom Sidebar"
+			DisplaySideBar="true">
+		<SideBarTemplate>
+			<ul class="list-unstyled mb-0" style="min-width: 170px;">
+				<li class="mb-2">
+					<button type="button" class="btn btn-link p-0 text-decoration-none" @onclick="() => _sidebarTemplateStep = 0">
+						@(_sidebarTemplateStep == 0 ? "➤ " : "")Account
+					</button>
+				</li>
+				<li class="mb-2">
+					<button type="button" class="btn btn-link p-0 text-decoration-none" @onclick="() => _sidebarTemplateStep = 1">
+						@(_sidebarTemplateStep == 1 ? "➤ " : "")Profile
+					</button>
+				</li>
+				<li>
+					<button type="button" class="btn btn-link p-0 text-decoration-none" @onclick="() => _sidebarTemplateStep = 2">
+						@(_sidebarTemplateStep == 2 ? "➤ " : "")Complete
+					</button>
+				</li>
+			</ul>
+		</SideBarTemplate>
+		<WizardSteps>
+			<WizardStep Title="Account">
+				<h3>Step 1: Account</h3>
+				<p>This sidebar is fully custom markup.</p>
+			</WizardStep>
+			<WizardStep Title="Profile">
+				<h3>Step 2: Profile</h3>
+				<p>The arrow indicator comes from the template.</p>
+			</WizardStep>
+			<WizardStep Title="Complete" StepType="WizardStepType.Finish">
+				<h3>Step 3: Complete</h3>
+				<p>The built-in sidebar links are replaced by the custom list.</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard DisplaySideBar="true"&gt;
+  &lt;SideBarTemplate&gt;
+    &lt;ul class="list-unstyled"&gt;
+      &lt;li&gt;Custom step list&lt;/li&gt;
+      &lt;li&gt;with your own layout&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/SideBarTemplate&gt;
+  &lt;WizardSteps&gt;...&lt;/WizardSteps&gt;
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
+<!-- StartNavigationTemplate -->
+<h3>Wizard with StartNavigationTemplate</h3>
+<p><code>StartNavigationTemplate</code> replaces the default navigation row for the first step, letting you use a custom button layout.</p>
+
+<div data-audit-control="Wizard-9">
+	<Wizard ActiveStepIndex="@_startTemplateStep" ActiveStepIndexChanged="(i) => _startTemplateStep = i"
+			HeaderText="Custom Start Navigation"
+			DisplaySideBar="false">
+		<StartNavigationTemplate>
+			<div class="d-flex justify-content-end gap-2">
+				<button type="button" class="btn btn-outline-primary" @onclick="() => _startTemplateStep = 1">🚀 Begin Setup</button>
+			</div>
+		</StartNavigationTemplate>
+		<WizardSteps>
+			<WizardStep Title="Start">
+				<h3>Step 1: Welcome</h3>
+				<p>The custom start button replaces the default Next button on this step.</p>
+			</WizardStep>
+			<WizardStep Title="Details" StepType="WizardStepType.Finish">
+				<h3>Step 2: Details</h3>
+				<p>After leaving the first step, the default finish navigation returns.</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard&gt;
+  &lt;StartNavigationTemplate&gt;
+    &lt;button type="button" class="btn btn-outline-primary"&gt;🚀 Begin Setup&lt;/button&gt;
+  &lt;/StartNavigationTemplate&gt;
+  &lt;WizardSteps&gt;...&lt;/WizardSteps&gt;
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
+<!-- StepNavigationTemplate -->
+<h3>Wizard with StepNavigationTemplate</h3>
+<p><code>StepNavigationTemplate</code> customizes navigation for middle steps while leaving the start and finish steps unchanged.</p>
+
+<div data-audit-control="Wizard-10">
+	<Wizard ActiveStepIndex="@_stepTemplateStep" ActiveStepIndexChanged="(i) => _stepTemplateStep = i"
+			HeaderText="Custom Middle Navigation"
+			DisplaySideBar="false">
+		<StepNavigationTemplate>
+			<div class="d-flex justify-content-between align-items-center">
+				<button type="button" class="btn btn-secondary" @onclick="() => _stepTemplateStep = 0">← Edit</button>
+				<button type="button" class="btn btn-success" @onclick="() => _stepTemplateStep = 2">Save →</button>
+			</div>
+		</StepNavigationTemplate>
+		<WizardSteps>
+			<WizardStep Title="Start">
+				<h3>Step 1: Start</h3>
+				<p>Use the default Next button to reach the middle step.</p>
+			</WizardStep>
+			<WizardStep Title="Review">
+				<h3>Step 2: Review</h3>
+				<p>This middle step uses a custom Previous/Next button layout.</p>
+			</WizardStep>
+			<WizardStep Title="Finish" StepType="WizardStepType.Finish">
+				<h3>Step 3: Finish</h3>
+				<p>The custom middle-step navigation is no longer rendered here.</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard&gt;
+  &lt;StepNavigationTemplate&gt;
+    &lt;div class="d-flex justify-content-between"&gt;
+      &lt;button type="button"&gt;← Edit&lt;/button&gt;
+      &lt;button type="button"&gt;Save →&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/StepNavigationTemplate&gt;
+  &lt;WizardSteps&gt;...&lt;/WizardSteps&gt;
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
+<!-- FinishNavigationTemplate -->
+<h3>Wizard with FinishNavigationTemplate</h3>
+<p><code>FinishNavigationTemplate</code> replaces the default Previous/Finish row on the finish step with custom actions.</p>
+
+<div data-audit-control="Wizard-11">
+	<Wizard ActiveStepIndex="@_finishTemplateStep" ActiveStepIndexChanged="(i) => _finishTemplateStep = i"
+			HeaderText="Custom Finish Navigation"
+			DisplaySideBar="false">
+		<FinishNavigationTemplate>
+			<div class="d-flex justify-content-end gap-2">
+				<button type="button" class="btn btn-outline-secondary" @onclick="() => _finishTemplateStep = 0">← Back</button>
+				<button type="button" class="btn btn-primary" @onclick="() => _finishTemplateStep = 2">✅ Confirm</button>
+			</div>
+		</FinishNavigationTemplate>
+		<WizardSteps>
+			<WizardStep Title="Summary">
+				<h3>Step 1: Summary</h3>
+				<p>Use the default Next button to reach the finish step.</p>
+			</WizardStep>
+			<WizardStep Title="Approve" StepType="WizardStepType.Finish">
+				<h3>Step 2: Approve</h3>
+				<p>This finish step uses custom back and confirm buttons.</p>
+			</WizardStep>
+			<WizardStep Title="Complete" StepType="WizardStepType.Complete">
+				<h3>Approval Complete</h3>
+				<p>The custom finish template advanced to the complete step.</p>
+			</WizardStep>
+		</WizardSteps>
+	</Wizard>
+</div>
+
+<p class="mt-3">Code:</p>
+<pre><code>&lt;Wizard&gt;
+  &lt;FinishNavigationTemplate&gt;
+    &lt;div class="d-flex justify-content-end gap-2"&gt;
+      &lt;button type="button"&gt;← Back&lt;/button&gt;
+      &lt;button type="button"&gt;✅ Confirm&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/FinishNavigationTemplate&gt;
+  &lt;WizardSteps&gt;...&lt;/WizardSteps&gt;
+&lt;/Wizard&gt;</code></pre>
+
+<hr />
+
 <h3>Source Code</h3>
 <p>Complete code-behind implementation for all wizard demonstrations:</p>
 
@@ -360,6 +578,21 @@ You acknowledge that this is a binding agreement.
 
 	// HeaderTemplate
 	private int _headerStep;
+
+	// FinishCompleteButtonText
+	private int _finishTextStep = 1;
+
+	// SideBarTemplate
+	private int _sidebarTemplateStep;
+
+	// StartNavigationTemplate
+	private int _startTemplateStep;
+
+	// StepNavigationTemplate
+	private int _stepTemplateStep = 1;
+
+	// FinishNavigationTemplate
+	private int _finishTemplateStep = 1;
 
 	private void HandleBasicFinish(WizardNavigationEventArgs args)
 	{
