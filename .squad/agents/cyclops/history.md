@@ -74,3 +74,6 @@
 
 ≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
 
+
+
+≡ƒôî Team update (2026-05-30T15:46:42Z): 6 decisions merged into team KB: CLI code-behind fixes, helper transforms, L1 quality, SSR form contract, MasterPage bridge contract — all agents

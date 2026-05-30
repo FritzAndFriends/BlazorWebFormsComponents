@@ -64,3 +64,6 @@
 
 **Deliverable:** Full gap analysis written to `.squad/decisions/inbox/forge-deptportal-analysis.md`
 
+
+
+≡ƒôî Team update (2026-05-30T15:46:42Z): 6 decisions merged from inbox including MasterPage bridge contract (Forge-authored) plus CLI fixes from Bishop — decided by Beast, Bishop, Forge
