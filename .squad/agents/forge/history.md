@@ -69,3 +69,18 @@
 ≡ƒôî Team update (2026-05-30T15:46:42Z): 6 decisions merged from inbox including MasterPage bridge contract (Forge-authored) plus CLI fixes from Bishop — decided by Beast, Bishop, Forge
 
 ≡ƒôî Team update (2026-05-30T11:53:20Z): User directive captured — prefer converting ASCX user controls to Blazor .razor files with .razor.cs backing (Jeffrey T. Fritz). Affects control-migration feature branch planning.
+
+≡ Team update (2026-05-30): ASCX/Custom-Control Migration Roadmap — decided by Forge
+
+**What:** 3-stream work plan for ASCX and custom-control migration established:
+- **P0 Infrastructure:** Web.config parser (#557), ASCX property/event analyzer (#555)
+- **P1 Transforms:** ContentTemplate unwrapper (#558), FindControl-to-@ref (#556)
+- **P2-P3 Deferred:** Scaffolding, skills, integration tests
+
+**Team assignments:**
+- Bishop (Parser/Transforms), Forge (Validation), Cyclops (Shims), Rogue (Tests), Beast (Docs)
+
+**Impact:** Unblocks Layer 1 correctness for ASCX-heavy apps, targets reduced L2 repair time
+
+---
+
