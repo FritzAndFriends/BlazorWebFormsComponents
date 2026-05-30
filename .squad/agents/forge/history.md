@@ -67,3 +67,5 @@
 
 
 ≡ƒôî Team update (2026-05-30T15:46:42Z): 6 decisions merged from inbox including MasterPage bridge contract (Forge-authored) plus CLI fixes from Bishop — decided by Beast, Bishop, Forge
+
+≡ƒôî Team update (2026-05-30T11:53:20Z): User directive captured — prefer converting ASCX user controls to Blazor .razor files with .razor.cs backing (Jeffrey T. Fritz). Affects control-migration feature branch planning.

@@ -289,3 +289,9 @@ Run 27 confirms the #1 toolkit gap: master-page conversion does not produce a us
 6. Next WingtipToys benchmark run (Run 28+) shows reduced Layer 2 repair time for layout.
 7. Sample page renders the bridge components live, not just as code snippets.
 
+
+### 2026-05-30T11:53:20.341-04:00: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Prefer converting ASCX user controls to Blazor .razor files with .razor.cs backing when feasible, rather than favoring WebControl-based wrappers.
+**Why:** User request — captured for team memory
+
