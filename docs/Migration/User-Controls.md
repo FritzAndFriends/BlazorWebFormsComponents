@@ -2,6 +2,22 @@
 
 User Controls (`.ascx` files) are a fundamental building block in ASP.NET Web Forms applications. They provide reusable, encapsulated UI components with both markup and code-behind logic. Migrating them to Blazor is straightforward: ASCX user controls become Razor components (`.razor` files) with minimal structural changes.
 
+## CLI Support Status (Current)
+
+The migration CLI now includes **P0 + P1 support** for ASCX controls:
+
+- **P0 discovery (`prescan` / runtime detection):**
+  - Parses each `.ascx` + code-behind pair into an `AscxDescriptor`
+  - Captures public properties, events, methods, and `FindControl("...")` identifiers
+  - Flags lifecycle/data-binding signals (`Page_Load`/`OnLoad`, `DataBind()`)
+  - Reports diagnostics for missing, unreadable, or unsupported code-behind files
+- **P1 transform coverage (`migrate` / `convert`):**
+  - Adds `@ref` for compatible component tags with `id="..."` and injects matching private fields in `.razor.cs`
+  - Uses ASCX lifecycle signals to convert `Page_Load(...)` and `override OnLoad(EventArgs e)` patterns toward `OnParametersSet()` with lifecycle TODO markers
+  - Captures `Control.DataSource = ...`, removes both `Control.DataBind()` and control-level `DataBind();`, and injects `Items="@( ... )"` where a matching control id exists
+  - Rewrites template-scoped `<%# Eval(...) %>` / `<%# Eval(..., "{0:...}") %>` expressions to Razor item bindings and unwraps `<ContentTemplate>` wrappers
+  - Rewrites direct `FindControl("ControlId")`/`this.FindControl("ControlId")` call sites to generated `@ref` fields when a safe matching reference exists
+
 ## Understanding User Controls
 
 ### Web Forms User Control Structure

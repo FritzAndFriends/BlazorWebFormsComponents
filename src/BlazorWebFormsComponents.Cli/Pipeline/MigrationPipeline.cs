@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Analysis;
 using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Scaffolding;
@@ -31,6 +32,7 @@ public class MigrationPipeline
     private readonly RedirectHandlerAnnotator? _redirectHandlerAnnotator;
     private readonly SemanticPatternCatalog _semanticPatternCatalog;
     private readonly PageQuarantineDetector _pageQuarantineDetector;
+    private readonly AscxDescriptorAnalyzer _ascxDescriptorAnalyzer = new();
     private ScaffoldResult? _lastScaffoldResult;
 
     private static readonly Regex ScaffoldClassNameRegex = new(
@@ -375,6 +377,7 @@ public class MigrationPipeline
         if (sourceFile.HasCodeBehind)
         {
             metadata.CodeBehindContent = await File.ReadAllTextAsync(sourceFile.CodeBehindPath!);
+            AttachAscxDescriptor(metadata, sourceFile.CodeBehindPath);
         }
         else
         {
@@ -605,11 +608,36 @@ public class MigrationPipeline
     /// </summary>
     public string TransformCodeBehind(string content, FileMetadata metadata)
     {
+        AttachAscxDescriptor(metadata);
+
         foreach (var transform in _codeBehindTransforms)
         {
             content = transform.Apply(content, metadata);
         }
         return content;
+    }
+
+    private void AttachAscxDescriptor(FileMetadata metadata, string? explicitCodeBehindPath = null)
+    {
+        if (metadata.FileType != FileType.Control || metadata.AscxDescriptor is not null)
+            return;
+
+        try
+        {
+            var codeBehindPath = explicitCodeBehindPath;
+            if (string.IsNullOrWhiteSpace(codeBehindPath) && !string.IsNullOrWhiteSpace(metadata.SourceFilePath))
+            {
+                var candidate = metadata.SourceFilePath + ".cs";
+                if (File.Exists(candidate))
+                    codeBehindPath = candidate;
+            }
+
+            metadata.AscxDescriptor = _ascxDescriptorAnalyzer.AnalyzeControl(metadata.SourceFilePath, codeBehindPath);
+        }
+        catch
+        {
+            // Best-effort signal enrichment only.
+        }
     }
 
     private static string GetProjectName(string sourcePath)

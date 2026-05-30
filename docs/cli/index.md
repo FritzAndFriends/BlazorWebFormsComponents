@@ -69,7 +69,24 @@ The tool will:
 4. Generate a migration report
 5. Scaffold supporting files for a .NET 10 Blazor SSR app (Program.cs, App.razor, shims, handlers)
 
-## Two Commands
+## Core Commands
+
+### `prescan` — Discovery and Readiness Analysis
+
+Scans a Web Forms project and emits migration readiness signals before conversion.
+
+```bash
+webforms-to-blazor prescan \
+  --input ./MyWebFormsProject
+```
+
+**Key outputs now include:**
+
+- `customControlRegistrations` from `Web.config` (`<compilation><assemblies>`, `<pages><controls>`) and page-level `<%@ Register %>` directives
+- `ascxDescriptors` for each `.ascx` file, including discovered public properties/events/methods, `FindControl("...")` IDs, `DataBind()` usage, `Page_Load`/`OnLoad` lifecycle signals, and parser diagnostics
+- Existing BWFC rule summary (`BWFC001+`) and per-file match inventory
+
+This lets you plan ASCX/custom-control work before running `migrate`, and it de-risks migration by surfacing missing or malformed code-behind early.
 
 ### `migrate` — Full Project Migration
 
@@ -120,6 +137,9 @@ The tool applies an ordered transform pipeline and then a semantic pattern catal
 1. **Directives** (5) — Page, Master, Control, Register, Import directives
 2. **Markup** (21) — Controls, expressions, master-page script cleanup, display-expression cleanup, templates, validator typing, typed GridView columns (including `CommandField`), and CRUD model-binding attributes
 3. **Code-Behind** (29) — Using statements, cart session-key stabilization, HttpUtility/EF modernization, IQueryable SelectMethod materialization, WebMethod TODO annotation, base classes, lifecycle, event handlers, compile-surface stubs, markup-driven safety stubs
+
+For ASCX-heavy migrations, the current P1 transform surface focuses on lifecycle (`Page_Load`), `DataBind()` normalization, template binding normalization (`<%# Eval(...) %>` inside item/content templates), and `@ref` + field scaffolding for control ids discovered in markup/code-behind pairs.  
+TODO(P1-FindControl-callsite): direct callsite rewrites for all `FindControl(...)` patterns are still a follow-up pass.
 
 See **[Transform Reference](transforms.md)** for the flat transform list and **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** for the bounded semantic pass that runs afterward.
 

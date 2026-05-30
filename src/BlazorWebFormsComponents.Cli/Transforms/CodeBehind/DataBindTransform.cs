@@ -24,6 +24,10 @@ public class DataBindTransform : ICodeBehindTransform
         @"[ \t]*(?:this\.)?\w+\.DataBind\(\)\s*;[ \t]*\r?\n?",
         RegexOptions.Compiled);
 
+    private static readonly Regex SelfDataBindCallRegex = new(
+        @"[ \t]*(?:this\.)?DataBind\(\)\s*;[ \t]*\r?\n?",
+        RegexOptions.Compiled);
+
     public string Apply(string content, FileMetadata metadata)
     {
         // Scan for DataSource assignments and store in metadata for cross-file correlation
@@ -37,6 +41,13 @@ public class DataBindTransform : ICodeBehindTransform
 
         // Remove .DataBind() calls — Blazor renders automatically
         content = DataBindCallRegex.Replace(content, "");
+
+        var hasAscxDataBindSignal = metadata.FileType == FileType.Control
+            && (metadata.AscxDescriptor?.HasDataBindCall ?? content.Contains("DataBind(", StringComparison.Ordinal));
+        if (hasAscxDataBindSignal)
+        {
+            content = SelfDataBindCallRegex.Replace(content, "");
+        }
 
         return content;
     }

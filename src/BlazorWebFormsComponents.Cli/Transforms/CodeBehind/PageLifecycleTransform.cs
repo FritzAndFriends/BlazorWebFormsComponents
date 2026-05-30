@@ -27,11 +27,80 @@ public class PageLifecycleTransform : ICodeBehindTransform
         @"(?m)([ \t]*)(?:(?:protected|private|public|internal)\s+)?(?:(?:virtual|override|new|static|sealed|abstract)\s+)*void\s+(?i:Page_PreRender)\s*\(\s*object\s+\w+\s*,\s*EventArgs\s+\w+\s*\)",
         RegexOptions.Compiled);
 
+    private static readonly Regex OnLoadOverrideRegex = new(
+        @"(?m)([ \t]*)(?:(?:protected|private|public|internal)\s+)?override\s+void\s+(?i:OnLoad)\s*\(\s*EventArgs\s+\w+\s*\)",
+        RegexOptions.Compiled);
+
     public string Apply(string content, FileMetadata metadata)
     {
+        if (metadata.FileType == FileType.Control)
+        {
+            var hasLifecycleSignal = metadata.AscxDescriptor?.HasPageLoadOverride
+                ?? (content.Contains("Page_Load(", StringComparison.Ordinal) || content.Contains("OnLoad(", StringComparison.Ordinal));
+
+            if (!hasLifecycleSignal)
+                return content;
+
+            content = ConvertControlPageLoad(content);
+            content = ConvertControlOnLoad(content);
+            return content;
+        }
+
         content = ConvertPageLoad(content);
         content = ConvertPageInit(content);
         content = ConvertPreRender(content);
+        return content;
+    }
+
+    private static string ConvertControlPageLoad(string content)
+    {
+        var match = PageLoadRegex.Match(content);
+        if (!match.Success) return content;
+
+        var indent = match.Groups[1].Value;
+        var matchStart = match.Index;
+        var matchEnd = matchStart + match.Length;
+
+        var newSig = $"{indent}protected override void OnParametersSet()";
+        content = content[..matchStart] + newSig + content[matchEnd..];
+
+        var sigEnd = matchStart + newSig.Length;
+        var bracePos = sigEnd;
+        while (bracePos < content.Length && char.IsWhiteSpace(content[bracePos])) bracePos++;
+
+        if (bracePos < content.Length && content[bracePos] == '{')
+        {
+            var injection = $"\n{indent}    // TODO(bwfc-lifecycle): Review ASCX lifecycle conversion for parameter-driven updates\n{indent}    base.OnParametersSet();\n";
+            content = content[..(bracePos + 1)] + injection + content[(bracePos + 1)..];
+        }
+
+        return content;
+    }
+
+    private static string ConvertControlOnLoad(string content)
+    {
+        var match = OnLoadOverrideRegex.Match(content);
+        if (!match.Success) return content;
+
+        var indent = match.Groups[1].Value;
+        var matchStart = match.Index;
+        var matchEnd = matchStart + match.Length;
+
+        var newSig = $"{indent}protected override void OnParametersSet()";
+        content = content[..matchStart] + newSig + content[matchEnd..];
+        content = Regex.Replace(content, @"\bbase\.OnLoad\s*\(\s*\w+\s*\)\s*;", "base.OnParametersSet();");
+
+        var sigEnd = matchStart + newSig.Length;
+        var bracePos = sigEnd;
+        while (bracePos < content.Length && char.IsWhiteSpace(content[bracePos])) bracePos++;
+
+        if (bracePos < content.Length && content[bracePos] == '{'
+            && !content.Substring(bracePos, Math.Min(content.Length - bracePos, 200)).Contains("TODO(bwfc-lifecycle)", StringComparison.Ordinal))
+        {
+            var injection = $"\n{indent}    // TODO(bwfc-lifecycle): Review ASCX lifecycle conversion for parameter-driven updates\n";
+            content = content[..(bracePos + 1)] + injection + content[(bracePos + 1)..];
+        }
+
         return content;
     }
 

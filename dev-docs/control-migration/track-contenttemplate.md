@@ -2,7 +2,7 @@
 
 **Priority:** P1 (Transforms)  
 **Owner:** Bishop (CLI Development)  
-**Status:** Planned  
+**Status:** In Progress (baseline transform landed)  
 **Validation:** Layer 1 build + Layer 1→L2 repair reduction
 
 ## Problem Statement

@@ -1,12 +1,31 @@
+using BlazorWebFormsComponents.Cli.Analysis;
+
 namespace BlazorWebFormsComponents.Cli.Scaffolding;
 
 public class RuntimeDetector
 {
     private readonly IReadOnlyList<IRuntimeSignalDetector> _detectors;
+    private readonly AscxDescriptorAnalyzer _ascxDescriptorAnalyzer;
+    private readonly WebConfigAssemblyParser _webConfigAssemblyParser;
 
     public RuntimeDetector(IEnumerable<IRuntimeSignalDetector> detectors)
+        : this(detectors, new AscxDescriptorAnalyzer(), new WebConfigAssemblyParser())
+    {
+    }
+
+    public RuntimeDetector(IEnumerable<IRuntimeSignalDetector> detectors, AscxDescriptorAnalyzer ascxDescriptorAnalyzer)
+        : this(detectors, ascxDescriptorAnalyzer, new WebConfigAssemblyParser())
+    {
+    }
+
+    public RuntimeDetector(
+        IEnumerable<IRuntimeSignalDetector> detectors,
+        AscxDescriptorAnalyzer ascxDescriptorAnalyzer,
+        WebConfigAssemblyParser webConfigAssemblyParser)
     {
         _detectors = detectors.ToList();
+        _ascxDescriptorAnalyzer = ascxDescriptorAnalyzer;
+        _webConfigAssemblyParser = webConfigAssemblyParser;
     }
 
     public RuntimeProfile Detect(string sourcePath)
@@ -21,6 +40,7 @@ public class RuntimeDetector
             detector.Apply(sourcePath, profile);
         }
 
+        profile.CustomControlRegistrations = _webConfigAssemblyParser.ParseProject(sourcePath);
         profile.ConnectionStringNames = profile.ConnectionStringNames
             .Where(static name => !string.IsNullOrWhiteSpace(name))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -29,6 +49,11 @@ public class RuntimeDetector
         profile.ApplicationStartPatterns = profile.ApplicationStartPatterns
             .Where(static pattern => !string.IsNullOrWhiteSpace(pattern))
             .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        profile.AscxDescriptors = RuntimeDetectionFiles.EnumerateFiles(sourcePath, ".ascx")
+            .Select(ascxPath => _ascxDescriptorAnalyzer.AnalyzeControl(ascxPath))
+            .OrderBy(static descriptor => descriptor.ControlName, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         return profile;
@@ -79,6 +104,8 @@ public class RuntimeProfile
     /// Authentication mode from Web.config &lt;authentication mode="..."&gt; (Forms, Windows, None).
     /// </summary>
     public string? AuthenticationMode { get; set; }
+    public ControlRegistrationInfo CustomControlRegistrations { get; set; } = new();
+    public List<AscxDescriptor> AscxDescriptors { get; set; } = [];
 
     public string? ResolvedDbContextTypeName =>
         string.IsNullOrWhiteSpace(DbContextClassName)

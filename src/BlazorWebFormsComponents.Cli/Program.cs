@@ -1,4 +1,5 @@
 using System.CommandLine;
+using BlazorWebFormsComponents.Cli.Analysis;
 using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Interop;
 using BlazorWebFormsComponents.Cli.Io;
@@ -51,6 +52,7 @@ class Program
         services.AddSingleton<IMarkupTransform, FormWrapperTransform>();
         services.AddSingleton<IMarkupTransform, DisplayExpressionTransform>();
         services.AddSingleton<IMarkupTransform, ExpressionTransform>();
+        services.AddSingleton<IMarkupTransform, ContentTemplateUnwrapperTransform>();
         services.AddSingleton<IMarkupTransform, ColorAttributeTransform>();
         services.AddSingleton<IMarkupTransform, ServerCodeBlockTransform>();
         services.AddSingleton<IMarkupTransform, LoginViewTransform>();
@@ -102,6 +104,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, MethodNameCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, SelfInstantiationTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefCodeBehindTransform>();
+        services.AddSingleton<ICodeBehindTransform, FindControlComponentRefTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefNullSafetyTransform>();
         services.AddSingleton<ICodeBehindTransform, LabelFieldBindCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();
@@ -146,6 +149,7 @@ class Program
         services.AddSingleton<IRuntimeSignalDetector, AjaxToolkitRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, SqlClientRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, DefaultPageRuntimeSignalDetector>();
+        services.AddSingleton<AscxDescriptorAnalyzer>();
         services.AddSingleton<RuntimeDetector>();
         services.AddSingleton<ProgramCsEmitter>();
         services.AddSingleton<MasterPageToLayoutConverter>();
@@ -614,4 +618,3 @@ class Program
         return edmxCommand;
     }
 }
-

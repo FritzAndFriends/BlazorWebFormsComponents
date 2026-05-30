@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Analysis;
+using BlazorWebFormsComponents.Cli.Scaffolding;
 
 namespace BlazorWebFormsComponents.Cli.Config;
 
@@ -25,6 +27,25 @@ public class PrescanAnalyzer
         new("BWFC017", "ClientScript", @"(Page\.)?ClientScript\.(RegisterStartupScript|RegisterClientScriptBlock|RegisterClientScriptInclude|GetPostBackEventReference)\s*\(", "ClientScript calls — use ClientScriptShim"),
         new("BWFC018", "Cache Access", @"\bCache\s*\[", "Cache dictionary access — use CacheShim on WebFormsPageBase")
     ];
+
+    private readonly WebConfigAssemblyParser _webConfigAssemblyParser;
+    private readonly AscxDescriptorAnalyzer _ascxDescriptorAnalyzer;
+
+    public PrescanAnalyzer()
+        : this(new WebConfigAssemblyParser(), new AscxDescriptorAnalyzer())
+    {
+    }
+
+    public PrescanAnalyzer(AscxDescriptorAnalyzer ascxDescriptorAnalyzer)
+        : this(new WebConfigAssemblyParser(), ascxDescriptorAnalyzer)
+    {
+    }
+
+    public PrescanAnalyzer(WebConfigAssemblyParser webConfigAssemblyParser, AscxDescriptorAnalyzer ascxDescriptorAnalyzer)
+    {
+        _webConfigAssemblyParser = webConfigAssemblyParser;
+        _ascxDescriptorAnalyzer = ascxDescriptorAnalyzer;
+    }
 
     public PrescanResult Analyze(string sourcePath)
     {
@@ -84,6 +105,11 @@ public class PrescanAnalyzer
         }
 
         result.FilesWithMatches = result.Files.Count;
+        result.CustomControlRegistrations = _webConfigAssemblyParser.ParseProject(sourcePath);
+        result.AscxDescriptors = RuntimeDetectionFiles.EnumerateFiles(sourcePath, ".ascx")
+            .Select(ascxPath => _ascxDescriptorAnalyzer.AnalyzeControl(ascxPath))
+            .OrderBy(static descriptor => descriptor.ControlName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
         return result;
     }
 
@@ -122,6 +148,8 @@ public class PrescanResult
     public int TotalFiles { get; set; }
     public int FilesWithMatches { get; set; }
     public int TotalMatches { get; set; }
+    public ControlRegistrationInfo CustomControlRegistrations { get; set; } = new();
+    public List<AscxDescriptor> AscxDescriptors { get; set; } = [];
 }
 
 public sealed record PrescanSummary(string Name, string Description, int TotalHits, int FileCount);

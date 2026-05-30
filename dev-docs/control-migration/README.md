@@ -11,14 +11,16 @@ This folder contains planning documents and issue tracking for the ASCX (ASP.NET
 
 ## Key Blockers
 
-User controls (`.ascx` files) and custom-control frameworks are pervasive in legacy Web Forms applications but are **not yet handled by the CLI migration pipeline**. Current state:
+User controls (`.ascx` files) and custom-control frameworks are pervasive in legacy Web Forms applications and still require iterative transform coverage. Current state:
 
-- ❌ `.ascx` files are copied as-is (not transformed)
+- 🟡 `.ascx` files run through the shared migration pipeline; baseline template expression rewrites (`<%# Eval(...) %>`) and `<ContentTemplate>` unwrapping are now in P1, with advanced templating still pending
 - ❌ Custom HTML controls (`.cs` inheriting from `WebControl`) are not migrated
-- ❌ `FindControl()` calls are not mapped to Blazor `@ref` patterns
-- ❌ ASCX property/event descriptors are not analyzed
-- ❌ ASCX data binding and lifecycle are not transformed
-- ❌ Web.config namespace registrations for custom controls are not parsed
+- 🟡 `FindControl()` readiness is partially automated via `@ref` + backing-field scaffolding; direct callsite rewrites remain manual
+- ✅ ASCX property/event descriptors are now analyzed in prescan/runtime detection (`AscxDescriptorAnalyzer`)
+- 🟡 ASCX lifecycle/data-binding has baseline transforms (`Page_Load` mapping, `DataBind()` cleanup + `Items` injection), but advanced patterns are still pending
+- ✅ Web.config namespace registrations for custom controls are now parsed (`WebConfigAssemblyParser`)
+
+TODO(P1-followup): close remaining gaps for complex `FindControl(...)` callsite rewrites and advanced lifecycle hooks (`OnLoad`/`Page_PreRender`) before marking P1 complete.
 
 ## Work Breakdown
 
@@ -69,9 +71,16 @@ When all work is complete:
 
 1. ✅ Create feature branch `feature/ascx-custom-control-migration`
 2. ✅ Create this planning doc + issue tracking
-3. → Create GitHub issues for P0 items (Web.config parser, ASCX descriptor analyzer)
-4. → Start implementation on P0 issues in parallel
-5. → Validate P0 with WingtipToys prescan, then move to P1 transforms
+3. ✅ Create GitHub issues for P0 items (Web.config parser, ASCX descriptor analyzer)
+4. ✅ Implement P0 issues in parallel (#555 + #557)
+5. → Keep docs and CLI tests current as P1 transforms land
+6. → Validate P0 with WingtipToys prescan, then move to P1 transforms
+
+## Validation Cadence on This Branch
+
+- Primary regression command: `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo`
+- Run after each control-migration increment (analysis, transform, or scaffolding step)
+- Keep docs updated in the same PR as behavior changes
 
 ## Related Documents
 
