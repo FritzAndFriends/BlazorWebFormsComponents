@@ -13,14 +13,14 @@ This folder contains planning documents and issue tracking for the ASCX (ASP.NET
 
 User controls (`.ascx` files) and custom-control frameworks are pervasive in legacy Web Forms applications and still require iterative transform coverage. Current state:
 
-- 🟡 `.ascx` files run through the shared migration pipeline; baseline template expression rewrites (`<%# Eval(...) %>`) and `<ContentTemplate>` unwrapping are now in P1, with advanced templating still pending
+- 🟡 `.ascx` files run through the shared migration pipeline; baseline template expression rewrites (`<%# Eval(...) %>`, `<%# Bind(...) %>`, `DataBinder.Eval(...)`) and `<ContentTemplate>` unwrapping are now in P1, with advanced templating still pending
 - ❌ Custom HTML controls (`.cs` inheriting from `WebControl`) are not migrated
 - 🟡 `FindControl()` readiness is partially automated via `@ref` + backing-field scaffolding; direct callsite rewrites remain manual
 - ✅ ASCX property/event descriptors are now analyzed in prescan/runtime detection (`AscxDescriptorAnalyzer`)
-- 🟡 ASCX lifecycle/data-binding has baseline transforms (`Page_Load` mapping, `DataBind()` cleanup + `Items` injection), but advanced patterns are still pending
+- ✅ ASCX lifecycle/data-binding has transforms (`Page_Load` → `OnParametersSet`, `Page_Init` → `OnInitialized`, `Page_PreRender` → `OnAfterRenderAsync`, `DataBind()` cleanup + `Items` injection)
 - ✅ Web.config namespace registrations for custom controls are now parsed (`WebConfigAssemblyParser`)
 
-TODO(P1-followup): close remaining gaps for complex `FindControl(...)` callsite rewrites and advanced lifecycle hooks (`OnLoad`/`Page_PreRender`) before marking P1 complete.
+TODO(P1-followup): close remaining gaps for complex `FindControl(...)` callsite rewrites (chained lookups, non-literal IDs) before marking P1 complete.
 
 ## Work Breakdown
 

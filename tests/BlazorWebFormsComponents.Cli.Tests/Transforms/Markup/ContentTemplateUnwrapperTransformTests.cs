@@ -90,4 +90,60 @@ public class ContentTemplateUnwrapperTransformTests
 
         Assert.Equal(input, result);
     }
+
+    [Fact]
+    public void Apply_RewritesBindExpression()
+    {
+        var input = """
+            <ItemTemplate>
+                <%# Bind("CustomerName") %>
+            </ItemTemplate>
+            """;
+
+        var result = _transform.Apply(input, MakeMetadata());
+
+        Assert.Contains("@Item.CustomerName", result);
+    }
+
+    [Fact]
+    public void Apply_RewritesBindWithFormatString()
+    {
+        var input = """
+            <ItemTemplate>
+                <%# Bind("Amount", "{0:N2}") %>
+            </ItemTemplate>
+            """;
+
+        var result = _transform.Apply(input, MakeMetadata());
+
+        Assert.Contains("@Item.Amount.ToString(\"N2\")", result);
+    }
+
+    [Fact]
+    public void Apply_RewritesDataBinderEval()
+    {
+        var input = """
+            <ItemTemplate>
+                <%# DataBinder.Eval(Container.DataItem, "ProductName") %>
+            </ItemTemplate>
+            """;
+
+        var result = _transform.Apply(input, MakeMetadata());
+
+        Assert.Contains("@Item.ProductName", result);
+    }
+
+    [Fact]
+    public void Apply_RewritesDataBinderEvalWithFormat()
+    {
+        var input = """
+            <ItemTemplate>
+                <%# DataBinder.Eval(Container.DataItem, "Price", "{0:C}") %>
+            </ItemTemplate>
+            """;
+
+        var result = _transform.Apply(input, MakeMetadata());
+
+        Assert.Contains("@Item.Price.ToString(\"C\")", result);
+    }
 }

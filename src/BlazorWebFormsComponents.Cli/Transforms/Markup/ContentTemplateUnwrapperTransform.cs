@@ -42,6 +42,24 @@ public sealed class ContentTemplateUnwrapperTransform : IMarkupTransform
         @"<%#\s*Container\.DataItem\s*%>",
         RegexOptions.Compiled);
 
+    // Bind("Property") — two-way binding variant, treated same as Eval in Blazor migration
+    private static readonly Regex BindFormatRegex = new(
+        """<%#\s*Bind\(\s*(?<q>['"])(?<prop>[\w.]+)\k<q>\s*,\s*(?<fq>['"])\{0:(?<fmt>[^}]+)\}\k<fq>\s*\)\s*%>""",
+        RegexOptions.Compiled);
+
+    private static readonly Regex BindRegex = new(
+        """<%#\s*Bind\(\s*(?<q>['"])(?<prop>[\w.]+)\k<q>\s*\)\s*%>""",
+        RegexOptions.Compiled);
+
+    // DataBinder.Eval(Container.DataItem, "Property") — explicit binder syntax
+    private static readonly Regex DataBinderEvalFormatRegex = new(
+        """<%#\s*DataBinder\.Eval\(\s*Container\.DataItem\s*,\s*(?<q>['"])(?<prop>[\w.]+)\k<q>\s*,\s*(?<fq>['"])\{0:(?<fmt>[^}]+)\}\k<fq>\s*\)\s*%>""",
+        RegexOptions.Compiled);
+
+    private static readonly Regex DataBinderEvalRegex = new(
+        """<%#\s*DataBinder\.Eval\(\s*Container\.DataItem\s*,\s*(?<q>['"])(?<prop>[\w.]+)\k<q>\s*\)\s*%>""",
+        RegexOptions.Compiled);
+
     public string Apply(string content, FileMetadata metadata)
     {
         string previous;
@@ -69,12 +87,29 @@ public sealed class ContentTemplateUnwrapperTransform : IMarkupTransform
 
     private static string RewriteTemplateBindings(string inner)
     {
+        // Eval with format string
         inner = EvalFormatRegex.Replace(inner, match =>
             $"@Item.{match.Groups["prop"].Value}.ToString(\"{match.Groups["fmt"].Value}\")");
+        // Simple Eval
         inner = EvalRegex.Replace(inner, match =>
             $"@Item.{match.Groups["prop"].Value}");
+        // Bind with format string (two-way binding, same output in Blazor migration)
+        inner = BindFormatRegex.Replace(inner, match =>
+            $"@Item.{match.Groups["prop"].Value}.ToString(\"{match.Groups["fmt"].Value}\")");
+        // Simple Bind
+        inner = BindRegex.Replace(inner, match =>
+            $"@Item.{match.Groups["prop"].Value}");
+        // DataBinder.Eval with format string
+        inner = DataBinderEvalFormatRegex.Replace(inner, match =>
+            $"@Item.{match.Groups["prop"].Value}.ToString(\"{match.Groups["fmt"].Value}\")");
+        // DataBinder.Eval simple
+        inner = DataBinderEvalRegex.Replace(inner, match =>
+            $"@Item.{match.Groups["prop"].Value}");
+        // Method calls with Container.DataItem
         inner = ContainerDataItemMethodRegex.Replace(inner, "@$1(Item)");
+        // Item.Property direct access
         inner = ItemPropertyRegex.Replace(inner, "@Item.$1");
+        // Bare Container.DataItem
         inner = ContainerDataItemRegex.Replace(inner, "@Item");
         return inner;
     }

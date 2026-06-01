@@ -62,4 +62,54 @@ public class PageLifecycleTransformTests
         Assert.Contains("protected override async Task OnInitializedAsync()", result);
         Assert.Contains("await base.OnInitializedAsync();", result);
     }
+
+    [Fact]
+    public void Apply_ConvertsPageInit_ToOnInitialized()
+    {
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Default.aspx",
+            OutputFilePath = "Default.razor",
+            FileType = FileType.Page,
+            OriginalContent = ""
+        };
+
+        var input = """
+            protected void Page_Init(object sender, EventArgs e)
+            {
+                SetupDefaults();
+            }
+            """;
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("protected override void OnInitialized()", result);
+        Assert.DoesNotContain("Page_Init", result);
+    }
+
+    [Fact]
+    public void Apply_ConvertsPagePreRender_ToOnAfterRenderAsyncWithFirstRenderGuard()
+    {
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Default.aspx",
+            OutputFilePath = "Default.razor",
+            FileType = FileType.Page,
+            OriginalContent = ""
+        };
+
+        var input = """
+            protected void Page_PreRender(object sender, EventArgs e)
+            {
+                UpdateUI();
+            }
+            """;
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("protected override async Task OnAfterRenderAsync(bool firstRender)", result);
+        Assert.Contains("if (firstRender)", result);
+        Assert.Contains("UpdateUI();", result);
+        Assert.DoesNotContain("Page_PreRender", result);
+    }
 }
