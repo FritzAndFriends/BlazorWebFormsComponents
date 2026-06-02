@@ -44,6 +44,42 @@ This is not for everyone, not everyone needs to migrate their application.  They
 
 Portions of the [original .NET Framework](https://github.com/microsoft/referencesource) are contributed to this project under their MIT license.
 
+## Custom Controls: Change One Line, Keep Your Code
+
+For applications with custom server controls that inherit `WebControl` and render via `HtmlTextWriter`, migration is as simple as changing a single `using` statement:
+
+```csharp
+// Before (Web Forms)
+using System.Web.UI.WebControls;
+
+// After (Blazor + BWFC)
+using BlazorWebFormsComponents.CustomControls;
+```
+
+Your `RenderContents`, `TagKey`, and `AddAttributesToRender` overrides work **unchanged**. The BWFC `WebControl` class provides a full `HtmlTextWriter` shim that captures your imperative rendering calls and emits them as HTML in Blazor's render tree — same output, zero rewrite.
+
+```csharp
+// This code works identically in Web Forms AND Blazor with BWFC
+public class StatusBadge : WebControl
+{
+    [Parameter] // Only addition: Blazor requires this attribute
+    public string Status { get; set; }
+
+    protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Span;
+
+    protected override void RenderContents(HtmlTextWriter writer)
+    {
+        writer.RenderBeginTag(HtmlTextWriterTag.Strong);
+        writer.Write(Status);
+        writer.RenderEndTag();
+    }
+}
+```
+
+This same principle applies across the library: **developers rewrite as little code as possible.** Page lifecycle methods (`Page_Load`, `Page_Init`), `FindControl()` calls, `Request`/`Response`/`Session` access — they all work through runtime shims rather than requiring code transformation.
+
+📖 [Full Custom WebControl Migration Guide](docs/Migration/CustomWebControl.md)
+
 ## Migration CLI Tool
 
 The **`webforms-to-blazor` CLI tool** automates the first phase of Web Forms to Blazor migration. It applies deterministic transforms to your markup and code-behind, removing boilerplate and converting patterns into a **.NET 10 Blazor Web App scaffolded for static server-side rendering (SSR)**:
