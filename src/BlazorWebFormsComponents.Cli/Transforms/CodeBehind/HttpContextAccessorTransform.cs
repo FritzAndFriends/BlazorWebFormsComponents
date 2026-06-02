@@ -100,12 +100,16 @@ public class HttpContextAccessorTransform : ICodeBehindTransform
             $"{FieldName}.HttpContext?.User");
 
         // Replace remaining HttpContext.Current.Property → _httpContextAccessor.HttpContext?.Property
+        // Skip HttpContext.Current.Server — handled by ServerShimTransform (order 330)
         content = Regex.Replace(content,
-            @"(?:System\.Web\.)?HttpContext\.Current\.(?<prop>\w+)",
+            @"(?:System\.Web\.)?HttpContext\.Current\.(?!Server\b)(?<prop>\w+)",
             m => $"{FieldName}.HttpContext?.{m.Groups["prop"].Value}");
 
         // Replace bare HttpContext.Current → _httpContextAccessor.HttpContext
-        content = HttpContextCurrentRegex.Replace(content, $"{FieldName}.HttpContext");
+        // Skip if followed by .Server (handled by ServerShimTransform)
+        content = Regex.Replace(content,
+            @"(?:System\.Web\.)?HttpContext\.Current(?!\.Server\b)",
+            $"{FieldName}.HttpContext");
 
         // Remove System.Web.HttpContext method parameters — the class now uses injected _httpContextAccessor
         // e.g., GetCart(HttpContext context) → GetCart()
@@ -124,6 +128,14 @@ public class HttpContextAccessorTransform : ICodeBehindTransform
         // Remove System.Web using if present (before injection adds Microsoft.AspNetCore.Http)
         content = Regex.Replace(content, @"^\s*using\s+System\.Web\s*;\s*\r?\n", "", RegexOptions.Multiline);
 
+        // Check if the accessor field is actually referenced (HttpContext.Current may have been
+        // fully handled by ServerShimTransform's skip pattern above, leaving nothing to inject for)
+        if (!content.Contains(FieldName, StringComparison.Ordinal))
+            return content;
+
+        // Detect if all usages of the accessor are inside static methods
+        var usesInStaticMethod = UsesAccessorInStaticMethod(content);
+
         // Inject the IHttpContextAccessor field/constructor
         if (!content.Contains(AccessorType, StringComparison.Ordinal))
         {
@@ -133,44 +145,54 @@ public class HttpContextAccessorTransform : ICodeBehindTransform
                 var className = classMatch.Groups["className"].Value;
                 var insertPos = classMatch.Index + classMatch.Length;
 
-                // Add field
-                var field = $"\n    private readonly {AccessorType} {FieldName};\n";
-
-                // Check if constructor already exists
-                var existingCtorRegex = new Regex(
-                    $@"public\s+{Regex.Escape(className)}\s*\(([^)]*)\)",
-                    RegexOptions.Compiled);
-                var ctorMatch = existingCtorRegex.Match(content);
-                if (ctorMatch.Success)
+                if (usesInStaticMethod)
                 {
-                    // Add parameter to existing constructor
-                    var existingParams = ctorMatch.Groups[1].Value.Trim();
-                    var paramName = "httpContextAccessor";
-                    var newParams = string.IsNullOrEmpty(existingParams)
-                        ? $"{AccessorType} {paramName}"
-                        : $"{existingParams}, {AccessorType} {paramName}";
-                    content = content[..ctorMatch.Index]
-                        + $"public {className}({newParams})"
-                        + content[(ctorMatch.Index + ctorMatch.Length)..];
-
-                    // Add field assignment in constructor body
-                    var ctorBodyStart = content.IndexOf('{', ctorMatch.Index) + 1;
-                    content = content[..ctorBodyStart]
-                        + $"\n        {FieldName} = {paramName};"
-                        + content[ctorBodyStart..];
+                    // Static field + Configure() pattern for classes with static methods
+                    var staticField = $"\n    private static {AccessorType} {FieldName} = default!;\n";
+                    var configureMethod = $"\n    public static void Configure({AccessorType} httpContextAccessor)\n    {{\n        {FieldName} = httpContextAccessor;\n    }}\n";
+                    content = content[..insertPos] + staticField + configureMethod + content[insertPos..];
                 }
                 else
                 {
-                    // Create new constructor
-                    var paramName = "httpContextAccessor";
-                    var ctor = $"\n    public {className}({AccessorType} {paramName})\n    {{\n        {FieldName} = {paramName};\n    }}\n";
-                    content = content[..insertPos] + field + ctor + content[insertPos..];
-                }
+                    // Instance field + constructor injection (original pattern)
+                    var field = $"\n    private readonly {AccessorType} {FieldName};\n";
 
-                // Add field if not yet inserted
-                if (!content.Contains($"readonly {AccessorType} {FieldName}", StringComparison.Ordinal))
-                {
-                    content = content[..insertPos] + field + content[insertPos..];
+                    // Check if constructor already exists
+                    var existingCtorRegex = new Regex(
+                        $@"public\s+{Regex.Escape(className)}\s*\(([^)]*)\)",
+                        RegexOptions.Compiled);
+                    var ctorMatch = existingCtorRegex.Match(content);
+                    if (ctorMatch.Success)
+                    {
+                        // Add parameter to existing constructor
+                        var existingParams = ctorMatch.Groups[1].Value.Trim();
+                        var paramName = "httpContextAccessor";
+                        var newParams = string.IsNullOrEmpty(existingParams)
+                            ? $"{AccessorType} {paramName}"
+                            : $"{existingParams}, {AccessorType} {paramName}";
+                        content = content[..ctorMatch.Index]
+                            + $"public {className}({newParams})"
+                            + content[(ctorMatch.Index + ctorMatch.Length)..];
+
+                        // Add field assignment in constructor body
+                        var ctorBodyStart = content.IndexOf('{', ctorMatch.Index) + 1;
+                        content = content[..ctorBodyStart]
+                            + $"\n        {FieldName} = {paramName};"
+                            + content[ctorBodyStart..];
+                    }
+                    else
+                    {
+                        // Create new constructor
+                        var paramName = "httpContextAccessor";
+                        var ctor = $"\n    public {className}({AccessorType} {paramName})\n    {{\n        {FieldName} = {paramName};\n    }}\n";
+                        content = content[..insertPos] + field + ctor + content[insertPos..];
+                    }
+
+                    // Add field if not yet inserted
+                    if (!content.Contains($"readonly {AccessorType} {FieldName}", StringComparison.Ordinal))
+                    {
+                        content = content[..insertPos] + field + content[insertPos..];
+                    }
                 }
             }
         }
@@ -187,5 +209,37 @@ public class HttpContextAccessorTransform : ICodeBehindTransform
         }
 
         return content;
+    }
+
+    /// <summary>
+    /// Detects whether the accessor field reference appears inside a static method,
+    /// indicating the class needs a static Configure() pattern instead of constructor injection.
+    /// </summary>
+    private static bool UsesAccessorInStaticMethod(string content)
+    {
+        // Find all static method bodies and check if they reference the field
+        var staticMethodRegex = new Regex(
+            @"\bstatic\b[^{]*\{",
+            RegexOptions.Compiled);
+
+        foreach (Match methodMatch in staticMethodRegex.Matches(content))
+        {
+            // Find the matching closing brace for this method
+            var braceStart = methodMatch.Index + methodMatch.Length - 1;
+            var depth = 1;
+            var pos = braceStart + 1;
+            while (pos < content.Length && depth > 0)
+            {
+                if (content[pos] == '{') depth++;
+                else if (content[pos] == '}') depth--;
+                pos++;
+            }
+
+            var methodBody = content[braceStart..pos];
+            if (methodBody.Contains(FieldName, StringComparison.Ordinal))
+                return true;
+        }
+
+        return false;
     }
 }

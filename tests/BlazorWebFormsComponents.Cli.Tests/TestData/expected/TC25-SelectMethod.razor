@@ -7,7 +7,7 @@
     SelectMethod="GetProducts">
     <ItemTemplate Context="Item">
         <tr>
-            <td><%# Item.Name %></td>
+            <td>@Item.Name</td>
         </tr>
     </ItemTemplate>
 </ListView>
@@ -18,7 +18,7 @@
     UpdateMethod="UpdateProduct"
     DeleteMethod="DeleteProduct">
     <ItemTemplate Context="Item">
-        <span><%# Item.Description %></span>
+        <span>@Item.Description</span>
     </ItemTemplate>
 </FormView>
 

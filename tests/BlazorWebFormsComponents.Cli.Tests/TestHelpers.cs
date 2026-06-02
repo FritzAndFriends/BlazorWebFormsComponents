@@ -202,6 +202,7 @@ public static class TestHelpers
             // Order 490-500: Expressions
             new DisplayExpressionTransform(),
             new ExpressionTransform(),
+            new ContentTemplateUnwrapperTransform(),
             new ColorAttributeTransform(),
             // Order 510: Statement block conversion (before LoginViewTransform)
             new ServerCodeBlockTransform(),
@@ -260,6 +261,7 @@ public static class TestHelpers
             new MethodNameCollisionTransform(),
             new SelfInstantiationTransform(),
             new ComponentRefCodeBehindTransform(),
+            // FindControlComponentRefTransform removed — FindControl is now a BWFC runtime feature
             new ComponentRefNullSafetyTransform(),
             new LabelFieldBindCodeBehindTransform(),
             new ResponseRedirectTransform(),

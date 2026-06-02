@@ -1,6 +1,6 @@
 ---
 name: wingtip-migration-test
-description: "**WORKFLOW SKILL** - Execute the end-to-end WingtipToys migration benchmark: clear samples\\AfterWingtipToys, run the migration-toolkit against samples\\WingtipToys, repair the generated app until Playwright acceptance tests pass, and write a numbered run report with embedded screenshots under dev-docs\\migration-tests\\wingtiptoys. WHEN: \"run Wingtip migration\", \"test WingtipToys migration\", \"Wingtip benchmark\", \"migrate WingtipToys\", \"rerun Wingtip migration\". INVOKES: migration-toolkit\\scripts\\bwfc-migrate.ps1, migration-toolkit\\skills\\migration-standards, bwfc-migration, bwfc-data-migration, bwfc-identity-migration, dotnet CLI, Playwright tests."
+description: "**WORKFLOW SKILL** - Execute the end-to-end WingtipToys migration benchmark: clear samples\\AfterWingtipToys, run the migration-toolkit against samples\\WingtipToys, repair the generated app until Playwright acceptance tests pass, and write a numbered run report with embedded screenshots under dev-docs\\migration-tests\\wingtiptoys. WHEN: \"run Wingtip migration\", \"test WingtipToys migration\", \"Wingtip benchmark\", \"migrate WingtipToys\", \"rerun Wingtip migration\". INVOKES: migration-toolkit (scripts + skills), dotnet CLI, Playwright tests."
 ---
 
 # WingtipToys Migration Test
@@ -108,14 +108,10 @@ Record:
 
 ### Phase 2: Layer 2/3 - Skill-Guided Repair
 
-Load and apply the migration toolkit skills from `migration-toolkit\skills\`:
+Load and apply the migration toolkit from `migration-toolkit\`:
 
-| Skill | Responsibility |
-|-------|---------------|
-| `migration-standards` | Canonical migration rules, page base class, render mode, SelectMethod, shims |
-| `bwfc-migration` | Markup conversion, template cleanup, lifecycle conversion, master/layout migration |
-| `bwfc-data-migration` | EF/data-layer modernization, service registration, data access fixes |
-| `bwfc-identity-migration` | Authentication and account-page migration |
+- Read `migration-toolkit/README.md` for the overall approach and key principles
+- Read `migration-toolkit/skills/` — the toolkit contains all the skills needed for the repair phase; apply whichever skills are relevant to the errors and patterns encountered in the generated output
 
 Repair the generated app **in place**. Do not replace it with a simplified rewrite or a fresh unrelated sample.
 
@@ -249,11 +245,6 @@ dev-docs/
 
 ## Reference Documents
 
-- `migration-toolkit/README.md`
-- `migration-toolkit/METHODOLOGY.md`
-- `migration-toolkit/skills/migration-standards/SKILL.md`
-- `migration-toolkit/skills/bwfc-migration/SKILL.md`
-- `migration-toolkit/skills/bwfc-data-migration/SKILL.md`
-- `migration-toolkit/skills/bwfc-identity-migration/SKILL.md`
+- `migration-toolkit/` — the full toolkit (README, METHODOLOGY, skills, scripts)
 - `src/WingtipToys.AcceptanceTests/TestConfiguration.cs`
 - `dev-docs/migration-tests/wingtiptoys/run25/report.md`

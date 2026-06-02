@@ -61,4 +61,90 @@ public class PrescanAnalyzerTests
         Assert.Contains("\"BWFC003\"", json);
         Assert.Contains("\"Default.aspx.cs\"", json);
     }
+
+    [Fact]
+    public void PrescanAnalyzer_IncludesAscxDescriptors()
+    {
+        var dir = TestHelpers.CreateTempProjectDir("prescan-ascx");
+        try
+        {
+            var ascxPath = Path.Combine(dir, "ProductsControl.ascx");
+            File.WriteAllText(ascxPath, """
+                <%@ Control Language="C#" CodeBehind="ProductsControl.ascx.cs" Inherits="WingtipToys.ProductsControl" %>
+                <asp:GridView ID="gvProducts" runat="server" />
+                """);
+
+            File.WriteAllText(ascxPath + ".cs", """
+                using System;
+                using System.Web.UI;
+
+                namespace WingtipToys;
+
+                public partial class ProductsControl : UserControl
+                {
+                    public int? CategoryID { get; set; }
+                    public event EventHandler? ProductSelected;
+                }
+                """);
+
+            var analyzer = new PrescanAnalyzer();
+            var result = analyzer.Analyze(dir);
+
+            var descriptor = Assert.Single(result.AscxDescriptors);
+            Assert.Equal("ProductsControl", descriptor.ControlName);
+            Assert.Contains(descriptor.Properties, property => property.Name == "CategoryID");
+
+            var json = PrescanAnalyzer.ToJson(result);
+            Assert.Contains("\"AscxDescriptors\"", json);
+            Assert.Contains("\"ProductsControl\"", json);
+        }
+        finally
+        {
+            TestHelpers.CleanupTempDir(dir);
+        }
+    }
+
+    [Fact]
+    public void PrescanAnalyzer_ReportsCustomControlRegistrations()
+    {
+        var dir = TestHelpers.CreateTempProjectDir("prescan-controls");
+        try
+        {
+            File.WriteAllText(Path.Combine(dir, "Web.config"), """
+                <?xml version="1.0" encoding="utf-8"?>
+                <configuration>
+                  <system.web>
+                    <pages>
+                      <controls>
+                        <add assembly="Microsoft.AspNet.Web.Optimization.WebForms" namespace="Microsoft.AspNet.Web.Optimization.WebForms" tagPrefix="webopt" />
+                      </controls>
+                    </pages>
+                  </system.web>
+                </configuration>
+                """);
+
+            File.WriteAllText(Path.Combine(dir, "Students.aspx"), """
+                <%@ Page Language="C#" %>
+                <%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+                """);
+
+            var analyzer = new PrescanAnalyzer();
+
+            var result = analyzer.Analyze(dir);
+            var json = PrescanAnalyzer.ToJson(result);
+
+            Assert.Contains(result.CustomControlRegistrations.NamespaceTags, registration =>
+                registration.TagPrefix == "webopt"
+                && registration.Namespace == "Microsoft.AspNet.Web.Optimization.WebForms");
+            Assert.Contains(result.CustomControlRegistrations.RegisterDirectives, registration =>
+                registration.TagPrefix == "ajaxToolkit"
+                && registration.AssemblyName == "AjaxControlToolkit");
+            Assert.Contains("\"CustomControlRegistrations\"", json);
+            Assert.Contains("\"webopt\"", json);
+        }
+        finally
+        {
+            TestHelpers.CleanupTempDir(dir);
+        }
+    }
 }

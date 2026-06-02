@@ -208,6 +208,10 @@ public static class ComponentCatalog
             Keywords: new[] { "ispostback", "postback", "guard", "httpcontext", "lifecycle", "migration", "shim" }),
         new("PostBack Demo", "Migration Helpers", "/ControlSamples/PostBackDemo", "GetPostBackEventReference, GetPostBackClientHyperlink, and ScriptManager.GetCurrent demos",
             Keywords: new[] { "postback", "dopostback", "scriptmanager", "clientscript", "hyperlink", "callback", "migration", "shim" }),
+        new("FindControl", "Migration Helpers", "/migration/findcontrol", "Runtime FindControl support: direct lookup, nested search, chained calls, case-insensitive matching",
+            Keywords: new[] { "findcontrol", "controls", "lookup", "cast", "panel", "naming", "migration", "runtime" }),
+        new("Custom WebControl", "Migration Helpers", "/ControlSamples/Migration/CustomWebControl", "Custom WebControl migration: RenderContents, TagKey, AddAttributesToRender with HtmlTextWriter shim",
+            Keywords: new[] { "webcontrol", "rendercontents", "htmltextwriter", "tagkey", "custom", "migration", "render" }),
 
         // Cross-Cutting / Base Properties
         new("BaseProperties", "Utility", "/ControlSamples/BaseProperties", "AccessKey, ToolTip, BackColor, ForeColor and other base class properties",

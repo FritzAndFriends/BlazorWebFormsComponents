@@ -1,6 +1,11 @@
 
 
 
+
+
+
+# Decision: Executive Summary Update Pattern
+
 # Decision: Executive Summary Update Pattern
 
 **Date:** 2026-05-17T21:45:23-04:00
@@ -52,6 +57,8 @@ The companion `DataBindTransform` bug was smaller but still a true pipeline fail
 - Full CLI test suite passed: 818/818.
 - Fresh isolated Contoso migration confirmed `Instructors.razor.cs` no longer has a dangling `this.` in `OnAfterRenderAsync`, and `Students.razor.cs` / `Courses.razor.cs` preserved real page code instead of API stubs.
 
+
+# Decision: Helper-class transforms for MapPath and self-instantiation
 
 # Bishop decision inbox — Contoso CRUD transforms\n\n- **Date:** 2026-05-17T00:00:00-04:00\n- **Owner:** Bishop\n\n## Decision\nFor Web Forms data controls that already use model binding, the CLI should preserve `SelectMethod`, `InsertMethod`, `UpdateMethod`, and `DeleteMethod` attributes in migrated BWFC markup instead of rewriting them into new delegate-style handler names or TODO comments.\n\nThe GridView migration path should also emit BWFC `CommandField` columns and preserve `BoundField ReadOnly` so generated CRUD pages stay structurally close to their Web Forms source.\n\n## Why\nBWFC already supports string-based CRUD method resolution at runtime through `DataBoundComponent<T>` and `SelectMethodResolver`, so attribute preservation is the lowest-risk, highest-fidelity migration behavior. Rewriting these attributes adds manual repair noise without improving the runnable output.\n\nContosoUniversity `Students.aspx` is the benchmark proof point: preserving CRUD attributes plus `CommandField`/`ReadOnly` keeps the generated GridView close to the original page and removes several avoidable Layer 2 edits.\n\n## Verification\n- `dotnet test tests\\BlazorWebFormsComponents.Cli.Tests --nologo`\n- `dotnet test src\\BlazorWebFormsComponents.Test --nologo --filter GridView`\n- `dotnet run --project src\\BlazorWebFormsComponents.Cli -- migrate -i samples\\ContosoUniversity\\ContosoUniversity -o samples\\AfterContosoUniversity --overwrite`\n
 
@@ -561,6 +568,11 @@ Run 27 confirms the #1 toolkit gap: master-page conversion does not produce a us
 6. Next WingtipToys benchmark run (Run 28+) shows reduced Layer 2 repair time for layout.
 7. Sample page renders the bridge components live, not just as code snippets.
 
+
+### 2026-05-30T11:53:20.341-04:00: User directive
+**By:** Jeffrey T. Fritz (via Copilot)
+**What:** Prefer converting ASCX user controls to Blazor .razor files with .razor.cs backing when feasible, rather than favoring WebControl-based wrappers.
+**Why:** User request — captured for team memory
 
 ### Wizard Web Forms Fidelity Contract — Review Follow-up
 

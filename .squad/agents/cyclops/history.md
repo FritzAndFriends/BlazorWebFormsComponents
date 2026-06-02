@@ -83,6 +83,8 @@
 ≡ Team update (2026-05-07): Inbox merged, decisions consolidated — Scribe
 
 
+
+≡ƒôî Team update (2026-05-30T15:46:42Z): 6 decisions merged into team KB: CLI code-behind fixes, helper transforms, L1 quality, SSR form contract, MasterPage bridge contract — all agents
 ≡ Team update (2026-05-21T12:26): Wizard finish button label precedence — FinishCompleteButtonText takes precedence over FinishButtonText for backward compatibility. Cyclops & Colossus spawned for sample templates and acceptance tests — decided by Cyclops
 
 ### 2026-05-21T08:26:50.933-04:00: Wizard sample template demonstrations

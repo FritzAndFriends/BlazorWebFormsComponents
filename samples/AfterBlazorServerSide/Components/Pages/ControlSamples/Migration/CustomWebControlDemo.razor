@@ -1,0 +1,193 @@
+@page "/ControlSamples/Migration/CustomWebControl"
+@using BlazorWebFormsComponents.CustomControls
+
+<h2>Custom WebControl Migration</h2>
+<p>
+    This page demonstrates how Web Forms custom controls that use <code>WebControl</code> base class
+    with <code>RenderContents(HtmlTextWriter)</code> work unchanged in Blazor through BWFC.
+</p>
+
+<hr />
+
+<h3>Demo 1: StatusBadge (TagKey + RenderContents + AddAttributesToRender)</h3>
+<p>A custom control that renders a badge with a data attribute and styled inner content.</p>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>Live Output:</h5>
+        <div class="p-3 border rounded">
+            <StatusBadge Status="Active" Label="Online" CssClass="badge bg-success text-white" />
+            <span class="mx-2"></span>
+            <StatusBadge Status="Warning" CssClass="badge bg-warning" />
+            <span class="mx-2"></span>
+            <StatusBadge Status="Error" Label="Offline" CssClass="badge bg-danger text-white" />
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h5>Component Code (unchanged from Web Forms):</h5>
+        <pre><code>public class StatusBadge : WebControl
+{
+    public string Status { get; set; }
+    public string Label { get; set; }
+
+    protected override HtmlTextWriterTag TagKey
+        => HtmlTextWriterTag.Span;
+
+    protected override void AddAttributesToRender(
+        HtmlTextWriter writer)
+    {
+        base.AddAttributesToRender(writer);
+        writer.AddAttribute("data-status",
+            Status?.ToLowerInvariant() ?? "unknown");
+    }
+
+    protected override void RenderContents(
+        HtmlTextWriter writer)
+    {
+        writer.RenderBeginTag(HtmlTextWriterTag.Strong);
+        writer.Write(Label ?? Status);
+        writer.RenderEndTag();
+    }
+}</code></pre>
+    </div>
+</div>
+
+<hr />
+
+<h3>Demo 2: InfoCard (Complex Nested RenderContents)</h3>
+<p>A custom control that renders a card with a header and body using nested HTML elements.</p>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <h5>Live Output:</h5>
+        <div class="p-3 border rounded">
+            <InfoCard Title="Migration Complete"
+                      Body="Your custom WebControl works in Blazor without code changes!"
+                      CssClass="card" />
+        </div>
+        <div class="p-3 border rounded mt-3">
+            <InfoCard Title="Custom Header Style"
+                      Body="The HeaderCssClass parameter controls the header styling."
+                      HeaderCssClass="card-header bg-primary text-white"
+                      CssClass="card" />
+        </div>
+    </div>
+    <div class="col-md-6">
+        <h5>Component Code (unchanged from Web Forms):</h5>
+        <pre><code>public class InfoCard : WebControl
+{
+    public string Title { get; set; }
+    public string Body { get; set; }
+    public string HeaderCssClass { get; set; }
+        = "card-header";
+
+    protected override HtmlTextWriterTag TagKey
+        => HtmlTextWriterTag.Div;
+
+    protected override void RenderContents(
+        HtmlTextWriter writer)
+    {
+        // Header
+        writer.AddAttribute(
+            HtmlTextWriterAttribute.Class,
+            HeaderCssClass);
+        writer.RenderBeginTag(HtmlTextWriterTag.Div);
+        writer.RenderBeginTag(HtmlTextWriterTag.H3);
+        writer.Write(Title);
+        writer.RenderEndTag(); // h3
+        writer.RenderEndTag(); // header div
+
+        // Body
+        writer.AddAttribute(
+            HtmlTextWriterAttribute.Class,
+            "card-body");
+        writer.RenderBeginTag(HtmlTextWriterTag.Div);
+        writer.Write(Body);
+        writer.RenderEndTag(); // body div
+    }
+}</code></pre>
+    </div>
+</div>
+
+<hr />
+
+<h3>How It Works</h3>
+<p>
+    In Web Forms, custom controls inherit <code>System.Web.UI.WebControls.WebControl</code> and override:
+</p>
+<ul>
+    <li><code>TagKey</code> — the outer HTML element</li>
+    <li><code>AddAttributesToRender(HtmlTextWriter)</code> — attributes on the outer tag</li>
+    <li><code>RenderContents(HtmlTextWriter)</code> — inner HTML content</li>
+</ul>
+<p>
+    In Blazor with BWFC, you change <strong>only the using statement</strong>:
+</p>
+<pre><code>// Before (Web Forms)
+using System.Web.UI.WebControls;
+
+// After (Blazor + BWFC)
+using BlazorWebFormsComponents.CustomControls;</code></pre>
+<p>
+    The BWFC <code>WebControl</code> class provides an <code>HtmlTextWriter</code> shim that captures
+    all rendering calls and emits the result as raw HTML in Blazor's render tree. Your
+    <code>RenderContents</code> code runs unchanged.
+</p>
+
+@code {
+    // Sample components defined inline for the demo
+    // In a real migration, these would be in their own .cs files
+
+    public class StatusBadge : WebControl
+    {
+        [Parameter]
+        public string Status { get; set; }
+
+        [Parameter]
+        public string Label { get; set; }
+
+        protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Span;
+
+        protected override void AddAttributesToRender(HtmlTextWriter writer)
+        {
+            base.AddAttributesToRender(writer);
+            writer.AddAttribute("data-status", Status?.ToLowerInvariant() ?? "unknown");
+        }
+
+        protected override void RenderContents(HtmlTextWriter writer)
+        {
+            writer.RenderBeginTag(HtmlTextWriterTag.Strong);
+            writer.Write(Label ?? Status);
+            writer.RenderEndTag();
+        }
+    }
+
+    public class InfoCard : WebControl
+    {
+        [Parameter]
+        public string Title { get; set; }
+
+        [Parameter]
+        public string Body { get; set; }
+
+        [Parameter]
+        public string HeaderCssClass { get; set; } = "card-header";
+
+        protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Div;
+
+        protected override void RenderContents(HtmlTextWriter writer)
+        {
+            writer.AddAttribute(HtmlTextWriterAttribute.Class, HeaderCssClass);
+            writer.RenderBeginTag(HtmlTextWriterTag.Div);
+            writer.RenderBeginTag(HtmlTextWriterTag.H3);
+            writer.Write(Title);
+            writer.RenderEndTag();
+            writer.RenderEndTag();
+
+            writer.AddAttribute(HtmlTextWriterAttribute.Class, "card-body");
+            writer.RenderBeginTag(HtmlTextWriterTag.Div);
+            writer.Write(Body);
+            writer.RenderEndTag();
+        }
+    }
+}

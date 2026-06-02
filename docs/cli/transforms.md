@@ -18,6 +18,7 @@ This page documents the flat markup and code-behind transforms applied by the `w
 | 310 | FormWrapperTransform | Markup | Markup | Convert `<form runat="server">` to Blazor form |
 | 490 | DisplayExpressionTransform | Markup | Markup | Normalize `<%#:` / `<%=:` display expressions and broken `@(: expr)` output to valid Razor |
 | 500 | ExpressionTransform | Markup | Markup | Convert `<%: %>`, `<%= %>`, and inline data expressions to Razor |
+| 505 | ContentTemplateUnwrapperTransform | Markup | Markup | Unwrap `<ContentTemplate>` blocks and normalize template-scoped `<%# Eval(...) %>` bindings to Razor item expressions |
 | 510 | ServerCodeBlockTransform | Markup | Markup | Convert `<% ... %>` statement blocks to Razor control flow |
 | 510 | LoginViewTransform | Markup | Markup | Convert `<asp:LoginView>` → `<AuthorizeView>` |
 | 520 | SelectMethodTransform | Markup | Markup | Preserve SelectMethod / InsertMethod / UpdateMethod / DeleteMethod model-binding attributes |

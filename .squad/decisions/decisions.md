@@ -327,3 +327,96 @@ Run 40 showed Layer 1 output still needed manual structural cleanup on flagship 
 Layer 1 now emits cleaner BWFC ListView placeholders and correctly typed GridView columns for Wingtip-style pages, reducing manual repair on the benchmark path. FormView item templates continue to emit valid typed fragments, and the CLI suite now guards this contract.
 
 
+
+---
+
+# Decision: ASCX/Custom-Control Migration Roadmap
+
+**Date:** 2026-05-30T16:05:00-04:00  
+**Author:** Forge (Lead / Web Forms Reviewer)  
+**Status:** Established  
+**Branch:** `feature/ascx-custom-control-migration`
+
+## Decision
+
+The ASCX (user control) and custom-control migration capability is a critical gap in the current toolkit. To fill this gap, I am establishing a **3-stream work plan** with clear priorities and dependencies:
+
+### Stream 1: Infrastructure (P0)
+1. **Web.config Custom Control Registry Parser** (Issue #557)
+   - Parse `<assemblies>` and `<controls>` sections
+   - Enable prescan detection of custom controls
+   - Unblocks all downstream analysis
+
+2. **ASCX Property/Event Descriptor Analyzer** (Issue #555)
+   - Extract properties, events, and methods from `.ascx.cs`
+   - Detect lifecycle patterns (DataBind, Page_Load)
+   - Enables template unwrapping and FindControl transforms
+
+### Stream 2: Transforms (P1)
+1. **ContentTemplate Unwrapper Transform** (Issue #558)
+   - Unwrap `<HeaderTemplate>`, `<ItemTemplate>`, etc.
+   - Rewrite `<%# Eval(...) %>` to `@item.Property`
+   - Reduces Layer 2 repair time on data-bound controls
+
+2. **FindControl-to-@ref Transform** (Issue #556)
+   - Rewrite `FindControl("id")` calls to `@ref` parameters
+   - Coordinate markup and code-behind rewrites
+   - Critical for Layer 1 code-behind correctness
+
+### Stream 3: Tooling (P2–P3, Deferred)
+- Custom-control scaffolder (depends on P0+P1 understanding)
+- ASCX and Custom-Control Copilot skills (depends on stable transforms)
+- Integration tests (depends on P0–P2 working end-to-end)
+
+## Validation
+
+- **WingtipToys benchmark** will exercise this pipeline on real user controls
+- **ContosoUniversity prescan** validates P0 detection
+- **Layer 1 build success** for ASCX-heavy applications validates P1 transforms
+- **Layer 2 acceptance tests** for migrated controls validate end-to-end correctness
+
+## Rationale
+
+Current state:
+- ❌ `.ascx` files copied unchanged → Layer 1 build breaks or requires heavy L2 rework
+- ❌ Custom assemblies in `Web.config` ignored → prescan cannot analyze custom controls
+- ❌ `FindControl()` calls unmapped → page code-behind remains broken
+- ❌ ASCX properties/events not understood → no automated component parameter generation
+
+This plan addresses the stack in dependency order:
+1. **P0 Foundation:** Parser + analyzer = prescan insight, enables scope estimation
+2. **P1 Transforms:** Template unwrapper + FindControl = Layer 1 correctness, reduces L2 burden
+3. **P2–P3 Future:** Scaffolding + skills = fully automated generation, Copilot-guided migration
+
+## Scope
+
+This decision encompasses:
+- Planning and issue creation for ASCX/custom-control work
+- Prioritization of four initial GitHub issues (#555, #556, #557, #558)
+- Integration into the current WingtipToys/ContosoUniversity benchmark cycle
+- Test and validation criteria for each stream
+
+This decision does NOT include:
+- Implementing P0–P1 transforms (separate work)
+- Custom WebControl base-class shim generation (P2)
+- Dynamic control discovery or reflection (P2)
+
+## Next Steps
+
+1. ✅ Create planning docs in `dev-docs/control-migration/`
+2. ✅ Create P0 and P1 issues (#555–#558)
+3. → Start P0 implementation (Parser + Analyzer in parallel)
+4. → Validate P0 with WingtipToys prescan run
+5. → Begin P1 transforms (ContentTemplate + FindControl)
+6. → Target reduced Layer 2 repair time in next benchmark run
+
+---
+
+**Team assignments:**
+- **Bishop** (CLI Developer) — P0 Parser, P1 Transforms
+- **Forge** (Lead/Reviewer) — Architecture validation, Web Forms behavior reference
+- **Cyclops** (Component Dev) — Custom base-class shims (P2)
+- **Rogue** (Test Lead) — Integration tests
+- **Beast** (Documentation) — Migration guides
+
+
