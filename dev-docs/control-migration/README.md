@@ -13,14 +13,12 @@ This folder contains planning documents and issue tracking for the ASCX (ASP.NET
 
 User controls (`.ascx` files) and custom-control frameworks are pervasive in legacy Web Forms applications and still require iterative transform coverage. Current state:
 
-- 🟡 `.ascx` files run through the shared migration pipeline; baseline template expression rewrites (`<%# Eval(...) %>`, `<%# Bind(...) %>`, `DataBinder.Eval(...)`) and `<ContentTemplate>` unwrapping are now in P1, with advanced templating still pending
+- ✅ `.ascx` files run through the shared migration pipeline; template expression rewrites (`<%# Eval(...) %>`, `<%# Bind(...) %>`, `DataBinder.Eval(...)`) and `<ContentTemplate>` unwrapping are complete
 - ❌ Custom HTML controls (`.cs` inheriting from `WebControl`) are not migrated
-- 🟡 `FindControl()` readiness is partially automated via `@ref` + backing-field scaffolding; direct callsite rewrites remain manual
+- ✅ `FindControl()` is a **runtime feature** on `BaseWebFormsComponent` — developer code stays unchanged, no CLI rewriting needed (O(1) indexed lookup, recursive descent, case-insensitive, cast-compatible)
 - ✅ ASCX property/event descriptors are now analyzed in prescan/runtime detection (`AscxDescriptorAnalyzer`)
 - ✅ ASCX lifecycle/data-binding has transforms (`Page_Load` → `OnParametersSet`, `Page_Init` → `OnInitialized`, `Page_PreRender` → `OnAfterRenderAsync`, `DataBind()` cleanup + `Items` injection)
 - ✅ Web.config namespace registrations for custom controls are now parsed (`WebConfigAssemblyParser`)
-
-TODO(P1-followup): close remaining gaps for complex `FindControl(...)` callsite rewrites (chained lookups, non-literal IDs) before marking P1 complete.
 
 ## Work Breakdown
 
@@ -48,8 +46,8 @@ This effort is organized into **two high-level streams**:
 |----------|------|--------|-------|
 | P0 | Web.config tag/namespace parser | 1 (Infrastructure) | Blocks all downstream transforms; unblocks WingtipToys |
 | P0 | ASCX descriptor analyzer | 1 (Infrastructure) | Blocks Content/Template unwrapping; enables Layer 1 scanning |
-| P1 | ContentTemplate unwrapper | 2 (Transforms) | Blocks findcontrol, binding transforms; enables basic ASCX→component skeleton |
-| P1 | FindControl-to-@ref transform | 2 (Transforms) | Enables code-behind rewrite for control queries |
+| P1 | ContentTemplate unwrapper | 2 (Transforms) | ✅ Complete — Bind(), DataBinder.Eval(), basic unwrapping |
+| P1 | FindControl runtime support | Runtime | ✅ Complete — promoted to BWFC runtime contract (not CLI rewrite) |
 | P2 | Custom base-class shim generator | 1 (Infrastructure) | Blocks custom WebControl adoption; deferred pending P0+P1 analysis |
 | P2 | ASCX binding/lifecycle transforms | 2 (Transforms) | Blocks full ASCX migration; needs descriptor analysis first |
 | P3 | Custom-control scaffolder | 2 (Transforms) | Deferred: enables generation of BWFC stubs only after descriptors+binding known |
