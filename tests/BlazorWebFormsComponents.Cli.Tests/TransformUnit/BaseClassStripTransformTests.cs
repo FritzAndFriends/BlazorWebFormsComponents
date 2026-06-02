@@ -103,20 +103,22 @@ public class BaseClassStripTransformTests
     [Fact]
     public void Control_PreservesUserControlFromFullyQualified()
     {
-        var input = "public partial class MyControl : System.Web.UI.UserControl { }";
+        var input = "using System;\npublic partial class MyControl : System.Web.UI.UserControl { }";
         var result = _transform.Apply(input, ControlMetadata(input));
 
         Assert.Contains("public partial class MyControl : UserControl", result);
         Assert.DoesNotContain("System.Web.UI", result);
+        Assert.Contains("using BlazorWebFormsComponents.CustomControls;", result);
     }
 
     [Fact]
     public void Control_PreservesShortFormUserControl()
     {
-        var input = "public partial class MyCtrl : UserControl { }";
+        var input = "using System;\npublic partial class MyCtrl : UserControl { }";
         var result = _transform.Apply(input, ControlMetadata(input));
 
         Assert.Contains("public partial class MyCtrl : UserControl", result);
+        Assert.Contains("using BlazorWebFormsComponents.CustomControls;", result);
     }
 
     // --- Shared behavior ---

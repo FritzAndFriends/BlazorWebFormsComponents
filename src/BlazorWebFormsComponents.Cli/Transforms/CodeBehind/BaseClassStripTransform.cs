@@ -42,9 +42,24 @@ public class BaseClassStripTransform : ICodeBehindTransform
         // Strip the System.Web.UI. prefix but keep the type name
         content = UserControlBaseRegex.Replace(content, "$1 : UserControl");
 
-        // For files inheriting from preserved base classes, don't strip
+        // For files inheriting from preserved base classes, add the CustomControls using and return
         if (PreservedBaseClassRegex.IsMatch(content))
+        {
+            if (!content.Contains("using BlazorWebFormsComponents.CustomControls;", StringComparison.Ordinal))
+            {
+                var lastUsing = Regex.Match(content, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
+                if (lastUsing.Success)
+                {
+                    var insertAt = lastUsing.Index + lastUsing.Length;
+                    content = content[..insertAt] + "\nusing BlazorWebFormsComponents.CustomControls;\n" + content[insertAt..];
+                }
+                else
+                {
+                    content = "using BlazorWebFormsComponents.CustomControls;\n" + content;
+                }
+            }
             return content;
+        }
 
         // Strip any other Web Forms base classes (e.g., bare Page in a control context)
         return PageBaseClassRegex.Replace(content, "$1");
