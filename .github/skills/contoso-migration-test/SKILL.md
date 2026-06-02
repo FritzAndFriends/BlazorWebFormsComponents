@@ -1,6 +1,6 @@
 ---
 name: contoso-migration-test
-description: "**WORKFLOW SKILL** — Execute end-to-end ContosoUniversity migration benchmark: clear output folder, run L1 script + L2 Copilot transforms, build, run Playwright acceptance tests, and generate a numbered run report. WHEN: \"run contoso migration test\", \"test contoso university migration\", \"contoso migration benchmark\", \"run CU migration\". INVOKES: bwfc-migrate.ps1, bwfc-migration skill, bwfc-ascx-migration skill, bwfc-custom-control-migration skill, bwfc-data-migration skill, bwfc-identity-migration skill, migration-standards skill, dotnet CLI, Playwright tests."
+description: "**WORKFLOW SKILL** — Execute end-to-end ContosoUniversity migration benchmark: clear output folder, run L1 script + L2 Copilot transforms, build, run Playwright acceptance tests, and generate a numbered run report. WHEN: \"run contoso migration test\", \"test contoso university migration\", \"contoso migration benchmark\", \"run CU migration\". INVOKES: migration-toolkit (scripts + skills), dotnet CLI, Playwright tests."
 ---
 
 # ContosoUniversity Migration Test
@@ -51,16 +51,10 @@ End-to-end migration benchmark that converts the ContosoUniversity Web Forms sam
 
 **Expected duration:** 20–30 minutes
 
-Load and apply the migration skills from `migration-toolkit/skills/`:
+Load and apply the migration toolkit from `migration-toolkit/`:
 
-| Skill | Responsibility |
-|-------|---------------|
-| `migration-standards` | Target architecture (.NET 10, Server Interactive), page base class, render mode |
-| `bwfc-migration` | Control translation, data binding expressions, Master→Layout, code-behind lifecycle |
-| `bwfc-ascx-migration` | ASCX user control conversion, code-behind preservation, tag prefix resolution, FindControl |
-| `bwfc-custom-control-migration` | Custom WebControl/CompositeControl migration, RenderContents/HtmlTextWriter preservation |
-| `bwfc-data-migration` | EF6→EF Core, Session→Scoped services, Global.asax→Program.cs, Web.config→appsettings |
-| `bwfc-identity-migration` | Identity/auth migration (if applicable to source) |
+- Read `migration-toolkit/README.md` for the overall approach and key principles
+- Read `migration-toolkit/skills/` — the toolkit contains all the skills needed for the repair phase; apply whichever skills are relevant to the errors and patterns encountered in the generated output
 
 **Key transforms to execute:**
 - Convert code-behind lifecycle (`Page_Load` → `OnInitializedAsync`)
