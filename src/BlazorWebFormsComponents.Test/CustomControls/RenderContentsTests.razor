@@ -1,0 +1,156 @@
+@using BlazorWebFormsComponents.CustomControls
+@using BlazorWebFormsComponents.Test.CustomControls.TestComponents
+@using Shouldly
+@using Xunit
+@using Microsoft.AspNetCore.Components
+@inherits BlazorWebFormsTestContext
+
+@code {
+	// ==========================================================================
+	// StatusBadge — TagKey + RenderContents + AddAttributesToRender pattern
+	// ==========================================================================
+
+	[Fact]
+	public void StatusBadge_RenderContents_OutputsInnerHtml()
+	{
+		var cut = Render(@<StatusBadge Status="Active" />);
+
+		cut.Markup.ShouldContain("<strong>");
+		cut.Markup.ShouldContain("Active");
+		cut.Markup.ShouldContain("</strong>");
+	}
+
+	[Fact]
+	public void StatusBadge_TagKey_RendersOuterSpan()
+	{
+		var cut = Render(@<StatusBadge Status="Active" />);
+
+		// Outer element should be a span (from TagKey)
+		cut.Markup.ShouldStartWith("<span");
+		cut.Markup.ShouldEndWith("</span>");
+	}
+
+	[Fact]
+	public void StatusBadge_AddAttributesToRender_EmitsDataAttribute()
+	{
+		var cut = Render(@<StatusBadge Status="Warning" />);
+
+		cut.Markup.ShouldContain("data-status=\"warning\"");
+	}
+
+	[Fact]
+	public void StatusBadge_Label_OverridesStatusText()
+	{
+		var cut = Render(@<StatusBadge Status="Active" Label="Online" />);
+
+		cut.Markup.ShouldContain("Online");
+		cut.Markup.ShouldNotContain(">Active<");
+	}
+
+	[Fact]
+	public void StatusBadge_CssClass_IncludedOnOuterTag()
+	{
+		var cut = Render(@<StatusBadge Status="Error" CssClass="badge badge-danger" />);
+
+		cut.Markup.ShouldContain("class=\"badge badge-danger\"");
+		cut.Markup.ShouldContain("data-status=\"error\"");
+	}
+
+	[Fact]
+	public void StatusBadge_Disabled_AddsDisabledAttribute()
+	{
+		var cut = Render(@<StatusBadge Status="Inactive" Enabled="false" />);
+
+		cut.Markup.ShouldContain("disabled=\"disabled\"");
+	}
+
+	// ==========================================================================
+	// InfoCard — Complex RenderContents with nested elements
+	// ==========================================================================
+
+	[Fact]
+	public void InfoCard_RenderContents_OutputsHeaderAndBody()
+	{
+		var cut = Render(@<InfoCard Title="Welcome" Body="Hello, World!" />);
+
+		var html = cut.Markup;
+		html.ShouldContain("<h3>");
+		html.ShouldContain("Welcome");
+		html.ShouldContain("</h3>");
+		html.ShouldContain("Hello, World!");
+	}
+
+	[Fact]
+	public void InfoCard_TagKey_RendersOuterDiv()
+	{
+		var cut = Render(@<InfoCard Title="Test" Body="Content" />);
+
+		cut.Markup.ShouldStartWith("<div");
+		cut.Markup.ShouldEndWith("</div>");
+	}
+
+	[Fact]
+	public void InfoCard_HeaderCssClass_AppliedToHeaderDiv()
+	{
+		var cut = Render(@<InfoCard Title="Test" Body="Content" HeaderCssClass="custom-header" />);
+
+		cut.Markup.ShouldContain("class=\"custom-header\"");
+	}
+
+	[Fact]
+	public void InfoCard_DefaultHeaderCssClass_IsCardHeader()
+	{
+		var cut = Render(@<InfoCard Title="Test" Body="Content" />);
+
+		cut.Markup.ShouldContain("class=\"card-header\"");
+	}
+
+	[Fact]
+	public void InfoCard_BodySection_HasCardBodyClass()
+	{
+		var cut = Render(@<InfoCard Title="Test" Body="Body text here" />);
+
+		cut.Markup.ShouldContain("class=\"card-body\"");
+		cut.Markup.ShouldContain("Body text here");
+	}
+
+	[Fact]
+	public void InfoCard_WithCssClass_AppliedToOuterDiv()
+	{
+		var cut = Render(@<InfoCard Title="Test" Body="Content" CssClass="card shadow" />);
+
+		// The outer div should have the class
+		cut.Markup.ShouldStartWith("<div");
+		cut.Markup.ShouldContain("class=\"card shadow\"");
+	}
+
+	[Fact]
+	public void InfoCard_NotVisible_RendersNothing()
+	{
+		var cut = Render(@<InfoCard Title="Test" Body="Content" Visible="false" />);
+
+		cut.Markup.ShouldBeEmpty();
+	}
+
+	// ==========================================================================
+	// TagKey-only pattern — minimal override, just changes outer element
+	// ==========================================================================
+
+	[Fact]
+	public void TagKeyDiv_DefaultRender_EmitsEmptyDiv()
+	{
+		var cut = Render(@<TagKeyDiv />);
+
+		cut.Markup.ShouldStartWith("<div");
+		cut.Markup.ShouldEndWith("</div>");
+	}
+
+	[Fact]
+	public void TagKeyTable_DefaultRender_EmitsEmptyTable()
+	{
+		var cut = Render(@<TagKeyTable />);
+
+		cut.Markup.ShouldStartWith("<table");
+		cut.Markup.ShouldEndWith("</table>");
+	}
+}

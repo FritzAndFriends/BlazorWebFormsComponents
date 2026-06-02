@@ -225,6 +225,7 @@ nav:
           - User Controls: Migration/User-Controls.md
           - Custom Controls: Migration/Custom-Controls.md
           - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
+          - Custom WebControl (RenderContents): Migration/CustomWebControl.md
           - FindControl Migration: Migration/FindControl-Migration.md
           - Deferred Controls: Migration/DeferredControls.md
           - Themes and Skins: Migration/ThemesAndSkins.md
