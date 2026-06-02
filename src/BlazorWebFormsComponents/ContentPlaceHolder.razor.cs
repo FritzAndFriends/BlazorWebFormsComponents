@@ -1,56 +1,49 @@
 using Microsoft.AspNetCore.Components;
-using System.Threading.Tasks;
 
 namespace BlazorWebFormsComponents
 {
 	/// <summary>
 	/// A component that emulates ASP.NET Web Forms ContentPlaceHolder control.
-	/// Defines a region in a master page that can be replaced with content from child pages.
+	/// Defines a named content slot in a master page that child pages can fill
+	/// with a <see cref="Content"/> control that targets the same
+	/// <see cref="BaseWebFormsComponent.ID"/>.
 	/// </summary>
 	/// <remarks>
-	/// In Web Forms, ContentPlaceHolder controls are used in master pages to define areas
-	/// that child pages can customize using Content controls.
-	/// 
-	/// In Blazor, this is typically done with @Body for the main content area or 
-	/// @RenderSection for named sections. This component bridges the gap by providing
-	/// Web Forms-style syntax while using Blazor's underlying mechanisms.
-	/// 
-	/// Original Microsoft documentation: https://docs.microsoft.com/en-us/dotnet/api/system.web.ui.webcontrols.contentplaceholder
+	/// <para>
+	/// ContentPlaceHolder is intentionally a thin reader over the shared
+	/// <see cref="MasterPageContext"/> registry. The master-page host is responsible
+	/// for re-rendering when the registry changes, which keeps this control aligned
+	/// with Blazor layout semantics while preserving the original Web Forms tag name.
+	/// </para>
 	/// </remarks>
 	public partial class ContentPlaceHolder : ContentPlaceHolderBase
 	{
-		/// <summary>
-		/// Default content to display if no Content control provides a replacement
-		/// </summary>
+		/// <summary>Default content shown when no matching <see cref="Content"/> is registered.</summary>
 		[Parameter]
 		public RenderFragment ChildContent { get; set; }
 
 		/// <summary>
-		/// Content provided by a child page's Content control
+		/// The shared master-page context cascaded by <see cref="MasterPage"/> or
+		/// <see cref="MasterPageLayoutBase"/>.
 		/// </summary>
-		internal RenderFragment Content { get; set; }
+		[CascadingParameter]
+		private MasterPageContext MasterContext { get; set; }
 
+		/// <summary>
+		/// Direct reference to the parent <see cref="MasterPage"/> component, kept for
+		/// backward compatibility.
+		/// </summary>
 		[CascadingParameter]
 		private MasterPage ParentMasterPage { get; set; }
 
-		protected override async Task OnInitializedAsync()
-		{
-			// Register this placeholder with the parent MasterPage
-			ParentMasterPage?.RegisterContentPlaceHolder(this);
-
-			// Get content from parent MasterPage if available
-			if (ParentMasterPage != null && !string.IsNullOrEmpty(ID))
-			{
-				Content = ParentMasterPage.GetContentForPlaceHolder(ID);
-			}
-
-			await base.OnInitializedAsync();
-		}
+		/// <summary>Fragment injected by a matching <see cref="Content"/> control, if any.</summary>
+		internal RenderFragment Content =>
+			string.IsNullOrWhiteSpace(ID)
+				? null
+				: MasterContext?.GetContent(ID) ?? ParentMasterPage?.GetContentForPlaceHolder(ID);
 	}
 
-	/// <summary>
-	/// Base class for ContentPlaceHolder component
-	/// </summary>
+	/// <summary>Base class for <see cref="ContentPlaceHolder"/> component.</summary>
 	public abstract class ContentPlaceHolderBase : BaseWebFormsComponent
 	{
 	}

@@ -11,6 +11,7 @@
     <form @ref="_formRef"
           method="@MethodString"
           action="@Action"
+          data-interactive="true"
           @onsubmit="HandleSubmit"
           @onsubmit:preventDefault
           @attributes="HtmlAttributes">
@@ -70,6 +71,17 @@ else
     protected override void OnInitialized()
     {
         _isInteractive = HttpContextAccessor.HttpContext == null;
+        // _isInteractive starts false; set in OnAfterRender which only runs
+        // on interactive circuits (never during prerendering or static SSR).
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && !_isInteractive)
+        {
+            _isInteractive = true;
+            StateHasChanged();
+        }
     }
 
     private async Task HandleSubmit()

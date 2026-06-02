@@ -13,7 +13,7 @@
 
 		var cut = Render(
 			@<GridView ItemType="Widget" AutoGenerateColumns="false"
-				SelectMethod="GetWidgets">
+				SelectMethodDelegate="GetWidgets">
 				<Columns>
 					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 				</Columns>
@@ -31,7 +31,7 @@
 
 		var cut = Render(
 			@<GridView ItemType="Widget" AutoGenerateColumns="false"
-				SelectMethod="GetWidgets">
+				SelectMethodDelegate="GetWidgets">
 				<Columns>
 					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 				</Columns>
@@ -51,7 +51,7 @@
 		var cut = Render(
 			@<GridView ItemType="Widget" AutoGenerateColumns="false"
 				AllowSorting="true" AllowPaging="true" PageSize="5"
-				SelectMethod="GetWidgets">
+				SelectMethodDelegate="GetWidgets">
 				<Columns>
 					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" SortExpression="Name" />
 				</Columns>

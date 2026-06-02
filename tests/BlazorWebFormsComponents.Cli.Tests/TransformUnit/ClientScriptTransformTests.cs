@@ -60,7 +60,7 @@ public class ClientScriptTransformTests
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Contains("TODO(bwfc-general)", result);
-        Assert.Contains("ClientScriptShim", result);
+        Assert.Contains("WebFormsPageBase", result);
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public class ClientScriptTransformTests
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.DoesNotContain("[Inject] private IJSRuntime JS", result);
-        Assert.Contains("ClientScriptShim", result);
+        Assert.Contains("WebFormsPageBase", result);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class ClientScriptTransformTests
 
         Assert.Contains("ClientScript.RegisterStartupScript", result);
         Assert.DoesNotContain("JS.InvokeVoidAsync", result);
-        Assert.Contains("ClientScriptShim", result);
+        Assert.Contains("WebFormsPageBase", result);
     }
 
     [Fact]
@@ -165,7 +165,7 @@ public class ClientScriptTransformTests
 
         Assert.Contains("ClientScript.RegisterClientScriptInclude", result);
         Assert.DoesNotContain("Page.ClientScript", result);
-        Assert.Contains("ClientScriptShim", result);
+        Assert.Contains("WebFormsPageBase", result);
     }
 
     [Fact]
@@ -205,7 +205,7 @@ public class ClientScriptTransformTests
 
         Assert.Contains("ClientScript.RegisterClientScriptBlock", result);
         Assert.DoesNotContain("Page.ClientScript", result);
-        Assert.Contains("ClientScriptShim", result);
+        Assert.Contains("WebFormsPageBase", result);
     }
 
     [Fact]
@@ -288,7 +288,7 @@ public class ClientScriptTransformTests
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Contains("ClientScript.GetPostBackEventReference(btnSubmit", result);
-        Assert.Contains("ClientScriptShim", result);
+        Assert.Contains("WebFormsPageBase", result);
     }
 
     [Fact]
@@ -366,7 +366,7 @@ public class ClientScriptTransformTests
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Contains("ScriptManagerShim", result);
-        Assert.Contains("ClientScriptShim", result);
+        Assert.Contains("WebFormsPageBase", result);
     }
 
     [Fact]
@@ -429,8 +429,8 @@ public class ClientScriptTransformTests
         // ScriptManager.GetCurrent → Page replaced with this
         Assert.Contains("ScriptManager.GetCurrent(this)", result);
         Assert.DoesNotContain("ScriptManager.GetCurrent(Page)", result);
-        // ClientScriptShim comment injected (not IJSRuntime)
-        Assert.Contains("ClientScriptShim", result);
+        // ClientScript preserved comment injected (not IJSRuntime)
+        Assert.Contains("ClientScript calls preserved", result);
         Assert.DoesNotContain("[Inject] private IJSRuntime JS", result);
     }
 
@@ -464,7 +464,7 @@ public class ClientScriptTransformTests
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        Assert.Contains("ClientScriptShim", result);
+        Assert.Contains("ClientScript calls preserved", result);
     }
 
     [Fact]

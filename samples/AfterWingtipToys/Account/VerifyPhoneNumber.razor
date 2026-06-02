@@ -1,27 +1,9 @@
-@page "/VerifyPhoneNumber"
-<PageTitle>Verify Phone Number</PageTitle>
-<h2>@(Title).</h2>
-    <p class="text-danger">
-        <Literal ID="ErrorMessage" />
-    </p>
-    <div class="form-horizontal">
-        <h4>Enter verification code</h4>
-        <hr />
-        <HiddenField ID="PhoneNumber" />
-        <ValidationSummary CssClass="text-danger" />
-        <div class="form-group">
-            <Label AssociatedControlID="Code" CssClass="col-md-2 control-label">Code</Label>
-            <div class="col-md-10">
-                <TextBox ID="Code" CssClass="form-control" />
-                <RequiredFieldValidator ControlToValidate="Code"
-                    CssClass="text-danger" ErrorMessage="The Code field is required." />
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <Button OnClick="Code_Click"
-                    Text="Submit" CssClass="btn btn-default" />
-            </div>
-        </div>
-    </div>
+@page "/Account/VerifyPhoneNumber"
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 
+<div class="migration-pending">
+    <h3>Page Not Yet Migrated</h3>
+    <p>This page (<code>Account/VerifyPhoneNumber.aspx</code>) requires manual migration.</p>
+    <p>Original Web Forms features used: ASP.NET Identity or membership APIs</p>
+    <p>Suggested migration approach: Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic.</p>
+</div>

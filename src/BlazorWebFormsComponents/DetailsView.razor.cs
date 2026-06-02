@@ -15,7 +15,7 @@ namespace BlazorWebFormsComponents
 	/// Displays a single record from a data source in a table layout with one row per field.
 	/// </summary>
 	/// <typeparam name="ItemType">The type of the data items.</typeparam>
-	public partial class DetailsView<ItemType> : DataBoundComponent<ItemType>, IDetailsViewStyleContainer, IPagerSettingsContainer
+	public partial class DetailsView<ItemType> : DataBoundComponent<ItemType>, IColumnCollection<ItemType>, IDetailsViewStyleContainer, IPagerSettingsContainer
 	{
 		#region Properties
 
@@ -408,6 +408,11 @@ namespace BlazorWebFormsComponents
 		private readonly List<DetailsViewField> _fieldDefinitions = new();
 
 		/// <summary>
+		/// Gets the explicit column definitions supplied as child fields.
+		/// </summary>
+		public List<IColumn<ItemType>> ColumnList { get; set; } = new();
+
+		/// <summary>
 		/// Adds a field definition to the DetailsView.
 		/// </summary>
 		internal void AddField(DetailsViewField field)
@@ -422,6 +427,24 @@ namespace BlazorWebFormsComponents
 		internal void RemoveField(DetailsViewField field)
 		{
 			_fieldDefinitions.Remove(field);
+			StateHasChanged();
+		}
+
+		/// <summary>
+		/// Adds an explicit column definition to the DetailsView.
+		/// </summary>
+		public void AddColumn(IColumn<ItemType> column)
+		{
+			ColumnList.Add(column);
+			StateHasChanged();
+		}
+
+		/// <summary>
+		/// Removes an explicit column definition from the DetailsView.
+		/// </summary>
+		public void RemoveColumn(IColumn<ItemType> column)
+		{
+			ColumnList.Remove(column);
 			StateHasChanged();
 		}
 
@@ -559,6 +582,11 @@ namespace BlazorWebFormsComponents
 			if (_fieldDefinitions.Any())
 			{
 				return _fieldDefinitions;
+			}
+
+			if (ColumnList.Any())
+			{
+				return ColumnList.Select(column => new DetailsViewColumnField<ItemType>(column)).Cast<DetailsViewField>().ToList();
 			}
 
 			if (!AutoGenerateRows)
@@ -758,6 +786,32 @@ namespace BlazorWebFormsComponents
 	/// <summary>
 	/// Represents an auto-generated field that reads a property value using reflection.
 	/// </summary>
+	internal class DetailsViewColumnField<ItemType> : DetailsViewField
+	{
+		private readonly IColumn<ItemType> _column;
+
+		public DetailsViewColumnField(IColumn<ItemType> column)
+		{
+			_column = column;
+			HeaderText = column.HeaderText;
+		}
+
+		public override RenderFragment GetValue(object dataItem, DetailsViewMode mode)
+		{
+			if (dataItem is not ItemType item)
+			{
+				return builder => { };
+			}
+
+			return mode switch
+			{
+				DetailsViewMode.Edit => _column.RenderEdit(item),
+				DetailsViewMode.Insert => _column.RenderEdit(item),
+				_ => _column.Render(item)
+			};
+		}
+	}
+
 	internal class DetailsViewAutoField : DetailsViewField
 	{
 		private readonly PropertyInfo _property;

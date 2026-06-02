@@ -1,6 +1,9 @@
 @page "/Contact"
+<WebFormsForm @formname="ContactForm">
+    <AntiforgeryToken />
 <PageTitle>Contact</PageTitle>
-<h2>@(Title).</h2>
+
+    <h2>@(Title).</h2>
     <h3>Your contact page.</h3>
     <address>
         One Microsoft Way<br />
@@ -14,3 +17,5 @@
         <strong>Marketing:</strong> <a href="mailto:Marketing@example.com">Marketing@example.com</a>
     </address>
 
+
+</WebFormsForm>

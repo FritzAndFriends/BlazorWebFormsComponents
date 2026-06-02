@@ -1,92 +1,127 @@
 @page "/Students"
-<HeadContent>
-    <link href="/CSS/Students_CSS.css" rel="stylesheet" />
-    <script src="/JQuery/JQuery_Students.js"></script>
-</HeadContent>
-<ScriptManager></ScriptManager>       
+<WebFormsForm @formname="StudentsForm">
+    <AntiforgeryToken />
+<PageTitle></PageTitle>
+
+    <link href="CSS/Students_CSS.css" rel="stylesheet" />
+    <script src="JQuery/JQuery_Students.js"></script>
+
+
+
+    <ScriptManager id="ScriptManager2" @ref="ScriptManager2"></ScriptManager>       
     <UpdatePanel>
-        <ContentTemplate>
+        
             <div id="grvStudentsData">
-                <GridView Items="@_students" ItemType="object"
+                <GridView ItemType="object" id="grv" @ref="grv"
                     CssClass="grv"
                     AutoGenerateColumns="false"
                     EmptyDataText="There are no records to display"
-                    DataKeyNames="ID"
-                    BackColor="WebColor.White" BorderColor="@("#3366CC")" BorderStyle="BorderStyle.None" BorderWidth="1"
+                    SelectMethod="grv_GetData" UpdateMethod="grv_UpdateItem"
+                    DeleteMethod="grv_DeleteItem" DataKeyNames="ID" OnRowUpdating="@grv_RowUpdating"
+                    BackColor='@("White")' BorderColor='@("#3366CC")' BorderStyle="@BorderStyle.None" BorderWidth="1"
                     CellPadding="4" Height="336" Width="416">
                     <Columns>
-                        <BoundField DataField="ID" HeaderText="Student ID" ReadOnly="true" />
-                        <BoundField DataField="FullName" HeaderText="Student Name" />
-                        <BoundField DataField="Email" HeaderText="Email" />
-                        <BoundField DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
-                        <BoundField DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
+                        <CommandField HeaderText="Delete Student" ShowDeleteButton="true" ButtonType="Button" />
+                        <BoundField ItemType="object" DataField="ID" HeaderText="Student ID" ReadOnly="true" />
+                        <BoundField ItemType="object" DataField="FullName" HeaderText="Student Name" />
+                        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
+                        <BoundField ItemType="object" DataField="Date" HeaderText="Enrollment Date" ReadOnly="true" />
+                        <BoundField ItemType="object" DataField="Count" HeaderText="Number of Courses" ReadOnly="true" />
+                        <CommandField ButtonType="Button" HeaderText="Update Student Peronal Data" ShowEditButton="true" />
                     </Columns>
-                    <FooterStyleContent><GridViewRowStyle BackColor="@("#99CCCC")" ForeColor="@("#003399")" /></FooterStyleContent>
-                    <HeaderStyleContent><GridViewHeaderStyle BackColor="@("#003399")" Font-Bold="true" ForeColor="@("#CCCCFF")" /></HeaderStyleContent>
-                    <PagerStyleContent><GridViewRowStyle BackColor="@("#99CCCC")" ForeColor="@("#003399")" HorizontalAlign="HorizontalAlign.Left" /></PagerStyleContent>
-                    <RowStyleContent><GridViewRowStyle BackColor="WebColor.White" ForeColor="@("#003399")" /></RowStyleContent>
-                    <SelectedRowStyleContent><GridViewRowStyle BackColor="@("#009999")" Font-Bold="true" ForeColor="@("#CCFF99")" /></SelectedRowStyleContent>
-                </GridView>
+                
+                    <ChildComponents>
+                        <FooterStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' />
+                        <HeaderStyle BackColor='@("#003399")' Font-Bold="true" ForeColor='@("#CCCCFF")' />
+                        <PagerStyle BackColor='@("#99CCCC")' ForeColor='@("#003399")' HorizontalAlign="@HorizontalAlign.Left" />
+                        <RowStyle BackColor='@("White")' ForeColor='@("#003399")' />
+                        <SelectedRowStyle BackColor='@("#009999")' Font-Bold="true" ForeColor='@("#CCFF99")' />
+                        <SortedAscendingCellStyle BackColor='@("#EDF6F6")' />
+                        <SortedAscendingHeaderStyle BackColor='@("#0D4AC4")' />
+                        <SortedDescendingCellStyle BackColor='@("#D6DFDF")' />
+                        <SortedDescendingHeaderStyle BackColor='@("#002876")' />
+                    </ChildComponents>
+</GridView>
             </div>
             <div id="addStud">
                 <h1 id="addStudent">Add Student</h1>
-                <Table
-                    CssClass="tabAddStud" BorderColor="@("#0033CC")" Font-Bold="true" Font-Italic="false"
-                    Font-Underline="false" ForeColor="WebColor.White"
-                    Font-Overline="false">
+                <Table id="tabAddStud" @ref="tabAddStud"
+                    CssClass="tabAddStud" BorderColor='@("#0033CC")' Font-Bold="true" Font-Italic="false" ForeColor='@("White")'>
                     <TableRow>
                         <TableCell>First Name</TableCell>
                         <TableCell>
-                            <TextBox @bind-Text="_firstName" placeholder="Type Your First Name..." />
+                            <TextBox id="txtFirstName" @ref="txtFirstName" placeholder="Type Your First Name..." />
                         </TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>Last Name</TableCell><TableCell>
-                            <TextBox @bind-Text="_lastName" placeholder="Type Your Last Name..." />
+                            <TextBox id="txtLastName" @ref="txtLastName" placeholder="Type Your Last Name..." />
                         </TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>Birth Date</TableCell><TableCell>
-                            <TextBox @bind-Text="_birthDate" placeholder="dd.mm.year" />
+                            <TextBox id="txtBirthDate" @ref="txtBirthDate" placeholder="dd.mm.year" />
                         </TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>Email</TableCell><TableCell>
-                            <TextBox @bind-Text="_email" placeholder="Email is Optional..." />
+                            <TextBox id="txtEmail" @ref="txtEmail" placeholder="Email is Optional..." />
                         </TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>Course Name</TableCell><TableCell>
-                            <select id="dropListCourses" @bind="_selectedCourse">
-                                <option value="">-- Select Course --</option>
-                                @foreach (var course in _courseNames)
-                                {
-                                    <option value="@course">@course</option>
-                                }
-                            </select>
+                            <DropDownList ItemType="object" id="dropListCourses" @ref="dropListCourses">
+                            </DropDownList>
                         </TableCell>
                     </TableRow>
                     <TableRow>
                         <TableCell>               
                         </TableCell><TableCell>
-                            <Button CssClass="insert" Text="New Enrollment" OnClick="btnInsert_Click" />
+                            <Button CssClass="insert" id="btnInsert" @ref="btnInsert" Text="New Enrollment" OnClick="@btnInsert_Click" />
                             &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                     <Button Text="Clear" OnClick="btnClear_Click" />
+                     <Button id="btnClear" @ref="btnClear" Text="Clear" OnClick="@btnClear_Click" />
                         </TableCell>
                     </TableRow>
                 </Table>
             </div>
             <div id="ajax">
                 <h1 id="searchStud">Search Student</h1>
-                <TextBox CssClass="txtSearch" @bind-Text="_searchText" placeholder="Type Student Name..." />
-                <Button Text="Show Student Info" OnClick="btnSearch_Click" CssClass="btnInfo" />
-                <DetailsView Items="@_studentDetails" ItemType="object"
+                <TextBox CssClass="txtSearch" id="txtSearch" @ref="txtSearch" placeholder="Type Student Name..." />
+                <AutoCompleteExtender
+                    id="AutoCompleteExtender1" @ref="AutoCompleteExtender1"
+                    TargetControlID="txtSearch"
+                    ServiceMethod="GetCompletionList"
+                    MinimumPrefixLength="1"
+                    CompletionInterval="100"
+                    EnableCaching="true"
+                    CompletionSetCount="20"
+                    ShowOnlyCurrentWordInCompletionListItem="true">
+                </AutoCompleteExtender>
+                <Button id="btnSearch" @ref="btnSearch" Text="Show Student Info" OnClick="@btnSearch_Click" CssClass="btnInfo" />
+                <DetailsView ItemType="object"
+                    id="studentData" @ref="studentData"
                     Width="125"
                     Height="50"
-                    AutoGenerateRows="true"
-                    CssClass="detailsView" BorderColor="WebColor.Black" ForeColor="WebColor.Black">
-                    <RowStyleContent><DetailsViewRowStyle BackColor="WebColor.White" /></RowStyleContent>
-                </DetailsView>
+                    AutoGenerateRows="false"
+                    CssClass="detailsView" BorderColor='@("Black")' ForeColor='@("Black")'
+                    DataSource="@_studentData_DataSource">
+                    <Fields>
+                        <BoundField ItemType="object"
+                            DataField="FirstName"
+                            HeaderText="First Name" />
+                        <BoundField ItemType="object" DataField="LastName" HeaderText="Last Name" />
+                        <BoundField ItemType="object" DataField="Email" HeaderText="Email" />
+                        <BoundField ItemType="object" DataField="BirthDate" HeaderText="Birth Date" />
+                        <BoundField ItemType="object" DataField="StudentID" HeaderText="id" />
+                    </Fields>
+                
+                    <ChildComponents>
+                        <RowStyle BackColor='@("White")' />
+                    </ChildComponents>
+</DetailsView>
             </div>
-        </ContentTemplate>
-    </UpdatePanel>
+        
+    </UpdatePanel>         
+     
+
+</WebFormsForm>

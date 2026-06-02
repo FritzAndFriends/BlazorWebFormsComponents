@@ -22,6 +22,11 @@ public class SessionDetectTransform : ICodeBehindTransform
         @"\bSession\s*\[",
         RegexOptions.Compiled);
 
+    // HttpContext.Current.Session[ — static accessor doesn't work in Blazor
+    private static readonly Regex HttpContextCurrentSessionRegex = new(
+        @"HttpContext\.Current\.Session\s*\[",
+        RegexOptions.Compiled);
+
     // Literal string key: Cache["ProductList"]
     private static readonly Regex CacheKeyRegex = new(
         @"\bCache\[""([^""]*)""\]",
@@ -42,6 +47,23 @@ public class SessionDetectTransform : ICodeBehindTransform
 
     public string Apply(string content, FileMetadata metadata)
     {
+        // Replace HttpContext.Current.Session[ with Session[ BEFORE detection
+        if (HttpContextCurrentSessionRegex.IsMatch(content))
+        {
+            content = HttpContextCurrentSessionRegex.Replace(content, "Session[");
+            // Add guidance about static accessor removal
+            if (!content.Contains("TODO(bwfc-session-state): HttpContext.Current.Session"))
+            {
+                var classMatch = ClassOpenRegex.Match(content);
+                if (classMatch.Success)
+                {
+                    var httpContextNote = "\n    // TODO(bwfc-session-state): HttpContext.Current.Session was replaced with Session[].\n"
+                        + "    // For non-page classes, inject SessionShim via constructor DI instead of using HttpContext.Current.\n";
+                    content = ClassOpenRegex.Replace(content, "$1" + httpContextNote, 1);
+                }
+            }
+        }
+
         // Detect patterns before any modifications
         var sessionLiteralMatches = SessionKeyRegex.Matches(content);
         var hasSession = SessionAccessRegex.IsMatch(content);
@@ -62,7 +84,7 @@ public class SessionDetectTransform : ICodeBehindTransform
             }
 
             var sessionBlock = SessionGuidanceMarker + "\n"
-                + "// TODO(bwfc-session-state): SessionShim auto-wired via [Inject] — Session[\"key\"] calls compile against the shim's indexer.\n"
+                + "// TODO(bwfc-session-state): Session[\"key\"] calls work automatically via SessionShim on WebFormsPageBase.\n"
                 + (sessionKeys.Count > 0 ? $"// Session keys found: {string.Join(", ", sessionKeys)}\n" : "")
                 + "// Options for long-term replacement:\n"
                 + "//   (1) ProtectedSessionStorage (Blazor Server) — persists across circuits\n"
@@ -91,7 +113,7 @@ public class SessionDetectTransform : ICodeBehindTransform
             }
 
             var cacheBlock = CacheGuidanceMarker + "\n"
-                + "// TODO(bwfc-session-state): CacheShim auto-wired via [Inject] — Cache[\"key\"] calls compile against the shim's indexer.\n"
+                + "// TODO(bwfc-session-state): Cache[\"key\"] calls work automatically via CacheShim on WebFormsPageBase.\n"
                 + (cacheKeys.Count > 0 ? $"// Cache keys found: {string.Join(", ", cacheKeys)}\n" : "")
                 + "// CacheShim wraps IMemoryCache — items are per-server, not distributed.\n"
                 + "// For distributed caching, consider IDistributedCache.\n\n";
@@ -122,27 +144,7 @@ public class SessionDetectTransform : ICodeBehindTransform
             }
         }
 
-        // Inject [Inject] properties after class opening brace (idempotent)
-        if (ClassOpenRegex.IsMatch(content))
-        {
-            var injectLines = "";
-
-            if (hasSession && !content.Contains("[Inject] private SessionShim Session"))
-            {
-                injectLines += "\n    [Inject] private SessionShim Session { get; set; }";
-            }
-
-            if (hasCache && !content.Contains("[Inject] private CacheShim Cache"))
-            {
-                injectLines += "\n    [Inject] private CacheShim Cache { get; set; }";
-            }
-
-            if (!string.IsNullOrEmpty(injectLines))
-            {
-                injectLines += "\n";
-                content = ClassOpenRegex.Replace(content, "$1" + injectLines, 1);
-            }
-        }
+        // Session and Cache are provided by WebFormsPageBase — no [Inject] needed.
 
         return content;
     }

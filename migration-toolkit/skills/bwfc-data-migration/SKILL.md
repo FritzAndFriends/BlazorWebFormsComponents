@@ -1,131 +1,112 @@
 ---
 name: bwfc-data-migration
-description: "Migrate Web Forms data access and application architecture to Blazor Server. Covers EF6 to EF Core, Session state to scoped services, Global.asax to Program.cs, Web.config to appsettings.json, and HTTP handlers to middleware. WHEN: \"migrate EF6\", \"session state to services\", \"Global.asax to Program.cs\", \"Web.config to appsettings\", \"data access migration\"."
+description: "**WORKFLOW SKILL** — Migrate Web Forms data access and architecture to Blazor Server. Covers EF6→EF Core with IDbContextFactory, Session→SessionShim, Global.asax→Program.cs, Web.config→appsettings.json, DataSource controls→service injection. WHEN: \"migrate EF6\", \"session state to services\", \"Global.asax to Program.cs\", \"data access migration\", \"SelectMethod to delegate\". INVOKES: dotnet CLI for EF migrations. FOR SINGLE OPERATIONS: use bwfc-migration for markup, bwfc-identity-migration for auth."
 ---
 
 # Web Forms Data Access & Architecture Migration
 
-This skill covers migrating Web Forms data access patterns and application architecture to Blazor Server. These are the **Layer 3 architecture decisions** that require project-specific judgment.
+## Overview
 
-**Related skills:**
-- `/bwfc-migration` — Core markup migration (controls, expressions, layouts)
-- `/bwfc-identity-migration` — Authentication and authorization migration
+Covers data access and architecture migration — the **Layer 2/3 decisions** requiring project-specific judgment.
 
----
+**Related:** `/bwfc-migration` (markup), `/bwfc-identity-migration` (auth)
 
 ## When to Use This Skill
 
-Use this skill when you need to:
-- Convert `SelectMethod` string to `SelectHandler` delegate, replace `DataSource` controls with service injection
-- Migrate Entity Framework 6 to EF Core
+- Convert `SelectMethod` string → `SelectHandler` delegate, replace `DataSource` controls with service injection
+- Migrate Entity Framework 6 → EF Core
 - Convert `Session`/`ViewState`/`Application` state to Blazor patterns
-- Migrate `Global.asax` to `Program.cs`
-- Convert `Web.config` to `appsettings.json`
+- Migrate `Global.asax` → `Program.cs`, `Web.config` → `appsettings.json`
 - Replace HTTP Handlers/Modules with middleware
-- Wire up third-party integrations
 
----
+## Critical Rules
 
-## ⚠️ Session State Under Interactive Server Mode
+## Session State Migration
 
-> **CRITICAL:** When using `<Routes @rendermode="InteractiveServer" />` (global interactive server mode), `HttpContext.Session` is **NULL** during WebSocket rendering. Any code that accesses `HttpContext.Session` inside a Blazor component event handler or lifecycle method will throw a `NullReferenceException` or silently fail.
+### Use SessionShim (Default — Works Everywhere)
 
-**Why this happens:** After the initial HTTP request establishes the SignalR circuit, Blazor communicates over WebSocket. There is no HTTP request/response — and therefore no session middleware processing — during component interactions.
+Pages inheriting `WebFormsPageBase` get a `Session` property backed by `SessionShim`.
+SessionShim works in BOTH SSR and interactive modes:
+- **SSR:** Reads/writes to ASP.NET Core `ISession` (cookie-backed)
+- **Interactive:** Uses in-memory `ConcurrentDictionary` scoped per circuit
 
-**Options for session-dependent operations (shopping cart, user preferences, etc.):**
-
-### Option A: Minimal API Endpoints (Recommended for form submissions)
-
-Use the same `<form method="post">` → minimal API pattern used for auth. The endpoint has a real `HttpContext` with session access.
-
+**Original Web Forms:**
 ```csharp
-// Program.cs
-app.MapPost("/api/students/add", async (StudentDto dto, SchoolContext db) =>
-{
-    var student = new Student 
-    { 
-        FirstName = dto.FirstName, 
-        LastName = dto.LastName, 
-        EnrollmentDate = dto.EnrollmentDate 
-    };
-    db.Students.Add(student);
-    await db.SaveChangesAsync();
-    return Results.Ok(student.StudentID);
-}).DisableAntiforgery();
+Session["CartId"] = Guid.NewGuid().ToString();
+var cartId = Session["CartId"].ToString();
+Session["payment_amt"] = 99.99m;
 ```
 
+**Migrated Blazor (IDENTICAL):**
+```csharp
+Session["CartId"] = Guid.NewGuid().ToString();
+var cartId = Session["CartId"].ToString();
+Session["payment_amt"] = 99.99m;
+```
+
+No `IHttpContextAccessor`. No Minimal API. No cookies. Just `Session["key"]`.
+
+**For non-page components**, inject SessionShim directly:
 ```razor
-@* In Students.razor *@
-@inject HttpClient Http
+@inject SessionShim Session
 
 @code {
-    private async Task AddStudent()
+    protected override void OnInitialized()
     {
-        await Http.PostAsJsonAsync("/api/students/add", newStudent);
-        await RefreshGrid();
+        var userId = Session["UserId"]?.ToString() ?? "guest";
     }
 }
 ```
 
-> **Important:** The endpoint MUST call `.DisableAntiforgery()` because Blazor's HTML rendering does not include antiforgery tokens.
+### When to Upgrade Beyond SessionShim
 
-### Option B: Scoped Service (For transient UI state)
+Only consider alternatives when you need cross-tab or cross-server persistence:
 
-Replace `Session["key"]` with a scoped DI service. State lives in server memory for the duration of the SignalR circuit.
-
+**ProtectedBrowserStorage** — For data that must survive page refreshes:
 ```csharp
-// CartService.cs
-public class CartService
+@inject ProtectedSessionStorage SessionStorage
+
+protected override async Task OnAfterRenderAsync(bool firstRender)
 {
-    private readonly List<CartItem> _items = new();
-    public void Add(CartItem item) => _items.Add(item);
-    public IReadOnlyList<CartItem> Items => _items.AsReadOnly();
-    public decimal GetTotal() => _items.Sum(i => i.Price * i.Quantity);
+    if (firstRender)
+    {
+        var result = await SessionStorage.GetAsync<ShoppingCart>("cart");
+        cart = result.Success ? result.Value! : new ShoppingCart();
+    }
+}
+```
+
+**Database-backed** — For shopping carts that persist across sessions:
+```csharp
+public class CartService(IDbContextFactory<AppDbContext> factory)
+{
+    public async Task<Cart> GetCartAsync(string userId)
+    {
+        using var db = factory.CreateDbContext();
+        return await db.Carts
+            .Include(c => c.Items)
+            .FirstOrDefaultAsync(c => c.UserId == userId) ?? new Cart();
+    }
+}
+```
+
+**Scoped services** — When the pattern doesn't fit key-value storage:
+```csharp
+public class WizardStateService
+{
+    public int CurrentStep { get; set; }
+    public FormData Data { get; set; } = new();
+    public bool IsComplete => CurrentStep == 5 && Data.IsValid();
 }
 
 // Program.cs
-builder.Services.AddScoped<CartService>();
-
-// Component usage
-@inject CartService CartService
-
-<button @onclick="() => CartService.Add(new CartItem(...))">Add</button>
+builder.Services.AddScoped<WizardStateService>();
 ```
 
-**Trade-off:** State is lost if the user refreshes the page or the circuit disconnects. Good for transient UI state (form drafts, temporary selections), not for durable cart data.
-
-### Option C: Database-Backed (For persistent state)
-
-Store state in the database, keyed by user ID or a cookie-based session token. Survives circuit disconnects, page refreshes, and server restarts.
-
-```csharp
-// UserPreferencesService.cs  
-public class UserPreferencesService(IDbContextFactory<SchoolContext> factory)
-{
-    public async Task<string?> GetAsync(string userId, string key)
-    {
-        using var db = factory.CreateDbContext();
-        var pref = await db.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId && p.Key == key);
-        return pref?.Value;
-    }
-    
-    public async Task SetAsync(string userId, string key, string value)
-    {
-        using var db = factory.CreateDbContext();
-        var pref = await db.UserPreferences.FirstOrDefaultAsync(p => p.UserId == userId && p.Key == key);
-        if (pref != null)
-            pref.Value = value;
-        else
-            db.UserPreferences.Add(new UserPreference { UserId = userId, Key = key, Value = value });
-        await db.SaveChangesAsync();
-    }
-}
-
-// Program.cs
-builder.Services.AddScoped<UserPreferencesService>();
-```
-
-**Recommendation:** For shopping carts and other business-critical state, prefer Option A (minimal API endpoints) or Option C (database). Use Option B only for transient UI state that can be safely lost on refresh or disconnect.
+**Progression model:**
+1. Start with SessionShim (zero migration cost)
+2. Move to scoped services if you need typed, structured state
+3. Move to database if you need persistence across circuits/sessions
 
 ---
 
@@ -330,31 +311,67 @@ BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of t
 
 ---
 
-## 3. Session State → Scoped Services
+## 3. Session, ViewState, and Application State Migration
 
-**Web Forms:** `Session["key"]` dictionary accessed anywhere.
-**Blazor:** Scoped services via DI. For browser persistence, use `ProtectedSessionStorage`.
+**Web Forms:** `Session["key"]`, `ViewState["key"]`, `Application["key"]` dictionaries.
+**Blazor:** SessionShim (auto-registered by `AddBlazorWebFormsComponents()`), component fields, and singleton services.
+
+### Session["key"] → SessionShim (Zero-Change Migration)
+
+No code changes needed. `WebFormsPageBase.Session` delegates to `SessionShim` automatically:
+
+```csharp
+// Web Forms — works IDENTICALLY in Blazor via SessionShim
+Session["ShoppingCart"] = cart;
+var cart = (ShoppingCart)Session["ShoppingCart"];
+
+// SessionShim also supports typed access:
+var cart = Session.Get<ShoppingCart>("ShoppingCart");
+Session.Set("ShoppingCart", cart);
+```
+
+**How SessionShim works:**
+- **SSR mode:** Backed by ASP.NET Core `ISession` (cookie-persisted)
+- **Interactive mode:** In-memory `ConcurrentDictionary` scoped per circuit
+- **Seamless:** Automatically switches based on render mode
+
+**For non-page components:**
+```razor
+@inject SessionShim Session
+
+@code {
+    private string GetUserId() => Session["UserId"]?.ToString() ?? "guest";
+}
+```
+
+### ViewState["key"] → Component Fields
+
+ViewState is component-instance state. Use normal C# fields/properties:
 
 ```csharp
 // Web Forms
-Session["ShoppingCart"] = cart;
-var cart = (ShoppingCart)Session["ShoppingCart"];
+ViewState["CurrentPage"] = pageIndex;
+var page = (int)ViewState["CurrentPage"];
+
+// Blazor
+private int currentPage;
 ```
 
+### Application["key"] → Singleton Services
+
+Application-wide state becomes singleton services:
+
 ```csharp
-// Blazor — Scoped service (in-memory, per-circuit)
-public class CartService
+// AppStateService.cs
+public class AppStateService
 {
-    public ShoppingCart Cart { get; set; } = new();
-    public void AddItem(Product product, int quantity = 1) { ... }
-    public decimal GetTotal() => Cart.Items.Sum(i => i.Price * i.Quantity);
+    private readonly ConcurrentDictionary<string, object> _state = new();
+    public void Set(string key, object value) => _state[key] = value;
+    public T? Get<T>(string key) => _state.TryGetValue(key, out var val) ? (T)val : default;
 }
 
 // Program.cs
-builder.Services.AddScoped<CartService>();
-
-// Component
-@inject CartService CartService
+builder.Services.AddSingleton<AppStateService>();
 ```
 
 ### State Storage Options
@@ -405,8 +422,48 @@ Architecture migration patterns (Global.asax, Web.config, routes, handlers, enha
 
 ## Common Data Migration Gotchas
 
-### DbContext Lifetime
+### DbContext Lifetime — CRITICAL
 Blazor Server circuits are long-lived. Always use `IDbContextFactory` and create short-lived `DbContext` instances per operation.
+
+**WRONG — IQueryable returned from disposed context:**
+```csharp
+private IQueryable<Product> GetProducts(int categoryId)
+{
+    using var db = DbFactory.CreateDbContext();
+    return db.Products.Where(p => p.CategoryId == categoryId); // Context disposed before query executes!
+}
+```
+
+**RIGHT — materialize inside using block:**
+```csharp
+private IQueryable<Product> GetProducts(int categoryId)
+{
+    using var db = DbFactory.CreateDbContext();
+    var results = db.Products
+        .Where(p => p.CategoryId == categoryId)
+        .ToList(); // Execute query NOW while context is alive
+    return results.AsQueryable(); // Return materialized data as IQueryable
+}
+```
+
+**For SelectHandler delegates**, the delegate is invoked by BWFC infrastructure AFTER your method returns. You MUST materialize:
+```csharp
+// BWFC SelectHandler delegate — MUST materialize
+private IQueryable<Product> SelectProducts(int maxRows, int startRowIndex, 
+    string sortByExpression, out int totalRowCount)
+{
+    using var db = DbFactory.CreateDbContext();
+    totalRowCount = db.Products.Count();
+    
+    var results = db.Products
+        .OrderBy(p => p.Name)
+        .Skip(startRowIndex)
+        .Take(maxRows)
+        .ToList(); // CRITICAL — materialize NOW
+        
+    return results.AsQueryable();
+}
+```
 
 ### No Page-Level Transaction Scope
 Web Forms `SelectMethod` runs inside a page lifecycle. Blazor doesn't have this. Use explicit transaction scopes in services if needed:
@@ -424,10 +481,110 @@ Web Forms `SelectMethod` returns `IQueryable` synchronously. Blazor services sho
 // RIGHT: return await db.Products.ToListAsync();
 ```
 
-### No ConfigurationManager
-`ConfigurationManager.AppSettings["key"]` doesn't exist. Inject `IConfiguration` or use the Options pattern.
+### ConfigurationManager Shim Available
+`ConfigurationManager.AppSettings["key"]` works via BWFC's `ConfigurationManager` shim. Call `app.UseConfigurationManagerShim()` in `Program.cs` to bind it to `IConfiguration`. For new code, prefer injecting `IConfiguration` or using the Options pattern.
 
 ### Static Helpers with HttpContext
 Web Forms often has static helper classes that access `HttpContext.Current`. These must be refactored to accept dependencies via constructor injection.
 
+### ThreadAbortException Dead Code Warning
+Web Forms throws `ThreadAbortException` when `Response.Redirect(url, true)` is called with `endResponse=true`. Blazor does **not** throw this exception — `ResponseShim.Redirect()` silently ignores the `endResponse` parameter. Any `catch (ThreadAbortException)` blocks become dead code after migration. Review and remove them. Code that runs AFTER `Response.Redirect(url, true)` **will execute** in Blazor (unlike Web Forms where execution stopped).
 
+---
+
+## ❌ Common Anti-Patterns to Avoid
+
+### DO NOT Create Minimal API Endpoints for Page Actions
+
+Minimal APIs are for **real HTTP endpoints** (REST APIs, webhooks), NOT for migrating Web Forms page actions.
+
+**WRONG:**
+```csharp
+// Program.cs — creating API endpoint for a page action
+app.MapPost("/api/cart/add", async (CartItem item, CartService cart) =>
+{
+    cart.Add(item);
+    return Results.Ok();
+});
+
+// Cart.razor — calling the API
+await Http.PostAsJsonAsync("/api/cart/add", item);
+```
+
+**RIGHT:**
+```csharp
+// Cart.razor — just call the service directly
+@inject CartService CartService
+
+<button @onclick="() => CartService.Add(item)">Add to Cart</button>
+```
+
+**When Minimal APIs ARE appropriate:**
+- External REST API consumed by mobile apps, SPAs, or third parties
+- Webhooks from payment processors, GitHub, etc.
+- Form POST endpoints for authentication (login/logout/register) — these need HTTP context for cookies
+
+**When they are NOT appropriate:**
+- Replacing button click handlers in migrated Web Forms pages
+- Working around Session["key"] access — use SessionShim instead
+- "Because HttpContext is null" — you don't need HttpContext for most operations
+
+### DO NOT Use IHttpContextAccessor to Access Session
+
+You already have `Session` via `WebFormsPageBase` or `@inject SessionShim`.
+
+**WRONG:**
+```csharp
+@inject IHttpContextAccessor HttpContextAccessor
+
+var session = HttpContextAccessor.HttpContext?.Session;
+var cartId = session?.GetString("CartId");
+```
+
+**RIGHT:**
+```csharp
+@inherits WebFormsPageBase
+
+var cartId = Session["CartId"]?.ToString();
+```
+
+### DO NOT Replace Session with Cookies
+
+If the original Web Forms code used `Session["key"]`, use `SessionShim`. Don't invent cookie-based workarounds.
+
+**WRONG:**
+```csharp
+// Creating cookie-based cart ID because "Session doesn't work in Blazor"
+Response.Cookies.Append("CartId", Guid.NewGuid().ToString());
+var cartId = Request.Cookies["CartId"];
+```
+
+**RIGHT:**
+```csharp
+// SessionShim handles the storage — just use Session
+Session["CartId"] = Guid.NewGuid().ToString();
+var cartId = Session["CartId"]?.ToString();
+```
+
+### DO NOT Use HttpContext.Current.Session
+
+There is no `HttpContext.Current` in ASP.NET Core. Use the `Session` property.
+
+**WRONG:**
+```csharp
+HttpContext.Current.Session["UserId"] = userId;
+```
+
+**RIGHT:**
+```csharp
+Session["UserId"] = userId; // From WebFormsPageBase or injected SessionShim
+```
+
+---
+
+
+| Error Signature | Recipe File |
+|---|---|
+| `CS1503: SelectMethod ... 'string' to 'SelectHandler'` | `../bwfc-migration/recipes/selectmethod-string-binding.md` |
+| `CS7036: no argument ... 'options' of 'XxxContext'` | `../bwfc-migration/recipes/new-dbcontext-to-di.md` |
+| `CS0246: 'IDatabaseInitializer'` | `../bwfc-migration/recipes/database-seed-initializer.md` |

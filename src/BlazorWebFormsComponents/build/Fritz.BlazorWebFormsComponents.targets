@@ -19,7 +19,7 @@
   <ItemGroup>
     <Using Include="BlazorWebFormsComponents" />
     <Using Include="BlazorWebFormsComponents.LoginControls" />
-    <Using Include="BlazorWebFormsComponents.Identity" />
+    <Using Include="BlazorWebFormsComponents.Validations" />
     <Using Include="BlazorWebFormsComponents.EntityFramework" />
   </ItemGroup>
 

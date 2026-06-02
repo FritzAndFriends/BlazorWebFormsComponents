@@ -4,7 +4,8 @@ using BlazorWebFormsComponents.Cli.Transforms.Markup;
 namespace BlazorWebFormsComponents.Cli.Tests.TransformUnit;
 
 /// <summary>
-/// Unit tests for SelectMethodTransform — preserves data-method attributes and adds TODO comments.
+/// Unit tests for SelectMethodTransform — preserves Web Forms model-binding attributes
+/// because BWFC DataBoundComponent already supports them directly.
 /// </summary>
 public class SelectMethodTransformTests
 {
@@ -31,95 +32,38 @@ public class SelectMethodTransformTests
     }
 
     [Fact]
-    public void AddsSelectMethodTodo()
+    public void PreservesSelectMethod()
     {
         var input = @"<GridView SelectMethod=""GetItems"" />";
-        var result = _transform.Apply(input, MakeMetadata());
-
-        Assert.Contains(@"SelectMethod=""GetItems""", result);
-        Assert.Contains(@"TODO(bwfc-select-method): Convert SelectMethod=""GetItems"" to a code-behind method that sets Items property", result);
-    }
-
-    [Fact]
-    public void AddsInsertMethodTodo()
-    {
-        var input = @"<GridView InsertMethod=""AddItem"" />";
-        var result = _transform.Apply(input, MakeMetadata());
-
-        Assert.Contains(@"InsertMethod=""AddItem""", result);
-        Assert.Contains(@"TODO(bwfc-select-method): Convert InsertMethod=""AddItem"" to a code-behind method that sets Items property", result);
-    }
-
-    [Fact]
-    public void AddsUpdateMethodTodo()
-    {
-        var input = @"<ListView UpdateMethod=""SaveChanges"" />";
-        var result = _transform.Apply(input, MakeMetadata());
-
-        Assert.Contains(@"UpdateMethod=""SaveChanges""", result);
-        Assert.Contains(@"TODO(bwfc-select-method): Convert UpdateMethod=""SaveChanges""", result);
-    }
-
-    [Fact]
-    public void AddsDeleteMethodTodo()
-    {
-        var input = @"<FormView DeleteMethod=""RemoveItem"" />";
-        var result = _transform.Apply(input, MakeMetadata());
-
-        Assert.Contains(@"DeleteMethod=""RemoveItem""", result);
-        Assert.Contains(@"TODO(bwfc-select-method): Convert DeleteMethod=""RemoveItem""", result);
-    }
-
-    [Fact]
-    public void PreservesOriginalAttribute()
-    {
-        var input = @"<GridView SelectMethod=""GetProducts"" id=""gvProducts"" />";
-        var result = _transform.Apply(input, MakeMetadata());
-
-        Assert.Contains(@"<GridView SelectMethod=""GetProducts"" id=""gvProducts"" />", result);
-    }
-
-    [Fact]
-    public void HandlesMutipleMethodAttributesOnSameLine()
-    {
-        var input = @"<GridView SelectMethod=""GetItems"" InsertMethod=""AddItem"" DeleteMethod=""RemoveItem"" />";
-        var result = _transform.Apply(input, MakeMetadata());
-
-        var lines = result.Split('\n');
-        var todoLines = lines.Where(l => l.Contains("TODO(bwfc-select-method)")).ToList();
-        Assert.Equal(3, todoLines.Count);
-        Assert.Contains(todoLines, l => l.Contains(@"SelectMethod=""GetItems"""));
-        Assert.Contains(todoLines, l => l.Contains(@"InsertMethod=""AddItem"""));
-        Assert.Contains(todoLines, l => l.Contains(@"DeleteMethod=""RemoveItem"""));
-    }
-
-    [Fact]
-    public void DoesNotModifyContentWithoutMethodAttributes()
-    {
-        var input = @"<GridView id=""gvProducts"" CssClass=""table"" />";
         var result = _transform.Apply(input, MakeMetadata());
 
         Assert.Equal(input, result);
     }
 
     [Fact]
-    public void TodoAppearsAfterOriginalLine()
+    public void PreservesCrudMethodAttributes()
     {
-        var input = @"<GridView SelectMethod=""GetItems"" />";
+        var input = @"<GridView SelectMethod=""GetItems"" InsertMethod=""AddItem"" UpdateMethod=""SaveItem"" DeleteMethod=""DeleteItem"" />";
         var result = _transform.Apply(input, MakeMetadata());
 
-        var lines = result.Split('\n');
-        Assert.Equal(2, lines.Length);
-        Assert.Contains(@"SelectMethod=""GetItems""", lines[0]);
-        Assert.StartsWith("@* TODO(bwfc-select-method):", lines[1]);
+        Assert.Equal(input, result);
     }
 
     [Fact]
-    public void IncludesActualMethodNameInTodo()
+    public void DoesNotEmitTodoCommentsForCrudMethods()
     {
-        var input = @"<ListView SelectMethod=""LoadCustomers"" />";
+        var input = @"<GridView UpdateMethod=""SaveItem"" DeleteMethod=""DeleteItem"" />";
         var result = _transform.Apply(input, MakeMetadata());
 
-        Assert.Contains("LoadCustomers", result);
+        Assert.DoesNotContain("TODO(bwfc-select-method)", result);
+    }
+
+    [Fact]
+    public void LeavesContentWithoutModelBindingUntouched()
+    {
+        var input = @"<GridView id=""gvProducts"" CssClass=""table"" />";
+        var result = _transform.Apply(input, MakeMetadata());
+
+        Assert.Equal(input, result);
     }
 }

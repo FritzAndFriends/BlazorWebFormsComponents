@@ -1,4 +1,8 @@
 @page "/TC21-EventHandlerSpecialized"
+<WebFormsForm @formname="TC21EventHandlerSpecializedForm">
+    <AntiforgeryToken />
 <PageTitle>Test</PageTitle>
 <GridView ItemType="object" id="gvItems" OnRowCommand="@Grid_RowCommand" OnPageIndexChanging="@Grid_PageIndexChanging">
 </GridView>
+
+</WebFormsForm>

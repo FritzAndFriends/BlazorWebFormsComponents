@@ -1,22 +1,25 @@
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 
 namespace BlazorWebFormsComponents;
 
 /// <summary>
 /// Compatibility shim for Web Forms <c>Server</c> (HttpServerUtility).
-/// Provides <c>Server.MapPath()</c>, <c>Server.HtmlEncode()</c>,
-/// <c>Server.HtmlDecode()</c>, <c>Server.UrlEncode()</c>, and
-/// <c>Server.UrlDecode()</c>.
+/// Provides <c>Server.MapPath()</c>, encoding helpers, and light-weight
+/// compatibility methods for <c>Transfer()</c>, <c>GetLastError()</c>, and
+/// <c>ClearError()</c>.
 /// </summary>
 public class ServerShim
 {
     private readonly IWebHostEnvironment _env;
+    private readonly NavigationManager? _navigationManager;
 
-    public ServerShim(IWebHostEnvironment env)
+    public ServerShim(IWebHostEnvironment env, NavigationManager? navigationManager = null)
     {
         _env = env;
+        _navigationManager = navigationManager;
     }
 
     /// <summary>
@@ -48,4 +51,40 @@ public class ServerShim
 
     /// <summary>URL-decodes a string.</summary>
     public string UrlDecode(string text) => System.Net.WebUtility.UrlDecode(text);
+
+    /// <summary>
+    /// Compatibility stub for <c>Server.GetLastError()</c>.
+    /// Returns <see langword="null"/> in Blazor because exception state is owned by middleware.
+    /// </summary>
+    public Exception? GetLastError() => null;
+
+    /// <summary>
+    /// Compatibility stub for <c>Server.ClearError()</c>.
+    /// Error clearing is handled by ASP.NET Core middleware, so this is a no-op.
+    /// </summary>
+    public void ClearError()
+    {
+    }
+
+    /// <summary>
+    /// Compatibility implementation for <c>Server.Transfer(path)</c>.
+    /// Delegates to <see cref="NavigationManager.NavigateTo(string, bool, bool)"/>.
+    /// </summary>
+    public void Transfer(string path)
+    {
+        if (_navigationManager is null)
+            throw new InvalidOperationException("NavigationManager is required for Server.Transfer().");
+
+        _navigationManager.NavigateTo(path);
+    }
+
+    /// <summary>
+    /// Compatibility implementation for <c>Server.Transfer(path, preserveForm)</c>.
+    /// The <paramref name="preserveForm"/> parameter is accepted for compile compatibility
+    /// but has no effect in Blazor — form state is not preserved across navigations.
+    /// </summary>
+    public void Transfer(string path, bool preserveForm)
+    {
+        Transfer(path);
+    }
 }

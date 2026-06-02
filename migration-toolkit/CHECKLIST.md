@@ -16,7 +16,7 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 **Complexity:** [Trivial / Easy / Medium / Complex]
 **Notes:** [Any page-specific context — what this page does, key controls used]
 
-### Layer 1 — Automated (bwfc-migrate.ps1)
+### Layer 1 — Automated (webforms-to-blazor CLI or bwfc-migrate.ps1)
 
 - [ ] File renamed (.aspx → .razor, .ascx → .razor, .master → .razor)
 - [ ] `<%@ Page %>` / `<%@ Control %>` / `<%@ Master %>` directive removed
@@ -28,6 +28,9 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] `<asp:Content>` wrappers removed (page body unwrapped)
 - [ ] `ItemType` → `TItem` converted
 - [ ] Code-behind file copied (.aspx.cs → .razor.cs) with TODO annotations
+- [ ] `AddBlazorWebFormsComponents()` registered in `Program.cs`
+- [ ] `_Imports.razor` has `@inherits WebFormsPageBase`
+- [ ] Pages using `Request.Form` wrapped in `<WebFormsForm>`
 
 ### Layer 2 — Copilot-Assisted (Structural Transforms)
 
@@ -35,10 +38,17 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] Data loading moved to `OnInitializedAsync`
 - [ ] Template `Context="Item"` variables added to all templates
 - [ ] Event handlers converted to Blazor signatures (remove `sender`, `EventArgs`)
-- [ ] `Page_Load` → `OnInitializedAsync`; `if (!IsPostBack)` works AS-IS via `WebFormsPageBase` (optionally simplify)
-- [ ] Navigation calls converted (`Response.Redirect` → `NavigationManager.NavigateTo`)
-- [ ] `<form runat="server">` removed (or converted to `<EditForm>` if validators present)
-- [ ] `Session["key"]` references identified and marked for Layer 3
+- [ ] ✅ `Page_Load` / `IsPostBack` — works AS-IS via `WebFormsPageBase` (only signature `Page_Load(sender, e)` → `OnInitializedAsync` needs converting; `IsPostBack` inside works unchanged)
+- [ ] ✅ `Response.Redirect` — works AS-IS via ResponseShim (auto-strips `~/` and `.aspx`)
+- [ ] Session state: Use `Session["key"]` from `WebFormsPageBase` (SessionShim) — works in interactive mode ✅
+- [ ] ✅ Response.Redirect() calls work via ResponseShim
+- [ ] ✅ Request.QueryString[] calls work via RequestShim
+- [ ] No raw `IHttpContextAccessor` injected (use shim properties from `WebFormsPageBase` instead)
+- [ ] No Minimal API endpoints created for page actions (use shim methods instead; minimal APIs are ONLY for cookie auth operations)
+- [ ] ✅ `Page.Title` / `Page.MetaDescription` — works AS-IS via WebFormsPageBase
+- [ ] ✅ `Request.QueryString["key"]` — works AS-IS via RequestShim
+- [ ] ✅ `Cache["key"]` — works AS-IS via CacheShim
+- [ ] `<form runat="server">` removed (or converted to `<WebFormsForm>` / `<EditForm>` if validators present)
 - [ ] Query parameters converted (`[QueryString]` → `[SupplyParameterFromQuery]`)
 - [ ] Route parameters converted (`[RouteData]` → `[Parameter]` with `@page` route)
 - [ ] `@using` statements added for model namespaces
@@ -48,7 +58,9 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 
 - [ ] Data access pattern decided (injected service, EF Core, Dapper, etc.)
 - [ ] Data service implemented and registered in `Program.cs`
-- [ ] Session state replaced with appropriate Blazor pattern (scoped service / ProtectedSessionStorage)
+- [ ] Session state: basic usage works AS-IS via SessionShim; if persistent/distributed state needed, replace with `ProtectedSessionStorage` or scoped service (OPTIONAL — shim works correctly)
+- [ ] Response.Redirect: works AS-IS via ResponseShim; if removing BWFC dependency, replace with `NavigationManager.NavigateTo()` (OPTIONAL — shim works correctly)
+- [ ] Request.QueryString: works AS-IS via RequestShim; if cleaner Blazor pattern desired, replace with `[SupplyParameterFromQuery]` (OPTIONAL — shim works correctly)
 - [ ] Authentication/authorization wired (if page requires auth)
 - [ ] Third-party integrations ported (API calls, payment, etc.)
 - [ ] Route registered and tested (`@page` directive matches expected URL)
@@ -63,6 +75,17 @@ The checklist is organized by the [three-layer pipeline](METHODOLOGY.md). Work t
 - [ ] No JavaScript console errors in browser dev tools
 - [ ] Data displays correctly (correct records, correct formatting)
 - [ ] Form submissions work (validation fires, data saves)
+
+### Optional: Refactor to Native Blazor (post-migration)
+
+> These are optional improvements you can make after the app is fully functional. Shim-based code works correctly — these refactors reduce BWFC dependency and adopt native Blazor patterns.
+
+- [ ] `Response.Redirect("~/path")` → `NavigationManager.NavigateTo("/path")` (if removing ResponseShim dependency)
+- [ ] `Session["key"]` → scoped service or `ProtectedSessionStorage` (if needing persistence/distribution)
+- [ ] `Request.QueryString["key"]` → `[SupplyParameterFromQuery]` parameter (cleaner Blazor pattern)
+- [ ] `Cache["key"]` → `IMemoryCache` or `IDistributedCache` (if needing distributed cache)
+- [ ] `ViewState["key"]` → component fields (ViewState is in-memory only, no page serialization)
+- [ ] `Page.ClientScript.RegisterStartupScript(...)` → direct `IJSRuntime` calls
 
 ### L3-opt — Performance Optimization Pass (Optional, run after Verification ✅)
 

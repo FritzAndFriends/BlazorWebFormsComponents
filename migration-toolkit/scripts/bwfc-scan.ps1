@@ -53,6 +53,15 @@ param(
     [string]$OutputFile
 )
 
+Write-Warning @"
+╔══════════════════════════════════════════════════════════════╗
+║  DEPRECATED: This script is deprecated.                     ║
+║  Use the CLI tool instead:                                  ║
+║    webforms-to-blazor scan --input <src> --output <out>     ║
+║  See: docs/cli/index.md                                     ║
+╚══════════════════════════════════════════════════════════════╝
+"@
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 

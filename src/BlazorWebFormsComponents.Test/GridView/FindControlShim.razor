@@ -1,0 +1,346 @@
+@using Shouldly
+@using System.Collections.Generic
+
+@code {
+	[Fact]
+	public void GridViewRow_FindControl_TextBox_ReturnsProxyWithText()
+	{
+		// Simulate: a GridViewRow with form data for a TextBox control
+		var formRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["PurchaseQuantity"] = "5"
+		};
+
+		var data = new List<FindControlProduct>
+		{
+			new FindControlProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="FindControlProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Qty">
+					<ItemTemplate>
+						<TextBox ID="PurchaseQuantity" Text="1" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		// Get the rendered GridViewRow
+		var gridView = cut.FindComponent<GridView<FindControlProduct>>().Instance;
+		var row = gridView.Rows[0] as GridViewRow<FindControlProduct>;
+		row.ShouldNotBeNull();
+
+		// Directly set FormRowData (simulating what would come from form POST)
+		row.FormRowData = formRowData;
+
+		// FindControl should return a TextBox proxy with Text from form data
+		var control = row.FindControl("PurchaseQuantity");
+		control.ShouldNotBeNull();
+		control.ShouldBeOfType<TextBox>();
+		((TextBox)control).Text.ShouldBe("5");
+	}
+
+	[Fact]
+	public void GridViewRow_FindControl_CheckBox_ReturnsProxyWithChecked()
+	{
+		var formRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["Remove"] = "on"
+		};
+
+		var data = new List<FindControlProduct>
+		{
+			new FindControlProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="FindControlProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Remove">
+					<ItemTemplate>
+						<CheckBox ID="Remove" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<FindControlProduct>>().Instance;
+		var row = gridView.Rows[0] as GridViewRow<FindControlProduct>;
+		row.ShouldNotBeNull();
+		row.FormRowData = formRowData;
+
+		var control = row.FindControl("Remove");
+		control.ShouldNotBeNull();
+		control.ShouldBeOfType<CheckBox>();
+		((CheckBox)control).Checked.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void GridViewRow_FindControl_CheckBox_UncheckedWhenAbsent()
+	{
+		// When a checkbox is not in the form data, it means unchecked
+		var formRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+		var data = new List<FindControlProduct>
+		{
+			new FindControlProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="FindControlProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Remove">
+					<ItemTemplate>
+						<CheckBox ID="Remove" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<FindControlProduct>>().Instance;
+		var row = gridView.Rows[0] as GridViewRow<FindControlProduct>;
+		row.ShouldNotBeNull();
+		row.FormRowData = formRowData;
+
+		// CheckBox registered during render, so FindControl returns a CheckBox with Checked=false
+		var control = row.FindControl("Remove");
+		control.ShouldNotBeNull();
+		control.ShouldBeOfType<CheckBox>();
+		((CheckBox)control).Checked.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void GridViewRow_FindControl_CheckBox_TrueValue()
+	{
+		var formRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["Remove"] = "true"
+		};
+
+		var data = new List<FindControlProduct>
+		{
+			new FindControlProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="FindControlProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Remove">
+					<ItemTemplate>
+						<CheckBox ID="Remove" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<FindControlProduct>>().Instance;
+		var row = gridView.Rows[0] as GridViewRow<FindControlProduct>;
+		row.ShouldNotBeNull();
+		row.FormRowData = formRowData;
+
+		var control = row.FindControl("Remove");
+		((CheckBox)control).Checked.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void GridViewRow_FindControl_UnknownControl_ReturnsNull()
+	{
+		var formRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+		var data = new List<FindControlProduct>
+		{
+			new FindControlProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="FindControlProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Name">
+					<ItemTemplate>
+						<TextBox ID="PurchaseQuantity" Text="1" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<FindControlProduct>>().Instance;
+		var row = gridView.Rows[0] as GridViewRow<FindControlProduct>;
+		row.ShouldNotBeNull();
+		row.FormRowData = formRowData;
+
+		// "NonExistent" was never registered, no form data either — returns null
+		var control = row.FindControl("NonExistent");
+		control.ShouldBeNull();
+	}
+
+	[Fact]
+	public void GridViewRow_FindControl_CastToTextBox_Works()
+	{
+		// This test validates the canonical WingtipToys ShoppingCart pattern:
+		// TextBox qty = (TextBox)CartList.Rows[i].FindControl("PurchaseQuantity");
+		// int quantity = Convert.ToInt16(qty.Text);
+		var formRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["PurchaseQuantity"] = "3"
+		};
+
+		var data = new List<FindControlProduct>
+		{
+			new FindControlProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="FindControlProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Qty">
+					<ItemTemplate>
+						<TextBox ID="PurchaseQuantity" Text="1" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<FindControlProduct>>().Instance;
+		var row = gridView.Rows[0] as GridViewRow<FindControlProduct>;
+		row.ShouldNotBeNull();
+		row.FormRowData = formRowData;
+
+		// This is the exact pattern from ShoppingCart.aspx.cs:
+		TextBox quantityTextBox = (TextBox)row.FindControl("PurchaseQuantity");
+		int quantity = Convert.ToInt16(quantityTextBox.Text);
+		quantity.ShouldBe(3);
+	}
+
+	[Fact]
+	public void GridViewRow_FindControl_CastToCheckBox_Works()
+	{
+		// This test validates:
+		// CheckBox cbRemove = (CheckBox)CartList.Rows[i].FindControl("Remove");
+		// bool remove = cbRemove.Checked;
+		var formRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["Remove"] = "on"
+		};
+
+		var data = new List<FindControlProduct>
+		{
+			new FindControlProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="FindControlProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Remove">
+					<ItemTemplate>
+						<CheckBox ID="Remove" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<FindControlProduct>>().Instance;
+		var row = gridView.Rows[0] as GridViewRow<FindControlProduct>;
+		row.ShouldNotBeNull();
+		row.FormRowData = formRowData;
+
+		// Exact pattern from ShoppingCart.aspx.cs:
+		CheckBox cbRemove = (CheckBox)row.FindControl("Remove");
+		cbRemove.Checked.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void GridViewRow_FindControl_MultipleRows_IndependentData()
+	{
+		var data = new List<FindControlProduct>
+		{
+			new FindControlProduct { Name = "Widget", Price = 9.99m },
+			new FindControlProduct { Name = "Gadget", Price = 19.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="FindControlProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Qty">
+					<ItemTemplate>
+						<TextBox ID="Qty" Text="1" />
+					</ItemTemplate>
+				</TemplateField>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Remove">
+					<ItemTemplate>
+						<CheckBox ID="Remove" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<FindControlProduct>>().Instance;
+
+		// Row 0: Qty=5, Remove=on
+		var row0 = gridView.Rows[0] as GridViewRow<FindControlProduct>;
+		row0.ShouldNotBeNull();
+		row0.FormRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["Qty"] = "5",
+			["Remove"] = "on"
+		};
+
+		// Row 1: Qty=2, Remove absent (unchecked)
+		var row1 = gridView.Rows[1] as GridViewRow<FindControlProduct>;
+		row1.ShouldNotBeNull();
+		row1.FormRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["Qty"] = "2"
+		};
+
+		// Verify row 0
+		((TextBox)row0.FindControl("Qty")).Text.ShouldBe("5");
+		((CheckBox)row0.FindControl("Remove")).Checked.ShouldBeTrue();
+
+		// Verify row 1
+		((TextBox)row1.FindControl("Qty")).Text.ShouldBe("2");
+		((CheckBox)row1.FindControl("Remove")).Checked.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void GridViewRow_FindControl_CaseInsensitive()
+	{
+		var formRowData = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+		{
+			["purchasequantity"] = "7"
+		};
+
+		var data = new List<FindControlProduct>
+		{
+			new FindControlProduct { Name = "Widget", Price = 9.99m }
+		};
+
+		var cut = Render(@<GridView ItemType="FindControlProduct" ID="CartList"
+						DataSource="data" AutoGenerateColumns="false">
+			<Columns>
+				<TemplateField ItemType="FindControlProduct" HeaderText="Qty">
+					<ItemTemplate>
+						<TextBox ID="PurchaseQuantity" Text="1" />
+					</ItemTemplate>
+				</TemplateField>
+			</Columns>
+		</GridView>);
+
+		var gridView = cut.FindComponent<GridView<FindControlProduct>>().Instance;
+		var row = gridView.Rows[0] as GridViewRow<FindControlProduct>;
+		row.ShouldNotBeNull();
+		row.FormRowData = formRowData;
+
+		// FindControl with different casing should still work
+		var control = row.FindControl("PurchaseQuantity");
+		control.ShouldNotBeNull();
+		((TextBox)control).Text.ShouldBe("7");
+	}
+
+	public class FindControlProduct
+	{
+		public string Name { get; set; }
+		public decimal Price { get; set; }
+	}
+}

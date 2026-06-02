@@ -567,7 +567,7 @@ public class InteractiveComponentTests
             var inputs = await page.Locator("input[type='text'], input[type='password'], input[type='email']").AllAsync();
             Assert.NotEmpty(inputs);
 
-            var buttons = await page.Locator("button, input[type='submit']").AllAsync();
+            var buttons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(buttons);
 
             // Assert no console errors
@@ -951,6 +951,401 @@ public class InteractiveComponentTests
     }
 
     [Fact]
+    public async Task Wizard_NextButton_AdvancesToNextStep()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var wizard = page.Locator("[data-audit-control='Wizard-1']");
+            var step1Heading = wizard.Locator("h3:has-text('Step 1: Personal Information')");
+            await step1Heading.WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Next']").ClickAsync();
+
+            var step2Heading = wizard.Locator("h3:has-text('Step 2: Preferences')");
+            await step2Heading.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await step2Heading.IsVisibleAsync(), "Step 2 should be visible after clicking Next");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_PreviousButton_GoesBack()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var wizard = page.Locator("[data-audit-control='Wizard-1']");
+            await wizard.Locator("h3:has-text('Step 1: Personal Information')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Next']").ClickAsync();
+            await wizard.Locator("h3:has-text('Step 2: Preferences')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Previous']").ClickAsync();
+
+            var step1Heading = wizard.Locator("h3:has-text('Step 1: Personal Information')");
+            await step1Heading.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await step1Heading.IsVisibleAsync(), "Step 1 should be visible after clicking Previous");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_SideBar_NavigatesToStep()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var wizard = page.Locator("[data-audit-control='Wizard-1']");
+            await wizard.Locator("h3:has-text('Step 1: Personal Information')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("button:has-text('Review')").ClickAsync();
+
+            var reviewHeading = wizard.Locator("h3:has-text('Step 3: Review')");
+            await reviewHeading.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await reviewHeading.IsVisibleAsync(), "Review step should be visible after clicking the sidebar link");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_FinishButton_ShowsCompleteStep()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            var wizard = page.Locator("[data-audit-control='Wizard-1']");
+            await wizard.Locator("h3:has-text('Step 1: Personal Information')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Next']").ClickAsync();
+            await wizard.Locator("h3:has-text('Step 2: Preferences')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Next']").ClickAsync();
+            await wizard.Locator("h3:has-text('Step 3: Review')").WaitForAsync(new() { Timeout = 5000 });
+
+            await wizard.Locator("input[value='Finish']").ClickAsync();
+
+            var completeHeading = wizard.Locator("h3:has-text('Registration Complete!')");
+            await completeHeading.WaitForAsync(new() { Timeout = 5000 });
+            Assert.True(await completeHeading.IsVisibleAsync(), "Complete step should be visible after clicking Finish");
+
+            var finishAlert = page.Locator("div.alert.alert-success").Filter(new() { HasTextString = "Finish event fired!" });
+            Assert.True(await finishAlert.IsVisibleAsync(), "Finish event confirmation should be visible");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_FinishCompleteButtonText_RendersCustomLabel()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-7']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            // Click forward once to reach the Finish step (step 1) where FinishCompleteButtonText renders
+            await ClickForwardNavigationAsync(page, wizard);
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 5000 });
+
+            var finishButton = await FindForwardNavigationButtonAsync(wizard);
+            var finishButtonLabel = await GetButtonLabelAsync(finishButton);
+
+            Assert.False(string.IsNullOrWhiteSpace(finishButtonLabel), "Finish button should render a label on the finish step.");
+            Assert.NotEqual("Finish", finishButtonLabel);
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_SideBarTemplate_RendersCustomSidebar()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-8']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            var sidebar = wizard.Locator("td").First;
+            await sidebar.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            var customSidebarContent = sidebar.Locator("div, section, aside, ul, ol, p, button, img, svg, [class*='sidebar'], [class*='custom'], [data-sidebar-template], [data-template='sidebar']");
+            Assert.True(await customSidebarContent.CountAsync() > 0,
+                "Sidebar template should render custom structured content instead of the default step link list.");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_StartNavigationTemplate_RendersCustomNav()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-9']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            var navigationArea = GetWizardNavigationArea(wizard);
+            await navigationArea.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            var customNavigationContent = navigationArea.Locator("button, nav, div, span, a, [class*='nav'], [class*='wizard'], [class*='custom'], [data-navigation-template], [data-template='navigation']");
+            Assert.True(await customNavigationContent.CountAsync() > 0,
+                "Start navigation template should render custom content in the navigation row.");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_StepNavigationTemplate_RendersCustomNav()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-10']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            await ClickForwardNavigationAsync(page, wizard);
+            // Wait for Blazor Server to process the click and re-render at step 1
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 5000 });
+
+            var currentStep = await wizard.Locator("input[name='__wizard_step']").GetAttributeAsync("value");
+            Assert.Equal("1", currentStep);
+
+            var navigationArea = GetWizardNavigationArea(wizard);
+            var customNavigationContent = navigationArea.Locator("button, nav, div, span, a, [class*='nav'], [class*='wizard'], [class*='custom'], [data-navigation-template], [data-template='navigation']");
+            Assert.True(await customNavigationContent.CountAsync() > 0,
+                "Step navigation template should render custom content after advancing past the start step.");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    [Fact]
+    public async Task Wizard_FinishNavigationTemplate_RendersCustomNav()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = CaptureConsoleErrors(page);
+
+        try
+        {
+            await GotoWizardPageAsync(page);
+
+            var wizard = page.Locator("[data-audit-control='Wizard-11']");
+            await wizard.WaitForAsync(new() { State = WaitForSelectorState.Visible, Timeout = 5000 });
+
+            // Click forward once to reach the Finish step (step 1) where FinishNavigationTemplate renders
+            await ClickForwardNavigationAsync(page, wizard);
+            await wizard.Locator("input[name='__wizard_step'][value='1']").WaitForAsync(new() { State = WaitForSelectorState.Attached, Timeout = 5000 });
+
+            var currentStep = await wizard.Locator("input[name='__wizard_step']").GetAttributeAsync("value");
+            Assert.Equal("1", currentStep);
+
+            var navigationArea = GetWizardNavigationArea(wizard);
+            var customNavigationContent = navigationArea.Locator("button, nav, div, span, a, [class*='nav'], [class*='wizard'], [class*='custom'], [data-navigation-template], [data-template='navigation']");
+            Assert.True(await customNavigationContent.CountAsync() > 0,
+                "Finish navigation template should render custom content on the finish step.");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    private List<string> CaptureConsoleErrors(IPage page)
+    {
+        var consoleErrors = new List<string>();
+
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error")
+            {
+                if (!System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                    consoleErrors.Add(msg.Text);
+            }
+        };
+
+        return consoleErrors;
+    }
+
+    private async Task GotoWizardPageAsync(IPage page)
+    {
+        await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Wizard", new PageGotoOptions
+        {
+            WaitUntil = WaitUntilState.NetworkIdle,
+            Timeout = 30000
+        });
+    }
+
+    private static ILocator GetWizardNavigationArea(ILocator wizard) => wizard.Locator("td[role='navigation'][aria-label='Wizard navigation']");
+
+    private static async Task ClickForwardNavigationAsync(IPage page, ILocator wizard)
+    {
+        var forwardButton = await FindForwardNavigationButtonAsync(wizard);
+        await forwardButton.ClickAsync();
+        // Wait for the page to settle after form POST (SSR) or state update
+        await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+    }
+
+    private static async Task<ILocator> FindForwardNavigationButtonAsync(ILocator wizard)
+    {
+        var buttons = await GetWizardNavigationArea(wizard).Locator("input[type='submit'], button").AllAsync();
+
+        foreach (var button in buttons)
+        {
+            if (!await button.IsVisibleAsync())
+            {
+                continue;
+            }
+
+            var label = await GetButtonLabelAsync(button);
+            if (string.IsNullOrWhiteSpace(label))
+            {
+                continue;
+            }
+
+            if (label.Contains("previous", StringComparison.OrdinalIgnoreCase)
+                || label.Contains("back", StringComparison.OrdinalIgnoreCase)
+                || label.Contains("cancel", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            return button;
+        }
+
+        throw new InvalidOperationException("Wizard forward navigation button was not found.");
+    }
+
+    private static async Task<string> GetButtonLabelAsync(ILocator button)
+    {
+        return ((await button.GetAttributeAsync("value")) ?? await button.TextContentAsync() ?? string.Empty).Trim();
+    }
+
+    [Fact]
     public async Task ChangePassword_FormFields_Present()
     {
         // Arrange
@@ -990,7 +1385,7 @@ public class InteractiveComponentTests
             Assert.NotEmpty(confirmPassword);
 
             // Verify submit button exists
-            var submitButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            var submitButtons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(submitButtons);
 
             // Assert no console errors
@@ -1041,7 +1436,7 @@ public class InteractiveComponentTests
             Assert.NotEmpty(passwordInputs);
 
             // Verify submit/create button exists
-            var submitButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            var submitButtons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(submitButtons);
 
             // Assert no console errors
@@ -1318,7 +1713,7 @@ public class InteractiveComponentTests
             Assert.NotEmpty(textInputs);
 
             // Assert — Submit button is present
-            var submitButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            var submitButtons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(submitButtons);
 
             // Assert no console errors
@@ -3150,7 +3545,7 @@ public class InteractiveComponentTests
             });
 
             // Verify themed buttons are present with inline styles applied by ThemeProvider
-            var themedButtons = await page.Locator("button, input[type='submit']").AllAsync();
+            var themedButtons = await page.Locator("button, input[type='button'], input[type='submit']").AllAsync();
             Assert.NotEmpty(themedButtons);
 
             // Verify the page has demo containers with themed content
@@ -3203,7 +3598,7 @@ public class InteractiveComponentTests
                 "Expected Theme panel text in the ThemeMode section");
 
             // Buttons should exist in the section (both panels have themed buttons)
-            var buttonsInSection = section7Container.First.Locator("button, input[type='submit']");
+            var buttonsInSection = section7Container.First.Locator("button, input[type='button'], input[type='submit']");
             Assert.True(await buttonsInSection.CountAsync() >= 2, "Expected at least 2 buttons in the ThemeMode section (one per panel)");
 
             Assert.Empty(consoleErrors);
@@ -3347,8 +3742,8 @@ public class InteractiveComponentTests
             var initialCount = await blockSection.Locator("strong").First.TextContentAsync();
             Assert.Equal("0", initialCount);
 
-            // Act - Click the button (BWFC Button renders as <input type="submit">)
-            var blockButton = blockSection.Locator("input[type='submit']").First;
+            // Act - Click the button (BWFC Button renders as <input type="button"> by default)
+            var blockButton = blockSection.Locator("input[type='button'], input[type='submit']").First;
             await blockButton.ClickAsync();
 
             // Wait for Blazor to update
@@ -3408,8 +3803,8 @@ public class InteractiveComponentTests
             var initialText = await contentSection.Locator("p").Filter(new() { HasTextString = "ContentTemplate click count:" }).First.TextContentAsync();
             Assert.Contains("0", initialText);
 
-            // Act - Click the ContentTemplate button (BWFC Button renders as <input type="submit">)
-            var contentTemplateButton = contentSection.Locator("input[type='submit']").First;
+            // Act - Click the ContentTemplate button (BWFC Button renders as <input type="button"> by default)
+            var contentTemplateButton = contentSection.Locator("input[type='button'], input[type='submit']").First;
             await contentTemplateButton.ClickAsync();
 
             // Wait for Blazor to update
@@ -3470,8 +3865,8 @@ public class InteractiveComponentTests
             Assert.NotNull(initialTime);
             Assert.NotEmpty(initialTime);
 
-            // Act - Click the Refresh button (BWFC Button renders as <input type="submit">)
-            var refreshButton = inlineSection.Locator("input[type='submit']").First;
+            // Act - Click the Refresh button (BWFC Button renders as <input type="button"> by default)
+            var refreshButton = inlineSection.Locator("input[type='button'], input[type='submit']").First;
             await refreshButton.ClickAsync();
 
             // Wait for Blazor to update
@@ -3508,8 +3903,8 @@ public class InteractiveComponentTests
             var section = page.Locator("[data-audit-control='BaseProperties-1']");
             await section.WaitForAsync(new LocatorWaitForOptions { Timeout = 5000 });
 
-            // BWFC Button renders as <input type="submit">
-            var buttonAccessKey = await section.Locator("input[type='submit']").First.GetAttributeAsync("accesskey");
+            // BWFC Button renders as <input type="button"> by default
+            var buttonAccessKey = await section.Locator("input[type='button'], input[type='submit']").First.GetAttributeAsync("accesskey");
             Assert.NotNull(buttonAccessKey);
             Assert.NotEmpty(buttonAccessKey);
 
@@ -4116,6 +4511,211 @@ public class InteractiveComponentTests
             // Verify View 2 is now visible
             var view2 = container.Locator("h4").Filter(new() { HasTextString = "View 2" });
             Assert.True(await view2.IsVisibleAsync(), "View 2 should be visible after clicking Next");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that the Content component injects markup into the matching ContentPlaceHolder
+    /// region (DemoHeader) and that the un-overridden region (DemoBody) still shows its default
+    /// content. This exercises the core MasterPage slot-filling mechanism introduced by the
+    /// MasterPage bridge fix.
+    /// </summary>
+    [Fact]
+    public async Task Content_SlotFilling_InjectsContentAndPreservesDefault()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Content", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Scope to the first live demo (Content-1)
+            var demo = page.Locator("[data-audit-control='Content-1']");
+            await demo.WaitForAsync(new() { Timeout = 10000 });
+
+            // The Content component targeting "DemoHeader" should replace the default
+            // "(Default header — replaced by Content below)" with the injected custom header.
+            var injectedHeader = demo.Locator("text=Custom Header:");
+            Assert.True(await injectedHeader.CountAsync() > 0,
+                "Content component should have injected its content into the DemoHeader placeholder");
+
+            // The DemoBody placeholder has no Content targeting it — its default text must be visible.
+            var defaultBody = demo.Locator("text=Default body");
+            Assert.True(await defaultBody.CountAsync() > 0,
+                "DemoBody placeholder default content should remain visible when no Content targets it");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies that the "Change Message" button on the Content sample page updates the
+    /// message displayed inside a Content component's ChildContent render fragment.
+    /// </summary>
+    [Fact]
+    public async Task Content_DynamicButton_UpdatesMessageInPlaceholder()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/Content", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Scope to the dynamic demo section (Content-3)
+            var demo = page.Locator("[data-audit-control='Content-3']");
+            await demo.WaitForAsync(new() { Timeout = 10000 });
+
+            // Verify initial message text is present
+            var initialMessage = await demo.Locator("strong").TextContentAsync();
+            Assert.False(string.IsNullOrWhiteSpace(initialMessage),
+                "Initial message should be visible inside the Content area");
+
+            // Click "Change Message" button
+            var changeButton = demo.Locator("button:has-text('Change Message')");
+            await changeButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Message should have updated to a timestamp
+            var updatedMessage = await demo.Locator("strong").TextContentAsync();
+            Assert.NotEqual(initialMessage, updatedMessage);
+            Assert.Contains("Updated at", updatedMessage);
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies the ContentPlaceHolder-2 demo: Region A is replaced by a Content component
+    /// while Region B keeps its default content. Tests the replacement contract of the
+    /// improved MasterPage bridge.
+    /// </summary>
+    [Fact]
+    public async Task ContentPlaceHolder_ContentReplacement_ReplacesTargetedRegionOnly()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ContentPlaceHolder", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.DOMContentLoaded,
+                Timeout = 30000
+            });
+
+            // Scope to the replacement demo (ContentPlaceHolder-2)
+            var demo = page.Locator("[data-audit-control='ContentPlaceHolder-2']");
+            await demo.WaitForAsync(new() { Timeout = 10000 });
+
+            // Region A should show the injected "replaced" text, not the default
+            var replacedRegion = demo.Locator("text=Region A was");
+            Assert.True(await replacedRegion.CountAsync() > 0,
+                "Region A should be replaced by the Content component");
+
+            // Region B has no Content — its default text should remain
+            var defaultRegion = demo.Locator("text=default Region B content");
+            Assert.True(await defaultRegion.CountAsync() > 0,
+                "Region B default content should remain visible when no Content targets it");
+
+            Assert.Empty(consoleErrors);
+        }
+        finally
+        {
+            await page.CloseAsync();
+        }
+    }
+
+    /// <summary>
+    /// Verifies the ContentPlaceHolder-3 interactive toggle demo: clicking the toggle button
+    /// applies the Content override (replacing default content), and clicking again removes
+    /// the override (restoring the default). This is a full round-trip test of the
+    /// Content/ContentPlaceHolder slot-filling mechanism under dynamic Blazor re-renders.
+    /// </summary>
+    [Fact]
+    public async Task ContentPlaceHolder_ToggleOverride_SwitchesBetweenDefaultAndOverride()
+    {
+        var page = await _fixture.NewPageAsync();
+        var consoleErrors = new List<string>();
+        page.Console += (_, msg) =>
+        {
+            if (msg.Type == "error" && !System.Text.RegularExpressions.Regex.IsMatch(msg.Text, @"^\[\d{4}-\d{2}-\d{2}T"))
+                consoleErrors.Add(msg.Text);
+        };
+
+        try
+        {
+            await page.GotoAsync($"{_fixture.BaseUrl}/ControlSamples/ContentPlaceHolder", new PageGotoOptions
+            {
+                WaitUntil = WaitUntilState.NetworkIdle,
+                Timeout = 30000
+            });
+
+            // Scope to the interactive toggle demo (ContentPlaceHolder-3)
+            var demo = page.Locator("[data-audit-control='ContentPlaceHolder-3']");
+            await demo.WaitForAsync(new() { Timeout = 10000 });
+
+            // Initially, the override is NOT active — default content must be visible
+            var defaultContent = demo.Locator("text=Default content");
+            Assert.True(await defaultContent.CountAsync() > 0,
+                "Default content should be visible before the override is applied");
+
+            // Click "Apply Override" to inject the Content component
+            var toggleButton = demo.Locator("button:has-text('Apply Override')");
+            await toggleButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Override is now active — injected text must be visible
+            var overrideContent = demo.Locator("text=Override active!");
+            Assert.True(await overrideContent.CountAsync() > 0,
+                "Override content should be visible after applying the override");
+
+            // Click "Remove Override" to restore default
+            var removeButton = demo.Locator("button:has-text('Remove Override')");
+            await removeButton.ClickAsync();
+            await page.WaitForTimeoutAsync(500);
+
+            // Default content must be back
+            Assert.True(await defaultContent.CountAsync() > 0,
+                "Default content should be restored after removing the override");
 
             Assert.Empty(consoleErrors);
         }

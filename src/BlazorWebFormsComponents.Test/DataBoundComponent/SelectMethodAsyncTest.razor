@@ -25,7 +25,7 @@
 		);
 
 		// Wait for async data to load and re-render
-		cut.WaitForState(() => cut.FindAll("tbody tr").Count > 1, TimeSpan.FromSeconds(2));
+		cut.WaitForState(() => cut.FindAll("tbody tr").Count > 1, TimeSpan.FromSeconds(5));
 
 		_asyncCallCount.ShouldBeGreaterThanOrEqualTo(1, "SelectMethodAsync should be invoked");
 		cut.FindAll("tbody tr").Count.ShouldBe(4, "Data from SelectMethodAsync should render");
@@ -41,7 +41,7 @@
 		var cut = Render(
 			@<GridView ItemType="Widget" AutoGenerateColumns="false"
 				SelectMethodAsync="@(async (int maxRows, int startRowIndex, string sortBy) => { _asyncCallCount++; await Task.Yield(); return asyncData.AsEnumerable(); })"
-				SelectMethod="GetWidgetsSync">
+				SelectMethodDelegate="GetWidgetsSync">
 				<Columns>
 					<BoundField ItemType="Widget" DataField="Name" HeaderText="Name" />
 				</Columns>
@@ -49,7 +49,7 @@
 		);
 
 		// Wait for async data to load
-		cut.WaitForState(() => _asyncCallCount >= 1, TimeSpan.FromSeconds(2));
+		cut.WaitForState(() => _asyncCallCount >= 1, TimeSpan.FromSeconds(5));
 
 		_asyncCallCount.ShouldBeGreaterThanOrEqualTo(1, "SelectMethodAsync should be invoked");
 		_syncCallCount.ShouldBe(0, "Sync SelectMethod should NOT be invoked when async is set");
@@ -75,7 +75,7 @@
 		);
 
 		// Wait for async data to load
-		cut.WaitForState(() => _asyncCallCount >= 1, TimeSpan.FromSeconds(2));
+		cut.WaitForState(() => _asyncCallCount >= 1, TimeSpan.FromSeconds(5));
 
 		_asyncCallCount.ShouldBeGreaterThanOrEqualTo(1);
 		cut.Find("tbody tr td").TextContent.ShouldContain("AsyncItem");

@@ -1,8 +1,8 @@
 namespace WingtipToys.Account;
 
-// TODO: Requires ASP.NET Core Identity migration — account management needs UserManager
-public partial class Manage
+public partial class Manage : BlazorWebFormsComponents.WebFormsPageBase
 {
-    private string SuccessMessage { get; set; } = "";
-    private int LoginsCount { get; set; }
+    // TODO: Migrate from Account/Manage.aspx
+    // Original features: ASP.NET Identity or membership APIs
+    // Quarantine reason: Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.
 }

@@ -1,15 +1,8 @@
-using Microsoft.AspNetCore.Components;
-
 namespace WingtipToys.Checkout;
 
-public partial class CheckoutError
+public partial class CheckoutError : BlazorWebFormsComponents.WebFormsPageBase
 {
-    [SupplyParameterFromQuery(Name = "ErrorCode")]
-    public string? ErrorCode { get; set; }
-
-    [SupplyParameterFromQuery(Name = "Desc")]
-    public string? Desc { get; set; }
-
-    [SupplyParameterFromQuery(Name = "Desc2")]
-    public string? Desc2 { get; set; }
+    // TODO: Migrate from Checkout/CheckoutError.aspx
+    // Original features: Non-essential path (auto-quarantined)
+    // Quarantine reason: Page is located in a non-essential path (Checkout/CheckoutError.aspx) that typically requires manual migration of legacy Web Forms APIs.
 }

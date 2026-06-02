@@ -1,29 +1,31 @@
 @page "/ErrorPage"
-<h2>Error:</h2>
-    <p></p>
-    <Label ID="FriendlyErrorMsg" Text="@_friendlyErrorMsg" Font-Size="Large" style="color: red"></Label>
+<WebFormsForm @formname="ErrorPageForm">
+    <AntiforgeryToken />
+<PageTitle></PageTitle>
 
-    @if (_showDetails)
-    {
-    <Panel ID="DetailedErrorPanel">
+    <h2>Error:</h2>
+    <p></p>
+    <span>@_FriendlyErrorMsg_Text</span>
+
+    <Panel id="DetailedErrorPanel" @ref="DetailedErrorPanel" Visible="false">
         <p>&nbsp;</p>
         <h4>Detailed Error:</h4>
         <p>
-            <Label ID="ErrorDetailedMsg" Text="@_errorDetailedMsg" Font-Size="Small" /><br />
+            <span>@_ErrorDetailedMsg_Text</span><br />
         </p>
 
         <h4>Error Handler:</h4>
         <p>
-            <Label ID="ErrorHandlerLabel" Text="@_errorHandler" Font-Size="Small" /><br />
+            <span>@_ErrorHandler_Text</span><br />
         </p>
 
         <h4>Detailed Error Message:</h4>
         <p>
-            <Label ID="InnerMessage" Text="@_innerMessage" Font-Size="Small" /><br />
+            <span>@_InnerMessage_Text</span><br />
         </p>
         <p>
-            <Label ID="InnerTrace" Text="@_innerTrace" />
+            <span>@_InnerTrace_Text</span>
         </p>
     </Panel>
-    }
 
+</WebFormsForm>

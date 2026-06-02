@@ -1,0 +1,38 @@
+@inherits BaseWebFormsComponent
+
+@if (Visible)
+{
+    <span>Lifecycle Test</span>
+}
+
+@code {
+    public bool InitCalled { get; private set; }
+    public bool LoadCalled { get; private set; }
+    public bool PreRenderCalled { get; private set; }
+    public bool UnloadCalled { get; private set; }
+    public List<string> CallOrder { get; } = new();
+
+    protected override void Page_Init(object sender, EventArgs e)
+    {
+        InitCalled = true;
+        CallOrder.Add("Init");
+    }
+
+    protected override void Page_Load(object sender, EventArgs e)
+    {
+        LoadCalled = true;
+        CallOrder.Add("Load");
+    }
+
+    protected override void Page_PreRender(object sender, EventArgs e)
+    {
+        PreRenderCalled = true;
+        CallOrder.Add("PreRender");
+    }
+
+    protected override void Page_Unload(object sender, EventArgs e)
+    {
+        UnloadCalled = true;
+        CallOrder.Add("Unload");
+    }
+}

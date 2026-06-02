@@ -4,20 +4,99 @@ using BlazorWebFormsComponents.Cli.Pipeline;
 namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 
 /// <summary>
-/// Removes Web Forms base class declarations from code-behind partial classes.
-/// The .razor file handles inheritance via @inherits, so the partial class must not declare a base.
+/// Replaces Web Forms base class declarations with WebFormsPageBase for Page/Master types,
+/// or strips them for unknown base classes. Preserves WebControl, CompositeControl, UserControl,
+/// and Control base classes since those have BWFC equivalents in BlazorWebFormsComponents.CustomControls.
+/// Page and Master code-behind classes get ": WebFormsPageBase" so pages automatically have
+/// access to Request, Response, Session, Server, Cache, ClientScript, IsPostBack, and ViewState shims.
 /// </summary>
 public class BaseClassStripTransform : ICodeBehindTransform
 {
     public string Name => "BaseClassStrip";
     public int Order => 200;
 
-    private static readonly Regex BaseClassRegex = new(
-        @"(partial\s+class\s+\w+)\s*:\s*(System\.Web\.UI\.Page|System\.Web\.UI\.MasterPage|System\.Web\.UI\.UserControl|(?<!\w)Page(?!\w)|(?<!\w)MasterPage(?!\w)|(?<!\w)UserControl(?!\w))",
+    // Matches page/master base classes that should become WebFormsPageBase
+    private static readonly Regex PageBaseClassRegex = new(
+        @"(partial\s+class\s+\w+)\s*:\s*(System\.Web\.UI\.Page|System\.Web\.UI\.MasterPage|Microsoft\.AspNetCore\.Components\.ComponentBase|(?<!\w)Page(?!\w)|(?<!\w)MasterPage(?!\w)|(?<!\w)ComponentBase(?!\w))",
+        RegexOptions.Compiled);
+
+    // Matches control base classes that should be preserved (they exist in BWFC.CustomControls)
+    private static readonly Regex PreservedBaseClassRegex = new(
+        @":\s*(System\.Web\.UI\.)?(?:WebControl|CompositeControl|UserControl|Control)\b",
+        RegexOptions.Compiled);
+
+    // Captures the bare type name from a preserved base class declaration
+    private static readonly Regex PreservedBaseClassCaptureRegex = new(
+        @":\s*(?:System\.Web\.UI\.)?(?<type>WebControl|CompositeControl|UserControl|Control)\b",
+        RegexOptions.Compiled);
+
+    // Matches UserControl base class with fully-qualified or bare name (for stripping the namespace prefix)
+    private static readonly Regex UserControlBaseRegex = new(
+        @"(partial\s+class\s+\w+)\s*:\s*System\.Web\.UI\.UserControl\b",
         RegexOptions.Compiled);
 
     public string Apply(string content, FileMetadata metadata)
     {
-        return BaseClassRegex.Replace(content, "$1");
+        if (metadata.FileType is FileType.Page or FileType.Master)
+        {
+            // Replace the Web Forms base class with WebFormsPageBase
+            return PageBaseClassRegex.Replace(content, "$1 : WebFormsPageBase");
+        }
+
+        // For Controls and CodeFiles: preserve custom control base classes
+        // Strip the System.Web.UI. prefix but keep the type name
+        content = UserControlBaseRegex.Replace(content, "$1 : UserControl");
+
+        // For files inheriting from preserved base classes, add the CustomControls using and return
+        if (PreservedBaseClassRegex.IsMatch(content))
+        {
+            if (!content.Contains("using BlazorWebFormsComponents.CustomControls;", StringComparison.Ordinal))
+            {
+                var lastUsing = Regex.Match(content, @"^using\s+[^;]+;\s*$", RegexOptions.Multiline | RegexOptions.RightToLeft);
+                if (lastUsing.Success)
+                {
+                    var insertAt = lastUsing.Index + lastUsing.Length;
+                    content = content[..insertAt] + "\nusing BlazorWebFormsComponents.CustomControls;\n" + content[insertAt..];
+                }
+                else
+                {
+                    content = "using BlazorWebFormsComponents.CustomControls;\n" + content;
+                }
+            }
+
+            // Inject @inherits into the .razor markup so the partial class base matches
+            InjectInheritsDirective(content, metadata);
+
+            return content;
+        }
+
+        // Strip any other Web Forms base classes (e.g., bare Page in a control context)
+        return PageBaseClassRegex.Replace(content, "$1");
+    }
+
+    /// <summary>
+    /// Injects @inherits and @using directives into the .razor markup so the
+    /// partial class base matches between the .razor and .razor.cs files.
+    /// Without this, the Razor compiler defaults to ComponentBase and CS0263 fires.
+    /// </summary>
+    private void InjectInheritsDirective(string codeBehindContent, FileMetadata metadata)
+    {
+        var markup = metadata.MarkupContent;
+        if (string.IsNullOrWhiteSpace(markup))
+            return;
+
+        // Already has an @inherits directive — don't add a duplicate
+        if (Regex.IsMatch(markup, @"^\s*@inherits\s", RegexOptions.Multiline))
+            return;
+
+        var match = PreservedBaseClassCaptureRegex.Match(codeBehindContent);
+        if (!match.Success)
+            return;
+
+        var baseType = match.Groups["type"].Value;
+
+        // Build directives to prepend
+        var directives = $"@using BlazorWebFormsComponents.CustomControls\n@inherits {baseType}\n\n";
+        metadata.MarkupContent = directives + markup;
     }
 }

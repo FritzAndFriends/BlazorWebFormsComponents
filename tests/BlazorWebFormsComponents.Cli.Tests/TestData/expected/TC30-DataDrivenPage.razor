@@ -1,6 +1,9 @@
 @page "/TC30-DataDrivenPage"
+<WebFormsForm @formname="TC30DataDrivenPageForm">
+    <AntiforgeryToken />
 <PageTitle>Product Catalog</PageTitle>
 @using ContosoStore.Models
+
     <h1>Product Catalog</h1>
     @* Product search and filter controls *@
     <div class="search-bar">
@@ -17,17 +20,14 @@
     </GridView>
     @* TODO(bwfc-datasource): Implement IdsProductsDataService to replace SqlDataSource *@
     <h2>Featured Products</h2>
-    <Repeater id="rptFeatured" TItem="Product" SelectMethod="GetFeaturedProducts">
-@* TODO(bwfc-select-method): Convert SelectMethod="GetFeaturedProducts" to a code-behind method that sets Items property *@
-        <ItemTemplate>
+    <Repeater id="rptFeatured" ItemType="Product" SelectMethod="GetFeaturedProducts">
+        <ItemTemplate Context="Item">
             <div class="product-card">
-                <h4>@context.ProductName</h4>
-                <span class="price">@context.UnitPrice</span>
+                <h4>@Item.ProductName</h4>
+                <span class="price">@Item.UnitPrice</span>
             </div>
         </ItemTemplate>
     </Repeater>
 
-@code {
-    // TODO(bwfc-datasource): Replace dsProductsData with real data from injected service
-    private IEnumerable<object> dsProductsData { get; set; } = Array.Empty<object>();
-}
+
+</WebFormsForm>

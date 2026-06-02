@@ -42,6 +42,11 @@ public class CliTests
         convertCommand.AddOption(new Option<bool>("--overwrite", "Overwrite existing .razor file"));
         rootCommand.AddCommand(convertCommand);
 
+        var prescanCommand = new Command("prescan", "Prescan migration patterns");
+        prescanCommand.AddOption(new Option<string>(new[] { "--input", "-i" }, "Source Web Forms project root") { IsRequired = true });
+        prescanCommand.AddOption(new Option<string?>("--report", "Output report path"));
+        rootCommand.AddCommand(prescanCommand);
+
         return rootCommand;
     }
 
@@ -117,12 +122,11 @@ public class CliTests
     }
 
     [Fact]
-    public void AnalyzeCommand_DoesNotExist()
+    public void PrescanCommand_Exists()
     {
-        // Architecture doc says analyze is internal — verify it's NOT exposed as a command
         var root = BuildRootCommand();
-        var analyze = root.Children.OfType<Command>().FirstOrDefault(c => c.Name == "analyze");
-        Assert.Null(analyze);
+        var prescan = root.Children.OfType<Command>().FirstOrDefault(c => c.Name == "prescan");
+        Assert.NotNull(prescan);
     }
 
     [Fact]

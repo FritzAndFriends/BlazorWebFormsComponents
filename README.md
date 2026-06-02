@@ -2,20 +2,30 @@
 
 A collection of Blazor components that are drop-in replacements for the ASP.NET Web Forms control of the same name.  The library also includes some other shims and modules that make migrating to Blazor a smooth experience
 
-[![Build and Test](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml/badge.svg)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml)  [![Integration Tests](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/integration-tests.yml)  [![Join the chat at https://gitter.im/BlazorWebFormsComponents/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BlazorWebFormsComponents/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)  [![docs](https://github.com/FritzAndFriends/BlazorWebFormsComponents/workflows/docs/badge.svg)](https://fritzandfriends.github.io/BlazorWebFormsComponents/)
+[![AI Ready](https://img.shields.io/badge/AI--Ready-yes-brightgreen?style=flat)](https://github.com/johnpapa/ai-ready)  [![Build and Test](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml/badge.svg)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/build.yml)  [![Integration Tests](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/actions/workflows/integration-tests.yml)  [![Join the chat at https://gitter.im/BlazorWebFormsComponents/community](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/BlazorWebFormsComponents/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)  [![docs](https://github.com/FritzAndFriends/BlazorWebFormsComponents/workflows/docs/badge.svg)](https://fritzandfriends.github.io/BlazorWebFormsComponents/)
 
 [![Nuget](https://img.shields.io/nuget/v/Fritz.BlazorWebFormsComponents?color=violet)](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents/)  [![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Fritz.BlazorWebFormsComponents)](https://www.nuget.org/packages/Fritz.BlazorWebFormsComponents/)  [![Live Sample](https://img.shields.io/badge/-Live%20Sample-purple)](https://blazorwebformscomponents.azurewebsites.net)
 
 [Live Samples running on Azure](https://blazorwebformscomponents.azurewebsites.net)
 
+## Documentation Site
+
+The [documentation site](https://fritzandfriends.github.io/BlazorWebFormsComponents/) covers every component, migration guides, and the Three-Layer Methodology for moving Web Forms apps to Blazor.
+
+### Docs Homepage
+![Docs Site Homepage](docs/images/docs-site-homepage.png)
+
+### Migration Methodology with Mermaid Diagrams
+![Migration Methodology](docs/images/docs-site-migration.png)
+
 ## Sample Site
 
-The sample site showcases all components with interactive examples, code snippets, and a searchable catalog.
+The [live sample site](https://blazorwebformscomponents.azurewebsites.net) showcases all components with interactive examples, code snippets, and a searchable catalog.
 
 ### Homepage & Component Catalog
 ![Sample Site Homepage](docs/images/sample-site-homepage.png)
 
-### GridView with Interactive Data
+### GridView with Paging
 ![GridView Sample](docs/images/sample-site-gridview.png)
 
 ### Chart Component with Chart.js
@@ -34,14 +44,50 @@ This is not for everyone, not everyone needs to migrate their application.  They
 
 Portions of the [original .NET Framework](https://github.com/microsoft/referencesource) are contributed to this project under their MIT license.
 
+## Custom Controls: Change One Line, Keep Your Code
+
+For applications with custom server controls that inherit `WebControl` and render via `HtmlTextWriter`, migration is as simple as changing a single `using` statement:
+
+```csharp
+// Before (Web Forms)
+using System.Web.UI.WebControls;
+
+// After (Blazor + BWFC)
+using BlazorWebFormsComponents.CustomControls;
+```
+
+Your `RenderContents`, `TagKey`, and `AddAttributesToRender` overrides work **unchanged**. The BWFC `WebControl` class provides a full `HtmlTextWriter` shim that captures your imperative rendering calls and emits them as HTML in Blazor's render tree — same output, zero rewrite.
+
+```csharp
+// This code works identically in Web Forms AND Blazor with BWFC
+public class StatusBadge : WebControl
+{
+    [Parameter] // Only addition: Blazor requires this attribute
+    public string Status { get; set; }
+
+    protected override HtmlTextWriterTag TagKey => HtmlTextWriterTag.Span;
+
+    protected override void RenderContents(HtmlTextWriter writer)
+    {
+        writer.RenderBeginTag(HtmlTextWriterTag.Strong);
+        writer.Write(Status);
+        writer.RenderEndTag();
+    }
+}
+```
+
+This same principle applies across the library: **developers rewrite as little code as possible.** Page lifecycle methods (`Page_Load`, `Page_Init`), `FindControl()` calls, `Request`/`Response`/`Session` access — they all work through runtime shims rather than requiring code transformation.
+
+📖 [Full Custom WebControl Migration Guide](docs/Migration/CustomWebControl.md)
+
 ## Migration CLI Tool
 
-The **`webforms-to-blazor` CLI tool** automates the first phase of Web Forms to Blazor migration. It applies deterministic transforms to your markup and code-behind, removing boilerplate and converting patterns:
+The **`webforms-to-blazor` CLI tool** automates the first phase of Web Forms to Blazor migration. It applies deterministic transforms to your markup and code-behind, removing boilerplate and converting patterns into a **.NET 10 Blazor Web App scaffolded for static server-side rendering (SSR)**:
 
 ```bash
 # Full project migration
 dotnet tool install --global Fritz.WebFormsToBlazor
-webforms-to-blazor migrate --input ./MyWebFormsProject --output ./MyBlazorProject --scaffold
+webforms-to-blazor migrate --input ./MyWebFormsProject --output ./MyBlazorProject
 
 # Or convert individual files
 webforms-to-blazor convert --input ProductCard.ascx --output ProductCard.razor
@@ -52,7 +98,7 @@ webforms-to-blazor convert --input ProductCard.ascx --output ProductCard.razor
 - Removes `asp:` prefixes: `<asp:Button>` → `<Button>`
 - Converts expressions: `<%: Model.Name %>` → `@(Model.Name)`
 - Detects patterns: Injects TODO comments for Copilot L2 automation
-- Scaffolds projects: Generates Program.cs, shims, and services
+- Scaffolds projects: Generates a .NET 10 Blazor SSR Program.cs, App.razor, shims, and services
 
 **See the [CLI Tool Documentation](docs/cli/index.md) for:**
 - [Transform Reference](docs/cli/transforms.md) — All 33 transforms with before/after examples
@@ -128,6 +174,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [Menu](docs/NavigationControls/Menu.md)
     - [SiteMapPath](docs/NavigationControls/SiteMapPath.md)
     - [TreeView](docs/NavigationControls/TreeView.md)
+    - [Wizard](docs/NavigationControls/Wizard.md)
   - Login Controls
     - [ChangePassword](docs/LoginControls/ChangePassword.md)
     - [CreateUserWizard](docs/LoginControls/CreateUserWizard.md)
@@ -244,4 +291,22 @@ Quick workflow:
 3. On `main` branch: `./scripts/publish-release.sh`
 
 The NuGet package is automatically published via GitHub Actions when a version tag is pushed.
+
+## Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide on how to contribute code, documentation, and use cases.
+
+**Quick start with Copilot CLI:**
+```
+Add a new Blazor component called XyzControl that emulates the Web Forms XyzControl with the same attributes and identical HTML output
+```
+
+**Local development:**
+```bash
+dotnet restore
+dotnet build
+dotnet test src/BlazorWebFormsComponents.Test
+```
+
+Every PR needs unit tests (bUnit), a sample page, and documentation. See [AGENTS.md](AGENTS.md) for the full contributor guide including the complete registration chain for new components.
 

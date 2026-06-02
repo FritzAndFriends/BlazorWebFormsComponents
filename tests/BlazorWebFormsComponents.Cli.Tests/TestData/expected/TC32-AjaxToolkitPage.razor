@@ -1,22 +1,25 @@
 @page "/TC32-AjaxToolkitPage"
+<WebFormsForm @formname="TC32AjaxToolkitPageForm">
+    <AntiforgeryToken />
 <PageTitle>Customer Management</PageTitle>
+
     <h1>Customer Management</h1>
     <TabContainer id="TabContainer1" ActiveTabIndex="0" CssClass="tabs">
         <TabPanel id="TabSearch" HeaderText="Search">
-
+            
                 <div class="form-group">
                     <TextBox id="txtCustomerSearch" CssClass="form-control" />
                     <AutoCompleteExtender id="aceSearch" TargetControlID="txtCustomerSearch"
                         ServiceMethod="GetCustomerSuggestions" MinimumPrefixLength="2" />
                 </div>
                 <Button id="btnSearch" Text="Search" OnClick="@Search_Click" />
-
+            
         </TabPanel>
         <TabPanel id="TabDetails" HeaderText="Details">
-
+            
                 <Label id="lblCustomerName" />
                 <TextBox id="txtEmail" />
-
+            
         </TabPanel>
     </TabContainer>
     <Accordion id="Accordion1" SelectedIndex="0" FadeTransitions="true">
@@ -41,3 +44,6 @@
         PopupControlID="pnlModal" CancelControlID="btnCancel" />
     @* Rating control has no BWFC equivalent *@
     @* TODO(bwfc-ajax-toolkit): Convert ajaxToolkit:Rating — no BWFC equivalent yet *@
+
+
+</WebFormsForm>

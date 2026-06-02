@@ -1,0 +1,115 @@
+using BlazorWebFormsComponents.Cli.Analysis;
+using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
+
+namespace BlazorWebFormsComponents.Cli.Tests.Transforms.CodeBehind;
+
+public class PageLifecycleTransformTests
+{
+    private readonly PageLifecycleTransform _transform = new();
+
+    [Fact]
+    public void Apply_ControlOnLoadOverride_ConvertsToOnParametersSet()
+    {
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "MyControl.ascx",
+            OutputFilePath = "MyControl.razor",
+            FileType = FileType.Control,
+            OriginalContent = "",
+            AscxDescriptor = new AscxDescriptor
+            {
+                ControlName = "MyControl",
+                HasPageLoadOverride = true
+            }
+        };
+
+        var input = """
+            protected override void OnLoad(EventArgs e)
+            {
+                base.OnLoad(e);
+                Prepare();
+            }
+            """;
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("protected override void OnParametersSet()", result);
+        Assert.Contains("base.OnParametersSet();", result);
+        Assert.DoesNotContain("OnLoad(EventArgs e)", result);
+    }
+
+    [Fact]
+    public void Apply_PageStillConvertsPageLoad_ToOnInitializedAsync()
+    {
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Default.aspx",
+            OutputFilePath = "Default.razor",
+            FileType = FileType.Page,
+            OriginalContent = ""
+        };
+
+        var input = """
+            protected void Page_Load(object sender, EventArgs e)
+            {
+                LoadData();
+            }
+            """;
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("protected override async Task OnInitializedAsync()", result);
+        Assert.Contains("await base.OnInitializedAsync();", result);
+    }
+
+    [Fact]
+    public void Apply_ConvertsPageInit_ToOnInitialized()
+    {
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Default.aspx",
+            OutputFilePath = "Default.razor",
+            FileType = FileType.Page,
+            OriginalContent = ""
+        };
+
+        var input = """
+            protected void Page_Init(object sender, EventArgs e)
+            {
+                SetupDefaults();
+            }
+            """;
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("protected override void OnInitialized()", result);
+        Assert.DoesNotContain("Page_Init", result);
+    }
+
+    [Fact]
+    public void Apply_ConvertsPagePreRender_ToOnAfterRenderAsyncWithFirstRenderGuard()
+    {
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Default.aspx",
+            OutputFilePath = "Default.razor",
+            FileType = FileType.Page,
+            OriginalContent = ""
+        };
+
+        var input = """
+            protected void Page_PreRender(object sender, EventArgs e)
+            {
+                UpdateUI();
+            }
+            """;
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Contains("protected override async Task OnAfterRenderAsync(bool firstRender)", result);
+        Assert.Contains("if (firstRender)", result);
+        Assert.Contains("UpdateUI();", result);
+        Assert.DoesNotContain("Page_PreRender", result);
+    }
+}

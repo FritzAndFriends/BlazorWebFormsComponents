@@ -11,11 +11,12 @@ For the full control translation rules (attribute mappings, code examples, befor
 | Metric | Value |
 |---|---|
 | Primary Web Forms controls | **58** |
-| Supporting components (field columns, styles, infrastructure, helpers) | **95** |
-| **Total Razor components shipped** | **153** |
+| Supporting components (field columns, styles, infrastructure, helpers) | **96** |
+| **Total Razor components shipped** | **154** |
+| Migration shims (compile-compatible APIs) | **14** |
 | Web Forms control categories covered | **9** (Editor, Data, Validation, Navigation, Login, AJAX, Infrastructure, Field Columns, Style Sub-Components) |
 | Enums | **54** |
-| Utility/infrastructure C# classes | **197** |
+| Utility/infrastructure C# classes | **197+** |
 | WingtipToys PoC coverage | **96.6%** (28 of 29 control types used) |
 | Controls with no BWFC equivalent | See [Not Supported](#controls-not-supported-by-bwfc) |
 
@@ -71,22 +72,36 @@ For the full control translation rules (attribute mappings, code examples, befor
 
 | Control | BWFC? | Complexity | Key Changes | Gotchas |
 |---|---|---|---|---|
-| **DataGrid** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → `Items` | Built-in numeric pager — does not use PagerSettings |
-| **DataList** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → `Items` | Template `Context="Item"` required |
+| **DataGrid** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → delegate or `Items` | Built-in numeric pager — does not use PagerSettings |
+| **DataList** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → delegate or `Items` | Template `Context="Item"` required |
 | **DataPager** | ✅ | Medium | Remove `asp:`, `runat` | Works with PageableData controls |
 | **DetailsView** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → `DataItem` | Single-record control — uses `DataItem`, not `Items` |
 | **FormView** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → `DataItem` | `RenderOuterTable="false"` supported; single-record control |
-| **GridView** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → `Items` | Add `Context="Item"` to templates; `BoundField`/`TemplateField` preserved |
-| **ListView** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → `Items` | `LayoutTemplate`, `GroupTemplate`, `GroupItemCount` all supported |
-| **Repeater** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → `Items` | `SeparatorTemplate` supported |
+| **GridView** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → delegate or `Items` | Add `Context="Item"` to templates; `BoundField`/`TemplateField` preserved |
+| **ListView** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → delegate or `Items` | `LayoutTemplate`, `GroupTemplate`, `GroupItemCount` all supported |
+| **Repeater** | ✅ | Medium | `ItemType` → `TItem`; `SelectMethod` → delegate or `Items` | `SeparatorTemplate` supported |
 
 ### Data Control Migration Pattern
 
-All data controls follow the same pattern:
+All data controls follow the same pattern. When the original Web Forms markup uses `SelectMethod`, **preserve it as a delegate reference** (preferred). When it uses `DataSource`/`DataBind()`, use `Items`.
+
+**Option A — SelectMethod preserved as delegate (preferred when original used SelectMethod):**
 
 ```xml
 <!-- Web Forms -->
 <asp:GridView ItemType="MyApp.Models.Product" SelectMethod="GetProducts" runat="server">
+```
+
+```razor
+<!-- Blazor — SelectMethod as delegate -->
+<GridView TItem="Product" SelectMethod="@productService.GetProducts">
+```
+
+**Option B — Items binding (when original used DataSource/DataBind):**
+
+```xml
+<!-- Web Forms -->
+<asp:GridView ItemType="MyApp.Models.Product" runat="server">
 ```
 
 ```razor
@@ -103,8 +118,10 @@ protected override async Task OnInitializedAsync()
 }
 ```
 
-- **Collection controls** (GridView, ListView, Repeater, DataList, DataGrid): use `Items` parameter
-- **Single-record controls** (FormView, DetailsView): use `DataItem` parameter
+> **⚠️ DO NOT convert SelectMethod to Items= binding** when the original Web Forms markup used `SelectMethod`. BWFC's `DataBoundComponent<ItemType>` has a native `SelectMethod` parameter of type `SelectHandler<ItemType>` that mirrors how Web Forms worked.
+
+- **Collection controls** (GridView, ListView, Repeater, DataList, DataGrid): use `SelectMethod` delegate or `Items` parameter
+- **Single-record controls** (FormView, DetailsView): use `SelectMethod` delegate or `DataItem` parameter
 
 ---
 
@@ -255,8 +272,8 @@ builder.Services.AddBlazorWebFormsComponents();
 
 | Class | Purpose |
 |---|---|
-| **WebFormsPageBase** | Base class for converted pages — provides `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack` |
-| **ServiceCollectionExtensions** | `AddBlazorWebFormsComponents()` — registers BlazorWebFormsJsInterop + IPageService |
+| **WebFormsPageBase** | Base class for converted pages — provides `Page.Title`, `IsPostBack`, `Request`, `Response`, `Server`, `Session`, `Cache`, `ViewState`, `ClientScript`, `PostBack` event, `ResolveUrl()`, `GetRouteUrl()` |
+| **ServiceCollectionExtensions** | `AddBlazorWebFormsComponents()` — registers all BWFC services (SessionShim, CacheShim, ServerShim, ClientScriptShim, ScriptManagerShim, IPageService, JS interop) |
 | **BaseWebFormsComponent** | Root base class — ID, ClientID, Visible, ViewState, lifecycle events (OnInit, OnLoad, OnPreRender, OnUnload), FindControl, theming, CaptureUnmatchedValues |
 | **BaseStyledComponent** | Adds CssClass, BackColor, ForeColor, BorderColor, BorderStyle, Font, Width, Height, ToolTip |
 | **DataBinder** | [Obsolete] Transitional `DataBinder.Eval()` support — use direct property access instead |
@@ -270,6 +287,54 @@ builder.Services.AddBlazorWebFormsComponents();
 | **BlazorWebFormsScripts** | Auto-loads BWFC JavaScript module via dynamic import |
 | **BlazorWebFormsHead** | Adds BWFC script tag to `<head>` via HeadContent |
 | **Eval** | Data-binding helper for `DataBinder.Eval()` expressions |
+| **WebFormsForm** | Interactive form component — captures form data via JS interop and feeds FormShim |
+
+---
+
+## Infrastructure & Shim Components
+
+BWFC provides a comprehensive shim layer that enables Web Forms API calls to compile and function in Blazor without code changes. All shims are auto-registered by `AddBlazorWebFormsComponents()` and auto-wired on `WebFormsPageBase`.
+
+| Component | Web Forms API Preserved | How It Works |
+|---|---|---|
+| **WebFormsPageBase** | `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, `IsPostBack` | Base class for all pages via `@inherits` in `_Imports.razor` |
+| **ResponseShim** | `Response.Redirect("~/path")` | Auto-strips `~/` prefix and `.aspx` extension; uses `NavigationManager` internally |
+| **RequestShim** | `Request.Url`, `Request.QueryString["key"]`, `Request.Cookies` | Reads current URL and query parameters from `NavigationManager` |
+| **FormShim** | `Request.Form["key"]`, `Request.Form.AllKeys`, `Request.Form.Count` | Dual-mode SSR+Interactive; requires `<WebFormsForm>` wrapper |
+| **SessionShim** | `Session["key"]`, `Session.Clear()`, `Session.Remove()` | Scoped in-memory dictionary — per-circuit lifetime |
+| **CacheShim** | `Cache["key"]`, `Cache.Insert()`, `Cache.Remove()` | Singleton in-memory cache |
+| **ServerShim** | `Server.MapPath("~/path")`, `Server.HtmlEncode()`, `Server.UrlEncode()` | Maps virtual paths; delegates encoding to `WebUtility` |
+| **ClientScriptShim** | `Page.ClientScript.RegisterStartupScript()`, `RegisterClientScriptBlock()` | Registers scripts via JS interop |
+| **ScriptManagerShim** | `ScriptManager.GetCurrent(Page)`, `RegisterStartupScript()` | Compatibility shim for ScriptManager API |
+| **ViewStateDictionary** | `ViewState["key"]` dictionary access | In-memory dictionary (not serialized to page) |
+| **PostBack support** | `__doPostBack()`, `IPostBackEventHandler`, `PostBackEventArgs` | PostBack event support with JS interop |
+| **ConfigurationManager** | `ConfigurationManager.AppSettings["key"]`, `ConnectionStrings["name"]` | Bridges to ASP.NET Core `IConfiguration`; call `app.UseConfigurationManagerShim()` |
+| **BundleConfig** | `BundleTable.Bundles.Add()`, `ScriptBundle`, `StyleBundle` | No-op compile shim — compiles but does nothing |
+| **RouteConfig** | `RouteTable.Routes.MapPageRoute()`, `Routes.Ignore()` | No-op compile shim — compiles but does nothing |
+| **WebFormsForm** | `<form>` POST data capture | Blazor component — wraps forms to feed `FormShim` |
+
+> **Key insight:** With `AddBlazorWebFormsComponents()` + `@inherits WebFormsPageBase`, code-behind files using `Response.Redirect`, `Session`, `Request`, `IsPostBack`, `Page.Title`, `Cache`, `Server.MapPath`, or `ClientScript` **compile and run without modification**. This shifts ~20% of previously-manual Layer 2 work into automatic Layer 1 coverage.
+
+### Migration Shims (14)
+
+These drop-in shims allow Web Forms API calls to compile and function in Blazor. On `WebFormsPageBase`, most are auto-wired — no code changes needed.
+
+| Shim | Web Forms API | Usage on WebFormsPageBase |
+|---|---|---|
+| **RequestShim** | `Request.Cookies`, `Request.Form`, `Request.QueryString`, `Request.Url` | `Request.*` — auto-wired |
+| **FormShim** | `Request.Form["key"]`, `Request.Form.AllKeys`, `Request.Form.Count` | `Request.Form["key"]` — auto-wired via RequestShim |
+| **ResponseShim** | `Response.Redirect()`, `Response.Cookies` | `Response.Redirect()` — auto-wired |
+| **SessionShim** | `Session["key"]`, `Session.Clear()`, `Session.Remove()` | `Session["key"]` — auto-wired |
+| **CacheShim** | `Cache["key"]`, `Cache.Insert()`, `Cache.Remove()` | `Cache["key"]` — auto-wired |
+| **ServerShim** | `Server.MapPath()`, `Server.HtmlEncode()`, `Server.UrlEncode()` | `Server.MapPath()` — auto-wired |
+| **ClientScriptShim** | `Page.ClientScript.RegisterStartupScript()`, `RegisterClientScriptBlock()`, `RegisterClientScriptInclude()`, `GetPostBackEventReference()` | `ClientScript.*` — auto-wired |
+| **ScriptManagerShim** | `ScriptManager.GetCurrent(Page)`, `ScriptManager.RegisterStartupScript()` | Via `ScriptManager.GetCurrent(this)` |
+| **ConfigurationManager** | `ConfigurationManager.AppSettings["key"]`, `ConfigurationManager.ConnectionStrings["name"]` | Call `app.UseConfigurationManagerShim()` in Program.cs |
+| **ViewStateDictionary** | `ViewState["key"]` dictionary-style access | `ViewState["key"]` — auto-wired |
+| **PostBack support** | `__doPostBack()`, `IPostBackEventHandler`, `PostBackEventArgs` | `PostBack` event — auto-wired with JS interop |
+| **BundleConfig** | `BundleTable.Bundles.Add()`, `ScriptBundle`, `StyleBundle` | No-op shim — compiles but does nothing |
+| **RouteConfig** | `RouteTable.Routes.MapPageRoute()`, `RouteTable.Routes.Ignore()` | No-op shim — compiles but does nothing |
+| **FormSubmitEventArgs** | N/A (new for Blazor) | Used with `<WebFormsForm OnSubmit="SetRequestFormData">` |
 
 ### Custom Control Shims
 

@@ -39,7 +39,7 @@ Both should render:
 ## Technology Stack
 
 - **.NET Version**: .NET 10.0 (see `global.json` for SDK version)
-- **Framework**: Blazor (Server-Side and WebAssembly)
+- **Framework**: Blazor (migration target is .NET 10 static SSR; samples also include Server-Side and WebAssembly)
 - **Project Type**: Razor Class Library (`Microsoft.NET.Sdk.Razor`)
 - **Testing Framework**: xUnit with bUnit for Blazor component testing
 - **Assertion Library**: Shouldly
@@ -51,14 +51,32 @@ Both should render:
 
 ```
 /docs                                 -- User documentation (MkDocs)
-/samples                              -- Usage samples
+/samples                              -- Usage samples and migration benchmarks (ordered by complexity ↓)
   BeforeWebForms/                     -- Original Web Forms sample (.NET Framework)
-  AfterBlazorServerSide/              -- Blazor Server-Side samples
-  AfterBlazorClientSide/              -- Blazor WebAssembly samples
+  AfterBlazorServerSide/              -- Blazor Server-Side component samples
+  AfterBlazorServerSide.Tests/        -- Playwright tests for the sample app
+  AfterBlazorClientSide/              -- Blazor WebAssembly component samples
   SharedSampleObjects/                -- Shared models/data for samples
+  WingtipToys/                        -- ★ Current benchmark focus — e-commerce app (products, cart, checkout, identity)
+  AfterWingtipToys/                   -- Migrated WingtipToys output (cleared + regenerated each benchmark run)
+  ContosoUniversity/                  -- Next benchmark — university CRUD app (EF, master-detail, search)
+  AfterContosoUniversity/             -- Migrated Contoso University output
+  DepartmentPortal/                   -- Most complex benchmark — multi-page portal (advanced data binding, nested controls)
+  AfterDepartmentPortal/              -- Migrated DepartmentPortal output
 /src
   BlazorWebFormsComponents/           -- Main component library
   BlazorWebFormsComponents.Test/      -- Unit tests with bUnit
+  BlazorWebFormsComponents.Analyzers/ -- Roslyn analyzers
+  BlazorWebFormsComponents.Analyzers.Test/ -- Analyzer tests
+  BlazorWebFormsComponents.Cli/       -- Web Forms to Blazor CLI pipeline and scaffolding
+  BlazorAjaxToolkitComponents/        -- AJAX Toolkit component library
+  WingtipToys.AcceptanceTests/        -- WingtipToys Playwright acceptance suite
+  ContosoUniversity.AcceptanceTests/  -- ContosoUniversity Playwright acceptance suite
+/tests
+  BlazorWebFormsComponents.Cli.Tests/ -- CLI transform and pipeline tests
+/migration-toolkit                    -- Wrapper scripts, skills, methodology, and benchmark helpers
+  scripts/                            -- bwfc-migrate.ps1, bwfc-scan.ps1, and compatibility wrappers
+  skills/                             -- bwfc-migration, bwfc-identity-migration, bwfc-data-migration, migration-standards, l3-performance-optimization
 ```
 
 ## Component Architecture
@@ -157,21 +175,19 @@ Tests are organized by component in folders matching component names:
     ...
 ```
 
-### bUnit Test Pattern (v2.x)
+### bUnit Test Quick Reference
 
-Tests inherit from `BunitContext` and use the `Render()` method with Razor syntax:
+Tests use bUnit v2 with `.razor` test files that inherit from `BlazorWebFormsTestContext` (which extends `BunitContext` with pre-registered BWFC services). Use `Render(@<Component />)` with inline Razor syntax and Shouldly assertions.
 
 ```razor
-@inherits BunitContext
+@inherits BlazorWebFormsTestContext
 
 @code {
     [Fact]
     public void ComponentName_Scenario_ExpectedBehavior()
     {
         var cut = Render(@<Button OnClick="HandleClick">Submit</Button>);
-
-        cut.Find("button").Click();
-
+        cut.Find("input").Click();
         ClickCount.ShouldBe(1);
     }
 
@@ -180,104 +196,11 @@ Tests inherit from `BunitContext` and use the `Render()` method with Razor synta
 }
 ```
 
-### Using the xUnit Logger (Optional)
+**Test naming:** `ComponentName_Scenario_ExpectedBehavior` (e.g., `Button_Click_InvokesHandler`)
 
-The test infrastructure supports optional logging via xUnit's `ITestOutputHelper` for debugging test execution. This is useful when you need to capture diagnostic output during test runs.
+**Assertions:** Use Shouldly (`ShouldBe`, `ShouldBeTrue`, `ShouldContain`) and bUnit's `MarkupMatches()` for HTML comparison.
 
-To enable logging in a test, inject `ITestOutputHelper` into the test constructor and pass it to the base constructor:
-
-```razor
-@using Microsoft.Extensions.Logging
-
-@code {
-    private ILogger<MyTest> _logger;
-
-    public MyTest(ITestOutputHelper output) : base(output)
-    {
-    }
-
-    [Fact]
-    public void MyComponent_WithDiagnostics_LogsExpectedMessages()
-    {
-        _logger = Services.GetService<ILogger<MyTest>>();
-        _logger?.LogInformation("Setting up test");
-
-        var cut = Render(@<MyComponent />);
-
-        _logger?.LogDebug("Component rendered successfully");
-
-        // Your test assertions...
-    }
-}
-```
-
-**When to use logging:**
-- Only add logging to tests where diagnostic output is helpful for debugging
-- Use for complex tests that need visibility into execution flow
-- Leave most simple tests without logging to keep them clean and focused
-- Logging is completely optional and does not affect test execution
-
-**Note:** The `BlazorWebFormsTestContext` base class automatically configures the xUnit logger when `ITestOutputHelper` is provided. Log messages appear in test output when tests fail.
-
-### Test Method Naming
-
-Use the pattern: `ComponentName_Scenario_ExpectedBehavior`
-
-Examples:
-- `Button_Click_InvokesHandler`
-- `DataList_EmptySource_ShowsEmptyTemplate`
-- `RequiredFieldValidator_BlankInput_DisplaysError`
-
-### Service Registration
-
-```razor
-@code {
-    [Fact]
-    public void Component_WithService_BehavesCorrectly()
-    {
-        Services.AddSingleton<IMyService>(new FakeService());
-
-        var cut = Render(@<MyComponent />);
-    }
-}
-```
-
-### Authentication Testing
-
-```razor
-@code {
-    [Fact]
-    public void SecureComponent_AuthenticatedUser_ShowsContent()
-    {
-        var auth = this.AddTestAuthorization();
-        auth.SetAuthorized("testuser");
-        auth.SetRoles("Admin", "User");
-
-        var cut = Render(@<SecureComponent />);
-    }
-}
-```
-
-### Accessing Component Instance
-
-When testing component properties or state, use `FindComponent<T>()`:
-
-```razor
-@code {
-    [Fact]
-    public void TreeView_StaticNodes_HasCorrectNodeCount()
-    {
-        var cut = Render(@<TreeView>...</TreeView>);
-
-        cut.FindComponent<TreeView>().Instance.Nodes.Count.ShouldBe(4);
-    }
-}
-```
-
-### Assertions
-- Use Shouldly for assertions (`value.ShouldBe(expected)`)
-- Use `MarkupMatches()` for HTML comparison
-- Follow Arrange-Act-Assert pattern in test methods
+> **For comprehensive test authoring guidance** — data-bound components, validation, event callbacks, JS interop mocking, service registration, authentication, xUnit logger integration — see the **bunit-testing** skill (`.github/skills/bunit-testing/SKILL.md`).
 
 ## Design Principles
 
@@ -286,7 +209,47 @@ When testing component properties or state, use `FindComponent<T>()`:
 3. **Minimal API Surface**: Focus on essential features, not full Web Forms API
 4. **No DataSources**: Use repository pattern instead of Web Forms DataSource controls
 5. **No ViewState**: Store state in private fields or session (ViewState property exists but is syntax-only)
-6. **No Postback**: Blazor's event model replaces postback
+6. **PostBack Compatibility**: `WebFormsPageBase` provides `IsPostBack`, `PostBack` event, and `__doPostBack()` JS interop bridge
+
+## Migration Rules
+
+These are hard rules for migration work in this repository:
+
+1. **Use the toolkit entry point**: Start project migrations with `migration-toolkit/scripts/bwfc-migrate.ps1` or the `webforms-to-blazor migrate` CLI it forwards to. Do not invent ad hoc regex converters or one-off migration scripts.
+2. **Always target Blazor static SSR**: Generated apps target .NET 10 static server-side rendering. Do not switch the whole app to interactive Blazor Server; only opt into interactive render modes deliberately and per page.
+3. **Trust the shims**: `WebFormsPageBase` preserves `Page.Request`, `Page.Response`, `Page.Session`, `Page.Server`, `Page.Cache`, `Page.ClientScript`, `IsPostBack`, and `ViewState`. Keep migrated code-behind compiling against those shims instead of rewriting to native ASP.NET Core services during Layer 1 or Layer 2 work.
+4. **Preserve BWFC data controls**: Never replace `ListView`, `FormView`, `GridView`, `DataList`, or `Repeater` with manual HTML tables or divs. Fix the generated BWFC markup, templates, item types, or child components instead.
+5. **Register transforms twice**: Every new CLI transform must be registered in both `src/BlazorWebFormsComponents.Cli/Program.cs` DI and `tests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs` so the runtime pipeline and isolated test pipeline stay aligned.
+6. **Respect quarantine boundaries**: `PageQuarantineDetector` should quarantine non-essential `Account/`, `Admin/`, `Checkout/`, mobile, payment, or compile-surface blocker pages, but benchmark-critical home, about, contact, product, catalog, and cart flows stay on the runnable path whenever possible.
+
+### Migration Benchmark Progression
+
+The `samples/` folder contains benchmark apps ordered by increasing complexity. Each app exercises more of the CLI and BWFC component surface:
+
+| Sample | Complexity | Key Challenges | Status |
+|--------|-----------|----------------|--------|
+| **WingtipToys** | ★★☆ | E-commerce: products, cart, checkout, identity, EF data binding | **Current focus** — active benchmark runs |
+| **ContosoUniversity** | ★★☆ | University CRUD: master-detail, search, EF migrations | Acceptance tests exist |
+| **DepartmentPortal** | ★★★ | Multi-page portal: advanced data binding, nested controls, complex layouts | Future target — most sophisticated |
+
+Always complete the current benchmark focus before moving to the next. Improvements to the CLI and toolkit should be validated against the current focus app first, then regression-tested against simpler samples.
+
+## Migration Shims
+
+The library provides compile-compatibility shims on `WebFormsPageBase` so migrated code-behind compiles unchanged:
+
+- **`Page.Request`** — `RequestShim` wrapping QueryString, Cookies, Url, Form (via `FormShim`)
+- **`Page.Response`** — `ResponseShim` wrapping `Redirect()` (auto-strips `~/` and `.aspx`) and Cookies
+- **`Page.Session`** — `SessionShim` with `ISession` sync and in-memory fallback
+- **`Page.Server`** — `ServerShim` wrapping `MapPath()`, `HtmlEncode()`, `UrlEncode()`
+- **`Page.Cache`** — `CacheShim` wrapping `IMemoryCache` with absolute/sliding expiration
+- **`Page.ClientScript`** — `ClientScriptShim` for `RegisterStartupScript()`, `RegisterClientScriptBlock()`, `GetPostBackEventReference()`
+- **`Page.ViewState`** — `ViewStateDictionary` per-component dictionary
+- **`<WebFormsForm>`** — Component enabling `Request.Form["key"]` in interactive mode via JS interop
+- **`ScriptManagerShim`** — `ScriptManager.GetCurrent(page)` pattern delegating to `ClientScriptShim`
+- **`ConfigurationManager`** — `AppSettings["key"]` and `ConnectionStrings["name"]` from `IConfiguration`
+
+All shims are auto-registered by `builder.Services.AddBlazorWebFormsComponents()` in `Program.cs`.
 
 ## Components Requiring Implementation
 
@@ -296,6 +259,81 @@ When adding new components:
 3. Add unit tests in matching folder under `/src/BlazorWebFormsComponents.Test/`
 4. Add sample page in `/samples/AfterBlazorServerSide/Pages/ControlSamples/`
 5. Document in `/docs/` folder (see Documentation Requirements below)
+
+## Migration CLI & Toolkit
+
+### Primary Entry Points
+
+- `src/BlazorWebFormsComponents.Cli/Program.cs` defines the `webforms-to-blazor` CLI entry point and command surface (`migrate`, `convert`, `prescan`, `scan`, `assets extract`, `edmx convert`).
+- `migration-toolkit/scripts/bwfc-migrate.ps1` is the supported migration-toolkit wrapper. It resolves the CLI project and forwards to `migrate` or `prescan` instead of maintaining a separate regex pipeline.
+- The migration-toolkit skill set currently includes `bwfc-migration`, `bwfc-identity-migration`, `bwfc-data-migration`, `migration-standards`, and `l3-performance-optimization`.
+
+### Pipeline Overview
+
+`MigrationPipeline` orchestrates the full migration sequence:
+
+1. `ProjectScaffolder` generates the .NET 10 Blazor static SSR scaffold unless `--skip-scaffold` is used.
+2. `WebConfigTransformer` converts `Web.config` settings into `appsettings.json`.
+3. Ordered markup transforms run first.
+4. Ordered code-behind transforms run second.
+5. `SemanticPatternCatalog` applies higher-level page rewrites.
+6. `PageQuarantineDetector` performs a late compile-surface pass and writes `migration-artifacts/quarantine-manifest.json` when pages must be stubbed.
+7. Static assets, source files, App_Start artifacts, NuGet assets, EDMX output, and redirect annotations are copied or generated.
+
+The CLI currently has **24 core markup transforms plus directive/infrastructure markup passes** and **27 code-behind transforms** wired through `Program.cs`.
+
+### Transform Registration Pattern
+
+When adding a transform:
+
+1. Create the transform class in `src/BlazorWebFormsComponents.Cli/Transforms/`.
+2. Register it in `BuildServiceProvider()` in `src/BlazorWebFormsComponents.Cli/Program.cs`.
+3. Add it to `CreateDefaultPipeline()` in `tests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs`.
+4. Add or update focused transform tests and pipeline coverage.
+
+```csharp
+// Program.cs
+services.AddSingleton<IMarkupTransform, MyNewTransform>();
+
+// TestHelpers.cs
+var markupTransforms = new List<IMarkupTransform>
+{
+    new MyNewTransform(),
+};
+```
+
+### Scaffolding System
+
+- `RuntimeDetector` aggregates runtime signal detectors for Entity Framework, session, identity, and `Global.asax` usage.
+- `ProjectScaffolder` generates the project file, `_Imports.razor`, `Components/App.razor`, `Components/Routes.razor`, `Components/Layout/MainLayout.razor`, and launch settings.
+- `ProgramCsEmitter` generates `Program.cs` for .NET 10 static SSR, including `AddRazorComponents()`, `AddBlazorWebFormsComponents()`, `UseStaticFiles()`, and `UseAntiforgery()`.
+- `DatabaseProviderDetector` and `WebConfigTransformer` carry forward database provider and connection-string wiring.
+
+### Quarantine System
+
+- `PageQuarantineDetector` creates build-safe placeholder pages for compile-surface blockers and emits a manifest under `migration-artifacts/quarantine-manifest.json`.
+- Essential benchmark pages (home, about, contact, product, catalog, shopping cart, add-to-cart flows) are exempt from incidental quarantine signals.
+- Quarantined pages keep stub `.razor` and `.razor.cs` files plus the transformed original code-behind as an artifact for later Layer 2 or Layer 3 repair.
+
+### Acceptance Test Suites
+
+Use these suites as the migration quality gate for benchmark apps:
+
+```bash
+# WingtipToys migrated app
+# Set WINGTIPTOYS_BASE_URL first if the app is not on https://localhost:5001
+
+dotnet build src/WingtipToys.AcceptanceTests
+pwsh src/WingtipToys.AcceptanceTests/bin/Debug/net10.0/playwright.ps1 install chromium
+dotnet test src/WingtipToys.AcceptanceTests
+
+# ContosoUniversity benchmark/original app
+# Set CONTOSO_BASE_URL first if the app is not on http://localhost:44380
+
+dotnet build src/ContosoUniversity.AcceptanceTests
+pwsh src/ContosoUniversity.AcceptanceTests/bin/Debug/net10.0/playwright.ps1 install chromium
+dotnet test src/ContosoUniversity.AcceptanceTests
+```
 
 ## Documentation Requirements
 
@@ -355,8 +393,31 @@ dotnet build
 # Run tests
 dotnet test
 
+# Run CLI tests
+dotnet test tests/BlazorWebFormsComponents.Cli.Tests
+
+# Prescan a Web Forms app
+dotnet run --project src/BlazorWebFormsComponents.Cli -- prescan -i samples/WingtipToys
+
+# Run the migration CLI
+dotnet run --project src/BlazorWebFormsComponents.Cli -- migrate -i samples/WingtipToys -o samples/AfterWingtipToys
+
 # Run server-side samples
 dotnet run --project samples/AfterBlazorServerSide
+```
+
+### Acceptance Test Commands
+
+```bash
+# WingtipToys migrated app (set WINGTIPTOYS_BASE_URL first if needed)
+dotnet build src/WingtipToys.AcceptanceTests
+pwsh src/WingtipToys.AcceptanceTests/bin/Debug/net10.0/playwright.ps1 install chromium
+dotnet test src/WingtipToys.AcceptanceTests
+
+# ContosoUniversity benchmark/original app (set CONTOSO_BASE_URL first if needed)
+dotnet build src/ContosoUniversity.AcceptanceTests
+pwsh src/ContosoUniversity.AcceptanceTests/bin/Debug/net10.0/playwright.ps1 install chromium
+dotnet test src/ContosoUniversity.AcceptanceTests
 ```
 
 ## Key Interfaces
@@ -516,6 +577,25 @@ Use these for callouts:
 !!! danger
     Critical information
 ```
+
+## Maintenance Matrix
+
+When making changes, ensure all related files are updated:
+
+| Change Made | Files to Update |
+|---|---|
+| **New component added** | `src/BlazorWebFormsComponents/ComponentName.razor` + `.razor.cs`, `src/BlazorWebFormsComponents.Test/ComponentName/*.razor` (tests), `samples/AfterBlazorServerSide/Pages/ControlSamples/ComponentName/*.razor` (sample), `docs/Category/ComponentName.md` (docs), `mkdocs.yml` (`nav:` entry), `README.md` (component link), `status.md` (status table) |
+| **Existing component modified** | Unit tests in `src/BlazorWebFormsComponents.Test/ComponentName/`, sample page if behavior changed, `docs/Category/ComponentName.md` if API changed |
+| **New migration shim added** | Shim class in `src/BlazorWebFormsComponents/`, register in `ServiceCollectionExtensions.cs` via `AddBlazorWebFormsComponents()`, update `docs/Migration/` guide, update `copilot-instructions.md` Migration Shims section |
+| **Base class changed** (`BaseWebFormsComponent`, `BaseStyledComponent`, `DataBoundComponent`) | Check all components inheriting from it — changes cascade to every component. Run full test suite. |
+| **CLI transform added** | Transform in `src/BlazorWebFormsComponents.Cli/Transforms/`, register it in `src/BlazorWebFormsComponents.Cli/Program.cs` and `tests/BlazorWebFormsComponents.Cli.Tests/TestHelpers.cs`, add or update transform tests, update `docs/cli/transforms.md`, update `docs/cli/index.md` transform count |
+| **CLI scaffolding/runtime changed** | Files in `src/BlazorWebFormsComponents.Cli/Scaffolding/` or `Pipeline/`, matching tests in `tests/BlazorWebFormsComponents.Cli.Tests/`, `migration-toolkit/README.md` or methodology docs if operator workflow changes, and `.github/copilot-instructions.md` if migration guidance changes |
+| **Migration toolkit wrapper or skill changed** | Matching files in `migration-toolkit/scripts/` or `migration-toolkit/skills/`, relevant `docs/Migration/` or `docs/cli/` pages, and `.github/copilot-instructions.md` when the recommended migration workflow changes |
+| **Analyzer rule added** | Rule in `src/BlazorWebFormsComponents.Analyzers/`, test in `src/BlazorWebFormsComponents.Analyzers.Test/`, update `docs/Analyzers/` |
+| **Target framework changed** | `Directory.Build.props` (version properties), all `.csproj` files (`TargetFrameworks`), `global.json`, `.github/workflows/build.yml` (dotnet-version), `.github/copilot-setup-steps.yml` |
+| **Documentation added/changed** | `docs/` markdown file, `mkdocs.yml` (`nav:` entry if new), verify local build passes with `docker run --rm -v "$(pwd):/docs" mkdocs build --strict` |
+| **NuGet dependency changed** | `.csproj` file, `Directory.Build.props` if version is centralized there, test that all three target frameworks build |
+| **Project structure changed** | `AGENTS.md` (repository structure), `README.md`, `CONTRIBUTING.md`, `.github/copilot-instructions.md` (project structure section) |
 
 ## Contributing
 

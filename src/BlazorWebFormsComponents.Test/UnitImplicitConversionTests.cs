@@ -1,6 +1,7 @@
 using BlazorWebFormsComponents.Enums;
 using Shouldly;
 using System;
+using System.ComponentModel;
 using Xunit;
 
 namespace BlazorWebFormsComponents.Test;
@@ -120,5 +121,22 @@ public class UnitImplicitConversionTests
 		Unit implicitResult = "125px";
 
 		implicitResult.ShouldBe(Unit.Pixel(125));
+	}
+
+	[Fact]
+	public void TypeDescriptorConverter_ParsesPixelString()
+	{
+		var converter = TypeDescriptor.GetConverter(typeof(Unit));
+
+		converter.CanConvertFrom(typeof(string)).ShouldBeTrue();
+		converter.ConvertFromInvariantString("500px").ShouldBe(new Unit("500px"));
+	}
+
+	[Fact]
+	public void TypeDescriptorConverter_ParsesPlainNumericStringAsPixels()
+	{
+		var converter = TypeDescriptor.GetConverter(typeof(Unit));
+
+		converter.ConvertFromInvariantString("500").ShouldBe(Unit.Pixel(500));
 	}
 }

@@ -42,7 +42,11 @@ markdown_extensions:
   - pymdownx.details
   - pymdownx.tabbed:
       alternate_style: true
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
@@ -54,6 +58,7 @@ plugins:
       glob:
         - "_overrides/*"
         - "Dockerfile"
+        - "migration-tests/*"
   - git-revision-date-localized:
       type: iso_datetime
   - macros
@@ -67,6 +72,7 @@ nav:
   - Themes and Skins: themes-and-skins.md
   - CLI Tool:
     - Overview: cli/index.md
+    - Semantic Pattern Catalog: cli/semantic-pattern-catalog.md
     - Transform Reference: cli/transforms.md
     - TODO Categories: cli/todo-conventions.md
     - Report Format: cli/report.md
@@ -126,6 +132,7 @@ nav:
     - Menu: NavigationControls/Menu.md
     - SiteMapPath: NavigationControls/SiteMapPath.md
     - TreeView: NavigationControls/TreeView.md
+    - Wizard: NavigationControls/Wizard.md
   - Login Controls:
     - ChangePassword: LoginControls/ChangePassword.md
     - CreateUserWizard: LoginControls/CreateUserWizard.md
@@ -187,8 +194,12 @@ nav:
     - ViewState: UtilityFeatures/ViewState.md
     - ViewState and PostBack Shim: UtilityFeatures/ViewStateAndPostBack.md
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
+    - WebFormsForm: UtilityFeatures/WebFormsForm.md
   - Migration:
       - Getting Started: Migration/readme.md
+      - Quick Start Guide: Migration/QuickStart.md
+      - Three-Layer Methodology: Migration/Methodology.md
+      - Control Coverage: Migration/ControlCoverage.md
       - Strangler Fig Pattern: Migration/StranglerFigPattern.md
       - Phase 1 - Compilation Shims:
           - ConfigurationManager: Migration/Phase1-ConfigurationManager.md
@@ -205,6 +216,7 @@ nav:
           - Migration Strategies: Migration/Strategies.md
           - .NET Standard to the Rescue: Migration/NET-Standard.md
           - Automated Migration Guide: Migration/AutomatedMigration.md
+          - Automated Migration with Copilot: Migration/AutomatedMigrationWithCopilot.md
           - Roslyn Analyzers: Migration/Analyzers.md
       - Guides:
           - ClientScript Migration: Migration/ClientScriptMigrationGuide.md
@@ -213,13 +225,17 @@ nav:
           - User Controls: Migration/User-Controls.md
           - Custom Controls: Migration/Custom-Controls.md
           - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
+          - Custom WebControl (RenderContents): Migration/CustomWebControl.md
           - FindControl Migration: Migration/FindControl-Migration.md
           - Deferred Controls: Migration/DeferredControls.md
           - Themes and Skins: Migration/ThemesAndSkins.md
           - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
-  - Migration Tests:
-      - Overview: migration-tests/README.md
-      - WingtipToys 2026-03-04: migration-tests/wingtiptoys-2026-03-04/report.md
+      - Copilot Skills (AI-Assisted):
+          - Overview: Migration/CopilotSkills/Overview.md
+          - Core Migration: Migration/CopilotSkills/CoreMigration.md
+          - Identity & Auth: Migration/CopilotSkills/IdentityMigration.md
+          - Data & Architecture: Migration/CopilotSkills/DataMigration.md
+      - Migration Checklist Template: Migration/ChecklistTemplate.md
   - Analyzers:
       - BWFC022: Analyzers/BWFC022.md
       - BWFC023: Analyzers/BWFC023.md

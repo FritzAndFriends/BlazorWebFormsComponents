@@ -1,5 +1,6 @@
 using BlazorWebFormsComponents.Cli.Pipeline;
 using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
+using BlazorWebFormsComponents.Cli.Analysis;
 
 namespace BlazorWebFormsComponents.Cli.Tests.TransformUnit;
 
@@ -32,6 +33,18 @@ public class DataBindTransformTests
     }
 
     [Fact]
+    public void RecordsThisPrefixedDataSourceAssignment_InMetadata()
+    {
+        var input = @"this.gvStudents.DataSource = GetStudents();";
+        var metadata = TestMetadata(input);
+
+        _transform.Apply(input, metadata);
+
+        Assert.True(metadata.DataBindMap.ContainsKey("gvStudents"));
+        Assert.Equal("GetStudents()", metadata.DataBindMap["gvStudents"]);
+    }
+
+    [Fact]
     public void RemovesDataBindCall()
     {
         var input = @"gvStudents.DataSource = GetStudents();
@@ -40,6 +53,21 @@ var x = 42;";
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.DoesNotContain("DataBind()", result);
+        Assert.Contains("var x = 42;", result);
+    }
+
+    [Fact]
+    public void RemovesThisPrefixedDataBindCall_WithoutLeavingDanglingThis()
+    {
+        var input = """
+            this.gvStudents.DataBind();
+            var x = 42;
+            """;
+
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.DoesNotContain("DataBind()", result);
+        Assert.DoesNotContain("this.", result);
         Assert.Contains("var x = 42;", result);
     }
 
@@ -79,6 +107,15 @@ ddlDepts.DataBind();";
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Contains("gvStudents.DataSource = GetStudents();", result);
+    }
+
+    [Fact]
+    public void PreservesThisPrefixedDataSourceAssignment_LineInOutput()
+    {
+        var input = @"this.gvStudents.DataSource = GetStudents();";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("this.gvStudents.DataSource = GetStudents();", result);
     }
 
     // --- InjectItemsAttributes static method ---
@@ -135,5 +172,41 @@ ddlDepts.DataBind();";
     public void OrderIs800()
     {
         Assert.Equal(800, _transform.Order);
+    }
+
+    [Fact]
+    public void RemovesSelfDataBind_ForUserControlsWhenSignalPresent()
+    {
+        var input = """
+            DataBind();
+            this.DataBind();
+            """;
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Products.ascx",
+            OutputFilePath = "Products.razor",
+            FileType = FileType.Control,
+            OriginalContent = input,
+            AscxDescriptor = new AscxDescriptor
+            {
+                ControlName = "Products",
+                HasDataBindCall = true
+            }
+        };
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.DoesNotContain("DataBind()", result);
+    }
+
+    [Fact]
+    public void KeepsSelfDataBind_ForPages()
+    {
+        var input = "DataBind();";
+        var metadata = TestMetadata(input);
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Equal(input, result);
     }
 }

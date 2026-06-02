@@ -4,7 +4,7 @@
 
 @if (Visible)
 {
-	<select id="@ClientID" class="@CssClass" style="@Style" title="@ToolTip"
+	<select id="@ClientID" name="@FormName" class="@CssClass" style="@Style" title="@ToolTip"
 			disabled="@(!Enabled)" @onchange="HandleChange"
 			@attributes="GetAutoPostBackAttributes(AutoPostBack)">
 		@foreach (var item in GetItems())

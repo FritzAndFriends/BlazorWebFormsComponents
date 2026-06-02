@@ -1,0 +1,82 @@
+{
+  "Timestamp": "2026-05-19T20:25:22.073418+00:00",
+  "SourceProject": "D:\\BlazorWebFormsComponents\\samples\\ContosoUniversity\\ContosoUniversity",
+  "PackagesFolder": "D:\\BlazorWebFormsComponents\\samples\\ContosoUniversity\\packages;C:\\Users\\jeffr\\.nuget\\packages",
+  "OutputProject": "D:\\BlazorWebFormsComponents\\samples\\AfterContosoUniversity",
+  "TotalPackages": 10,
+  "PackagesWithAssets": 0,
+  "TotalFilesExtracted": 0,
+  "ManifestOnly": false,
+  "Packages": [
+    {
+      "PackageId": "EntityFramework",
+      "Version": "6.1.3",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    },
+    {
+      "PackageId": "Microsoft.ApplicationInsights",
+      "Version": "2.1.0",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    },
+    {
+      "PackageId": "Microsoft.ApplicationInsights.Agent.Intercept",
+      "Version": "1.2.1",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    },
+    {
+      "PackageId": "Microsoft.ApplicationInsights.DependencyCollector",
+      "Version": "2.1.0",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    },
+    {
+      "PackageId": "Microsoft.ApplicationInsights.PerfCounterCollector",
+      "Version": "2.1.0",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    },
+    {
+      "PackageId": "Microsoft.ApplicationInsights.Web",
+      "Version": "2.1.0",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    },
+    {
+      "PackageId": "Microsoft.ApplicationInsights.WindowsServer",
+      "Version": "2.1.0",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    },
+    {
+      "PackageId": "Microsoft.ApplicationInsights.WindowsServer.TelemetryChannel",
+      "Version": "2.1.0",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    },
+    {
+      "PackageId": "Microsoft.CodeDom.Providers.DotNetCompilerPlatform",
+      "Version": "1.0.0",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    },
+    {
+      "PackageId": "Microsoft.Net.Compilers",
+      "Version": "1.0.0",
+      "Status": "skipped",
+      "Reason": "Build/runtime dependency \u2014 no static assets expected",
+      "Files": []
+    }
+  ]
+}

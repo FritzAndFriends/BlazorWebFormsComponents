@@ -12,16 +12,16 @@
 
 | Name | Role | Charter | Status |
 |------|------|---------|--------|
-| Forge | Lead / Web Forms Reviewer | `.ai-team/agents/forge/charter.md` | ✅ Active |
-| Cyclops | Component Dev | `.ai-team/agents/cyclops/charter.md` | ✅ Active |
-| Beast | Technical Writer | `.ai-team/agents/beast/charter.md` | ✅ Active |
-| Jubilee | Sample Writer | `.ai-team/agents/jubilee/charter.md` | ✅ Active |
-| Rogue | QA Analyst | `.ai-team/agents/rogue/charter.md` | ✅ Active |
-| Colossus | Integration Test Engineer | `.ai-team/agents/colossus/charter.md` | ✅ Active |
-| Psylocke | Skills Engineer | `.ai-team/agents/psylocke/charter.md` | ✅ Active |
-| Bishop | Migration Tooling Dev | `.ai-team/agents/bishop/charter.md` | ✅ Active |
-| Scribe | Session Logger | `.ai-team/agents/scribe/charter.md` | 📋 Silent |
-| Ralph | Work Monitor | — | 🔄 Monitor |
+| Forge | Lead / Web Forms Reviewer | `.squad/agents/forge/charter.md` |  Active |
+| Cyclops | Component Dev | `.squad/agents/cyclops/charter.md` |  Active |
+| Beast | Technical Writer | `.squad/agents/beast/charter.md` |  Active |
+| Jubilee | Sample Writer | `.squad/agents/jubilee/charter.md` |  Active |
+| Rogue | QA Analyst | `.squad/agents/rogue/charter.md` |  Active |
+| Colossus | Integration Test Engineer | `.squad/agents/colossus/charter.md` |  Active |
+| Psylocke | Skills Engineer | `.squad/agents/psylocke/charter.md` |  Active |
+| Bishop | Migration Tooling Dev | `.squad/agents/bishop/charter.md` |  Active |
+| Scribe | Session Logger | `.squad/agents/scribe/charter.md` |  Silent |
+| Ralph | Work Monitor |  |  Monitor |
 
 ## Project Context
 

@@ -16,7 +16,7 @@ public class ScaffoldingTests : IDisposable
     {
         _tempDir = Path.Combine(Path.GetTempPath(), $"bwfc-scaffold-{Guid.NewGuid():N}");
         Directory.CreateDirectory(_tempDir);
-        _scaffolder = new ProjectScaffolder(new DatabaseProviderDetector());
+        _scaffolder = TestHelpers.CreateDefaultScaffolder();
     }
 
     public void Dispose()
@@ -45,7 +45,27 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("Fritz.BlazorWebFormsComponents", csproj);
         Assert.Contains("<TargetFramework>net10.0</TargetFramework>", csproj);
         Assert.Contains("<Nullable>enable</Nullable>", csproj);
+        Assert.Contains("<EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>", csproj);
         Assert.Contains("Microsoft.NET.Sdk.Web", csproj);
+        Assert.DoesNotContain("System.Web.HttpUtility", csproj);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_UsesProjectReference_WhenOutputIsInsideRepo()
+    {
+        var repoRoot = Path.Combine(_tempDir, "repo");
+        var srcDir = Path.Combine(repoRoot, "src", "BlazorWebFormsComponents");
+        var outputDir = Path.Combine(repoRoot, "samples", "AfterTestApp");
+
+        Directory.CreateDirectory(srcDir);
+        Directory.CreateDirectory(outputDir);
+        File.WriteAllText(Path.Combine(srcDir, "BlazorWebFormsComponents.csproj"), "<Project />");
+
+        var result = _scaffolder.Scaffold(repoRoot, outputDir, "TestApp");
+        var csproj = result.Files["csproj"].Content;
+
+        Assert.Contains(@"<ProjectReference Include=""..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj"" />", csproj);
+        Assert.DoesNotContain(@"<PackageReference Include=""Fritz.BlazorWebFormsComponents"" Version=""*"" />", csproj);
     }
 
     [Fact]
@@ -65,8 +85,25 @@ public class ScaffoldingTests : IDisposable
 
         Assert.Contains("AddBlazorWebFormsComponents()", program);
         Assert.Contains("AddRazorComponents()", program);
-        Assert.Contains("AddInteractiveServerComponents()", program);
+        Assert.DoesNotContain("AddInteractiveServerComponents()", program);
+        Assert.DoesNotContain("AddInteractiveServerRenderMode()", program);
         Assert.Contains("using BlazorWebFormsComponents;", program);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_ProgramCs_UsesStaticFilesMiddleware()
+    {
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+
+        Assert.Contains("app.MapStaticAssets();", result.Files["program"].Content);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_ProgramCs_UsesAntiforgeryMiddleware()
+    {
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+
+        Assert.Contains("app.UseAntiforgery();", result.Files["program"].Content);
     }
 
     [Fact]
@@ -77,7 +114,7 @@ public class ScaffoldingTests : IDisposable
         var program = result.Files["program"].Content;
 
         Assert.Contains("MapRazorComponents<TestApp.Components.App>()", program);
-        Assert.Contains("AddInteractiveServerRenderMode()", program);
+        Assert.DoesNotContain("AddInteractiveServerRenderMode()", program);
     }
 
     [Fact]
@@ -88,16 +125,31 @@ public class ScaffoldingTests : IDisposable
         var imports = result.Files["imports"].Content;
 
         // Standard Blazor usings
+        Assert.Contains("@namespace TestApp", imports);
         Assert.Contains("@using Microsoft.AspNetCore.Components.Web", imports);
         Assert.Contains("@using Microsoft.AspNetCore.Components.Forms", imports);
         Assert.Contains("@using Microsoft.AspNetCore.Components.Routing", imports);
         Assert.Contains("@using Microsoft.JSInterop", imports);
         // BWFC usings
         Assert.Contains("@using BlazorWebFormsComponents", imports);
+        Assert.Contains("@using BlazorWebFormsComponents.Enums", imports);
+        Assert.Contains("@using BlazorWebFormsComponents.Validations", imports);
+        Assert.DoesNotContain("@using static Microsoft.AspNetCore.Components.Web.RenderMode", imports);
         // Project namespace
-        Assert.Contains("@using TestApp", imports);
+        Assert.Contains("@using global::TestApp", imports);
         // WebFormsPageBase inherits
         Assert.Contains("@inherits BlazorWebFormsComponents.WebFormsPageBase", imports);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_GeneratesModelsUsing_WhenModelsExist()
+    {
+        Directory.CreateDirectory(Path.Combine(_tempDir, "Models"));
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var imports = result.Files["imports"].Content;
+
+        Assert.Contains("@using global::TestApp.Models", imports);
     }
 
     [Fact]
@@ -110,7 +162,9 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("<Routes />", appRazor);
         Assert.Contains("<HeadOutlet />", appRazor);
         Assert.Contains("<!DOCTYPE html>", appRazor);
-        Assert.Contains("blazor.web.js", appRazor);
+        Assert.Contains("_framework/blazor.web.js", appRazor);
+        Assert.Contains("_content/Fritz.BlazorWebFormsComponents/js/Basepage.js", appRazor);
+        Assert.Contains("Generated for .NET 10 static SSR migration output", appRazor);
     }
 
     [Fact]
@@ -123,6 +177,17 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("<Router", routes);
         Assert.Contains("RouteView", routes);
         Assert.Contains("FocusOnNavigate", routes);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_GeneratesMainLayout()
+    {
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+
+        var layout = result.Files["layout"].Content;
+
+        Assert.Contains("@inherits LayoutComponentBase", layout);
+        Assert.Contains("@Body", layout);
     }
 
     [Fact]
@@ -176,7 +241,133 @@ public class ScaffoldingTests : IDisposable
         var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
 
         Assert.True(result.HasModels);
-        Assert.Contains("EntityFrameworkCore", result.Files["csproj"].Content);
+        Assert.False(result.RuntimeProfile.NeedsEntityFramework);
+        Assert.DoesNotContain("EntityFrameworkCore", result.Files["csproj"].Content);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_DetectsDbContext_AndGeneratesEntityFrameworkRuntimeWiring()
+    {
+        Directory.CreateDirectory(Path.Combine(_tempDir, "Models"));
+        File.WriteAllText(Path.Combine(_tempDir, "Models", "CatalogContext.cs"), """
+            using Microsoft.EntityFrameworkCore;
+
+            namespace TestApp.Models;
+
+            public class CatalogContext : DbContext
+            {
+                public CatalogContext(DbContextOptions<CatalogContext> options)
+                    : base(options)
+                {
+                }
+            }
+            """);
+        File.WriteAllText(Path.Combine(_tempDir, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <connectionStrings>
+                <add name="CatalogConnection" connectionString="Server=(localdb)\\MSSQLLocalDB;Database=Catalog;" providerName="System.Data.SqlClient" />
+              </connectionStrings>
+            </configuration>
+            """);
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.True(result.RuntimeProfile.NeedsEntityFramework);
+        Assert.Equal("CatalogContext", result.RuntimeProfile.DbContextClassName);
+        Assert.Contains("CatalogConnection", result.RuntimeProfile.ConnectionStringNames);
+        Assert.Contains("AddDbContext<global::TestApp.Models.CatalogContext>", program);
+        Assert.Contains("GetConnectionString(\"CatalogConnection\")", program);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_DetectsSessionUsage_AndGeneratesSessionRuntimeWiring()
+    {
+        File.WriteAllText(Path.Combine(_tempDir, "Default.aspx.cs"), """
+            namespace TestApp;
+
+            public partial class _Default
+            {
+                public void AddToCart()
+                {
+                    Session["CartId"] = "cart-123";
+                }
+            }
+            """);
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.True(result.RuntimeProfile.NeedsSession);
+        Assert.Contains("builder.Services.AddSession(options =>", program);
+        Assert.Contains("app.UseSession();", program);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_DetectsIdentityPages_AndGeneratesIdentityRuntimeWiring()
+    {
+        Directory.CreateDirectory(Path.Combine(_tempDir, "Account"));
+        File.WriteAllText(Path.Combine(_tempDir, "Account", "Login.aspx"), "<%@ Page Language=\"C#\" %>");
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.True(result.RuntimeProfile.NeedsIdentity);
+        Assert.Contains("AddDefaultIdentity<ApplicationUser>", program);
+        Assert.Contains("using TestApp.Models;", program);
+        Assert.Contains("ConfigureApplicationCookie", program);
+        Assert.Contains("options.LoginPath = \"/Account/Login\";", program);
+        Assert.Contains("options.LogoutPath = \"/Account/Logout\";", program);
+        Assert.Contains("app.UseAuthentication();", program);
+        Assert.Contains("app.UseAuthorization();", program);
+
+        // Identity stub files should be generated
+        Assert.True(result.Files.ContainsKey("applicationUser"));
+        Assert.Contains("class ApplicationUser : IdentityUser", result.Files["applicationUser"].Content);
+        Assert.True(result.Files.ContainsKey("applicationDbContext"));
+        Assert.Contains("class ApplicationDbContext", result.Files["applicationDbContext"].Content);
+        Assert.Contains("IdentityDbContext<ApplicationUser>", result.Files["applicationDbContext"].Content);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_EmitsApplicationStartReviewNotes_WhenGlobalAsaxPatternsDetected()
+    {
+        File.WriteAllText(Path.Combine(_tempDir, "Global.asax.cs"), """
+            using System.Web.Routing;
+
+            namespace TestApp;
+
+            public class Global : System.Web.HttpApplication
+            {
+                protected void Application_Start()
+                {
+                    RouteConfig.RegisterRoutes(RouteTable.Routes);
+                    AuthConfig.RegisterOpenAuth();
+                }
+            }
+            """);
+
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.Contains("RouteConfig.RegisterRoutes", result.RuntimeProfile.ApplicationStartPatterns);
+        Assert.Contains("AuthConfig.RegisterOpenAuth", result.RuntimeProfile.ApplicationStartPatterns);
+        Assert.Contains("Review legacy Application_Start registrations", program);
+    }
+
+    [Fact]
+    public void ProjectScaffolder_GeneratesMinimalProgram_WhenNoRuntimeSignalsDetected()
+    {
+        var result = _scaffolder.Scaffold(_tempDir, _tempDir, "TestApp");
+        var program = result.Files["program"].Content;
+
+        Assert.False(result.RuntimeProfile.NeedsEntityFramework);
+        Assert.False(result.RuntimeProfile.NeedsSession);
+        Assert.False(result.RuntimeProfile.NeedsIdentity);
+        Assert.DoesNotContain("AddDbContext<", program);
+        Assert.DoesNotContain("AddSession(options =>", program);
+        Assert.DoesNotContain("AddDefaultIdentity<", program);
     }
 
     [Fact]
@@ -189,8 +380,9 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("imports", result.Files.Keys);
         Assert.Contains("app", result.Files.Keys);
         Assert.Contains("routes", result.Files.Keys);
+        Assert.Contains("layout", result.Files.Keys);
         Assert.Contains("launchSettings", result.Files.Keys);
-        Assert.Equal(6, result.Files.Count);
+        Assert.Equal(7, result.Files.Count); // No identity stubs when identity not detected
     }
 
     // ───────────────────────────────────────────────────────────────
@@ -207,6 +399,10 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("global using Microsoft.AspNetCore.Components;", content);
         Assert.Contains("global using Microsoft.AspNetCore.Components.Web;", content);
         Assert.Contains("global using Microsoft.AspNetCore.Components.Routing;", content);
+        Assert.Contains("global using BlazorWebFormsComponents;", content);
+        Assert.Contains("global using BlazorWebFormsComponents.Enums;", content);
+        Assert.Contains("global using BlazorWebFormsComponents.LoginControls;", content);
+        Assert.Contains("global using BlazorWebFormsComponents.Validations;", content);
         Assert.DoesNotContain("Identity", content);
     }
 

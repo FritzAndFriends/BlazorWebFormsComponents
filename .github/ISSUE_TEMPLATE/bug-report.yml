@@ -1,0 +1,106 @@
+name: Bug Report
+description: Report a bug with a BlazorWebFormsComponents component, shim, or the CLI tool
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a bug! Please fill out the details below so we can reproduce and fix it.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected Area
+      description: Which part of the project is affected?
+      options:
+        - Component (Blazor component behavior)
+        - Migration Shim (Request, Response, Session, etc.)
+        - CLI Tool (webforms-to-blazor)
+        - Roslyn Analyzer
+        - Documentation
+        - Samples
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: component
+    attributes:
+      label: Component / Feature Name
+      description: Which specific component or feature is affected?
+      placeholder: e.g., GridView, Button, RequestShim, ClientScriptShim
+    validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear description of what the bug is.
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened. Include error messages or stack traces if applicable.
+    validations:
+      required: true
+
+  - type: textarea
+    id: markup
+    attributes:
+      label: Relevant Markup / Code
+      description: Paste any relevant Razor markup, C# code, or original Web Forms markup.
+      render: razor
+
+  - type: dropdown
+    id: hosting
+    attributes:
+      label: Blazor Hosting Model
+      options:
+        - Blazor Server
+        - Blazor WebAssembly
+        - Blazor United (Interactive Server)
+        - Not applicable
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dotnet-version
+    attributes:
+      label: .NET Version
+      options:
+        - .NET 10
+        - .NET 9
+        - .NET 8
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, screenshots, or information about the problem.

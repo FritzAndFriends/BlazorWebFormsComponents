@@ -1,17 +1,8 @@
 namespace WingtipToys.Account;
 
-// TODO: Requires ASP.NET Core Identity migration — password management needs UserManager
-public partial class ManagePassword
+public partial class ManagePassword : BlazorWebFormsComponents.WebFormsPageBase
 {
-    private string Password { get; set; } = "";
-
-    private void SetPassword_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
-    {
-        // TODO: Implement with UserManager
-    }
-
-    private void ChangePassword_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
-    {
-        // TODO: Implement with UserManager
-    }
+    // TODO: Migrate from Account/ManagePassword.aspx
+    // Original features: ASP.NET Identity or membership APIs
+    // Quarantine reason: Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.
 }

@@ -1,10 +1,8 @@
 namespace WingtipToys.Account;
 
-// TODO: Requires ASP.NET Core Identity migration — phone verification needs UserManager
-public partial class VerifyPhoneNumber
+public partial class VerifyPhoneNumber : BlazorWebFormsComponents.WebFormsPageBase
 {
-    private void Code_Click(Microsoft.AspNetCore.Components.Web.MouseEventArgs e)
-    {
-        // TODO: Implement with UserManager
-    }
+    // TODO: Migrate from Account/VerifyPhoneNumber.aspx
+    // Original features: ASP.NET Identity or membership APIs
+    // Quarantine reason: Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.
 }

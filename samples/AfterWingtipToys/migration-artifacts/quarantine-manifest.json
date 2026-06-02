@@ -1,0 +1,140 @@
+{
+  "pages": [
+    {
+      "originalFilePath": "Account/AddPhoneNumber.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/Confirm.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/Forgot.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/Lockout.aspx",
+      "detectedUnsupportedFeatures": [
+        "Non-essential path (auto-quarantined)"
+      ],
+      "reasonForQuarantine": "Page is located in a non-essential path (Account/Lockout.aspx) that typically requires manual migration of legacy Web Forms APIs.",
+      "suggestedMigrationApproach": "Migrate the page manually once core pages are stable, using injected services and Blazor patterns."
+    },
+    {
+      "originalFilePath": "Account/Manage.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/ManageLogins.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/ManagePassword.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/ResetPassword.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/ResetPasswordConfirmation.aspx",
+      "detectedUnsupportedFeatures": [
+        "Non-essential path (auto-quarantined)"
+      ],
+      "reasonForQuarantine": "Page is located in a non-essential path (Account/ResetPasswordConfirmation.aspx) that typically requires manual migration of legacy Web Forms APIs.",
+      "suggestedMigrationApproach": "Migrate the page manually once core pages are stable, using injected services and Blazor patterns."
+    },
+    {
+      "originalFilePath": "Account/TwoFactorAuthenticationSignIn.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Account/VerifyPhoneNumber.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic."
+    },
+    {
+      "originalFilePath": "Admin/AdminPage.aspx",
+      "detectedUnsupportedFeatures": [
+        "Non-essential path (auto-quarantined)"
+      ],
+      "reasonForQuarantine": "Page is located in a non-essential path (Admin/AdminPage.aspx) that typically requires manual migration of legacy Web Forms APIs.",
+      "suggestedMigrationApproach": "Migrate the page manually once core pages are stable, using injected services and Blazor patterns."
+    },
+    {
+      "originalFilePath": "Checkout/CheckoutCancel.aspx",
+      "detectedUnsupportedFeatures": [
+        "Non-essential path (auto-quarantined)"
+      ],
+      "reasonForQuarantine": "Page is located in a non-essential path (Checkout/CheckoutCancel.aspx) that typically requires manual migration of legacy Web Forms APIs.",
+      "suggestedMigrationApproach": "Migrate the page manually once core pages are stable, using injected services and Blazor patterns."
+    },
+    {
+      "originalFilePath": "Checkout/CheckoutComplete.aspx",
+      "detectedUnsupportedFeatures": [
+        "Payment or checkout integration"
+      ],
+      "reasonForQuarantine": "Detected payment-provider integration code that requires manual migration and secrets-safe server orchestration.",
+      "suggestedMigrationApproach": "Move payment orchestration into a dedicated server-side service or API boundary, then reconnect the page once the provider SDK is re-integrated."
+    },
+    {
+      "originalFilePath": "Checkout/CheckoutError.aspx",
+      "detectedUnsupportedFeatures": [
+        "Non-essential path (auto-quarantined)"
+      ],
+      "reasonForQuarantine": "Page is located in a non-essential path (Checkout/CheckoutError.aspx) that typically requires manual migration of legacy Web Forms APIs.",
+      "suggestedMigrationApproach": "Migrate the page manually once core pages are stable, using injected services and Blazor patterns."
+    },
+    {
+      "originalFilePath": "Checkout/CheckoutReview.aspx",
+      "detectedUnsupportedFeatures": [
+        "Non-essential path (auto-quarantined)"
+      ],
+      "reasonForQuarantine": "Page is located in a non-essential path (Checkout/CheckoutReview.aspx) that typically requires manual migration of legacy Web Forms APIs.",
+      "suggestedMigrationApproach": "Migrate the page manually once core pages are stable, using injected services and Blazor patterns."
+    },
+    {
+      "originalFilePath": "Checkout/CheckoutStart.aspx",
+      "detectedUnsupportedFeatures": [
+        "Non-essential path (auto-quarantined)"
+      ],
+      "reasonForQuarantine": "Page is located in a non-essential path (Checkout/CheckoutStart.aspx) that typically requires manual migration of legacy Web Forms APIs.",
+      "suggestedMigrationApproach": "Migrate the page manually once core pages are stable, using injected services and Blazor patterns."
+    }
+  ]
+}

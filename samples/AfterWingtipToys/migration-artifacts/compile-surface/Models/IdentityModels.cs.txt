@@ -1,0 +1,34 @@
+// TODO: Review — 'Models\IdentityModels.cs' was quarantined from the generated Blazor SSR compile surface.
+// TODO: Reason — ASP.NET Identity bootstrap code needs app-specific migration and should not be compiled as-is.
+// TODO: Move or rewrite only the relevant pieces into Program.cs, services, middleware, or application code.
+
+using BlazorWebFormsComponents.Identity;
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+namespace WingtipToys.Models;
+public partial class ApplicationUser
+{
+    public ClaimsIdentity GenerateUserIdentity(ApplicationUserManager manager) => throw new NotImplementedException();
+    public Task<ClaimsIdentity> GenerateUserIdentityAsync(ApplicationUserManager manager) => throw new NotImplementedException();
+}
+
+public partial class ApplicationDbContext
+{
+    public static ApplicationDbContext Create() => throw new NotImplementedException();
+}
+
+public static partial class IdentityHelper
+{
+    public const string XsrfKey = "XsrfId";
+    public const string ProviderNameKey = "providerName";
+    public const string CodeKey = "code";
+    public const string UserIdKey = "userId";
+
+    public static void SignIn(ApplicationUserManager manager, ApplicationUser user, bool isPersistent) { }
+    public static string GetProviderNameFromRequest(Microsoft.AspNetCore.Http.HttpRequest request) => throw new NotImplementedException();
+    public static string GetCodeFromRequest(Microsoft.AspNetCore.Http.HttpRequest request) => throw new NotImplementedException();
+    public static string GetUserIdFromRequest(Microsoft.AspNetCore.Http.HttpRequest request) => throw new NotImplementedException();
+    public static string GetResetPasswordRedirectUrl(string code, Microsoft.AspNetCore.Http.HttpRequest request) => throw new NotImplementedException();
+    public static string GetUserConfirmationRedirectUrl(string code, string userId, Microsoft.AspNetCore.Http.HttpRequest request) => throw new NotImplementedException();
+    public static void RedirectToReturnUrl(string returnUrl, HttpResponse response) { }
+}

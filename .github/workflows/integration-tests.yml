@@ -6,19 +6,27 @@ on:
       - 'main'
       - 'dev'
       - 'v*'
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'mkdocs.yml'
+    paths:
+      - 'src/**'
+      - 'samples/**'
+      - 'tests/**'
+      - '.github/workflows/integration-tests.yml'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'nuget.config'
   pull_request:
     branches:
       - 'main'
       - 'dev'
       - 'v*'
-    paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
-      - 'mkdocs.yml'
+    paths:
+      - 'src/**'
+      - 'samples/**'
+      - 'tests/**'
+      - '.github/workflows/integration-tests.yml'
+      - 'global.json'
+      - 'Directory.Build.props'
+      - 'nuget.config'
   workflow_dispatch:
 
 jobs:
@@ -89,3 +97,13 @@ jobs:
           path: samples/AfterBlazorServerSide.Tests/TestResults/*.trx
           reporter: dotnet-trx
           fail-on-error: true
+
+      - name: Post test summary to PR
+        if: always() && github.event_name == 'pull_request'
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: |
+            samples/AfterBlazorServerSide.Tests/TestResults/*.trx
+          check_name: Integration Tests Summary
+          comment_title: "🎭 Integration Test Results"
+          comment_mode: always

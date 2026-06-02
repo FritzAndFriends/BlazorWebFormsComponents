@@ -1,3 +1,4 @@
+@using System.Net
 @using Microsoft.AspNetCore.Components.Rendering
 @using Microsoft.AspNetCore.Http
 @using Microsoft.Extensions.Primitives
@@ -96,6 +97,26 @@
 		var qs = cut.Instance.ExposedRequest.QueryString;
 
 		qs.Count.ShouldBe(0);
+	}
+
+	[Fact]
+	public void QueryString_Get_ReturnsValueForExistingKey()
+	{
+		var cut = RenderWithMockNav("http://localhost/products?id=5&name=widget");
+
+		var value = cut.Instance.ExposedRequest.QueryString.Get("name");
+
+		value.ShouldBe("widget");
+	}
+
+	[Fact]
+	public void QueryString_Get_ReturnsNullForMissingKey()
+	{
+		var cut = RenderWithMockNav("http://localhost/products?id=5");
+
+		var value = cut.Instance.ExposedRequest.QueryString.Get("missing");
+
+		value.ShouldBeNull();
 	}
 
 	[Fact]
@@ -297,6 +318,57 @@
 			});
 
 		cut.Instance.ExposedRequest.Form["nonexistent"].ShouldBeNull();
+	}
+
+	private IRenderedComponent<TestPage> RenderWithConnectionHttpContext(IPAddress? remoteIp, IPAddress? localIp = null)
+	{
+		JSInterop.Mode = JSRuntimeMode.Loose;
+		var httpContext = new DefaultHttpContext();
+		httpContext.Connection.RemoteIpAddress = remoteIp;
+		httpContext.Connection.LocalIpAddress = localIp;
+		var mockAccessor = new Mock<IHttpContextAccessor>();
+		mockAccessor.Setup(x => x.HttpContext).Returns(httpContext);
+		Services.AddSingleton<IHttpContextAccessor>(mockAccessor.Object);
+		var nav = new MockNavigationManager();
+		Services.AddSingleton<Microsoft.AspNetCore.Components.NavigationManager>(nav);
+		Services.AddLogging();
+		Services.AddScoped<SessionShim>();
+		Services.AddScoped<IPageService, PageService>();
+		RegisterShimServices();
+		return Render<TestPage>();
+	}
+
+	[Fact]
+	public void IsLocal_WithoutHttpContext_UsesLoopbackNavigationUri()
+	{
+		var cut = RenderWithMockNav("http://localhost/products");
+
+		cut.Instance.ExposedRequest.IsLocal.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void IsLocal_WithLoopbackRemoteAddress_ReturnsTrue()
+	{
+		var cut = RenderWithConnectionHttpContext(IPAddress.Loopback);
+
+		cut.Instance.ExposedRequest.IsLocal.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void IsLocal_WithMatchingRemoteAndLocalAddress_ReturnsTrue()
+	{
+		var address = IPAddress.Parse("192.168.1.25");
+		var cut = RenderWithConnectionHttpContext(address, address);
+
+		cut.Instance.ExposedRequest.IsLocal.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void IsLocal_WithDifferentRemoteAndLocalAddresses_ReturnsFalse()
+	{
+		var cut = RenderWithConnectionHttpContext(IPAddress.Parse("203.0.113.10"), IPAddress.Parse("192.168.1.25"));
+
+		cut.Instance.ExposedRequest.IsLocal.ShouldBeFalse();
 	}
 
 	// ── Form: Edge cases ──

@@ -1,0 +1,68 @@
+name: Feature Request
+description: Suggest a new feature, component, or enhancement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please describe what you'd like to see added or improved.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Feature Area
+      description: Which part of the project would this feature affect?
+      options:
+        - New Component
+        - Existing Component Enhancement
+        - Migration Shim
+        - CLI Tool
+        - Roslyn Analyzer
+        - Documentation
+        - Samples / Demos
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature Description
+      description: A clear description of the feature you'd like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this feature important? What problem does it solve? If this is a migration scenario, describe the original Web Forms code you need to migrate.
+    validations:
+      required: true
+
+  - type: textarea
+    id: webforms-reference
+    attributes:
+      label: Original Web Forms Behavior
+      description: If applicable, describe or paste the original Web Forms markup/code that this feature would help migrate.
+      render: html
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed Blazor API
+      description: If you have ideas about how this should look in Blazor, describe the expected markup or API.
+      render: razor
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any workarounds or alternative approaches?
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Any other context, screenshots, or references.

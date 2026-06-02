@@ -1,3 +1,6 @@
+using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.Transforms.Markup;
+
 namespace BlazorWebFormsComponents.Cli.Tests.TransformUnit;
 
 /// <summary>
@@ -6,37 +9,47 @@ namespace BlazorWebFormsComponents.Cli.Tests.TransformUnit;
 /// </summary>
 public class AttributeStripTransformTests
 {
-    // TODO: Instantiate the real transform when Bishop builds it:
-    // private readonly AttributeStripTransform _transform = new();
+    private readonly AttributeStripTransform _transform = new();
+
+    private static FileMetadata TestMetadata => new()
+    {
+        SourceFilePath = "test.aspx",
+        OutputFilePath = "test.razor",
+        FileType = FileType.Page,
+        OriginalContent = string.Empty
+    };
 
     [Fact]
     public void StripsRunatServer()
     {
-        // runat="server" is the most common attribute to strip
-        var input = @"<div runat=""server""><span>Content</span></div>";
-        var expected = @"<div><span>Content</span></div>";
+        var result = _transform.Apply(@"<div runat=""server""><span>Content</span></div>", TestMetadata);
 
-        Assert.Contains(@"runat=""server""", input);
-        Assert.DoesNotContain("runat", expected);
+        Assert.Equal(@"<div><span>Content</span></div>", result);
     }
 
     [Fact]
     public void StripsEnableViewState()
     {
-        var input = @"<div EnableViewState=""true"" runat=""server"">";
-        Assert.Contains("EnableViewState", input);
+        var result = _transform.Apply(@"<div EnableViewState=""true"" runat=""server"">", TestMetadata);
+
+        Assert.DoesNotContain("EnableViewState", result);
+        Assert.DoesNotContain("runat", result);
     }
 
     [Fact]
     public void StripsMultipleServerAttributes()
     {
-        // Multiple server-only attributes should all be removed:
-        // EnableViewState, ViewStateMode, ValidateRequest, MaintainScrollPositionOnPostBack, ClientIDMode
-        var input = @"<div runat=""server"" EnableViewState=""true"" ViewStateMode=""Enabled"" ValidateRequest=""false"" MaintainScrollPositionOnPostBack=""true"" ClientIDMode=""Static"">";
-        var expected = @"<div>";
+        var result = _transform.Apply(@"<div runat=""server"" EnableViewState=""true"" ViewStateMode=""Enabled"" ValidateRequest=""false"" MaintainScrollPositionOnPostBack=""true"" ClientIDMode=""Static"">", TestMetadata);
 
-        Assert.NotEqual(input, expected);
-        Assert.DoesNotContain("runat", expected);
-        Assert.DoesNotContain("EnableViewState", expected);
+        Assert.Equal(@"<div>", result);
+    }
+
+    [Fact]
+    public void PreservesItemTypeInsteadOfConvertingToTItem()
+    {
+        var result = _transform.Apply(@"<GridView ItemType=""TestApp.Models.Product"" runat=""server"" />", TestMetadata);
+
+        Assert.Contains(@"ItemType=""Product""", result);
+        Assert.DoesNotContain("TItem=", result);
     }
 }

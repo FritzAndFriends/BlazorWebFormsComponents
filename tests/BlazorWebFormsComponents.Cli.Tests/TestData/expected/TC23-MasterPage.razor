@@ -1,17 +1,17 @@
-@inherits LayoutComponentBase
-@* TODO(bwfc-master-page): Review head content extraction for App.razor *@
+@* TODO(bwfc-master-page): Review shell scripts, bundle references, and auth/cart chrome for SSR-safe migration. *@
 
-<!DOCTYPE html>
-<html>
-<head>
+<MasterPage>
+<Head>
     <title>My Site</title>
     <link href="/Content/Site.css" rel="stylesheet" />
-</head>
-<body>
-    <form id="form1">
+</Head>
+<ChildContent>
         <div class="container">
-            @Body
+            <ContentPlaceHolder id="MainContent">
+                <p>Default content</p>
+            </ContentPlaceHolder>
         </div>
-    </form>
-</body>
-</html>
+    
+@ChildContent
+</ChildContent>
+</MasterPage>

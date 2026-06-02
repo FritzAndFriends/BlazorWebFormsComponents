@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Io;
 
@@ -9,11 +10,25 @@ namespace BlazorWebFormsComponents.Cli.Scaffolding;
 /// </summary>
 public class ProjectScaffolder
 {
-    private readonly DatabaseProviderDetector _dbDetector;
+    private static readonly Regex SystemWebHttpUtilityPackageRegex = new(
+        @"^\s*<PackageReference Include=""System\.Web\.HttpUtility"".*?/?>\s*$\r?\n?",
+        RegexOptions.Compiled | RegexOptions.Multiline);
 
-    public ProjectScaffolder(DatabaseProviderDetector dbDetector)
+    private readonly DatabaseProviderDetector _dbDetector;
+    private readonly RuntimeDetector _runtimeDetector;
+    private readonly ProgramCsEmitter _programCsEmitter;
+    private readonly MasterPageToLayoutConverter _masterPageConverter;
+
+    public ProjectScaffolder(
+        DatabaseProviderDetector dbDetector,
+        RuntimeDetector runtimeDetector,
+        ProgramCsEmitter programCsEmitter,
+        MasterPageToLayoutConverter masterPageConverter)
     {
         _dbDetector = dbDetector;
+        _runtimeDetector = runtimeDetector;
+        _programCsEmitter = programCsEmitter;
+        _masterPageConverter = masterPageConverter;
     }
 
     public ScaffoldResult Scaffold(string sourcePath, string outputRoot, string projectName)
@@ -23,30 +38,31 @@ public class ProjectScaffolder
         // Detect features
         var hasModels = !string.IsNullOrEmpty(sourcePath) &&
                         Directory.Exists(Path.Combine(sourcePath, "Models"));
-        var hasIdentity = DetectIdentity(sourcePath);
+        var runtimeProfile = _runtimeDetector.Detect(sourcePath);
         var dbProvider = _dbDetector.Detect(sourcePath);
 
         result.HasModels = hasModels;
-        result.HasIdentity = hasIdentity;
+        result.HasIdentity = runtimeProfile.NeedsIdentity;
         result.DbProvider = dbProvider;
+        result.RuntimeProfile = runtimeProfile;
 
         // Generate all scaffold files
         result.Files["csproj"] = new ScaffoldFile
         {
             RelativePath = $"{projectName}.csproj",
-            Content = GenerateCsproj(projectName, hasModels, hasIdentity, dbProvider)
+            Content = GenerateCsproj(projectName, outputRoot, runtimeProfile, dbProvider)
         };
 
         result.Files["program"] = new ScaffoldFile
         {
             RelativePath = "Program.cs",
-            Content = GenerateProgramCs(projectName, hasModels, hasIdentity, dbProvider)
+            Content = _programCsEmitter.Generate(projectName, runtimeProfile, dbProvider)
         };
 
         result.Files["imports"] = new ScaffoldFile
         {
             RelativePath = "_Imports.razor",
-            Content = GenerateImportsRazor(projectName)
+            Content = GenerateImportsRazor(projectName, hasModels, runtimeProfile.NeedsAjaxToolkit, sourcePath)
         };
 
         result.Files["app"] = new ScaffoldFile
@@ -61,11 +77,32 @@ public class ProjectScaffolder
             Content = GenerateRoutesRazor()
         };
 
+        result.Files["layout"] = new ScaffoldFile
+        {
+            RelativePath = Path.Combine("Components", "Layout", "MainLayout.razor"),
+            Content = GenerateMainLayoutRazor(sourcePath)
+        };
+
         result.Files["launchSettings"] = new ScaffoldFile
         {
             RelativePath = Path.Combine("Properties", "launchSettings.json"),
             Content = GenerateLaunchSettings(projectName)
         };
+
+        if (runtimeProfile.NeedsIdentity)
+        {
+            result.Files["applicationUser"] = new ScaffoldFile
+            {
+                RelativePath = Path.Combine("Models", "ApplicationUser.cs"),
+                Content = GenerateApplicationUser(projectName)
+            };
+
+            result.Files["applicationDbContext"] = new ScaffoldFile
+            {
+                RelativePath = Path.Combine("Models", "ApplicationDbContext.cs"),
+                Content = GenerateApplicationDbContext(projectName)
+            };
+        }
 
         return result;
     }
@@ -79,124 +116,180 @@ public class ProjectScaffolder
         }
     }
 
-    private static bool DetectIdentity(string sourcePath)
-    {
-        if (string.IsNullOrEmpty(sourcePath))
-            return false;
-
-        return Directory.Exists(Path.Combine(sourcePath, "Account")) ||
-               File.Exists(Path.Combine(sourcePath, "Login.aspx")) ||
-               File.Exists(Path.Combine(sourcePath, "Register.aspx"));
-    }
-
-    private static string GenerateCsproj(string projectName, bool hasModels, bool hasIdentity, DatabaseProviderInfo dbProvider)
+    private static string GenerateCsproj(string projectName, string outputRoot, RuntimeProfile runtimeProfile, DatabaseProviderInfo dbProvider)
     {
         var additionalPackages = "";
-        if (hasModels)
+        if (runtimeProfile.NeedsEntityFramework)
         {
             additionalPackages += $"\n    <PackageReference Include=\"{dbProvider.PackageName}\" Version=\"10.0.0\" />";
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.EntityFrameworkCore.Tools\" Version=\"10.0.0\" />";
         }
-        if (hasIdentity)
+        if (runtimeProfile.NeedsIdentity)
         {
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Identity.EntityFrameworkCore\" Version=\"10.0.0\" />";
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Identity.UI\" Version=\"10.0.0\" />";
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore\" Version=\"10.0.0\" />";
         }
+        if (runtimeProfile.NeedsSqlClient)
+        {
+            additionalPackages += "\n    <PackageReference Include=\"System.Data.SqlClient\" Version=\"4.9.0\" />";
+        }
 
-        return $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
+        var ajaxToolkitReference = runtimeProfile.NeedsAjaxToolkit
+            ? "\n" + ResolveAjaxToolkitReference(outputRoot)
+            : "";
+
+        var bwfcReference = ResolveBwfcReference(outputRoot);
+        var bwfcTargetsImport = ResolveBwfcTargetsImport(outputRoot);
+
+        var csproj = $@"<Project Sdk=""Microsoft.NET.Sdk.Web"">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <BwfcMigrationMode>true</BwfcMigrationMode>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include=""Fritz.BlazorWebFormsComponents"" Version=""*"" />{additionalPackages}
+{bwfcReference}{ajaxToolkitReference}{additionalPackages}
   </ItemGroup>
-
+{bwfcTargetsImport}
 </Project>
 ";
+
+        return StripUnsupportedPackages(csproj);
     }
 
-    private static string GenerateProgramCs(string projectName, bool hasModels, bool hasIdentity, DatabaseProviderInfo dbProvider)
+    private static string StripUnsupportedPackages(string csproj)
+        => SystemWebHttpUtilityPackageRegex.Replace(csproj, string.Empty);
+
+    private static string ResolveBwfcReference(string outputRoot)
     {
-        var dbContextLine = !string.IsNullOrEmpty(dbProvider.ConnectionString)
-            ? $"// builder.Services.AddDbContextFactory<YourDbContext>(options => options.{dbProvider.ProviderMethod}(\"{dbProvider.ConnectionString.Replace("\\", "\\\\")}\"));"
-            : $"// builder.Services.AddDbContextFactory<YourDbContext>(options => options.{dbProvider.ProviderMethod}(\"your-connection-string\"));";
+        var outputFullPath = Path.GetFullPath(outputRoot);
+        var current = new DirectoryInfo(outputFullPath);
 
-        var identityServiceBlock = "";
-        var identityMiddlewareBlock = "";
-
-        if (hasIdentity)
+        while (current is not null)
         {
-            identityServiceBlock = $@"
+            var candidate = Path.Combine(current.FullName, "src", "BlazorWebFormsComponents", "BlazorWebFormsComponents.csproj");
+            if (File.Exists(candidate))
+            {
+                var relativePath = Path.GetRelativePath(outputFullPath, candidate)
+                    .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                return $@"    <ProjectReference Include=""{relativePath}"" />";
+            }
 
-// TODO(bwfc-datasource): Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
-{dbContextLine}
-
-// TODO(bwfc-identity): Configure Identity
-// builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
-//     .AddEntityFrameworkStores<ProductContext>();
-
-// TODO(bwfc-session-state): Configure session for cart/state management
-// builder.Services.AddDistributedMemoryCache();
-// builder.Services.AddSession();
-// builder.Services.AddHttpContextAccessor();
-// builder.Services.AddCascadingAuthenticationState();
-";
-
-            identityMiddlewareBlock = @"
-
-// TODO(bwfc-general): Add middleware in the pipeline
-// app.UseSession();
-// app.UseAuthentication();
-// app.UseAuthorization();
-";
-        }
-        else if (hasModels)
-        {
-            identityServiceBlock = $@"
-
-// TODO(bwfc-datasource): Configure database connection (use AddDbContextFactory — do NOT also register AddDbContext to avoid DI conflicts)
-{dbContextLine}
-";
+            current = current.Parent;
         }
 
-        return $@"// TODO(bwfc-general): Review and adjust this generated Program.cs for your application needs.
-using BlazorWebFormsComponents;
-
-var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-
-builder.Services.AddBlazorWebFormsComponents();
-{identityServiceBlock}
-var app = builder.Build();
-
-if (!app.Environment.IsDevelopment())
-{{
-    app.UseExceptionHandler(""/Error"");
-    app.UseHsts();
-}}
-
-app.UseHttpsRedirection();
-app.MapStaticAssets();
-app.UseAntiforgery();
-{identityMiddlewareBlock}
-app.MapRazorComponents<{projectName}.Components.App>()
-    .AddInteractiveServerRenderMode();
-
-app.Run();
-";
+        return @"    <PackageReference Include=""Fritz.BlazorWebFormsComponents"" Version=""*"" />";
     }
 
-    private static string GenerateImportsRazor(string projectName)
+    private static string ResolveBwfcTargetsImport(string outputRoot)
     {
-        return $@"@using System.Net.Http
+        var outputFullPath = Path.GetFullPath(outputRoot);
+        var current = new DirectoryInfo(outputFullPath);
+
+        while (current is not null)
+        {
+            var candidate = Path.Combine(current.FullName, "src", "BlazorWebFormsComponents", "BlazorWebFormsComponents.csproj");
+            if (File.Exists(candidate))
+            {
+                var targetsDir = Path.GetDirectoryName(candidate)!;
+                var targetsFile = Path.Combine(targetsDir, "build", "Fritz.BlazorWebFormsComponents.targets");
+                if (File.Exists(targetsFile))
+                {
+                    var targetsRelative = Path.GetRelativePath(outputFullPath, targetsFile)
+                        .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                    return $@"
+  <Import Project=""{targetsRelative}"" />
+";
+                }
+                return "";
+            }
+            current = current.Parent;
+        }
+        return "";
+    }
+
+
+    private static string ResolveAjaxToolkitReference(string outputRoot)
+    {
+        var outputFullPath = Path.GetFullPath(outputRoot);
+        var current = new DirectoryInfo(outputFullPath);
+
+        while (current is not null)
+        {
+            var candidate = Path.Combine(current.FullName, "src", "BlazorAjaxToolkitComponents", "BlazorAjaxToolkitComponents.csproj");
+            if (File.Exists(candidate))
+            {
+                var relativePath = Path.GetRelativePath(outputFullPath, candidate)
+                    .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                return $@"    <ProjectReference Include=""{relativePath}"" />";
+            }
+
+            current = current.Parent;
+        }
+
+        return @"    <PackageReference Include=""Fritz.BlazorAjaxToolkitComponents"" Version=""*"" />";
+    }
+
+
+    private static string GenerateImportsRazor(string projectName, bool hasModels, bool needsAjaxToolkit)
+    {
+        return GenerateImportsRazor(projectName, hasModels, needsAjaxToolkit, null);
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex NamespaceExtractRegex = new(
+        @"^\s*namespace\s+(?<ns>[A-Za-z_][\w.]*)",
+        System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.Multiline);
+
+    internal static string GenerateImportsRazor(string projectName, bool hasModels, bool needsAjaxToolkit, string? sourcePath)
+    {
+        var modelsUsing = hasModels
+            ? $@"
+@using global::{projectName}.Models"
+            : string.Empty;
+
+        // Detect additional sub-namespaces from known folders (Logic, BLL, Services, etc.)
+        var additionalNamespaces = new HashSet<string>(StringComparer.Ordinal);
+        if (!string.IsNullOrEmpty(sourcePath))
+        {
+            var subDirs = new[] { "Logic", "BLL", "Services", "Helpers", "Utils" };
+            foreach (var dir in subDirs)
+            {
+                var dirPath = Path.Combine(sourcePath, dir);
+                if (!Directory.Exists(dirPath)) continue;
+
+                // Read namespace from first .cs file in the directory
+                var firstFile = Directory.EnumerateFiles(dirPath, "*.cs").FirstOrDefault();
+                if (firstFile != null)
+                {
+                    var fileContent = File.ReadAllText(firstFile);
+                    var nsMatch = NamespaceExtractRegex.Match(fileContent);
+                    if (nsMatch.Success)
+                    {
+                        var ns = nsMatch.Groups["ns"].Value;
+                        // Only add if it's a child of the project namespace and not already Models
+                        if (ns.StartsWith(projectName, StringComparison.Ordinal) &&
+                            !ns.Equals($"{projectName}.Models", StringComparison.Ordinal))
+                        {
+                            additionalNamespaces.Add(ns);
+                        }
+                    }
+                }
+            }
+        }
+
+        var additionalUsings = string.Join("", additionalNamespaces.Select(ns => $"\n@using global::{ns}"));
+
+        var ajaxToolkitUsing = needsAjaxToolkit
+            ? "\n@using BlazorAjaxToolkitComponents"
+            : string.Empty;
+
+        return $@"@namespace {projectName}
+@using System.Net.Http
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -204,10 +297,10 @@ app.Run();
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
+@using BlazorWebFormsComponents.Enums
 @using BlazorWebFormsComponents.LoginControls
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
-@using {projectName}
-@using {projectName}.Models
+@using BlazorWebFormsComponents.Validations{ajaxToolkitUsing}
+@using global::{projectName}{modelsUsing}{additionalUsings}
 @inherits BlazorWebFormsComponents.WebFormsPageBase
 ";
     }
@@ -224,10 +317,11 @@ app.Run();
     <HeadOutlet />
 </head>
 
-@* SSR by default — add @rendermode=""InteractiveServer"" to pages that need interactivity *@
-<body>
+@* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
+<body data-enhance-nav=""false"">
     <Routes />
     <script src=""_framework/blazor.web.js""></script>
+    <script src=""_content/Fritz.BlazorWebFormsComponents/js/Basepage.js""></script>
 </body>
 
 </html>
@@ -242,6 +336,27 @@ app.Run();
         <FocusOnNavigate RouteData=""routeData"" Selector=""h1"" />
     </Found>
 </Router>
+";
+    }
+
+    private string GenerateMainLayoutRazor(string sourcePath)
+    {
+        // Try to convert the original Site.Master into a proper layout
+        var masterPath = MasterPageToLayoutConverter.FindMasterPage(sourcePath);
+        if (masterPath != null)
+        {
+            var masterContent = File.ReadAllText(masterPath);
+            var converted = _masterPageConverter.Convert(masterContent);
+            if (converted != null)
+                return converted;
+        }
+
+        // Fallback: minimal layout
+        return @"@inherits LayoutComponentBase
+
+<main>
+    @Body
+</main>
 ";
     }
 
@@ -263,6 +378,40 @@ app.Run();
 }
 """;
     }
+
+    private static string GenerateApplicationUser(string projectName)
+    {
+        return $@"using Microsoft.AspNetCore.Identity;
+
+namespace {projectName}.Models;
+
+/// <summary>
+/// Stub generated by BWFC migration CLI.
+/// Add custom user properties as needed for your application.
+/// </summary>
+public class ApplicationUser : IdentityUser
+{{
+}}
+";
+    }
+
+    private static string GenerateApplicationDbContext(string projectName)
+    {
+        return $@"using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+
+namespace {projectName}.Models;
+
+/// <summary>
+/// Stub generated by BWFC migration CLI.
+/// Add DbSet properties for your application entities.
+/// </summary>
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+    : IdentityDbContext<ApplicationUser>(options)
+{{
+}}
+";
+    }
 }
 
 public class ScaffoldResult
@@ -271,6 +420,7 @@ public class ScaffoldResult
     public bool HasModels { get; set; }
     public bool HasIdentity { get; set; }
     public DatabaseProviderInfo? DbProvider { get; set; }
+    public RuntimeProfile RuntimeProfile { get; set; } = new();
     public Dictionary<string, ScaffoldFile> Files { get; } = [];
 }
 

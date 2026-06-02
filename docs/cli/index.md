@@ -1,6 +1,6 @@
 # WebForms to Blazor CLI Tool
 
-The `webforms-to-blazor` CLI is a powerful command-line tool that automates the first phase of your Web Forms to Blazor migration. It performs deterministic, pattern-based transformations on your Web Forms markup and code-behind to produce Blazor-ready code.
+The `webforms-to-blazor` CLI is a powerful command-line tool that automates the first phase of your Web Forms to Blazor migration. It performs deterministic, pattern-based transformations on your Web Forms markup and code-behind to produce Blazor-ready code and a **.NET 10 Blazor Web App scaffold configured for static server-side rendering (SSR)**.
 
 ## What It Does
 
@@ -9,10 +9,22 @@ This tool **reduces manual migration effort** by:
 - Removing boilerplate Web Forms directives and syntax
 - Converting ASP.NET server controls to BWFC components
 - Replacing Web Forms expressions with Blazor syntax
+- Normalizing `<%#:` / `<%=:` display expressions, including `String.Format(...)`, and broken `@(: expr)` output to valid Razor `@(...)`
+- Stripping Web Forms-only master-page script infrastructure such as `ScriptManager`, bundle references, and `Scripts.Render(...)` placeholders
+- Applying semantic page-pattern rewrites after the core transform pass
+- Injecting explicit validator generic arguments for BWFC validation components
+- Converting `<%# ... %>` data-binding expressions that appear inside attribute values into Razor `@(...)` expressions
+- Rewriting legacy `HttpUtility.*` calls inline to `WebUtility.*`
+- Upgrading EF6-style `DbContext` string constructors to EF Core `DbContextOptions<TContext>` constructors
+- Generating compile-safe stubs for markup-referenced members that are still missing after code-behind conversion
+- Quarantining non-migratable pages (identity, payment, complex admin CRUD, mobile shells, unresolved compile blockers) behind build-safe placeholders while preserving transformed originals under `migration-artifacts\codebehind\` and recording entries in `migration-artifacts\quarantine-manifest.json`, while keeping essential benchmark paths such as product, cart, home, contact, about, and redirect-only shim-friendly action pages out of quarantine
 - Extracting code patterns and flagging them with TODO comments for Copilot L2 automation
-- Scaffolding a new Blazor project structure with shims and services
+- Quarantining risky legacy bootstrap/source artifacts out of the generated SSR compile surface
+- Scaffolding a new .NET 10 Blazor SSR project structure with shims, services, and relaxed code-style build enforcement for copied legacy files
+- Detecting common runtime needs from the source app (DbContext classes, session usage, Account pages, and Global.asax startup hooks) and wiring matching `Program.cs` services/middleware automatically, including static-file serving, antiforgery middleware for SSR form posts, and generated account login/register/logout endpoints when Identity is detected
+- Modernizing legacy `AttachDbFilename=|DataDirectory|\*.mdf` connection strings to use `Initial Catalog=...` so migrated apps do not depend on missing local MDF files at runtime
 
-The tool processes `.aspx`, `.ascx`, and `.master` files in a fixed sequence, ensuring each transformation builds on the previous one correctly.
+The tool processes `.aspx`, `.ascx`, and `.master` files in a fixed sequence, then applies a bounded semantic pattern catalog so each higher-level rewrite builds on a normalized page shape.
 
 ## Installation
 
@@ -41,7 +53,7 @@ webforms-to-blazor --help
 ### Convert a Single File
 
 ```bash
-webforms-to-blazor migrate --input ProductCard.ascx --output ./BlazorComponents
+webforms-to-blazor convert --input ProductCard.ascx --output ./BlazorComponents
 ```
 
 ### Convert a Whole Project
@@ -52,36 +64,54 @@ webforms-to-blazor migrate --input ./MyWebFormsProject --output ./MyBlazorProjec
 
 The tool will:
 1. Scan all `.aspx`, `.ascx`, and `.master` files
-2. Apply 33 transforms in sequence
-3. Generate a migration report
-4. Scaffold supporting files (Program.cs, shims, handlers)
+2. Apply the ordered markup and code-behind transform pipeline
+3. Apply semantic page-pattern rewrites for known recurring Web Forms shapes
+4. Generate a migration report
+5. Scaffold supporting files for a .NET 10 Blazor SSR app (Program.cs, App.razor, shims, handlers)
 
-## Two Commands
+## Core Commands
+
+### `prescan` — Discovery and Readiness Analysis
+
+Scans a Web Forms project and emits migration readiness signals before conversion.
+
+```bash
+webforms-to-blazor prescan \
+  --input ./MyWebFormsProject
+```
+
+**Key outputs now include:**
+
+- `customControlRegistrations` from `Web.config` (`<compilation><assemblies>`, `<pages><controls>`) and page-level `<%@ Register %>` directives
+- `ascxDescriptors` for each `.ascx` file, including discovered public properties/events/methods, `FindControl("...")` IDs, `DataBind()` usage, `Page_Load`/`OnLoad` lifecycle signals, and parser diagnostics
+- Existing BWFC rule summary (`BWFC001+`) and per-file match inventory
+
+This lets you plan ASCX/custom-control work before running `migrate`, and it de-risks migration by surfacing missing or malformed code-behind early.
 
 ### `migrate` — Full Project Migration
 
-Transforms an entire Web Forms project to Blazor with scaffolding.
+Transforms an entire Web Forms project to **.NET 10 Blazor SSR** with scaffolding.
 
 ```bash
 webforms-to-blazor migrate \
   --input ./MyWebFormsProject \
-  --output ./MyBlazorProject \
-  --database SqlServer \
-  --scaffold
+  --output ./MyBlazorProject
 ```
 
 **Key Options:**
 
 - `--input <path>` — Web Forms project root (required)
-- `--output <path>` — Blazor output directory (required)
-- `--database <provider>` — SqlServer, Sqlite, Postgres, Oracle (scaffolds appropriate connection setup)
-- `--scaffold` — Generate Program.cs, _Imports.razor, App.razor, and shims
+- `--output <path>` — .NET 10 Blazor SSR output directory (required)
+- `--skip-scaffold` — Skip generating the .NET 10 Blazor SSR scaffold
 - `--dry-run` — Preview changes without writing files
+- `--verbose` / `-v` — Show detailed per-file transform logging
+- `--overwrite` — Overwrite existing files in the output directory
+- `--report <path>` — Write the JSON migration report to a specific file
 
 **Output:**
 - Converted `.razor` files
-- Converted `.razor.cs` code-behind
-- Generated `Program.cs` with shim registration
+- Quarantined manual code-behind and risky legacy source artifacts under `migration-artifacts\`, including a `quarantine-manifest.json` inventory for deferred page migration work
+- Generated `Program.cs` with shim registration for static SSR on .NET 10 plus detected runtime wiring for EF Core, session state, identity, generated account auth endpoints, and legacy `Application_Start` review notes
 - Migration report (`migration-report.json`)
 
 ### `convert` — File-Level Transformation
@@ -98,17 +128,20 @@ webforms-to-blazor convert \
 
 - `--input <path>` — Single `.ascx` or `.aspx` file (required)
 - `--output <path>` — Output file path
-- `--dry-run` — Preview transformation
+- `--overwrite` — Overwrite an existing generated file
 
 ## Transform Categories
 
-The tool applies **33 transforms** organized in three groups:
+The tool applies an ordered transform pipeline and then a semantic pattern catalog:
 
 1. **Directives** (5) — Page, Master, Control, Register, Import directives
-2. **Markup** (19) — Controls, expressions, templates, data binding
-3. **Code-Behind** (9) — Using statements, base classes, lifecycle, event handlers
+2. **Markup** (21) — Controls, expressions, master-page script cleanup, display-expression cleanup, templates, validator typing, typed GridView columns (including `CommandField`), and CRUD model-binding attributes
+3. **Code-Behind** (29) — Using statements, cart session-key stabilization, HttpUtility/EF modernization, IQueryable SelectMethod materialization, WebMethod TODO annotation, base classes, lifecycle, event handlers, compile-surface stubs, markup-driven safety stubs
 
-See **[Transform Reference](transforms.md)** for complete details on each transform, including before/after examples.
+For ASCX-heavy migrations, the current P1 transform surface focuses on lifecycle (`Page_Load`), `DataBind()` normalization, template binding normalization (`<%# Eval(...) %>` inside item/content templates), and `@ref` + field scaffolding for control ids discovered in markup/code-behind pairs.  
+TODO(P1-FindControl-callsite): direct callsite rewrites for all `FindControl(...)` patterns are still a follow-up pass.
+
+See **[Transform Reference](transforms.md)** for the flat transform list and **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** for the bounded semantic pass that runs afterward.
 
 ## TODO Comments and L2 Automation
 
@@ -117,7 +150,7 @@ The tool inserts TODO comments with standardized category slugs so Copilot L2 sk
 ```csharp
 // TODO(bwfc-lifecycle): Page_Load → OnInitializedAsync
 // TODO(bwfc-ispostback): Review IsPostBack guard for Blazor patterns
-// TODO(bwfc-session-state): SessionShim auto-wired via [Inject]
+// TODO(bwfc-session-state): Session["CartId"] calls work automatically via SessionShim on WebFormsPageBase
 ```
 
 See **[TODO Categories](todo-conventions.md)** for the complete list of 13 categories and how L2 automation uses them.
@@ -155,9 +188,7 @@ After running the CLI:
 # 1. Scan and transform
 webforms-to-blazor migrate \
   --input ./MyApp.Web \
-  --output ./MyApp.Blazor \
-  --database SqlServer \
-  --scaffold
+  --output ./MyApp.Blazor
 
 # 2. Review migration report
 cat MyApp.Blazor/migration-report.json | jq '.manualItems[] | select(.severity == "Error")'
@@ -173,6 +204,7 @@ copilot /webforms-migration
 ## Next Steps
 
 - **[Transform Reference](transforms.md)** — See what each transform does with before/after examples
+- **[Semantic Pattern Catalog](semantic-pattern-catalog.md)** — Understand when page-shape rewrites belong in the isolated semantic pass
 - **[TODO Conventions](todo-conventions.md)** — Understand the TODO categories for L2 automation
 - **[Report Schema](report.md)** — Interpret the migration report
 - **[Migration Strategies](../Migration/Strategies.md)** — Learn the full migration approach

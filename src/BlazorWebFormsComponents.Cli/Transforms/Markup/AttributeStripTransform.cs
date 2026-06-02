@@ -5,7 +5,7 @@ namespace BlazorWebFormsComponents.Cli.Transforms.Markup;
 
 /// <summary>
 /// Removes Web Forms-specific attributes (runat="server", AutoEventWireup, EnableViewState, etc.).
-/// Converts ItemType to TItem. Adds ItemType="object" fallback to generic BWFC components.
+/// Preserves ItemType for BWFC generic components and adds ItemType="object" fallback when missing.
 /// Converts ID= to id=.
 /// </summary>
 public class AttributeStripTransform : IMarkupTransform
@@ -24,7 +24,7 @@ public class AttributeStripTransform : IMarkupTransform
         @"ClientIDMode\s*=\s*""[^""]*"""
     ];
 
-    // ItemType="Namespace.Class" → TItem="Class"
+    // ItemType="Namespace.Class" → ItemType="Class"
     private static readonly Regex ItemTypeRegex = new(
         @"ItemType=""(?:[^""]*\.)?([^""]+)""",
         RegexOptions.Compiled);
@@ -49,14 +49,14 @@ public class AttributeStripTransform : IMarkupTransform
             content = regex.Replace(content, "");
         }
 
-        // ItemType → TItem
-        content = ItemTypeRegex.Replace(content, "TItem=\"$1\"");
+        // Normalize ItemType values to simple BWFC generic type names
+        content = ItemTypeRegex.Replace(content, "ItemType=\"$1\"");
 
         // Add ItemType="object" fallback to generic components missing it
         foreach (var comp in GenericComponents)
         {
-            var tagRegex = new Regex($@"(<{comp}\s)(?![^>]*(?:ItemType|TItem)=)([^/>]*)(>|/>)");
-            content = tagRegex.Replace(content, "${1}ItemType=\"object\" ${2}${3}");
+            var tagRegex = new Regex($@"(<{comp}\b)(?![^>]*ItemType=)([^/>]*)(>|/>)");
+            content = tagRegex.Replace(content, "${1} ItemType=\"object\"${2}${3}");
         }
 
         // ID → id

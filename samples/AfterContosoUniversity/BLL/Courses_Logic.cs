@@ -1,35 +1,40 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Models;
 
+using Microsoft.EntityFrameworkCore;
 namespace ContosoUniversity.BLL
 {
     public class Courses_Logic
     {
-        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
+    private readonly ContosoUniversityEntities _contosoUniversityEntities;
 
-        public Courses_Logic(IDbContextFactory<ContosoUniversityEntities> factory)
-        {
-            _factory = factory;
-        }
+    public Courses_Logic(ContosoUniversityEntities contosoUniversityEntities)
+    {
+        _contosoUniversityEntities = contosoUniversityEntities;
+    }
 
+        #region Get Courses By Department
         public List<Cours> GetCourses(string department)
         {
-            using var db = _factory.CreateDbContext();
-            return db.Courses
-                .Include(c => c.Department)
-                .Where(c => c.Department.DepartmentName == department)
-                .ToList();
-        }
+            var courses = (from cours in _contosoUniversityEntities.Courses.Include(x => x.Department)
+                           where cours.Department.DepartmentName == department
+                           select cours).ToList<Cours>();
 
-        public List<Cours> GetCourse(string courseName)
-        {
-            using var db = _factory.CreateDbContext();
-            return db.Courses
-                .Where(c => c.CourseName == courseName)
-                .ToList();
+            return courses;
         }
+        #endregion
+
+        #region Get Course By CourseName
+        public List<Cours> GetCourse(string courseName)                   
+        {
+            var course = (from crs in _contosoUniversityEntities.Courses
+                          where crs.CourseName == courseName
+                          select crs).ToList<Cours>();
+
+            return course;
+        }   
+        #endregion
     }
 }

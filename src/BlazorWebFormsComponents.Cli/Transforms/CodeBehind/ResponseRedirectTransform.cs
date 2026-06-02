@@ -4,8 +4,9 @@ using BlazorWebFormsComponents.Cli.Pipeline;
 namespace BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 
 /// <summary>
-/// Converts Response.Redirect() calls to NavigationManager.NavigateTo() and injects
-/// [Inject] NavigationManager property into the class.
+/// Detects Response.Redirect() calls and strips Page./this. prefixes so they compile
+/// against ResponseShim on WebFormsPageBase. ResponseShim handles ~/ prefix stripping
+/// and .aspx extension removal automatically — no NavigationManager injection needed.
 /// </summary>
 public class ResponseRedirectTransform : ICodeBehindTransform
 {
@@ -32,56 +33,75 @@ public class ResponseRedirectTransform : ICodeBehindTransform
         @"Response\.Redirect\(\s*([^)]+)\s*\)",
         RegexOptions.Compiled);
 
-    // For injecting [Inject] NavigationManager
+    // Strips "Page." or "this." prefix before Response.Redirect
+    private static readonly Regex PageOrThisPrefixRegex = new(
+        @"(?:Page\.|this\.)(?=Response\.Redirect\s*\()",
+        RegexOptions.Compiled);
+
     private static readonly Regex ClassOpenRegex = new(
         @"((?:public|internal|private)\s+(?:partial\s+)?class\s+\w+[^{]*\{)",
         RegexOptions.Compiled);
 
+    // catch (ThreadAbortException) — dead code after migration (Blazor doesn't throw)
+    private static readonly Regex ThreadAbortCatchRegex = new(
+        @"catch\s*\(\s*ThreadAbortException\b",
+        RegexOptions.Compiled);
+
+    // Response.Redirect(url, true) — endResponse=true silently ignored by ResponseShim
+    private static readonly Regex RedirectEndResponseTrueRegex = new(
+        @"Response\.Redirect\s*\([^,)]+,\s*true\s*\)",
+        RegexOptions.Compiled);
+
+    private const string GuidanceMarker = "// --- Response.Redirect Migration ---";
+    private const string ThreadAbortMarker = "// TODO(bwfc-navigation): DEAD CODE";
+    private const string EndResponseMarker = "// TODO(bwfc-navigation): endResponse=true";
+
     public string Apply(string content, FileMetadata metadata)
     {
-        var hasRedirectConversion = false;
+        // Count redirect calls for guidance (using existing detection regexes)
+        var hasRedirect = RedirectLitBoolRegex.IsMatch(content)
+            || RedirectLitRegex.IsMatch(content)
+            || RedirectExprBoolRegex.IsMatch(content)
+            || RedirectExprRegex.IsMatch(content);
 
-        // Pattern 1: literal URL with endResponse bool
-        if (RedirectLitBoolRegex.IsMatch(content))
+        if (!hasRedirect) return content;
+
+        // Pre-detect endResponse=true BEFORE any other processing
+        var hasEndResponseTrue = RedirectEndResponseTrueRegex.IsMatch(content);
+
+        // Strip Page.Response.Redirect → Response.Redirect and this.Response.Redirect → Response.Redirect
+        if (PageOrThisPrefixRegex.IsMatch(content))
         {
-            content = RedirectLitBoolRegex.Replace(content, m =>
+            content = PageOrThisPrefixRegex.Replace(content, "");
+        }
+
+        // Emit guidance (idempotent)
+        if (!content.Contains(GuidanceMarker) && ClassOpenRegex.IsMatch(content))
+        {
+            var guidanceBlock = "\n    " + GuidanceMarker + "\n"
+                + "    // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.\n"
+                + "    // For non-page classes, inject ResponseShim via DI.\n";
+
+            content = ClassOpenRegex.Replace(content, "$1" + guidanceBlock, 1);
+        }
+
+        // Detect ThreadAbortException catch blocks — dead code after migration
+        if (ThreadAbortCatchRegex.IsMatch(content) && !content.Contains(ThreadAbortMarker))
+        {
+            content = ThreadAbortCatchRegex.Replace(content, m =>
+                m.Value + $"\n            {ThreadAbortMarker} — Blazor does not throw ThreadAbortException on redirect. " +
+                "This catch block is dead code after migration. Review and remove if safe.");
+        }
+
+        // Warn about Response.Redirect(url, true) endResponse behavior
+        if (hasEndResponseTrue && !content.Contains(EndResponseMarker))
+        {
+            if (ClassOpenRegex.IsMatch(content))
             {
-                var url = Regex.Replace(m.Groups[1].Value, @"^~/", "/");
-                return $"NavigationManager.NavigateTo(\"{url}\")";
-            });
-            hasRedirectConversion = true;
-        }
-
-        // Pattern 2: simple literal URL
-        if (RedirectLitRegex.IsMatch(content))
-        {
-            content = RedirectLitRegex.Replace(content, m =>
-            {
-                var url = Regex.Replace(m.Groups[1].Value, @"^~/", "/");
-                return $"NavigationManager.NavigateTo(\"{url}\")";
-            });
-            hasRedirectConversion = true;
-        }
-
-        // Pattern 3: expression with endResponse bool
-        if (RedirectExprBoolRegex.IsMatch(content))
-        {
-            content = RedirectExprBoolRegex.Replace(content, "NavigationManager.NavigateTo($1) /* TODO(bwfc-navigation): Verify navigation target */");
-            hasRedirectConversion = true;
-        }
-
-        // Pattern 4: remaining expression URLs
-        if (RedirectExprRegex.IsMatch(content))
-        {
-            content = RedirectExprRegex.Replace(content, "NavigationManager.NavigateTo($1) /* TODO(bwfc-navigation): Verify navigation target */");
-            hasRedirectConversion = true;
-        }
-
-        // Inject [Inject] NavigationManager if conversions were made
-        if (hasRedirectConversion && ClassOpenRegex.IsMatch(content))
-        {
-            var injectLine = "\n    [Inject] private NavigationManager NavigationManager { get; set; } // TODO(bwfc-navigation): Add @using Microsoft.AspNetCore.Components to _Imports.razor if needed\n";
-            content = ClassOpenRegex.Replace(content, "$1" + injectLine, 1);
+                var warning = $"\n    {EndResponseMarker} is silently ignored by ResponseShim. " +
+                    "Code after redirect calls WILL execute (unlike Web Forms where it threw ThreadAbortException).\n";
+                content = ClassOpenRegex.Replace(content, "$1" + warning, 1);
+            }
         }
 
         return content;

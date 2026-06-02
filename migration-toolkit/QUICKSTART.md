@@ -49,7 +49,15 @@ The scanner inventories every `.aspx`, `.ascx`, and `.master` file — extractin
 
 ## Step 3: Run Layer 1 — Automated Transforms
 
-The migration script handles the mechanical work: stripping `asp:` prefixes, removing `runat="server"`, converting expressions, renaming files, and scaffolding the Blazor project:
+Layer 1 applies mechanical transforms deterministically. Use either the CLI tool (recommended) or the PowerShell script:
+
+**Option A: CLI tool** (37 compiled transforms, migration report):
+
+```bash
+dotnet run --project src/BlazorWebFormsComponents.Cli -- migrate -i "C:\src\MyWebFormsApp" -o "C:\src\MyBlazorApp"
+```
+
+**Option B: PowerShell script** (lightweight, no build required):
 
 ```powershell
 .\scripts\bwfc-migrate.ps1 -Path "C:\src\MyWebFormsApp" -Output "C:\src\MyBlazorApp"
@@ -71,6 +79,10 @@ The migration script handles the mechanical work: stripping `asp:` prefixes, rem
 **Dry-run first** to preview changes without writing files:
 
 ```powershell
+# CLI: use the --dry-run flag
+dotnet run --project src/BlazorWebFormsComponents.Cli -- migrate -i "C:\src\MyWebFormsApp" -o "C:\src\MyBlazorApp" --dry-run
+
+# PowerShell alternative:
 .\scripts\bwfc-migrate.ps1 -Path "C:\src\MyWebFormsApp" -Output "C:\src\MyBlazorApp" -WhatIf
 ```
 
@@ -90,12 +102,33 @@ After the migration script runs, verify these are in place (the script scaffolds
 @inherits BlazorWebFormsComponents.WebFormsPageBase
 ```
 
-The `@inherits` line makes every page inherit from `WebFormsPageBase`, which provides `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`, and `IsPostBack` — so Web Forms code-behind compiles unchanged.
+**This one line gives every page the Web Forms API:**
+- `Page.Title`, `Page.MetaDescription`, `Page.MetaKeywords`
+- `IsPostBack` (false on first render, true on interactions)
+- `Session["key"]` (scoped in-memory dictionary)
+- `Response.Redirect("~/path")` (auto-strips `~/` and `.aspx`)
+- `Request.Url`, `Request.QueryString["key"]`, `Request.Form["key"]`
+- `Cache["key"]` (application-level cache)
+- `Server.MapPath("~/path")` (virtual → physical path)
+- `ClientScript.RegisterStartupScript(...)` (JS interop)
+
+Your Web Forms code-behind compiles **unchanged**. No manual conversion needed.
 
 **`Program.cs`** — register BWFC services:
 ```csharp
 builder.Services.AddBlazorWebFormsComponents();
 ```
+
+**What this does:**
+- Registers `SessionShim` (scoped in-memory dictionary for `Session["key"]`)
+- Registers `ResponseShim` (handles `Response.Redirect`, `Response.Write`)
+- Registers `RequestShim` (provides `Request.QueryString`, `Request.Form`, `Request.Url`)
+- Registers `CacheShim` (in-memory application cache)
+- Registers `ServerShim` (provides `Server.MapPath`)
+- Registers `ClientScriptShim` (JS interop for `ClientScript.RegisterStartupScript`)
+- Registers `ViewStateShim` (compile-compatible dictionary)
+
+After this single call, all Web Forms APIs work AS-IS in your migrated code — no manual conversion required.
 
 **Layout (`MainLayout.razor`)** — add the Page render component:
 ```razor
@@ -133,16 +166,68 @@ Alternatively, point Copilot at the BWFC migration skill directly:
 
 Open each migrated `.razor` file and work through the structural transforms that the script couldn't handle. These are the patterns Copilot handles well with the migration skill:
 
+> 💡 **Many Web Forms API calls now compile unchanged thanks to BWFC shims.** `Response.Redirect`, `Session["key"]`, `IsPostBack`, `Page.Title`, `Request.QueryString`, `Cache`, and `Server.MapPath` all work AS-IS — no conversion needed. Focus Layer 2 effort on data binding, templates, and event handler signatures.
+
 | Transform | What To Do |
 |---|---|
 | `SelectMethod` → `Items` | Replace `SelectMethod="GetProducts"` with `Items="products"`, load data in `OnInitializedAsync` |
 | `ItemType` → `TItem` | Already done by Layer 1, but verify generic type parameter is correct |
 | Template context | Add `Context="Item"` to `<ItemTemplate>`, `<EditItemTemplate>`, etc. |
-| Code-behind lifecycle | Convert `Page_Load` → `OnInitializedAsync`; `IsPostBack` works AS-IS via `WebFormsPageBase` |
+| Code-behind lifecycle | Convert `Page_Load(object sender, EventArgs e)` signature → `OnInitializedAsync`; `IsPostBack` inside works AS-IS |
 | Event handlers | Convert `void Btn_Click(object sender, EventArgs e)` → `void Btn_Click()` |
-| Navigation | Replace `Response.Redirect("~/path")` → `NavigationManager.NavigateTo("/path")` |
-| Form wrappers | Remove `<form runat="server">`, use `<EditForm>` where validation is needed |
-| Master Page → Layout | Convert to `@inherits LayoutComponentBase` with `@Body` |
+| Form wrappers | Remove `<form runat="server">`; use `<WebFormsForm>` if page uses `Request.Form`, or `<EditForm>` for validation |
+| Master Page shell | Convert to runnable `<MasterPage>` + `<ChildContent>` first; normalize page sections under `<ChildComponents>` |
+
+> **If your pages use `Request.Form`**, wrap the form content in `<WebFormsForm>` — this component captures form POST data and feeds the `FormShim` so `Request.Form["key"]` works in your code-behind.
+
+The following are **no longer Layer 2 work** — they work AS-IS via shims:
+- ~~`Response.Redirect("~/path")` → `NavigationManager.NavigateTo`~~ → works via ResponseShim
+- ~~`Session["key"]` → mark for Layer 3~~ → works via SessionShim
+- ~~`Page.Title` conversion~~ → works via WebFormsPageBase
+
+### Using Shims (No Conversion Needed)
+
+**The shims preserve Web Forms API calls AS-IS.** Here's what works unchanged:
+
+```csharp
+// Session access — works exactly like Web Forms
+Session["CartId"] = cartId;
+var cartId = Session["CartId"];
+
+// Response.Redirect — auto-strips ~/ and .aspx
+Response.Redirect("~/Products");
+Response.Redirect("~/Product.aspx?id=5"); // becomes /Product/5 if routing configured
+
+// Request.QueryString — reads URL parameters
+var productId = Request.QueryString["id"];
+
+// Request.Form — reads form POST data (requires <WebFormsForm> wrapper)
+var username = Request.Form["username"];
+
+// IsPostBack — false on first render, true on interactions
+if (!IsPostBack)
+{
+    LoadInitialData();
+}
+
+// Page properties — auto-rendered by <Page /> component
+Page.Title = "Product Details";
+Page.MetaDescription = "View product details";
+
+// Cache — application-level cache
+Cache["RecentProducts"] = products;
+
+// Server.MapPath — virtual to physical path
+var filePath = Server.MapPath("~/App_Data/config.xml");
+```
+
+**Do NOT inject these services manually:**
+- ❌ `IHttpContextAccessor` — use `Request` property instead
+- ❌ `NavigationManager` (for redirects) — use `Response.Redirect()` instead
+- ❌ `IMemoryCache` — use `Cache` property instead
+- ❌ `IJSRuntime` (for startup scripts) — use `ClientScript.RegisterStartupScript()` instead
+
+The shim properties are already available via `WebFormsPageBase`. Injecting these services and manually converting is extra work that provides no migration benefit.
 
 Look for `<!-- TODO: BWFC-MIGRATE -->` comments left by the migration script — these mark items that need manual attention.
 
@@ -153,13 +238,58 @@ Look for `<!-- TODO: BWFC-MIGRATE -->` comments left by the migration script —
 These are the decisions that need a human (or a human + the migration agent):
 
 - **Data access:** Replace `SqlDataSource`/`ObjectDataSource` with injected services
-- **Session state:** Convert `Session["key"]` to scoped services or `ProtectedSessionStorage`
+- **Session state:** Convert `Session["key"]` to scoped services or `ProtectedSessionStorage` (if you need persistence or distributed sessions — basic usage works AS-IS via SessionShim)
 - **Authentication:** Migrate ASP.NET Membership/Identity to ASP.NET Core Identity
 - **EF6 → EF Core:** Update DbContext, register with DI, adjust LINQ queries
 - **Global.asax → Program.cs:** Convert lifecycle hooks to middleware
 - **Third-party integrations:** Port to `HttpClient` pattern
+- **Shim replacement (OPTIONAL):** Replace `Response.Redirect()` with `NavigationManager.NavigateTo()`, `Session` with injected state services, etc. — this is a performance/modernization step, NOT a migration requirement
 
 > 📄 For interactive guidance, use the [Data Migration Skill](skills/bwfc-data-migration/SKILL.md)
+
+### Common Mistakes to Avoid
+
+**Anti-pattern #1: Manually converting shim-supported APIs**
+
+❌ **Wrong:**
+```csharp
+@inject NavigationManager Nav
+@code {
+    void GoToProducts() => Nav.NavigateTo("/Products");
+}
+```
+
+✅ **Correct (use the shim):**
+```csharp
+@code {
+    void GoToProducts() => Response.Redirect("~/Products");
+}
+```
+
+**Anti-pattern #2: Injecting services that shims already provide**
+
+❌ **Wrong:**
+```csharp
+@inject IHttpContextAccessor HttpContext
+@code {
+    var id = HttpContext.HttpContext.Request.Query["id"];
+}
+```
+
+✅ **Correct (use the shim):**
+```csharp
+@code {
+    var id = Request.QueryString["id"];
+}
+```
+
+**Anti-pattern #3: Treating shims as temporary scaffolding**
+
+❌ **Wrong mindset:** "I'll use shims to get it compiling, then replace them with 'real' Blazor code."
+
+✅ **Correct mindset:** "Shims are the migration strategy. They work correctly. Replacing them is an optional optimization I can do later if my team wants to reduce BWFC dependency."
+
+The shims ARE the solution, not a workaround.
 
 ---
 

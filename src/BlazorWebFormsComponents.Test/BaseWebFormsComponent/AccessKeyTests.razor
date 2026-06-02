@@ -14,7 +14,7 @@
 		var cut = Render(@<Button Text="Click Me" AccessKey="B" />);
 
 		// Assert
-		var button = cut.Find("input[type=submit]");
+		var button = cut.Find("input[type=button]");
 		button.HasAttribute("accesskey").ShouldBeTrue();
 		button.GetAttribute("accesskey").ShouldBe("B");
 	}
@@ -26,7 +26,7 @@
 		var cut = Render(@<Button Text="Click Me" AccessKey="" />);
 
 		// Assert
-		cut.Find("input[type=submit]").HasAttribute("accesskey").ShouldBeFalse();
+		cut.Find("input[type=button]").HasAttribute("accesskey").ShouldBeFalse();
 	}
 
 	[Fact]
@@ -36,7 +36,7 @@
 		var cut = Render(@<Button Text="Click Me" />);
 
 		// Assert
-		cut.Find("input[type=submit]").HasAttribute("accesskey").ShouldBeFalse();
+		cut.Find("input[type=button]").HasAttribute("accesskey").ShouldBeFalse();
 	}
 
 	// --- Label AccessKey ---
@@ -173,7 +173,8 @@
 	{
 		// AccessKey should be a single character per HTML spec
 		var cut = Render(@<Button Text="Test" AccessKey="X" />);
-		cut.Find("input[type=submit]").GetAttribute("accesskey").ShouldBe("X");
+		cut.Find("input[type=button]").GetAttribute("accesskey").ShouldBe("X");
 	}
 
 }
+

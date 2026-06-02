@@ -1,41 +1,9 @@
-@page "/ManageLogins"
-@using Microsoft.AspNetCore.Identity
-<h2>Manage your external logins.</h2>
-    <PlaceHolder ID="successMessage" Visible="false">
-            <p class="text-success">@(SuccessMessage)</p>
-        </PlaceHolder>
-    <div>
-        <section id="externalLoginsForm">
+@page "/Account/ManageLogins"
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 
-            <ListView
-                ItemType="UserLoginInfo"
-                SelectMethod="@GetLogins" DeleteMethod="RemoveLogin" DataKeyNames="LoginProvider,ProviderKey">
-@* TODO: SelectMethod="GetLogins" preserved — convert to delegate: SelectMethod="@((maxRows, startRow, sort, out total) => YourService.GetLogins(maxRows, startRow, sort, out total))" *@
-
-                <LayoutTemplate>
-                    <h4>Registered Logins</h4>
-                    <table class="table">
-                        <tbody>
-                            @context
-                        </tbody>
-                    </table>
-
-                </LayoutTemplate>
-                <ItemTemplate>
-                    <tr>
-                        <td>@context.LoginProvider</td>
-                        <td>
-                            @* TODO: ToolTip and Visible attributes used Web Forms <%# %> data-binding syntax — migrate to Blazor *@
-                            <Button Text="Remove" CommandName="Delete" CausesValidation="false"
-                                CssClass="btn btn-default" />
-                        </td>
-                    </tr>
-                </ItemTemplate>
-            </ListView>
-
-        </section>
-    </div>
-    <div>
-        <OpenAuthProviders ReturnUrl="~/Account/ManageLogins" />
-    </div>
-
+<div class="migration-pending">
+    <h3>Page Not Yet Migrated</h3>
+    <p>This page (<code>Account/ManageLogins.aspx</code>) requires manual migration.</p>
+    <p>Original Web Forms features used: ASP.NET Identity or membership APIs</p>
+    <p>Suggested migration approach: Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic.</p>
+</div>

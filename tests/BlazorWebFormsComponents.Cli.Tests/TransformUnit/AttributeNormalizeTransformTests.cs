@@ -171,4 +171,66 @@ public class AttributeNormalizeTransformTests
     {
         Assert.Equal(810, _transform.Order);
     }
+
+    // --- Additional unit suffix tests ---
+
+    [Fact]
+    public void StripsEm_FromWidth()
+    {
+        var input = @"<Panel Width=""10em"" />";
+        var result = _transform.Apply(input, TestMetadata);
+
+        Assert.Contains(@"Width=""10""", result);
+    }
+
+    [Fact]
+    public void StripsPt_FromHeight()
+    {
+        var input = @"<Panel Height=""14pt"" />";
+        var result = _transform.Apply(input, TestMetadata);
+
+        Assert.Contains(@"Height=""14""", result);
+    }
+
+    [Fact]
+    public void StripsPercent_FromWidth()
+    {
+        var input = @"<Panel Width=""100%"" />";
+        var result = _transform.Apply(input, TestMetadata);
+
+        Assert.Contains(@"Width=""100""", result);
+    }
+
+    // --- Hyphenated attribute removal ---
+
+    [Fact]
+    public void RemovesFontSize_HyphenatedAttribute()
+    {
+        var input = @"<GridView Font-Size=""30px"" CellPadding=""5"" />";
+        var result = _transform.Apply(input, TestMetadata);
+
+        Assert.DoesNotContain("Font-Size", result);
+        Assert.Contains(@"CellPadding=""5""", result);
+    }
+
+    [Fact]
+    public void RemovesFontWeight_HyphenatedAttribute()
+    {
+        var input = @"<Label Font-Weight=""Bold"" Text=""Hello"" />";
+        var result = _transform.Apply(input, TestMetadata);
+
+        Assert.DoesNotContain("Font-Weight", result);
+        Assert.Contains(@"Text=""Hello""", result);
+    }
+
+    [Fact]
+    public void RemovesMultipleHyphenatedAttributes()
+    {
+        var input = @"<Panel Font-Size=""12px"" Font-Style=""Italic"" Width=""100"" />";
+        var result = _transform.Apply(input, TestMetadata);
+
+        Assert.DoesNotContain("Font-Size", result);
+        Assert.DoesNotContain("Font-Style", result);
+        Assert.Contains(@"Width=""100""", result);
+    }
 }

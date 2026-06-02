@@ -1,0 +1,15 @@
+@inherits BaseWebFormsComponent
+
+@if (Visible)
+{
+    <span>No Params Lifecycle</span>
+}
+
+@code {
+    public bool LoadCalled { get; private set; }
+
+    protected override void Page_Load(object sender, EventArgs e)
+    {
+        LoadCalled = true;
+    }
+}

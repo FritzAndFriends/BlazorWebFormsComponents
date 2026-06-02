@@ -11,7 +11,7 @@ public static class ComponentCatalog
         // Utility Controls
         new("Content", "Utility", "/ControlSamples/Content", "Provides content to ContentPlaceHolder regions in master page layouts"),
         new("ContentPlaceHolder", "Utility", "/ControlSamples/ContentPlaceHolder", "Defines replaceable content regions in master page layouts"),
-        new("MasterPage", "Utility", "/control-samples/masterpage", "Master page template support for consistent layouts"),
+        new("MasterPage", "Utility", "/control-samples/masterpage", "Recommended MasterPage shell pattern with ChildContent placeholders, ChildComponents content sections, and head bridging"),
         new("Localize", "Utility", "/ControlSamples/Localize", "Localization and resource string rendering"),
         new("MultiView", "Utility", "/ControlSamples/MultiView", "Container for multiple View controls with switching"),
         new("View", "Utility", "/ControlSamples/View", "Container panel within a MultiView, visible one at a time"),
@@ -118,6 +118,8 @@ public static class ComponentCatalog
         new("TreeView", "Navigation", "/ControlSamples/TreeView", "Hierarchical tree navigation control",
             new[] { "Accessibility", "ArrowsImages", "BulletImages", "BulletsNoExpand", "ExpandCollapse", "ImageAndConfig", "Images", "Selection", "ShowLines", "SiteMapDataSource", "XmlDataSource" },
             new[] { "tree", "hierarchy", "expand", "collapse" }),
+        new("Wizard", "Navigation", "/ControlSamples/Wizard", "Multi-step wizard control for guided navigation",
+            Keywords: new[] { "wizard", "steps", "multi-step", "navigation" }),
 
         // Login Controls
         new("ChangePassword", "Login", "/ControlSamples/ChangePassword", "Form for changing user password",
@@ -198,12 +200,18 @@ public static class ComponentCatalog
             Keywords: new[] { "request", "querystring", "url", "cookies", "httpcontext", "migration", "shim" }),
         new("Request.Form", "Migration Helpers", "/migration/request-form", "FormShim providing Web Forms-compatible Request.Form access with SSR support",
             Keywords: new[] { "request", "form", "post", "formshim", "ssr", "migration", "shim" }),
+        new("WebFormsForm", "Migration Helpers", "/migration/webforms-form", "Interactive WebFormsForm component with JS interop populating Request.Form via SetRequestFormData",
+            Keywords: new[] { "webformsform", "form", "interactive", "jsinterop", "request", "migration", "shim" }),
         new("Response.Redirect", "Migration Helpers", "/migration/response-redirect", "ResponseShim providing Redirect with automatic ~/  and .aspx stripping",
             Keywords: new[] { "response", "redirect", "navigation", "tilde", "aspx", "migration", "shim" }),
         new("IsPostBack", "Migration Helpers", "/migration/ispostback", "IsPostBack status, guard pattern, and IsHttpContextAvailable check",
             Keywords: new[] { "ispostback", "postback", "guard", "httpcontext", "lifecycle", "migration", "shim" }),
         new("PostBack Demo", "Migration Helpers", "/ControlSamples/PostBackDemo", "GetPostBackEventReference, GetPostBackClientHyperlink, and ScriptManager.GetCurrent demos",
             Keywords: new[] { "postback", "dopostback", "scriptmanager", "clientscript", "hyperlink", "callback", "migration", "shim" }),
+        new("FindControl", "Migration Helpers", "/migration/findcontrol", "Runtime FindControl support: direct lookup, nested search, chained calls, case-insensitive matching",
+            Keywords: new[] { "findcontrol", "controls", "lookup", "cast", "panel", "naming", "migration", "runtime" }),
+        new("Custom WebControl", "Migration Helpers", "/ControlSamples/Migration/CustomWebControl", "Custom WebControl migration: RenderContents, TagKey, AddAttributesToRender with HtmlTextWriter shim",
+            Keywords: new[] { "webcontrol", "rendercontents", "htmltextwriter", "tagkey", "custom", "migration", "render" }),
 
         // Cross-Cutting / Base Properties
         new("BaseProperties", "Utility", "/ControlSamples/BaseProperties", "AccessKey, ToolTip, BackColor, ForeColor and other base class properties",

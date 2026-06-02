@@ -1,6 +1,9 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Pipeline;
+using BlazorWebFormsComponents.Cli.Scaffolding;
+using BlazorWebFormsComponents.Cli.SemanticPatterns;
 using BlazorWebFormsComponents.Cli.Transforms;
 using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
 using BlazorWebFormsComponents.Cli.Transforms.Directives;
@@ -148,11 +151,39 @@ public static class TestHelpers
     }
 
     /// <summary>
+    /// Creates the semantic pattern catalog used by both isolated and full-pipeline tests.
+    /// </summary>
+    public static IReadOnlyList<ISemanticPattern> CreateDefaultSemanticPatterns() =>
+    [
+        new QueryDetailsSemanticPattern(),
+        new MasterContentContractsSemanticPattern(),
+        new ActionPagesSemanticPattern(),
+        new AccountPagesSemanticPattern()
+    ];
+
+    public static RuntimeDetector CreateDefaultRuntimeDetector() =>
+        new([
+            new EntityFrameworkRuntimeSignalDetector(),
+            new SessionRuntimeSignalDetector(),
+            new IdentityRuntimeSignalDetector(),
+            new GlobalAsaxRuntimeSignalDetector(),
+            new WebConfigRuntimeSignalDetector(),
+            new AjaxToolkitRuntimeSignalDetector(),
+            new SqlClientRuntimeSignalDetector(),
+            new DefaultPageRuntimeSignalDetector()
+        ]);
+
+    public static ProjectScaffolder CreateDefaultScaffolder() =>
+        new(new DatabaseProviderDetector(), CreateDefaultRuntimeDetector(), new ProgramCsEmitter(), new MasterPageToLayoutConverter());
+
+    /// <summary>
     /// Creates a fully configured MigrationPipeline with all markup and code-behind
     /// transforms registered in the canonical order.
     /// </summary>
     public static MigrationPipeline CreateDefaultPipeline()
     {
+        var quarantineDetector = new PageQuarantineDetector();
+
         var markupTransforms = new List<IMarkupTransform>
         {
             // Order 100-120: Directives
@@ -162,46 +193,110 @@ public static class TestHelpers
             // Order 200-210: Imports & Registers
             new ImportDirectiveTransform(),
             new RegisterDirectiveTransform(),
-            // Order 250: Master page layout conversion
+            // Order 250-255: Master page shell cleanup
             new MasterPageTransform(),
+            new ScriptManagerStripTransform(),
             // Order 300-310: Content/Form wrappers
             new ContentWrapperTransform(),
             new FormWrapperTransform(),
-            // Order 500: Expressions
+            // Order 490-500: Expressions
+            new DisplayExpressionTransform(),
             new ExpressionTransform(),
+            new ContentTemplateUnwrapperTransform(),
+            new ColorAttributeTransform(),
+            // Order 510: Statement block conversion (before LoginViewTransform)
+            new ServerCodeBlockTransform(),
             // Order 510-520: Semantic controls
             new LoginViewTransform(),
             new SelectMethodTransform(),
-            // Order 600-610: Prefix stripping (Ajax before Asp)
+            // Order 600-620: Prefix stripping, validator typing, TemplateField wrapping
             new AjaxToolkitPrefixTransform(),
             new AspPrefixTransform(),
-            // Order 700-720: Attributes
+            new DataBindingAttributeTransform(),
+            new ValidatorGenericTypeTransform(),
+            new TemplateFieldChildComponentsTransform(),
+            new DataControlChildComponentsTransform(),
+            // Order 700-750: Attributes & refs
             new AttributeStripTransform(),
+            new GridViewColumnItemTypeTransform(),
             new EventWiringTransform(),
+            new ComponentRefMarkupTransform(),
             new UrlReferenceTransform(),
             // Order 800-820: Normalize & templates
             new TemplatePlaceholderTransform(),
+            new TemplateContextTransform(),
+            new TemplateToStringTransform(),
             new AttributeNormalizeTransform(),
             new DataSourceIdTransform(),
+            new EnhancedNavAnnotationTransform(),
+            new GetRouteUrlMarkupTransform(),
+            new HtmlBoilerplateStripTransform(),
+            new PageFormWrapperTransform(),
+            new SsrFormContractTransform(),
+            new ButtonToSubmitTransform(),
+            new MarkupCleanupTransform(),
+            new LabelFieldBindTransform(),
         };
 
         var codeBehindTransforms = new List<ICodeBehindTransform>
         {
             new TodoHeaderTransform(),
+            new NestedClassCollisionTransform(),
             new UsingStripTransform(),
+            new ProjectNamespaceUsingTransform(),
+            new IdentityUsingTransform(),
+            new HttpUtilityRewriteTransform(),
+            new EntityFrameworkTransform(),
+            new EfContextConstructorTransform(),
+            new DbContextInstantiationTransform(),
+            new ServiceConstructorWiringTransform(),
+            new HttpContextAccessorTransform(),
+            new SelectMethodMaterializeTransform(),
+            new EagerLoadNavigationTransform(),
+            new HttpExceptionTransform(),
+            new ConfigurationManagerTransform(),
             new BaseClassStripTransform(),
+            new ClassNameAlignTransform(),
+            new NamespaceAlignTransform(),
+            new MethodNameCollisionTransform(),
+            new SelfInstantiationTransform(),
+            new ComponentRefCodeBehindTransform(),
+            // FindControlComponentRefTransform removed — FindControl is now a BWFC runtime feature
+            new ComponentRefNullSafetyTransform(),
+            new LabelFieldBindCodeBehindTransform(),
             new ResponseRedirectTransform(),
+            new RequestFormTransform(),
+            new QueryStringTypeAnnotationTransform(),
+            new ServerShimTransform(),
             new GetRouteUrlTransform(),
+            new CartSessionKeyTransform(),
             new SessionDetectTransform(),
+            new SessionGetStringNullSafetyTransform(),
             new ViewStateDetectTransform(),
             new IsPostBackTransform(),
+            new WebMethodAnnotationTransform(),
             new PageLifecycleTransform(),
             new EventHandlerSignatureTransform(),
+            new DeadControlTreeCodeTransform(),
+            new ItemsAddToDataSourceTransform(),
+            new InnerTextRewriteTransform(),
             new DataBindTransform(),
+            new DataSourceParameterBindingTransform(),
+            new StaticItemsParameterBindingTransform(),
             new ClientScriptTransform(),
             new UrlCleanupTransform(),
+            new CompileSurfaceStubTransform(quarantineDetector),
+            new LegacyHelperStubTransform(),
+            new RouteParameterWiringTransform(),
+            new RouteDataParameterPromotionTransform(),
+            new DuplicateRouteParameterTransform(),
+            new TitlePropertyCodeBehindTransform(),
+            new MarkupReferencedMemberStubTransform(),
+            new TypeMismatchFixTransform(),
+            new IdentityCodeBehindQuarantineTransform(),
+            new DisposeReadonlyFieldTransform(),
         };
 
-        return new MigrationPipeline(markupTransforms, codeBehindTransforms);
+        return new MigrationPipeline(markupTransforms, codeBehindTransforms, CreateDefaultSemanticPatterns());
     }
 }

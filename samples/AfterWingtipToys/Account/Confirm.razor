@@ -1,17 +1,9 @@
-@page "/Confirm"
-<PageTitle>Account Confirmation</PageTitle>
-<h2>@(Title).</h2>
+@page "/Account/Confirm"
+@inherits BlazorWebFormsComponents.WebFormsPageBase
 
-    <div>
-        <PlaceHolder ID="successPanel" Visible="true">
-            <p>
-                Thank you for confirming your account. Click <HyperLink ID="login" NavigateUrl="/Account/Login">here</HyperLink>  to login             
-            </p>
-        </PlaceHolder>
-        <PlaceHolder ID="errorPanel" Visible="false">
-            <p class="text-danger">
-                An error has occurred.
-            </p>
-        </PlaceHolder>
-    </div>
-
+<div class="migration-pending">
+    <h3>Page Not Yet Migrated</h3>
+    <p>This page (<code>Account/Confirm.aspx</code>) requires manual migration.</p>
+    <p>Original Web Forms features used: ASP.NET Identity or membership APIs</p>
+    <p>Suggested migration approach: Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic.</p>
+</div>

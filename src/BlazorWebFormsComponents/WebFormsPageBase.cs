@@ -1,11 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Primitives;
 using Microsoft.JSInterop;
 
 namespace BlazorWebFormsComponents;
@@ -16,25 +22,68 @@ namespace BlazorWebFormsComponents;
 /// Response.Cookies, Request.Cookies, Request.QueryString, Request.Url,
 /// ViewState, GetRouteUrl, ClientScript, and PostBack compatibility so that
 /// Web Forms code-behind patterns survive migration with minimal changes.
+///
+/// <para>Cascades itself as a <see cref="CascadingValue{TValue}"/> named
+/// "WebFormsPage" so that data-bound components (ListView, GridView, etc.)
+/// can resolve string-based SelectMethod/InsertMethod/UpdateMethod/DeleteMethod
+/// names via reflection, exactly as ASP.NET Web Forms does.</para>
 /// </summary>
 public abstract class WebFormsPageBase : ComponentBase, IAsyncDisposable
 {
-[Inject] private IPageService _pageService { get; set; } = null!;
-[Inject] private NavigationManager _navigationManager { get; set; } = null!;
-[Inject] private LinkGenerator _linkGenerator { get; set; } = null!;
-[Inject] private IHttpContextAccessor _httpContextAccessor { get; set; } = null!;
-[Inject] private ILogger<WebFormsPageBase> _logger { get; set; } = null!;
-[Inject] private SessionShim _sessionShim { get; set; } = null!;
-[Inject] private IWebHostEnvironment _webHostEnvironment { get; set; } = null!;
-[Inject] private CacheShim _cacheShim { get; set; } = null!;
-[Inject] private IJSRuntime _jsRuntime { get; set; } = null!;
-[Inject] private ClientScriptShim _clientScriptShim { get; set; } = null!;
+internal const string CascadingParameterName = "WebFormsPage";
+
+private static readonly FieldInfo _renderFragmentField =
+	typeof(ComponentBase).GetField("_renderFragment", BindingFlags.NonPublic | BindingFlags.Instance);
+
+private readonly RenderFragment _baseRenderFragment;
+
+protected WebFormsPageBase()
+{
+	// Wrap the default render output in a CascadingValue so child data-bound
+	// components can locate this page instance for SelectMethod resolution.
+	_baseRenderFragment = (RenderFragment)_renderFragmentField.GetValue(this);
+	_renderFragmentField.SetValue(this, (RenderFragment)PageCascadingBuildRenderTree);
+
+	void PageCascadingBuildRenderTree(RenderTreeBuilder builder)
+	{
+		builder.OpenComponent(0, typeof(CascadingValue<WebFormsPageBase>));
+		builder.AddAttribute(1, nameof(CascadingValue<object>.Name), CascadingParameterName);
+		builder.AddAttribute(2, nameof(CascadingValue<object>.Value), this);
+		builder.AddAttribute(3, nameof(CascadingValue<object>.ChildContent), _baseRenderFragment);
+		builder.AddAttribute(4, nameof(CascadingValue<object>.IsFixed), true);
+		builder.CloseComponent();
+	}
+}
+[Inject] private IServiceProvider ServiceProvider { get; set; } = null!;
+
+private SessionShim? _sessionShim;
+private CacheShim? _cacheShim;
+private ClientScriptShim? _clientScriptShim;
+private IMemoryCache? _fallbackMemoryCache;
+
+private IPageService? _pageService;
+private string _currentTitle = string.Empty;
+private string _currentMetaDescription = string.Empty;
+private string _currentMetaKeywords = string.Empty;
+private bool _pageServiceSubscribed;
+
+private NavigationManager NavigationManager => ServiceProvider.GetRequiredService<NavigationManager>();
+private IJSRuntime JsRuntime => ServiceProvider.GetRequiredService<IJSRuntime>();
+private LinkGenerator LinkGenerator => ServiceProvider.GetRequiredService<LinkGenerator>();
+private IHttpContextAccessor HttpContextAccessor
+    => ServiceProvider.GetService<IHttpContextAccessor>() ?? new HttpContextAccessor();
+private ILogger<WebFormsPageBase> Logger
+    => ServiceProvider.GetService<ILogger<WebFormsPageBase>>() ?? NullLogger<WebFormsPageBase>.Instance;
+private IWebHostEnvironment WebHostEnvironment => ServiceProvider.GetRequiredService<IWebHostEnvironment>();
 
 /// <summary>
 /// Provides access to client script registration methods, emulating
 /// <c>Page.ClientScript</c> from ASP.NET Web Forms.
 /// </summary>
-public ClientScriptShim ClientScript => _clientScriptShim;
+public ClientScriptShim ClientScript
+    => _clientScriptShim ??= ServiceProvider.GetService<ClientScriptShim>()
+        ?? new ClientScriptShim(ServiceProvider.GetService<ILogger<ClientScriptShim>>()
+            ?? NullLogger<ClientScriptShim>.Instance);
 
 // ─── PostBack Support ─────────────────────────────────────────────
 
@@ -53,7 +102,10 @@ public event EventHandler<PostBackEventArgs>? PostBack;
 /// <see cref="ISession"/> in SSR mode; falls back to in-memory storage
 /// in interactive Blazor Server mode.
 /// </summary>
-protected SessionShim Session => _sessionShim;
+protected SessionShim Session
+    => _sessionShim ??= ServiceProvider.GetService<SessionShim>()
+        ?? new SessionShim(ServiceProvider.GetService<ILogger<SessionShim>>()
+            ?? NullLogger<SessionShim>.Instance, HttpContextAccessor);
 
 /// <summary>
 /// Returns <c>true</c> when an <see cref="HttpContext"/> is available
@@ -62,7 +114,7 @@ protected SessionShim Session => _sessionShim;
 /// cookies, headers, or <see cref="GetRouteUrl"/>.
 /// </summary>
 protected bool IsHttpContextAvailable
-=> _httpContextAccessor.HttpContext is not null;
+    => HttpContextAccessor.HttpContext is not null;
 
 /// <summary>
 /// Gets or sets the title of the page. Delegates to IPageService.
@@ -70,8 +122,15 @@ protected bool IsHttpContextAvailable
 /// </summary>
 public string Title
 {
-get => _pageService.Title;
-set => _pageService.Title = value;
+get => _pageService?.Title ?? _currentTitle;
+set
+{
+    _currentTitle = value ?? string.Empty;
+    if (_pageService is not null)
+    {
+        _pageService.Title = _currentTitle;
+    }
+}
 }
 
 /// <summary>
@@ -80,8 +139,15 @@ set => _pageService.Title = value;
 /// </summary>
 public string MetaDescription
 {
-get => _pageService.MetaDescription;
-set => _pageService.MetaDescription = value;
+get => _pageService?.MetaDescription ?? _currentMetaDescription;
+set
+{
+    _currentMetaDescription = value ?? string.Empty;
+    if (_pageService is not null)
+    {
+        _pageService.MetaDescription = _currentMetaDescription;
+    }
+}
 }
 
 /// <summary>
@@ -90,9 +156,34 @@ set => _pageService.MetaDescription = value;
 /// </summary>
 public string MetaKeywords
 {
-get => _pageService.MetaKeywords;
-set => _pageService.MetaKeywords = value;
+get => _pageService?.MetaKeywords ?? _currentMetaKeywords;
+set
+{
+    _currentMetaKeywords = value ?? string.Empty;
+    if (_pageService is not null)
+    {
+        _pageService.MetaKeywords = _currentMetaKeywords;
+    }
 }
+}
+
+/// <summary>
+/// The current page title resolved from <see cref="IPageService"/> or the local fallback state.
+/// Intended for components that render page head content.
+/// </summary>
+protected string CurrentTitle => _currentTitle;
+
+/// <summary>
+/// The current page meta description resolved from <see cref="IPageService"/> or the local fallback state.
+/// Intended for components that render page head content.
+/// </summary>
+protected string CurrentMetaDescription => _currentMetaDescription;
+
+/// <summary>
+/// The current page meta keywords resolved from <see cref="IPageService"/> or the local fallback state.
+/// Intended for components that render page head content.
+/// </summary>
+protected string CurrentMetaKeywords => _currentMetaKeywords;
 
 /// <summary>
 /// Returns <c>true</c> when the current request is a postback (form POST in SSR mode)
@@ -110,7 +201,7 @@ public bool IsPostBack
 	get
 	{
 		// SSR mode: HttpContext is available — check HTTP method
-		if (_httpContextAccessor?.HttpContext is { } context)
+		if (HttpContextAccessor.HttpContext is { } context)
 			return HttpMethods.IsPost(context.Request.Method);
 
 		// ServerInteractive mode: track initialization state
@@ -127,12 +218,23 @@ private bool _hasInitialized;
 protected WebFormsPageBase Page => this;
 
 /// <summary>
+/// Compatibility shim for Web Forms <c>Context</c> access.
+/// Returns the current <see cref="HttpContext"/> when available.
+/// </summary>
+protected HttpContext? Context => HttpContextAccessor.HttpContext;
+
+/// <summary>
+/// Compatibility property for Web Forms <c>Page.ViewStateUserKey</c>.
+/// </summary>
+public string? ViewStateUserKey { get; set; }
+
+/// <summary>
 /// Compatibility shim for Web Forms <c>Response</c> object.
 /// Supports <c>Response.Redirect()</c> and <c>Response.Cookies</c>.
 /// Cookies degrade gracefully to no-op when HttpContext is unavailable.
 /// </summary>
 protected ResponseShim Response
-=> new(_navigationManager, _httpContextAccessor.HttpContext, _logger);
+	=> new(NavigationManager, HttpContextAccessor.HttpContext, Logger);
 
 /// <summary>
 /// Compatibility shim for Web Forms <c>Request</c> object.
@@ -143,14 +245,38 @@ protected ResponseShim Response
 /// <see cref="NavigationManager"/>.
 /// </summary>
 protected RequestShim Request
-=> new(_httpContextAccessor.HttpContext, _navigationManager, _logger);
+	=> _requestShim ??= new(HttpContextAccessor.HttpContext, NavigationManager, Logger);
+private RequestShim? _requestShim;
+
+/// <summary>
+/// Injects form data captured by <see cref="WebFormsForm"/> into the
+/// <see cref="Request"/> shim so that <c>Request.Form["key"]</c>
+/// returns the submitted values during interactive mode.
+/// </summary>
+/// <param name="formData">Form field data from JS interop.</param>
+public void SetRequestFormData(Dictionary<string, StringValues> formData)
+{
+	// Ensure the shim is initialized, then push form data into it
+	_ = Request;
+	_requestShim!.SetFormData(formData);
+}
+
+/// <summary>
+/// Convenience overload accepting <see cref="FormSubmitEventArgs"/>
+/// directly from a <c>&lt;WebFormsForm OnSubmit="SetRequestFormData"&gt;</c> binding.
+/// </summary>
+/// <param name="e">The form submit event args.</param>
+public void SetRequestFormData(FormSubmitEventArgs e)
+{
+	SetRequestFormData(e.FormData);
+}
 
 /// <summary>
 /// Compatibility shim for Web Forms <c>Server</c> object.
 /// Supports <c>Server.MapPath()</c>, <c>Server.HtmlEncode()</c>,
 /// <c>Server.UrlEncode()</c>, etc.
 /// </summary>
-protected ServerShim Server => new(_webHostEnvironment);
+protected ServerShim Server => new(WebHostEnvironment, NavigationManager);
 
 /// <summary>
 /// Compatibility shim for Web Forms <c>Cache</c> object
@@ -158,7 +284,10 @@ protected ServerShim Server => new(_webHostEnvironment);
 /// Provides dictionary-style <c>Cache["key"]</c> access backed by
 /// ASP.NET Core <see cref="Microsoft.Extensions.Caching.Memory.IMemoryCache"/>.
 /// </summary>
-protected CacheShim Cache => _cacheShim;
+protected CacheShim Cache
+    => _cacheShim ??= ServiceProvider.GetService<CacheShim>()
+        ?? new CacheShim(_fallbackMemoryCache ??= new MemoryCache(new MemoryCacheOptions()),
+            ServiceProvider.GetService<ILogger<CacheShim>>() ?? NullLogger<CacheShim>.Instance);
 
 /// <summary>
 /// Resolves a relative URL to an application-absolute URL.
@@ -202,7 +331,60 @@ public ViewStateDictionary ViewState { get; } = new();
 protected override void OnInitialized()
 {
 	base.OnInitialized();
+    EnsurePageService();
 	_hasInitialized = true;
+}
+
+private void EnsurePageService()
+{
+    if (_pageServiceSubscribed)
+    {
+        return;
+    }
+
+    _pageService = ServiceProvider.GetService<IPageService>();
+    if (_pageService is null)
+    {
+        return;
+    }
+
+    _currentTitle = _pageService.Title;
+    _currentMetaDescription = _pageService.MetaDescription;
+    _currentMetaKeywords = _pageService.MetaKeywords;
+
+    _pageService.TitleChanged += OnTitleChanged;
+    _pageService.MetaDescriptionChanged += OnMetaDescriptionChanged;
+    _pageService.MetaKeywordsChanged += OnMetaKeywordsChanged;
+    _pageServiceSubscribed = true;
+}
+
+private async void OnTitleChanged(object? sender, string newTitle)
+{
+    _currentTitle = newTitle;
+    await NotifyPageStateChangedAsync();
+}
+
+private async void OnMetaDescriptionChanged(object? sender, string newMetaDescription)
+{
+    _currentMetaDescription = newMetaDescription;
+    await NotifyPageStateChangedAsync();
+}
+
+private async void OnMetaKeywordsChanged(object? sender, string newMetaKeywords)
+{
+    _currentMetaKeywords = newMetaKeywords;
+    await NotifyPageStateChangedAsync();
+}
+
+protected virtual async Task NotifyPageStateChangedAsync()
+{
+    try
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+    catch (ObjectDisposedException)
+    {
+    }
 }
 
 /// <summary>
@@ -221,8 +403,8 @@ RequireHttpContext(nameof(GetRouteUrl));
 if (routeName != null && routeName.EndsWith(".aspx", StringComparison.OrdinalIgnoreCase))
 routeName = routeName[..^5];
 
-return _linkGenerator.GetPathByRouteValues(
-_httpContextAccessor.HttpContext, routeName, routeParameters);
+return LinkGenerator.GetPathByRouteValues(
+	HttpContextAccessor.HttpContext, routeName, routeParameters);
 }
 
 /// <summary>
@@ -230,21 +412,21 @@ _httpContextAccessor.HttpContext, routeName, routeParameters);
 /// Equivalent to Page.GetRouteUrl(routeParameters) in Web Forms.
 /// </summary>
 public string GetRouteUrl(object routeParameters)
-=> _linkGenerator.GetPathByRouteValues(_httpContextAccessor.HttpContext, null, routeParameters);
+	=> LinkGenerator.GetPathByRouteValues(HttpContextAccessor.HttpContext, null, routeParameters);
 
 /// <summary>
 /// Generates a URL for the specified route parameters dictionary.
 /// Equivalent to Page.GetRouteUrl(routeParameters) in Web Forms.
 /// </summary>
 public string GetRouteUrl(RouteValueDictionary routeParameters)
-=> _linkGenerator.GetPathByRouteValues(_httpContextAccessor.HttpContext, null, routeParameters);
+	=> LinkGenerator.GetPathByRouteValues(HttpContextAccessor.HttpContext, null, routeParameters);
 
 /// <summary>
 /// Generates a URL for the specified named route with a parameters dictionary.
 /// Equivalent to Page.GetRouteUrl(routeName, routeParameters) in Web Forms.
 /// </summary>
 public string GetRouteUrl(string routeName, RouteValueDictionary routeParameters)
-=> _linkGenerator.GetPathByRouteValues(_httpContextAccessor.HttpContext, routeName, routeParameters);
+	=> LinkGenerator.GetPathByRouteValues(HttpContextAccessor.HttpContext, routeName, routeParameters);
 
 /// <summary>
 /// Guards a member that requires <see cref="HttpContext"/>.
@@ -253,7 +435,7 @@ public string GetRouteUrl(string routeName, RouteValueDictionary routeParameters
 /// <param name="memberName">The name of the calling member, for diagnostics.</param>
 private void RequireHttpContext(string memberName)
 {
-if (_httpContextAccessor.HttpContext is null)
+if (HttpContextAccessor.HttpContext is null)
 throw new InvalidOperationException(
 $"{memberName} requires HttpContext, which is unavailable during interactive " +
 $"rendering (WebSocket mode). Use {nameof(IsHttpContextAvailable)} to guard " +
@@ -324,32 +506,46 @@ protected override async Task OnAfterRenderAsync(bool firstRender)
 {
     await base.OnAfterRenderAsync(firstRender);
 
-    if (firstRender)
+    if (firstRender && EnablePostBackInterop)
     {
         _postBackTargetId = GetType().Name;
         _postBackRef = DotNetObjectReference.Create(this);
 
         // Bootstrap __doPostBack and registration functions
-        await _jsRuntime.InvokeVoidAsync("eval", PostBackBootstrapJs);
-        await _jsRuntime.InvokeVoidAsync("__bwfc.registerPostBackTarget",
+        await JsRuntime.InvokeVoidAsync("eval", PostBackBootstrapJs);
+        await JsRuntime.InvokeVoidAsync("__bwfc.registerPostBackTarget",
             _postBackTargetId, _postBackRef);
     }
 
     // Flush any queued ClientScript registrations
-    if (_clientScriptShim != null)
-    {
-        await _clientScriptShim.FlushAsync(_jsRuntime);
-    }
+        if (_clientScriptShim != null)
+        {
+            await _clientScriptShim.FlushAsync(JsRuntime);
+        }
 }
+
+/// <summary>
+/// Controls whether the page base should register Web Forms postback JS interop.
+/// Head-only helper components can disable this.
+/// </summary>
+protected virtual bool EnablePostBackInterop => true;
 
 /// <inheritdoc />
 public virtual async ValueTask DisposeAsync()
 {
+    if (_pageServiceSubscribed && _pageService is not null)
+    {
+        _pageService.TitleChanged -= OnTitleChanged;
+        _pageService.MetaDescriptionChanged -= OnMetaDescriptionChanged;
+        _pageService.MetaKeywordsChanged -= OnMetaKeywordsChanged;
+        _pageServiceSubscribed = false;
+    }
+
     if (_postBackTargetId != null && _postBackRef != null)
     {
         try
         {
-            await _jsRuntime.InvokeVoidAsync(
+            await JsRuntime.InvokeVoidAsync(
                 "__bwfc.unregisterPostBackTarget", _postBackTargetId);
         }
         catch (JSDisconnectedException) { }

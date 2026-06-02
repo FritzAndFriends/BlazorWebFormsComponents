@@ -1,0 +1,13 @@
+{
+  "pages": [
+    {
+      "originalFilePath": "Logout.aspx",
+      "detectedUnsupportedFeatures": [
+        "ASP.NET Identity or membership APIs",
+        "Unresolved compile-surface blockers"
+      ],
+      "reasonForQuarantine": "Detected ASP.NET Identity, membership, or heavyweight account-control usage that the CLI cannot safely preserve in the generated compile surface. FormsAuthentication usage is not page-codebehind safe.",
+      "suggestedMigrationApproach": "Rebuild this flow with ASP.NET Core Identity, EditForm, and app-specific authentication endpoints before restoring the page logic. Port the remaining server-control or lifecycle logic into BWFC-compatible components, services, or semantic patterns before re-enabling the page."
+    }
+  ]
+}

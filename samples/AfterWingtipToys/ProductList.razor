@@ -1,14 +1,18 @@
 @page "/ProductList"
+@page "/Category/{categoryName}"
+<WebFormsForm @formname="ProductListForm">
+    <AntiforgeryToken />
 <PageTitle>Products</PageTitle>
-	<section>
+	
+    <section>
         <div>
             <hgroup>
                 <h2>@(Page.Title)</h2>
             </hgroup>
 
-            <ListView ID="productList" 
+            <ListView id="productList" @ref="productList" 
                 DataKeyNames="ProductID" GroupItemCount="4"
-                ItemType="Product" SelectMethod="@GetProducts">
+                ItemType="Product" SelectMethod="GetProductsQueryDetails_SelectMethod">
                 <EmptyDataTemplate>
                     <table >
                         <tr>
@@ -17,35 +21,35 @@
                     </table>
                 </EmptyDataTemplate>
                 <EmptyItemTemplate>
-                    <td/>
+                    <td></td>
                 </EmptyItemTemplate>
-                <GroupTemplate>
+                <GroupTemplate Context="items">
                     <tr id="itemPlaceholderContainer">
-                        @context
+                        @items
                     </tr>
                 </GroupTemplate>
-                <ItemTemplate Context="context">
+                <ItemTemplate Context="Item">
                     <td>
                         <table>
                             <tr>
                                 <td>
-                                    <a href="/ProductDetails?ProductID=@context.ProductID">
-                                    <image src='/Catalog/Images/Thumbs/@context.ImagePath'
-                                      width="100" height="75" border="1" />
+                                  <a href="@($"/Product/{Item.ProductName}")">
+                                    <image src='/Catalog/Images/Thumbs/@Item.ImagePath'
+                                      width="100" height="75" border="1"></image>
                                   </a>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <a href="/ProductDetails?ProductID=@context.ProductID">
-                                      @context.ProductName
+                                    <a href="@($"/Product/{Item.ProductName}")">
+                                      @Item.ProductName
                                     </a>
                                     <br />
                                     <span>
-                                        <b>Price: </b>@($"{context.UnitPrice:c}")
+                                        <b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))
                                     </span>
                                     <br />
-                                    <a href="/AddToCart?productID=@context.ProductID" data-enhance-nav="false">               
+                                    <a href="/AddToCart.aspx?productID=@Item.ProductID" data-enhance-nav="false">               
                                         <span class="ProductListItem">
                                             <b>Add To Cart</b>
                                         </span>           
@@ -58,13 +62,13 @@
                         </table>
                     </td>
                 </ItemTemplate>
-                <LayoutTemplate>
+                <LayoutTemplate Context="groups">
                     <table style="width:100%;">
                         <tbody>
                             <tr>
                                 <td>
                                     <table id="groupPlaceholderContainer" style="width:100%">
-                                        @context
+                                        @groups
                                     </table>
                                 </td>
                             </tr>
@@ -79,3 +83,4 @@
         </div>
     </section>
 
+</WebFormsForm>

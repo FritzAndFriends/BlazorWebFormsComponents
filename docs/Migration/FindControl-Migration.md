@@ -1,8 +1,22 @@
-# Migrating Away from FindControl
+# FindControl in BWFC
 
-**FindControl** is a Web Forms method that allows you to locate a control in the page's control tree by its ID. While powerful, it's one of the most problematic patterns to migrate to Blazor because Blazor uses a component-based architecture with no "control tree" in the Web Forms sense.
+**FindControl** is a Web Forms method that allows you to locate a control in the page's control tree by its ID. BWFC provides **full runtime support** for `FindControl` on `BaseWebFormsComponent` — your existing code-behind that uses `FindControl` compiles and runs **without modification**.
 
-This guide explains the FindControl problem, why it's difficult to migrate, and the idiomatic Blazor solutions.
+!!! tip "Zero Code Rewrites"
+    Unlike other migration approaches that rewrite `FindControl("Id")` calls into `@ref` fields, BWFC supports `FindControl` as a first-class runtime method. Cast patterns, chained lookups, and case-insensitive matching all work out of the box.
+
+```csharp
+// This Web Forms code works unchanged in BWFC:
+TextBox searchBox = (TextBox)FindControl("SearchBox");
+searchBox.Text = "hello";
+
+// Chained lookups work too:
+var child = FindControl("Panel1").FindControl("TextBox1");
+```
+
+**[Live Demo →](/migration/findcontrol)** — See FindControl working in the sample app.
+
+This guide also covers the background of FindControl, naming container boundaries, and idiomatic Blazor alternatives for new code.
 
 ---
 
@@ -328,21 +342,73 @@ userLabel.Text = GetCurrentUserName();
 
 ---
 
-## BWFC's FindControl — What It Does
+## BWFC's FindControl — Runtime Contract
 
-The `BaseWebFormsComponent` class provides a `FindControl` method that matches the Web Forms API name:
+`BaseWebFormsComponent` provides a hardened `FindControl` implementation as a formal runtime contract:
 
 ```csharp
-public class BaseWebFormsComponent : ComponentBase
+public abstract class BaseWebFormsComponent : ComponentBase, IAsyncDisposable
 {
-    public BaseWebFormsComponent FindControl(string id)
+    public virtual BaseWebFormsComponent FindControl(string controlId)
     {
-        // Recursively searches this component and all descendants for matching ID
+        // O(1) dictionary lookup for direct children
+        // Recursive descent for nested controls
+        // Case-insensitive matching
     }
 }
 ```
 
-**What it does:** Searches the current component's child controls and all descendants recursively for one with the matching ID. This mirrors the deep-search behavior that migrated Web Forms code typically expects.
+**Key features:**
+
+- **O(1) direct-child lookup** — Children are indexed by ID in a case-insensitive dictionary
+- **Recursive descent** — Nested controls are found by traversing the component tree
+- **Cast-compatible** — Returns `BaseWebFormsComponent`, castable to `TextBox`, `Panel`, etc.
+- **Chaining** — `FindControl("A").FindControl("B")` works because every component has the method
+- **Auto-registration** — Children register with their parent on initialization
+- **Auto-unregistration** — Children unregister on disposal (conditional rendering safe)
+- **Lifecycle hook** — `OnControlTreeReadyAsync()` fires after children are registered
+
+### Supported Patterns
+
+```csharp
+// Direct lookup with cast
+TextBox box = (TextBox)panel.FindControl("SearchBox");
+
+// Chained container traversal
+var nested = FindControl("Panel1").FindControl("TextBox1");
+
+// Null-safe pattern (same as Web Forms)
+var control = FindControl("MaybeExists");
+if (control != null) { /* use it */ }
+
+// Case-insensitive (Web Forms behavior)
+var found = FindControl("searchbox"); // finds ID="SearchBox"
+```
+
+### GridViewRow.FindControl — Data Row Controls
+
+For data controls like `GridView`, `FindControl` also works on individual rows. `GridViewRow<T>` and the non-generic `GridViewRow` shim both support `FindControl(string id)`:
+
+```csharp
+// This Web Forms pattern compiles and works unchanged in BWFC:
+GridViewRow row = CartList.Rows[i];  // implicit operator from GridViewRow<T>
+TextBox qty = (TextBox)row.FindControl("PurchaseQuantity");
+CheckBox remove = (CheckBox)row.FindControl("chkRemove");
+```
+
+In SSR mode, `FindControl` returns proxy `TextBox` and `CheckBox` instances whose `Text` and `Checked` properties are populated from the form POST data. This means migrated code that reads control values inside a postback handler works without modification.
+
+**Key compatibility features:**
+
+| Feature | Description |
+|---------|-------------|
+| `Rows[i]` typed indexer | Returns `GridViewRow<T>`, not `IRow<T>` |
+| Implicit conversion | `GridViewRow<T>` converts to non-generic `GridViewRow` automatically |
+| `FindControl` on rows | Returns proxy controls populated from form POST data |
+| `Cells` collection | `DataControlFieldCellCollection` with `ContainingField.ExtractValuesFromCell()` |
+| `RowState` | `DataControlRowState` flags enum (Normal, Alternate, Edit, Selected) |
+
+See [GridView — GridViewRow Compatibility](../DataControls/GridView.md#gridviewrow-compatibility) for full details and code examples.
 
 ---
 

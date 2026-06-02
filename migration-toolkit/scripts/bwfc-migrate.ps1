@@ -79,8 +79,75 @@ param(
     [switch]$Prescan
 )
 
+Write-Warning @"
+╔══════════════════════════════════════════════════════════════╗
+║  DEPRECATED: This script is deprecated.                     ║
+║  Use the CLI tool instead:                                  ║
+║    webforms-to-blazor migrate --input <src> --output <out>  ║
+║  See: docs/cli/index.md                                     ║
+╚══════════════════════════════════════════════════════════════╝
+"@
+
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+
+function Resolve-BwfcCliProject {
+    param([string]$StartPath)
+
+    $currentDir = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($StartPath))
+    while ($null -ne $currentDir) {
+        $candidate = Join-Path $currentDir.FullName 'src\BlazorWebFormsComponents.Cli\BlazorWebFormsComponents.Cli.csproj'
+        if (Test-Path $candidate) {
+            return $candidate
+        }
+
+        $currentDir = $currentDir.Parent
+    }
+
+    throw "Could not locate BlazorWebFormsComponents.Cli.csproj from '$StartPath'."
+}
+
+$cliProject = Resolve-BwfcCliProject -StartPath $PSScriptRoot
+
+$cliArgs = @(
+    'run',
+    '--project', $cliProject,
+    '--'
+)
+
+if ($Prescan) {
+    $cliArgs += @(
+        'prescan',
+        '--input', $Path
+    )
+}
+else {
+    $cliArgs += @(
+        'migrate',
+        '--input', $Path,
+        '--output', $Output,
+        '--overwrite'
+    )
+
+    if ($SkipProjectScaffold) {
+        $cliArgs += '--skip-scaffold'
+    }
+
+    if ($WhatIfPreference) {
+        $cliArgs += '--dry-run'
+    }
+
+    if ($VerbosePreference -eq 'Continue') {
+        $cliArgs += '--verbose'
+    }
+}
+
+& dotnet @cliArgs
+if ($LASTEXITCODE -ne 0) {
+    exit $LASTEXITCODE
+}
+
+return
 
 #region --- Configuration ---
 
@@ -126,6 +193,11 @@ function Invoke-BwfcPrescan {
         'BWFC012' = @{ Name = 'runat="server"'; Pattern = 'runat\s*=\s*"server"'; Description = 'runat="server" artifacts in strings/comments' }
         'BWFC013' = @{ Name = 'Response Object'; Pattern = 'Response\.(Write|WriteFile|Clear|Flush|End)\s*\('; Description = 'Response object method calls' }
         'BWFC014' = @{ Name = 'Request Object'; Pattern = 'Request\.(Form|Cookies|Headers|Files|QueryString|ServerVariables)\s*[\[\.]'; Description = 'Request object property access' }
+        'BWFC015' = @{ Name = 'Server Utility'; Pattern = 'Server\.(MapPath|HtmlEncode|HtmlDecode|UrlEncode|UrlDecode)\s*\('; Description = 'Server utility calls — use ServerShim on WebFormsPageBase' }
+        'BWFC016' = @{ Name = 'ConfigurationManager'; Pattern = 'ConfigurationManager\.(AppSettings|ConnectionStrings)\s*\['; Description = 'ConfigurationManager access — BWFC provides shim' }
+        'BWFC017' = @{ Name = 'ClientScript'; Pattern = '(Page\.)?ClientScript\.(RegisterStartupScript|RegisterClientScriptBlock|RegisterClientScriptInclude|GetPostBackEventReference)\s*\('; Description = 'ClientScript calls — use ClientScriptShim' }
+        'BWFC018' = @{ Name = 'Cache Access'; Pattern = '\bCache\s*\['; Description = 'Cache dictionary access — use CacheShim on WebFormsPageBase' }
+        'BWFC021' = @{ Name = 'ContentPlaceHolder/MasterPage'; Pattern = '<asp:ContentPlaceHolder|MasterPageFile\s*='; Description = 'Master page placeholder relationships — will be preserved as BWFC ContentPlaceHolder/Content components' }
     }
     
     $csFiles = Get-ChildItem -Path $SourcePath -Filter '*.cs' -Recurse -File
@@ -406,6 +478,18 @@ function New-ProjectScaffold {
         $additionalPackages += "`n    <PackageReference Include=`"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore`" Version=`"10.0.0`" />"
     }
 
+    $bwfcReference = '<PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />'
+    $currentDir = [System.IO.DirectoryInfo]::new([System.IO.Path]::GetFullPath($OutputRoot))
+    while ($null -ne $currentDir) {
+        $candidate = Join-Path $currentDir.FullName 'src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj'
+        if (Test-Path $candidate) {
+            $relative = [System.IO.Path]::GetRelativePath([System.IO.Path]::GetFullPath($OutputRoot), $candidate) -replace '/', '\'
+            $bwfcReference = "<ProjectReference Include=`"$relative`" />"
+            break
+        }
+        $currentDir = $currentDir.Parent
+    }
+
     # .csproj
     $csprojContent = @"
 <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -418,7 +502,7 @@ function New-ProjectScaffold {
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fritz.BlazorWebFormsComponents" Version="*" />${additionalPackages}
+    ${bwfcReference}${additionalPackages}
   </ItemGroup>
 
 </Project>
@@ -439,7 +523,6 @@ function New-ProjectScaffold {
 @using Microsoft.JSInterop
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.LoginControls
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 @using $ProjectName
 @using $ProjectName.Models
 @inherits BlazorWebFormsComponents.WebFormsPageBase
@@ -448,12 +531,12 @@ function New-ProjectScaffold {
     # Program.cs
     $programContent = @"
 // TODO: Review and adjust this generated Program.cs for your application needs.
+// Generated for .NET 10 Blazor static SSR. Keep interactive render modes opt-in and page-specific.
 using BlazorWebFormsComponents;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+builder.Services.AddRazorComponents();
 
 builder.Services.AddBlazorWebFormsComponents();
 
@@ -469,8 +552,7 @@ app.UseHttpsRedirection();
 app.MapStaticAssets();
 app.UseAntiforgery();
 
-app.MapRazorComponents<$ProjectName.Components.App>()
-    .AddInteractiveServerRenderMode();
+app.MapRazorComponents<$ProjectName.Components.App>();
 
 app.Run();
 "@
@@ -623,10 +705,9 @@ function New-AppRazorScaffold {
     <HeadOutlet />
 </head>
 
-@* SSR by default — add @rendermode="InteractiveServer" to pages that need interactivity *@
+@* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
 <body>
     <Routes />
-    <script src="_framework/blazor.web.js"></script>
 </body>
 
 </html>
@@ -857,7 +938,7 @@ function Invoke-ScriptAutoDetection {
         return
     }
 
-    # Inject <script> tags into App.razor before closing </body> (after blazor.web.js)
+    # Inject <script> tags into App.razor before closing </body>
     $appContent = Get-Content -Path $appRazorPath -Raw
     $injectionBlock = "    @* Auto-detected JS files from Scripts/ *@`n" + ($scriptTags -join "`n") + "`n"
     if ($appContent -match '</body>') {
@@ -2456,11 +2537,15 @@ function Copy-CodeBehind {
 //   - Page_PreRender → OnAfterRenderAsync
 //   - IsPostBack checks → remove or convert to state logic
 //   - ViewState usage → component [Parameter] or private fields
-//   - Session/Cache access → inject IHttpContextAccessor or use DI
-//   - Response.Redirect → NavigationManager.NavigateTo
+//   - Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
+//   - Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
+//   - Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
+//   - Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
+//   - ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
+//   - ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
 //   - Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
 //   - Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   - ScriptManager code-behind references → remove (Blazor handles updates)
+//   - ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
 //   - UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
 //   - User controls → Blazor component references
 // =============================================================================

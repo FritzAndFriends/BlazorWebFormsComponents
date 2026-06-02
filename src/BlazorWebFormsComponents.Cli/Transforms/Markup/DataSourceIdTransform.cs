@@ -87,30 +87,11 @@ public class DataSourceIdTransform : IMarkupTransform
             propertyLines.Add($"    private IEnumerable<object> {dsId}Data {{ get; set; }} = Array.Empty<object>();");
         }
 
+        // Always inject into code-behind (guaranteed to exist by the pipeline)
         if (metadata.CodeBehindContent != null)
         {
-            // Inject properties into code-behind class body (before last closing brace)
-            var lastBrace = metadata.CodeBehindContent.LastIndexOf('}');
-            if (lastBrace >= 0)
-            {
-                var injection = "\n" + string.Join("\n", propertyLines) + "\n";
-                metadata.CodeBehindContent = metadata.CodeBehindContent.Insert(lastBrace, injection);
-            }
-        }
-        else
-        {
-            // No code-behind — append @code block to markup
-            var sb = new StringBuilder(content.TrimEnd());
-            sb.Append('\n');
-            sb.Append('\n');
-            sb.Append("@code {\n");
-            foreach (var line in propertyLines)
-            {
-                sb.Append(line);
-                sb.Append('\n');
-            }
-            sb.Append('}');
-            content = sb.ToString();
+            metadata.CodeBehindContent = CodeBehindInjector.InjectMembers(
+                metadata.CodeBehindContent, string.Join("\n", propertyLines));
         }
 
         return content;

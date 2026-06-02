@@ -13,7 +13,7 @@ namespace BlazorWebFormsComponents
 		public override string PostBackUrl { get; set; }
 
 		[Parameter]
-		public bool UseSubmitBehavior { get; set; } = true;
+		public bool UseSubmitBehavior { get; set; } = false;
 
 	}
 }

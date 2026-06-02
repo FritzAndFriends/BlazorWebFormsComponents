@@ -1,0 +1,91 @@
+@namespace BlazorWebFormsComponents.Test
+@using System.Collections.Generic
+@using System.Text
+@using System.Text.Json
+@using System.Threading
+@using Microsoft.AspNetCore.Http
+@using Microsoft.Extensions.Logging.Abstractions
+
+@code {
+	[Fact]
+	public void SessionShim_StoreAndRetrieveString_RoundTrips()
+	{
+		var session = new TestSession();
+		session.SetString("message", "Wingtip order confirmed");
+		var shim = CreateShim(session);
+
+		shim.Get<string>("message").ShouldBe("Wingtip order confirmed");
+		shim["message"].ShouldBe("Wingtip order confirmed");
+	}
+
+	[Fact]
+	public void SessionShim_StoreAndRetrieveObject_RoundTrips()
+	{
+		var session = new TestSession();
+		var expected = new TestPayload { Name = "Road bike", Quantity = 2 };
+		session.SetString("cart", JsonSerializer.Serialize(expected));
+		var shim = CreateShim(session);
+
+		var actual = shim.Get<TestPayload>("cart");
+
+		actual.ShouldNotBeNull();
+		actual.Name.ShouldBe("Road bike");
+		actual.Quantity.ShouldBe(2);
+	}
+
+	[Fact]
+	public void SessionShim_MixedStringAndObject_IndependentRoundTrip()
+	{
+		var session = new TestSession();
+		var expected = new TestPayload { Name = "Helmet", Quantity = 1 };
+		session.SetString("flash", "Item saved");
+		session.SetString("cart", JsonSerializer.Serialize(expected));
+		var shim = CreateShim(session);
+
+		shim.Get<string>("flash").ShouldBe("Item saved");
+		shim["flash"].ShouldBe("Item saved");
+		var actual = shim.Get<TestPayload>("cart");
+
+		actual.ShouldNotBeNull();
+		actual.Name.ShouldBe("Helmet");
+		actual.Quantity.ShouldBe(1);
+	}
+
+	private static SessionShim CreateShim(ISession session)
+	{
+		var httpContext = new Mock<HttpContext>();
+		httpContext.SetupGet(context => context.Session).Returns(session);
+
+		var accessor = new Mock<IHttpContextAccessor>();
+		accessor.SetupGet(context => context.HttpContext).Returns(httpContext.Object);
+
+		return new SessionShim(NullLogger<SessionShim>.Instance, accessor.Object);
+	}
+
+	private sealed class TestPayload
+	{
+		public string Name { get; set; } = string.Empty;
+		public int Quantity { get; set; }
+	}
+
+	private sealed class TestSession : ISession
+	{
+		private readonly Dictionary<string, byte[]> _values = new();
+
+		public IEnumerable<string> Keys => _values.Keys;
+		public string Id { get; } = Guid.NewGuid().ToString();
+		public bool IsAvailable => true;
+
+		public void Clear() => _values.Clear();
+
+		public Task CommitAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+		public Task LoadAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+		public void Remove(string key) => _values.Remove(key);
+
+		public void Set(string key, byte[] value) => _values[key] = value;
+
+		public bool TryGetValue(string key, out byte[] value) => _values.TryGetValue(key, out value!);
+	}
+}

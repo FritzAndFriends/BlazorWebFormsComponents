@@ -1,4 +1,6 @@
 @page "/TC28-AjaxToolkit"
+<WebFormsForm @formname="TC28AjaxToolkitForm">
+    <AntiforgeryToken />
 <PageTitle>Ajax Test</PageTitle>
 <TabContainer id="TabContainer1">
     <TabPanel HeaderText="Tab 1">
@@ -8,3 +10,5 @@
     </TabPanel>
 </TabContainer>
 @* TODO(bwfc-ajax-toolkit): Convert ajaxToolkit:RatingExtender — no BWFC equivalent yet *@
+
+</WebFormsForm>

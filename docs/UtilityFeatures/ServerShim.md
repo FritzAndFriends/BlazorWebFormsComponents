@@ -1,6 +1,6 @@
 # Server & Path Resolution Shim
 
-The `ServerShim` class provides compatibility with the ASP.NET Web Forms `Server` object (`HttpServerUtility`). It wraps ASP.NET Core's `IWebHostEnvironment` and `System.Net.WebUtility` so that migrated code-behind using `Server.MapPath()`, `Server.HtmlEncode()`, and `Server.UrlEncode()` compiles and works correctly. The `ResolveUrl()` and `ResolveClientUrl()` methods on `WebFormsPageBase` handle virtual path and `.aspx` extension stripping.
+The `ServerShim` class provides compatibility with the ASP.NET Web Forms `Server` object (`HttpServerUtility`). It wraps ASP.NET Core's `IWebHostEnvironment`, `NavigationManager`, and `System.Net.WebUtility` so that migrated code-behind using `Server.MapPath()`, encoding helpers, `Server.Transfer()`, `Server.GetLastError()`, and `Server.ClearError()` compiles and works correctly. The `ResolveUrl()` and `ResolveClientUrl()` methods on `WebFormsPageBase` handle virtual path and `.aspx` extension stripping.
 
 Original Microsoft implementation: https://docs.microsoft.com/en-us/dotnet/api/system.web.httpserverutility?view=netframework-4.8
 
@@ -25,6 +25,8 @@ In Blazor, these concerns are split across several APIs. The `ServerShim` bridge
 1. **`MapPath("~/path")`** — Resolves `~/` to `IWebHostEnvironment.WebRootPath` (wwwroot) and other paths to `ContentRootPath`
 2. **`HtmlEncode()` / `HtmlDecode()`** — Delegates to `System.Net.WebUtility`
 3. **`UrlEncode()` / `UrlDecode()`** — Delegates to `System.Net.WebUtility`
+4. **`Transfer(path)`** — Delegates to `NavigationManager.NavigateTo(path)`
+5. **`GetLastError()` / `ClearError()`** — Compatibility stubs for Web Forms error-handling patterns
 
 The `ResolveUrl()` and `ResolveClientUrl()` methods live on `WebFormsPageBase` and:
 

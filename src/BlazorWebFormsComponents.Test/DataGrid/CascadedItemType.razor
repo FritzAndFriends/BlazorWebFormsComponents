@@ -6,7 +6,7 @@
 		// This uses the CascadingTypeParameter feature
 		var cut = Render(@<DataGrid ItemType="Widget"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField DataField="Id" HeaderText="ID" />
 				<BoundField DataField="Name" HeaderText="Widget Name" />
@@ -34,7 +34,7 @@
 		// Test backward compatibility - explicit ItemType on columns should still work
 		var cut = Render(@<DataGrid ItemType="Widget"
 							AutoGenerateColumns="false"
-							SelectMethod="GetWidgets">
+							Items="@(Widget.SimpleWidgetList)">
 			<Columns>
 				<BoundField ItemType="Widget" DataField="Id" HeaderText="ID" />
 				<BoundField ItemType="Widget" DataField="Name" HeaderText="Widget Name" />
@@ -53,3 +53,4 @@
 		return Widget.SimpleWidgetList.AsQueryable();
 	}
 }
+

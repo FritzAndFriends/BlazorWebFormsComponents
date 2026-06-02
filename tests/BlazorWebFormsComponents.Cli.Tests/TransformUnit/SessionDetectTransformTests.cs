@@ -5,8 +5,8 @@ namespace BlazorWebFormsComponents.Cli.Tests.TransformUnit;
 
 /// <summary>
 /// Unit tests for SessionDetectTransform — detects Session["key"] and Cache["key"]
-/// patterns, injects [Inject] SessionShim / CacheShim properties, and generates
-/// migration guidance.
+/// patterns and generates migration guidance. Session/Cache are provided by
+/// WebFormsPageBase — no [Inject] needed.
 /// </summary>
 public class SessionDetectTransformTests
 {
@@ -21,9 +21,10 @@ public class SessionDetectTransformTests
     };
 
     [Fact]
-    public void InjectsSessionShimProperty()
+    public void DetectsSessionAccess_AddsGuidance()
     {
-        var input = @"namespace MyApp
+        var input = @"// =============================================================================
+namespace MyApp
 {
     public partial class MyPage
     {
@@ -32,13 +33,16 @@ public class SessionDetectTransformTests
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        Assert.Contains("[Inject] private SessionShim Session { get; set; }", result);
+        Assert.Contains("// --- Session State Migration ---", result);
+        Assert.Contains("SessionShim on WebFormsPageBase", result);
+        Assert.DoesNotContain("[Inject]", result);
     }
 
     [Fact]
-    public void InjectsCacheShimProperty()
+    public void DetectsCacheAccess_AddsGuidance()
     {
-        var input = @"namespace MyApp
+        var input = @"// =============================================================================
+namespace MyApp
 {
     public partial class MyPage
     {
@@ -47,13 +51,16 @@ public class SessionDetectTransformTests
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        Assert.Contains("[Inject] private CacheShim Cache { get; set; }", result);
+        Assert.Contains("// --- Cache Migration ---", result);
+        Assert.Contains("CacheShim on WebFormsPageBase", result);
+        Assert.DoesNotContain("[Inject]", result);
     }
 
     [Fact]
-    public void InjectsBothSessionAndCacheShims()
+    public void DetectsBothSessionAndCache_AddsBothGuidanceBlocks()
     {
-        var input = @"namespace MyApp
+        var input = @"// =============================================================================
+namespace MyApp
 {
     public partial class MyPage
     {
@@ -66,8 +73,9 @@ public class SessionDetectTransformTests
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        Assert.Contains("[Inject] private SessionShim Session { get; set; }", result);
-        Assert.Contains("[Inject] private CacheShim Cache { get; set; }", result);
+        Assert.Contains("// --- Session State Migration ---", result);
+        Assert.Contains("// --- Cache Migration ---", result);
+        Assert.DoesNotContain("[Inject]", result);
     }
 
     [Fact]
@@ -84,7 +92,7 @@ namespace MyApp
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Contains("// --- Session State Migration ---", result);
-        Assert.Contains("SessionShim auto-wired via [Inject]", result);
+        Assert.Contains("calls work automatically via SessionShim on WebFormsPageBase", result);
         Assert.Contains("Session keys found: CartId", result);
         Assert.Contains("Options for long-term replacement:", result);
     }
@@ -103,7 +111,7 @@ namespace MyApp
         var result = _transform.Apply(input, TestMetadata(input));
 
         Assert.Contains("// --- Cache Migration ---", result);
-        Assert.Contains("CacheShim auto-wired via [Inject]", result);
+        Assert.Contains("calls work automatically via CacheShim on WebFormsPageBase", result);
         Assert.Contains("Cache keys found: Products", result);
         Assert.Contains("CacheShim wraps IMemoryCache", result);
     }
@@ -133,9 +141,10 @@ namespace MyApp
     }
 
     [Fact]
-    public void IdempotentDoesNotDuplicateInjectProperty()
+    public void IdempotentDoesNotDuplicateGuidance()
     {
-        var input = @"namespace MyApp
+        var input = @"// =============================================================================
+namespace MyApp
 {
     public partial class MyPage
     {
@@ -145,13 +154,12 @@ namespace MyApp
         var firstPass = _transform.Apply(input, TestMetadata(input));
         var secondPass = _transform.Apply(firstPass, TestMetadata(firstPass));
 
-        // Count occurrences of the inject line
-        var injectCount = secondPass.Split("[Inject] private SessionShim Session").Length - 1;
-        Assert.Equal(1, injectCount);
+        var markerCount = secondPass.Split("// --- Session State Migration ---").Length - 1;
+        Assert.Equal(1, markerCount);
     }
 
     [Fact]
-    public void IdempotentDoesNotDuplicateGuidanceBlock()
+    public void IdempotentDoesNotDuplicateGuidanceBlock_WithTodoHeader()
     {
         var input = @"// =============================================================================
 namespace MyApp
@@ -186,7 +194,8 @@ namespace MyApp
     [Fact]
     public void DetectsVariableKeySessionAccess()
     {
-        var input = @"namespace MyApp
+        var input = @"// =============================================================================
+namespace MyApp
 {
     public partial class MyPage
     {
@@ -195,7 +204,8 @@ namespace MyApp
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        Assert.Contains("[Inject] private SessionShim Session { get; set; }", result);
+        Assert.Contains("// --- Session State Migration ---", result);
+        Assert.Contains("SessionShim on WebFormsPageBase", result);
     }
 
     [Fact]
@@ -229,9 +239,10 @@ namespace MyApp
     }
 
     [Fact]
-    public void InjectPropertyAppearsAfterClassBrace()
+    public void GuidanceAppearsInOutput()
     {
-        var input = @"namespace MyApp
+        var input = @"// =============================================================================
+namespace MyApp
 {
     public partial class MyPage
     {
@@ -240,10 +251,9 @@ namespace MyApp
 }";
         var result = _transform.Apply(input, TestMetadata(input));
 
-        var classIdx = result.IndexOf("public partial class MyPage");
-        var braceIdx = result.IndexOf('{', classIdx);
-        var injectIdx = result.IndexOf("[Inject] private SessionShim Session", braceIdx);
-        Assert.True(injectIdx > braceIdx, "[Inject] should appear after the class opening brace");
+        Assert.Contains("// --- Session State Migration ---", result);
+        Assert.Contains("SessionShim on WebFormsPageBase", result);
+        Assert.DoesNotContain("[Inject]", result);
     }
 
     [Fact]
@@ -264,6 +274,74 @@ namespace MyApp
 
         Assert.Contains(@"Session[""CartId""]", result);
         Assert.Contains(@"Session[""UserName""] = ""test""", result);
+    }
+
+    [Fact]
+    public void DetectsHttpContextCurrentSession_ReplacesWithSession()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Load() { var x = HttpContext.Current.Session[""CartId""]; }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        // The actual code line should have HttpContext.Current.Session replaced
+        Assert.DoesNotContain(@"var x = HttpContext.Current.Session[""CartId""]", result);
+        Assert.Contains(@"var x = Session[""CartId""]", result);
+        Assert.Contains("TODO(bwfc-session-state): HttpContext.Current.Session was replaced", result);
+    }
+
+    [Fact]
+    public void HttpContextCurrentSession_StillAddsSessionGuidance()
+    {
+        var input = @"// =============================================================================
+namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Load() { var x = HttpContext.Current.Session[""CartId""]; }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        // After replacement, Session[ is detected → guidance is added
+        Assert.Contains("SessionShim on WebFormsPageBase", result);
+        Assert.DoesNotContain("[Inject]", result);
+    }
+
+    [Fact]
+    public void HttpContextCurrentSession_EmitsDiGuidanceForNonPage()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Load() { var x = HttpContext.Current.Session[""CartId""]; }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+
+        Assert.Contains("non-page classes, inject SessionShim via constructor DI", result);
+    }
+
+    [Fact]
+    public void HttpContextCurrentSession_Idempotent()
+    {
+        var input = @"namespace MyApp
+{
+    public partial class MyPage
+    {
+        void Load() { var x = HttpContext.Current.Session[""CartId""]; }
+    }
+}";
+        var result = _transform.Apply(input, TestMetadata(input));
+        result = _transform.Apply(result, TestMetadata(result));
+
+        var count = result.Split("HttpContext.Current.Session was replaced").Length - 1;
+        Assert.Equal(1, count);
     }
 
     [Fact]

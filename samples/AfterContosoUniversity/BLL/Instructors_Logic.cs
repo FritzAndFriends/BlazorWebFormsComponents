@@ -1,43 +1,77 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using System.Data;
+using System.Data.SqlClient;
+using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;
 using ContosoUniversity.Models;
 
 namespace ContosoUniversity.BLL
 {
     public class Instructors_Logic
     {
-        private readonly IDbContextFactory<ContosoUniversityEntities> _factory;
+    // --- ConfigurationManager Migration ---
+    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
+    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+    // ConnectionString names found: ContosoUniversity
+    // Add these to appsettings.json under "ConnectionStrings" section.
 
-        public Instructors_Logic(IDbContextFactory<ContosoUniversityEntities> factory)
-        {
-            _factory = factory;
-        }
+    private readonly ContosoUniversityEntities _contosoUniversityEntities;
 
+    public Instructors_Logic(ContosoUniversityEntities contosoUniversityEntities)
+    {
+        _contosoUniversityEntities = contosoUniversityEntities;
+    }
+
+        #region Get Instructors List
         public List<Instructor> getInstructors()
         {
-            using var db = _factory.CreateDbContext();
-            return db.Instructors.ToList();
+            var instructors = (from instructor in _contosoUniversityEntities.Instructors
+                               select instructor).ToList<Instructor>();
+
+            return instructors;
         }
+        #endregion
 
-        public List<Instructor> GetSortedInstrucors(string expression, string direction)
-        {
-            using var db = _factory.CreateDbContext();
-            IQueryable<Instructor> query = db.Instructors;
+        #region Get Sorted Instructors List
+        public List<Instructor> GetSortedInstrucors(string expression,string direction)
+        {           
+            List<Instructor> list = new List<Instructor>();
+            string query = "select * from dbo.[Instructors]";
+            string connectionStr = ConfigurationManager.ConnectionStrings["ContosoUniversity"].ConnectionString;
 
-            if (!string.IsNullOrEmpty(expression))
+            if (!String.IsNullOrEmpty(expression))
             {
-                query = expression switch
-                {
-                    "InstructorID" => direction == "asc" ? query.OrderBy(i => i.InstructorID) : query.OrderByDescending(i => i.InstructorID),
-                    "FirstName" => direction == "asc" ? query.OrderBy(i => i.FirstName) : query.OrderByDescending(i => i.FirstName),
-                    "LastName" => direction == "asc" ? query.OrderBy(i => i.LastName) : query.OrderByDescending(i => i.LastName),
-                    _ => query
-                };
+                query += " order by " + expression + " " + direction;
             }
 
-            return query.ToList();
+            using (SqlConnection con = new SqlConnection(connectionStr))
+            {
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
+                    con.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            Instructor instr = new Instructor();
+
+                            instr.InstructorID = Convert.ToInt32(dr["InstructorID"]);
+                            instr.FirstName = dr["FirstName"].ToString();
+                            instr.LastName = dr["LastName"].ToString();
+                            instr.BirthDate = DateTime.Parse(dr["BirthDate"].ToString());
+                            instr.Email = dr["Email"].ToString();
+
+                            list.Add(instr);
+                        }
+                        dr.Close();
+                    }                   
+                }
+                con.Close();
+            }
+            return list;
         }
+        #endregion
     }
 }
