@@ -4,14 +4,14 @@ namespace AfterBlazorServerSide.Components.Pages.ControlSamples.Migration;
 
 public partial class FindControlDemo
 {
-	private string _directBoxText = "Hello from DirectBox";
-	private string _directResult = "";
-	private string _nestedBoxText = "Hello from NestedBox";
-	private string _nestedResult = "";
-	private string _chainLabelText = "Chained Label";
-	private string _chainedResult = "";
-	private string _caseBoxText = "Case Insensitive";
-	private string _caseResult = "";
+	private string _directBoxText = "";
+	private string _directResult = "Waiting for render...";
+	private string _nestedBoxText = "";
+	private string _nestedResult = "Waiting for render...";
+	private string _chainLabelText = "";
+	private string _chainedResult = "Waiting for render...";
+	private string _caseBoxText = "";
+	private string _caseResult = "Waiting for render...";
 
 	private BlazorWebFormsComponents.Panel? _directParent;
 	private BlazorWebFormsComponents.Panel? _outerPanel;
@@ -24,18 +24,28 @@ public partial class FindControlDemo
 
 		if (firstRender)
 		{
-			// 1. Direct child lookup with cast
+			// 1. Direct child lookup — find it and set its Text (just like the code sample)
 			if (_directParent != null)
 			{
 				var box = (TextBox)_directParent.FindControl("DirectBox");
-				_directResult = box != null ? $"Found! Text='{box.Text}'" : "NOT FOUND";
+				if (box != null)
+				{
+					box.Text = "Found it!";
+					_directBoxText = box.Text;
+					_directResult = "FindControl found the TextBox and set Text = \"Found it!\"";
+				}
 			}
 
 			// 2. Nested/recursive lookup
 			if (_outerPanel != null)
 			{
 				var nested = (TextBox)_outerPanel.FindControl("NestedBox");
-				_nestedResult = nested != null ? $"Found! Text='{nested.Text}'" : "NOT FOUND";
+				if (nested != null)
+				{
+					nested.Text = "Found deep!";
+					_nestedBoxText = nested.Text;
+					_nestedResult = "FindControl recursed through InnerPanel to find NestedBox";
+				}
 			}
 
 			// 3. Chained lookup
@@ -45,15 +55,25 @@ public partial class FindControlDemo
 				if (child != null)
 				{
 					var label = (BlazorWebFormsComponents.Label)child.FindControl("ChainLabel");
-					_chainedResult = label != null ? $"Found! Text='{label.Text}'" : "NOT FOUND";
+					if (label != null)
+					{
+						label.Text = "Chained!";
+						_chainLabelText = label.Text;
+						_chainedResult = "Chained: parent.FindControl(\"ChainChild\").FindControl(\"ChainLabel\") succeeded";
+					}
 				}
 			}
 
-			// 4. Case-insensitive
+			// 4. Case-insensitive — note lowercase "mixedcasebox" finds ID="MixedCaseBox"
 			if (_caseParent != null)
 			{
 				var caseBox = (TextBox)_caseParent.FindControl("mixedcasebox");
-				_caseResult = caseBox != null ? $"Found! Text='{caseBox.Text}'" : "NOT FOUND";
+				if (caseBox != null)
+				{
+					caseBox.Text = "Case doesn't matter!";
+					_caseBoxText = caseBox.Text;
+					_caseResult = "FindControl(\"mixedcasebox\") matched ID=\"MixedCaseBox\"";
+				}
 			}
 
 			StateHasChanged();

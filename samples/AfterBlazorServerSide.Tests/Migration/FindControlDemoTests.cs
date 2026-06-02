@@ -35,8 +35,7 @@ public class FindControlDemoTests
 			var text = await result.TextContentAsync();
 
 			Assert.NotNull(text);
-			Assert.Contains("Found!", text!);
-			Assert.Contains("Hello from DirectBox", text!);
+			Assert.Contains("FindControl found the TextBox", text!);
 		}
 		finally
 		{
@@ -62,8 +61,7 @@ public class FindControlDemoTests
 			var text = await result.TextContentAsync();
 
 			Assert.NotNull(text);
-			Assert.Contains("Found!", text!);
-			Assert.Contains("Hello from NestedBox", text!);
+			Assert.Contains("recursed through InnerPanel", text!);
 		}
 		finally
 		{
@@ -89,8 +87,8 @@ public class FindControlDemoTests
 			var text = await result.TextContentAsync();
 
 			Assert.NotNull(text);
-			Assert.Contains("Found!", text!);
-			Assert.Contains("Chained Label", text!);
+			Assert.Contains("Chained:", text!);
+			Assert.Contains("succeeded", text!);
 		}
 		finally
 		{
@@ -116,8 +114,8 @@ public class FindControlDemoTests
 			var text = await result.TextContentAsync();
 
 			Assert.NotNull(text);
-			Assert.Contains("Found!", text!);
-			Assert.Contains("Case Insensitive", text!);
+			Assert.Contains("mixedcasebox", text!);
+			Assert.Contains("MixedCaseBox", text!);
 		}
 		finally
 		{
