@@ -30,6 +30,34 @@ namespace BlazorWebFormsComponents
 		private readonly RenderFragment _baseRenderFragment;
 		private readonly Dictionary<string, BaseWebFormsComponent> _childIndex = new(StringComparer.OrdinalIgnoreCase);
 
+		#region Lifecycle Auto-Wiring
+
+		/// <summary>
+		/// Called during initialization, matching the Web Forms Page_Init timing.
+		/// Override in subclasses to provide initialization logic.
+		/// </summary>
+		protected virtual void Page_Init(object sender, EventArgs e) { }
+
+		/// <summary>
+		/// Called during initialization after Page_Init, matching the Web Forms Page_Load timing.
+		/// Override in subclasses to provide load logic.
+		/// </summary>
+		protected virtual void Page_Load(object sender, EventArgs e) { }
+
+		/// <summary>
+		/// Called during initialization after Page_Load, matching the Web Forms Page_PreRender timing.
+		/// Override in subclasses to provide pre-render logic.
+		/// </summary>
+		protected virtual void Page_PreRender(object sender, EventArgs e) { }
+
+		/// <summary>
+		/// Called after first render, matching the Web Forms Page_Unload timing.
+		/// Override in subclasses to provide cleanup logic.
+		/// </summary>
+		protected virtual void Page_Unload(object sender, EventArgs e) { }
+
+		#endregion
+
 		public BaseWebFormsComponent()
 		{
 			// Grab a copy of the default RenderFragment to go into the CascadingValue
@@ -565,14 +593,17 @@ namespace BlazorWebFormsComponents
 
 			if (OnInit.HasDelegate)
 				await OnInit.InvokeAsync(EventArgs.Empty);
+				Page_Init(this, EventArgs.Empty);
 
-			await base.OnInitializedAsync();
+				await base.OnInitializedAsync();
 
-			if (OnLoad.HasDelegate)
-				await OnLoad.InvokeAsync(EventArgs.Empty);
+				if (OnLoad.HasDelegate)
+					await OnLoad.InvokeAsync(EventArgs.Empty);
+				Page_Load(this, EventArgs.Empty);
 
-			if (OnPreRender.HasDelegate)
-				await OnPreRender.InvokeAsync(EventArgs.Empty);
+				if (OnPreRender.HasDelegate)
+					await OnPreRender.InvokeAsync(EventArgs.Empty);
+				Page_PreRender(this, EventArgs.Empty);
 
 			_hasInitialized = true;
 		}
@@ -587,6 +618,11 @@ namespace BlazorWebFormsComponents
 				await OnUnload.InvokeAsync(EventArgs.Empty);
 				_UnloadTriggered = true;
 			}
+				if (!_UnloadTriggered)
+				{
+					Page_Unload(this, EventArgs.Empty);
+					_UnloadTriggered = true;
+				}
 
 			// Auto-flush any queued ClientScript registrations
 			if (_clientScriptResolved && _clientScript != null)

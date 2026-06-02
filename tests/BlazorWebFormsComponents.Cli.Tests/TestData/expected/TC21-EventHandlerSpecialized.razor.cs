@@ -19,6 +19,8 @@
 //   TODO(bwfc-general): User controls → Blazor component references
 // =============================================================================
 using System;
+using BlazorWebFormsComponents.CustomControls;
+
 namespace MyApp
 {
     public partial class TC21_EventHandlerSpecialized : WebFormsPageBase

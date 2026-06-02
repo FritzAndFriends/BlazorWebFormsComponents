@@ -98,25 +98,25 @@ public class BaseClassStripTransformTests
         Assert.Contains("public partial class SiteMaster : WebFormsPageBase { }", result);
     }
 
-    // --- Control type: strips base class entirely ---
+    // --- Control type: preserves WebControl/UserControl/CompositeControl (BWFC equivalents exist) ---
 
     [Fact]
-    public void Control_StripsSystemWebUIUserControl()
+    public void Control_PreservesUserControlFromFullyQualified()
     {
         var input = "public partial class MyControl : System.Web.UI.UserControl { }";
         var result = _transform.Apply(input, ControlMetadata(input));
 
-        Assert.Contains("public partial class MyControl { }", result);
-        Assert.DoesNotContain("UserControl", result);
+        Assert.Contains("public partial class MyControl : UserControl", result);
+        Assert.DoesNotContain("System.Web.UI", result);
     }
 
     [Fact]
-    public void Control_StripsShortFormUserControl()
+    public void Control_PreservesShortFormUserControl()
     {
         var input = "public partial class MyCtrl : UserControl { }";
         var result = _transform.Apply(input, ControlMetadata(input));
 
-        Assert.Contains("public partial class MyCtrl { }", result);
+        Assert.Contains("public partial class MyCtrl : UserControl", result);
     }
 
     // --- Shared behavior ---

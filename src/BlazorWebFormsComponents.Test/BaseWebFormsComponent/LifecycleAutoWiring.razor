@@ -1,0 +1,47 @@
+@inherits BlazorWebFormsComponents.Test.BlazorWebFormsTestContext
+
+@code {
+
+    [Fact]
+    public void PageLoad_WithSenderAndArgs_IsCalledDuringInit()
+    {
+        var cut = Render(@<LifecycleTestComponent />);
+        var instance = cut.FindComponent<LifecycleTestComponent>().Instance;
+        instance.InitCalled.ShouldBeTrue();
+        instance.LoadCalled.ShouldBeTrue();
+        instance.PreRenderCalled.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void PageLoad_NoParameters_IsCalledDuringInit()
+    {
+        var cut = Render(@<LifecycleNoParamsComponent />);
+        var instance = cut.FindComponent<LifecycleNoParamsComponent>().Instance;
+        instance.LoadCalled.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void PageUnload_IsCalledAfterRender()
+    {
+        var cut = Render(@<LifecycleTestComponent />);
+        var instance = cut.FindComponent<LifecycleTestComponent>().Instance;
+        // Page_Unload fires in OnAfterRenderAsync (matching the OnUnload EventCallback behavior)
+        instance.UnloadCalled.ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Lifecycle_OrderIsCorrect()
+    {
+        var cut = Render(@<LifecycleTestComponent />);
+        var instance = cut.FindComponent<LifecycleTestComponent>().Instance;
+        instance.CallOrder.ShouldBe(new[] { "Init", "Load", "PreRender", "Unload" });
+    }
+
+    [Fact]
+    public void NoLifecycleMethods_DoesNotThrow()
+    {
+        // A standard BWFC component without Page_* methods should work fine
+        var cut = Render(@<Label Text="Hello" />);
+        cut.Find("span").TextContent.ShouldBe("Hello");
+    }
+}
