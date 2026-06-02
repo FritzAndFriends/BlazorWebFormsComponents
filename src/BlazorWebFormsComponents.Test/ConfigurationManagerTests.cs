@@ -12,6 +12,7 @@ namespace BlazorWebFormsComponents.Test;
 /// System.Configuration.ConfigurationManager patterns to IConfiguration.
 /// Tests are written from spec — implementation may not exist yet.
 /// </summary>
+[Collection("ConfigurationManager")]
 public class ConfigurationManagerTests : IDisposable
 {
 	/// <summary>
@@ -163,10 +164,13 @@ public class ConfigurationManagerTests : IDisposable
 		ConfigurationManager.Initialize(config);
 
 		// Act & Assert
-		ConfigurationManager.ConnectionStrings["Primary"]!.ConnectionString
-			.ShouldBe("Server=primary;Database=A");
-		ConfigurationManager.ConnectionStrings["ReadOnly"]!.ConnectionString
-			.ShouldBe("Server=readonly;Database=B");
+		var primary = ConfigurationManager.ConnectionStrings["Primary"];
+		primary.ShouldNotBeNull();
+		primary.ConnectionString.ShouldBe("Server=primary;Database=A");
+
+		var readOnly = ConfigurationManager.ConnectionStrings["ReadOnly"];
+		readOnly.ShouldNotBeNull();
+		readOnly.ConnectionString.ShouldBe("Server=readonly;Database=B");
 	}
 
 	#endregion

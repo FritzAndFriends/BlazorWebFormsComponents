@@ -83,4 +83,13 @@
 **Impact:** Unblocks Layer 1 correctness for ASCX-heavy apps, targets reduced L2 repair time
 
 ---
+## Learnings
+
+### 2026-05-20T21:07:06.347-04:00: Wizard Web Forms fidelity review
+
+- `src/BlazorWebFormsComponents/Wizard.razor` already uses a table-based shell, but the header and navigation rows live inside a nested content table instead of the outer table layout used by ASP.NET Web Forms Wizard.
+- `src/BlazorWebFormsComponents/Wizard.razor.cs` matches the core step model (`ActiveStepIndex`, `DisplaySideBar`, `HeaderText`, destination URLs, key navigation events, `WizardStepType` auto-resolution) and includes SSR form replay via `__wizard_step` and `__wizard_action` fields.
+- Declared Wizard surface area overstates actual behavior: `StartNavigationTemplate`, `StepNavigationTemplate`, `FinishNavigationTemplate`, `SideBarButtonStyle`, and `FinishCompleteButtonText` exist in code/docs but are not wired into rendered markup.
+- Sidebar fidelity gap: the Blazor Wizard renders flat `<a>/<span><br />` content inside one `<td>` rather than the Web Forms sidebar list/table/button structure, so CSS/JS targeting the original sidebar DOM will not match cleanly.
+- Key review files for future parity checks: `src/BlazorWebFormsComponents/Wizard.razor`, `src/BlazorWebFormsComponents/Wizard.razor.cs`, `src/BlazorWebFormsComponents/WizardStep.razor.cs`, `src/BlazorWebFormsComponents.Test/Wizard/Navigation.razor`, and `docs/NavigationControls/Wizard.md`.
 

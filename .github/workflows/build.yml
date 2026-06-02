@@ -117,3 +117,14 @@ jobs:
           path: src/BlazorWebFormsComponents.Analyzers.Test/TestResults/*.trx
           reporter: dotnet-trx
           fail-on-error: true
+
+      - name: Post test summary to PR
+        if: always() && github.event_name == 'pull_request'
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: |
+            src/BlazorWebFormsComponents.Test/TestResults/*.trx
+            src/BlazorWebFormsComponents.Analyzers.Test/TestResults/*.trx
+          check_name: Unit Tests Summary
+          comment_title: "🧪 Unit Test Results"
+          comment_mode: always
