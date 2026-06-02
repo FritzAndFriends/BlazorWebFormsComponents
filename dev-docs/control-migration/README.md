@@ -2,7 +2,7 @@
 
 **Owner:** Forge (Lead / Web Forms Reviewer)  
 **Created:** 2026-05-30  
-**Status:** Planning  
+**Status:** ✅ Complete  
 **Branch:** `feature/ascx-custom-control-migration`
 
 ## Overview
@@ -44,16 +44,16 @@ This effort is organized into **two high-level streams**:
 
 | Priority | Item | Stream | Notes |
 |----------|------|--------|-------|
-| P0 | Web.config tag/namespace parser | 1 (Infrastructure) | Blocks all downstream transforms; unblocks WingtipToys |
-| P0 | ASCX descriptor analyzer | 1 (Infrastructure) | Blocks Content/Template unwrapping; enables Layer 1 scanning |
+| P0 | Web.config tag/namespace parser | 1 (Infrastructure) | ✅ Complete — `WebConfigAssemblyParser` |
+| P0 | ASCX descriptor analyzer | 1 (Infrastructure) | ✅ Complete — `AscxDescriptorAnalyzer` |
 | P1 | ContentTemplate unwrapper | 2 (Transforms) | ✅ Complete — Bind(), DataBinder.Eval(), basic unwrapping |
-| P1 | FindControl runtime support | Runtime | ✅ Complete — promoted to BWFC runtime contract (not CLI rewrite) |
-| P2 | Custom base-class shim generator | 1 (Infrastructure) | Blocks custom WebControl adoption; deferred pending P0+P1 analysis |
-| P2 | ASCX binding/lifecycle transforms | 2 (Transforms) | Blocks full ASCX migration; needs descriptor analysis first |
-| P3 | Custom-control scaffolder | 2 (Transforms) | Deferred: enables generation of BWFC stubs only after descriptors+binding known |
-| P3 | ASCX Skill | 3 (Tooling) | Deferred: written after P0–P2 transforms stable |
-| P3 | Custom-Control Skill | 3 (Tooling) | Deferred: written after P0–P2 transforms + shim generator stable |
-| P3 | Integration tests | 3 (Tooling) | Deferred: written after P0–P2 working end-to-end |
+| P1 | FindControl runtime support | Runtime | ✅ Complete — runtime on `BaseWebFormsComponent` (O(1) indexed, recursive, cast-compat) |
+| P2 | Custom base-class shim generator | 1 (Infrastructure) | ✅ Complete — `WebControl`, `CompositeControl`, `UserControl`, `Control` compat classes + `@inherits` injection |
+| P2 | ASCX binding/lifecycle transforms | 2 (Transforms) | ✅ Complete — `Page_Init`/`Page_Load`/`Page_PreRender`/`Page_Unload` auto-wiring via virtual overrides |
+| P3 | Custom-control scaffolder | 2 (Transforms) | ✅ Complete — not needed as separate scaffolder; `WebControl.RenderContents` + `HtmlTextWriter` work natively |
+| P3 | ASCX Skill | 3 (Tooling) | ✅ Complete — `migration-toolkit/skills/bwfc-ascx-migration/` |
+| P3 | Custom-Control Skill | 3 (Tooling) | ✅ Complete — `migration-toolkit/skills/bwfc-custom-control-migration/` |
+| P3 | Integration tests | 3 (Tooling) | ✅ Complete — bUnit tests + Playwright tests + CustomWebControl sample page |
 
 ## Acceptance Criteria
 
@@ -71,8 +71,10 @@ When all work is complete:
 2. ✅ Create this planning doc + issue tracking
 3. ✅ Create GitHub issues for P0 items (Web.config parser, ASCX descriptor analyzer)
 4. ✅ Implement P0 issues in parallel (#555 + #557)
-5. → Keep docs and CLI tests current as P1 transforms land
-6. → Validate P0 with WingtipToys prescan, then move to P1 transforms
+5. ✅ P1 transforms landed and validated with CLI tests (882 passing)
+6. ✅ P2 classes + lifecycle auto-wiring + WTT run94 (26/26 passing)
+7. ✅ P3 skills, RenderContents docs/tests, benchmark skill wiring
+8. → **Merge to main** — all items complete
 
 ## Validation Cadence on This Branch
 
