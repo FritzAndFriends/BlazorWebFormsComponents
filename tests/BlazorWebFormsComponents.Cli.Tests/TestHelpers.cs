@@ -261,7 +261,7 @@ public static class TestHelpers
             new MethodNameCollisionTransform(),
             new SelfInstantiationTransform(),
             new ComponentRefCodeBehindTransform(),
-            new FindControlComponentRefTransform(),
+            // FindControlComponentRefTransform removed — FindControl is now a BWFC runtime feature
             new ComponentRefNullSafetyTransform(),
             new LabelFieldBindCodeBehindTransform(),
             new ResponseRedirectTransform(),

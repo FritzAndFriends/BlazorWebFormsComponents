@@ -28,6 +28,7 @@ namespace BlazorWebFormsComponents
 		// Get Access to the ComponentBase field we need to wrap every component in a CascadingValue
 		private static readonly FieldInfo _renderFragmentField = typeof(ComponentBase).GetField(BASEFRAGMENTFIELDNAME, BindingFlags.NonPublic | BindingFlags.Instance);
 		private readonly RenderFragment _baseRenderFragment;
+		private readonly Dictionary<string, BaseWebFormsComponent> _childIndex = new(StringComparer.OrdinalIgnoreCase);
 
 		public BaseWebFormsComponent()
 		{
@@ -560,7 +561,7 @@ namespace BlazorWebFormsComponents
 				}
 			}
 
-			Parent?.Controls.Add(this);
+			Parent?.RegisterChildControl(this);
 
 			if (OnInit.HasDelegate)
 				await OnInit.InvokeAsync(EventArgs.Empty);
@@ -596,6 +597,7 @@ namespace BlazorWebFormsComponents
 			if (firstRender)
 			{
 
+				await OnControlTreeReadyAsync();
 				HandleUnknownAttributes();
 				StateHasChanged();
 
@@ -648,6 +650,8 @@ namespace BlazorWebFormsComponents
 			ViewState.MarkClean();
 		}
 
+		protected virtual Task OnControlTreeReadyAsync() => Task.CompletedTask;
+
 		protected virtual void HandleUnknownAttributes() { }
 
 
@@ -662,6 +666,8 @@ namespace BlazorWebFormsComponents
 			{
 				if (disposing)
 				{
+					Parent?.UnregisterChildControl(this);
+
 					if (OnDisposed.HasDelegate)
 					{
 						await OnDisposed.InvokeAsync(EventArgs.Empty);
@@ -693,6 +699,23 @@ namespace BlazorWebFormsComponents
 		/// </summary>
 		public List<BaseWebFormsComponent> Controls { get; set; } = new List<BaseWebFormsComponent>();
 
+		internal void RegisterChildControl(BaseWebFormsComponent child)
+		{
+			if (child == null) return;
+			if (!Controls.Contains(child))
+				Controls.Add(child);
+			if (!string.IsNullOrEmpty(child.ID))
+				_childIndex[child.ID] = child;
+		}
+
+		internal void UnregisterChildControl(BaseWebFormsComponent child)
+		{
+			if (child == null) return;
+			Controls.Remove(child);
+			if (!string.IsNullOrEmpty(child.ID))
+				_childIndex.Remove(child.ID);
+		}
+
 		/// <summary>
 		/// Searches this control and all descendants for a control with the specified ID.
 		/// Matches the ASP.NET Web Forms Control.FindControl API name for drop-in migration.
@@ -704,14 +727,14 @@ namespace BlazorWebFormsComponents
 		{
 			if (string.IsNullOrEmpty(controlId)) return null;
 
-			// Check direct children first
-			var found = Controls.Find(control => control.ID == controlId);
-			if (found != null) return found;
+			// Fast dictionary lookup for direct children
+			if (_childIndex.TryGetValue(controlId, out var indexed))
+				return indexed;
 
 			// Recurse into children
 			foreach (var child in Controls)
 			{
-				found = child.FindControl(controlId);
+				var found = child.FindControl(controlId);
 				if (found != null) return found;
 			}
 

@@ -104,7 +104,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, MethodNameCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, SelfInstantiationTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefCodeBehindTransform>();
-        services.AddSingleton<ICodeBehindTransform, FindControlComponentRefTransform>();
+        // FindControlComponentRefTransform removed — FindControl is now a BWFC runtime feature
         services.AddSingleton<ICodeBehindTransform, ComponentRefNullSafetyTransform>();
         services.AddSingleton<ICodeBehindTransform, LabelFieldBindCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();

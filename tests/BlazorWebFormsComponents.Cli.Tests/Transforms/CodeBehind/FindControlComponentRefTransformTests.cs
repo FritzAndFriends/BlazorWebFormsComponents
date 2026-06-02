@@ -1,76 +1,67 @@
-using BlazorWebFormsComponents.Cli.Analysis;
 using BlazorWebFormsComponents.Cli.Pipeline;
-using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
+using BlazorWebFormsComponents.Cli.Tests;
 
 namespace BlazorWebFormsComponents.Cli.Tests.Transforms.CodeBehind;
 
-public class FindControlComponentRefTransformTests
+/// <summary>
+/// Verifies that FindControl calls are preserved through the pipeline (not rewritten).
+/// FindControl is a BWFC runtime feature — the CLI should leave these calls unchanged.
+/// </summary>
+public class FindControlPreservationTests
 {
-    private readonly FindControlComponentRefTransform _transform = new();
-
-    private static FileMetadata CreateMetadata() => new()
-    {
-        SourceFilePath = "Control.ascx",
-        OutputFilePath = "Control.razor",
-        FileType = FileType.Control,
-        OriginalContent = "",
-        AscxDescriptor = new AscxDescriptor
-        {
-            ControlName = "Control",
-            ReferencedControlIds = ["SearchBox"]
-        }
-    };
-
     [Fact]
-    public void Apply_RewritesDirectFindControl_WhenRefExists()
+    public void Pipeline_PreservesFindControlCalls()
     {
-        var metadata = CreateMetadata();
+        var pipeline = TestHelpers.CreateDefaultPipeline();
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Control.ascx",
+            OutputFilePath = "Control.razor",
+            FileType = FileType.Control,
+            OriginalContent = "",
+        };
         metadata.ComponentRefs["SearchBox"] = "TextBox";
-        var input = """var box = FindControl("SearchBox");""";
+        var input = """var box = (TextBox)FindControl("SearchBox");""";
 
-        var result = _transform.Apply(input, metadata);
+        var result = pipeline.TransformCodeBehind(input, metadata);
 
-        Assert.Equal("var box = SearchBox;", result);
+        Assert.Contains("""FindControl("SearchBox")""", result);
     }
 
     [Fact]
-    public void Apply_RewritesThisFindControl_WhenRefExists()
+    public void Pipeline_PreservesThisFindControlCalls()
     {
-        var metadata = CreateMetadata();
+        var pipeline = TestHelpers.CreateDefaultPipeline();
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Control.ascx",
+            OutputFilePath = "Control.razor",
+            FileType = FileType.Control,
+            OriginalContent = "",
+        };
         metadata.ComponentRefs["SearchBox"] = "TextBox";
         var input = """var box = this.FindControl("SearchBox");""";
 
-        var result = _transform.Apply(input, metadata);
+        var result = pipeline.TransformCodeBehind(input, metadata);
 
-        Assert.Equal("var box = SearchBox;", result);
+        Assert.Contains("""FindControl("SearchBox")""", result);
     }
 
     [Fact]
-    public void Apply_DoesNotRewriteUnknownControl()
+    public void Pipeline_PreservesChainedFindControlCalls()
     {
-        var metadata = CreateMetadata();
-        metadata.ComponentRefs["Known"] = "TextBox";
-        var input = """var box = FindControl("Unknown");""";
-
-        var result = _transform.Apply(input, metadata);
-
-        Assert.Equal(input, result);
-    }
-
-    [Fact]
-    public void Apply_DoesNotRewriteWhenNoAnalysisReferences()
-    {
-        var metadata = CreateMetadata();
-        metadata.AscxDescriptor = new AscxDescriptor
+        var pipeline = TestHelpers.CreateDefaultPipeline();
+        var metadata = new FileMetadata
         {
-            ControlName = "Control",
-            ReferencedControlIds = []
+            SourceFilePath = "Default.aspx",
+            OutputFilePath = "Default.razor",
+            FileType = FileType.Page,
+            OriginalContent = "",
         };
-        metadata.ComponentRefs["SearchBox"] = "TextBox";
-        var input = """var box = FindControl("SearchBox");""";
+        var input = """var child = FindControl("Panel1").FindControl("TextBox1");""";
 
-        var result = _transform.Apply(input, metadata);
+        var result = pipeline.TransformCodeBehind(input, metadata);
 
-        Assert.Equal(input, result);
+        Assert.Contains("""FindControl("Panel1").FindControl("TextBox1")""", result);
     }
 }
