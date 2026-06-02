@@ -1,6 +1,6 @@
 ---
 name: wingtip-migration-test
-description: "**WORKFLOW SKILL** - Execute the end-to-end WingtipToys migration benchmark: clear samples\\AfterWingtipToys, run the migration-toolkit against samples\\WingtipToys, repair the generated app until Playwright acceptance tests pass, and write a numbered run report with embedded screenshots under dev-docs\\migration-tests\\wingtiptoys. WHEN: \"run Wingtip migration\", \"test WingtipToys migration\", \"Wingtip benchmark\", \"migrate WingtipToys\", \"rerun Wingtip migration\". INVOKES: migration-toolkit\\scripts\\bwfc-migrate.ps1, migration-toolkit\\skills\\migration-standards, bwfc-migration, bwfc-data-migration, bwfc-identity-migration, dotnet CLI, Playwright tests."
+description: "**WORKFLOW SKILL** - Execute the end-to-end WingtipToys migration benchmark: clear samples\\AfterWingtipToys, run the migration-toolkit against samples\\WingtipToys, repair the generated app until Playwright acceptance tests pass, and write a numbered run report with embedded screenshots under dev-docs\\migration-tests\\wingtiptoys. WHEN: \"run Wingtip migration\", \"test WingtipToys migration\", \"Wingtip benchmark\", \"migrate WingtipToys\", \"rerun Wingtip migration\". INVOKES: migration-toolkit\\scripts\\bwfc-migrate.ps1, migration-toolkit\\skills\\migration-standards, bwfc-migration, bwfc-ascx-migration, bwfc-custom-control-migration, bwfc-data-migration, bwfc-identity-migration, dotnet CLI, Playwright tests."
 ---
 
 # WingtipToys Migration Test
@@ -114,6 +114,8 @@ Load and apply the migration toolkit skills from `migration-toolkit\skills\`:
 |-------|---------------|
 | `migration-standards` | Canonical migration rules, page base class, render mode, SelectMethod, shims |
 | `bwfc-migration` | Markup conversion, template cleanup, lifecycle conversion, master/layout migration |
+| `bwfc-ascx-migration` | ASCX user control conversion, code-behind preservation, tag prefix resolution, FindControl |
+| `bwfc-custom-control-migration` | Custom WebControl/CompositeControl migration, RenderContents/HtmlTextWriter preservation |
 | `bwfc-data-migration` | EF/data-layer modernization, service registration, data access fixes |
 | `bwfc-identity-migration` | Authentication and account-page migration |
 
@@ -253,6 +255,8 @@ dev-docs/
 - `migration-toolkit/METHODOLOGY.md`
 - `migration-toolkit/skills/migration-standards/SKILL.md`
 - `migration-toolkit/skills/bwfc-migration/SKILL.md`
+- `migration-toolkit/skills/bwfc-ascx-migration/SKILL.md`
+- `migration-toolkit/skills/bwfc-custom-control-migration/SKILL.md`
 - `migration-toolkit/skills/bwfc-data-migration/SKILL.md`
 - `migration-toolkit/skills/bwfc-identity-migration/SKILL.md`
 - `src/WingtipToys.AcceptanceTests/TestConfiguration.cs`

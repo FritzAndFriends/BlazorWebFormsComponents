@@ -406,6 +406,8 @@ Script handles:
 - EF6 → EF Core (models, DbContext, seed)
 - Identity/Auth subsystem
 - Session → scoped services
+- ASCX user control repair (guided by `bwfc-ascx-migration` skill)
+- Custom WebControl/CompositeControl migration (guided by `bwfc-custom-control-migration` skill)
 - Business logic (checkout, payment, admin CRUD)
 - Complex data-binding with arithmetic/method chains
 - Data loading patterns (`SelectMethod` string → `SelectHandler` delegate, or `Items` via `OnInitializedAsync`)
