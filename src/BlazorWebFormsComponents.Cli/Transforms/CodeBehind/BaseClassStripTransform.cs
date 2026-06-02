@@ -25,6 +25,11 @@ public class BaseClassStripTransform : ICodeBehindTransform
         @":\s*(System\.Web\.UI\.)?(?:WebControl|CompositeControl|UserControl|Control)\b",
         RegexOptions.Compiled);
 
+    // Captures the bare type name from a preserved base class declaration
+    private static readonly Regex PreservedBaseClassCaptureRegex = new(
+        @":\s*(?:System\.Web\.UI\.)?(?<type>WebControl|CompositeControl|UserControl|Control)\b",
+        RegexOptions.Compiled);
+
     // Matches UserControl base class with fully-qualified or bare name (for stripping the namespace prefix)
     private static readonly Regex UserControlBaseRegex = new(
         @"(partial\s+class\s+\w+)\s*:\s*System\.Web\.UI\.UserControl\b",
@@ -58,10 +63,40 @@ public class BaseClassStripTransform : ICodeBehindTransform
                     content = "using BlazorWebFormsComponents.CustomControls;\n" + content;
                 }
             }
+
+            // Inject @inherits into the .razor markup so the partial class base matches
+            InjectInheritsDirective(content, metadata);
+
             return content;
         }
 
         // Strip any other Web Forms base classes (e.g., bare Page in a control context)
         return PageBaseClassRegex.Replace(content, "$1");
+    }
+
+    /// <summary>
+    /// Injects @inherits and @using directives into the .razor markup so the
+    /// partial class base matches between the .razor and .razor.cs files.
+    /// Without this, the Razor compiler defaults to ComponentBase and CS0263 fires.
+    /// </summary>
+    private void InjectInheritsDirective(string codeBehindContent, FileMetadata metadata)
+    {
+        var markup = metadata.MarkupContent;
+        if (string.IsNullOrWhiteSpace(markup))
+            return;
+
+        // Already has an @inherits directive — don't add a duplicate
+        if (Regex.IsMatch(markup, @"^\s*@inherits\s", RegexOptions.Multiline))
+            return;
+
+        var match = PreservedBaseClassCaptureRegex.Match(codeBehindContent);
+        if (!match.Success)
+            return;
+
+        var baseType = match.Groups["type"].Value;
+
+        // Build directives to prepend
+        var directives = $"@using BlazorWebFormsComponents.CustomControls\n@inherits {baseType}\n\n";
+        metadata.MarkupContent = directives + markup;
     }
 }
