@@ -66,7 +66,8 @@ public class PipelineIntegrationTests : IDisposable
             new NativeNuGetStaticAssetExtractor(),
             new NativeEdmxToEfCoreConverter(),
             new RedirectHandlerAnnotator(outputWriter),
-            new PageQuarantineDetector());
+            new PageQuarantineDetector(),
+            new CodeOnlyControlScaffolder());
     }
 
     private (string inputDir, string outputDir) CreateTempProjectDir(
@@ -921,6 +922,53 @@ public class PipelineIntegrationTests : IDisposable
 
         // Assert — report
         Assert.True(report.FilesProcessed >= 2);
+        Assert.Empty(report.Errors);
+    }
+
+    [Fact]
+    public async Task FullMigration_EmitsCodeOnlyControlSkeletons_AndPopulatesPrefixMap()
+    {
+        var (inputDir, outputDir) = CreateTempProjectDir(includeWebConfig: true);
+        File.WriteAllText(Path.Combine(inputDir, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <system.web>
+                <pages>
+                  <controls>
+                    <add assembly="Contoso.Controls" namespace="Contoso.Controls" tagPrefix="cc1" />
+                  </controls>
+                </pages>
+              </system.web>
+            </configuration>
+            """);
+
+        File.WriteAllText(Path.Combine(inputDir, "FancyCalendar.cs"), """
+            using System.Web.UI.WebControls;
+
+            namespace Contoso.Controls;
+
+            public class FancyCalendar : WebControl
+            {
+            }
+            """);
+
+        var pipeline = CreateFullPipeline();
+        var scanner = new SourceScanner();
+        var sourceFiles = scanner.Scan(inputDir, outputDir);
+        var context = new MigrationContext
+        {
+            SourcePath = inputDir,
+            OutputPath = outputDir,
+            Options = new MigrationOptions { DryRun = false },
+            SourceFiles = sourceFiles
+        };
+
+        var report = await pipeline.ExecuteAsync(context);
+
+        Assert.True(context.CustomControlPrefixToNamespace.TryGetValue("cc1", out var namespaceName));
+        Assert.Equal("Contoso.Controls", namespaceName);
+        Assert.True(File.Exists(Path.Combine(outputDir, "Generated", "CodeOnlyControls", "FancyCalendar.razor")));
+        Assert.True(File.Exists(Path.Combine(outputDir, "Generated", "CodeOnlyControls", "FancyCalendar.razor.cs")));
         Assert.Empty(report.Errors);
     }
 

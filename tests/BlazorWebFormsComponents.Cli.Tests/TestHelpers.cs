@@ -209,6 +209,8 @@ public static class TestHelpers
             // Order 510-520: Semantic controls
             new LoginViewTransform(),
             new SelectMethodTransform(),
+            // Order 595: Namespace-level tag prefix resolution (before Ajax/Asp prefix transforms)
+            new LocalTagNamespaceResolutionTransform(),
             // Order 600-620: Prefix stripping, validator typing, TemplateField wrapping
             new AjaxToolkitPrefixTransform(),
             new AspPrefixTransform(),
