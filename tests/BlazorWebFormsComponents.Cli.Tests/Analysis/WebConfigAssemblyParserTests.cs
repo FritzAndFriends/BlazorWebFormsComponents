@@ -47,6 +47,7 @@ public sealed class WebConfigAssemblyParserTests : IDisposable
             registration.TagPrefix == "webopt"
             && registration.Namespace == "Microsoft.AspNet.Web.Optimization.WebForms"
             && registration.AssemblyName == "Microsoft.AspNet.Web.Optimization.WebForms");
+        Assert.Equal("Microsoft.AspNet.Web.Optimization.WebForms", result.PrefixToNamespaceMap["webopt"]);
     }
 
     [Fact]
@@ -111,6 +112,106 @@ public sealed class WebConfigAssemblyParserTests : IDisposable
             && registration.TagName == "OpenAuthProviders"
             && registration.SourceVirtualPath == "~/Account/OpenAuthProviders.ascx"
             && registration.SourceFilePath == Path.Combine("Account", "Login.aspx"));
+    }
+
+    [Fact]
+    public void Parse_ExtractsNamespaceTags_FromNamespacedWebConfig()
+    {
+        var webConfigPath = Path.Combine(_testRoot, "Web.config");
+        File.WriteAllText(webConfigPath, """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration xmlns="urn:test:webconfig">
+              <system.web>
+                <pages>
+                  <controls>
+                    <add assembly="Contoso.Web" namespace="Contoso.Web.Controls" tagPrefix="contoso" />
+                  </controls>
+                </pages>
+              </system.web>
+            </configuration>
+            """);
+
+        var parser = new WebConfigAssemblyParser();
+
+        var result = parser.Parse(webConfigPath);
+
+        Assert.Null(result.Error);
+        Assert.Contains(result.NamespaceTags, registration =>
+            registration.TagPrefix == "contoso"
+            && registration.Namespace == "Contoso.Web.Controls"
+            && registration.AssemblyName == "Contoso.Web");
+    }
+
+    [Fact]
+    public void ParseProject_DeduplicatesRegisterDirectives_CaseInsensitive()
+    {
+        File.WriteAllText(Path.Combine(_testRoot, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration />
+            """);
+
+        File.WriteAllText(Path.Combine(_testRoot, "Default.aspx"), """
+            <%@ Page Language="C#" %>
+            <%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
+            <%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="AJAXTOOLKIT" %>
+            """);
+
+        var parser = new WebConfigAssemblyParser();
+
+        var result = parser.ParseProject(_testRoot);
+
+        var registrations = result.RegisterDirectives
+            .Where(registration =>
+                string.Equals(registration.TagPrefix, "ajaxToolkit", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(registration.Namespace, "AjaxControlToolkit", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        Assert.Single(registrations);
+    }
+
+    [Fact]
+    public void ParseProject_MergesAllWebConfigControlRegistrations()
+    {
+        File.WriteAllText(Path.Combine(_testRoot, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <system.web>
+                <pages>
+                  <controls>
+                    <add tagPrefix="root" namespace="Contoso.Root.Controls" assembly="Contoso.Root" />
+                  </controls>
+                </pages>
+              </system.web>
+            </configuration>
+            """);
+
+        var adminDirectory = Path.Combine(_testRoot, "Admin");
+        Directory.CreateDirectory(adminDirectory);
+        File.WriteAllText(Path.Combine(adminDirectory, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <system.web>
+                <pages>
+                  <controls>
+                    <add tagPrefix="admin" namespace="Contoso.Admin.Controls" assembly="Contoso.Admin" />
+                  </controls>
+                </pages>
+              </system.web>
+            </configuration>
+            """);
+
+        var parser = new WebConfigAssemblyParser();
+
+        var result = parser.ParseProject(_testRoot);
+
+        Assert.Contains(result.NamespaceTags, registration =>
+            registration.TagPrefix == "root"
+            && registration.Namespace == "Contoso.Root.Controls");
+        Assert.Contains(result.NamespaceTags, registration =>
+            registration.TagPrefix == "admin"
+            && registration.Namespace == "Contoso.Admin.Controls");
+        Assert.Equal("Contoso.Root.Controls", result.PrefixToNamespaceMap["root"]);
+        Assert.Equal("Contoso.Admin.Controls", result.PrefixToNamespaceMap["admin"]);
     }
 
     public void Dispose()

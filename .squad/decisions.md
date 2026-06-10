@@ -768,3 +768,82 @@ The current `Wizard` implementation only raises `ActiveStepIndexChanged` during 
 - Future Wizard implementation work has named tests ready to unskip when the behavior lands.
 - Reports can distinguish supported parity from intentionally deferred Wizard behavior.
 
+
+
+---
+
+# Custom control parser + scaffolder handoff (#557, #549, #550, #548)
+
+**Author:** Bishop  
+**Date:** 2026-06-10T10:33:04.9872011-04:00  
+**Scope:** BWFC CLI parser/runtime/pipeline wiring for custom controls
+
+## Decision
+
+Ship #557 now with production-grade parsing + runtime integration, and land only the starter surface for #549 and #550 so follow-on work can iterate safely without re-plumbing core context.
+
+## Delivered in this slice
+
+1. **#557 (implemented):**
+   - `WebConfigAssemblyParser` now aggregates custom control registrations across all `Web.config` files in the source tree.
+   - Parser emits `PrefixToNamespaceMap` to normalize prefix resolution.
+   - `RuntimeDetector` consumes parser output and exposes prefix map through runtime profile.
+   - Added/updated parser + runtime tests.
+
+2. **#549 (started):**
+   - Added `CodeOnlyServerControlAnalyzer` to detect code-only controls (`.cs` classes inheriting Web Forms control bases, no `.ascx/.aspx/.master` companion).
+   - Added `CodeOnlyControlScaffolder` skeleton emitter.
+   - Wired emission into `MigrationPipeline` startup path (after scaffold) to generate placeholder components under `Generated/CodeOnlyControls`.
+   - Added scaffolder and pipeline integration tests for starter behavior.
+
+3. **#550 (plumbing only):**
+   - Added shared context path: `MigrationContext.CustomControlPrefixToNamespace` and `FileMetadata.CustomControlPrefixToNamespace`.
+   - Pipeline now hydrates this map from runtime detection (and from parser when scaffold is skipped).
+
+## Handoff: remaining work
+
+### #549 remaining
+- Replace placeholder generated markup/code with base-class-aware templates (`WebControl`, `CompositeControl`, `DataBoundControl`, `Control`) per team design matrix.
+- Project detected public properties/events into `[Parameter]`/`EventCallback` members.
+- Add deterministic naming/namespace strategy for duplicate class names beyond numeric suffixing.
+- Add migration report surface that links generated control stubs back to source registrations and usage sites.
+
+### #550 remaining
+- Implement markup transform that uses `FileMetadata.CustomControlPrefixToNamespace` to resolve local/custom prefixes into generated components/usings.
+- Coordinate ordering with existing directive/prefix transforms so this runs before generic `AspPrefixTransform` stripping causes information loss.
+- Add regression cases for nested `Web.config` overrides and prefix conflicts.
+
+### #548 handoff note
+- This slice did not implement #548 behavior.
+- If #548 depends on custom control resolution/scaffolding, build directly on the new shared map + detected code-only control descriptors to avoid adding another parser pass.
+
+## Validation executed
+
+- `dotnet test tests\BlazorWebFormsComponents.Cli.Tests --nologo --filter "FullyQualifiedName~WebConfigAssemblyParserTests|FullyQualifiedName~RuntimeDetectorTests|FullyQualifiedName~CodeOnlyControlScaffolderTests|FullyQualifiedName~FullMigration_EmitsCodeOnlyControlSkeletons_AndPopulatesPrefixMap"`
+- `dotnet build samples\AfterWingtipToys --nologo` (fails with pre-existing sample compile error in `Logic\ExceptionUtility.cs`)
+- `dotnet build samples\AfterBlazorServerSide --nologo` (passes)
+
+
+---
+
+# WebFormsForm must inherit ComponentBase explicitly
+
+**Author:** Rogue (QA)  
+**Date:** 2026-07  
+**Scope:** WebFormsForm.razor, RequestShim.cs  
+**Issue:** #533
+
+## Decision
+
+Any `.razor` component in the main project that should NOT be a Web Forms control must explicitly declare `@inherits ComponentBase` to override the project-level `_Imports.razor` (which specifies `@inherits BaseWebFormsComponent`).
+
+## Bugs Found
+
+1. **WebFormsForm.razor** — Missing `@inherits ComponentBase` caused it to inherit `BaseWebFormsComponent` via `_Imports.razor`. Both classes had `[Parameter(CaptureUnmatchedValues = true)]`, throwing `ThrowForMultipleCaptureUnmatchedValuesParameters` at render time. Fixed by adding `@inherits ComponentBase`.
+
+2. **RequestShim.cs line 79** — `new FormShim(null)` was ambiguous between `FormShim(IFormCollection?)` and `FormShim(Dictionary<string, StringValues>)` after the dual-mode constructor was added. Fixed by casting to `(IFormCollection?)null`.
+
+## Impact
+
+Both fixes are required for the WebFormsForm component to render at all. Without them, any page using `<WebFormsForm>` crashes at component initialization.
+
