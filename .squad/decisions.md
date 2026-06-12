@@ -2,7 +2,30 @@
 
 
 
+# Decision: Xml and BaseCompareValidator — tracked test gap resolution
 
+**Date:** 2026-06-12T09:56:18-04:00
+**Author:** Rogue (QA Analyst)
+**Status:** Established
+
+## Xml — no tests; deferred component
+
+`Xml` is listed in `tracked-components.json` with `"status": "Deferred"`. No `Xml.razor` or `Xml.razor.cs` component source files exist in the library. The original `System.Web.UI.WebControls.Xml` control was a niche XSL transformation container with no clear Blazor analogue. **No bUnit tests should be added for Xml until a component implementation exists.** The tracked-tests gap for Xml is intentional; it must remain open until the component ships. No repo change is needed beyond this note.
+
+## BaseCompareValidator — abstract base; covered via property tests
+
+`BaseCompareValidator<InputType>` is an abstract generic base class that cannot be directly instantiated. Its only testable surface beyond what `BaseValidator` already provides is:
+
+- `Type` (ValidationDataType, defaults to `String`)
+- `CultureInvariantValues` (bool, defaults to `false`)
+
+Both concrete subclasses (`CompareValidator` and `RangeValidator`) already exercise this base class's `Compare()` logic extensively. To close the tracking gap, targeted property-default and parameter-acceptance tests were added in:
+
+`src/BlazorWebFormsComponents.Test/Validations/BaseCompareValidatorPropertyTests.razor`
+
+These 6 tests use `CompareValidator` and `RangeValidator` as proxies. **No implementation change is needed.** Going forward, `BaseCompareValidator` should be treated as "covered" once these property tests pass.
+
+---
 
 # Decision: Executive Summary Update Pattern
 
@@ -825,6 +848,1308 @@ Ship #557 now with production-grade parsing + runtime integration, and land only
 
 
 ---
+
+# WebFormsForm must inherit ComponentBase explicitly
+
+**Author:** Rogue (QA)  
+**Date:** 2026-07  
+**Scope:** WebFormsForm.razor, RequestShim.cs  
+**Issue:** #533
+
+## Decision
+
+Any `.razor` component in the main project that should NOT be a Web Forms control must explicitly declare `@inherits ComponentBase` to override the project-level `_Imports.razor` (which specifies `@inherits BaseWebFormsComponent`).
+
+## Bugs Found
+
+1. **WebFormsForm.razor** — Missing `@inherits ComponentBase` caused it to inherit `BaseWebFormsComponent` via `_Imports.razor`. Both classes had `[Parameter(CaptureUnmatchedValues = true)]`, throwing `ThrowForMultipleCaptureUnmatchedValuesParameters` at render time. Fixed by adding `@inherits ComponentBase`.
+
+2. **RequestShim.cs line 79** — `new FormShim(null)` was ambiguous between `FormShim(IFormCollection?)` and `FormShim(Dictionary<string, StringValues>)` after the dual-mode constructor was added. Fixed by casting to `(IFormCollection?)null`.
+
+## Impact
+
+Both fixes are required for the WebFormsForm component to render at all. Without them, any page using `<WebFormsForm>` crashes at component initialization.
+
+
+
+# Documentation Alignment Remediation Checklist
+
+**Date:** 2026-06-12  
+**Initiated by:** Beast (Technical Writer)  
+**Scope:** Dashboard accuracy, mkdocs.yml coverage, README completeness, docs file naming alignment
+
+---
+
+## EXECUTIVE SUMMARY
+
+Three meta-gaps identified:
+
+1. **Dashboard scope mismatch**: `docs/dashboard.md` claims "52 targeted Web Forms controls" but `tracked-components.json` contains 61 components. The health dashboard needs scope clarification.
+
+2. **Naming misalignment**: 13 catalog items lack one-to-one documentation pages (e.g., `ConfigurationManager` exists as `Phase1-ConfigurationManager.md` under Migration/), and 15 catalog items are missing README doc links.
+
+3. **Coverage distribution**: While 155+ nav entries exist in `mkdocs.yml` and 191 `.md` files exist under `docs/`, many are utility/infrastructure/migration guides that supplement rather than one-to-one map catalog entries.
+
+---
+
+## BUCKET 1: Must-Fix Mismatches
+
+These require action to prevent user confusion and maintain internal consistency.
+
+### 1.1 Dashboard Scope Number Inconsistency
+
+**Problem:**  
+`docs/dashboard.md` line 9 states: "The dashboard tracks **52 targeted Web Forms controls**"  
+But `dev-docs/tracked-components.json` lists **61 components** across all categories.
+
+**Impact:**  
+- Users reading dashboard.md expect tracking of 52 items but might find 61 in actual dashboard
+- Health scoring logic vs. inventory mismatch confuses developers
+- Non-deterministic: unclear if 52 is intentional subset vs. outdated count
+
+**Suggested Fix:**
+- **Option A:** Update dashboard.md line 9 to say "61 targeted Web Forms controls"
+- **Option B:** Clarify scope: "52 core Web Forms controls plus 9 infrastructure/utility components" with explanation
+- **Recommend Option A** for simplicity (Update `docs/dashboard.md` line 9 only)
+
+**Files to change:**
+- `docs/dashboard.md` (line 9)
+
+**Severity:** HIGH — directly impacts documentation accuracy
+
+---
+
+### 1.2 Infrastructure/Utility Components Missing from README Component Lists
+
+**Problem:**  
+README.md organizes components by Web Forms category (Editor, Data, Validation, Navigation, Login) but omits Infrastructure/Utility controls that are in tracked-components.json:
+- Content
+- ContentPlaceHolder
+- MasterPage
+- NamingContainer
+- ScriptManager (stub)
+- UpdatePanel
+
+**Impact:**  
+- Developers searching README for these components won't find them
+- Suggests components are not officially supported when they are tracked
+- Incomplete public API inventory
+
+**Suggested Fix:**
+Add a new "Infrastructure & Utility Components" section in README.md after Login Controls section (around line 193).
+
+**Files to change:**
+- `README.md` (add section, add links to existing docs)
+
+**Severity:** HIGH — README is public-facing primary documentation
+
+---
+
+## BUCKET 2: Needs Naming/Alignment Decision
+
+These items have documentation coverage but naming/location decisions need team input.
+
+### 2.1 Migration Phase/Shim Docs Mapped Under Different Names
+
+**Problem:**  
+Several catalog entries map to migration methodology docs but NOT with one-to-one page names:
+
+| Catalog Entry | Actual Doc Location | Type |
+|---|---|---|
+| `ConfigurationManager` | `docs/Migration/Phase1-ConfigurationManager.md` | Migration guide (present) |
+| `FindControl` | `docs/Migration/FindControl-Migration.md` | Migration guide (present) |
+| `Session State` | `docs/Migration/Phase2-SessionShim.md` | Migration guide (present) |
+| `Server Utilities` | `docs/UtilityFeatures/ServerShim.md` | Utility feature (present) |
+| `Request.Form` / Web Forms Request | `docs/UtilityFeatures/RequestShim.md` + `docs/UtilityFeatures/WebFormsForm.md` | Utility features (present, split) |
+| `Cache` | `docs/UtilityFeatures/CacheShim.md` | Utility feature (present) |
+| `ClientScript` | `docs/Migration/ClientScriptMigrationGuide.md` | Migration guide (present) |
+
+**Decision Needed:**
+1. **Should these entries get their own same-name doc pages?**  
+   - Pro: Matches ComponentHealthService detection logic (looks for `docs/**/{ComponentName}.md`)
+   - Con: Duplicates content that's already well-covered under Migration/Utility sections
+   
+2. **Or should ComponentHealthService be updated to recognize aliased doc names?**  
+   - Pro: Avoids doc duplication
+   - Con: Requires code logic changes; harder to maintain
+
+**Current State:**
+- ComponentHealthService likely reports these as "missing docs" (false negative)
+- mkdocs.yml does NOT have top-level nav entries for `ConfigurationManager.md`, `FindControl.md`, etc.
+- All content is present in appropriate guides, just under different organizational names
+
+**Recommended Decision:**
+- **Add topic-specific landing pages** under `docs/UtilityFeatures/` and/or `docs/Migration/` with cross-references
+- Create lightweight alias pages: `docs/UtilityFeatures/ClientScript.md` → redirects/embeds `docs/Migration/ClientScriptMigrationGuide.md`
+- OR: Update ComponentHealthService to recognize these mappings as "documented" without literal filename match
+
+**Files likely to change (depending on decision):**
+- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthService.cs` (detection logic)
+- Potential new files: `docs/UtilityFeatures/ClientScript.md`, `docs/UtilityFeatures/ConfigurationManager.md`, etc.
+- `docs/Migration/ConfigurationManager-Overview.md` (if adding top-level aliases)
+- `mkdocs.yml` (nav entries for new alias pages)
+
+**Severity:** MEDIUM — documentation exists but may not be discoverable by some tools/developers
+
+---
+
+### 2.2 AJAX Toolkit Showcase / AjaxToolkitShowcase Naming
+
+**Problem:**  
+Sample catalog likely has an entry "AjaxToolkitShowcase" or similar but no corresponding one-to-one component doc.
+
+**Current Coverage:**
+- `docs/AjaxToolkit/index.md` exists (overview)
+- Multiple extender docs exist (Accordion.md, AutoCompleteExtender.md, etc.)
+- mkdocs.yml has "Ajax Control Toolkit Extenders" nav section with 20+ entries
+
+**Decision Needed:**
+1. Is "AjaxToolkitShowcase" a **sample page** (not a component) that shouldn't be tracked in ComponentHealthService?
+2. Or should there be a top-level `docs/AjaxToolkit/AjaxToolkitShowcase.md` landing page?
+
+**Recommended Decision:**
+- Verify if this is a sample route vs. a tracked component
+- If sample route: exclude from ComponentHealthService tracked list
+- If component category: create `docs/AjaxToolkit/AjaxToolkitShowcase.md` as overview/index alternative
+
+**Files likely to change:**
+- `dev-docs/tracked-components.json` (possibly remove if not a component)
+- `docs/AjaxToolkit/AjaxToolkitShowcase.md` (create if needed)
+- `src/BlazorWebFormsComponents/Diagnostics/ComponentHealthService.cs` (exclusion logic)
+
+**Severity:** LOW — Toolkit is well-documented; this is more about classification
+
+---
+
+### 2.3 Custom Controls / Custom WebControl Naming
+
+**Problem:**  
+Catalog likely tracks "Custom WebControl" as a component, but this is a **migration pattern**, not a trackable BWFC component.
+
+**Current Coverage:**
+- `docs/Migration/CustomWebControl.md` exists
+- `docs/Migration/Custom-Controls.md` exists
+- Both are about how to migrate custom controls, not "the Custom WebControl component"
+
+**Decision Needed:**
+1. Should "Custom WebControl" be in `tracked-components.json` at all?
+2. Or is it a "feature" (adapter classes) rather than a "component"?
+
+**Recommended Decision:**
+- Remove "Custom WebControl" from tracked-components.json or rename it to "CustomWebControl Adapter" with category "Infrastructure/Feature"
+- Clarify in dashboard.md that this is a *migration tool/pattern*, not a Blazor component
+
+**Files likely to change:**
+- `dev-docs/tracked-components.json` (remove or rename entry)
+- `docs/dashboard.md` (clarify feature vs. component definition)
+
+**Severity:** LOW — Editorial/classification issue
+
+---
+
+## BUCKET 3: Nice-to-Have Cleanup
+
+These are low-risk improvements that enhance clarity and consistency.
+
+### 3.1 Update mkdocs.yml to Cross-Reference Aliased Content
+
+**Problem:**  
+mkdocs.yml has migration guides but no top-level entries linking directly to infrastructure components.
+
+**Current State:**
+```yaml
+- Utility Features:
+    - Cache: UtilityFeatures/CacheShim.md
+    - Server & Path Resolution: UtilityFeatures/ServerShim.md
+    - Request: UtilityFeatures/RequestShim.md
+```
+
+But Component Catalog may expect:
+```yaml
+- Utility Features:
+    - Cache: UtilityFeatures/Cache.md  (alias/landing page)
+    - ConfigurationManager: UtilityFeatures/ConfigurationManager.md  (alias)
+    - ClientScript: UtilityFeatures/ClientScript.md  (alias)
+```
+
+**Suggested Fix:**
+Review mkdocs.yml nav entries and verify naming matches both:
+1. What ComponentHealthService looks for (docs/{ComponentName}.md)
+2. What catalog entries expect
+
+**Files to change:**
+- `mkdocs.yml` (nav section)
+
+**Severity:** LOW — Docs are accessible; this is UX polish
+
+---
+
+### 3.2 Add Brief Component Inventory Doc
+
+**Suggested Improvement:**
+Create `docs/ComponentInventory.md` listing:
+- All 61 tracked components by category
+- Which are "Core" (Editor, Data, Validation, Navigation, Login) vs. "Infrastructure" vs. "Utility"
+- Status (Complete, Stub, Deferred) per tracked-components.json
+
+**Purpose:**
+- Single source of truth for what's tracked and what's not
+- Reduces need to cross-reference catalog/tracked-components.json/dashboard
+- Aligns README, dashboard.md, and mkdocs.yml
+
+**Files to add:**
+- `docs/ComponentInventory.md` (new)
+- `mkdocs.yml` (add entry in nav)
+
+**Severity:** LOW — Nice to have; doesn't fix existing gaps
+
+---
+
+### 3.3 Standardize Naming in tracked-components.json Categories
+
+**Problem:**
+tracked-components.json uses category names that may not match mkdocs.yml section names:
+- "Editor" vs. "Editor Controls"
+- "Data" vs. "Data Controls"
+- "Validation" vs. "Validation Controls"
+- "Navigation" vs. "Navigation Controls"
+- "Login" vs. "Login Controls"
+- "Infrastructure" (no corresponding mkdocs section; scattered across Utility Features & AJAX Controls)
+
+**Suggested Fix:**
+Align category names in `tracked-components.json` to match mkdocs.yml section names for consistency.
+
+**Files to change:**
+- `dev-docs/tracked-components.json` (category name harmonization)
+
+**Severity:** LOW — Cosmetic consistency
+
+---
+
+## SUMMARY TABLE
+
+| Bucket | Item | Priority | Files to Change | Estimated Effort |
+|---|---|---|---|---|
+| **1: Must-Fix** | Dashboard scope number (52 vs 61) | HIGH | `docs/dashboard.md` | 5 min |
+| **1: Must-Fix** | README missing Infrastructure section | HIGH | `README.md` | 15 min |
+| **2: Decision** | ConfigurationManager/FindControl/ClientScript aliasing | MEDIUM | Multiple (depends on decision) | 1-2 hours |
+| **2: Decision** | AjaxToolkitShowcase classification | MEDIUM | `tracked-components.json`, `ComponentHealthService.cs` | 30 min |
+| **2: Decision** | Custom WebControl classification | MEDIUM | `tracked-components.json`, `docs/dashboard.md` | 30 min |
+| **3: Nice-to-Have** | Update mkdocs.yml nav cross-refs | LOW | `mkdocs.yml` | 30 min |
+| **3: Nice-to-Have** | Create ComponentInventory.md | LOW | New file, `mkdocs.yml` | 45 min |
+| **3: Nice-to-Have** | Standardize tracked-components.json categories | LOW | `tracked-components.json` | 20 min |
+
+---
+
+## RECOMMENDED IMMEDIATE ACTIONS (Today)
+
+1. **Fix dashboard.md line 9**: Change "52" → "61" (5 min, resolves confusion)
+2. **Add Infrastructure section to README.md**: List Content, ContentPlaceHolder, MasterPage, NamingContainer (15 min, addresses public-facing gap)
+3. **Create decision issue**: Schedule 15-min team discussion on Bucket 2 naming/aliasing strategy
+
+---
+
+## TEAM QUESTIONS FOR FRITZ
+
+1. **Dashboard Scope**: Is 52 the *original* intended target, or is 61 the current reality we should track?
+2. **Aliasing Strategy**: For migration phase docs (ConfigurationManager, FindControl, ClientScript), do you want:
+   - Option A: Same-name landing pages + cross-references (cleaner for tooling)?
+   - Option B: Update health-detection logic to recognize aliases (less duplication)?
+3. **Infrastructure vs. Component**: Should tracked-components.json include Infrastructure items (Content, ContentPlaceHolder, etc.), or are those "features" not scored?
+
+---
+
+## NEXT STEPS
+
+1. Approve fixes for Bucket 1 (HIGH priority)
+2. Schedule brief decision meeting for Bucket 2 items
+3. Delegate Bucket 3 cleanup as low-priority / deferred work
+4. After decisions, assign implementation tasks to Beast for doc updates
+
+
+# Gap Analysis Execution Plan: Feature Completion
+
+**Date:** 2026-06-12  
+**Prepared by:** Bishop (Migration Tooling Dev)  
+**Status:** Recommended for Team Review  
+**Scope:** Aligning sample catalog, documentation, Playwright tests, and component health scoring
+
+---
+
+## Executive Summary
+
+The audit identified **13 specific gaps in Playwright test coverage**, **13 catalog entries missing one-to-one documentation pages**, and **15 components missing README links**. These gaps cluster into **three distinct gap types** (metadata, test, content) with different fix strategies and owners. No repository files were modified during this audit—this is an analysis-only snapshot.
+
+---
+
+## Gap Classification
+
+### Gap Type 1: **Test Coverage Gaps** (13 items)
+**Nature:** Routes cataloged in `ComponentCatalog.cs` but not explicitly included in `ControlSampleTests.cs` Playwright test suite.
+
+**Affected Routes:**
+- `/ControlSamples/Migration/ConfigurationManager`
+- `/migration/session`
+- `/ControlSamples/NamingContainer`
+- `/ControlSamples/ClientScriptShim`
+- `/ControlSamples/ScriptManagerProxy`
+- `/migration/server-mappath`
+- `/migration/cache`
+- `/migration/request`
+- `/migration/response-redirect`
+- `/migration/ispostback`
+- `/ControlSamples/PostBackDemo`
+- `/migration/findcontrol`
+- `/ControlSamples/Migration/CustomWebControl`
+
+**Gap Type:** Test coverage (these pages exist in the sample app but are not explicitly validated by Playwright).  
+**Severity:** Medium—the pages render but lack automated smoke test coverage.  
+**Owner:** Rogue (Component Test Lead)
+
+---
+
+### Gap Type 2: **Documentation Structure Gaps** (13 items)
+**Nature:** Catalog entries without strict one-to-one matching documentation pages (though some concept coverage may exist under different names).
+
+**Affected Catalog Entries:**
+- `AjaxToolkitShowcase`
+- `ConfigurationManager`
+- `Session State`
+- `ClientScript`
+- `ClientScriptShim`
+- `Server Utilities`
+- `Request.Form`
+- `IsPostBack`
+- `PostBack Demo`
+- `FindControl`
+- `Custom WebControl`
+- `BaseProperties`
+- `Theming`
+
+**Gap Type:** Documentation metadata (docs exist, but naming doesn't match component health detection rules).  
+**Severity:** Low-to-Medium—concepts are documented; the issue is file naming/catalog mismatch.  
+**Root Cause:** `ComponentHealthService` detects docs by strict pattern match: `docs/**/{ComponentName}.md`. Pages like `Phase1-ConfigurationManager.md` exist but fail the pattern.  
+**Owner:** Beast (Documentation Lead)
+
+---
+
+### Gap Type 3: **README Navigation Gaps** (15 items)
+**Nature:** Components missing doc links in the main `README.md` feature list, even if docs exist elsewhere.
+
+**Affected Components:**
+- `Content`
+- `ContentPlaceHolder`
+- `MasterPage`
+- `ModelErrorMessage`
+- `AjaxToolkitShowcase`
+- `ConfigurationManager`
+- `NamingContainer`
+- `ClientScript`
+- `ClientScriptShim`
+- `Cache`
+- `WebFormsForm`
+- `IsPostBack`
+- `FindControl`
+- `BaseProperties`
+- `Theming`
+
+**Gap Type:** Metadata/Navigation (docs link discovery).  
+**Severity:** Low—internal/advanced features not prominent in main README; not a blocker for end users.  
+**Owner:** Beast (Documentation Lead)
+
+---
+
+## Execution Plan by Phase
+
+### Phase 1: Clarify the Documentation Strategy (Owner: Beast + Jeffrey)
+**Duration:** 1 sprint  
+**Goal:** Decide whether the team wants one canonical page per catalog entry or looser conceptual coverage.
+
+**Decisions Needed:**
+1. **Naming convention rule:** Should every catalog entry have a corresponding `docs/{Category}/{ComponentName}.md` file?
+   - Option A: Enforce strict 1:1 mapping (rename/consolidate existing docs)
+   - Option B: Accept conceptual coverage under different names (update health-detection logic)
+
+2. **Health scoring rule:** Should `ComponentHealthService` detect docs by:
+   - Current: Strict file-name pattern match
+   - Alternative: Semantic lookup table (e.g., `"ConfigurationManager" → "docs/Migration/Phase1-ConfigurationManager.md"`)
+
+3. **README.md scope:** Should all 95+ catalog entries be linked in README, or only tier-1 core components?
+   - Current: ~90 links; 15 missing
+   - Decision: Link all, or define a curated "core" list for visibility?
+
+**Validation Gate:** Team decision recorded in `.squad/decisions.md` with chosen strategy.
+
+---
+
+### Phase 2a: Close Test Coverage Gaps (Owner: Rogue)
+**Duration:** 1–2 sprints  
+**Goal:** Add 13 missing routes to `ControlSampleTests.cs` Playwright test matrix.
+
+**Action Items:**
+1. Add `InlineData` entries for each missing route:
+   - `/ControlSamples/Migration/ConfigurationManager`
+   - `/migration/session`
+   - (… etc., all 13 from Gap Type 1)
+
+2. Verify each route loads without JS errors in Playwright tests.
+
+3. Run full `ControlSampleTests` to ensure no regressions.
+
+**Validation Gate:** All 13 routes added to `InlineData` and passing in `dotnet test` run.  
+**Automation:** This can be partially automated: script to extract catalog routes, compare against `InlineData` patterns, emit missing routes.
+
+---
+
+### Phase 2b: Align Documentation Naming (Owner: Beast)
+**Duration:** 1–2 sprints  
+**Goal:** Either rename/consolidate docs to match catalog names OR update health detection.
+
+**Option A Path (1:1 Mapping):**
+1. Create or rename docs files to match strict pattern: `docs/{Category}/{ComponentName}.md`
+   - E.g., rename `docs/Migration/Phase1-ConfigurationManager.md` → `docs/UtilityFeatures/ConfigurationManager.md`
+   - E.g., create `docs/UtilityFeatures/Session.md` for Session State
+
+2. Update `mkdocs.yml` nav entries to match new names.
+
+3. Run component health dashboard locally; verify all 13 entries now show docs checkmark.
+
+**Option B Path (Semantic Lookup):**
+1. Create mapping file: `dev-docs/doc-component-aliases.json`
+   ```json
+   {
+     "ConfigurationManager": "docs/Migration/Phase1-ConfigurationManager.md",
+     "Session State": "docs/UtilityFeatures/Request.md",
+     ...
+   }
+   ```
+
+2. Update `ComponentHealthService.DetectDocumentation()` to consult the alias map before falling back to strict pattern match.
+
+3. Run health dashboard; verify all 13 entries now show docs checkmark.
+
+**Validation Gate:** Health dashboard shows all 13 formerly-missing entries with ✅ for "Has Documentation."
+
+---
+
+### Phase 2c: Update README Links (Owner: Beast)
+**Duration:** 0.5 sprint  
+**Goal:** Add README.md links for all 15 missing components OR update docs/README entry count.
+
+**Action Items:**
+1. Decide scope: Link all 95+ catalog entries, or only core components?
+
+2. Extract missing component names from audit.
+
+3. Add links in appropriate section of README.md.
+
+4. Verify links resolve to live documentation pages.
+
+**Validation Gate:** README links match documentation site structure; `grep` confirms all components mentioned have corresponding docs links.
+
+---
+
+## Automation Recommendations
+
+### High-Priority Automation (Owner: Bishop)
+These checks can be **automated and run on every commit** to prevent future gaps:
+
+1. **Test Route Coverage Audit** (yearly or per-release):
+   - Parse `ComponentCatalog.cs` to extract all routes
+   - Parse `ControlSampleTests.cs` to extract all `InlineData` routes
+   - Compare; emit missing-route report
+   - **Integration:** Add to `.github/workflows/build.yml` as informational check
+
+2. **Documentation Presence Audit** (yearly or per-release):
+   - Use `ComponentHealthService` reflection to discover all tracked components
+   - Scan `docs/` directory (or consult alias map)
+   - Compare; emit missing-docs report
+   - **Integration:** Add to `.github/workflows/docs.yml` or as pre-merge check
+
+3. **README Link Audit** (yearly or per-release):
+   - Parse `README.md` for component doc links
+   - Compare against tracked-components list
+   - Emit missing-link report
+   - **Integration:** Add to build validation matrix
+
+### Low-Priority / Manual Checks
+- Health dashboard Playwright validation (requires running sample app; quarterly or as-needed)
+- Catalog-to-test alignment (manual review, but scripted report reduces effort)
+
+### Recommended Script Locations
+```
+migration-toolkit/scripts/
+  - audit-test-coverage.ps1       (test route gaps)
+  - audit-docs-coverage.ps1       (doc file gaps)
+  - audit-readme-links.ps1        (README link gaps)
+  - audit-all-coverage.ps1        (master runner)
+```
+
+These can be invoked manually or triggered by CI/CD.
+
+---
+
+## Canonical Sources of Truth (Recommended)
+
+### 1. **Sample Catalog (`ComponentCatalog.cs`)**
+- **What it tracks:** Routes, component names, categories, grouping
+- **Current status:** Authoritative for "what's in the sample app"
+- **Recommendation:** Keep this as the primary inventory. Every route listed here should have:
+  - A corresponding Playwright test route
+  - A corresponding doc page (or alias entry)
+  - A corresponding README link (if tier-1 or marked public)
+- **Maintenance:** Update when adding new sample pages; run audit script before PR merge.
+
+### 2. **Documentation Navigation (`mkdocs.yml`)**
+- **What it tracks:** Published documentation structure, nav hierarchy
+- **Current status:** Derived from `docs/` directory
+- **Recommendation:** This is the "published truth." Ensure it stays in sync with actual doc files; use CI to verify no orphaned entries.
+
+### 3. **Component Health Tracking (`tracked-components.json` + `reference-baselines.json`)**
+- **What it tracks:** Expected component surface (property/event parity) + implementation status
+- **Current status:** Hand-curated baselines; optional tracking file
+- **Recommendation:** Adopt `tracked-components.json` as the team's official component inventory for health scoring. Keep in sync with actual implemented components.
+
+### 4. **README.md**
+- **What it tracks:** Public feature list + doc link quick-reference
+- **Current status:** Manual; prone to drift
+- **Recommendation:** This should be derived/generated from `tracked-components.json` or catalog, not hand-maintained. Consider a pre-build step to validate or regenerate it.
+
+### 5. **Test Route Registry (`ControlSampleTests.cs`)**
+- **What it tracks:** Playwright test coverage
+- **Current status:** Broad but incomplete; includes ~146 unique routes vs. ~95 catalog entries
+- **Recommendation:** Treat catalog as source of truth; test registry should be derived. Every catalog route should have a test. Gaps should trigger PR comments.
+
+---
+
+## Validation Gates and Metrics
+
+| Phase | Gate | Measurement | Owner |
+|-------|------|-------------|-------|
+| **Phase 1** | Documentation strategy decided | Decision recorded in `.squad/decisions.md` | Jeffrey / Beast |
+| **Phase 2a** | Test coverage complete | 100% of catalog routes in `ControlSampleTests.cs` | Rogue |
+| **Phase 2b** | Docs aligned | Health dashboard: all tracked components show ✅ for docs | Beast |
+| **Phase 2c** | README current | Grep confirms all 95+ catalog components have README links (if public tier) | Beast |
+| **Ongoing** | Audit automation active | Pre-merge CI check emits coverage report | Bishop |
+
+---
+
+## Effort Estimate
+
+| Phase | Complexity | Effort | Timeline |
+|-------|-----------|--------|----------|
+| Phase 1 (Strategy) | Low | 4–8 hours | Week 1 |
+| Phase 2a (Tests) | Medium | 8–16 hours | Weeks 2–3 |
+| Phase 2b (Docs) | Medium–High | 16–24 hours | Weeks 2–4 |
+| Phase 2c (README) | Low | 2–4 hours | Week 3 |
+| Automation Setup | Low–Medium | 8–12 hours | Week 4 |
+| **Total** | — | **38–64 hours** | **~4 weeks** |
+
+---
+
+## Key Decisions to Record
+
+1. **Documentation naming strategy** (1:1 strict mapping vs. semantic aliases)
+2. **README.md scope** (all components vs. curated tier-1 list)
+3. **Automation priority** (implement all audits, or defer secondary ones)
+4. **Ownership clarification** (Beast, Rogue, Bishop roles confirmed for ongoing maintenance)
+
+---
+
+## Risks & Mitigation
+
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|-----------|
+| Documentation naming conflicts (component + doc name collisions) | Low | Medium | Phase 1 strategy decision clarifies naming rules; aliases prevent collisions |
+| Audit automation doesn't catch all edge cases | Medium | Low | Start with manual audit templates; refine rules as gaps discovered |
+| Playwright test additions slow down CI | Low | Low | Tests are fast; broad test matrix is expected at this repo scale |
+| Team resists process change (new audit automation) | Low | Medium | Pilot audits as informational checks; escalate to requirements only if consensus |
+
+---
+
+## Success Criteria
+
+✅ **Phase 1 Complete:** Team strategy recorded; owners assigned.  
+✅ **Phase 2a Complete:** 13 missing test routes added; all Playwright tests pass.  
+✅ **Phase 2b Complete:** Docs naming aligned; health dashboard shows 100% docs coverage for tracked components.  
+✅ **Phase 2c Complete:** README links match catalog scope; no orphaned components.  
+✅ **Automation Complete:** Audit scripts in place; pre-merge CI validation active.
+
+---
+
+## Next Actions for Bishop
+
+1. **Now:** Share this plan with Jeffrey (user) and team for feedback.
+2. **Decision Point 1:** Wait for Phase 1 strategy clarification (Beast + Jeffrey).
+3. **Decision Point 2:** Confirm automation priority before implementing scripts.
+4. **Ongoing:** Monitor phases 2a–c for blockers; maintain executor → owner alignment.
+
+---
+
+## Appendix: Audit Summary Statistics
+
+| Metric | Count | Status |
+|--------|-------|--------|
+| Total Catalog Entries | 95 | ✅ Inventory current |
+| Test Routes (Playwright InlineData) | 146 | ✅ Broad; some over-coverage |
+| Missing Test Routes | 13 | ⚠️ Gap: Phase 2a |
+| Docs Files in `/docs/` | 191 | ✅ Extensive coverage |
+| MkDocs Nav Entries | 155 | ✅ Well-structured |
+| README Doc Links | 90 | ⚠️ Gap: 15 missing (Phase 2c) |
+| Catalog → Docs Name Mismatches | 13 | ⚠️ Gap: Phase 2b |
+| Tracked Components (health dashboard) | 52 | ✅ Core set well-defined |
+
+---
+
+**This plan is ready for team review and decision. No repository files have been modified.**
+
+
+# Bishop Handoff: #550 and #548
+
+- Timestamp: 2026-06-10T10:33:04.9872011-04:00
+- Requested by: Jeffrey T. Fritz
+
+## Completed context to carry forward
+- #557 is complete: `WebConfigAssemblyParser` now aggregates custom control registrations across discovered `Web.config` files and feeds a shared prefix-to-namespace map through runtime detection.
+- #549 skeleton context is in place: `CodeOnlyServerControlAnalyzer` + `CodeOnlyControlScaffolder` starter path is wired in `MigrationPipeline` to emit placeholder components under `Generated/CodeOnlyControls`.
+
+## #550 next implementation steps
+- Implement `LocalTagNamespaceResolutionTransform` to consume `FileMetadata.CustomControlPrefixToNamespace` and resolve custom/local tag prefixes before generic prefix stripping.
+- Register the transform in both `src\BlazorWebFormsComponents.Cli\Program.cs` and `tests\BlazorWebFormsComponents.Cli.Tests\TestHelpers.cs`.
+- Add regression coverage for nested `Web.config` prefix overrides/conflicts and verify generated component/usings resolution across folder boundaries.
+- Validate ordering with existing directive/prefix transforms so prefix metadata is preserved and resolved deterministically.
+
+## #548 next implementation steps
+- Implement #548 behavior directly on top of the new shared prefix map and code-only control descriptors from #557/#549 (no new parser pass).
+- Define required pipeline hook points so #548 logic runs after runtime metadata hydration but before transforms that erase custom-tag intent.
+- Add focused tests proving #548 works with both normal scaffold mode and `--skip-scaffold` paths.
+- Add a migration report note path that points maintainers from #548 outcomes back to source control registrations and generated placeholders when manual follow-up is required.
+
+
+# Colossus Test Gate Decisions — Integration Test Coverage Audit
+
+**Decision Requested By**: Colossus (Integration Test Engineer)  
+**Context**: Audit of Playwright sample page coverage vs. ComponentCatalog  
+**Date**: 2026-06-12  
+**Audit Report**: `colossus-remediation-checklist.txt`
+
+---
+
+## FINDINGS SUMMARY
+
+### Playwright Smoke Coverage Gaps (13 Routes)
+
+| Route | Sample Page | Status | Classification |
+|-------|-------------|--------|-----------------|
+| /ControlSamples/Migration/ConfigurationManager | ✅ Exists | Missing Test | **Tier 0 — Quick Win** |
+| /ControlSamples/ClientScriptShim | ❌ Not Found | Missing Both | Tier 1 — High Value |
+| /ControlSamples/NamingContainer | ❌ Not Found | Missing Both | Tier 1 — High Value |
+| /ControlSamples/PostBackDemo | ❌ Not Found | Missing Both | Tier 1 — High Value |
+| /ControlSamples/ScriptManagerProxy | ❌ Not Found | Missing Both | Tier 1 — High Value |
+| /migration/cache | ❌ Not Found | Missing Both | Tier 2 — Reference Catalog |
+| /migration/findcontrol | ❌ Not Found | Missing Both | Tier 2 — Reference Catalog |
+| /migration/ispostback | ❌ Not Found | Missing Both | Tier 2 — Reference Catalog |
+| /migration/request | ❌ Not Found | Missing Both | Tier 2 — Reference Catalog |
+| /migration/response-redirect | ❌ Not Found | Missing Both | Tier 2 — Reference Catalog |
+| /migration/server-mappath | ❌ Not Found | Missing Both | Tier 2 — Reference Catalog |
+| /migration/session | ❌ Not Found | Missing Both | Tier 2 — Reference Catalog |
+
+### bUnit Test Gaps (2 Components)
+
+- **Xml** (Editor control, Status: **Deferred**)
+  - Tracked in `tracked-components.json`
+  - No component implementation yet
+  - No bUnit tests
+
+- **BaseCompareValidator** (Validation base class)
+  - Tracked in `tracked-components.json`
+  - Base class infrastructure component
+  - No bUnit tests (CompareValidator tests exist; base class logic untested)
+
+---
+
+## DECISION REQUIRED: TIER PRIORITIZATION
+
+### ❓ Question 1: ConfigurationManager Playwright Test
+
+**What**: Add `[InlineData("/ControlSamples/Migration/ConfigurationManager")]` to ControlSampleTests.cs theory group.
+
+**Options**:
+- **A) Add to "Utility Features" theory** (groups with DataBinder, ViewState, etc.)
+- **B) Add to "Migration Shim Sample Pages" theory** (groups with /migration/request-form, /migration/webforms-form)
+- **C) Create new "Migration Utilities" theory** (separates migration components from basic utilities)
+
+**Recommendation**: **Option B** — /ControlSamples/Migration/ConfigurationManager is a migration shim feature page, not a core utility. Grouping with other migration pages clarifies test organization.
+
+**Impact**: ~1 line change. No implementation needed.
+
+---
+
+### ❓ Question 2: Tier 1 Sample Page Creation (4 pages)
+
+**What**: Decide whether to create sample pages for:
+- `/ControlSamples/ClientScriptShim`
+- `/ControlSamples/NamingContainer`
+- `/ControlSamples/PostBackDemo`
+- `/ControlSamples/ScriptManagerProxy`
+
+**Context**:
+- `NamingContainer` has existing bUnit tests → public API, likely worth a sample page
+- `PostBackDemo` is a migration feature showcase → high value for migration documentation
+- `ClientScriptShim` vs. existing `/ControlSamples/ClientScript` — may be duplicate or naming variant
+- `ScriptManagerProxy` is infrastructure → validate if already covered by ScriptManager sample
+
+**Options**:
+- **A) Create all 4** (complete coverage, ~2-4 hours implementation + tests)
+- **B) Create 2 of 4** (NamingContainer + PostBackDemo only; skip AJAX infrastructure)
+- **C) Defer to WingtipToys benchmark phase** (validate impact on migration workflow first)
+- **D) Create as migration reference code examples** (no dedicated sample page; add to docs instead)
+
+**Recommendation**: **Option B** (NamingContainer + PostBackDemo) — Both have clear use cases:
+- **NamingContainer**: Blazor .NET equivalent of Web Forms NamingContainer behavior (page hierarchies, FindControl scoping)
+- **PostBackDemo**: Demonstrates IsPostBack, Page.PostBack, and client-side __doPostBack JS interop
+
+**Impact**: ~3-4 hours (2 sample pages + 2 smoke tests + 2 interaction tests)
+
+---
+
+### ❓ Question 3: Tier 2 Migration Reference Catalog (7 pages)
+
+**What**: Decide whether to create `/migration/*` reference pages:
+- `/migration/request`
+- `/migration/response-redirect`
+- `/migration/session`
+- `/migration/cache`
+- `/migration/findcontrol`
+- `/migration/ispostback`
+- `/migration/server-mappath`
+
+**Context**:
+- These are migration shim reference features (RequestShim, ResponseShim, SessionShim, CacheShim, FindControl, Page.IsPostBack)
+- Currently only 2 migration pages exist: `/migration/request-form`, `/migration/webforms-form`
+- High value for migration workflows (developers need working examples of shim usage)
+- High volume (7 pages = 4-6 hours implementation + tests)
+
+**Options**:
+- **A) Create all 7 as reference catalog** (one example page per shim feature, phased over Q2-Q3)
+- **B) Create 3 priority features** (session, request, response-redirect; skip cache/findcontrol/ispostback)
+- **C) Defer to docs/tutorial** (add migration guide docs instead of sample pages)
+- **D) Create as code snippets in docs** (no dedicated sample pages; reference in migration guides)
+
+**Recommendation**: **Option A (phased)** — These are high-value for migration workflows and align with WingtipToys benchmark needs:
+- **Phase 1 (M23)**: /migration/session, /migration/response-redirect, /migration/request (critical shims)
+- **Phase 2 (M24)**: /migration/cache, /migration/findcontrol (supporting features)
+- **Phase 3 (M25)**: /migration/ispostback, /migration/server-mappath (documentation examples)
+
+**Impact**: ~6-8 hours across 3 milestones + ~20 min Playwright tests per page
+
+---
+
+### ❓ Question 4: Xml Component Tests
+
+**What**: Decide on test coverage for **Xml** (deferred control).
+
+**Current Status**:
+- Tracked in `tracked-components.json` with status: **Deferred**
+- No component implementation
+- No bUnit tests
+
+**Options**:
+- **A) Keep deferred; add NO tests** (component not yet public; stub tests premature)
+- **B) Add placeholder stub tests** (reserve bUnit folder for future implementation)
+- **C) Remove from tracked components** (not planning to implement Xml)
+
+**Recommendation**: **Option A** — Keep deferred. **Xml is a data-transformation control with limited Blazor use cases** (XML processing for data binding). Defer tests until component implementation is prioritized.
+
+**Impact**: No change. Return to this decision when Xml component is un-deferred.
+
+---
+
+### ❓ Question 5: BaseCompareValidator Tests
+
+**What**: Decide whether to add bUnit tests for **BaseCompareValidator** (base validation class).
+
+**Current Status**:
+- Tracked in `tracked-components.json`
+- Base class; no public user-facing sample page
+- Existing CompareValidator tests cover derived functionality
+- BaseValidator tests exist but BaseCompareValidator logic is untested
+
+**Options**:
+- **A) Add unit tests in Validations folder** (BaseCompareValidatorTests.razor covering type comparers + ControlToCompare binding)
+- **B) Extend CompareValidator tests** (add BaseCompareValidator property coverage to existing CompareValidator tests)
+- **C) Skip — CompareValidator tests sufficient** (derived tests are adequate coverage)
+
+**Recommendation**: **Option A** — Add **BaseCompareValidatorPropertyTests.razor** under `src/BlazorWebFormsComponents.Test/Validations/`:
+- **Why**: BaseCompareValidator contains shared validation logic (type comparers, ControlToCompare property binding) that should have explicit tests
+- **Coverage**: Verify TypeComparer factory, ControlToCompare property/parameter validation, and base error messages
+- **Pattern**: Mirror existing `BaseValidatorPropertyTests.razor` structure
+
+**Impact**: ~1-1.5 hours (1 test file, 8-12 test methods)
+
+---
+
+## TEAM DECISION CHECKLIST
+
+- [ ] **Decision 1 — ConfigurationManager theory group**: Choose A/B/C
+- [ ] **Decision 2 — Tier 1 sample pages**: Choose A/B/C/D
+- [ ] **Decision 3 — Tier 2 migration catalog**: Choose A/B/C/D
+- [ ] **Decision 4 — Xml deferred**: Choose A/B/C
+- [ ] **Decision 5 — BaseCompareValidator tests**: Choose A/B/C
+
+---
+
+## IMPLEMENTATION ROADMAP (Assuming Recommended Path)
+
+| Task | Effort | Phase | Owner |
+|------|--------|-------|-------|
+| Add ConfigurationManager Playwright test | 5 min | M22 | Colossus |
+| Create NamingContainer sample + tests | 90 min | M22 | Cyclops + Colossus |
+| Create PostBackDemo sample + tests | 90 min | M22 | Cyclops + Colossus |
+| Add BaseCompareValidator unit tests | 60 min | M22 | Colossus |
+| **Phase 1 Total** | **~4.5 hours** | **M22** | — |
+| Create /migration/session + /migration/response-redirect + /migration/request pages + tests | 120 min | M23 | Cyclops + Colossus |
+| Create /migration/cache + /migration/findcontrol pages + tests | 100 min | M24 | Cyclops + Colossus |
+| Create /migration/ispostback + /migration/server-mappath pages + tests | 100 min | M25 | Cyclops + Colossus |
+
+---
+
+## DECISION DEADLINE
+
+**Requested from**: Jeffrey T. Fritz, Forge, Cyclops  
+**Needed by**: 2026-06-13 (before M22 sprint planning)  
+**Format**: Reply in this file with decision selections (A/B/C/D) or in `.squad/decisions.md` main file with final ruling.
+
+---
+
+## APPENDIX: AUDIT METRICS
+
+**Catalog Total**: 95 routes  
+**Tested Routes**: 146 (includes sub-pages/variants)  
+**Missing Smoke Tests**: 13  
+**Missing Sample Pages**: 12  
+**Existing but Untested**: 1 (ConfigurationManager)  
+
+**bUnit Test Gaps**: 2 (Xml deferred, BaseCompareValidator)  
+**Components with Tests**: 85 / 87 tracked (98%)
+
+**Estimated Remediation Effort**:
+- Phase 1 (Decisions + High-Priority): 4.5 hours
+- Phase 2 (Interactive assertions): 8-10 hours (ongoing)
+- Phase 3 (Migration reference catalog): 6-8 hours over 3 milestones
+- **Total**: ~20-25 hours over M22-M25
+
+
+# Decision: Legacy .aspx URL Compatibility in Migrated Blazor Apps
+
+**Date:** 2026-06-10T17:29:42-04:00
+**Author:** Cyclops (Component Dev)
+**Status:** Implemented in ContosoUniversity; recommended for all generated apps
+
+## Decision
+
+Migrated Blazor apps must serve legacy `.aspx` URLs (e.g. `/Students.aspx`) via
+301 permanent redirect to the canonical clean Blazor route (e.g. `/Students`).
+
+### Implementation Pattern
+
+Add the following middleware in the generated `Program.cs`, immediately after
+`app.UseHttpsRedirection()` and before `app.MapStaticAssets()`:
+
+```csharp
+// Redirect legacy .aspx URLs to clean Blazor routes
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? string.Empty;
+    if (path.EndsWith(".aspx", StringComparison.OrdinalIgnoreCase))
+    {
+        var cleanPath = path[..^5]; // strip .aspx
+        if (string.Equals(cleanPath, "/Home", StringComparison.OrdinalIgnoreCase))
+            cleanPath = "/";
+        context.Response.Redirect(cleanPath + context.Request.QueryString, permanent: true);
+        return;
+    }
+    await next(context);
+});
+```
+
+### Special Cases
+
+- `/Home.aspx` must map to `/` (root), not `/Home`, because generated `Home.razor`
+  declares `@page "/"`. All other pages follow the simple strip-extension rule.
+- Query strings are preserved through the redirect so deep-link parameters survive.
+
+## Why
+
+The acceptance test suite already used `.aspx` URLs because they were authored
+against the original Web Forms app. Without this redirect, every test that navigated
+to `/Home.aspx`, `/Students.aspx`, etc. returned 404 in the migrated app.
+
+More broadly, real users and external sites have bookmarks/links pointing at the
+original `.aspx` URLs. Issuing a 301 permanent redirect is the standard web
+mechanism to preserve those links while canonicalizing to clean Blazor routes.
+
+## Scope
+
+- **Implemented now:** `samples/AfterContosoUniversity/Program.cs`
+- **Recommended next:** `ProgramCsEmitter` in the CLI should emit this middleware
+  block automatically for all generated apps (WingtipToys, DepartmentPortal, etc.)
+  so the pattern is consistently applied without per-app manual edits.
+- **Acceptance tests:** `src/ContosoUniversity.AcceptanceTests/LegacyAspxUrlTests.cs`
+  provides the coverage template for the other benchmark suites.
+
+
+# Forge: Completion Coverage Remediation Plan
+
+**Date:** 2026-06-12  
+**Author:** Forge  
+**Status:** Proposed  
+**Audience:** Beast (Docs), Jubilee (Samples), Rogue (Tests), Jeffrey (Project Owner)
+
+---
+
+## Overview
+
+The audit identified concrete gaps between what we claim to ship (**tracked-components.json: 61 components**), what the Component Health Dashboard tracks (**docs/dashboard.md: 52 controls**), and what actually has complete coverage across Docs / Tests / Samples.
+
+**Snapshot of Coverage:**
+- Docs: 60/61 components (98%) — Missing only `Xml`
+- Tests: 59/61 components (97%) — Missing `Xml`, `BaseCompareValidator`
+- Samples: 57/61 components (93%) — Missing `TextBox`, `Xml`, `BaseValidator`, `BaseCompareValidator`
+- Playwright routes: 82/95 catalog routes (86%) — 13 migration/utility routes lack broad coverage
+
+**Key insight:** The dashboard claims "52 targeted controls" but our actual shipping scope is 61 components, creating a perception gap that needs either a scope clarification or a dashboard update.
+
+---
+
+## 1. IMMEDIATE FIXES (Do This Sprint)
+
+### 1.1 Metadata Cleanup (Ownership: Scribe + Forge)
+
+**Action:** Align tracked-components.json to actual shipping scope and update dashboard.md  
+**Effort:** 1–2 hours
+
+1. Decide: Do we track **61 components** (current tracked-components.json) or **52 controls** (current dashboard.md claim)?
+   - **Recommended:** Adopt 61. The dashboard's "52" is a subset of "50 essential Web Forms controls + 2 infrastructure" that no longer matches our actual output.
+   - Update `docs/dashboard.md` line 9: "tracks **61 components**" instead of "52 targeted Web Forms controls"
+   - Update the Glossary to clarify: "These 61 include 50 Web Forms controls, 6 validators, 3 infrastructure (Content, ContentPlaceHolder, MasterPage), 2 shims (Xml:Deferred, ScriptManager:Stub)."
+
+2. Document deferred/stub status in dashboard.md decision table:
+   - `Xml` → Deferred (marked in tracked-components.json)
+   - `ScriptManager` → Stub (marked in tracked-components.json)
+   - This clarifies why their scores are lower.
+
+**Owner:** Scribe (or Forge if Scribe unavailable)
+
+---
+
+### 1.2 Route Coverage — Add 13 Missing Playwright Tests (Ownership: Rogue)
+
+**Action:** Extend `ControlSampleTests.cs` to cover all 13 catalog routes  
+**Effort:** 2–3 hours (mostly data entry + one test run)
+
+Missing routes (from audit):
+```
+/ControlSamples/ClientScriptShim
+/ControlSamples/Migration/ConfigurationManager
+/ControlSamples/Migration/CustomWebControl
+/ControlSamples/NamingContainer
+/ControlSamples/PostBackDemo
+/ControlSamples/ScriptManagerProxy
+/migration/cache
+/migration/findcontrol
+/migration/ispostback
+/migration/request
+/migration/response-redirect
+/migration/server-mappath
+/migration/session
+```
+
+**Steps:**
+1. Grep `ComponentCatalog.cs` for these exact route names — confirm they exist
+2. Add `[InlineData(...)]` entries to `ControlSampleTests.cs` (likely in a "Migration Utilities" section after line 224)
+3. Run `dotnet test src/AfterBlazorServerSide.Tests --filter "ControlSampleTests"`
+4. Confirm all 13 routes load without 404 or exceptions
+
+**Expected outcome:** All 95 catalog routes are now covered by Playwright.
+
+**Owner:** Rogue
+
+---
+
+### 1.3 Sample Page Additions (Ownership: Jubilee)
+
+**Action:** Create sample pages for 4 missing tracked components  
+**Effort:** 3–4 hours per component
+
+**Missing sample pages:**
+1. `TextBox` — Editor control, should be trivial (mimic Button sample structure)
+2. `Xml` — Deferred status; create a stub page explaining deferred status
+3. `BaseValidator` — Validation base class; create a concept page showing inheritance hierarchy
+4. `BaseCompareValidator` — Validation base class; create a concept page showing inheritance hierarchy
+
+**Steps per component:**
+1. Create `Pages/ControlSamples/{ComponentName}/Index.razor` + `.razor.cs`
+2. Register in `ComponentCatalog.cs` with the exact route (e.g., `/ControlSamples/TextBox`)
+3. For `Xml` and base classes: add a "Status" banner explaining why they're not fully interactive
+4. Include a link back to `docs/{ComponentCategory}/{ComponentName}.md`
+
+**Owner:** Jubilee
+
+---
+
+### 1.4 Documentation Completeness (Ownership: Beast)
+
+**Action:** Verify one-to-one doc pages for all 61 tracked components  
+**Effort:** 2–3 hours
+
+**Current status:**
+- Missing one-to-one doc page: `Xml` only
+- Naming mismatches (docs exist but under different names/paths):
+  - `ConfigurationManager` → `docs/Migration/Phase1-ConfigurationManager.md` 
+  - `FindControl` → `docs/Migration/FindControl-Migration.md`
+  - `Server Utilities` → `docs/UtilityFeatures/ServerShim.md`
+  - `Request.Form` → possibly split across `RequestShim.md` and `WebFormsForm.md`
+
+**Steps:**
+1. Add `Xml.md` to `docs/EditorControls/` explaining deferred status and migration guidance
+2. Update `mkdocs.yml` nav entry: `- Xml: EditorControls/Xml.md`
+3. Audit the naming-mismatch items: verify docs are discoverable under their tracked names
+4. If a naming mismatch exists (e.g., catalog says "ConfigurationManager" but doc is "Phase1-ConfigurationManager"), either:
+   - Rename the doc to match the catalog name, OR
+   - Create a redirect/symlink in the nav
+5. Add all 61 components to `mkdocs.yml` nav (current snapshot shows some are missing from nav even though docs exist)
+
+**Owner:** Beast
+
+---
+
+### 1.5 README Links (Ownership: Beast)
+
+**Action:** Update README.md component list to be exhaustive  
+**Effort:** 1–2 hours
+
+**Current state:** README lists ~45 components with doc links; 16 are missing or buried.
+
+**Steps:**
+1. Generate an exhaustive list of all 61 components grouped by category
+2. Ensure every tracked component in README has a clickable doc link
+3. For deferred/stub components, add a note (e.g., `[Xml](docs/EditorControls/Xml.md) (Deferred)`)
+
+**Owner:** Beast
+
+---
+
+## 2. STRUCTURAL DECISIONS REQUIRED (This Week)
+
+### 2.1 Definition: "Source of Truth" for Component Completeness
+
+**Question:** Which inventory should be canonical?
+
+- **Option A (Recommended):** `tracked-components.json` (61 components) is the master inventory. Dashboard.md, mkdocs.yml, ComponentCatalog.cs, and README must all reflect this same scope.
+- **Option B:** `ComponentCatalog.cs` (95 entries) is the source of truth. Some catalog entries are meta-concepts (not real components) — dashboard should only track the 61 "true" components.
+
+**Decision for Jeffrey:**  
+I recommend **Option A**. The 61 tracked components are the formal product surface. The 95 catalog entries are a mix of components, concept pages, sample scenarios, and migration examples. By declaring tracked-components.json canonical, we ensure:
+- Completion checklist is unambiguous: 61 → must have docs, tests, samples
+- Health dashboard stays honest: all 61 must be scored
+- README and mkdocs.yml can link all 61 + optionally include the extra 34 as "sample scenarios"
+
+**Action:** Update `.squad/decisions/inbox/forge-completion-plan.md` with this decision and have Scribe merge it into `decisions.md`.
+
+---
+
+### 2.2 Documentation Scope: 1:1 vs. Conceptual
+
+**Question:** Must every tracked component have a same-name markdown file in `docs/`?
+
+- **Current state:** Most do (60/61), but some are grouped under concept pages (e.g., "All Validators" under BaseValidator rather than separate pages per validator)
+- **Tension:** Health dashboard strictly checks `docs/{ComponentName}.md` filename, so any "conceptual grouping" is flagged as missing docs
+
+**Decision for Beast:**  
+I recommend **strict 1:1 mapping**, but with a "hub-and-spoke" structure:
+- Every component gets its own `docs/{Category}/{ComponentName}.md` page
+- That page can reference a hub page (e.g., `ValidationControls/BaseValidator.md` → linked to from each concrete validator page)
+- This ensures the health dashboard detects completeness AND users can find individual components
+
+**Action:** Establish this as a rule in the Contributing Guide / AGENTS.md so future components follow it.
+
+---
+
+### 2.3 Deferred/Stub Handling in Health Dashboard
+
+**Question:** Should deferred components (Xml) and stubs (ScriptManager) count toward completion?
+
+- **Current:** Xml and ScriptManager are in tracked-components.json but have lower baseline/implementation scores
+- **Problem:** Unclear if "incomplete" means "not yet implemented" vs. "intentionally deferred"
+
+**Recommendation:** Add a status indicator to the dashboard scoring:
+- **Status = "Complete"**: Expected = Implemented (green checkmark for all dimensions)
+- **Status = "Stub"**: Intentionally limited scope (show 50% color)
+- **Status = "Deferred"**: Not started (show grey/off-white; exclude from portfolio completeness claims)
+
+**Action:** Update `ComponentHealthService.cs` to visually distinguish status tiers in the dashboard. This lets us claim "60/61 components complete or in progress" instead of the weaker "52 complete."
+
+---
+
+## 3. DEFINITION OF DONE / ACCEPTANCE GATES
+
+### For This Remediation Cycle
+
+A feature is **completion-verified** when ALL of these are true:
+
+#### 3.1 Inventory Completeness
+- [ ] Component is in `tracked-components.json` (single source of truth)
+- [ ] Component is registered in `ComponentCatalog.cs` with a `/ControlSamples/{Name}` route
+- [ ] Component name matches across all three files (case-sensitive, no renaming aliases)
+
+#### 3.2 Documentation Completeness
+- [ ] Component has a markdown file at `docs/{Category}/{ComponentName}.md`
+- [ ] Markdown file is registered in `mkdocs.yml` nav under the correct category section
+- [ ] Component has a clickable link in `README.md` component list
+- [ ] **For deferred/stub:** Status is clearly marked (e.g., "(Deferred)" or "(Stub)") in all three places
+
+#### 3.3 Sample Page Completeness
+- [ ] Component sample page exists at `Pages/ControlSamples/{ComponentName}/Index.razor`
+- [ ] Sample page is registered in `ComponentCatalog.cs` with route matching the filename
+- [ ] Sample page loads without 404 or unhandled exceptions
+
+#### 3.4 Test Coverage Completeness
+- [ ] Component has bUnit tests in `src/BlazorWebFormsComponents.Test/{ComponentName}/`
+- [ ] Component has Playwright route coverage in `ControlSampleTests.cs` (route must appear in `[InlineData(...)]`)
+- [ ] Both test suites pass: `dotnet test src/BlazorWebFormsComponents.Test` + `dotnet test src/AfterBlazorServerSide.Tests`
+
+#### 3.5 Dashboard Health Score
+- [ ] Component appears on `/dashboard` in the sample app
+- [ ] Health score is ≥70% (yellow threshold) for production components, ≥50% for stubs
+- [ ] **For deferred:** Marked with status indicator and noted in dashboard help text
+
+---
+
+### For Future Component Additions
+
+When adding a new component, the PR checklist must include:
+
+1. **Before merging:**
+   - Add component to `tracked-components.json`
+   - Create component in `src/BlazorWebFormsComponents/`
+   - Add to `ComponentCatalog.cs` with a `/ControlSamples/{Name}` route
+   - Add bUnit tests to `src/BlazorWebFormsComponents.Test/{ComponentName}/`
+   - Add sample page to `Pages/ControlSamples/{ComponentName}/`
+   - Create markdown doc at `docs/{Category}/{ComponentName}.md`
+   - Add nav entry to `mkdocs.yml`
+   - Add link to `README.md` component list
+   - Add reference baseline to `dev-docs/reference-baselines.json`
+
+2. **PR validation:**
+   - All 5 test suites pass (component unit, CLI tests, acceptance, etc.)
+   - Dashboard shows new component with ≥70% score
+
+3. **After merge:**
+   - Verify the live sample site reflects the new component
+   - Verify the live docs site has the new page
+
+---
+
+## 4. MAINTAINING COVERAGE GOING FORWARD
+
+### Add a "Completion Status" CI Check
+
+Create a simple PowerShell/bash script that runs after each build and verifies:
+
+```powershell
+# Pseudo-code for a completion validator
+$tracked = Get-Content tracked-components.json | ConvertFrom-Json
+$catalog = Get-Content ComponentCatalog.cs | grep "new(" | measure-object
+$docs = Get-ChildItem docs/**/*.md | measure-object
+$tests = Get-ChildItem src/BlazorWebFormsComponents.Test/*/  -Directory | measure-object
+$samples = Get-ChildItem Pages/ControlSamples/*/ -Directory | measure-object
+
+# Alert if any dimension drops below 95% of tracked count
+if ($docs.Count -lt $tracked.components.Count * 0.95) { 
+    Write-Error "Docs coverage below threshold: $($docs.Count)/$($tracked.components.Count)" 
+}
+```
+
+**Owner:** Rogue (integrate into CI) + Scribe (document the rule)
+
+---
+
+## 5. TIMELINE AND PRIORITY
+
+| Priority | Task | Owner | Est. Effort | Deadline |
+|----------|------|-------|-------------|----------|
+| **P0** | Metadata alignment (tracked-components.json = 61) | Scribe | 1h | End of week |
+| **P0** | Add 13 missing Playwright routes | Rogue | 2h | End of week |
+| **P1** | Add 4 missing sample pages | Jubilee | 4h | Next week |
+| **P1** | Create Xml.md + audit docs naming | Beast | 2h | Next week |
+| **P1** | Update README to be exhaustive | Beast | 1h | Next week |
+| **P2** | Update dashboard scoring for status tiers | Forge + Bishop | 4h | Sprint +2 |
+| **P3** | Implement CI completion validator | Rogue + Scribe | 3h | Sprint +2 |
+
+---
+
+## 6. SUCCESS CRITERIA
+
+**End-of-Sprint "Complete" State:**
+- ✅ All 61 tracked components have docs + sample pages + tests
+- ✅ All 95 catalog routes have Playwright coverage
+- ✅ Dashboard shows 61/61 components (with status labels for deferred/stub)
+- ✅ README links all 61 components
+- ✅ mkdocs.yml nav exhaustively lists all 61
+- ✅ No components appear as "missing" in health dashboard
+- ✅ Audit report shows 61/61 docs, 61/61 tests, 61/61 samples (no gap)
+
+---
+
+## 7. TEAM DECISIONS FOR BOARD
+
+**Forge formally proposes the following team decisions:**
+
+### Decision 1: tracked-components.json (61 components) is the canonical product scope
+- **Rationale:** Clear, auditable, reflects actual shipping scope
+- **Impact:** Dashboard, README, mkdocs.yml, ComponentCatalog must all reflect 61 (not 52 or 95)
+- **Who signs:** Jeffrey (Owner)
+
+### Decision 2: Strict 1:1 documentation mapping (one file per component)
+- **Rationale:** Ensures health dashboard remains honest; easier for users to find docs
+- **Impact:** No more "grouped" concept pages (every validator gets its own page, linked from a hub)
+- **Who signs:** Beast (Docs Lead)
+
+### Decision 3: Deferred and Stub components are separately tracked
+- **Rationale:** Product roadmap clarity; "60/61 complete + 1 deferred" is better than "60/61 incomplete"
+- **Impact:** Dashboard shows status tiers; contributes to portfolio narrative
+- **Who signs:** Forge (Reviewer)
+
+---
+
+## Appendix: Audit Data Summary
+
+### What the audit found:
+- **tracked-components.json:** 61 components (source of truth)
+- **Dashboard.md claim:** 52 controls (outdated)
+- **ComponentCatalog.cs:** 95 routes (includes scenarios + samples)
+- **docs/ presence:** 60/61 markdown files (missing Xml only)
+- **mkdocs.yml nav:** ~48 entries (incomplete; doesn't list all 61)
+- **README.md:** ~45 components with links (incomplete)
+- **Playwright coverage:** 82/95 routes (13 catalog routes untested)
+- **bUnit tests:** 59/61 components (missing Xml, BaseCompareValidator)
+- **Sample pages:** 57/61 components (missing TextBox, Xml, BaseValidator, BaseCompareValidator)
+
+### Gap analysis:
+| Metric | Current | Target | Gap | Effort |
+|--------|---------|--------|-----|--------|
+| Tracked components | 61 | 61 | 0 | — |
+| Docs coverage | 60/61 | 61/61 | 1 (Xml) | 1h |
+| Sample pages | 57/61 | 61/61 | 4 | 4h |
+| bUnit tests | 59/61 | 61/61 | 2 | 2h |
+| Playwright routes | 82/95 | 95/95 | 13 | 2h |
+| README links | ~45 | 61 | 16 | 1h |
+| mkdocs.yml nav | ~48 | 61 | 13 | 1h |
+
+**Total immediate effort: ~14 hours across the team**
+
+
 
 # WebFormsForm must inherit ComponentBase explicitly
 
