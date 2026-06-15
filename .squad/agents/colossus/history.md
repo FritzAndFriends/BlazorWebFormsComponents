@@ -157,3 +157,10 @@ Added 5 smoke tests (Timer, UpdatePanel, UpdateProgress, ScriptManager, Substitu
 - For the not-yet-landed sample demos, broad assertions are safer than exact text checks: verify custom navigation/sidebar template structure exists inside the scoped Wizard wrapper instead of hard-coding Cyclops' final demo text.
 - Added small Wizard-specific test helpers to reuse the page navigation pattern, collect console errors, and find the forward navigation control without matching `Previous`, `Back`, or `Cancel` labels.
 - Compile validation succeeded with `dotnet build samples\AfterBlazorServerSide.Tests --nologo` after the test additions.
+
+### Migration Helper Route Coverage (2026-06-12T09:56:18.833-04:00)
+- Audited all 13 routes in the "known missing" list against file system.
+- 12 of 13 routes have real backing pages; `/ControlSamples/ScriptManagerProxy` has no page file yet and is documented in a comment in `ControlSampleTests.cs` pending page implementation.
+- Added 3 routes to `AjaxControl_Loads_WithoutErrors` theory: `/ControlSamples/ClientScriptShim`, `/ControlSamples/NamingContainer`, `/ControlSamples/PostBackDemo`.
+- Added 9 routes to `MigrationPage_Loads_WithoutErrors` theory: `/ControlSamples/Migration/ConfigurationManager`, `/ControlSamples/Migration/CustomWebControl`, `/migration/cache`, `/migration/findcontrol`, `/migration/ispostback`, `/migration/request`, `/migration/response-redirect`, `/migration/server-mappath`, `/migration/session`.
+- Build green: `dotnet build samples\AfterBlazorServerSide.Tests --nologo` — 0 errors, 0 compiler warnings.

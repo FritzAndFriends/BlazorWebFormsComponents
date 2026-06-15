@@ -45,7 +45,7 @@ dotnet test src/WingtipToys.AcceptanceTests
 | **AuthenticationTests** | Register page has expected form fields, Login page has expected form fields, Register → Login end-to-end flow |
 | **StaticAssetTests** | CSS files are served (HTTP 200), no broken images on ProductList, navbar has Bootstrap classes & reasonable height, homepage/ProductList/ProductDetails visual sanity screenshots, no failed static asset requests on homepage |
 | **ProductDetailsTests** | ProductDetails page renders content (image, heading, description) when navigated via link click from ProductList |
-| **EnhancedNavigationFlowTests** | ProductList via navbar click shows products, ProductDetails from link shows core fields, ShoppingCart shows items after AddToCart, ProductDetails via direct URL renders all data fields; 3 tests **skipped (TODO #548)**: enhanced load event, `Body_DataEnhanceNavFalse_IsAbsent` regression guard, and `SelectMethod` data renders during enhanced navigation |
+| **EnhancedNavigationFlowTests** | ProductList via navbar click shows products, ProductDetails from link shows core fields, ShoppingCart shows items after AddToCart, ProductDetails via direct URL renders all data fields, enhanced load event fires on link navigation, `<body data-enhance-nav="false">` is absent, and `SelectMethod` data renders during enhanced navigation |
 
 ## Usage in Migration Iterations
 

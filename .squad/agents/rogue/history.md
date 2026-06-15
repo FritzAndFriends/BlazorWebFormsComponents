@@ -155,6 +155,25 @@ Confirmed 10/10 ComponentRef tests passing. Test coverage is complete — no fur
 - Existing baseline test: `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor`
 - Component implementation: `src\BlazorWebFormsComponents\Wizard.razor`, `src\BlazorWebFormsComponents\Wizard.razor.cs`, `src\BlazorWebFormsComponents\WizardStep.razor.cs`
 
+### 2026-06-12T09:56:18-04:00: Xml and BaseCompareValidator tracked gap closure
+
+**Task:** Investigate the two tracked bUnit gaps (Xml and BaseCompareValidator) and implement the safe fix.
+
+**Xml — deferred:**
+No `Xml.razor` component source files exist. `tracked-components.json` already marks Xml as `"status": "Deferred"`. The `System.Web.UI.WebControls.Xml` control has no Blazor equivalent yet. Decision documented in `.squad/decisions.md` — no tests should be added until an implementation exists. No repo change required.
+
+**BaseCompareValidator — abstract base; property tests added:**
+`BaseCompareValidator<InputType>` is abstract and cannot be directly instantiated. Added `src/BlazorWebFormsComponents.Test/Validations/BaseCompareValidatorPropertyTests.razor` with 6 tests exercising `Type` (defaults to `ValidationDataType.String`, accepts `Integer`, `Date`) and `CultureInvariantValues` (defaults to `false`, can be set to `true`) via `CompareValidator` and `RangeValidator` as concrete proxies.
+
+**Validation command:** `dotnet test src\BlazorWebFormsComponents.Test --nologo --filter "BaseCompareValidator"` → **18 passed (6 per TFM), 0 failed** across net8.0, net9.0, net10.0.
+
+**Key file paths:**
+- New tests: `src/BlazorWebFormsComponents.Test/Validations/BaseCompareValidatorPropertyTests.razor`
+- Decision note: `.squad/decisions.md` (Xml and BaseCompareValidator section)
+- Component source: `src/BlazorWebFormsComponents/Validations/BaseCompareValidator.cs`
+
+---
+
 ### FormShim & WebFormsForm Tests (Issue #533)
 
 **39 new tests — all passing.** Created 2 test files covering FormShim dual-mode support and WebFormsForm component rendering.

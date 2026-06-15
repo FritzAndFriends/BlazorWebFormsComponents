@@ -6,6 +6,7 @@ namespace WingtipToys.AcceptanceTests;
 public class EnhancedNavigationFlowTests
 {
     private readonly PlaywrightFixture _fixture;
+    private const int EnhancedLoadTimeoutMs = 15000;
 
     public EnhancedNavigationFlowTests(PlaywrightFixture fixture) => _fixture = fixture;
 
@@ -67,22 +68,19 @@ public class EnhancedNavigationFlowTests
         Assert.True(await cartRows.CountAsync() > 1, "ShoppingCart should render at least one data row after AddToCart.");
     }
 
-    [Fact(Skip = "TODO(#548): Re-enable once body-level data-enhance-nav opt-out is removed and enhanced navigation is active.")]
+    [Fact]
     public async Task EnhancedNavigation_ProductListToProductDetails_RaisesEnhancedLoadEvent()
     {
         var page = await _fixture.NewPageAsync();
         await page.GotoAsync($"{TestConfiguration.BaseUrl}/ProductList");
 
-        await page.EvaluateAsync("""
-            () => {
-                window.__enhancedLoadCount = 0;
-                if (window.Blazor && typeof Blazor.addEventListener === "function") {
-                    Blazor.addEventListener("enhancedload", () => window.__enhancedLoadCount++);
-                }
-            }
-            """);
+        await ArmEnhancedLoadCounterAsync(page);
 
         await page.Locator("a[href*='/Product/']").First.ClickAsync();
+        await page.WaitForFunctionAsync(
+            "() => (window.__enhancedLoadCount || 0) > 0",
+            null,
+            new PageWaitForFunctionOptions { Timeout = EnhancedLoadTimeoutMs });
         var enhancedCount = await page.EvaluateAsync<int>("() => window.__enhancedLoadCount || 0");
 
         Assert.True(enhancedCount > 0, "Expected enhancedload event when navigating by product link.");
@@ -141,11 +139,8 @@ public class EnhancedNavigationFlowTests
     /// Verifies that <body data-enhance-nav="false"> has been removed from Components/App.razor
     /// so that Blazor enhanced navigation is active for all links.
     ///
-    /// SKIPPED: Remove this skip annotation once ProjectScaffolder.cs stops emitting
-    /// data-enhance-nav="false" on the body tag (i.e., when #548 is fixed and the
-    /// SelectMethod cascading-parameter issue is resolved).
     /// </summary>
-    [Fact(Skip = "TODO(#548): Re-enable when data-enhance-nav='false' workaround is removed from Components/App.razor — verifies enhanced navigation is globally active.")]
+    [Fact]
     public async Task Body_DataEnhanceNavFalse_IsAbsent()
     {
         var page = await _fixture.NewPageAsync();
@@ -170,28 +165,22 @@ public class EnhancedNavigationFlowTests
     /// items were empty when navigated to via enhanced navigation because the HostingPage
     /// cascading parameter was null during the enhanced-navigation component lifecycle.
     ///
-    /// SKIPPED: Remove this skip once data-enhance-nav="false" workaround is removed
-    /// (i.e., when #548 is fixed).
     /// </summary>
-    [Fact(Skip = "TODO(#548): Re-enable when data-enhance-nav='false' is removed — verifies SelectMethod data renders correctly during Blazor enhanced navigation.")]
+    [Fact]
     public async Task EnhancedNavigation_ProductDetails_SelectMethodDataRendersAfterLinkClick()
     {
         var page = await _fixture.NewPageAsync();
         await page.GotoAsync($"{TestConfiguration.BaseUrl}/ProductList");
         await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-        // Arm the enhancedload counter before the link click
-        await page.EvaluateAsync("""
-            () => {
-                window.__enhancedLoadCount = 0;
-                if (window.Blazor && typeof Blazor.addEventListener === "function") {
-                    Blazor.addEventListener("enhancedload", () => window.__enhancedLoadCount++);
-                }
-            }
-            """);
+        await ArmEnhancedLoadCounterAsync(page);
 
         // Click a product link — this should trigger enhanced navigation, not a full reload
         await page.Locator("a[href*='/Product/']").First.ClickAsync();
+        await page.WaitForFunctionAsync(
+            "() => (window.__enhancedLoadCount || 0) > 0",
+            null,
+            new PageWaitForFunctionOptions { Timeout = EnhancedLoadTimeoutMs });
 
         await Assertions.Expect(page).ToHaveURLAsync(
             new System.Text.RegularExpressions.Regex(".*/Product/.*"),
@@ -217,5 +206,26 @@ public class EnhancedNavigationFlowTests
             content.Contains("Price", StringComparison.OrdinalIgnoreCase) ||
             content.Contains("$", StringComparison.OrdinalIgnoreCase),
             "ProductDetails price is missing after enhanced navigation — #548 symptom: SelectMethod data is empty.");
+    }
+
+    private static async Task ArmEnhancedLoadCounterAsync(IPage page)
+    {
+        await page.EvaluateAsync("""
+            async () => {
+                window.__enhancedLoadCount = 0;
+                const increment = () => window.__enhancedLoadCount = (window.__enhancedLoadCount || 0) + 1;
+                document.addEventListener("enhancedload", increment);
+
+                const start = Date.now();
+                while (!window.Blazor || typeof window.Blazor.addEventListener !== "function") {
+                    if (Date.now() - start > 5000) {
+                        return;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+
+                window.Blazor.addEventListener("enhancedload", increment);
+            }
+            """);
     }
 }

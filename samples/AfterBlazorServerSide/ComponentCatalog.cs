@@ -63,6 +63,8 @@ public static class ComponentCatalog
             Keywords: new[] { "radio", "options", "select" }),
         new("Table", "Editor", "/ControlSamples/Table", "Programmatically created HTML table",
             Keywords: new[] { "grid", "rows", "cells" }),
+        new("TextBox", "Editor", "/ControlSamples/TextBox", "Single-line, multi-line, and password text input control",
+            Keywords: new[] { "input", "text", "password", "multiline", "textarea", "email", "number", "placeholder" }),
 
         // Data Controls
         new("Calendar", "Data", "/ControlSamples/Calendar", "Interactive calendar for date selection",

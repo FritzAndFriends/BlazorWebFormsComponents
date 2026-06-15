@@ -35,6 +35,24 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Redirect legacy .aspx URLs to clean Blazor routes so existing bookmarks and links keep working.
+// /Home.aspx → /   (Home is the root route)
+// /About.aspx → /About, /Students.aspx → /Students, etc.
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? string.Empty;
+    if (path.EndsWith(".aspx", StringComparison.OrdinalIgnoreCase))
+    {
+        var cleanPath = path[..^5]; // strip .aspx
+        if (string.Equals(cleanPath, "/Home", StringComparison.OrdinalIgnoreCase))
+            cleanPath = "/";
+        context.Response.Redirect(cleanPath + context.Request.QueryString, permanent: true);
+        return;
+    }
+    await next(context);
+});
+
 app.MapStaticAssets();
 app.UseBlazorWebFormsComponents();
 app.UseAntiforgery();

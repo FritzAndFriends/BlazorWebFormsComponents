@@ -9,6 +9,29 @@
 
 <!--  Summarized 2026-02-27 by Scribe  covers M1M16 -->
 
+### 2026-06-10: Legacy .aspx URL compatibility for ContosoUniversity
+
+**Task:** Ensure `.aspx` route URLs (as used by the original Web Forms app and by the existing acceptance test suite) continue to resolve successfully in the migrated Blazor app.
+
+**Changes delivered:**
+- Added inline redirect middleware in `samples/AfterContosoUniversity/Program.cs` immediately after `UseHttpsRedirection()`. It intercepts any request whose path ends in `.aspx`, strips the extension, special-cases `/Home.aspx` → `/` (the root Blazor route), and issues a 301 permanent redirect.
+- Added `src/ContosoUniversity.AcceptanceTests/LegacyAspxUrlTests.cs` with three parameterized test methods covering all five key pages (Home, About, Students, Courses, Instructors):
+  1. `LegacyAspxUrl_ReturnsSuccessfulResponse` — Playwright follows the redirect; asserts final HTTP status is OK.
+  2. `LegacyAspxUrl_RedirectsToCleanRoute` — asserts the final URL no longer contains `.aspx`.
+  3. `LegacyAspxUrl_PageRendersExpectedContent` — asserts page body contains a page-specific keyword.
+
+**Key decisions:**
+- Middleware placed before `MapStaticAssets()` so it intercepts before any static-file fallback.
+- 301 (permanent) redirect chosen so browsers and crawlers update bookmarks over time.
+- The special case `/Home.aspx` → `/` is necessary because `Home.razor` declares `@page "/"`, not `@page "/Home"`.
+- Both projects build with 0 errors (pre-existing warnings unchanged).
+
+**Files touched:**
+- `samples/AfterContosoUniversity/Program.cs`
+- `src/ContosoUniversity.AcceptanceTests/LegacyAspxUrlTests.cs` (new)
+
+**Future note:** This pattern should be emitted by `ProgramCsEmitter` in the CLI for all generated apps so every benchmark migration gets `.aspx` redirect support automatically.
+
 ### 2026-05-20T21:19:29.902-04:00: Wizard template wiring
 
 - `src/BlazorWebFormsComponents/Wizard.razor` owns the rendered sidebar and navigation chrome; step content still comes from registered `WizardStep` children.
