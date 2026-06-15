@@ -1,3 +1,4 @@
+// TODO(bwfc-query-details): GetProducts now binds through component query properties and a SelectMethod wrapper in the generated .razor file.
 // =============================================================================
 // TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
 //
@@ -26,7 +27,7 @@ using WingtipToys.Logic;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
-  public partial class ProductList : WebFormsPageBase
+  public partial class ProductList
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -54,7 +55,7 @@ namespace WingtipToys
                         [QueryString("id")] int? categoryId,
                         [RouteData] string categoryName)
     {
-      var _db = _productContext; // Injected via DI
+      var _db = new WingtipToys.Models.ProductContext();
       IQueryable<Product> query = _db.Products;
 
       if (categoryId.HasValue && categoryId > 0)

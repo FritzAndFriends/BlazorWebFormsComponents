@@ -30,23 +30,21 @@ namespace WingtipToys
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
-    // --- Request.Form Migration ---
-    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
-    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
-    // Form keys found: key
-    // For non-page classes, inject RequestShim via DI.
+    [Parameter, SupplyParameterFromQuery(Name = "productId")]
+    public int? ProductId { get; set; }
 
-    private FormView<Product> productDetail = default!;
-    [Parameter] public string? productName { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
+    public int? ProductIdLegacy { get; set; }
 
     [Inject]
     protected ProductContext _productContext { get; set; } = default!;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
-        await base.OnInitializedAsync();
+        await base.OnParametersSetAsync();
+        Title = "Product Details";
 
+        var requestedId = ProductId ?? ProductIdLegacy;
 
     }
 

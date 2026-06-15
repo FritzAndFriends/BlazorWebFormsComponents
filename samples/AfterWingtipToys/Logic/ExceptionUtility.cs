@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
+using System.Text;
 
-using Microsoft.AspNetCore.Http;
-namespace WingtipToys.Logic
+namespace WingtipToys.Logic;
+
+public static class ExceptionUtility
 {
   // Create our own utility for exceptions
   public sealed class ExceptionUtility
@@ -40,21 +38,6 @@ namespace WingtipToys.Logic
         sw.WriteLine(exc.InnerException.Source);
         if (exc.InnerException.StackTrace != null)
         {
-          sw.WriteLine("Inner Stack Trace: ");
-          sw.WriteLine(exc.InnerException.StackTrace);
         }
-      }
-      sw.Write("Exception Type: ");
-      sw.WriteLine(exc.GetType().ToString());
-      sw.WriteLine("Exception: " + exc.Message);
-      sw.WriteLine("Source: " + source);
-      sw.WriteLine("Stack Trace: ");
-      if (exc.StackTrace != null)
-      {
-        sw.WriteLine(exc.StackTrace);
-        sw.WriteLine();
-      }
-      sw.Close();
     }
-  }
 }

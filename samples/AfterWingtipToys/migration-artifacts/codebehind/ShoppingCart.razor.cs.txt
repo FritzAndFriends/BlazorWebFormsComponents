@@ -35,10 +35,9 @@ using WingtipToys.Models;
 using WingtipToys.Logic;
 using System.Collections.Specialized;
 using System.Collections;
-using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
-  public partial class ShoppingCart : WebFormsPageBase
+  public partial class ShoppingCart
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -55,6 +54,10 @@ namespace WingtipToys
 
     private GridView<CartItem> CartList = default!;
     private ImageButton CheckoutImageBtn = default!;
+    private Label LabelTotalText = default!;
+    private Label lblTotal = default!;
+    private TextBox PurchaseQuantity = default!;
+    private CheckBox Remove = default!;
     private Button UpdateBtn = default!;
     [Inject]
     protected ShoppingCartActions usersShoppingCart { get; set; } = default!;
@@ -64,24 +67,24 @@ namespace WingtipToys
         // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
         await base.OnInitializedAsync();
 
-      // DbContext 'ShoppingCartActions' is injected via DI
-
+      using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
+      {
         decimal cartTotal = 0;
         cartTotal = usersShoppingCart.GetTotal();
         if (cartTotal > 0)
         {
           // Display Total.
-          _lblTotal_Text = String.Format("{0:c}", cartTotal);
+          lblTotal.Text = String.Format("{0:c}", cartTotal);
         }
         else
         {
-          _LabelTotalText_Text = "";
-          _lblTotal_Text = "";
-          ShoppingCartTitle = "Shopping Cart is Empty";
-          UpdateBtn?.Visible = false;
-          CheckoutImageBtn?.Visible = false;
+          LabelTotalText.Text = "";
+          lblTotal.Text = "";
+          ShoppingCartTitle.InnerText = "Shopping Cart is Empty";
+          UpdateBtn.Visible = false;
+          CheckoutImageBtn.Visible = false;
         }
-      
+      }
     }
 
     public List<CartItem> GetShoppingCartItems()
@@ -131,12 +134,12 @@ namespace WingtipToys
       return values;
     }
 
-    protected void UpdateBtn_Click(EventArgs e)
+    protected void UpdateBtn_Click()
     {
       UpdateCartItems();
     }
 
-    protected void CheckoutBtn_Click(EventArgs e)
+    protected void CheckoutBtn_Click(ImageClickEventArgs e)
     {
       // DbContext 'ShoppingCartActions' is injected via DI
 
@@ -144,10 +147,5 @@ namespace WingtipToys
       
       Response.Redirect("Checkout/CheckoutStart.aspx");
     }
-  
-
-    private object? _LabelTotalText_Text; // TODO: migrate from Web Forms code-behind
-
-    private object? _lblTotal_Text; // TODO: migrate from Web Forms code-behind
-}
+  }
 }

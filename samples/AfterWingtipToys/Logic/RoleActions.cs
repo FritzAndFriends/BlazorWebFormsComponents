@@ -3,4 +3,7 @@
 namespace WingtipToys.Logic;
 public partial class RoleActions
 {
+    internal void AddUserAndRole()
+    {
+    }
 }

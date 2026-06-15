@@ -24,9 +24,7 @@ using System.Linq;
 using WingtipToys.Logic;
 namespace WingtipToys
 {
-  public partial class Default : WebFormsPageBase
-  {
-	protected string Title { get; set; } = "Welcome";
+    [Inject] private IDbContextFactory<ProductContext> DbFactory { get; set; } = default!;
 
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -45,10 +43,11 @@ namespace WingtipToys
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
         await base.OnInitializedAsync();
+        Title = "Wingtip Toys";
 
-
+        await using var db = await DbFactory.CreateDbContextAsync();
+        FeaturedProducts = await db.Products.OrderBy(product => product.ProductID).Take(4).ToListAsync();
     }
 
     private void Page_Error(EventArgs e)

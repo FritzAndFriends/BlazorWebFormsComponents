@@ -37,7 +37,7 @@ using WingtipToys.Logic;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys.Checkout
 {
-  public partial class CheckoutComplete : WebFormsPageBase
+  public partial class CheckoutComplete
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -88,10 +88,10 @@ namespace WingtipToys.Checkout
           {
             // Retrieve PayPal confirmation value.
             string PaymentConfirmation = decoder["PAYMENTINFO_0_TRANSACTIONID"].ToString();
-            _TransactionId_Text = PaymentConfirmation;
+            TransactionId.Text = PaymentConfirmation;
 
 
-
+            ProductContext _db = new ProductContext();
             // Get the current order id.
             int currentOrderId = -1;
             if (Session["currentOrderId"] != string.Empty)
@@ -110,10 +110,11 @@ namespace WingtipToys.Checkout
             }
 
             // Clear shopping cart.
-            // DbContext 'ShoppingCartActions' is injected via DI
-
-              _shoppingCartActions.EmptyCart();
-
+            using (WingtipToys.Logic.ShoppingCartActions usersShoppingCart =
+                new WingtipToys.Logic.ShoppingCartActions())
+            {
+              usersShoppingCart.EmptyCart();
+            }
 
             // Clear order id.
             Session["currentOrderId"] = string.Empty;
@@ -124,7 +125,7 @@ namespace WingtipToys.Checkout
           }
     }
 
-    protected void Continue_Click(EventArgs e)
+    protected void Continue_Click()
     {
       Response.Redirect("~/Default.aspx");
     }

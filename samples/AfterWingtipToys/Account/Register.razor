@@ -10,30 +10,45 @@
     <AntiforgeryToken />
     @if (!string.IsNullOrWhiteSpace(ReturnUrl))
     {
-        <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+        <p class="text-danger">@Error</p>
     }
-    <div class="form-group">
-        <label class="col-md-2 control-label" for="email">Email</label>
-        <div class="col-md-10">
-            <input id="email" name="Email" type="email" class="form-control" />
+    <form method="post" action="/Account/RegisterHandler" class="form-horizontal" @formname="bwfc-form-1">
+    <AntiforgeryToken />
+        @if (!string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            <input type="hidden" name="ReturnUrl" value="@ReturnUrl" />
+        }
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="email">Email</label>
+            <div class="col-md-10">
+                <input id="email" name="Email" type="email" class="form-control" />
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="col-md-2 control-label" for="password">Password</label>
-        <div class="col-md-10">
-            <input id="password" name="Password" type="password" class="form-control" />
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="password">Password</label>
+            <div class="col-md-10">
+                <input id="password" name="Password" type="password" class="form-control" />
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <label class="col-md-2 control-label" for="confirm-password">Confirm password</label>
-        <div class="col-md-10">
-            <input id="confirm-password" name="ConfirmPassword" type="password" class="form-control" />
+        <div class="form-group">
+            <label class="col-md-2 control-label" for="confirm-password">Confirm password</label>
+            <div class="col-md-10">
+                <input id="confirm-password" name="ConfirmPassword" type="password" class="form-control" />
+            </div>
         </div>
-    </div>
-    <div class="form-group">
-        <div class="col-md-offset-2 col-md-10">
-            <button type="submit" class="btn btn-default">Register</button>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-default">Register</button>
+            </div>
         </div>
-    </div>
-</form>
-<p><a href="/Account/Login">Already have an account? Sign in</a></p>
+    </form>
+    <p><a href="/Account/Login">Already have an account? Sign in</a></p>
+</Content>
+    </ChildComponents>
+</Site>
+
+@code {
+    [Parameter, SupplyParameterFromQuery(Name = "error")] public string? Error { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "returnUrl")] public string? ReturnUrl { get; set; }
+}

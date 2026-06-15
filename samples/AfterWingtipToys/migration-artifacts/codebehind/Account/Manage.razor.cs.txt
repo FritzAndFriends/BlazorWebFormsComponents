@@ -46,6 +46,7 @@ namespace WingtipToys.Account
 
     private HyperLink ChangePassword = default!;
     private HyperLink CreatePassword = default!;
+    private Label PhoneNumber = default!;
     private PlaceHolder successMessage = default!;
         protected string SuccessMessage
         {

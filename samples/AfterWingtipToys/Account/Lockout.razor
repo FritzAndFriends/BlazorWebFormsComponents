@@ -1,9 +1,13 @@
 @page "/Account/Lockout"
-@inherits BlazorWebFormsComponents.WebFormsPageBase
-
-<div class="migration-pending">
-    <h3>Page Not Yet Migrated</h3>
-    <p>This page (<code>Account/Lockout.aspx</code>) requires manual migration.</p>
-    <p>Original Web Forms features used: Non-essential path (auto-quarantined)</p>
-    <p>Suggested migration approach: Migrate the page manually once core pages are stable, using injected services and Blazor patterns.</p>
-</div>
+@page "/Lockout"
+<PageTitle></PageTitle>
+<Site>
+    <ChildComponents>
+        <Content ContentPlaceHolderID="MainContent">
+            <hgroup>
+                <h1>Locked out.</h1>
+                <h2 class="text-danger">This account has been locked out, please try again later.</h2>
+            </hgroup>
+        </Content>
+    </ChildComponents>
+</Site>

@@ -30,32 +30,32 @@ namespace WingtipToys
   {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
-    // --- Request.Form Migration ---
-    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
-    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
-    // Form keys found: key
-    // For non-page classes, inject RequestShim via DI.
+    [Parameter, SupplyParameterFromQuery(Name = "id")]
+    public int? CategoryId { get; set; }
 
-    private ListView<Product> productList = default!;
-    [Parameter] public string? categoryName { get; set; }
+    [Parameter, SupplyParameterFromQuery(Name = "categoryName")]
+    public string? CategoryName { get; set; }
 
     [Inject]
     protected ProductContext _productContext { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
-        await base.OnInitializedAsync();
+        await base.OnParametersSetAsync();
+        Title = "Products";
 
+        await using var db = await DbFactory.CreateDbContextAsync();
+        var query = db.Products.Include(product => product.Category).AsQueryable();
 
-    }
+        if (CategoryId is > 0)
+        {
+            query = query.Where(product => product.CategoryID == CategoryId);
+        }
 
-    public IQueryable<Product> GetProducts(
-                        [QueryString("id")] int? categoryId,
-                        [RouteData] string categoryName)
-    {
-      var _db = _productContext; // Injected via DI
-      IQueryable<Product> query = _db.Products;
+        if (!string.IsNullOrWhiteSpace(CategoryName))
+        {
+            query = query.Where(product => product.Category != null && product.Category.CategoryName == CategoryName);
+        }
 
       if (categoryId.HasValue && categoryId > 0)
       {

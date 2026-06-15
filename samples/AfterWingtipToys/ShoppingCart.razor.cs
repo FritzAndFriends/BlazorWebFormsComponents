@@ -1,36 +1,6 @@
-// =============================================================================
-// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
-//
-// Common transforms needed (use the BWFC Copilot skill for assistance):
-//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
-//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
-//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
-//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
-//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
-//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
-//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
-//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
-//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
-//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
-//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
-//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
-//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
-//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
-//   TODO(bwfc-general): User controls → Blazor component references
-// =============================================================================
-
-// --- Session State Migration ---
-// TODO(bwfc-session-state): Session["key"] calls work automatically via SessionShim on WebFormsPageBase.
-// Session keys found: payment_amt
-// Options for long-term replacement:
-//   (1) ProtectedSessionStorage (Blazor Server) — persists across circuits
-//   (2) Scoped service via DI — lifetime matches user circuit
-//   (3) Cascading parameter from a root-level state provider
-// See: https://learn.microsoft.com/aspnet/core/blazor/state-management
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Http;
+using WingtipToys.Logic;
 using WingtipToys.Models;
 using WingtipToys.Logic;
 using System.Collections.Specialized;
@@ -38,9 +8,8 @@ using System.Collections;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
-  public partial class ShoppingCart : WebFormsPageBase
-  {
-    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
+    [Inject] private CartStore CartStore { get; set; } = default!;
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
 
     private string ShoppingCartTitle = ""; // TODO: HTML server control field — render via @ShoppingCartTitle or bind in markup
     // --- Request.Form Migration ---
@@ -61,10 +30,27 @@ namespace WingtipToys
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
-        await base.OnInitializedAsync();
+        var cartId = GetOrCreateCartId();
+        var workingItems = CartStore.GetCart(cartId)
+            .Select(item => new CartItem
+            {
+                ItemId = item.ItemId,
+                CartId = item.CartId,
+                ProductId = item.ProductId,
+                Product = item.Product,
+                Quantity = item.Quantity,
+                DateCreated = item.DateCreated
+            })
+            .ToList();
 
-      // DbContext 'ShoppingCartActions' is injected via DI
+        if (HttpContextAccessor.HttpContext?.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase) == true)
+        {
+            foreach (var item in workingItems.ToList())
+            {
+                var qtyValue = Request.Form[$"qty_{item.ProductId}"];
+                var removeValue = Request.Form[$"remove_{item.ProductId}"];
+                var removeItem = string.Equals(removeValue, "on", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(removeValue, "true", StringComparison.OrdinalIgnoreCase);
 
         decimal cartTotal = 0;
         cartTotal = usersShoppingCart.GetTotal();
@@ -73,18 +59,16 @@ namespace WingtipToys
           // Display Total.
           _lblTotal_Text = String.Format("{0:c}", cartTotal);
         }
-        else
-        {
-          _LabelTotalText_Text = "";
-          _lblTotal_Text = "";
-          ShoppingCartTitle = "Shopping Cart is Empty";
-          UpdateBtn?.Visible = false;
-          CheckoutImageBtn?.Visible = false;
-        }
-      
+
+        CartItems = workingItems;
+        var total = CartItems.Sum(item => Convert.ToDecimal(item.Product?.UnitPrice ?? 0) * item.Quantity);
+        TotalText = total.ToString("C");
+        ShoppingCartTitle = CartItems.Count == 0 ? "Shopping Cart is Empty" : "Shopping Cart";
+        Title = ShoppingCartTitle;
+        return Task.CompletedTask;
     }
 
-    public List<CartItem> GetShoppingCartItems()
+    private string GetOrCreateCartId()
     {
 
       return usersShoppingCart.GetCartItems();
@@ -99,17 +83,7 @@ namespace WingtipToys
         ShoppingCartActions.ShoppingCartUpdates[] cartUpdates = new ShoppingCartActions.ShoppingCartUpdates[CartList.Rows.Count];
         for (int i = 0; i < CartList.Rows.Count; i++)
         {
-          IOrderedDictionary rowValues = new OrderedDictionary();
-          rowValues = GetValues(CartList.Rows[i]);
-          cartUpdates[i].ProductId = Convert.ToInt32(rowValues["ProductID"]);
-
-          CheckBox cbRemove = new CheckBox();
-          cbRemove = (CheckBox)CartList.Rows[i].FindControl("Remove");
-          cartUpdates[i].RemoveItem = cbRemove.Checked;
-
-          TextBox quantityTextBox = new TextBox();
-          quantityTextBox = (TextBox)CartList.Rows[i].FindControl("PurchaseQuantity");
-          cartUpdates[i].PurchaseQuantity = Convert.ToInt16(quantityTextBox.Text.ToString());
+            return "anonymous-cart";
         }
         usersShoppingCart.UpdateShoppingCartDatabase(cartId, cartUpdates);
         _lblTotal_Text = String.Format("{0:c}", usersShoppingCart.GetTotal());
@@ -117,23 +91,21 @@ namespace WingtipToys
       
     }
 
-    public static IOrderedDictionary GetValues(GridViewRow row)
-    {
-      IOrderedDictionary values = new OrderedDictionary();
-      foreach (DataControlFieldCell cell in row.Cells)
-      {
-        if (cell.Visible)
+        if (context.Request.Cookies.TryGetValue("CartSessionId", out var existing) && !string.IsNullOrWhiteSpace(existing))
         {
-          // Extract values from the cell.
-          cell.ContainingField.ExtractValuesFromCell(values, cell, row.RowState, true);
+            return existing;
         }
-      }
-      return values;
-    }
 
-    protected void UpdateBtn_Click(EventArgs e)
-    {
-      UpdateCartItems();
+        var cartId = Guid.NewGuid().ToString("N");
+        context.Response.Cookies.Append("CartSessionId", cartId, new CookieOptions
+        {
+            HttpOnly = true,
+            IsEssential = true,
+            SameSite = SameSiteMode.Lax,
+            Secure = context.Request.IsHttps
+        });
+
+        return cartId;
     }
 
     protected void CheckoutBtn_Click(EventArgs e)
