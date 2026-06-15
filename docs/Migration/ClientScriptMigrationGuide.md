@@ -193,7 +193,7 @@ protected override void OnInitialized()
 }
 ```
 
-See [ClientScriptShim (Zero-Rewrite Path)](#-recommended-clientscriptshim-zero-rewrite-path) above for full details.
+See [ClientScriptShim (Zero-Rewrite Path)](#recommended-clientscriptshim-zero-rewrite-path) above for full details.
 
 ### Alternative Approach: Modern IJSRuntime Rewrite
 
