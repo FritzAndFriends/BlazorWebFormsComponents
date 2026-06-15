@@ -50,7 +50,9 @@ protected WebFormsPageBase()
 		builder.AddAttribute(1, nameof(CascadingValue<object>.Name), CascadingParameterName);
 		builder.AddAttribute(2, nameof(CascadingValue<object>.Value), this);
 		builder.AddAttribute(3, nameof(CascadingValue<object>.ChildContent), _baseRenderFragment);
-		builder.AddAttribute(4, nameof(CascadingValue<object>.IsFixed), true);
+		// Do not mark the page cascade as fixed. During enhanced navigation the
+		// renderer can reuse this CascadingValue component across route transitions,
+		// and descendants must observe the updated page instance.
 		builder.CloseComponent();
 	}
 }

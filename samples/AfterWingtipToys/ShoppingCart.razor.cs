@@ -11,11 +11,24 @@ namespace WingtipToys
     [Inject] private CartStore CartStore { get; set; } = default!;
     [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = default!;
 
-    private List<CartItem> CartItems { get; set; } = [];
-    private string ShoppingCartTitle { get; set; } = "Shopping Cart";
-    private string TotalText { get; set; } = "$0.00";
+    private string ShoppingCartTitle = ""; // TODO: HTML server control field — render via @ShoppingCartTitle or bind in markup
+    // --- Request.Form Migration ---
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
+    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
+    // Form keys found: key
+    // For non-page classes, inject RequestShim via DI.
 
-    protected override Task OnParametersSetAsync()
+    // --- Response.Redirect Migration ---
+    // TODO(bwfc-navigation): Response.Redirect() works via ResponseShim on WebFormsPageBase. Handles ~/ and .aspx automatically.
+    // For non-page classes, inject ResponseShim via DI.
+
+    private GridView<CartItem> CartList = default!;
+    private ImageButton CheckoutImageBtn = default!;
+    private Button UpdateBtn = default!;
+    [Inject]
+    protected ShoppingCartActions usersShoppingCart { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
     {
         var cartId = GetOrCreateCartId();
         var workingItems = CartStore.GetCart(cartId)
@@ -39,19 +52,12 @@ namespace WingtipToys
                 var removeItem = string.Equals(removeValue, "on", StringComparison.OrdinalIgnoreCase)
                     || string.Equals(removeValue, "true", StringComparison.OrdinalIgnoreCase);
 
-                if (removeItem)
-                {
-                    workingItems.Remove(item);
-                    continue;
-                }
-
-                if (int.TryParse(qtyValue, out var quantity) && quantity > 0)
-                {
-                    item.Quantity = quantity;
-                }
-            }
-
-            CartStore.UpdateCart(cartId, workingItems);
+        decimal cartTotal = 0;
+        cartTotal = usersShoppingCart.GetTotal();
+        if (cartTotal > 0)
+        {
+          // Display Total.
+          _lblTotal_Text = String.Format("{0:c}", cartTotal);
         }
 
         CartItems = workingItems;
@@ -64,11 +70,26 @@ namespace WingtipToys
 
     private string GetOrCreateCartId()
     {
-        var context = HttpContextAccessor.HttpContext;
-        if (context is null)
+
+      return usersShoppingCart.GetCartItems();
+    }
+
+    public List<CartItem> UpdateCartItems()
+    {
+      // DbContext 'ShoppingCartActions' is injected via DI
+
+        String cartId = usersShoppingCart.GetCartId();
+
+        ShoppingCartActions.ShoppingCartUpdates[] cartUpdates = new ShoppingCartActions.ShoppingCartUpdates[CartList.Rows.Count];
+        for (int i = 0; i < CartList.Rows.Count; i++)
         {
             return "anonymous-cart";
         }
+        usersShoppingCart.UpdateShoppingCartDatabase(cartId, cartUpdates);
+        _lblTotal_Text = String.Format("{0:c}", usersShoppingCart.GetTotal());
+        return usersShoppingCart.GetCartItems();
+      
+    }
 
         if (context.Request.Cookies.TryGetValue("CartSessionId", out var existing) && !string.IsNullOrWhiteSpace(existing))
         {
@@ -91,7 +112,7 @@ namespace WingtipToys
     {
       // DbContext 'ShoppingCartActions' is injected via DI
 
-        Session["payment_amt"] = _shoppingCartActions.GetTotal();
+        Session["payment_amt"] = usersShoppingCart.GetTotal();
       
       Response.Redirect("Checkout/CheckoutStart.aspx");
     }

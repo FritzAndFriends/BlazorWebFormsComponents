@@ -10,8 +10,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BlazorWebFormsComponents\BlazorWebFormsComponents.csproj" />
+    <ProjectReference Include="..\..\src\BlazorAjaxToolkitComponents\BlazorAjaxToolkitComponents.csproj" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
 
   <Import Project="..\..\src\BlazorWebFormsComponents\build\Fritz.BlazorWebFormsComponents.targets" />

@@ -1,13 +1,18 @@
 @page "/Account/Login"
-@page "/Login"
-<PageTitle>Log in</PageTitle>
-<Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-    <h1>Login</h1>
-    @* TODO(bwfc-identity): Wire this account page to ASP.NET Core Identity or your app's authentication service. *@
-    @* TODO(bwfc-identity): Recreate validation and submit handling with EditForm, minimal APIs, or an equivalent SSR-safe endpoint. *@
-    @if (Registered.GetValueOrDefault() != 0)
+<h1>Login</h1>
+@* TODO(bwfc-identity): Wire this account page to ASP.NET Core Identity or your app's authentication service. *@
+@* TODO(bwfc-identity): Recreate validation and submit handling with EditForm, minimal APIs, or an equivalent SSR-safe endpoint. *@
+@if (Registered.GetValueOrDefault() != 0)
+{
+    <p class="text-success">Registration succeeded. Please log in.</p>
+}
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <p class="text-danger">@Error</p>
+}
+<form method="post" action="/Account/LoginHandler" class="form-horizontal" @formname="LoginForm">
+    <AntiforgeryToken />
+    @if (!string.IsNullOrWhiteSpace(ReturnUrl))
     {
         <p class="text-success">Registration succeeded. Please log in.</p>
     }

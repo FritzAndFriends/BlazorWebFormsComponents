@@ -165,6 +165,7 @@ public class ScaffoldingTests : IDisposable
         Assert.Contains("_framework/blazor.web.js", appRazor);
         Assert.Contains("_content/Fritz.BlazorWebFormsComponents/js/Basepage.js", appRazor);
         Assert.Contains("Generated for .NET 10 static SSR migration output", appRazor);
+        Assert.DoesNotContain(@"data-enhance-nav=""false""", appRazor);
     }
 
     [Fact]

@@ -21,11 +21,12 @@
 using System;
 using WingtipToys.Models;
 
+using WingtipToys.Logic;
 using BlazorWebFormsComponents.Identity;
 
 namespace WingtipToys.Account
 {
-    public partial class Confirm
+    public partial class Confirm : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -38,10 +39,6 @@ namespace WingtipToys.Account
     private PlaceHolder errorPanel = default!;
     private HyperLink login = default!;
     private PlaceHolder successPanel = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         protected string StatusMessage
         {
             get;
@@ -61,12 +58,12 @@ namespace WingtipToys.Account
                 var result = manager.ConfirmEmail(userId, code);
                 if (result.Succeeded)
                 {
-                    successPanel.Visible = true;
+                    successPanel?.Visible = true;
                     return;
                 }
             }
-            successPanel.Visible = false;
-            errorPanel.Visible = true;
+            successPanel?.Visible = false;
+            errorPanel?.Visible = true;
         }
     }
 }

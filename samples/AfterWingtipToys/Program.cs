@@ -37,6 +37,14 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
+
+
+// Service classes discovered with constructor injection — registered for DI
+builder.Services.AddScoped<AddProducts>();
+builder.Services.AddScoped<ExceptionUtility>();
+builder.Services.AddScoped<NVPAPICaller>();
+builder.Services.AddScoped<RoleActions>();
+builder.Services.AddScoped<ShoppingCartActions>();
 builder.Services.AddBlazorWebFormsComponents();
 builder.Services.AddSingleton<CartStore>();
 

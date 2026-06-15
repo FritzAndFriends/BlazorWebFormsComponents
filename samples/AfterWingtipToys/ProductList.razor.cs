@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
+using WingtipToys.Logic;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
@@ -35,9 +36,10 @@ namespace WingtipToys
     [Parameter, SupplyParameterFromQuery(Name = "categoryName")]
     public string? CategoryName { get; set; }
 
-    private IReadOnlyList<Product> Products { get; set; } = [];
+    [Inject]
+    protected ProductContext _productContext { get; set; } = default!;
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
         await base.OnParametersSetAsync();
         Title = "Products";
@@ -55,7 +57,29 @@ namespace WingtipToys
             query = query.Where(product => product.Category != null && product.Category.CategoryName == CategoryName);
         }
 
-        Products = await query.OrderBy(product => product.ProductName).ToListAsync();
+      if (categoryId.HasValue && categoryId > 0)
+      {
+        query = query.Where(p => p.CategoryID == categoryId);
+      }
+
+      if (!String.IsNullOrEmpty(categoryName))
+      {
+        query = query.Where(p =>
+                            String.Compare(p.Category.CategoryName,
+                            categoryName) == 0);
+      }
+      return query;
+    }
+  
+    [Parameter, SupplyParameterFromQuery(Name = "id")] public int? CategoryId { get; set; }
+
+    private global::System.Linq.IQueryable<Product> GetProductsQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        totalRowCount = 0;
+        // TODO(bwfc-query-details): Wrapper delegates to the code-behind GetProducts method.
+        var query = GetProducts(CategoryId, categoryName);
+        if (query != null) totalRowCount = query.Count();
+        return query ?? global::System.Linq.Enumerable.Empty<Product>().AsQueryable();
     }
 }
 }

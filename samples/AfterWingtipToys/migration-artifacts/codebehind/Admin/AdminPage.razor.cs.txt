@@ -66,10 +66,6 @@ namespace WingtipToys.Admin
     private RequiredFieldValidator<object> RequiredFieldValidator2 = default!;
     private RequiredFieldValidator<object> RequiredFieldValidator3 = default!;
     private RequiredFieldValidator<object> RequiredFieldValidator4 = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
     [Inject]
     protected ProductContext _productContext { get; set; } = default!;
 

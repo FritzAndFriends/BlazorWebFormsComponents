@@ -1,0 +1,99 @@
+@page "/migration/findcontrol"
+
+<PageTitle>FindControl Runtime Demo</PageTitle>
+
+<h2>FindControl — Runtime Support</h2>
+
+<p>BWFC provides a runtime <code>FindControl(string id)</code> method on every component,
+   matching the Web Forms API. Your existing code-behind that uses <code>FindControl</code>
+   compiles and runs <strong>without modification</strong>.</p>
+
+<hr />
+
+<h3>1. Direct Child Lookup</h3>
+<div class="card mt-3" data-testid="direct-lookup-demo">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Code</h5>
+                <pre><code>TextBox box = (TextBox)panel.FindControl("DirectBox");
+box.Text = "Found it!";</code></pre>
+            </div>
+            <div class="col-md-6">
+                <h5>Result</h5>
+                <Panel @ref="_directParent" ID="DirectParent">
+                    <TextBox ID="DirectBox" Text="@_directBoxText" />
+                </Panel>
+                <p class="mt-2 text-muted" data-testid="direct-result">@_directResult</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-4">2. Nested / Recursive Lookup</h3>
+<div class="card mt-3" data-testid="nested-lookup-demo">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Code</h5>
+                <pre><code>// Search through nested panels
+TextBox nested = (TextBox)outerPanel.FindControl("NestedBox");
+nested.Text = "Found deep!";</code></pre>
+            </div>
+            <div class="col-md-6">
+                <h5>Result</h5>
+                <Panel @ref="_outerPanel" ID="OuterPanel">
+                    <Panel ID="InnerPanel">
+                        <TextBox ID="NestedBox" Text="@_nestedBoxText" />
+                    </Panel>
+                </Panel>
+                <p class="mt-2 text-muted" data-testid="nested-result">@_nestedResult</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-4">3. Chained Lookup</h3>
+<div class="card mt-3" data-testid="chained-lookup-demo">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Code</h5>
+                <pre><code>// Chain through containers
+var child = parent.FindControl("ChainChild");
+Label lbl = (Label)child.FindControl("ChainLabel");
+lbl.Text = "Chained!";</code></pre>
+            </div>
+            <div class="col-md-6">
+                <h5>Result</h5>
+                <Panel @ref="_chainParent" ID="ChainParent">
+                    <Panel ID="ChainChild">
+                        <Label ID="ChainLabel" Text="@_chainLabelText" />
+                    </Panel>
+                </Panel>
+                <p class="mt-2 text-muted" data-testid="chained-result">@_chainedResult</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<h3 class="mt-4">4. Case-Insensitive Matching</h3>
+<div class="card mt-3" data-testid="case-insensitive-demo">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Code</h5>
+                <pre><code>// ID="MixedCaseBox" found with lowercase
+TextBox box = (TextBox)panel.FindControl("mixedcasebox");
+box.Text = "Case doesn't matter!";</code></pre>
+            </div>
+            <div class="col-md-6">
+                <h5>Result</h5>
+                <Panel @ref="_caseParent" ID="CaseParent">
+                    <TextBox ID="MixedCaseBox" Text="@_caseBoxText" />
+                </Panel>
+                <p class="mt-2 text-muted" data-testid="case-result">@_caseResult</p>
+            </div>
+        </div>
+    </div>
+</div>

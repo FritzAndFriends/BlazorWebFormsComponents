@@ -2,17 +2,11 @@
 // TODO: Reason — OWIN/bootstrap wiring does not belong in the generated Blazor SSR compile surface.
 // TODO: Move or rewrite only the relevant pieces into Program.cs, services, middleware, or application code.
 
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using System.Web;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.AspNet.Identity.Owin;
-using Microsoft.Owin.Security;
-using WingtipToys.Models;
-
-namespace WingtipToys.Models
+using BlazorWebFormsComponents.Identity;
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+namespace WingtipToys.Models;
+public partial class ApplicationUser
 {
     // You can add User data for the user by adding more properties to your User class, please visit http://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
     public class ApplicationUser : IdentityUser

@@ -1,34 +1,13 @@
 @page "/"
-<PageTitle>Wingtip Toys</PageTitle>
-<Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-            <div class="jumbotron">
-                <h1>Wingtip Toys</h1>
-                <p class="lead">Wingtip Toys can help you find the perfect gift.</p>
-                <p>We're all about transportation toys. Explore the catalog, view product details, and add items to your cart.</p>
-                <p><a class="btn btn-primary btn-lg" href="/ProductList">Shop Now</a></p>
-            </div>
+<WebFormsForm @formname="DefaultForm">
+    <AntiforgeryToken />
+<PageTitle>Welcome</PageTitle>
 
-            <h2>Featured Products</h2>
-            <ListView ItemType="Product" Items="@FeaturedProducts">
-                <LayoutTemplate Context="items">
-                    <div class="row">@items</div>
-                </LayoutTemplate>
-                <ItemTemplate Context="Item">
-                    <div class="col-sm-3">
-                        <div class="thumbnail">
-                            <a href="/ProductDetails?productId=@Item.ProductID">
-                                <img src="/Catalog/Images/Thumbs/@Item.ImagePath" alt="@Item.ProductName" style="width:100%;height:160px;object-fit:contain" />
-                            </a>
-                            <div class="caption">
-                                <h4><a href="/ProductDetails?productId=@Item.ProductID">@Item.ProductName</a></h4>
-                                <p>@Item.Description</p>
-                            </div>
-                        </div>
-                    </div>
-                </ItemTemplate>
-            </ListView>
-        </Content>
-    </ChildComponents>
-</Site>
+        <h1>@(Title).</h1>
+        <h2>Wingtip Toys can help you find the perfect gift.</h2>
+        <p class="lead">We're all about transportation toys. You can order 
+                any of our toys today. Each toy listing has detailed 
+                information to help you choose the right toy.</p>
+
+
+</WebFormsForm>

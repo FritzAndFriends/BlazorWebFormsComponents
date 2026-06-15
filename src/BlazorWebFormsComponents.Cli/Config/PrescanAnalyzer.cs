@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Analysis;
+using BlazorWebFormsComponents.Cli.Scaffolding;
 
 namespace BlazorWebFormsComponents.Cli.Config;
 
@@ -25,6 +27,35 @@ public class PrescanAnalyzer
         new("BWFC017", "ClientScript", @"(Page\.)?ClientScript\.(RegisterStartupScript|RegisterClientScriptBlock|RegisterClientScriptInclude|GetPostBackEventReference)\s*\(", "ClientScript calls — use ClientScriptShim"),
         new("BWFC018", "Cache Access", @"\bCache\s*\[", "Cache dictionary access — use CacheShim on WebFormsPageBase")
     ];
+
+    private readonly WebConfigAssemblyParser _webConfigAssemblyParser;
+    private readonly AscxDescriptorAnalyzer _ascxDescriptorAnalyzer;
+    private readonly CodeOnlyServerControlAnalyzer _codeOnlyServerControlAnalyzer;
+
+    public PrescanAnalyzer()
+        : this(new WebConfigAssemblyParser(), new AscxDescriptorAnalyzer(), new CodeOnlyServerControlAnalyzer())
+    {
+    }
+
+    public PrescanAnalyzer(AscxDescriptorAnalyzer ascxDescriptorAnalyzer)
+        : this(new WebConfigAssemblyParser(), ascxDescriptorAnalyzer, new CodeOnlyServerControlAnalyzer())
+    {
+    }
+
+    public PrescanAnalyzer(WebConfigAssemblyParser webConfigAssemblyParser, AscxDescriptorAnalyzer ascxDescriptorAnalyzer)
+        : this(webConfigAssemblyParser, ascxDescriptorAnalyzer, new CodeOnlyServerControlAnalyzer())
+    {
+    }
+
+    public PrescanAnalyzer(
+        WebConfigAssemblyParser webConfigAssemblyParser,
+        AscxDescriptorAnalyzer ascxDescriptorAnalyzer,
+        CodeOnlyServerControlAnalyzer codeOnlyServerControlAnalyzer)
+    {
+        _webConfigAssemblyParser = webConfigAssemblyParser;
+        _ascxDescriptorAnalyzer = ascxDescriptorAnalyzer;
+        _codeOnlyServerControlAnalyzer = codeOnlyServerControlAnalyzer;
+    }
 
     public PrescanResult Analyze(string sourcePath)
     {
@@ -84,6 +115,14 @@ public class PrescanAnalyzer
         }
 
         result.FilesWithMatches = result.Files.Count;
+        result.CustomControlRegistrations = _webConfigAssemblyParser.ParseProject(sourcePath);
+        result.CodeOnlyServerControls = _codeOnlyServerControlAnalyzer
+            .Analyze(sourcePath, result.CustomControlRegistrations)
+            .ToList();
+        result.AscxDescriptors = RuntimeDetectionFiles.EnumerateFiles(sourcePath, ".ascx")
+            .Select(ascxPath => _ascxDescriptorAnalyzer.AnalyzeControl(ascxPath))
+            .OrderBy(static descriptor => descriptor.ControlName, StringComparer.OrdinalIgnoreCase)
+            .ToList();
         return result;
     }
 
@@ -122,6 +161,10 @@ public class PrescanResult
     public int TotalFiles { get; set; }
     public int FilesWithMatches { get; set; }
     public int TotalMatches { get; set; }
+    public ControlRegistrationInfo CustomControlRegistrations { get; set; } = new();
+    /// <summary>Code-only server controls detected in the source project — the "Custom Controls Found" section.</summary>
+    public List<CodeOnlyServerControlDescriptor> CodeOnlyServerControls { get; set; } = [];
+    public List<AscxDescriptor> AscxDescriptors { get; set; } = [];
 }
 
 public sealed record PrescanSummary(string Name, string Description, int TotalHits, int FileCount);

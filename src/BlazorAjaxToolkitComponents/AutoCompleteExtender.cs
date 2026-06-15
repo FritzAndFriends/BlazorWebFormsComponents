@@ -68,6 +68,12 @@ public class AutoCompleteExtender : BaseExtenderComponent
 	public string DelimiterCharacters { get; set; } = string.Empty;
 
 	/// <summary>
+	/// Whether to cache completion results on the client. Default is true.
+	/// </summary>
+	[Parameter]
+	public bool EnableCaching { get; set; } = true;
+
+	/// <summary>
 	/// Whether to automatically select the first item in the completion list.
 	/// </summary>
 	[Parameter]

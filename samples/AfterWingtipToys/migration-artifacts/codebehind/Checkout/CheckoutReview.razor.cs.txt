@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
 
+using WingtipToys.Logic;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys.Checkout
 {
@@ -52,11 +53,9 @@ namespace WingtipToys.Checkout
 
     private Button CheckoutConfirm = default!;
     private GridView<object> OrderItemList = default!;
+    private object _OrderItemList_DataSource = null!;
     private DetailsView<object> ShipInfo = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
+    private object _ShipInfo_DataSource = null!;
     [Inject]
     protected ShoppingCartActions _shoppingCartActions { get; set; } = default!;
 
@@ -144,11 +143,11 @@ namespace WingtipToys.Checkout
               // Display Order information.
               List<Order> orderList = new List<Order>();
               orderList.Add(myOrder);
-              ShipInfo?.DataSource = orderList;
+            _ShipInfo_DataSource = orderList;
               ShipInfo?.DataBind();
 
               // Display OrderDetails.
-              OrderItemList?.DataSource = myOrderList;
+            _OrderItemList_DataSource = myOrderList;
               OrderItemList?.DataBind();
 
           }

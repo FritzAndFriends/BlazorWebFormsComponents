@@ -1,4 +1,6 @@
 @page "/TC17-BindExpression"
+<WebFormsForm @formname="TC17BindExpressionForm">
+    <AntiforgeryToken />
 <PageTitle>Bind Test</PageTitle>
 <FormView ItemType="object" id="FormView1">
     <EditItemTemplate Context="Item">
@@ -7,3 +9,5 @@
         <DropDownList ItemType="object" id="ddlCategory" @bind-Value="Item.CategoryId" />
     </EditItemTemplate>
 </FormView>
+
+</WebFormsForm>

@@ -33,6 +33,8 @@ using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
 
+using WingtipToys.Logic;
+using Microsoft.AspNetCore.Components;
 namespace WingtipToys.Checkout
 {
   public partial class CheckoutComplete
@@ -50,10 +52,11 @@ namespace WingtipToys.Checkout
     // For non-page classes, inject ResponseShim via DI.
 
     private Button Continue = default!;
-    private Label TransactionId = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+    [Inject]
+    protected ShoppingCartActions _shoppingCartActions { get; set; } = default!;
+
+    [Inject]
+    protected ProductContext _db { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {

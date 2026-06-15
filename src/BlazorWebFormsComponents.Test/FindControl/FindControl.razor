@@ -1,0 +1,113 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+	[Fact]
+	public void FindControl_DirectChild_ReturnsChild()
+	{
+		var cut = Render(@<Panel ID="parent">
+			<TextBox ID="SearchBox" />
+		</Panel>);
+		var panel = cut.FindComponent<Panel>().Instance;
+		var textBox = cut.FindComponent<TextBox>().Instance;
+
+		var found = panel.FindControl("SearchBox");
+
+		found.ShouldNotBeNull();
+		found.ShouldBe(textBox);
+		found.ID.ShouldBe("SearchBox");
+	}
+
+	[Fact]
+	public void FindControl_NestedChild_ReturnsDescendant()
+	{
+		var cut = Render(@<Panel ID="parent">
+			<Panel ID="InnerPanel">
+				<TextBox ID="NestedBox" />
+			</Panel>
+		</Panel>);
+		var panels = cut.FindComponents<Panel>();
+		var parent = panels[0].Instance;
+		var nestedTextBox = cut.FindComponent<TextBox>().Instance;
+
+		var found = parent.FindControl("NestedBox");
+
+		found.ShouldNotBeNull();
+		found.ShouldBe(nestedTextBox);
+		found.ID.ShouldBe("NestedBox");
+	}
+
+	[Fact]
+	public void FindControl_CaseInsensitive_Matches()
+	{
+		var cut = Render(@<Panel ID="parent">
+			<TextBox ID="SearchBox" />
+		</Panel>);
+		var panel = cut.FindComponent<Panel>().Instance;
+		var textBox = cut.FindComponent<TextBox>().Instance;
+
+		var found = panel.FindControl("searchbox");
+
+		found.ShouldNotBeNull();
+		found.ShouldBe(textBox);
+		found.ID.ShouldBe("SearchBox");
+	}
+
+	[Fact]
+	public void FindControl_CastToConcreteType_Works()
+	{
+		var cut = Render(@<Panel ID="parent">
+			<TextBox ID="SearchBox" />
+		</Panel>);
+		var panel = cut.FindComponent<Panel>().Instance;
+		var textBox = cut.FindComponent<TextBox>().Instance;
+
+		var found = (TextBox)panel.FindControl("SearchBox");
+
+		found.ShouldNotBeNull();
+		found.ShouldBe(textBox);
+		found.ShouldBeOfType<TextBox>();
+	}
+
+	[Fact]
+	public void FindControl_ChainedLookup_Works()
+	{
+		var cut = Render(@<Panel ID="parent">
+			<Panel ID="InnerPanel">
+				<TextBox ID="NestedBox" />
+			</Panel>
+		</Panel>);
+		var parent = cut.FindComponents<Panel>()[0].Instance;
+		var nestedTextBox = cut.FindComponent<TextBox>().Instance;
+
+		var found = parent.FindControl("InnerPanel").FindControl("NestedBox");
+
+		found.ShouldNotBeNull();
+		found.ShouldBe(nestedTextBox);
+		found.ID.ShouldBe("NestedBox");
+	}
+
+	[Fact]
+	public void FindControl_MissingId_ReturnsNull()
+	{
+		var cut = Render(@<Panel ID="parent">
+			<TextBox ID="SearchBox" />
+		</Panel>);
+		var panel = cut.FindComponent<Panel>().Instance;
+
+		var found = panel.FindControl("NonExistent");
+
+		found.ShouldBeNull();
+	}
+
+	[Fact]
+	public void FindControl_NullOrEmpty_ReturnsNull()
+	{
+		var cut = Render(@<Panel ID="parent">
+			<TextBox ID="SearchBox" />
+		</Panel>);
+		var panel = cut.FindComponent<Panel>().Instance;
+
+		panel.FindControl(null).ShouldBeNull();
+		panel.FindControl(string.Empty).ShouldBeNull();
+	}
+}

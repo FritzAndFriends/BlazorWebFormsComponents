@@ -31,6 +31,7 @@ using System.Linq;
 using ContosoUniversity.Models;
 using ContosoUniversity.BLL;
 
+using Microsoft.AspNetCore.Components;
 namespace ContosoUniversity
 {
     public partial class Instructors : WebFormsPageBase
@@ -44,19 +45,16 @@ namespace ContosoUniversity
     // For non-page classes, inject RequestShim via DI.
 
     private GridView<object> grvInstructors = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+    private object _grvInstructors_DataSource = null!;
+    [Inject]
+    protected Instructors_Logic instructorsLogic { get; set; } = default!;
      
-        private Instructors_Logic instructorsLogic;
-            
-        protected override async Task OnInitializedAsync()
+protected override async Task OnInitializedAsync()
         {
-            // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
-            await base.OnInitializedAsync();
+    // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
+    await base.OnInitializedAsync();
          
-            instructorsLogic = new Instructors_Logic();              
-            this.grvInstructors?.DataSource = instructorsLogic.getInstructors();
+            _grvInstructors_DataSource = instructorsLogic.getInstructors();
 
                         // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
             ViewState["SortDirection"] = "desc";
@@ -87,7 +85,7 @@ namespace ContosoUniversity
             // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
             if (firstRender)
             {
-                this.            }
+            }
         }     
     }
 }

@@ -21,12 +21,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WingtipToys.Logic;
 using BlazorWebFormsComponents.Identity;
 using UserLoginInfo = BlazorWebFormsComponents.Identity.UserLoginInfo;
 
 namespace WingtipToys.Account
 {
-    public partial class ManageLogins
+    public partial class ManageLogins : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -41,10 +42,6 @@ namespace WingtipToys.Account
     // For non-page classes, inject ResponseShim via DI.
 
     private PlaceHolder successMessage = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
-
         protected string SuccessMessage
         {
             get;
@@ -70,7 +67,7 @@ namespace WingtipToys.Account
             CanRemoveExternalLogins = manager.GetLogins(User.Identity.GetUserId()).Count() > 1;
 
             SuccessMessage = String.Empty;
-            successMessage.Visible = !String.IsNullOrEmpty(SuccessMessage);
+            successMessage?.Visible = !String.IsNullOrEmpty(SuccessMessage);
         }
 
         public IEnumerable<UserLoginInfo> GetLogins()

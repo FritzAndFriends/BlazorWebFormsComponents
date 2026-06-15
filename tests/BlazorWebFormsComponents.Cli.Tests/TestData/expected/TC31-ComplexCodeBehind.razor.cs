@@ -37,7 +37,7 @@
 // See: https://learn.microsoft.com/aspnet/core/blazor/state-management
 
 using System;
-// using System.Configuration; // BWFC provides ConfigurationManager shim
+using ConfigurationManager = BlazorWebFormsComponents.ConfigurationManager;
 namespace ContosoAdmin
 {
     public partial class TC31_ComplexCodeBehind : WebFormsPageBase

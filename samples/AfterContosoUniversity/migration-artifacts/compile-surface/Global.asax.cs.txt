@@ -4,9 +4,8 @@
 
 // Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
 // TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
-
 namespace ContosoUniversity;
-
 public partial class Global
 {
+    protected void Application_Start(object sender, EventArgs e) { }
 }

@@ -1,0 +1,55 @@
+@* TODO(bwfc-master-page): Review shell scripts, bundle references, and auth/cart chrome for SSR-safe migration. *@
+
+<MasterPage>
+<Head>
+    <title>Zava Loan Portal</title>
+    <style>
+        body {
+            margin: 0;
+            background: #cfd7e2;
+            font-family: Verdana, Arial;
+            font-size: 12px;
+        }
+
+        a {
+            color: #103d73;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</Head>
+<ChildContent>
+    @ChildComponents
+        <ScriptManager id="smMain" @ref="smMain" />
+        <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+                <td style="height: 72px; background: #1e4f8a; color: #fff; padding-left: 18px; background-image: linear-gradient(#3a6ea8, #1e4f8a);">
+                    <span style="font-size: 24px; font-weight: bold;">Zava Loan Portal</span>
+                    <br />
+                    <span style="font-size: 11px;">Legacy Loan Origination Front Office</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="background: #b8c6d8; border-top: 1px solid #8ea7c2; border-bottom: 1px solid #8ea7c2; padding: 6px 10px;">
+                    <a href="/" style="font-weight: bold; color: #1e4f8a;">&#9664; ZavaBank Portal</a>&nbsp;|&nbsp;
+                    <HyperLink id="lnkHome" @ref="lnkHome" NavigateUrl="/Default.aspx" Text="Home" />&nbsp;|&nbsp;
+                    <HyperLink id="lnkLogin" @ref="lnkLogin" NavigateUrl="/Login.aspx" Text="Login" />&nbsp;|&nbsp;
+                    <HyperLink id="lnkLogout" @ref="lnkLogout" NavigateUrl="/Logout.aspx" Text="Logout" />
+                    <span style="float: right;">
+                        <span>@_lblUserStatus_Text</span>
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <ContentPlaceHolder id="MainContentPlaceHolder" @ref="MainContentPlaceHolder" />
+                </td>
+            </tr>
+        </table>
+    
+@ChildContent
+</ChildContent>
+</MasterPage>

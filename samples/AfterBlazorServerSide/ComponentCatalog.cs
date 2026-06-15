@@ -63,6 +63,8 @@ public static class ComponentCatalog
             Keywords: new[] { "radio", "options", "select" }),
         new("Table", "Editor", "/ControlSamples/Table", "Programmatically created HTML table",
             Keywords: new[] { "grid", "rows", "cells" }),
+        new("TextBox", "Editor", "/ControlSamples/TextBox", "Single-line, multi-line, and password text input control",
+            Keywords: new[] { "input", "text", "password", "multiline", "textarea", "email", "number", "placeholder" }),
 
         // Data Controls
         new("Calendar", "Data", "/ControlSamples/Calendar", "Interactive calendar for date selection",
@@ -118,6 +120,8 @@ public static class ComponentCatalog
         new("TreeView", "Navigation", "/ControlSamples/TreeView", "Hierarchical tree navigation control",
             new[] { "Accessibility", "ArrowsImages", "BulletImages", "BulletsNoExpand", "ExpandCollapse", "ImageAndConfig", "Images", "Selection", "ShowLines", "SiteMapDataSource", "XmlDataSource" },
             new[] { "tree", "hierarchy", "expand", "collapse" }),
+        new("Wizard", "Navigation", "/ControlSamples/Wizard", "Multi-step wizard control for guided navigation",
+            Keywords: new[] { "wizard", "steps", "multi-step", "navigation" }),
 
         // Login Controls
         new("ChangePassword", "Login", "/ControlSamples/ChangePassword", "Form for changing user password",
@@ -206,6 +210,10 @@ public static class ComponentCatalog
             Keywords: new[] { "ispostback", "postback", "guard", "httpcontext", "lifecycle", "migration", "shim" }),
         new("PostBack Demo", "Migration Helpers", "/ControlSamples/PostBackDemo", "GetPostBackEventReference, GetPostBackClientHyperlink, and ScriptManager.GetCurrent demos",
             Keywords: new[] { "postback", "dopostback", "scriptmanager", "clientscript", "hyperlink", "callback", "migration", "shim" }),
+        new("FindControl", "Migration Helpers", "/migration/findcontrol", "Runtime FindControl support: direct lookup, nested search, chained calls, case-insensitive matching",
+            Keywords: new[] { "findcontrol", "controls", "lookup", "cast", "panel", "naming", "migration", "runtime" }),
+        new("Custom WebControl", "Migration Helpers", "/ControlSamples/Migration/CustomWebControl", "Custom WebControl migration: RenderContents, TagKey, AddAttributesToRender with HtmlTextWriter shim",
+            Keywords: new[] { "webcontrol", "rendercontents", "htmltextwriter", "tagkey", "custom", "migration", "render" }),
 
         // Cross-Cutting / Base Properties
         new("BaseProperties", "Utility", "/ControlSamples/BaseProperties", "AccessKey, ToolTip, BackColor, ForeColor and other base class properties",

@@ -90,6 +90,11 @@ namespace BlazorWebFormsComponents.DataBinding
 
 		private IEnumerable<ItemType> GetDataSource(object dataSource)
 		{
+			if (dataSource is null)
+			{
+				return Enumerable.Empty<ItemType>();
+			}
+
 			if (dataSource is IEnumerable<ItemType> enumerableOfItemType)
 			{
 				return enumerableOfItemType;

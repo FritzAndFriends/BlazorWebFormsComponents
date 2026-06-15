@@ -25,22 +25,41 @@ using ContosoUniversity.Models;
 using ContosoUniversity.BLL;
 
 
+using ContosoUniversity.BLL;
+using Microsoft.AspNetCore.Components;
 namespace ContosoUniversity
 {
     public partial class About : WebFormsPageBase
     {
-    [Inject] private Enrollmet_Logic _enrollmetLogic { get; set; } = default!;
+    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
+
+    // --- Request.Form Migration ---
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
+    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
+    // Form keys found: key
+    // For non-page classes, inject RequestShim via DI.
 
     private GridView<object> EnrollmentsStat = default!;
+    [Inject]
+    protected Enrollmet_Logic _enrollmet_Logic { get; set; } = default!;
 
         protected override async Task OnInitializedAsync()
         {
+            // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
             await base.OnInitializedAsync();
+
+            
         }
 
+        // The return type can be changed to IEnumerable, however to support
+        // paging and sorting, the following parameters must be added:
+        //     int maximumRows
+        //     int startRowIndex
+        //     out int totalRowCount
+        //     string sortByExpression
         public Dictionary<string, int> EnrollmentsStat_GetData()
         {
-            return _enrollmetLogic.Get_Enrollment_ByDate();
+            return _enrollmet_Logic.Get_Enrollment_ByDate();
         }
     }
 }

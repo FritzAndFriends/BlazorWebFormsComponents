@@ -1,10 +1,53 @@
-// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
-// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
-namespace WingtipToys.Account;
-public partial class OpenAuthProviders
+// =============================================================================
+// TODO(bwfc-general): This code-behind was copied from Web Forms and needs manual migration.
+//
+// Common transforms needed (use the BWFC Copilot skill for assistance):
+//   TODO(bwfc-lifecycle): Page_Load / Page_Init → OnInitializedAsync / OnParametersSetAsync
+//   TODO(bwfc-lifecycle): Page_PreRender → OnAfterRenderAsync
+//   TODO(bwfc-ispostback): IsPostBack checks → remove or convert to state logic
+//   TODO(bwfc-viewstate): ViewState usage → component [Parameter] or private fields
+//   TODO(bwfc-session-state): Session/Cache access → auto-wired on WebFormsPageBase via SessionShim/CacheShim
+//   TODO(bwfc-navigation): Response.Redirect → auto-wired on WebFormsPageBase via ResponseShim
+//   TODO(bwfc-form): Request.Form["key"] → auto-wired on WebFormsPageBase via FormShim (use <WebFormsForm> for interactive mode)
+//   TODO(bwfc-server): Server.MapPath/HtmlEncode → auto-wired on WebFormsPageBase via ServerShim
+//   TODO(bwfc-config): ConfigurationManager.AppSettings → BWFC shim (call app.UseConfigurationManagerShim() in Program.cs)
+//   TODO(bwfc-general): ClientScript.RegisterStartupScript → auto-wired on WebFormsPageBase via ClientScriptShim
+//   TODO(bwfc-general): Event handlers (Button_Click, etc.) → convert to Blazor event callbacks
+//   TODO(bwfc-datasource): Data binding (DataBind, DataSource) → component parameters or OnInitialized
+//   TODO(bwfc-general): ScriptManager code-behind references → use ScriptManagerShim via ScriptManager.GetCurrent(this)
+//   TODO(bwfc-general): UpdatePanel markup preserved by BWFC (ContentTemplate supported) — remove only code-behind API calls
+//   TODO(bwfc-general): User controls → Blazor component references
+// =============================================================================
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using WingtipToys.Logic;
+namespace WingtipToys.Account
 {
-    private ListView<String> providerDetails = default!;
-    public string ReturnUrl { get; set; }
+    public partial class OpenAuthProviders
+    {
+    // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
-    public IEnumerable<string> GetProviderNames() => throw new NotImplementedException();
+    // --- Request.Form Migration ---
+    // TODO(bwfc-form): Request.Form calls work automatically via RequestShim on WebFormsPageBase.
+    // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
+    // Form keys found: key, provider
+    // For non-page classes, inject RequestShim via DI.
+
+    private ListView<String> providerDetails = default!;
+        protected override async Task OnInitializedAsync()
+        {
+            // Identity flow handled by generated ASP.NET Core endpoints.
+            return;
+        }
+
+        public string ReturnUrl { get; set; }
+
+        public IEnumerable<string> GetProviderNames()
+        {
+            // Identity flow handled by generated ASP.NET Core endpoints.
+            return default!;
+        }
+    }
 }

@@ -1,10 +1,31 @@
 @page "/ErrorPage"
-<PageTitle>Error</PageTitle>
-<Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-            <h2>Error</h2>
-            <p>Something went wrong while processing your request.</p>
-        </Content>
-    </ChildComponents>
-</Site>
+<WebFormsForm @formname="ErrorPageForm">
+    <AntiforgeryToken />
+<PageTitle></PageTitle>
+
+    <h2>Error:</h2>
+    <p></p>
+    <span>@_FriendlyErrorMsg_Text</span>
+
+    <Panel id="DetailedErrorPanel" @ref="DetailedErrorPanel" Visible="false">
+        <p>&nbsp;</p>
+        <h4>Detailed Error:</h4>
+        <p>
+            <span>@_ErrorDetailedMsg_Text</span><br />
+        </p>
+
+        <h4>Error Handler:</h4>
+        <p>
+            <span>@_ErrorHandler_Text</span><br />
+        </p>
+
+        <h4>Detailed Error Message:</h4>
+        <p>
+            <span>@_InnerMessage_Text</span><br />
+        </p>
+        <p>
+            <span>@_InnerTrace_Text</span>
+        </p>
+    </Panel>
+
+</WebFormsForm>

@@ -62,7 +62,7 @@ public class ProjectScaffolder
         result.Files["imports"] = new ScaffoldFile
         {
             RelativePath = "_Imports.razor",
-            Content = GenerateImportsRazor(projectName, hasModels)
+            Content = GenerateImportsRazor(projectName, hasModels, runtimeProfile.NeedsAjaxToolkit, sourcePath)
         };
 
         result.Files["app"] = new ScaffoldFile
@@ -130,6 +130,14 @@ public class ProjectScaffolder
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Identity.UI\" Version=\"10.0.0\" />";
             additionalPackages += "\n    <PackageReference Include=\"Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore\" Version=\"10.0.0\" />";
         }
+        if (runtimeProfile.NeedsSqlClient)
+        {
+            additionalPackages += "\n    <PackageReference Include=\"System.Data.SqlClient\" Version=\"4.9.0\" />";
+        }
+
+        var ajaxToolkitReference = runtimeProfile.NeedsAjaxToolkit
+            ? "\n" + ResolveAjaxToolkitReference(outputRoot)
+            : "";
 
         var bwfcReference = ResolveBwfcReference(outputRoot);
         var bwfcTargetsImport = ResolveBwfcTargetsImport(outputRoot);
@@ -145,7 +153,7 @@ public class ProjectScaffolder
   </PropertyGroup>
 
   <ItemGroup>
-{bwfcReference}{additionalPackages}
+{bwfcReference}{ajaxToolkitReference}{additionalPackages}
   </ItemGroup>
 {bwfcTargetsImport}
 </Project>
@@ -206,11 +214,78 @@ public class ProjectScaffolder
     }
 
 
-    private static string GenerateImportsRazor(string projectName, bool hasModels)
+    private static string ResolveAjaxToolkitReference(string outputRoot)
+    {
+        var outputFullPath = Path.GetFullPath(outputRoot);
+        var current = new DirectoryInfo(outputFullPath);
+
+        while (current is not null)
+        {
+            var candidate = Path.Combine(current.FullName, "src", "BlazorAjaxToolkitComponents", "BlazorAjaxToolkitComponents.csproj");
+            if (File.Exists(candidate))
+            {
+                var relativePath = Path.GetRelativePath(outputFullPath, candidate)
+                    .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+                return $@"    <ProjectReference Include=""{relativePath}"" />";
+            }
+
+            current = current.Parent;
+        }
+
+        return @"    <PackageReference Include=""Fritz.BlazorAjaxToolkitComponents"" Version=""*"" />";
+    }
+
+
+    private static string GenerateImportsRazor(string projectName, bool hasModels, bool needsAjaxToolkit)
+    {
+        return GenerateImportsRazor(projectName, hasModels, needsAjaxToolkit, null);
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex NamespaceExtractRegex = new(
+        @"^\s*namespace\s+(?<ns>[A-Za-z_][\w.]*)",
+        System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.Multiline);
+
+    internal static string GenerateImportsRazor(string projectName, bool hasModels, bool needsAjaxToolkit, string? sourcePath)
     {
         var modelsUsing = hasModels
             ? $@"
 @using global::{projectName}.Models"
+            : string.Empty;
+
+        // Detect additional sub-namespaces from known folders (Logic, BLL, Services, etc.)
+        var additionalNamespaces = new HashSet<string>(StringComparer.Ordinal);
+        if (!string.IsNullOrEmpty(sourcePath))
+        {
+            var subDirs = new[] { "Logic", "BLL", "Services", "Helpers", "Utils" };
+            foreach (var dir in subDirs)
+            {
+                var dirPath = Path.Combine(sourcePath, dir);
+                if (!Directory.Exists(dirPath)) continue;
+
+                // Read namespace from first .cs file in the directory
+                var firstFile = Directory.EnumerateFiles(dirPath, "*.cs").FirstOrDefault();
+                if (firstFile != null)
+                {
+                    var fileContent = File.ReadAllText(firstFile);
+                    var nsMatch = NamespaceExtractRegex.Match(fileContent);
+                    if (nsMatch.Success)
+                    {
+                        var ns = nsMatch.Groups["ns"].Value;
+                        // Only add if it's a child of the project namespace and not already Models
+                        if (ns.StartsWith(projectName, StringComparison.Ordinal) &&
+                            !ns.Equals($"{projectName}.Models", StringComparison.Ordinal))
+                        {
+                            additionalNamespaces.Add(ns);
+                        }
+                    }
+                }
+            }
+        }
+
+        var additionalUsings = string.Join("", additionalNamespaces.Select(ns => $"\n@using global::{ns}"));
+
+        var ajaxToolkitUsing = needsAjaxToolkit
+            ? "\n@using BlazorAjaxToolkitComponents"
             : string.Empty;
 
         return $@"@namespace {projectName}
@@ -224,8 +299,8 @@ public class ProjectScaffolder
 @using BlazorWebFormsComponents
 @using BlazorWebFormsComponents.Enums
 @using BlazorWebFormsComponents.LoginControls
-@using BlazorWebFormsComponents.Validations
-@using global::{projectName}{modelsUsing}
+@using BlazorWebFormsComponents.Validations{ajaxToolkitUsing}
+@using global::{projectName}{modelsUsing}{additionalUsings}
 @inherits BlazorWebFormsComponents.WebFormsPageBase
 ";
     }
@@ -243,7 +318,7 @@ public class ProjectScaffolder
 </head>
 
 @* Generated for .NET 10 static SSR migration output. Only opt into interactive render modes deliberately and per page. *@
-<body data-enhance-nav=""false"">
+<body>
     <Routes />
     <script src=""_framework/blazor.web.js""></script>
     <script src=""_content/Fritz.BlazorWebFormsComponents/js/Basepage.js""></script>

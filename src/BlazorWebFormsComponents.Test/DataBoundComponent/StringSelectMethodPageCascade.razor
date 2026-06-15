@@ -1,0 +1,56 @@
+@using BlazorWebFormsComponents.DataBinding
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Rendering
+
+@code {
+	[Fact]
+	public void StringSelectMethod_RendersWhenHostedByWebFormsPageBase()
+	{
+		var cut = Render<TestPage>();
+
+		cut.FindAll("span").Count.ShouldBe(Widget.SimpleWidgetList.Length);
+	}
+
+	[Fact]
+	public void StringSelectMethod_RebindsAfterPageParameterChange()
+	{
+		var cut = Render<TestPage>();
+		cut.FindAll("span").Count.ShouldBe(Widget.SimpleWidgetList.Length);
+
+		cut.Instance.UseAlternateData = true;
+		cut.Render();
+
+		cut.FindAll("span").Count.ShouldBe(1);
+		cut.Markup.ShouldContain("Alternate");
+	}
+
+	private sealed class TestPage : WebFormsPageBase
+	{
+		[Parameter]
+		public bool UseAlternateData { get; set; }
+
+		protected override void BuildRenderTree(RenderTreeBuilder builder)
+		{
+			builder.OpenComponent<ListView<Widget>>(0);
+			builder.AddAttribute(1, "ItemType", typeof(Widget));
+			builder.AddAttribute(2, "SelectMethod", nameof(GetWidgets));
+			builder.AddAttribute(3, "ItemTemplate", (RenderFragment<Widget>)(item => itemBuilder =>
+			{
+				itemBuilder.OpenElement(0, "span");
+				itemBuilder.AddContent(1, item.Name);
+				itemBuilder.CloseElement();
+			}));
+			builder.CloseComponent();
+		}
+
+		public IQueryable<Widget> GetWidgets()
+		{
+			if (UseAlternateData)
+			{
+				return new[] { new Widget { Name = "Alternate" } }.AsQueryable();
+			}
+
+			return Widget.SimpleWidgetList.AsQueryable();
+		}
+	}
+}

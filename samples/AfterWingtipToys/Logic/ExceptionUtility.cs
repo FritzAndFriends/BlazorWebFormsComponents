@@ -4,22 +4,39 @@ namespace WingtipToys.Logic;
 
 public static class ExceptionUtility
 {
+  // Create our own utility for exceptions
+  public sealed class ExceptionUtility
+  {
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public ExceptionUtility(IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
+
+    // All methods are static, so this can be private
+    private ExceptionUtility()
+    { }
+
+    // Log an Exception
     public static void LogException(Exception exc, string source)
     {
-        try
-        {
-            var directory = Path.Combine(AppContext.BaseDirectory, "App_Data");
-            Directory.CreateDirectory(directory);
-            var logPath = Path.Combine(directory, "ErrorLog.txt");
-            var builder = new StringBuilder()
-                .AppendLine($"********** {DateTime.UtcNow:u} **********")
-                .AppendLine($"Source: {source}")
-                .AppendLine($"Exception: {exc.Message}")
-                .AppendLine(exc.ToString())
-                .AppendLine();
-            File.AppendAllText(logPath, builder.ToString());
-        }
-        catch
+      // Include logic for logging exceptions
+      // Get the absolute path to the log file
+      string logFile = Path.Combine(AppContext.BaseDirectory, "App_Data", "ErrorLog.txt");
+
+      // Open the log file for append and write the log
+      StreamWriter sw = new StreamWriter(logFile, true);
+      sw.WriteLine("********** {0} **********", DateTime.Now);
+      if (exc.InnerException != null)
+      {
+        sw.Write("Inner Exception Type: ");
+        sw.WriteLine(exc.InnerException.GetType().ToString());
+        sw.Write("Inner Exception: ");
+        sw.WriteLine(exc.InnerException.Message);
+        sw.Write("Inner Source: ");
+        sw.WriteLine(exc.InnerException.Source);
+        if (exc.InnerException.StackTrace != null)
         {
         }
     }

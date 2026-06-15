@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using WingtipToys.Models;
+using WingtipToys.Logic;
 using Microsoft.AspNetCore.Components;
 namespace WingtipToys
 {
@@ -35,10 +36,8 @@ namespace WingtipToys
     [Parameter, SupplyParameterFromQuery(Name = "ProductID")]
     public int? ProductIdLegacy { get; set; }
 
-    [Parameter, SupplyParameterFromQuery(Name = "productName")]
-    public string? ProductName { get; set; }
-
-    private Product? Product { get; set; }
+    [Inject]
+    protected ProductContext _productContext { get; set; } = default!;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -47,23 +46,39 @@ namespace WingtipToys
 
         var requestedId = ProductId ?? ProductIdLegacy;
 
-        await using var db = await DbFactory.CreateDbContextAsync();
-        if (requestedId is > 0)
-        {
-            Product = await db.Products.Include(product => product.Category)
-                .FirstOrDefaultAsync(product => product.ProductID == requestedId.Value);
-        }
-        else if (!string.IsNullOrWhiteSpace(ProductName))
-        {
-            Product = await db.Products.Include(product => product.Category)
-                .FirstOrDefaultAsync(product => product.ProductName == ProductName);
-        }
-        else
-        {
-            Product = await db.Products.Include(product => product.Category)
-                .OrderBy(product => product.ProductID)
-                .FirstOrDefaultAsync();
-        }
+    }
+
+    public IQueryable<Product> GetProduct(
+                        [QueryString("ProductID")] int? productId,
+                        [RouteData] string productName)
+    {
+      var _db = _productContext; // Injected via DI
+      IQueryable<Product> query = _db.Products;
+      if (productId.HasValue && productId > 0)
+      {
+        query = query.Where(p => p.ProductID == productId);
+      }
+      else if (!String.IsNullOrEmpty(productName))
+      {
+        query = query.Where(p =>
+                  String.Compare(p.ProductName, productName) == 0);
+      }
+      else
+      {
+        query = null;
+      }
+      return query;
+    }
+  
+    [Parameter, SupplyParameterFromQuery(Name = "ProductID")] public int? ProductId { get; set; }
+
+    private global::System.Linq.IQueryable<Product> GetProductQueryDetails_SelectMethod(int maxRows, int startRowIndex, string sortByExpression, out int totalRowCount)
+    {
+        totalRowCount = 0;
+        // TODO(bwfc-query-details): Wrapper delegates to the code-behind GetProduct method.
+        var query = GetProduct(ProductId, productName);
+        if (query != null) totalRowCount = query.Count();
+        return query ?? global::System.Linq.Enumerable.Empty<Product>().AsQueryable();
     }
 }
 }

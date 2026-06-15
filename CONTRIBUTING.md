@@ -27,26 +27,70 @@ This project is currently a single library that will provide a shim, a buffer th
 
 ### Project Folder Structure
 
-This project is designed to be built and run primarily with Visual Studio 2019. The folders are configured so that they will support editing and working in other editors and on non-Windows operating systems.  We encourage you to develop with these other environments, because we would like to be able to support developers who use those tools as well.  The folders are configured as follows:
+This project is designed to be built and run primarily with Visual Studio 2019. The folders are configured so that they will support editing and working in other editors and on non-Windows operating systems.  We encourage you to develop with these other environments, because we would like to be able to support developers who use those tools as well.  The folders are organized as follows:
 
 ```
-/docs                                 -- User Documentation
-/samples                              -- Usage Samples
-  BeforeWebForms
-  AfterBlazorClientSide               -- Shell project with WebAssembly config
-  AfterBlazorServerSide               -- Shared project with Server-Side config
-    /Pages/ControlSamples/COMPONENT_NAME/SCENARIO.razor
-/src                                  -- Library source and unit tests
-  BlazorWebFormsComponents
-  BlazorWebFormsComponents.Test
-    /COMPONENT_NAME/test.razor        -- Unit tests
+/
+├── BlazorMeetsWebForms.sln              -- Solution file (root entry point)
+├── global.json                          -- .NET SDK version pin (10.0.100)
+├── Directory.Build.props                -- Shared MSBuild properties, analyzers, versioning
+├── version.json                         -- Nerdbank.GitVersioning config
+├── nuget.config                         -- NuGet feed configuration
+├── mkdocs.yml                           -- MkDocs documentation config
+│
+├── src/
+│   ├── BlazorWebFormsComponents/        -- Main component library (Razor Class Library)
+│   │   ├── *.razor / *.razor.cs         -- Component markup + code-behind pairs
+│   │   ├── Validations/                 -- Validation components (RequiredFieldValidator, etc.)
+│   │   ├── LoginControls/               -- Login/auth components
+│   │   ├── Theming/                     -- Themes and skins support
+│   │   ├── Interfaces/                  -- IStyle, IColumn, IRow, etc.
+│   │   └── wwwroot/                     -- Static assets (JS interop files)
+│   ├── BlazorWebFormsComponents.Test/   -- Unit tests (xUnit + bUnit)
+│   │   └── ComponentName/              -- Tests organized by component
+│   ├── BlazorWebFormsComponents.Analyzers/  -- Roslyn analyzers (BWFC001, etc.)
+│   ├── BlazorWebFormsComponents.Cli/    -- Migration CLI tool source
+│   └── BlazorAjaxToolkitComponents/     -- AJAX Toolkit component library
+│
+├── tests/
+│   └── BlazorWebFormsComponents.Cli.Tests/  -- CLI tool tests
+│
+├── samples/
+│   ├── BeforeWebForms/                  -- Original Web Forms sample (.NET Framework)
+│   ├── AfterBlazorServerSide/           -- Blazor Server-Side sample app
+│   ├── AfterBlazorServerSide.Tests/     -- Playwright integration tests for sample app
+│   ├── WingtipToys/                     -- Original WingtipToys Web Forms project
+│   ├── AfterWingtipToys/                -- Migrated WingtipToys sample
+│   ├── ContosoUniversity/               -- Original Contoso University project
+│   └── AfterContosoUniversity/          -- Migrated Contoso University sample
+│
+├── docs/                                -- MkDocs documentation source
+│   ├── EditorControls/                  -- Button, Label, TextBox, etc.
+│   ├── DataControls/                    -- GridView, Repeater, DataList, etc.
+│   ├── ValidationControls/             -- RequiredFieldValidator, etc.
+│   ├── NavigationControls/             -- Menu, TreeView, SiteMapPath
+│   ├── LoginControls/                  -- Login, CreateUserWizard, etc.
+│   ├── Migration/                       -- Migration guides and strategies
+│   ├── AjaxToolkit/                     -- AJAX Toolkit components
+│   ├── cli/                             -- CLI tool documentation
+│   └── UtilityFeatures/                -- DataBinder, ViewState, etc.
+│
+├── migration-toolkit/                   -- Migration automation scripts and tools
+├── dev-docs/                            -- Developer documentation (architecture, audits, baselines)
+│
+└── .github/
+    ├── copilot-instructions.md          -- Copilot coding conventions
+    ├── workflows/                       -- GitHub Actions CI/CD
+    │   ├── build.yml                    -- Build + unit tests
+    │   ├── integration-tests.yml        -- Playwright integration tests
+    │   ├── docs.yml                     -- MkDocs build + deploy
+    │   ├── codeql.yml                   -- CodeQL security scanning
+    │   ├── nuget.yml                    -- NuGet package publish
+    │   └── release.yml                  -- Release automation
+    └── skills/                          -- Copilot custom skills
 ```
 
-
-
-We may add a top level `tests` folder if there are integration tests to show at some point.
-
-All official versions of the project are built and delivered with Azure DevOps Pipelines and linked in the main README.md and [releases tab in GitHub](https://github.com/FritzAndFriends/BlazorWebFormsComponents/releases).
+All official versions of the project are built and delivered via GitHub Actions Pipelines and linked in the main README.md and [releases tab in GitHub](https://github.com/FritzAndFriends/BlazorWebFormsComponents/releases).
 
 ### Design Decisions
 

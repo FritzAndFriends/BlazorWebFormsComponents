@@ -115,7 +115,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull("ItemCommand should fire on command button click");
 		capturedArgs.CommandName.ShouldBe("Select");
@@ -137,7 +137,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull("OnItemCommand should fire on command button click");
 		capturedArgs.CommandName.ShouldBe("Action");
@@ -164,7 +164,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		fired.ShouldBeTrue("SelectedIndexChanged should fire on Select command");
 	}
@@ -186,7 +186,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		fired.ShouldBeTrue("OnSelectedIndexChanged should fire on Select command");
 	}
@@ -211,7 +211,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull("EditCommand should fire on Edit command");
 		capturedArgs.CommandName.ShouldBe("Edit");
@@ -233,7 +233,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull("OnEditCommand should fire on Edit command");
 	}
@@ -258,7 +258,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull("UpdateCommand should fire on Update command");
 		capturedArgs.CommandName.ShouldBe("Update");
@@ -284,7 +284,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull("DeleteCommand should fire on Delete command");
 		capturedArgs.CommandName.ShouldBe("Delete");
@@ -310,7 +310,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull("CancelCommand should fire on Cancel command");
 		capturedArgs.CommandName.ShouldBe("Cancel");
@@ -352,7 +352,7 @@
 			</DataList>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull();
 		capturedArgs.Sender.ShouldNotBeNull("Sender property should be populated");

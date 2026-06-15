@@ -43,7 +43,13 @@ public class ShoppingCartActions : IDisposable
 
     public decimal GetTotal() => GetCartItems().Sum(item => Convert.ToDecimal(item.Product?.UnitPrice ?? 0) * item.Quantity);
 
-    public ShoppingCartActions GetCart(object? _) => this;
+    public ShoppingCartActions GetCart()
+    {
+      
+        this.ShoppingCartId = this.GetCartId();
+        return this;
+      
+    }
 
     public void UpdateShoppingCartDatabase(string cartId, ShoppingCartUpdates[] cartItemUpdates)
     {
@@ -91,22 +97,12 @@ public class ShoppingCartActions : IDisposable
 
     public int GetCount() => GetCartItems().Sum(item => item.Quantity);
 
-    public void MigrateCart(string cartId, string userName)
-    {
-        if (Carts.TryRemove(cartId, out var items))
-        {
-            foreach (var item in items)
-            {
-                item.CartId = userName;
-            }
-
-            Carts[userName] = items;
-            ShoppingCartId = userName;
-        }
-    }
-
-    public void Dispose()
-    {
+      // Get the count of each item in the cart and sum them up          
+      int? count = (from cartItems in _db.ShoppingCartItems
+                    where cartItems.CartId == ShoppingCartId
+                    select (int?)cartItems.Quantity).Sum();
+      // Return 0 if all entries are null         
+      return count ?? 0;
     }
 
     public struct ShoppingCartUpdates

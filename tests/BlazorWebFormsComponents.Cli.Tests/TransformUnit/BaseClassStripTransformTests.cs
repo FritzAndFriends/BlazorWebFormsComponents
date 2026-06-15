@@ -27,12 +27,13 @@ public class BaseClassStripTransformTests
         OriginalContent = content
     };
 
-    private static FileMetadata ControlMetadata(string content) => new()
+    private static FileMetadata ControlMetadata(string content, string? markupContent = null) => new()
     {
         SourceFilePath = "MyControl.ascx.cs",
         OutputFilePath = "MyControl.razor.cs",
         FileType = FileType.Control,
-        OriginalContent = content
+        OriginalContent = content,
+        MarkupContent = markupContent
     };
 
     // --- Page type: replaces with WebFormsPageBase ---
@@ -98,25 +99,81 @@ public class BaseClassStripTransformTests
         Assert.Contains("public partial class SiteMaster : WebFormsPageBase { }", result);
     }
 
-    // --- Control type: strips base class entirely ---
+    // --- Control type: preserves WebControl/UserControl/CompositeControl (BWFC equivalents exist) ---
 
     [Fact]
-    public void Control_StripsSystemWebUIUserControl()
+    public void Control_PreservesUserControlFromFullyQualified()
     {
-        var input = "public partial class MyControl : System.Web.UI.UserControl { }";
-        var result = _transform.Apply(input, ControlMetadata(input));
+        var input = "using System;\npublic partial class MyControl : System.Web.UI.UserControl { }";
+        var markup = "<div>Hello</div>";
+        var metadata = ControlMetadata(input, markup);
+        var result = _transform.Apply(input, metadata);
 
-        Assert.Contains("public partial class MyControl { }", result);
-        Assert.DoesNotContain("UserControl", result);
+        Assert.Contains("public partial class MyControl : UserControl", result);
+        Assert.DoesNotContain("System.Web.UI", result);
+        Assert.Contains("using BlazorWebFormsComponents.CustomControls;", result);
     }
 
     [Fact]
-    public void Control_StripsShortFormUserControl()
+    public void Control_PreservesShortFormUserControl()
     {
-        var input = "public partial class MyCtrl : UserControl { }";
-        var result = _transform.Apply(input, ControlMetadata(input));
+        var input = "using System;\npublic partial class MyCtrl : UserControl { }";
+        var markup = "<div>Hello</div>";
+        var metadata = ControlMetadata(input, markup);
+        var result = _transform.Apply(input, metadata);
 
-        Assert.Contains("public partial class MyCtrl { }", result);
+        Assert.Contains("public partial class MyCtrl : UserControl", result);
+        Assert.Contains("using BlazorWebFormsComponents.CustomControls;", result);
+    }
+
+    // --- @inherits injection into markup ---
+
+    [Fact]
+    public void Control_InjectsInheritsDirective_ForUserControl()
+    {
+        var input = "using System;\npublic partial class MyControl : System.Web.UI.UserControl { }";
+        var markup = "<div>Hello</div>";
+        var metadata = ControlMetadata(input, markup);
+        _transform.Apply(input, metadata);
+
+        Assert.Contains("@inherits UserControl", metadata.MarkupContent);
+        Assert.Contains("@using BlazorWebFormsComponents.CustomControls", metadata.MarkupContent);
+    }
+
+    [Fact]
+    public void Control_InjectsInheritsDirective_ForWebControl()
+    {
+        var input = "using System;\npublic partial class MyControl : WebControl { }";
+        var markup = "<div>Hello</div>";
+        var metadata = ControlMetadata(input, markup);
+        _transform.Apply(input, metadata);
+
+        Assert.Contains("@inherits WebControl", metadata.MarkupContent);
+    }
+
+    [Fact]
+    public void Control_DoesNotDuplicateInheritsDirective()
+    {
+        var input = "using System;\npublic partial class MyControl : System.Web.UI.UserControl { }";
+        var markup = "@inherits UserControl\n<div>Hello</div>";
+        var metadata = ControlMetadata(input, markup);
+        _transform.Apply(input, metadata);
+
+        // Should not add a second @inherits
+        var count = metadata.MarkupContent!.Split("@inherits").Length - 1;
+        Assert.Equal(1, count);
+    }
+
+    [Fact]
+    public void Control_NoInheritsInjection_ForPageTypes()
+    {
+        var input = "public partial class Default : System.Web.UI.Page { }";
+        var markup = "<div>Hello</div>";
+        var metadata = PageMetadata(input);
+        metadata.MarkupContent = markup;
+        _transform.Apply(input, metadata);
+
+        Assert.DoesNotContain("@inherits", metadata.MarkupContent);
     }
 
     // --- Shared behavior ---

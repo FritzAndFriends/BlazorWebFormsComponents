@@ -1,0 +1,128 @@
+@using BlazorWebFormsComponents.Enums
+
+@code {
+	readonly ForwardRef<InputBase<string>> StringRef = new ForwardRef<InputBase<string>>();
+	readonly ForwardRef<InputBase<int>> IntRef = new ForwardRef<InputBase<int>>();
+
+	// BaseCompareValidator<InputType> is abstract; CompareValidator and RangeValidator are used
+	// as concrete proxies so its shared properties can be verified.
+
+	[Fact]
+	public void BaseCompareValidator_Type_DefaultsToString()
+	{
+		var model = new BcvModel { Value = "hello" };
+		var cut = Render(
+			@<EditForm Model="@model">
+				<InputText @ref="StringRef.Current" @bind-Value="model.Value" />
+				<CompareValidator InputType="string"
+					ControlRef="@StringRef"
+					ValueToCompare="hello"
+					Operator="Equal"
+					ErrorMessage="Must match." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<CompareValidator<string>>().Instance;
+		validator.Type.ShouldBe(ValidationDataType.String);
+	}
+
+	[Fact]
+	public void BaseCompareValidator_Type_CanBeSetToInteger()
+	{
+		var model = new BcvIntModel { Number = 5 };
+		var cut = Render(
+			@<EditForm Model="@model">
+				<InputNumber @ref="IntRef.Current" @bind-Value="model.Number" />
+				<CompareValidator InputType="int"
+					ControlRef="@IntRef"
+					ValueToCompare="5"
+					Type="Integer"
+					Operator="Equal"
+					ErrorMessage="Must be 5." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<CompareValidator<int>>().Instance;
+		validator.Type.ShouldBe(ValidationDataType.Integer);
+	}
+
+	[Fact]
+	public void BaseCompareValidator_CultureInvariantValues_DefaultsToFalse()
+	{
+		var model = new BcvModel { Value = "hello" };
+		var cut = Render(
+			@<EditForm Model="@model">
+				<InputText @ref="StringRef.Current" @bind-Value="model.Value" />
+				<CompareValidator InputType="string"
+					ControlRef="@StringRef"
+					ValueToCompare="hello"
+					Operator="Equal"
+					ErrorMessage="Must match." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<CompareValidator<string>>().Instance;
+		validator.CultureInvariantValues.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void BaseCompareValidator_CultureInvariantValues_CanBeSetToTrue()
+	{
+		var model = new BcvModel { Value = "hello" };
+		var cut = Render(
+			@<EditForm Model="@model">
+				<InputText @ref="StringRef.Current" @bind-Value="model.Value" />
+				<CompareValidator InputType="string"
+					ControlRef="@StringRef"
+					ValueToCompare="hello"
+					CultureInvariantValues="true"
+					Operator="Equal"
+					ErrorMessage="Must match." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<CompareValidator<string>>().Instance;
+		validator.CultureInvariantValues.ShouldBeTrue();
+	}
+
+	[Fact]
+	public void BaseCompareValidator_RangeValidator_InheritsType_CanBeSetToDate()
+	{
+		var model = new BcvModel { Value = "2024-01-15" };
+		var cut = Render(
+			@<EditForm Model="@model">
+				<InputText @ref="StringRef.Current" @bind-Value="model.Value" />
+				<RangeValidator ControlRef="@StringRef"
+					Type="Date"
+					MinimumValue="2024-01-01"
+					MaximumValue="2024-12-31"
+					ErrorMessage="Date out of range." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<RangeValidator<string>>().Instance;
+		validator.Type.ShouldBe(ValidationDataType.Date);
+	}
+
+	[Fact]
+	public void BaseCompareValidator_RangeValidator_CultureInvariantValues_DefaultsToFalse()
+	{
+		var model = new BcvModel { Value = "5" };
+		var cut = Render(
+			@<EditForm Model="@model">
+				<InputText @ref="StringRef.Current" @bind-Value="model.Value" />
+				<RangeValidator ControlRef="@StringRef"
+					Type="Integer"
+					MinimumValue="1"
+					MaximumValue="10"
+					ErrorMessage="Out of range." />
+			</EditForm>
+		);
+
+		var validator = cut.FindComponent<RangeValidator<string>>().Instance;
+		validator.CultureInvariantValues.ShouldBeFalse();
+	}
+
+	public class BcvModel { public string Value { get; set; } = ""; }
+	public class BcvIntModel { public int Number { get; set; } }
+}

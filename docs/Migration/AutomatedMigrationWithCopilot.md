@@ -117,6 +117,8 @@ The prescan reports:
 - File inventory (`.aspx`, `.ascx`, `.master` counts)
 - Control usage by type and frequency
 - DataSource controls (these need L3 replacement)
+- Custom-control registrations from `Web.config` and `<%@ Register %>` directives
+- ASCX descriptor signals (public members, lifecycle/data-binding clues, `FindControl` IDs, parse diagnostics)
 - Migration readiness score
 
 A score of **90%+** means automated migration will produce a clean result. Lower scores indicate more L3 architecture work ahead.
@@ -154,6 +156,8 @@ pwsh migration-toolkit/scripts/bwfc-migrate.ps1 `
 | Convert `ItemType` | `ItemType="WingtipToys.Product"` → `TItem="Product"` |
 | Remove content wrappers | `<asp:Content ...>` → unwrapped |
 | Map page lifecycle | `Page_Load` → `OnInitializedAsync` |
+| Prepare `FindControl` migrations | `id="CartList"` + code-behind → `@ref="CartList"` + backing field |
+| Normalize `DataBind()` patterns | Keep `DataSource = ...`, remove `.DataBind()`, inject `Items="@( ... )"` |
 | Convert event signatures | `Btn_Click(object, EventArgs)` → `Btn_Click()` |
 | Master Page → Layout | `Site.Master` → `MainLayout.razor` |
 | Scaffold project | `.csproj`, `Program.cs`, `_Imports.razor`, `App.razor` |
@@ -161,6 +165,8 @@ pwsh migration-toolkit/scripts/bwfc-migrate.ps1 `
 | Quarantine unsafe pages | `Account/`, `Checkout/` stubbed if needed |
 
 After this step, a migration report is written to `samples/AfterWingtipToys/migration-artifacts/`.
+
+TODO(P1-FindControl-callsite): automated callsite rewrites for all `FindControl(...)` cast/access shapes are still incomplete; verify those edits during L2 review.
 
 ### Step 3 — Build the Output
 

@@ -1,5 +1,6 @@
 using BlazorWebFormsComponents.Cli.Pipeline;
 using BlazorWebFormsComponents.Cli.Transforms.CodeBehind;
+using BlazorWebFormsComponents.Cli.Analysis;
 
 namespace BlazorWebFormsComponents.Cli.Tests.TransformUnit;
 
@@ -171,5 +172,41 @@ ddlDepts.DataBind();";
     public void OrderIs800()
     {
         Assert.Equal(800, _transform.Order);
+    }
+
+    [Fact]
+    public void RemovesSelfDataBind_ForUserControlsWhenSignalPresent()
+    {
+        var input = """
+            DataBind();
+            this.DataBind();
+            """;
+        var metadata = new FileMetadata
+        {
+            SourceFilePath = "Products.ascx",
+            OutputFilePath = "Products.razor",
+            FileType = FileType.Control,
+            OriginalContent = input,
+            AscxDescriptor = new AscxDescriptor
+            {
+                ControlName = "Products",
+                HasDataBindCall = true
+            }
+        };
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.DoesNotContain("DataBind()", result);
+    }
+
+    [Fact]
+    public void KeepsSelfDataBind_ForPages()
+    {
+        var input = "DataBind();";
+        var metadata = TestMetadata(input);
+
+        var result = _transform.Apply(input, metadata);
+
+        Assert.Equal(input, result);
     }
 }

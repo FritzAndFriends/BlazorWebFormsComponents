@@ -225,5 +225,7 @@ When Copilot encounters these attributes during migration, remove them without c
 ## References
 
 - [BWFC Migration Skill (full rules)](https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/migration-toolkit/skills/bwfc-migration/SKILL.md)
+- [BWFC ASCX Migration Skill](https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/migration-toolkit/skills/bwfc-ascx-migration/SKILL.md)
+- [BWFC Custom WebControl Skill](https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/migration-toolkit/skills/bwfc-custom-control-migration/SKILL.md)
 - [BWFC Control Coverage](https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/migration-toolkit/CONTROL-COVERAGE.md)
 - [BWFC Migration Toolkit](https://github.com/FritzAndFriends/BlazorWebFormsComponents/blob/dev/migration-toolkit/README.md)

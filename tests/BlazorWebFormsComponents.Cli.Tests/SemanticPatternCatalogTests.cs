@@ -116,7 +116,8 @@ public class SemanticPatternCatalogTests : IDisposable
             new NativeNuGetStaticAssetExtractor(),
             new NativeEdmxToEfCoreConverter(),
             new RedirectHandlerAnnotator(outputWriter),
-            new PageQuarantineDetector());
+            new PageQuarantineDetector(),
+            new CodeOnlyControlScaffolder());
 
         var context = new MigrationContext
         {

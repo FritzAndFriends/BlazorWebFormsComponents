@@ -1,13 +1,14 @@
 @page "/Account/Register"
-@page "/Register"
-<PageTitle>Register</PageTitle>
-<Site>
-    <ChildComponents>
-        <Content ContentPlaceHolderID="MainContent">
-    <h1>Register</h1>
-    @* TODO(bwfc-identity): Wire this account page to ASP.NET Core Identity or your app's authentication service. *@
-    @* TODO(bwfc-identity): Recreate validation and submit handling with EditForm, minimal APIs, or an equivalent SSR-safe endpoint. *@
-    @if (!string.IsNullOrWhiteSpace(Error))
+<h1>Register</h1>
+@* TODO(bwfc-identity): Wire this account page to ASP.NET Core Identity or your app's authentication service. *@
+@* TODO(bwfc-identity): Recreate validation and submit handling with EditForm, minimal APIs, or an equivalent SSR-safe endpoint. *@
+@if (!string.IsNullOrWhiteSpace(Error))
+{
+    <p class="text-danger">@Error</p>
+}
+<form method="post" action="/Account/RegisterHandler" class="form-horizontal" @formname="RegisterForm">
+    <AntiforgeryToken />
+    @if (!string.IsNullOrWhiteSpace(ReturnUrl))
     {
         <p class="text-danger">@Error</p>
     }

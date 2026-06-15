@@ -2,19 +2,10 @@
 // TODO: Reason — Legacy bootstrap file 'Global.asax.cs' was quarantined from the generated compile surface.
 // TODO: Move or rewrite only the relevant pieces into Program.cs, services, middleware, or application code.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Optimization;
-using System.Web.Routing;
-using System.Web.Security;
-using System.Web.SessionState;
-using System.Data.Entity;
-using WingtipToys.Models;
-using WingtipToys.Logic;
-
-namespace WingtipToys
+// Auto-generated API-compatible stub. Original referenced legacy Web Forms APIs.
+// TODO(bwfc-general): Rebuild method bodies using ASP.NET Core equivalents.
+namespace WingtipToys;
+public partial class Global
 {
     public class Global : HttpApplication
     {

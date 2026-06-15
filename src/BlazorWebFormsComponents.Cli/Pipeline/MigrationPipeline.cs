@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using BlazorWebFormsComponents.Cli.Analysis;
 using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Io;
 using BlazorWebFormsComponents.Cli.Scaffolding;
@@ -29,8 +30,10 @@ public class MigrationPipeline
     private readonly NativeNuGetStaticAssetExtractor? _nuGetStaticAssetExtractor;
     private readonly NativeEdmxToEfCoreConverter? _edmxConverterBridge;
     private readonly RedirectHandlerAnnotator? _redirectHandlerAnnotator;
+    private readonly CodeOnlyControlScaffolder _codeOnlyControlScaffolder;
     private readonly SemanticPatternCatalog _semanticPatternCatalog;
     private readonly PageQuarantineDetector _pageQuarantineDetector;
+    private readonly AscxDescriptorAnalyzer _ascxDescriptorAnalyzer = new();
     private ScaffoldResult? _lastScaffoldResult;
 
     private static readonly Regex ScaffoldClassNameRegex = new(
@@ -57,7 +60,8 @@ public class MigrationPipeline
         NativeNuGetStaticAssetExtractor nuGetStaticAssetExtractor,
         NativeEdmxToEfCoreConverter edmxConverterBridge,
         RedirectHandlerAnnotator redirectHandlerAnnotator,
-        PageQuarantineDetector pageQuarantineDetector)
+        PageQuarantineDetector pageQuarantineDetector,
+        CodeOnlyControlScaffolder codeOnlyControlScaffolder)
     {
         _markupTransforms = markupTransforms.OrderBy(t => t.Order).ToList();
         _codeBehindTransforms = codeBehindTransforms.OrderBy(t => t.Order).ToList();
@@ -75,6 +79,7 @@ public class MigrationPipeline
         _edmxConverterBridge = edmxConverterBridge;
         _redirectHandlerAnnotator = redirectHandlerAnnotator;
         _pageQuarantineDetector = pageQuarantineDetector;
+        _codeOnlyControlScaffolder = codeOnlyControlScaffolder;
     }
 
     /// <summary>
@@ -99,6 +104,7 @@ public class MigrationPipeline
         _edmxConverterBridge = null;
         _redirectHandlerAnnotator = null;
         _pageQuarantineDetector = new PageQuarantineDetector();
+        _codeOnlyControlScaffolder = new CodeOnlyControlScaffolder();
     }
 
     /// <summary>
@@ -117,6 +123,14 @@ public class MigrationPipeline
         {
             await ScaffoldProjectAsync(context, report);
         }
+        else
+        {
+            PopulatePrefixNamespaceMap(
+                context,
+                new WebConfigAssemblyParser().ParseProject(context.SourcePath).PrefixToNamespaceMap);
+        }
+
+        await EmitCodeOnlyControlSkeletonsAsync(context, report);
 
         // Step 2: Transform config (web.config → appsettings.json)
         await TransformConfigAsync(context, report);
@@ -242,6 +256,7 @@ public class MigrationPipeline
 
         var scaffoldResult = _scaffolder.Scaffold(context.SourcePath, context.OutputPath, projectName);
         _lastScaffoldResult = scaffoldResult;
+        PopulatePrefixNamespaceMap(context, scaffoldResult.RuntimeProfile.CustomControlPrefixToNamespaceMap);
         await _scaffolder.WriteAsync(scaffoldResult, context.OutputPath, _outputWriter);
         report.ScaffoldFilesGenerated += scaffoldResult.Files.Count;
 
@@ -254,6 +269,42 @@ public class MigrationPipeline
         report.ScaffoldFilesGenerated++; // WebFormsShims.cs
         if (scaffoldResult.HasIdentity)
             report.ScaffoldFilesGenerated++; // IdentityShims.cs
+    }
+
+    private async Task EmitCodeOnlyControlSkeletonsAsync(MigrationContext context, MigrationReport report)
+    {
+        var controls = _lastScaffoldResult?.RuntimeProfile.CodeOnlyServerControls;
+        if (controls == null || controls.Count == 0)
+            return;
+
+        var projectName = GetProjectName(context.SourcePath);
+        var generatedFiles = await _codeOnlyControlScaffolder.EmitAsync(
+            context.OutputPath,
+            projectName,
+            controls,
+            _outputWriter);
+
+        report.ScaffoldFilesGenerated += generatedFiles;
+        foreach (var control in controls)
+        {
+            report.AddManualItem(
+                control.SourceFilePath,
+                0,
+                "bwfc-control-scaffold",
+                $"Generated code-only control skeleton for {control.ClassName}. Review parameters and rendered markup.",
+                "medium");
+        }
+    }
+
+    private static void PopulatePrefixNamespaceMap(
+        MigrationContext context,
+        IReadOnlyDictionary<string, string> prefixToNamespaceMap)
+    {
+        context.CustomControlPrefixToNamespace.Clear();
+        foreach (var pair in prefixToNamespaceMap)
+        {
+            context.CustomControlPrefixToNamespace[pair.Key] = pair.Value;
+        }
     }
 
     private async Task TransformConfigAsync(MigrationContext context, MigrationReport report)
@@ -368,13 +419,15 @@ public class MigrationPipeline
             OriginalContent = markupContent,
             OutputRootPath = context.OutputPath,
             SourceRootPath = context.SourcePath,
-            ProjectNamespace = projectName
+            ProjectNamespace = projectName,
+            CustomControlPrefixToNamespace = context.CustomControlPrefixToNamespace
         };
 
         // Read code-behind if present
         if (sourceFile.HasCodeBehind)
         {
             metadata.CodeBehindContent = await File.ReadAllTextAsync(sourceFile.CodeBehindPath!);
+            AttachAscxDescriptor(metadata, sourceFile.CodeBehindPath);
         }
         else
         {
@@ -605,11 +658,36 @@ public class MigrationPipeline
     /// </summary>
     public string TransformCodeBehind(string content, FileMetadata metadata)
     {
+        AttachAscxDescriptor(metadata);
+
         foreach (var transform in _codeBehindTransforms)
         {
             content = transform.Apply(content, metadata);
         }
         return content;
+    }
+
+    private void AttachAscxDescriptor(FileMetadata metadata, string? explicitCodeBehindPath = null)
+    {
+        if (metadata.FileType != FileType.Control || metadata.AscxDescriptor is not null)
+            return;
+
+        try
+        {
+            var codeBehindPath = explicitCodeBehindPath;
+            if (string.IsNullOrWhiteSpace(codeBehindPath) && !string.IsNullOrWhiteSpace(metadata.SourceFilePath))
+            {
+                var candidate = metadata.SourceFilePath + ".cs";
+                if (File.Exists(candidate))
+                    codeBehindPath = candidate;
+            }
+
+            metadata.AscxDescriptor = _ascxDescriptorAnalyzer.AnalyzeControl(metadata.SourceFilePath, codeBehindPath);
+        }
+        catch
+        {
+            // Best-effort signal enrichment only.
+        }
     }
 
     private static string GetProjectName(string sourcePath)

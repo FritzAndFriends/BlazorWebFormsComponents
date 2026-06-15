@@ -1,5 +1,7 @@
 @page "/ProductList"
 @page "/Category/{categoryName}"
+<WebFormsForm @formname="ProductListForm">
+    <AntiforgeryToken />
 <PageTitle>Products</PageTitle>
 <Site>
     <ChildComponents>
@@ -20,17 +22,43 @@
                                     <a href="/ProductDetails?productId=@Item.ProductID">
                                         <img src="/Catalog/Images/Thumbs/@Item.ImagePath" alt="@Item.ProductName" style="width:100%;height:160px;object-fit:contain" />
                                     </a>
-                                    <div class="caption">
-                                        <h4><a href="/ProductDetails?productId=@Item.ProductID">@Item.ProductName</a></h4>
-                                        <p><strong>Price:</strong> @Item.UnitPrice?.ToString("C")</p>
-                                        <p><a href="/AddToCart?productId=@Item.ProductID" class="btn btn-primary">Add To Cart</a></p>
-                                    </div>
-                                </div>
-                            </div>
-                        </ItemTemplate>
-                    </ListView>
-                </div>
-            </section>
-        </Content>
-    </ChildComponents>
-</Site>
+                                    <br />
+                                    <span>
+                                        <b>Price: </b>@(String.Format("{0:c}", Item.UnitPrice))
+                                    </span>
+                                    <br />
+                                    <a href="/AddToCart.aspx?productID=@Item.ProductID" data-enhance-nav="false">               
+                                        <span class="ProductListItem">
+                                            <b>Add To Cart</b>
+                                        </span>           
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>&nbsp;</td>
+                            </tr>
+                        </table>
+                    </td>
+                </ItemTemplate>
+                <LayoutTemplate Context="groups">
+                    <table style="width:100%;">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table id="groupPlaceholderContainer" style="width:100%">
+                                        @groups
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                            </tr>
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </LayoutTemplate>
+            </ListView>
+        </div>
+    </section>
+
+</WebFormsForm>

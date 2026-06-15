@@ -1,4 +1,6 @@
+using WingtipToys.Logic;
 using Microsoft.EntityFrameworkCore;
+
 namespace WingtipToys.Models
 {
   public class ProductContext : DbContext

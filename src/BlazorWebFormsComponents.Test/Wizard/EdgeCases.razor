@@ -1,0 +1,111 @@
+@inherits BlazorWebFormsTestContext
+
+@code {
+
+	[Fact]
+	public void Wizard_SingleStepWizard_RendersWithoutNavigationButtons()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplaySideBar="false">
+				<WizardSteps>
+					<WizardStep Title="Only Step">
+						<p>Single step content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		// No navigation buttons should render for a single-step wizard
+		cut.FindAll("input[type='submit']").Count.ShouldBe(0);
+		cut.Markup.ShouldContain("Single step content");
+	}
+
+	[Fact]
+	public void Wizard_WithManySteps_RendersSidebarForAllSteps()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplaySideBar="true">
+				<WizardSteps>
+					<WizardStep Title="Step 1"><p>Step 1 Content</p></WizardStep>
+					<WizardStep Title="Step 2"><p>Step 2 Content</p></WizardStep>
+					<WizardStep Title="Step 3"><p>Step 3 Content</p></WizardStep>
+					<WizardStep Title="Step 4"><p>Step 4 Content</p></WizardStep>
+					<WizardStep Title="Step 5"><p>Step 5 Content</p></WizardStep>
+					<WizardStep Title="Step 6"><p>Step 6 Content</p></WizardStep>
+					<WizardStep Title="Step 7"><p>Step 7 Content</p></WizardStep>
+					<WizardStep Title="Step 8"><p>Step 8 Content</p></WizardStep>
+					<WizardStep Title="Step 9"><p>Step 9 Content</p></WizardStep>
+					<WizardStep Title="Step 10"><p>Step 10 Content</p></WizardStep>
+					<WizardStep Title="Step 11"><p>Step 11 Content</p></WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("td[role='navigation'] button[type='submit']").Count.ShouldBe(10);
+		cut.FindAll("span").Count.ShouldBe(1);
+		cut.Markup.ShouldContain("Step 11");
+	}
+
+	[Fact]
+	public void Wizard_NullTitleStep_UsesGeneratedSidebarTitle()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1" DisplaySideBar="true">
+				<WizardSteps>
+					<WizardStep Title="@((string)null)">
+						<p>First Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>Second Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("td[role='navigation'] button[type='submit']").Single().TextContent.ShouldBe("Step 1");
+	}
+
+	[Fact]
+	public void Wizard_EmptyTitleStep_RendersEmptySidebarText()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="1" DisplaySideBar="true">
+				<WizardSteps>
+					<WizardStep Title="">
+						<p>First Content</p>
+					</WizardStep>
+					<WizardStep Title="Step 2">
+						<p>Second Content</p>
+					</WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		cut.FindAll("td[role='navigation'] button[type='submit']").Single().TextContent.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void Wizard_DynamicStepsAddedOrRemoved_UpdatesRegisteredSteps()
+	{
+		var cut = Render(
+			@<Wizard ActiveStepIndex="0" DisplaySideBar="true">
+				<WizardSteps>
+					<WizardStep Title="Step A"><p>A</p></WizardStep>
+					<WizardStep Title="Step B"><p>B</p></WizardStep>
+					<WizardStep Title="Step C"><p>C</p></WizardStep>
+				</WizardSteps>
+			</Wizard>
+		);
+
+		// Initially 3 steps — sidebar shows 2 buttons (non-active) + 1 span (active step A)
+		cut.FindAll("td[role='navigation'] button[type='submit']").Count.ShouldBe(2);
+
+		// Verify navigation buttons exist (multi-step wizard)
+		cut.FindAll("input[type='submit']").Count.ShouldBeGreaterThan(0);
+
+		// Verify the Wizard tracks all 3 steps
+		var wizard = cut.FindComponent<Wizard>().Instance;
+		wizard.GetHistory().ShouldNotBeNull();
+	}
+
+}

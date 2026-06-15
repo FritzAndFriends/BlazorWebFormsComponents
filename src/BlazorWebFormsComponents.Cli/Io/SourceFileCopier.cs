@@ -61,7 +61,7 @@ public class SourceFileCopier
         _outputWriter = outputWriter;
         // Only apply a subset of transforms relevant to non-page .cs files
         _transforms = transforms
-            .Where(t => t.Name is "UsingStrip" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "HttpContextAccessor" or "SelectMethodMaterialize" or "SelfInstantiation" or "ServerShim" or "LegacyHelperStub" or "TypeMismatchFix" or "EagerLoadNavigation" or "DisposeReadonlyField" or "NamespaceAlign")
+            .Where(t => t.Name is "UsingStrip" or "ProjectNamespaceUsing" or "IdentityUsing" or "HttpUtilityRewrite" or "EntityFramework" or "EfContextConstructor" or "DbContextInstantiation" or "HttpContextAccessor" or "SelectMethodMaterialize" or "SelfInstantiation" or "ServerShim" or "LegacyHelperStub" or "TypeMismatchFix" or "EagerLoadNavigation" or "DisposeReadonlyField" or "NamespaceAlign" or "ConfigurationManager")
             .OrderBy(t => t.Order)
             .ToList();
     }
@@ -175,6 +175,8 @@ public class SourceFileCopier
 
             // Detect duplicate classes: if a class with the same fully-qualified name
             // was already copied from another file, skip this one to avoid CS0101.
+            // Also detect same-name classes across different namespaces (e.g., BLL/ and Models/)
+            // which cause CS0104 ambiguity when both namespaces are imported.
             var fileNamespace = NamespaceRegex.Match(content);
             var fileClasses = ClassRegex.Matches(content);
             var isDuplicate = false;
@@ -183,13 +185,30 @@ public class SourceFileCopier
                 var ns = fileNamespace.Groups["ns"].Value;
                 foreach (Match cm in fileClasses)
                 {
-                    var fqn = $"{ns}.{cm.Groups["name"].Value}";
+                    var className = cm.Groups["name"].Value;
+                    var fqn = $"{ns}.{className}";
                     if (!copiedClassNames.Add(fqn))
                     {
                         isDuplicate = true;
                         if (verbose)
                             Console.WriteLine($"  Skipped duplicate class: {fqn} in {relativePath}");
                         break;
+                    }
+                    // Also check by short name: if another namespace already has this class,
+                    // skip the one in Models/ (BLL takes priority over Models stubs)
+                    var shortKey = $"__short__{className}";
+                    if (!copiedClassNames.Add(shortKey))
+                    {
+                        // A class with this name was already copied from another namespace.
+                        // Skip this one if it's in a Models/ directory (BLL is canonical).
+                        var pathSegments = relativePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                        if (pathSegments.Any(s => s.Equals("Models", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            isDuplicate = true;
+                            if (verbose)
+                                Console.WriteLine($"  Skipped ambiguous class: {className} in {relativePath} (already in another namespace)");
+                            break;
+                        }
                     }
                 }
             }

@@ -115,3 +115,80 @@ Confirmed 10/10 ComponentRef tests passing. Test coverage is complete — no fur
 - L1 migration stayed at 19 seconds; build repair dropped to 63 seconds.
 - Startup smoke checks for `/`, `/ProductList`, `/About`, and `/Account/Login` all returned HTTP 200 before test execution.
 - Three of the four target fixes (`Entities`/`DataContext`, EDMX T4 exclusion, BLL namespace alignment) were not directly exercised by WingtipToys, so they still need another benchmark for validation.
+
+### 2026-05-20T21:07:06.347-04:00: Wizard bUnit coverage audit
+
+**Task:** Investigate the Wizard component's bUnit test coverage, execute the existing Wizard-filtered test run, and identify missing scenarios.
+
+**Outcome:** `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor` is currently the only Wizard-specific test file and contains 16 `[Fact]` tests. The requested `dotnet test src\BlazorWebFormsComponents.Test --nologo --filter "Wizard"` run passed 26 tests across `net8.0`, `net9.0`, and `net10.0`; the broader count indicates the filter also matches non-folder tests such as CreateUserWizard coverage, so component-folder counts should be tracked separately from filter output.
+
+**Coverage notes:**
+- Existing Wizard coverage focuses on active-step rendering, next/previous navigation, finish and complete behavior, sidebar visibility/navigation, `AllowReturn=false`, `OnNextButtonClick`, `OnFinishButtonClick`, cancel button visibility, `HeaderText`, and `Visible=false`.
+- Missing coverage includes explicit verification for all `WizardStepType` values (`Auto`, `Start`, `Step`), programmatic `ActiveStepIndex` updates and `ActiveStepIndexChanged`, `OnActiveStepChanged`, `OnPreviousButtonClick`, `OnCancelButtonClick`, `OnSideBarButtonClick`, cancel/finish destination navigation, template rendering (`HeaderTemplate`, `SideBarTemplate`, navigation templates), and edge cases such as empty, single-step, null-title, and many-step wizards.
+- `Wizard.razor.cs` declares `StartNavigationTemplate`, `StepNavigationTemplate`, and `FinishNavigationTemplate`, but `Wizard.razor` never renders them; this is a high-priority QA gap because new tests should first confirm intended behavior and may expose a product bug.
+
+**Key file paths:**
+- Tests: `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor`
+- Component: `src\BlazorWebFormsComponents\Wizard.razor` and `src\BlazorWebFormsComponents\Wizard.razor.cs`
+- Step child: `src\BlazorWebFormsComponents\WizardStep.razor` and `src\BlazorWebFormsComponents\WizardStep.razor.cs`
+- Enum/events: `src\BlazorWebFormsComponents\Enums\WizardStepType.cs`, `src\BlazorWebFormsComponents\WizardNavigationEventArgs.cs`
+
+### 2026-05-20T21:19:29.902-04:00: Wizard callback and edge-case coverage expansion
+
+**Task:** Add the missing Wizard bUnit coverage for callbacks, step-type behavior, and edge cases without modifying `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor`.
+
+**Outcome:** Added three new Wizard test files — `src\BlazorWebFormsComponents.Test\Wizard\Callbacks.razor`, `src\BlazorWebFormsComponents.Test\Wizard\StepTypes.razor`, and `src\BlazorWebFormsComponents.Test\Wizard\EdgeCases.razor` — covering callback firing, `WizardStepType` rendering behavior, many-step sidebar output, and null/empty title handling. The requested validation command `dotnet test src\BlazorWebFormsComponents.Test --nologo --filter "Wizard"` passed with 123 total tests, 117 succeeded, and 6 skipped across `net8.0`, `net9.0`, and `net10.0`.
+
+**Architecture / behavior notes:**
+- `Wizard.razor.cs` raises `OnActiveStepChanged` and `ActiveStepIndexChanged` only from internal navigation handlers (`HandleNextClick`, `HandlePreviousClick`, `HandleFinishClick`, `HandleSideBarNavigation`), not from parent-driven parameter updates.
+- `WizardStepType.Auto` resolves by position: first step becomes `Start`, last non-`Complete` step becomes `Finish`, and middle steps become `Step`.
+- Sidebar titles fall back to `Step {index + 1}` only when `Title` is `null`; an empty string renders as empty text because the component uses the null-coalescing operator rather than `string.IsNullOrEmpty`.
+- Step registration is add-only via `Wizard.AddStep()`; there is no removal path, so dynamic step removal is not currently supported.
+
+**Known gaps captured as skipped tests:**
+- Programmatic `ActiveStepIndex` parameter changes do not currently trigger `ActiveStepIndexChanged`.
+- Single-step wizards still render start-step navigation instead of suppressing navigation entirely.
+- Dynamic step add/remove updates are not supported by the current registration model.
+
+**Key file paths:**
+- New tests: `src\BlazorWebFormsComponents.Test\Wizard\Callbacks.razor`, `src\BlazorWebFormsComponents.Test\Wizard\StepTypes.razor`, `src\BlazorWebFormsComponents.Test\Wizard\EdgeCases.razor`
+- Existing baseline test: `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor`
+- Component implementation: `src\BlazorWebFormsComponents\Wizard.razor`, `src\BlazorWebFormsComponents\Wizard.razor.cs`, `src\BlazorWebFormsComponents\WizardStep.razor.cs`
+
+### 2026-06-12T09:56:18-04:00: Xml and BaseCompareValidator tracked gap closure
+
+**Task:** Investigate the two tracked bUnit gaps (Xml and BaseCompareValidator) and implement the safe fix.
+
+**Xml — deferred:**
+No `Xml.razor` component source files exist. `tracked-components.json` already marks Xml as `"status": "Deferred"`. The `System.Web.UI.WebControls.Xml` control has no Blazor equivalent yet. Decision documented in `.squad/decisions.md` — no tests should be added until an implementation exists. No repo change required.
+
+**BaseCompareValidator — abstract base; property tests added:**
+`BaseCompareValidator<InputType>` is abstract and cannot be directly instantiated. Added `src/BlazorWebFormsComponents.Test/Validations/BaseCompareValidatorPropertyTests.razor` with 6 tests exercising `Type` (defaults to `ValidationDataType.String`, accepts `Integer`, `Date`) and `CultureInvariantValues` (defaults to `false`, can be set to `true`) via `CompareValidator` and `RangeValidator` as concrete proxies.
+
+**Validation command:** `dotnet test src\BlazorWebFormsComponents.Test --nologo --filter "BaseCompareValidator"` → **18 passed (6 per TFM), 0 failed** across net8.0, net9.0, net10.0.
+
+**Key file paths:**
+- New tests: `src/BlazorWebFormsComponents.Test/Validations/BaseCompareValidatorPropertyTests.razor`
+- Decision note: `.squad/decisions.md` (Xml and BaseCompareValidator section)
+- Component source: `src/BlazorWebFormsComponents/Validations/BaseCompareValidator.cs`
+
+---
+
+### FormShim & WebFormsForm Tests (Issue #533)
+
+**39 new tests — all passing.** Created 2 test files covering FormShim dual-mode support and WebFormsForm component rendering.
+
+**Test files created:**
+- `FormShimTests.cs` (27 tests, all pass): Dual-mode coverage for SSR (IFormCollection) and interactive (Dictionary<string, StringValues>) paths. Tests indexer, GetValues, AllKeys, Count, ContainsKey for both modes plus null/empty. SetFormData mutation tests for interactive mode (populate, replace, multi-value preservation).
+- `WebFormsForm/WebFormsFormTests.razor` (12 tests, all pass): bUnit rendering tests — form element renders, default method is POST, Method/Action parameters, ChildContent renders inside form, HtmlAttributes (class, id, data-*), multiple attributes, empty form, nested elements.
+
+**Bug found and fixed:**
+- `WebFormsForm.razor` was missing `@inherits ComponentBase`, causing it to inherit `BaseWebFormsComponent` via `_Imports.razor`. Both `BaseWebFormsComponent` and `WebFormsForm` had `[Parameter(CaptureUnmatchedValues = true)]`, causing `ThrowForMultipleCaptureUnmatchedValuesParameters` at render time. Fixed by adding explicit `@inherits ComponentBase`.
+- `RequestShim.cs` line 79: `new FormShim(null)` was ambiguous between `FormShim(IFormCollection?)` and `FormShim(Dictionary<string, StringValues>)`. Fixed by casting to `(IFormCollection?)null`.
+
+**Key patterns:**
+- FormShim tests are pure C# xUnit (no bUnit needed) — use `new FormCollection(dict)` for SSR mock data.
+- WebFormsForm tests use `.razor` bUnit pattern inheriting `BlazorWebFormsTestContext`.
+- Any `.razor` component in the main project that should NOT inherit `BaseWebFormsComponent` must have explicit `@inherits ComponentBase` to override the project-level `_Imports.razor`.
+
+≡ Team update (2026-05-21T12:26): Wizard unsupported behaviors remain explicit QA gaps — keep skipped tests for parent-driven `ActiveStepIndex` changes, single-step navigation suppression, and dynamic step add/remove. Tests serve as regression markers while gaps document product deferred behaviors for future implementation — decided by Rogue (per Jeffrey T. Fritz request)

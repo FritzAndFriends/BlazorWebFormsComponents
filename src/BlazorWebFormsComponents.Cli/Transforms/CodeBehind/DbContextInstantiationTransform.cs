@@ -75,7 +75,7 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
         foreach (var contextType in contextTypes)
         {
             // Preserve the original variable name when possible; fall back to generated name
-            var fieldName = originalVarNames.TryGetValue(contextType, out var origVar) && origVar.StartsWith('_')
+            var fieldName = originalVarNames.TryGetValue(contextType, out var origVar)
                 ? origVar
                 : "_" + char.ToLowerInvariant(contextType[0]) + contextType[1..];
 
@@ -83,8 +83,16 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
             // or: Namespace.XxxContext _db = new Namespace.XxxContext();
             var fqnPattern = $@"(?:[\w.]+\.)?{Regex.Escape(contextType)}";
             var fieldDeclRegex = new Regex(
-                $@"(?<indent>[ \t]*)(?:private\s+)?{fqnPattern}\s+\w+\s*=\s*new\s+{fqnPattern}\s*\(\s*\)\s*;",
+                $@"(?<indent>[ \t]*)(?:private\s+)?{fqnPattern}\s+(?<var>\w+)\s*=\s*new\s+{fqnPattern}\s*\(\s*\)\s*;",
                 RegexOptions.Compiled);
+            // Collect variable names that differ from the injected field name before removing declarations
+            var removedVarNames = new HashSet<string>(StringComparer.Ordinal);
+            foreach (Match dm in fieldDeclRegex.Matches(content))
+            {
+                var removedVar = dm.Groups["var"].Value;
+                if (!string.Equals(removedVar, fieldName, StringComparison.Ordinal))
+                    removedVarNames.Add(removedVar);
+            }
             content = fieldDeclRegex.Replace(content, "");
 
             // Replace using declarations: using (XxxContext x = new XxxContext()) { ... }
@@ -151,6 +159,12 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
                 RegexOptions.Compiled);
             content = remainingNewRegex.Replace(content, fieldName);
 
+            // Replace references to removed variable names with the injected field name
+            foreach (var removedVar in removedVarNames)
+            {
+                content = Regex.Replace(content, $@"\b{Regex.Escape(removedVar)}\b", fieldName);
+            }
+
             // Add injection for the context
             if (!content.Contains($"{contextType} {fieldName}", StringComparison.Ordinal))
             {
@@ -181,6 +195,11 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
                         var insertPos = classMatch.Index + classMatch.Length;
                         var field = $"\n    private readonly {contextType} {fieldName};\n";
 
+                        // Derive parameter name distinct from the field name
+                        var paramName = fieldName.StartsWith('_')
+                            ? fieldName.TrimStart('_')
+                            : fieldName + "Param";
+
                         // Check if a constructor already exists
                         var existingCtorRegex = new Regex(
                             $@"public\s+{Regex.Escape(className)}\s*\(([^)]*)\)",
@@ -191,8 +210,8 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
                             // Add parameter to existing constructor
                             var existingParams = ctorMatch.Groups[1].Value.Trim();
                             var newParams = string.IsNullOrEmpty(existingParams)
-                                ? $"{contextType} {fieldName.TrimStart('_')}"
-                                : $"{existingParams}, {contextType} {fieldName.TrimStart('_')}";
+                                ? $"{contextType} {paramName}"
+                                : $"{existingParams}, {contextType} {paramName}";
                             content = content[..ctorMatch.Index]
                                 + $"public {className}({newParams})"
                                 + content[(ctorMatch.Index + ctorMatch.Length)..];
@@ -200,13 +219,13 @@ public class DbContextInstantiationTransform : ICodeBehindTransform
                             // Add field assignment in constructor body
                             var ctorBodyStart = content.IndexOf('{', ctorMatch.Index) + 1;
                             content = content[..ctorBodyStart]
-                                + $"\n        {fieldName} = {fieldName.TrimStart('_')};"
+                                + $"\n        {fieldName} = {paramName};"
                                 + content[ctorBodyStart..];
                         }
                         else
                         {
                             // Create new constructor
-                            var ctor = $"\n    public {className}({contextType} {fieldName.TrimStart('_')})\n    {{\n        {fieldName} = {fieldName.TrimStart('_')};\n    }}\n";
+                            var ctor = $"\n    public {className}({contextType} {paramName})\n    {{\n        {fieldName} = {paramName};\n    }}\n";
                             content = content[..insertPos] + field + ctor + content[insertPos..];
                         }
 

@@ -9,6 +9,7 @@ public class MigrationContext
     public required string OutputPath { get; init; }
     public required MigrationOptions Options { get; init; }
     public IReadOnlyList<SourceFile> SourceFiles { get; set; } = [];
+    public Dictionary<string, string> CustomControlPrefixToNamespace { get; } = new(StringComparer.OrdinalIgnoreCase);
     public TransformLog Log { get; } = new();
 }
 

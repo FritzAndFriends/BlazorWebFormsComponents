@@ -28,7 +28,7 @@ using WingtipToys.Logic;
 
 namespace WingtipToys
 {
-    public partial class Site
+    public partial class Site : WebFormsPageBase
     {
     // TODO(bwfc-general): ClientScript calls preserved — works via WebFormsPageBase (no injection needed). ScriptManagerShim may need @inject ScriptManagerShim ScriptManager for non-page classes.
 
@@ -41,9 +41,27 @@ namespace WingtipToys
     private ListView<Category> categoryList = default!;
     private Image Image1 = default!;
     private ContentPlaceHolder MainContent = default!;
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
+    private readonly ProductContext _productContext;
+
+    private readonly ShoppingCartActions usersShoppingCart;
+
+    public Site(ShoppingCartActions usersShoppingCartParam, ProductContext productContext)
+    {
+        _productContext = productContext;
+        usersShoppingCart = usersShoppingCartParam;
+
+
+        private void HandlePostBack()
+        {
+            // TODO(bwfc-ispostback): Wire HandlePostBack() to appropriate Blazor event handlers (e.g., button Click, form Submit)
+            // Validate the Anti-XSRF token
+            if ((string)ViewState[AntiXsrfTokenKey] != _antiXsrfTokenValue
+            || (string)ViewState[AntiXsrfUserNameKey] != (Context.User.Identity.Name ?? String.Empty))
+            {
+            throw new InvalidOperationException("Validation of Anti-XSRF token failed.");
+            }
+        }
+    }
 
         private const string AntiXsrfTokenKey = "__AntiXsrfToken";
         private const string AntiXsrfUserNameKey = "__AntiXsrfUserName";
@@ -83,7 +101,7 @@ namespace WingtipToys
             Page.PreLoad += master_Page_PreLoad;
         }
 
-        protected void master_Page_PreLoad()
+        protected void master_Page_PreLoad(EventArgs e)
         {
                         // BWFC: IsPostBack guard unwrapped — Blazor re-renders on every state change
             // Set Anti-XSRF token
@@ -107,17 +125,15 @@ namespace WingtipToys
             // TODO(bwfc-lifecycle): Review lifecycle conversion — verify async behavior
             if (firstRender)
             {
-              using (ShoppingCartActions usersShoppingCart = new ShoppingCartActions())
-              {
+              // DbContext 'ShoppingCartActions' is injected via DI
                 string cartStr = string.Format("Cart ({0})", usersShoppingCart.GetCount());
-                cartCount.InnerText = cartStr;
-              }
+                cartCount = cartStr;
             }
         }
 
         public IQueryable<Category> GetCategories()
         {
-          var _db = new WingtipToys.Models.ProductContext();
+          var _db = _productContext; // Injected via DI
           IQueryable<Category> query = _db.Categories;
           return query;
         }
@@ -126,18 +142,12 @@ namespace WingtipToys
         {
             Context.GetOwinContext().Authentication.SignOut();
         }
+    
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
 
-
-        private void HandlePostBack()
-        {
-            // TODO(bwfc-ispostback): Wire HandlePostBack() to appropriate Blazor event handlers (e.g., button Click, form Submit)
-            // Validate the Anti-XSRF token
-            if ((string)ViewState[AntiXsrfTokenKey] != _antiXsrfTokenValue
-            || (string)ViewState[AntiXsrfUserNameKey] != (Context.User.Identity.Name ?? String.Empty))
-            {
-            throw new InvalidOperationException("Validation of Anti-XSRF token failed.");
-            }
-        }
-    }
+    [Parameter]
+    public RenderFragment? ChildComponents { get; set; }
+}
 
 }

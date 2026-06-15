@@ -8,7 +8,7 @@
 		var cut = Render(@<Button Text="Click Me" ToolTip="Button tooltip" />);
 
 		// Assert
-		var button = cut.Find("input[type=submit]");
+		var button = cut.Find("input[type=button]");
 		button.HasAttribute("title").ShouldBeTrue();
 		button.GetAttribute("title").ShouldBe("Button tooltip");
 	}
@@ -44,7 +44,7 @@
 		var cut = Render(@<Button Text="Click Me" ToolTip="" />);
 
 		// Assert — empty ToolTip still produces the title attribute on Button (known behavior)
-		cut.Find("input[type=submit]").GetAttribute("title").ShouldBe("");
+		cut.Find("input[type=button]").GetAttribute("title").ShouldBe("");
 	}
 
 	[Fact]
@@ -54,7 +54,7 @@
 		var cut = Render(@<Button Text="Click Me" />);
 
 		// Assert
-		cut.Find("input[type=submit]").HasAttribute("title").ShouldBeFalse();
+		cut.Find("input[type=button]").HasAttribute("title").ShouldBeFalse();
 	}
 
 	[Fact]
@@ -62,7 +62,7 @@
 	{
 		// Verify Button's ToolTip renders as title after moving to base class
 		var cut = Render(@<Button Text="Submit" ToolTip="Submit form" OnClientClick="return true;" />);
-		cut.Find("input[type=submit]").GetAttribute("title").ShouldBe("Submit form");
+		cut.Find("input[type=button]").GetAttribute("title").ShouldBe("Submit form");
 	}
 
 	[Fact]
@@ -252,7 +252,7 @@
 	public void Button_ToolTip_WithAmpersand_RendersCorrectly()
 	{
 		var cut = Render(@<Button Text="Save" ToolTip="Save & Continue" />);
-		cut.Find("input[type=submit]").GetAttribute("title").ShouldBe("Save & Continue");
+		cut.Find("input[type=button]").GetAttribute("title").ShouldBe("Save & Continue");
 	}
 
 	[Fact]
@@ -286,3 +286,4 @@
 	}
 
 }
+

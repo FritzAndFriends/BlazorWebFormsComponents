@@ -12,7 +12,9 @@ public class FileMetadata
     public string? OutputRootPath { get; init; }
     public string? SourceRootPath { get; init; }
     public string? ProjectNamespace { get; init; }
+    public IReadOnlyDictionary<string, string> CustomControlPrefixToNamespace { get; init; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     public string? CodeBehindContent { get; set; }
+    public BlazorWebFormsComponents.Cli.Analysis.AscxDescriptor? AscxDescriptor { get; set; }
     public Dictionary<string, string> DataBindMap { get; set; } = new();
 
     /// <summary>

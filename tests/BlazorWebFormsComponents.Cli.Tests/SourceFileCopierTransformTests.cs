@@ -185,7 +185,8 @@ public class SourceFileCopierTransformTests : IDisposable
         var copied = await File.ReadAllTextAsync(Path.Combine(outputDir, "BLL", "Students_Logic.cs"));
         Assert.DoesNotContain("new ContosoUniversityEntities()", copied);
         Assert.Contains("private readonly ContosoUniversityEntities", copied);
-        Assert.Contains("_contosoUniversityEntities", copied);
+        // Original variable name 'db' is preserved as the field name
+        Assert.Contains("db", copied);
         // Constructor injection: parameter added to constructor
         Assert.Contains("public Students_Logic(ContosoUniversityEntities", copied);
     }

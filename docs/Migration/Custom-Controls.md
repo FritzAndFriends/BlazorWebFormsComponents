@@ -2,6 +2,24 @@
 
 When migrating ASP.NET Web Forms applications to Blazor, you'll often encounter custom controls that inherit from `WebControl` or `CompositeControl`. The BlazorWebFormsComponents library provides adapter classes that allow you to migrate these controls with minimal code changes.
 
+## CLI Support Status (Current)
+
+The migration CLI now performs **P0 custom-control registration discovery** before conversion:
+
+- Reads `Web.config` `<compilation><assemblies>` and `<pages><controls>` registrations
+- Extracts page/control-level `<%@ Register ... %>` directives from `.aspx`, `.ascx`, and `.master`
+- Normalizes assembly names and reports parse errors without stopping the migration pipeline
+
+These signals are surfaced in prescan/runtime analysis so custom-control namespaces and tag prefixes are known earlier in migration planning.
+
+For ASCX wrappers around custom controls, P1 transform support now also:
+- normalizes `Page_Load` / `OnLoad` lifecycle patterns toward Blazor component lifecycle hooks,
+- removes Web Forms `DataBind()` control-tree calls where ASCX analysis confirms data-binding usage, and
+- rewrites direct `FindControl("...")` lookups to generated `@ref` fields when the lookup is safely resolvable.
+
+For **P1 user-control transform behavior** (lifecycle/data-binding and `FindControl` preparation), see [User Controls](User-Controls.md).  
+TODO(P1-custom-control-scaffolder): direct scaffolding for `.cs` custom controls inheriting from `WebControl`/`CompositeControl` is still in progress.
+
 ## Roslyn Analyzer Support
 
 The `BlazorWebFormsComponents.Analyzers` NuGet package provides automated code analysis and fixes to help with migration:
@@ -341,4 +359,3 @@ See: `/src/BlazorWebFormsComponents.Test/CustomControls/TestComponents/`
 - [BaseWebFormsComponent API](../UtilityFeatures/IDRendering.md)
 - [Blazor Component Basics](https://docs.microsoft.com/aspnet/core/blazor/components/)
 - [Migration Strategies](Strategies.md)
-

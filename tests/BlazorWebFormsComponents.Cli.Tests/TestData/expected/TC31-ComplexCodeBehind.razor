@@ -1,4 +1,6 @@
 @page "/TC31-ComplexCodeBehind"
+<WebFormsForm @formname="TC31ComplexCodeBehindForm">
+    <AntiforgeryToken />
 <PageTitle>Admin Dashboard</PageTitle>
 <h1>Admin Dashboard</h1>
 <Label id="lblStatus" Text="Loading..." />
@@ -11,3 +13,5 @@
 </GridView>
 <Button id="btnExport" Text="Export Report" OnClick="@Export_Click" />
 <Button id="btnRefresh" Text="Refresh" OnClick="@Refresh_Click" />
+
+</WebFormsForm>

@@ -21,6 +21,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ContosoUniversity.BLL;
 namespace ContosoUniversity
 {
     public partial class Home : WebFormsPageBase
@@ -32,10 +33,6 @@ namespace ContosoUniversity
     // For interactive mode, wrap your form in <WebFormsForm OnSubmit="SetRequestFormData">.
     // Form keys found: key
     // For non-page classes, inject RequestShim via DI.
-
-    // --- ConfigurationManager Migration ---
-    // TODO(bwfc-config): ConfigurationManager calls work via BWFC shim.
-    // Ensure app.UseConfigurationManagerShim() is called in Program.cs.
 
         protected override async Task OnInitializedAsync()
         {

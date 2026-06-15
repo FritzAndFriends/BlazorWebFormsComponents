@@ -129,7 +129,7 @@
 		);
 
 		// Click the button to trigger the command
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull("ItemCommand should fire when a command button is clicked");
 		capturedArgs.CommandName.ShouldBe("DoSomething");
@@ -151,7 +151,7 @@
 			</Repeater>
 		);
 
-		cut.Find("input[type=submit]").Click();
+		cut.Find("input[type=button]").Click();
 
 		capturedArgs.ShouldNotBeNull("OnItemCommand should fire when a command button is clicked");
 		capturedArgs.CommandName.ShouldBe("TestCmd");

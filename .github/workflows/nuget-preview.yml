@@ -1,0 +1,69 @@
+name: Publish Preview NuGet
+
+on:
+  push:
+    branches:
+      - 'dev'
+    paths:
+      - 'src/BlazorWebFormsComponents/**'
+      - 'Directory.Build.props'
+      - 'version.json'
+
+jobs:
+  publish-preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install NBGV
+        run: dotnet tool install --global nbgv
+
+      - name: Get version from NBGV
+        id: version
+        run: |
+          VERSION=$(nbgv get-version -v NuGetPackageVersion)
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "📦 Publishing version: $VERSION"
+
+      - name: Restore dependencies
+        run: dotnet restore src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj
+
+      - name: Build
+        run: dotnet build src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-restore
+
+      - name: Run tests
+        run: |
+          dotnet restore src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj
+          dotnet test src/BlazorWebFormsComponents.Test/BlazorWebFormsComponents.Test.csproj --configuration Release --verbosity normal
+
+      - name: Pack
+        run: dotnet pack src/BlazorWebFormsComponents/BlazorWebFormsComponents.csproj --configuration Release --no-build --output ./nupkg
+
+      - name: Push to GitHub Packages
+        run: dotnet nuget push ./nupkg/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+
+      - name: Push to nuget.org
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        if: env.NUGET_API_KEY != ''
+        run: dotnet nuget push ./nupkg/*.nupkg --source "https://api.nuget.org/v3/index.json" --api-key ${{ env.NUGET_API_KEY }} --skip-duplicate
+
+      - name: Summary
+        run: |
+          echo "### 📦 Preview Published" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** \`${{ steps.version.outputs.version }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Package:** Fritz.BlazorWebFormsComponents" >> $GITHUB_STEP_SUMMARY
+          echo "**Feed:** nuget.org + GitHub Packages" >> $GITHUB_STEP_SUMMARY

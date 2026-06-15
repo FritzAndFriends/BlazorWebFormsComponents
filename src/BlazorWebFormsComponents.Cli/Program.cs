@@ -1,4 +1,5 @@
 using System.CommandLine;
+using BlazorWebFormsComponents.Cli.Analysis;
 using BlazorWebFormsComponents.Cli.Config;
 using BlazorWebFormsComponents.Cli.Interop;
 using BlazorWebFormsComponents.Cli.Io;
@@ -51,10 +52,12 @@ class Program
         services.AddSingleton<IMarkupTransform, FormWrapperTransform>();
         services.AddSingleton<IMarkupTransform, DisplayExpressionTransform>();
         services.AddSingleton<IMarkupTransform, ExpressionTransform>();
+        services.AddSingleton<IMarkupTransform, ContentTemplateUnwrapperTransform>();
         services.AddSingleton<IMarkupTransform, ColorAttributeTransform>();
         services.AddSingleton<IMarkupTransform, ServerCodeBlockTransform>();
         services.AddSingleton<IMarkupTransform, LoginViewTransform>();
         services.AddSingleton<IMarkupTransform, SelectMethodTransform>();
+        services.AddSingleton<IMarkupTransform, LocalTagNamespaceResolutionTransform>();
         services.AddSingleton<IMarkupTransform, AjaxToolkitPrefixTransform>();
         services.AddSingleton<IMarkupTransform, AspPrefixTransform>();
         services.AddSingleton<IMarkupTransform, DataBindingAttributeTransform>();
@@ -74,7 +77,9 @@ class Program
         services.AddSingleton<IMarkupTransform, EnhancedNavAnnotationTransform>();
         services.AddSingleton<IMarkupTransform, GetRouteUrlMarkupTransform>();
         services.AddSingleton<IMarkupTransform, HtmlBoilerplateStripTransform>();
+        services.AddSingleton<IMarkupTransform, PageFormWrapperTransform>();
         services.AddSingleton<IMarkupTransform, SsrFormContractTransform>();
+        services.AddSingleton<IMarkupTransform, ButtonToSubmitTransform>();
         services.AddSingleton<IMarkupTransform, MarkupCleanupTransform>();
         services.AddSingleton<IMarkupTransform, LabelFieldBindTransform>();
 
@@ -82,11 +87,13 @@ class Program
         services.AddSingleton<ICodeBehindTransform, TodoHeaderTransform>();
         services.AddSingleton<ICodeBehindTransform, NestedClassCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, UsingStripTransform>();
+        services.AddSingleton<ICodeBehindTransform, ProjectNamespaceUsingTransform>();
         services.AddSingleton<ICodeBehindTransform, IdentityUsingTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpUtilityRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, EntityFrameworkTransform>();
         services.AddSingleton<ICodeBehindTransform, EfContextConstructorTransform>();
         services.AddSingleton<ICodeBehindTransform, DbContextInstantiationTransform>();
+        services.AddSingleton<ICodeBehindTransform, ServiceConstructorWiringTransform>();
         services.AddSingleton<ICodeBehindTransform, HttpContextAccessorTransform>();
         services.AddSingleton<ICodeBehindTransform, SelectMethodMaterializeTransform>();
         services.AddSingleton<ICodeBehindTransform, EagerLoadNavigationTransform>();
@@ -98,6 +105,7 @@ class Program
         services.AddSingleton<ICodeBehindTransform, MethodNameCollisionTransform>();
         services.AddSingleton<ICodeBehindTransform, SelfInstantiationTransform>();
         services.AddSingleton<ICodeBehindTransform, ComponentRefCodeBehindTransform>();
+        // FindControlComponentRefTransform removed — FindControl is now a BWFC runtime feature
         services.AddSingleton<ICodeBehindTransform, ComponentRefNullSafetyTransform>();
         services.AddSingleton<ICodeBehindTransform, LabelFieldBindCodeBehindTransform>();
         services.AddSingleton<ICodeBehindTransform, ResponseRedirectTransform>();
@@ -113,8 +121,12 @@ class Program
         services.AddSingleton<ICodeBehindTransform, WebMethodAnnotationTransform>();
         services.AddSingleton<ICodeBehindTransform, PageLifecycleTransform>();
         services.AddSingleton<ICodeBehindTransform, EventHandlerSignatureTransform>();
+        services.AddSingleton<ICodeBehindTransform, DeadControlTreeCodeTransform>();
+        services.AddSingleton<ICodeBehindTransform, ItemsAddToDataSourceTransform>();
         services.AddSingleton<ICodeBehindTransform, InnerTextRewriteTransform>();
         services.AddSingleton<ICodeBehindTransform, DataBindTransform>();
+        services.AddSingleton<ICodeBehindTransform, DataSourceParameterBindingTransform>();
+        services.AddSingleton<ICodeBehindTransform, StaticItemsParameterBindingTransform>();
         services.AddSingleton<ICodeBehindTransform, ClientScriptTransform>();
         services.AddSingleton<ICodeBehindTransform, UrlCleanupTransform>();
         services.AddSingleton<PageQuarantineDetector>();
@@ -135,10 +147,15 @@ class Program
         services.AddSingleton<IRuntimeSignalDetector, IdentityRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, GlobalAsaxRuntimeSignalDetector>();
         services.AddSingleton<IRuntimeSignalDetector, WebConfigRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, AjaxToolkitRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, SqlClientRuntimeSignalDetector>();
+        services.AddSingleton<IRuntimeSignalDetector, DefaultPageRuntimeSignalDetector>();
+        services.AddSingleton<AscxDescriptorAnalyzer>();
         services.AddSingleton<RuntimeDetector>();
         services.AddSingleton<ProgramCsEmitter>();
         services.AddSingleton<MasterPageToLayoutConverter>();
         services.AddSingleton<ProjectScaffolder>();
+        services.AddSingleton<CodeOnlyControlScaffolder>();
         services.AddSingleton<GlobalUsingsGenerator>();
         services.AddSingleton<ShimGenerator>();
         services.AddSingleton<AppAssetInjector>();
@@ -182,7 +199,8 @@ class Program
             sp.GetRequiredService<NativeNuGetStaticAssetExtractor>(),
             sp.GetRequiredService<NativeEdmxToEfCoreConverter>(),
             sp.GetRequiredService<RedirectHandlerAnnotator>(),
-            sp.GetRequiredService<PageQuarantineDetector>()));
+            sp.GetRequiredService<PageQuarantineDetector>(),
+            sp.GetRequiredService<CodeOnlyControlScaffolder>()));
 
         return services.BuildServiceProvider();
     }
@@ -603,4 +621,3 @@ class Program
         return edmxCommand;
     }
 }
-
