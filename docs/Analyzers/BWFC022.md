@@ -69,7 +69,7 @@ Page.ClientScript.RegisterStartupScript(GetType(), "init", "...", true);
 ClientScript.RegisterStartupScript(GetType(), "init", "...", true);
 ```
 
-See ["ClientScriptShim (Zero-Rewrite Path)"](../Migration/ClientScriptMigrationGuide.md#-recommended-clientscriptshim-zero-rewrite-path) in the migration guide for details.
+See ["ClientScriptShim (Zero-Rewrite Path)"](../Migration/ClientScriptMigrationGuide.md#recommended-clientscriptshim-zero-rewrite-path) in the migration guide for details.
 
 ---
 
