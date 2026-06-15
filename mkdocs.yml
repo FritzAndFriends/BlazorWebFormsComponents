@@ -196,46 +196,47 @@ nav:
     - WebFormsPage: UtilityFeatures/WebFormsPage.md
     - WebFormsForm: UtilityFeatures/WebFormsForm.md
   - Migration:
-      - Getting Started: Migration/readme.md
-      - Quick Start Guide: Migration/QuickStart.md
-      - Three-Layer Methodology: Migration/Methodology.md
-      - Control Coverage: Migration/ControlCoverage.md
-      - Strangler Fig Pattern: Migration/StranglerFigPattern.md
-      - Phase 1 - Compilation Shims:
-          - ConfigurationManager: Migration/Phase1-ConfigurationManager.md
-          - App_Start Stubs: Migration/Phase1-AppStartStubs.md
-      - Phase 2 - Runtime Shims:
-          - Session State: Migration/Phase2-SessionShim.md
-          - Page Lifecycle: Migration/Phase2-LifecycleTransforms.md
-          - Event Handler Signatures: Migration/Phase2-EventHandlerSignatures.md
-      - Assess:
-          - Migration Readiness Assessment: Migration/migration_readiness.md
-          - Deprecation Guidance: Migration/DeprecationGuidance.md
-          - Known Fidelity Divergences: MigrationGuides/KnownFidelityDivergences.md
-      - Plan:
-          - Migration Strategies: Migration/Strategies.md
-          - .NET Standard to the Rescue: Migration/NET-Standard.md
-          - Automated Migration Guide: Migration/AutomatedMigration.md
-          - Automated Migration with Copilot: Migration/AutomatedMigrationWithCopilot.md
-          - Roslyn Analyzers: Migration/Analyzers.md
-      - Guides:
-          - ClientScript Migration: Migration/ClientScriptMigrationGuide.md
-      - Implement:
-          - Master Pages: Migration/MasterPages.md
-          - User Controls: Migration/User-Controls.md
-          - Custom Controls: Migration/Custom-Controls.md
-          - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
-          - Custom WebControl (RenderContents): Migration/CustomWebControl.md
-          - FindControl Migration: Migration/FindControl-Migration.md
-          - Deferred Controls: Migration/DeferredControls.md
-          - Themes and Skins: Migration/ThemesAndSkins.md
-          - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
-      - Copilot Skills (AI-Assisted):
-          - Overview: Migration/CopilotSkills/Overview.md
-          - Core Migration: Migration/CopilotSkills/CoreMigration.md
-          - Identity & Auth: Migration/CopilotSkills/IdentityMigration.md
-          - Data & Architecture: Migration/CopilotSkills/DataMigration.md
-      - Migration Checklist Template: Migration/ChecklistTemplate.md
+     - Getting Started: Migration/readme.md
+     - Quick Start Guide: Migration/QuickStart.md
+     - Three-Layer Methodology: Migration/Methodology.md
+     - Control Coverage: Migration/ControlCoverage.md
+     - Strangler Fig Pattern: Migration/StranglerFigPattern.md
+     - Phase 1 - Compilation Shims:
+         - ConfigurationManager: Migration/Phase1-ConfigurationManager.md
+         - App_Start Stubs: Migration/Phase1-AppStartStubs.md
+     - Phase 2 - Runtime Shims:
+         - Session State: Migration/Phase2-SessionShim.md
+         - Page Lifecycle: Migration/Phase2-LifecycleTransforms.md
+         - Event Handler Signatures: Migration/Phase2-EventHandlerSignatures.md
+     - Assess:
+         - Migration Readiness Assessment: Migration/migration_readiness.md
+         - Deprecation Guidance: Migration/DeprecationGuidance.md
+         - Known Fidelity Divergences: MigrationGuides/KnownFidelityDivergences.md
+     - Plan:
+         - Migration Strategies: Migration/Strategies.md
+         - .NET Standard to the Rescue: Migration/NET-Standard.md
+         - Automated Migration Guide: Migration/AutomatedMigration.md
+         - Automated Migration with Copilot: Migration/AutomatedMigrationWithCopilot.md
+         - Roslyn Analyzers: Migration/Analyzers.md
+     - Guides:
+         - ClientScript Migration: Migration/ClientScriptMigrationGuide.md
+         - Inline C# Forms: Migration/InlineCSharp.md
+     - Implement:
+         - Master Pages: Migration/MasterPages.md
+         - User Controls: Migration/User-Controls.md
+         - Custom Controls: Migration/Custom-Controls.md
+         - Custom Control Base Classes: Migration/CustomControl-BaseClasses.md
+         - Custom WebControl (RenderContents): Migration/CustomWebControl.md
+         - FindControl Migration: Migration/FindControl-Migration.md
+         - Deferred Controls: Migration/DeferredControls.md
+         - Themes and Skins: Migration/ThemesAndSkins.md
+         - Migrating .ashx Handlers: Migration/MigratingAshxHandlers.md
+     - Copilot Skills (AI-Assisted):
+         - Overview: Migration/CopilotSkills/Overview.md
+         - Core Migration: Migration/CopilotSkills/CoreMigration.md
+         - Identity & Auth: Migration/CopilotSkills/IdentityMigration.md
+         - Data & Architecture: Migration/CopilotSkills/DataMigration.md
+     - Migration Checklist Template: Migration/ChecklistTemplate.md
   - Analyzers:
       - BWFC022: Analyzers/BWFC022.md
       - BWFC023: Analyzers/BWFC023.md

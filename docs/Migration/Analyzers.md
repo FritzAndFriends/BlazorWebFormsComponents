@@ -793,7 +793,6 @@ This analyzer does not have an automatic code fix because the correct replacemen
 
 <!-- TODO: Add Visual Studio screenshot showing BWFC025 Warning squiggle on ViewState assignment with DataTable -->
 <!-- Screenshot should show: the yellow warning squiggle under the assignment, tooltip showing "ViewState assignment stores 'System.Data.DataTable' which may not be JSON-serializable" -->
-![BWFC025 Warning squiggle in Visual Studio](../images/analyzers/bwfc025-warning-squiggle.png){ .analyzer-screenshot }
 
 ---
 

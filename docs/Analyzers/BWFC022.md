@@ -20,6 +20,12 @@ This analyzer warns when your code uses `Page.ClientScript` or `ClientScriptMana
 
 ---
 
+## Recommended Solution
+
+**Use the ClientScriptShim for zero-code rewrite** — See [ClientScript Migration Guide](../Migration/ClientScriptMigrationGuide.md) for details on the easiest migration path that requires no code changes.
+
+---
+
 ## Example
 
 ```csharp
