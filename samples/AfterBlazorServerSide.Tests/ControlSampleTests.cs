@@ -243,15 +243,29 @@ public class ControlSampleTests
     [InlineData("/ControlSamples/ScriptManager")]
     [InlineData("/ControlSamples/Substitution")]
     [InlineData("/ControlSamples/ClientScript")]
+    [InlineData("/ControlSamples/ClientScriptShim")]
+    [InlineData("/ControlSamples/NamingContainer")]
+    [InlineData("/ControlSamples/PostBackDemo")]
     public async Task AjaxControl_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);
     }
 
     // Migration Shim Sample Pages
+    // Note: /ControlSamples/ScriptManagerProxy is registered in ComponentCatalog but has no
+    // backing page file yet — it will be added here once the page is implemented.
     [Theory]
     [InlineData("/migration/request-form")]
     [InlineData("/migration/webforms-form")]
+    [InlineData("/ControlSamples/Migration/ConfigurationManager")]
+    [InlineData("/ControlSamples/Migration/CustomWebControl")]
+    [InlineData("/migration/cache")]
+    [InlineData("/migration/findcontrol")]
+    [InlineData("/migration/ispostback")]
+    [InlineData("/migration/request")]
+    [InlineData("/migration/response-redirect")]
+    [InlineData("/migration/server-mappath")]
+    [InlineData("/migration/session")]
     public async Task MigrationPage_Loads_WithoutErrors(string path)
     {
         await VerifyPageLoadsWithoutErrors(path);

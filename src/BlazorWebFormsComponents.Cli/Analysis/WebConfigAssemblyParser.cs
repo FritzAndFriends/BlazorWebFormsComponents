@@ -36,9 +36,30 @@ public class WebConfigAssemblyParser
 
     public ControlRegistrationInfo ParseProject(string sourcePath)
     {
-        var result = Parse(FindWebConfig(sourcePath));
         if (string.IsNullOrWhiteSpace(sourcePath) || !Directory.Exists(sourcePath))
-            return result;
+            return new();
+
+        var webConfigPaths = RuntimeDetectionFiles.EnumerateFiles(sourcePath, ".config")
+            .Where(file => Path.GetFileName(file).Equals("Web.config", StringComparison.OrdinalIgnoreCase))
+            .OrderBy(file => file, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var assemblies = new List<AssemblyRegistration>();
+        var namespaceTags = new List<NamespaceTagRegistration>();
+        var errors = new List<string>();
+
+        foreach (var webConfigPath in webConfigPaths)
+        {
+            var parsed = Parse(webConfigPath);
+            if (!string.IsNullOrWhiteSpace(parsed.Error))
+            {
+                errors.Add($"{Path.GetRelativePath(sourcePath, webConfigPath)}: {parsed.Error}");
+                continue;
+            }
+
+            assemblies.AddRange(parsed.Assemblies);
+            namespaceTags.AddRange(parsed.NamespaceTags);
+        }
 
         var registerDirectives = new List<RegisterDirectiveRegistration>();
         foreach (var file in RuntimeDetectionFiles.EnumerateFiles(sourcePath, ".aspx", ".ascx", ".master"))
@@ -77,17 +98,30 @@ public class WebConfigAssemblyParser
             }
         }
 
-        return result with
+        var distinctAssemblies = DistinctBy(
+            assemblies,
+            registration => string.Join("|", registration.AssemblyName, registration.Namespace ?? string.Empty));
+        var distinctNamespaceTags = DistinctBy(
+            namespaceTags,
+            registration => string.Join("|", registration.TagPrefix, registration.Namespace, registration.AssemblyName ?? string.Empty));
+        var distinctRegisterDirectives = DistinctBy(
+            registerDirectives,
+            registration => string.Join("|",
+                registration.TagPrefix,
+                registration.TagName ?? string.Empty,
+                registration.Namespace ?? string.Empty,
+                registration.AssemblyName ?? string.Empty,
+                registration.SourceVirtualPath ?? string.Empty,
+                registration.SourceFilePath));
+
+        return new ControlRegistrationInfo
         {
-            RegisterDirectives = DistinctBy(
-                registerDirectives,
-                registration => string.Join("|",
-                    registration.TagPrefix,
-                    registration.TagName ?? string.Empty,
-                    registration.Namespace ?? string.Empty,
-                    registration.AssemblyName ?? string.Empty,
-                    registration.SourceVirtualPath ?? string.Empty,
-                    registration.SourceFilePath))
+            WebConfigPath = webConfigPaths.FirstOrDefault(),
+            Error = errors.Count > 0 ? string.Join(" | ", errors) : null,
+            Assemblies = distinctAssemblies,
+            NamespaceTags = distinctNamespaceTags,
+            RegisterDirectives = distinctRegisterDirectives,
+            PrefixToNamespaceMap = BuildPrefixToNamespaceMap(distinctNamespaceTags, distinctRegisterDirectives)
         };
     }
 
@@ -123,15 +157,19 @@ public class WebConfigAssemblyParser
             .Where(static registration => registration is not null)
             .Cast<NamespaceTagRegistration>();
 
+        var distinctAssemblies = DistinctBy(
+            assemblies,
+            registration => string.Join("|", registration.AssemblyName, registration.Namespace ?? string.Empty));
+        var distinctNamespaceTags = DistinctBy(
+            namespaceTags,
+            registration => string.Join("|", registration.TagPrefix, registration.Namespace, registration.AssemblyName ?? string.Empty));
+
         return new ControlRegistrationInfo
         {
             WebConfigPath = webConfigPath,
-            Assemblies = DistinctBy(
-                assemblies,
-                registration => string.Join("|", registration.AssemblyName, registration.Namespace ?? string.Empty)),
-            NamespaceTags = DistinctBy(
-                namespaceTags,
-                registration => string.Join("|", registration.TagPrefix, registration.Namespace, registration.AssemblyName ?? string.Empty))
+            Assemblies = distinctAssemblies,
+            NamespaceTags = distinctNamespaceTags,
+            PrefixToNamespaceMap = BuildPrefixToNamespaceMap(distinctNamespaceTags, [])
         };
     }
 
@@ -196,6 +234,29 @@ public class WebConfigAssemblyParser
             .Select(static group => group.First())
             .ToList();
     }
+
+    private static IReadOnlyDictionary<string, string> BuildPrefixToNamespaceMap(
+        IEnumerable<NamespaceTagRegistration> namespaceTags,
+        IEnumerable<RegisterDirectiveRegistration> registerDirectives)
+    {
+        var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var registration in namespaceTags.OrderBy(static item => item.TagPrefix, StringComparer.OrdinalIgnoreCase))
+        {
+            if (!map.ContainsKey(registration.TagPrefix))
+                map[registration.TagPrefix] = registration.Namespace;
+        }
+
+        foreach (var registration in registerDirectives
+                     .Where(static item => !string.IsNullOrWhiteSpace(item.Namespace))
+                     .OrderBy(static item => item.TagPrefix, StringComparer.OrdinalIgnoreCase))
+        {
+            if (!map.ContainsKey(registration.TagPrefix))
+                map[registration.TagPrefix] = registration.Namespace!;
+        }
+
+        return map;
+    }
 }
 
 public sealed record ControlRegistrationInfo
@@ -205,6 +266,7 @@ public sealed record ControlRegistrationInfo
     public IReadOnlyList<AssemblyRegistration> Assemblies { get; init; } = [];
     public IReadOnlyList<NamespaceTagRegistration> NamespaceTags { get; init; } = [];
     public IReadOnlyList<RegisterDirectiveRegistration> RegisterDirectives { get; init; } = [];
+    public IReadOnlyDictionary<string, string> PrefixToNamespaceMap { get; init; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 }
 
 public sealed record AssemblyRegistration(string AssemblyName, string? Namespace);

@@ -132,6 +132,8 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [Calendar](docs/EditorControls/Calendar.md)
     - [CheckBox](docs/EditorControls/CheckBox.md)
     - [CheckBoxList](docs/EditorControls/CheckBoxList.md)
+    - [Content](docs/EditorControls/Content.md)
+    - [ContentPlaceHolder](docs/EditorControls/ContentPlaceHolder.md)
     - [DropDownList](docs/EditorControls/DropDownList.md)
     - [FileUpload](docs/EditorControls/FileUpload.md)
     - [HiddenField](docs/EditorControls/HiddenField.md)
@@ -143,6 +145,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [ListBox](docs/EditorControls/ListBox.md)
     - [Literal](docs/EditorControls/Literal.md)
     - [Localize](docs/EditorControls/Localize.md)
+    - [MasterPage](docs/EditorControls/MasterPage.md)
     - [MultiView](docs/EditorControls/MultiView.md)
     - [Panel](docs/EditorControls/Panel.md)
     - [PlaceHolder](docs/EditorControls/PlaceHolder.md)
@@ -150,7 +153,7 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [RadioButtonList](docs/EditorControls/RadioButtonList.md)
     - [Table](docs/EditorControls/Table.md)
     - [TextBox](docs/EditorControls/TextBox.md)
-    - [View](docs/EditorControls/MultiView.md)
+    - [View](docs/EditorControls/View.md)
     - ~~Xml~~ — *Deferred ([details](docs/Migration/DeferredControls.md))*
   - Data Controls
     - [Chart](docs/DataControls/Chart.md)
@@ -163,6 +166,8 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [ListView](docs/DataControls/ListView.md)
     - [Repeater](docs/DataControls/Repeater.md)
   - Validation Controls
+    - [BaseCompareValidator](docs/ValidationControls/BaseCompareValidator.md)
+    - [BaseValidator](docs/ValidationControls/BaseValidator.md)
     - [CompareValidator](docs/ValidationControls/CompareValidator.md)
     - [CustomValidator](docs/ValidationControls/CustomValidator.md)
     - [RangeValidator](docs/ValidationControls/RangeValidator.md)
@@ -190,6 +195,8 @@ There are a significant number of controls in ASP.NET Web Forms, and we will foc
     - [Timer](docs/EditorControls/Timer.md)
     - [UpdatePanel](docs/EditorControls/UpdatePanel.md)
     - [UpdateProgress](docs/EditorControls/UpdateProgress.md)
+  - Utility Components
+    - [NamingContainer](docs/UtilityFeatures/NamingContainer.md)
 
 
 ## Ajax Control Toolkit Components

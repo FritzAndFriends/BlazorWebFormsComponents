@@ -29,6 +29,15 @@ public sealed class RuntimeDetectorTests : IDisposable
             <%@ Page Language="C#" %>
             <%@ Register Assembly="AjaxControlToolkit" Namespace="AjaxControlToolkit" TagPrefix="ajaxToolkit" %>
             """);
+        File.WriteAllText(Path.Combine(_tempDir, "FancyPager.cs"), """
+            using System.Web.UI.WebControls;
+
+            namespace AjaxControlToolkit;
+
+            public class FancyPager : WebControl
+            {
+            }
+            """);
 
         var detector = TestHelpers.CreateDefaultRuntimeDetector();
 
@@ -40,6 +49,51 @@ public sealed class RuntimeDetectorTests : IDisposable
         Assert.Contains(profile.CustomControlRegistrations.RegisterDirectives, registration =>
             registration.TagPrefix == "ajaxToolkit"
             && registration.AssemblyName == "AjaxControlToolkit");
+        Assert.Equal("Microsoft.AspNet.Web.Optimization.WebForms", profile.CustomControlPrefixToNamespaceMap["webopt"]);
+        Assert.Equal("AjaxControlToolkit", profile.CustomControlPrefixToNamespaceMap["ajaxToolkit"]);
+        Assert.Contains(profile.CodeOnlyServerControls, descriptor =>
+            descriptor.ClassName == "FancyPager"
+            && descriptor.Namespace == "AjaxControlToolkit"
+            && descriptor.TagPrefixes.Contains("ajaxToolkit", StringComparer.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Detect_IncludesNamespacePrefixPlumbing_FromRootAndNestedWebConfig()
+    {
+        File.WriteAllText(Path.Combine(_tempDir, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <system.web>
+                <pages>
+                  <controls>
+                    <add assembly="Contoso.Root" namespace="Contoso.Root.Controls" tagPrefix="root" />
+                  </controls>
+                </pages>
+              </system.web>
+            </configuration>
+            """);
+
+        var adminDirectory = Path.Combine(_tempDir, "Admin");
+        Directory.CreateDirectory(adminDirectory);
+        File.WriteAllText(Path.Combine(adminDirectory, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <system.web>
+                <pages>
+                  <controls>
+                    <add assembly="Contoso.Admin" namespace="Contoso.Admin.Controls" tagPrefix="admin" />
+                  </controls>
+                </pages>
+              </system.web>
+            </configuration>
+            """);
+
+        var detector = TestHelpers.CreateDefaultRuntimeDetector();
+
+        var profile = detector.Detect(_tempDir);
+
+        Assert.Equal("Contoso.Root.Controls", profile.CustomControlPrefixToNamespaceMap["root"]);
+        Assert.Equal("Contoso.Admin.Controls", profile.CustomControlPrefixToNamespaceMap["admin"]);
     }
 
     public void Dispose()

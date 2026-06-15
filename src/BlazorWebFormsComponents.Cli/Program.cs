@@ -57,6 +57,7 @@ class Program
         services.AddSingleton<IMarkupTransform, ServerCodeBlockTransform>();
         services.AddSingleton<IMarkupTransform, LoginViewTransform>();
         services.AddSingleton<IMarkupTransform, SelectMethodTransform>();
+        services.AddSingleton<IMarkupTransform, LocalTagNamespaceResolutionTransform>();
         services.AddSingleton<IMarkupTransform, AjaxToolkitPrefixTransform>();
         services.AddSingleton<IMarkupTransform, AspPrefixTransform>();
         services.AddSingleton<IMarkupTransform, DataBindingAttributeTransform>();
@@ -154,6 +155,7 @@ class Program
         services.AddSingleton<ProgramCsEmitter>();
         services.AddSingleton<MasterPageToLayoutConverter>();
         services.AddSingleton<ProjectScaffolder>();
+        services.AddSingleton<CodeOnlyControlScaffolder>();
         services.AddSingleton<GlobalUsingsGenerator>();
         services.AddSingleton<ShimGenerator>();
         services.AddSingleton<AppAssetInjector>();
@@ -197,7 +199,8 @@ class Program
             sp.GetRequiredService<NativeNuGetStaticAssetExtractor>(),
             sp.GetRequiredService<NativeEdmxToEfCoreConverter>(),
             sp.GetRequiredService<RedirectHandlerAnnotator>(),
-            sp.GetRequiredService<PageQuarantineDetector>()));
+            sp.GetRequiredService<PageQuarantineDetector>(),
+            sp.GetRequiredService<CodeOnlyControlScaffolder>()));
 
         return services.BuildServiceProvider();
     }

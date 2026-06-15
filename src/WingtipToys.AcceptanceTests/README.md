@@ -44,6 +44,8 @@ dotnet test src/WingtipToys.AcceptanceTests
 | **ShoppingCartTests** | Product list displays products, add item to cart, update cart quantity, remove item from cart |
 | **AuthenticationTests** | Register page has expected form fields, Login page has expected form fields, Register → Login end-to-end flow |
 | **StaticAssetTests** | CSS files are served (HTTP 200), no broken images on ProductList, navbar has Bootstrap classes & reasonable height, homepage/ProductList/ProductDetails visual sanity screenshots, no failed static asset requests on homepage |
+| **ProductDetailsTests** | ProductDetails page renders content (image, heading, description) when navigated via link click from ProductList |
+| **EnhancedNavigationFlowTests** | ProductList via navbar click shows products, ProductDetails from link shows core fields, ShoppingCart shows items after AddToCart, ProductDetails via direct URL renders all data fields, enhanced load event fires on link navigation, `<body data-enhance-nav="false">` is absent, and `SelectMethod` data renders during enhanced navigation |
 
 ## Usage in Migration Iterations
 

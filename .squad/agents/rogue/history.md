@@ -155,4 +155,40 @@ Confirmed 10/10 ComponentRef tests passing. Test coverage is complete — no fur
 - Existing baseline test: `src\BlazorWebFormsComponents.Test\Wizard\Navigation.razor`
 - Component implementation: `src\BlazorWebFormsComponents\Wizard.razor`, `src\BlazorWebFormsComponents\Wizard.razor.cs`, `src\BlazorWebFormsComponents\WizardStep.razor.cs`
 
+### 2026-06-12T09:56:18-04:00: Xml and BaseCompareValidator tracked gap closure
+
+**Task:** Investigate the two tracked bUnit gaps (Xml and BaseCompareValidator) and implement the safe fix.
+
+**Xml — deferred:**
+No `Xml.razor` component source files exist. `tracked-components.json` already marks Xml as `"status": "Deferred"`. The `System.Web.UI.WebControls.Xml` control has no Blazor equivalent yet. Decision documented in `.squad/decisions.md` — no tests should be added until an implementation exists. No repo change required.
+
+**BaseCompareValidator — abstract base; property tests added:**
+`BaseCompareValidator<InputType>` is abstract and cannot be directly instantiated. Added `src/BlazorWebFormsComponents.Test/Validations/BaseCompareValidatorPropertyTests.razor` with 6 tests exercising `Type` (defaults to `ValidationDataType.String`, accepts `Integer`, `Date`) and `CultureInvariantValues` (defaults to `false`, can be set to `true`) via `CompareValidator` and `RangeValidator` as concrete proxies.
+
+**Validation command:** `dotnet test src\BlazorWebFormsComponents.Test --nologo --filter "BaseCompareValidator"` → **18 passed (6 per TFM), 0 failed** across net8.0, net9.0, net10.0.
+
+**Key file paths:**
+- New tests: `src/BlazorWebFormsComponents.Test/Validations/BaseCompareValidatorPropertyTests.razor`
+- Decision note: `.squad/decisions.md` (Xml and BaseCompareValidator section)
+- Component source: `src/BlazorWebFormsComponents/Validations/BaseCompareValidator.cs`
+
+---
+
+### FormShim & WebFormsForm Tests (Issue #533)
+
+**39 new tests — all passing.** Created 2 test files covering FormShim dual-mode support and WebFormsForm component rendering.
+
+**Test files created:**
+- `FormShimTests.cs` (27 tests, all pass): Dual-mode coverage for SSR (IFormCollection) and interactive (Dictionary<string, StringValues>) paths. Tests indexer, GetValues, AllKeys, Count, ContainsKey for both modes plus null/empty. SetFormData mutation tests for interactive mode (populate, replace, multi-value preservation).
+- `WebFormsForm/WebFormsFormTests.razor` (12 tests, all pass): bUnit rendering tests — form element renders, default method is POST, Method/Action parameters, ChildContent renders inside form, HtmlAttributes (class, id, data-*), multiple attributes, empty form, nested elements.
+
+**Bug found and fixed:**
+- `WebFormsForm.razor` was missing `@inherits ComponentBase`, causing it to inherit `BaseWebFormsComponent` via `_Imports.razor`. Both `BaseWebFormsComponent` and `WebFormsForm` had `[Parameter(CaptureUnmatchedValues = true)]`, causing `ThrowForMultipleCaptureUnmatchedValuesParameters` at render time. Fixed by adding explicit `@inherits ComponentBase`.
+- `RequestShim.cs` line 79: `new FormShim(null)` was ambiguous between `FormShim(IFormCollection?)` and `FormShim(Dictionary<string, StringValues>)`. Fixed by casting to `(IFormCollection?)null`.
+
+**Key patterns:**
+- FormShim tests are pure C# xUnit (no bUnit needed) — use `new FormCollection(dict)` for SSR mock data.
+- WebFormsForm tests use `.razor` bUnit pattern inheriting `BlazorWebFormsTestContext`.
+- Any `.razor` component in the main project that should NOT inherit `BaseWebFormsComponent` must have explicit `@inherits ComponentBase` to override the project-level `_Imports.razor`.
+
 ≡ Team update (2026-05-21T12:26): Wizard unsupported behaviors remain explicit QA gaps — keep skipped tests for parent-driven `ActiveStepIndex` changes, single-step navigation suppression, and dynamic step add/remove. Tests serve as regression markers while gaps document product deferred behaviors for future implementation — decided by Rogue (per Jeffrey T. Fritz request)

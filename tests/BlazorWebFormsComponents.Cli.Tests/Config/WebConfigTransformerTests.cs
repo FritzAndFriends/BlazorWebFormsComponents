@@ -95,6 +95,81 @@ public sealed class WebConfigTransformerTests : IDisposable
         Assert.Equal("Data Source=.;Initial Catalog=MyDb;Integrated Security=True", connectionString);
     }
 
+    [Fact]
+    public void Transform_DuplicateAppSettingKeys_LastValueWins()
+    {
+        File.WriteAllText(Path.Combine(_testRoot, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <appSettings>
+                <add key="FeatureFlag" value="false" />
+                <add key="FeatureFlag" value="true" />
+              </appSettings>
+            </configuration>
+            """);
+
+        var transformer = new WebConfigTransformer();
+
+        var result = transformer.Transform(_testRoot);
+
+        Assert.NotNull(result);
+        using var json = JsonDocument.Parse(result!.JsonContent!);
+        var featureFlag = json.RootElement.GetProperty("FeatureFlag").GetString();
+        Assert.Equal("true", featureFlag);
+        Assert.Equal(1, result.AppSettingsCount);
+    }
+
+    [Fact]
+    public void Transform_IgnoresIncompleteConnectionStringEntries()
+    {
+        File.WriteAllText(Path.Combine(_testRoot, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration>
+              <connectionStrings>
+                <add name="MissingConnectionString" providerName="System.Data.SqlClient" />
+                <add connectionString="Server=.;Database=MissingName;" providerName="System.Data.SqlClient" />
+                <add name="ValidConnection" connectionString="Server=.;Database=ValidDb;" providerName="System.Data.SqlClient" />
+              </connectionStrings>
+            </configuration>
+            """);
+
+        var transformer = new WebConfigTransformer();
+
+        var result = transformer.Transform(_testRoot);
+
+        Assert.NotNull(result);
+        Assert.Equal(1, result!.ConnectionStringsCount);
+        Assert.Contains("ValidConnection", result.ConnectionStringNames);
+        Assert.DoesNotContain("MissingConnectionString", result.ConnectionStringNames);
+    }
+
+    [Fact(Skip = "Blocked by #557: Web.config parser should support default-namespace XML sections.")]
+    public void Transform_ParsesNamespacedConfigurationSections()
+    {
+        File.WriteAllText(Path.Combine(_testRoot, "Web.config"), """
+            <?xml version="1.0" encoding="utf-8"?>
+            <configuration xmlns="urn:test:webconfig">
+              <appSettings>
+                <add key="SiteName" value="NamespacedApp" />
+              </appSettings>
+              <connectionStrings>
+                <add name="DefaultConnection" connectionString="Server=.;Database=Namespaced;" providerName="System.Data.SqlClient" />
+              </connectionStrings>
+            </configuration>
+            """);
+
+        var transformer = new WebConfigTransformer();
+
+        var result = transformer.Transform(_testRoot);
+
+        Assert.NotNull(result);
+        Assert.Equal(1, result!.AppSettingsCount);
+        Assert.Equal(1, result.ConnectionStringsCount);
+        using var json = JsonDocument.Parse(result.JsonContent!);
+        Assert.Equal("NamespacedApp", json.RootElement.GetProperty("SiteName").GetString());
+        Assert.Equal("Server=.;Database=Namespaced;", json.RootElement.GetProperty("ConnectionStrings").GetProperty("DefaultConnection").GetString());
+    }
+
     public void Dispose()
     {
         if (Directory.Exists(_testRoot))

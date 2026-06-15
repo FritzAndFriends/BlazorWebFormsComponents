@@ -6,7 +6,7 @@ The **Component Health Dashboard** is a diagnostic tool that measures how comple
 
 It answers the question: *"For each Web Forms control we've re-created, how close is the Blazor version to the original?"*
 
-The dashboard tracks **52 targeted Web Forms controls** across six dimensions:
+The dashboard tracks **61 targeted Web Forms controls** across six dimensions:
 - Properties implemented vs. expected
 - Events implemented vs. expected  
 - Test coverage (bUnit tests)

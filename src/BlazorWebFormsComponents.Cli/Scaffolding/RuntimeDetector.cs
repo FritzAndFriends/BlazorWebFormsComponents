@@ -7,25 +7,28 @@ public class RuntimeDetector
     private readonly IReadOnlyList<IRuntimeSignalDetector> _detectors;
     private readonly AscxDescriptorAnalyzer _ascxDescriptorAnalyzer;
     private readonly WebConfigAssemblyParser _webConfigAssemblyParser;
+    private readonly CodeOnlyServerControlAnalyzer _codeOnlyServerControlAnalyzer;
 
     public RuntimeDetector(IEnumerable<IRuntimeSignalDetector> detectors)
-        : this(detectors, new AscxDescriptorAnalyzer(), new WebConfigAssemblyParser())
+        : this(detectors, new AscxDescriptorAnalyzer(), new WebConfigAssemblyParser(), new CodeOnlyServerControlAnalyzer())
     {
     }
 
     public RuntimeDetector(IEnumerable<IRuntimeSignalDetector> detectors, AscxDescriptorAnalyzer ascxDescriptorAnalyzer)
-        : this(detectors, ascxDescriptorAnalyzer, new WebConfigAssemblyParser())
+        : this(detectors, ascxDescriptorAnalyzer, new WebConfigAssemblyParser(), new CodeOnlyServerControlAnalyzer())
     {
     }
 
     public RuntimeDetector(
         IEnumerable<IRuntimeSignalDetector> detectors,
         AscxDescriptorAnalyzer ascxDescriptorAnalyzer,
-        WebConfigAssemblyParser webConfigAssemblyParser)
+        WebConfigAssemblyParser webConfigAssemblyParser,
+        CodeOnlyServerControlAnalyzer codeOnlyServerControlAnalyzer)
     {
         _detectors = detectors.ToList();
         _ascxDescriptorAnalyzer = ascxDescriptorAnalyzer;
         _webConfigAssemblyParser = webConfigAssemblyParser;
+        _codeOnlyServerControlAnalyzer = codeOnlyServerControlAnalyzer;
     }
 
     public RuntimeProfile Detect(string sourcePath)
@@ -41,6 +44,9 @@ public class RuntimeDetector
         }
 
         profile.CustomControlRegistrations = _webConfigAssemblyParser.ParseProject(sourcePath);
+        profile.CodeOnlyServerControls = _codeOnlyServerControlAnalyzer
+            .Analyze(sourcePath, profile.CustomControlRegistrations)
+            .ToList();
         profile.ConnectionStringNames = profile.ConnectionStringNames
             .Where(static name => !string.IsNullOrWhiteSpace(name))
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -105,6 +111,8 @@ public class RuntimeProfile
     /// </summary>
     public string? AuthenticationMode { get; set; }
     public ControlRegistrationInfo CustomControlRegistrations { get; set; } = new();
+    public IReadOnlyList<CodeOnlyServerControlDescriptor> CodeOnlyServerControls { get; set; } = [];
+    public IReadOnlyDictionary<string, string> CustomControlPrefixToNamespaceMap => CustomControlRegistrations.PrefixToNamespaceMap;
     public List<AscxDescriptor> AscxDescriptors { get; set; } = [];
 
     public string? ResolvedDbContextTypeName =>

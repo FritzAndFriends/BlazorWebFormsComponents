@@ -30,6 +30,7 @@ public class MigrationPipeline
     private readonly NativeNuGetStaticAssetExtractor? _nuGetStaticAssetExtractor;
     private readonly NativeEdmxToEfCoreConverter? _edmxConverterBridge;
     private readonly RedirectHandlerAnnotator? _redirectHandlerAnnotator;
+    private readonly CodeOnlyControlScaffolder _codeOnlyControlScaffolder;
     private readonly SemanticPatternCatalog _semanticPatternCatalog;
     private readonly PageQuarantineDetector _pageQuarantineDetector;
     private readonly AscxDescriptorAnalyzer _ascxDescriptorAnalyzer = new();
@@ -59,7 +60,8 @@ public class MigrationPipeline
         NativeNuGetStaticAssetExtractor nuGetStaticAssetExtractor,
         NativeEdmxToEfCoreConverter edmxConverterBridge,
         RedirectHandlerAnnotator redirectHandlerAnnotator,
-        PageQuarantineDetector pageQuarantineDetector)
+        PageQuarantineDetector pageQuarantineDetector,
+        CodeOnlyControlScaffolder codeOnlyControlScaffolder)
     {
         _markupTransforms = markupTransforms.OrderBy(t => t.Order).ToList();
         _codeBehindTransforms = codeBehindTransforms.OrderBy(t => t.Order).ToList();
@@ -77,6 +79,7 @@ public class MigrationPipeline
         _edmxConverterBridge = edmxConverterBridge;
         _redirectHandlerAnnotator = redirectHandlerAnnotator;
         _pageQuarantineDetector = pageQuarantineDetector;
+        _codeOnlyControlScaffolder = codeOnlyControlScaffolder;
     }
 
     /// <summary>
@@ -101,6 +104,7 @@ public class MigrationPipeline
         _edmxConverterBridge = null;
         _redirectHandlerAnnotator = null;
         _pageQuarantineDetector = new PageQuarantineDetector();
+        _codeOnlyControlScaffolder = new CodeOnlyControlScaffolder();
     }
 
     /// <summary>
@@ -119,6 +123,14 @@ public class MigrationPipeline
         {
             await ScaffoldProjectAsync(context, report);
         }
+        else
+        {
+            PopulatePrefixNamespaceMap(
+                context,
+                new WebConfigAssemblyParser().ParseProject(context.SourcePath).PrefixToNamespaceMap);
+        }
+
+        await EmitCodeOnlyControlSkeletonsAsync(context, report);
 
         // Step 2: Transform config (web.config → appsettings.json)
         await TransformConfigAsync(context, report);
@@ -244,6 +256,7 @@ public class MigrationPipeline
 
         var scaffoldResult = _scaffolder.Scaffold(context.SourcePath, context.OutputPath, projectName);
         _lastScaffoldResult = scaffoldResult;
+        PopulatePrefixNamespaceMap(context, scaffoldResult.RuntimeProfile.CustomControlPrefixToNamespaceMap);
         await _scaffolder.WriteAsync(scaffoldResult, context.OutputPath, _outputWriter);
         report.ScaffoldFilesGenerated += scaffoldResult.Files.Count;
 
@@ -256,6 +269,42 @@ public class MigrationPipeline
         report.ScaffoldFilesGenerated++; // WebFormsShims.cs
         if (scaffoldResult.HasIdentity)
             report.ScaffoldFilesGenerated++; // IdentityShims.cs
+    }
+
+    private async Task EmitCodeOnlyControlSkeletonsAsync(MigrationContext context, MigrationReport report)
+    {
+        var controls = _lastScaffoldResult?.RuntimeProfile.CodeOnlyServerControls;
+        if (controls == null || controls.Count == 0)
+            return;
+
+        var projectName = GetProjectName(context.SourcePath);
+        var generatedFiles = await _codeOnlyControlScaffolder.EmitAsync(
+            context.OutputPath,
+            projectName,
+            controls,
+            _outputWriter);
+
+        report.ScaffoldFilesGenerated += generatedFiles;
+        foreach (var control in controls)
+        {
+            report.AddManualItem(
+                control.SourceFilePath,
+                0,
+                "bwfc-control-scaffold",
+                $"Generated code-only control skeleton for {control.ClassName}. Review parameters and rendered markup.",
+                "medium");
+        }
+    }
+
+    private static void PopulatePrefixNamespaceMap(
+        MigrationContext context,
+        IReadOnlyDictionary<string, string> prefixToNamespaceMap)
+    {
+        context.CustomControlPrefixToNamespace.Clear();
+        foreach (var pair in prefixToNamespaceMap)
+        {
+            context.CustomControlPrefixToNamespace[pair.Key] = pair.Value;
+        }
     }
 
     private async Task TransformConfigAsync(MigrationContext context, MigrationReport report)
@@ -370,7 +419,8 @@ public class MigrationPipeline
             OriginalContent = markupContent,
             OutputRootPath = context.OutputPath,
             SourceRootPath = context.SourcePath,
-            ProjectNamespace = projectName
+            ProjectNamespace = projectName,
+            CustomControlPrefixToNamespace = context.CustomControlPrefixToNamespace
         };
 
         // Read code-behind if present

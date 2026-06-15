@@ -88,7 +88,10 @@ public class RequestShim
 				}
 			}
 
-			// Interactive mode without prior SetFormData call
+			// Interactive mode: cache and reuse so SetFormData() persists
+			if (_cachedFormShim != null)
+				return _cachedFormShim;
+
 			if (!_formWarned)
 			{
 				_logger.LogWarning(
